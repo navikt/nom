@@ -14,14 +14,8 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
-import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
-import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
-import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,8 +32,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
-
 @Slf4j
 @Tag(name = "OrgEnheter")
 @RestController
@@ -48,23 +40,18 @@ public class OrgEnhetController {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
-    private final RessursRestService ressursRestService;
     private final AuthResolver authResolver;
-    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     public OrgEnhetController(
         OrgenhetService orgenhetService,
         OrgEnhetMapper orgEnhetMapper,
         KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
-        RessursRestService ressursRestService,
-        AuthResolver authResolver, OrgtilknytningStateRepository orgtilknytningStateRepository
+        AuthResolver authResolver
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
-        this.ressursRestService = ressursRestService;
         this.authResolver = authResolver;
-        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -122,10 +109,9 @@ public class OrgEnhetController {
         return ResponseEntity.ok(false);
     }
 
-
     @GetMapping("/exportKontaktpersonerFor/{orgenhetId}")
     @Operation(
-        description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
+        description = "Genererer regneark med oversikt over kontaktpersoner for en orgenhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -134,55 +120,6 @@ public class OrgEnhetController {
         }
     )
     public void exportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
-        try {
-            var orgEnhet = orgenhetService.getById(orgenhetId)
-                .map(orgEnhetMapper::mapToOrgEnhet);
-
-            if (orgEnhet.isEmpty()) {
-                String notFoundError = "Orgenhet not found! " + orgenhetId;
-                log.error(notFoundError);
-                response.sendError(404, notFoundError);
-                return;
-            }
-
-            var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
-            var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
-            boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(loggedInUser, orgenhetId);
-            if (!isAdminToEnhet && !kanRedigereOrgenhet) {
-                var accessDeniedError = "User does not have access to view ressurser for this orgenhet: " + loggedInUser + "-" + orgenhetId;
-                log.error(accessDeniedError);
-                throw new AccessDeniedException(accessDeniedError);
-            }
-
-            log.info("User have access to view ressurser for this orgenhet: {}-{}", loggedInUser, orgenhetId);
-            var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
-
-            log.info(TEAM_LOGS, "Ressurser are retrieved for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
-            log.info("{} ressurser are retrieved for this orgenhet: {}", sortedRessurser.size(), orgenhetId);
-
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=kontaktpersoner.xlsx");
-            kontaktpersonerExcelGenerator.generate(response, orgEnhet.get(), sortedRessurser);
-        } catch (Exception e) {
-            if (e instanceof AccessDeniedException) {
-                throw e;
-            } else {
-                log.error("Something wrong happened while getting contact info or generating excel file. " + e.getMessage());
-                response.sendError(500, "Noe galt skjedde under henting av kontaktinformasjon eller generering av excel-fil.");
-            }
-        }
-    }
-
-    @GetMapping("/nyExportKontaktpersonerFor/{orgenhetId}")
-    @Operation(
-        description = "Genererer regneark med oversikt over kontakt personer for en orgenhet",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Exported file"),
-        }
-    )
-    public void nyExportKontaktpersonerForOrgenhetId(HttpServletResponse response, @PathVariable String orgenhetId) throws IOException {
 
         var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
         var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
@@ -294,23 +231,4 @@ public class OrgEnhetController {
         return orgenhetService.setOrgEnhetsType(setOrgEnhetsTypeRequest);
     }
 
-    private List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
-        log.info("Finn navidenter i og under enhet {}", orgenhetId);
-        var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetId);
-        var aktiveEllerFremtidigeNavidenter = orgtilknytningStateRepository.getAll().stream()
-            .filter(ot -> ot.orgEnhetId().equals(orgenhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
-            .filter(PeriodeUtil::isCurrentOrFuturePeriod)
-            .map(OrgtilknytningState::navident)
-            .toList();
-
-        log.info("Hent {} ressurser for navidenter og sorter", aktiveEllerFremtidigeNavidenter.size());
-        var ressurser = ressursRestService.findRessurserByNavident(aktiveEllerFremtidigeNavidenter);
-
-        // sort ressurser by fornavn and etternavn
-        return ressurser.stream().sorted((r1, r2) -> {
-            var n1 = r1.state().visningsnavn();
-            var n2 = r2.state().visningsnavn();
-            return n1.fornavn().compareTo(n2.fornavn()) == 0 ? n1.etternavn().compareTo(n2.etternavn()) : n1.fornavn().compareTo(n2.fornavn());
-        }).toList();
-    }
 }

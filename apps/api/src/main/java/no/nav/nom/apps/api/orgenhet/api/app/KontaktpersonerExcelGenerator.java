@@ -60,19 +60,17 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generateExcelFileToServletResponse(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) throws IOException {
-        log.info(TEAM_LOGS, "Getting content info for ressurser: {}", sortedRessurser);
-        log.info("Getting content info for {} ressurser", sortedRessurser.size());
         List<RessursKontaktinfo> kontaktinfoForRessurser;
 
-        // try to get the contact info for the ressurser
+        // Try to get the contact info for ressurser
         try {
             kontaktinfoForRessurser = kontaktinfoClient
                 .getKontaktinfoForRessurser(
                     sortedRessurser.stream().map(r -> r.state().navident()).toList(),
                     orgEnhet.id()
                 );
-            log.info(TEAM_LOGS, "Received kontaktinfo for this orgenhet: {}-{}", orgEnhet.id(), kontaktinfoForRessurser);
-            log.info("Received {} kontaktinfo for this orgenhet: {}", kontaktinfoForRessurser.size(), orgEnhet.id());
+            log.info(TEAM_LOGS, "Received kontaktinfo for orgenhet {}: {}", orgEnhet.id(), kontaktinfoForRessurser);
+            log.info("Received {} kontaktinfo for orgenhet {}", kontaktinfoForRessurser.size(), orgEnhet.id());
         } catch (Exception e) {
             if (e instanceof AccessDeniedException) {
                 throw e;
@@ -85,7 +83,7 @@ public class KontaktpersonerExcelGenerator {
         Map<String, Ressurs> ressursPerNavident = sortedRessurser.stream()
             .collect(Collectors.toMap(r -> r.state().navident(), r -> r));
 
-        log.info(
+        log.debug(
             TEAM_LOGS,
             "Generating excel for orgenhet {} with ressurser {}, and contantinfo {}",
             orgEnhet.id(),
@@ -107,7 +105,7 @@ public class KontaktpersonerExcelGenerator {
 
         } catch (Exception e) {
             log.error("Error generating Excel file for Medarbeidere og kontaktpersoner", e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating Excel file");
         }
     }
 
@@ -123,8 +121,8 @@ public class KontaktpersonerExcelGenerator {
         } else {
             var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
 
-            log.info(TEAM_LOGS, "Ressurser are retrieved for this orgenhet: {}-{}", sortedRessurser, orgenhetId);
-            log.info("{} ressurser are retrieved for this orgenhet: {}", sortedRessurser.size(), orgenhetId);
+            log.debug(TEAM_LOGS, "Ressurser retrieved for orgenhet {}: {}", orgenhetId, sortedRessurser);
+            log.debug("Ressurser retrieved for orgenhet {}: {}", orgenhetId, sortedRessurser.size());
 
             generateExcelFileToServletResponse(response, orgEnhet.get(), sortedRessurser);
 
@@ -213,15 +211,6 @@ public class KontaktpersonerExcelGenerator {
             log.error("Error generating excel file. ", e);
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    private Ressurs getRessursForGittNavident(List<Ressurs> ressurser, String navident) {
-        return ressurser.stream().filter(r -> r.state().navident().equals(navident)).findFirst().orElse(null);
-    }
-
-    private Kontaktinfo getPrioritertKontaktinfo(List<Kontaktinfo> kontaktinfo) {
-        return kontaktinfo.stream().min((k1, k2) -> k1.prioritet().compareTo(k2.prioritet()))
-            .orElse(null);
     }
 
     private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo, int index) {
@@ -317,7 +306,7 @@ public class KontaktpersonerExcelGenerator {
     }
 
     private List<Ressurs> getSortedRessurserInAndUnderliggendeOrgenheter(String orgenhetId) {
-        log.info("Finn navidenter i og under enhet {}", orgenhetId);
+        log.debug("Finner navidenter i og under enhet {}", orgenhetId);
         var underliggendeEnheter = orgenhetService.findAllUnderliggendeOrgenheter(orgenhetId);
         var aktiveEllerFremtidigeNavidenter = orgtilknytningStateRepository.getAll().stream()
             .filter(ot -> ot.orgEnhetId().equals(orgenhetId) || underliggendeEnheter.contains(ot.orgEnhetId()))
@@ -325,7 +314,7 @@ public class KontaktpersonerExcelGenerator {
             .map(OrgtilknytningState::navident)
             .toList();
 
-        log.info("Hent {} ressurser for navidenter og sorter", aktiveEllerFremtidigeNavidenter.size());
+        log.debug("Henter {} ressurser og sorterer", aktiveEllerFremtidigeNavidenter.size());
         var ressurser = ressursRestService.findRessurserByNavident(aktiveEllerFremtidigeNavidenter);
 
         // sort ressurser by fornavn and etternavn
