@@ -38,9 +38,9 @@ public class OrgEnhetSanityCheckController {
     private final OrgEnhetSanityCheckService orgEnhetSanityCheckService;
     private final ExcelGenerator excelGenerator;
 
-    public OrgEnhetSanityCheckController(OrgEnhetSanityCheckService orgEnhetSanityCheckService, ExcelGenerator excelGenerator) {
+    public OrgEnhetSanityCheckController(OrgEnhetSanityCheckService orgEnhetSanityCheckService) {
         this.orgEnhetSanityCheckService = orgEnhetSanityCheckService;
-        this.excelGenerator = excelGenerator;
+        this.excelGenerator = new  ExcelGenerator();
     }
 
 

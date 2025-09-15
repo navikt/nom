@@ -45,9 +45,9 @@ public class RessursSanityCheckController {
     private final RessursSanityCheckService ressursSanityCheckService;
     private final ExcelGenerator excelGenerator;
 
-    public RessursSanityCheckController(RessursSanityCheckService ressursSanityCheckService, ExcelGenerator excelGenerator) {
+    public RessursSanityCheckController(RessursSanityCheckService ressursSanityCheckService) {
         this.ressursSanityCheckService = ressursSanityCheckService;
-        this.excelGenerator = excelGenerator;
+        this.excelGenerator = new ExcelGenerator();
     }
 
     @Operation(

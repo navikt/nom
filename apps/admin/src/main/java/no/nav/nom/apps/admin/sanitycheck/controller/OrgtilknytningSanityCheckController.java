@@ -38,11 +38,10 @@ public class OrgtilknytningSanityCheckController {
     private final ExcelGenerator excelGenerator;
 
     public OrgtilknytningSanityCheckController(
-        OrgtilknytningSanityCheckService orgtilknytningSanityCheckService,
-        ExcelGenerator excelGenerator
+        OrgtilknytningSanityCheckService orgtilknytningSanityCheckService
     ) {
         this.orgtilknytningSanityCheckService = orgtilknytningSanityCheckService;
-        this.excelGenerator = excelGenerator;
+        this.excelGenerator = new ExcelGenerator();
     }
 
     @Operation(
