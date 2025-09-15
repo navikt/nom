@@ -53,6 +53,7 @@
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
 <!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
     <logger name="no.nav.nom.apps.api.orgenhet.implementations.dvh.v2" level="DEBUG"/>
+    <logger name="no.nav.nom.apps.api.orgenhet.api.app" level="DEBUG"/>
 
 <!-- Spring Security logger -->
 <!--    <logger name="org.springframework.security" level="trace"/>-->
