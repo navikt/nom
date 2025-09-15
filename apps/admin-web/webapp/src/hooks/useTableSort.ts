@@ -45,9 +45,10 @@ export function sortTableData<T>({
 
   const keys = !!objectExample ? Object.keys(objectExample) : undefined;
 
-  const caseCorrectedKey = keys?.find(
-    (key) => key.toLowerCase() === orderBy.toLowerCase(),
-  );
+  const caseCorrectedKey =
+    orderBy.toLowerCase() === "dato"
+      ? "dato"
+      : keys?.find((key) => key.toLowerCase() === orderBy.toLowerCase());
 
   let sortedData = [...tableData];
 
@@ -61,7 +62,7 @@ export function sortTableData<T>({
       const dateB = kafkaB.metadata?.createdTimestamp
         ? new Date(kafkaB.metadata.createdTimestamp).getTime()
         : 0;
-      return dateA - dateB;
+      return dateB - dateA;
     });
   } else {
     sortedData = sortBy(tableData, caseCorrectedKey ?? orderBy);
