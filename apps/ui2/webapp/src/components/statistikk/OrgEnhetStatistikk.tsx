@@ -17,7 +17,6 @@ import {
   getStatistikkForOrgEnhet,
   getUnderliggendeOrgenheter,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -265,8 +264,6 @@ function OrgEnheterStatistikkGridWrapper({
 }: {
   statistikk: GlobalStatistikkResponse | undefined;
 }) {
-  const hasAdminAccess = useHasAdminAccess();
-
   const antallNavKontorer = statistikk?.antallNavKontorer ?? 0;
   const antallFylkekontor = statistikk?.antallFylkekontor ?? 0;
   const antallLovnoder = statistikk?.antallLovNoder ?? 0;
@@ -294,43 +291,43 @@ function OrgEnheterStatistikkGridWrapper({
       value: antallNavKontorer,
     });
   }
-  if (antallHjelpemidlerOgTilrettelegging > 0 && hasAdminAccess) {
+  if (antallHjelpemidlerOgTilrettelegging > 0) {
     statistikkItems.push({
       label: "Hjelpemidler og tilrettelegging:",
       value: antallHjelpemidlerOgTilrettelegging,
     });
   }
-  if (antallKlageinstanser > 0 && hasAdminAccess) {
+  if (antallKlageinstanser > 0) {
     statistikkItems.push({
       label: "Klageinstanser:",
       value: antallKlageinstanser,
     });
   }
-  if (antallKontrollKonrollenheter > 0 && hasAdminAccess) {
+  if (antallKontrollKonrollenheter > 0) {
     statistikkItems.push({
       label: "Kontrollenheter:",
       value: antallKontrollKonrollenheter,
     });
   }
-  if (antallNavKontaktsenter > 0 && hasAdminAccess) {
+  if (antallNavKontaktsenter > 0) {
     statistikkItems.push({
       label: "Nav kontaktsenter:",
       value: antallNavKontaktsenter,
     });
   }
-  if (antallNavArbeidOgYtelser > 0 && hasAdminAccess) {
+  if (antallNavArbeidOgYtelser > 0) {
     statistikkItems.push({
       label: "Nav arbeid og ytelser:",
       value: antallNavArbeidOgYtelser,
     });
   }
-  if (antallNavFamilieOgPensjonsytelser > 0 && hasAdminAccess) {
+  if (antallNavFamilieOgPensjonsytelser > 0) {
     statistikkItems.push({
       label: "Nav familie- og pensjonsytelser:",
       value: antallNavFamilieOgPensjonsytelser,
     });
   }
-  if (antallLovnoder > 0 && hasAdminAccess) {
+  if (antallLovnoder > 0) {
     statistikkItems.push({
       label: "Organisasjonsenheter:",
       value: antallLovnoder,
