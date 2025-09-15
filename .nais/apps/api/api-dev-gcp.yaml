@@ -179,6 +179,9 @@ spec:
         - application: testnav-nom-proxy-trygdeetaten
           namespace: dolly
           cluster: dev-gcp
+        - application: testnav-nom-proxy
+          namespace: dolly
+          cluster: dev-gcp
         - application: repr-fullmakt
           namespace: repr
           cluster: dev-fss
