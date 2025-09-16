@@ -16,13 +16,11 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import freemarker.template.Configuration;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -91,7 +89,7 @@ public class RessursOpprettetEmailService {
             String subject = String.format("Ressurs opprettet %s (%s)",
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()
             );
-            String body = getFormattetEmailBody(
+            String body = getFormattedEmailBody(
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(),
                 opprettetRessurs.navident(),
                 orgenhetName
@@ -110,7 +108,7 @@ public class RessursOpprettetEmailService {
         }
     }
 
-    public String getFormattetEmailBody(String resursName, String navIdent, String orgenhetName) throws IOException, TemplateException {
+    public String getFormattedEmailBody(String resursName, String navIdent, String orgenhetName) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
         var model = Map.of(
             "resursName", resursName,
@@ -135,8 +133,7 @@ public class RessursOpprettetEmailService {
 
     private static String getAuthenticatedNavIdent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return getNavIdent(authentication).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims of authenticated user", NAVIDENT)));
+        return getNavIdent(authentication).orElse("");
     }
 
     private static Optional<String> getNavIdent(Authentication authentication) {

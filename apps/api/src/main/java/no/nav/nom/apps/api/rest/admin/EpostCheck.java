@@ -57,7 +57,7 @@ public class EpostCheck {
     public String sendEmailTest(@RequestParam List<String> ids) throws TemplateException, IOException {
         List<String> recipientList = ids.stream().map(id -> id + "@nav.no").toList();
 
-        String testBody = opprettetRessurs.getFormattetEmailBody(
+        String testBody = opprettetRessurs.getFormattedEmailBody(
             "Test ressurs",
             "Test navident",
             "Test orgenhetName"
