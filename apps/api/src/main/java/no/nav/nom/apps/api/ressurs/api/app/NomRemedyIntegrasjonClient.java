@@ -43,25 +43,30 @@ public class NomRemedyIntegrasjonClient {
 
     public List<FysiskBrukersted> getFysiskeBrukersteder() {
         log.info("Henter fysiske brukersteder fra NomRemedyIntegrasjon");
-        var nNomRemedyIntegrasjonFysiskBrukersteder = webClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/api/fysiskebrukersteder")
-                .build()
-            )
-            .retrieve()
-            .toEntityList(NomRemedyIntegrasjonFysiskBrukersted.class)
-            .block()
-            .getBody();
+        try {
+            var nomRemedyIntegrasjonFysiskBrukersteder = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/api/fysiskebrukersteder")
+                    .build()
+                )
+                .retrieve()
+                .toEntityList(NomRemedyIntegrasjonFysiskBrukersted.class)
+                .block()
+                .getBody();
 
-        if (nNomRemedyIntegrasjonFysiskBrukersteder == null) {
-            log.error("Fikk ingen fysiske brukersteder fra NomRemedyIntegrasjon");
-            return List.of();
+            if (nomRemedyIntegrasjonFysiskBrukersteder == null) {
+                log.error("Fikk ingen fysiske brukersteder fra NomRemedyIntegrasjon");
+                return List.of();
+            }
+
+            return nomRemedyIntegrasjonFysiskBrukersteder
+                .stream()
+                .map(fysiskBrukersted -> new FysiskBrukersted(fysiskBrukersted.brukerstedNr(), fysiskBrukersted.brukerstedNavn()))
+                .toList();
+        } catch (Exception e) {
+            log.error("ALERT: Feil ved henting av fysiske brukersteder fra NomRemedyIntegrasjon", e);
+            throw e;
         }
-
-        return nNomRemedyIntegrasjonFysiskBrukersteder
-            .stream()
-            .map(fysiskBrukersted -> new FysiskBrukersted(fysiskBrukersted.brukerstedNr(), fysiskBrukersted.brukerstedNavn()))
-            .toList();
     }
 
     public record NomRemedyIntegrasjonFysiskBrukersted (
