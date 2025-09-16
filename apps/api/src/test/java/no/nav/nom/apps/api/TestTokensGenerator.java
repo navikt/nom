@@ -153,6 +153,12 @@ public class TestTokensGenerator {
         return validToken(claims);
     }
 
+    public String dollyClient() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "dollyClient");
+        return validToken(claims);
+    }
+
     public String nomUiClient(String navident) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("NAVident", navident);

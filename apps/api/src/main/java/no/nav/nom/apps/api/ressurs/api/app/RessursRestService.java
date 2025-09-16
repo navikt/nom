@@ -27,6 +27,7 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.api.v1.navident.NavidentResponse;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -55,6 +56,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -647,13 +650,18 @@ public class RessursRestService {
     }
 
     private String createNavident(OpprettRessursRequest request) {
-        final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
-            OpprettNavidentRequest.builder()
-                .personid(request.personident())
-                .identPrefix(request.visningsetternavn().substring(0, 1))
-                .identType(isNull(request.identType()) ? IdentType.STANDARD.name() : request.identType().name())
-                .build()
-        );
+        var opprettNavidentRequest = OpprettNavidentRequest.builder()
+            .personid(request.personident())
+            .identPrefix(request.visningsetternavn().substring(0, 1))
+            .identType(isNull(request.identType()) ? IdentType.STANDARD.name() : request.identType().name())
+            .build();
+
+        ResponseEntity<OpprettNavidentResponse> opprettNavidentResponse;
+        if (isUserLoggedIn()) {
+            opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(opprettNavidentRequest);
+        } else {
+            opprettNavidentResponse = nikClient.opprettNavident(opprettNavidentRequest);
+        }
 
         if (!opprettNavidentResponse.getStatusCode().is2xxSuccessful()) {
             throw new ResponseStatusException(
@@ -672,6 +680,10 @@ public class RessursRestService {
         }
 
         return opprettNavidentResponse.getBody().getNavident();
+    }
+
+    private static boolean isUserLoggedIn() {
+        return SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication()).isPresent();
     }
 
     public void avvikleRessurs(String fid, AvvikleRessursRequest request) {

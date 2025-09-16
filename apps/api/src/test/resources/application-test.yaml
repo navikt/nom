@@ -43,6 +43,9 @@ app:
       nomRemedyIntegrasjonClient:
         client-id: nomRemedyIntegrasjonClient
         scopes: ["NOM_REMEDY_INTEGRASJON_APP"]
+      dolly:
+        client-id: dollyClient
+        scopes: ["MUTATE_RESSURS", "DOLLY"]
     groups:
       nomWriteGroup:
         group-id: nomWriteGroup
@@ -69,6 +72,9 @@ app:
     riksrev: dummyRiksrevisjonenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
     nav: dummyNavId
+  dolly-ressurs:
+    fysisk-brukersted-nr: dummyDollyFysiskBrukerstedNr
+    orgenhet-id: dummyDollyOrgenhetId
   google-storage-bucket-name:
     missing-ot: none
       
