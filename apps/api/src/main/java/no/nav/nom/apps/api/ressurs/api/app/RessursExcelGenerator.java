@@ -95,14 +95,15 @@ public class RessursExcelGenerator {
                     )
                 );
             } else {
-                var gyldigFromCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
-                var gyldigFom = Collections.min(gyldigFromCandidates);
+                var gyldigFomCandidates = entry.stream().map(OrgtilknytningState::gyldigFom).filter(Objects::nonNull).toList();
+                var gyldigFom = Collections.min(gyldigFomCandidates);
 
-                var orgEnheterIdOgNavn = otMap.get(ressurs.state().navident()).stream()
-                    .map(orgtilknytningState -> orgenhetNavnMap.get(orgtilknytningState.orgEnhetId()))
-                    .collect(Collectors.toMap(OrgEnhetState::id, orgEnhet -> orgEnhet));
+                var orgEnheterIdOgState = otMap.get(ressurs.state().navident()).stream()
+                    .map(OrgtilknytningState::orgEnhetId)
+                    .distinct()
+                    .collect(Collectors.toMap(orgEnhetId -> orgEnhetId, orgenhetNavnMap::get));
 
-                for (Map.Entry<String, OrgEnhetState> orgEnhetEntry : orgEnheterIdOgNavn.entrySet()) {
+                for (Map.Entry<String, OrgEnhetState> orgEnhetEntry : orgEnheterIdOgState.entrySet()) {
                     excelRows.add(createExcelRow(ressurs, orgEnhetEntry.getKey(), orgEnhetEntry.getValue().agressoId(), orgEnhetEntry.getValue().navn(), gyldigFom, kanSeSluttdato));
                 }
             }
