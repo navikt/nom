@@ -77,7 +77,7 @@ public class OrgEnhetNomNivaaHandler {
     public void ensureArbeidsomraadePresentUnderDriftsenhet(NomNivaaEndretEventV1 nomNivaaEndretEventV1) {
         var nomNivaa = nomNivaaEndretEventV1.getNomNivaaEndretEventData().nomNivaa();
 
-        if (nomNivaa.equals(NomNivaa.DRIFTSENHET)) {
+        if (nonNull(nomNivaa) && nomNivaa.equals(NomNivaa.DRIFTSENHET)) {
             orgEnhetStateRepository.findByFid(nomNivaaEndretEventV1.getFid()).ifPresent(
                 orgEnhetState -> {
                     addArbeidsomraadeInAllSubPathsIfMissing(orgEnhetState);

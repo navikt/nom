@@ -101,10 +101,10 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             Arguments.of(OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING, NomNivaa.DRIFTSENHET),
             Arguments.of(OrgEnhetsType.NAV_KONTAKTSENTER, NomNivaa.DRIFTSENHET),
             Arguments.of(OrgEnhetsType.FYLKE, NomNivaa.DRIFTSENHET),
-            Arguments.of(OrgEnhetsType.KLAGEINSTANS, NomNivaa.DRIFTSENHET),
 
-            Arguments.of(OrgEnhetsType.NAV_KONTOR, NomNivaa.ARBEIDSOMRAADE),
             Arguments.of(OrgEnhetsType.TILTAK, NomNivaa.ARBEIDSOMRAADE),
+            Arguments.of(OrgEnhetsType.NAV_KONTOR, NomNivaa.ARBEIDSOMRAADE),
+            Arguments.of(OrgEnhetsType.KLAGEINSTANS, NomNivaa.ARBEIDSOMRAADE),
             Arguments.of(OrgEnhetsType.ARBEIDSLIVSSENTER, NomNivaa.ARBEIDSOMRAADE),
             Arguments.of(OrgEnhetsType.ARBEIDSRAADGIVNING, NomNivaa.ARBEIDSOMRAADE),
 
@@ -164,11 +164,11 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             Arguments.of(OrgEnhetsType.KONTROLL_KONTROLLENHET, NomNivaa.ARBEIDSOMRAADE),
             Arguments.of(OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING, NomNivaa.ARBEIDSOMRAADE),
             Arguments.of(OrgEnhetsType.NAV_KONTAKTSENTER, NomNivaa.ARBEIDSOMRAADE),
-            Arguments.of(OrgEnhetsType.KLAGEINSTANS, NomNivaa.ARBEIDSOMRAADE),
 
             Arguments.of(OrgEnhetsType.FYLKE, null),
-            Arguments.of(OrgEnhetsType.NAV_KONTOR, null),
             Arguments.of(OrgEnhetsType.TILTAK, null),
+            Arguments.of(OrgEnhetsType.NAV_KONTOR, null),
+            Arguments.of(OrgEnhetsType.KLAGEINSTANS, null),
             Arguments.of(OrgEnhetsType.ARBEIDSLIVSSENTER, null),
             Arguments.of(OrgEnhetsType.ARBEIDSRAADGIVNING, null)
         );

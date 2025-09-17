@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
@@ -89,6 +90,7 @@ public class TriggerUtledNomNivaaPaaNytt {
         }
 
         orgenheterToProcess.stream()
+            .filter(orgEnhetState -> nonNull(orgEnhetState.nomNivaa()))
             .filter(orgEnhetState -> orgEnhetState.nomNivaa().equals(NomNivaa.DRIFTSENHET))
             .forEach(orgEnhetNomNivaaHandler::addArbeidsomraadeInAllSubPathsIfMissing);
 
