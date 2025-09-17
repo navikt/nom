@@ -97,14 +97,6 @@ public record StillingPeriode(
         return isNull(stilling.ressursAgressoId) || stilling.ressursAgressoId.isBlank() || stilling.ressursAgressoId.startsWith("-");
     }
 
-    public boolean erRessursAgressoOrgNivORGENHETnode() {
-        return "ORGENHET".equalsIgnoreCase(stilling.ressursAgressoOrgNiv);
-    }
-
-    public boolean erAgressoIdOgRessursAgressoIdLike() {
-        return stilling.agressoId.equals(stilling.ressursAgressoId);
-    }
-
     public boolean matcherRessursAgressoIdOgAgressoId() {
         if (erAgressoIdPresis()) {
             return stilling.agressoId.startsWith(requireNonNullElse(stilling.ressursAgressoId, "-"));
@@ -131,20 +123,8 @@ public record StillingPeriode(
         return PeriodeUtil.isCurrentPeriod(this);
     }
 
-    public boolean isHistoricPeriod() {
-        return PeriodeUtil.isHistoricPeriod(this);
-    }
-
-    public boolean isFuturePeriod() {
-        return PeriodeUtil.isFuturePeriod(this);
-    }
-
     public boolean covers(LocalDate date) {
         return PeriodeUtil.intervalCoversDate(this, date);
-    }
-
-    public boolean overlaps(StillingPeriode other) {
-        return PeriodeUtil.overlapsInterval(this, other);
     }
 
     public boolean overlaps(OrgtilknytningState other) {

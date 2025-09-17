@@ -294,7 +294,6 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         for (StillingPeriode stillingPeriode : stillingPerioder) {
             var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
             if (hasDOLBeenSet) {
-                var  nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
                 nyeFremtidigStillingPerioder.add(stillingPeriode);
                 if (nySP.erDagligOppfolging()) {
                     lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NULL"));
