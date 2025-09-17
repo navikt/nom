@@ -251,7 +251,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         // 3. The gyldigTom date of organisering present in the state is NOT anymore in the future
         var newGyldigTom = LocalDate.now().minusDays(5);
         var organiseringState_avsluttet = organiseringState.toBuilder()
-            .gyldigTom(Optional.of(newGyldigTom))
+            .gyldigTom(newGyldigTom)
             .build();
         organiseringStateRepository.putEventAggregate(organiseringState_avsluttet);
 
@@ -636,7 +636,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
             .idOver(idOver)
             .navnOver(navnOver)
             .gyldigFom(gyldigFom)
-            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .gyldigTom(gyldigTom)
             .build();
     }
 

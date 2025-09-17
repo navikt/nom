@@ -95,7 +95,7 @@ public class TestData {
             .navn("orgEnhetNavn")
             .navnOver("orgEnhetOverNavn")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
     }
 

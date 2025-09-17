@@ -109,7 +109,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now()))
+            .gyldigTom(LocalDate.now())
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_todayMinus2_dager = OrganiseringState.builder()
@@ -117,7 +117,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
+            .gyldigTom(LocalDate.now().minusDays(2))
             .build();
 
         OrganiseringState organisering_fom_today_tom_todayPlus2_dager = OrganiseringState.builder()
@@ -125,7 +125,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(2)))
+            .gyldigTom(LocalDate.now().plusDays(2))
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_today = OrganiseringState.builder()
@@ -133,7 +133,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
-            .gyldigTom(Optional.of(LocalDate.now()))
+            .gyldigTom(LocalDate.now())
             .build();
 
         OrganiseringState organisering_fom_today_tom_todayMinus1 = OrganiseringState.builder()
@@ -141,7 +141,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .gyldigTom(LocalDate.now().minusDays(1))
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_todayPlus10 = OrganiseringState.builder()
@@ -149,7 +149,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now().minusDays(10))
-            .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+            .gyldigTom(LocalDate.now().plusDays(10))
             .build();
 
         OrganiseringState organisering_fom_today_tom_notset = OrganiseringState.builder()
@@ -164,7 +164,7 @@ public class OrganiseringStateRepositoryTest {
             .id("the_id")
             .idOver("id_over")
             .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
 

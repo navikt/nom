@@ -202,7 +202,7 @@ public class StatistikkRestServiceTest {
                 .idOver("NAV123")
                 .navnOver("Nav")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-456")
@@ -211,7 +211,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet123")
                 .navnOver("Test enhet123")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-789")
@@ -220,7 +220,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet456")
                 .navnOver("Test enhet456")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-101112")
@@ -229,7 +229,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet456")
                 .navnOver("Test enhet456")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-131415")
@@ -238,7 +238,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet456")
                 .navnOver("Test enhet456")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-161718")
@@ -247,7 +247,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet456")
                 .navnOver("Test enhet456")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build(),
             OrganiseringState.builder()
                 .fid("fid-192021")
@@ -256,7 +256,7 @@ public class StatistikkRestServiceTest {
                 .idOver("orgEnhet161718")
                 .navnOver("Test enhet161718")
                 .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(Optional.empty())
+                .gyldigTom(null)
                 .build()
         );
     }

@@ -180,7 +180,7 @@ public class OrganiseringService {
             orgenhetOver.getId(),
             orgenhetOver.getNavn(),
             dvhOrganisering.getGyldigFom(), // TODO Fix dates!
-            Optional.empty(),
+            null,
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }
@@ -192,7 +192,7 @@ public class OrganiseringService {
             orgenhetOver.getId(),
             orgenhetOver.getNavn(),
             LocalDate.now(),
-            Optional.empty(),
+            null,
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }

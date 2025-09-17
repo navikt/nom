@@ -306,7 +306,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("X")
             .navnOver("OrgEnhet X")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_A1_A = OrganiseringState.builder()
@@ -316,7 +316,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A")
             .navnOver("OrgEnhet A")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_A11_A1 = OrganiseringState.builder()
@@ -326,7 +326,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A1")
             .navnOver("OrgEnhet A1")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
 
@@ -337,7 +337,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A")
             .navnOver("OrgEnhet A")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_B1_B = OrganiseringState.builder()
@@ -347,7 +347,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("B")
             .navnOver("OrgEnhet B")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_B11_B1 = OrganiseringState.builder()
@@ -357,7 +357,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("B1")
             .navnOver("OrgEnhet B1")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_C_A = OrganiseringState.builder()
@@ -367,7 +367,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A")
             .navnOver("OrgEnhet A")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_C1_C = OrganiseringState.builder()
@@ -377,7 +377,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("C")
             .navnOver("OrgEnhet C")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_C11_C1 = OrganiseringState.builder()
@@ -387,7 +387,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("C1")
             .navnOver("OrgEnhet C1")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_C2_C = OrganiseringState.builder()
@@ -397,7 +397,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("C")
             .navnOver("OrgEnhet C")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_C22_C2 = OrganiseringState.builder()
@@ -407,7 +407,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("C2")
             .navnOver("OrgEnhet C2")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_D_A = OrganiseringState.builder()
@@ -417,7 +417,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A")
             .navnOver("OrgEnhet A")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_D1_D = OrganiseringState.builder()
@@ -427,7 +427,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("D")
             .navnOver("OrgEnhet D")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_E_A = OrganiseringState.builder()
@@ -437,7 +437,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("A")
             .navnOver("OrgEnhet A")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         OrganiseringState organisering_E1_E = OrganiseringState.builder()
@@ -447,7 +447,7 @@ abstract public class MockBasisTestOrganisering {
             .idOver("E")
             .navnOver("OrgEnhet E")
             .gyldigFom(LocalDate.now().minusDays(5))
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .build();
 
         when(organiseringStateRepository.getActiveOrganisering()).thenReturn(Map.ofEntries(

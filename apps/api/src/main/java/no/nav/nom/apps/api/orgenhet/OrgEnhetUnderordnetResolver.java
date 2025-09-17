@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
+
 @Component
 public class OrgEnhetUnderordnetResolver {
     private final Logger logger = LoggerFactory.getLogger(OrgEnhetUnderordnetResolver.class);
@@ -32,7 +34,7 @@ public class OrgEnhetUnderordnetResolver {
         return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
             .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
             .peek(organiseringState -> {
-                if (organiseringState.gyldigTom().toString().contains("2024-02-25") || organiseringState.id().equals("py458c")) {
+                if ((nonNull(organiseringState.gyldigTom()) && organiseringState.gyldigTom().toString().contains("2024-02-25")) || organiseringState.id().equals("py458c")) {
                     logger.warn("Fant en utgåtte organisering med id: {}", organiseringState);
                 }
             })

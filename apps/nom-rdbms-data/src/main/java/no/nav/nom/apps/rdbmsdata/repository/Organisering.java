@@ -59,7 +59,7 @@ public class Organisering {
             .idOver(organiseringState.idOver())
             .navnOver(organiseringState.navnOver())
             .gyldigFom(organiseringState.gyldigFom())
-            .gyldigTom(organiseringState.gyldigTom().orElse(null))
+            .gyldigTom(organiseringState.gyldigTom())
             .build();
     }
 }

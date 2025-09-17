@@ -18,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 @Service
 public class OrganiseringStateRepositoryImpl implements OrganiseringStateRepository {
 
@@ -110,7 +112,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
 
     @Override
     public void update(OrganiseringState organiseringState) {
-        if(organiseringState.gyldigTom() != null && organiseringState.gyldigTom().isPresent() && organiseringState.gyldigTom().get().isBefore(LocalDate.now())){
+        if(nonNull(organiseringState.gyldigTom()) && organiseringState.gyldigTom().isBefore(LocalDate.now())){
             removeEventAggregate(organiseringState);
         } else {
             putEventAggregate(organiseringState);
@@ -252,21 +254,21 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {
-        return organiseringState.gyldigTom().isPresent() &&
-            organiseringState.gyldigFom() != null &&
-            organiseringState.gyldigTom().get().isEqual(organiseringState.gyldigFom()) &&
-            organiseringState.gyldigTom().get().isEqual(LocalDate.now());
+        return nonNull(organiseringState.gyldigTom()) &&
+            nonNull(organiseringState.gyldigFom()) &&
+            organiseringState.gyldigTom().isEqual(organiseringState.gyldigFom()) &&
+            organiseringState.gyldigTom().isEqual(LocalDate.now());
     }
 
     private boolean isGyldigTomTodayOrLater(OrganiseringState organiseringState) {
-        return organiseringState.gyldigTom().isPresent()
-            && organiseringState.gyldigTom().get().isAfter(LocalDate.now().minusDays(1));
+        return nonNull(organiseringState.gyldigTom())
+            && organiseringState.gyldigTom().isAfter(LocalDate.now().minusDays(1));
     }
 
     private boolean isGyldigTomNull(OrganiseringState organiseringState) {
         LocalDate gyldigTom = Optional.of(organiseringState)
-            .filter(state -> state.gyldigTom() != null && state.gyldigTom().isPresent())
-            .flatMap(OrganiseringState::gyldigTom)
+            .filter(state -> nonNull(state.gyldigTom()))
+            .map(OrganiseringState::gyldigTom)
             .orElse(null);
         return gyldigTom == null;
     }

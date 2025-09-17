@@ -4,7 +4,6 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.UUID;
 
 public class OrgenhetTestUtils {
@@ -31,7 +30,7 @@ public class OrgenhetTestUtils {
             orgEnhetOver.id(),
             orgEnhetOver.navn(),
             LocalDate.now(),
-            Optional.empty()
+            null
         );
     }
 }

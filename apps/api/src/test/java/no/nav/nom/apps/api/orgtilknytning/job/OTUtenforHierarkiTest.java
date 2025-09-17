@@ -152,8 +152,8 @@ class OTUtenforHierarkiTest {
     LocalDate yesterday = today.minusDays(1);
 
     private void setupOrganisering() {
-        var organisering1 = new OrganiseringState("FID_1", enhet1.getId(), enhet1.getNavn(), enhet3.getId(), enhet3.getNavn(), LocalDate.now().minusYears(3), Optional.of(yesterday));
-        var organisering2 = new OrganiseringState("FID_2", enhet2.getId(), enhet2.getNavn(), enhet3.getId(), enhet3.getNavn(), today, Optional.empty());
+        var organisering1 = new OrganiseringState("FID_1", enhet1.getId(), enhet1.getNavn(), enhet3.getId(), enhet3.getNavn(), LocalDate.now().minusYears(3), yesterday);
+        var organisering2 = new OrganiseringState("FID_2", enhet2.getId(), enhet2.getNavn(), enhet3.getId(), enhet3.getNavn(), today, null);
 
         when(organiseringStateRepository.findById(enhet1.getId())).thenReturn(Optional.of(organisering1));
         when(organiseringStateRepository.findById(enhet2.getId())).thenReturn(Optional.of(organisering2));

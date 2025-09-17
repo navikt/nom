@@ -177,7 +177,7 @@ class OrganiseringServiceTest {
             .idOver(nomIdOver)
             .navn(initialDvhOrg.getNavnUnder())
             .navnOver(initialDvhOrg.getNavnOver())
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .gyldigFom(LocalDate.now().minusDays(5))
             .build();
 
@@ -205,7 +205,7 @@ class OrganiseringServiceTest {
             .idOver(nomIdOver)
             .navn(initialDvhOrg.getNavnUnder())
             .navnOver(initialDvhOrg.getNavnOver())
-            .gyldigTom(Optional.empty())
+            .gyldigTom(null)
             .gyldigFom(LocalDate.now())
             .build();
 

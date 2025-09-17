@@ -94,7 +94,7 @@ public class HendelserTestUtils {
                 "idOver",
                 "navnOver",
                 LocalDate.of(2021, 1, 1),
-                Optional.empty()
+                null
             ),
             eventMetadata
         );
@@ -109,7 +109,7 @@ public class HendelserTestUtils {
                 "idOver",
                 "navnOver",
                 LocalDate.of(2021, 1, 1),
-                Optional.empty()
+                null
             ),
             eventMetadata
         );
