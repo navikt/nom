@@ -109,7 +109,8 @@ export const ValgtOrgEnhet = ({
     queryFn: () => getTeamcatSection.queryFn(orgEnhet.id),
     enabled:
       orgEnhet.orgEnhetsType === OrgEnhetsType.DIR ||
-      orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT,
+      orgEnhet.orgEnhetsType === OrgEnhetsType.DIREKTORAT ||
+      orgEnhet.orgEnhetsType === OrgEnhetsType.KLAGEINSTANS,
   }).data;
 
   const tkatLenke = inDevelopment
