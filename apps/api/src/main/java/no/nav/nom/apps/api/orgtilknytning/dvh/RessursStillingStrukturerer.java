@@ -43,8 +43,8 @@ public class RessursStillingStrukturerer {
 
     public Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
         return ressursStillinger.stream()
-            .filter(rs -> rs.getNavident().isPresent())
-            .collect(groupingBy(rs -> rs.getNavident().get()));
+            .filter(rs -> nonNull(rs.getNavident()))
+            .collect(groupingBy(DvhRessursStilling::getNavident));
     }
 
     public Map<String, List<StillingPeriode>> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
@@ -272,9 +272,9 @@ public class RessursStillingStrukturerer {
             .forEach(stillingPeriode -> {
                 List<IOrgenhet> nomEnheter = Collections.emptyList();
                 // Kan kun matche for på stilling agressoId hvis denne finnes og er presis
-                if (stillingPeriode.stilling().agressoId().orElse("").length() >= 7) {
+                if (nonNull(stillingPeriode.stilling().agressoId()) && stillingPeriode.stilling().agressoId().length() >= 7) {
                     nomEnheter = finnNomEnheterForIdOgNavn(
-                        stillingPeriode.stilling().agressoId().get(),
+                        stillingPeriode.stilling().agressoId(),
                         stillingPeriode.stilling().enhetNavn(),
                         stillingPeriode.gyldigFom(),
                         stillingPeriode.gyldigTom()
@@ -284,12 +284,13 @@ public class RessursStillingStrukturerer {
                     // og ressurs agressoId er presis
                     // og hvis denne matcher stilling partial eller tom agressoId (Eg. stilling agressoId er overenhet for ressursens agressoId)
                     isCurrentPeriod(stillingPeriode)
-                        && stillingPeriode.stilling().ressursAgressoId().orElse("").length() >= 7
-                        && stillingPeriode.stilling().ressursAgressoId().get().startsWith(stillingPeriode.stilling().agressoId().orElse(""))
+                        && nonNull(stillingPeriode.stilling().ressursAgressoId())
+                        && stillingPeriode.stilling().ressursAgressoId().length() >= 7
+                        && stillingPeriode.stilling().ressursAgressoId().startsWith(Objects.requireNonNullElse(stillingPeriode.stilling().agressoId(), ""))
                 ) {
                     // så kan vi matche på ressurs sin agressoId
                     nomEnheter = finnNomEnheterForId(
-                        stillingPeriode.stilling().ressursAgressoId().get(),
+                        stillingPeriode.stilling().ressursAgressoId(),
                         stillingPeriode.gyldigFom(),
                         stillingPeriode.gyldigTom()
                     );
@@ -345,7 +346,7 @@ public class RessursStillingStrukturerer {
 
                         // forsøker på å finne korrekt tidligere enhet for den samme agressoid’en
                         List<IOrgenhet> tidligereNomEnheter = finnNomEnheterForExactId(
-                            stillingPeriode.stilling().agressoId().get(),
+                            stillingPeriode.stilling().agressoId(),
                             stillingPeriode.gyldigFom(),
                             nomEnheter.get(0).getGyldigFom().minusDays(1)
                         );
@@ -457,7 +458,7 @@ public class RessursStillingStrukturerer {
                         List<IOrgenhet> seinereNomEnherer = Collections.emptyList();
                         if (nonNull(nomEnheter.getFirst().getGyldigTom())) {
                             seinereNomEnherer =  finnNomEnheterForExactId(
-                                stillingPeriode.stilling().agressoId().get(),
+                                stillingPeriode.stilling().agressoId(),
                                 nomEnheter.getFirst().getGyldigTom().plusDays(1),
                                 stillingPeriode.gyldigTom()
                             );

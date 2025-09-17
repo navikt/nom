@@ -185,7 +185,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
                     var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
                     nyeHistoriskeStillingPerioder.add(nyStillingPeriode);
                     if (nySP.erDagligOppfolging()) {
-                        lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                        lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NULL"));
                     }
                 } else {
                     nyeHistoriskeStillingPerioder.add(nySP);
@@ -238,7 +238,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
                 var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
                 behandledeStillingPerioder.add(nyStillingPeriode);
                 if (nySP.erDagligOppfolging()) {
-                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NULL"));
                 }
             } else {
                 behandledeStillingPerioder.add(nySP);
@@ -294,10 +294,9 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
         for (StillingPeriode stillingPeriode : stillingPerioder) {
             var nySP = matchDOLMotOrgenhetPaaRessurs(stillingPeriode);
             if (hasDOLBeenSet) {
-                var nyStillingPeriode = new StillingPeriode(stillingPeriode, StillingPeriode.DagligOppfolging.NEI);
                 nyeFremtidigStillingPerioder.add(stillingPeriode);
                 if (nySP.erDagligOppfolging()) {
-                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, stillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+                    lagErrorPeriodeMedOPRMatchMotFlere(sspForNavident, stillingPerioder, requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NULL"));
                 }
             } else {
                 nyeFremtidigStillingPerioder.add(nySP);
@@ -344,7 +343,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
 
     private StillingPeriode matchDOLMotOrgenhetPaaRessurs(StillingPeriode stillingPeriode) {
         return new StillingPeriode(stillingPeriode,
-            stillingPeriode.orgenhet().getAgressoId().startsWith(stillingPeriode.stilling().ressursAgressoId().orElse("NULL")) ?
+            stillingPeriode.orgenhet().getAgressoId().startsWith(requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NULL")) ?
                 StillingPeriode.DagligOppfolging.JA : StillingPeriode.DagligOppfolging.NEI);
     }
 
@@ -399,7 +398,7 @@ public class SettDOLPerioderPaaStrukturerteStillinger {
     ) {
         var fom = aktiveStillingPerioder.getFirst().gyldigFom();
         var tom = aktiveStillingPerioder.getFirst().gyldigTom();
-        var orgenhetPaaRessurs = aktiveStillingPerioder.getFirst().stilling().ressursAgressoId().orElse("NULL");
+        var orgenhetPaaRessurs = requireNonNullElse(aktiveStillingPerioder.getFirst().stilling().ressursAgressoId(), "NULL");
 
         List<String> enheter = aktiveStillingPerioder.stream()
                 .map(sp -> sp.orgenhet().getId() + "-" + sp.orgenhet().getNavn() + " (" + sp.orgenhet().getAgressoId() + ")")

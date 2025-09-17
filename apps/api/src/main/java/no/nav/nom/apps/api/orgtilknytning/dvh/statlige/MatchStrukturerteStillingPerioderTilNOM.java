@@ -79,13 +79,13 @@ public class MatchStrukturerteStillingPerioderTilNOM {
                     // Vi har agressoId fra stilling men den er ikke presis
                     // Ref: 'Matche til enheter i NOM'  2.ii - Ingen match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs)
                     OTSomMatcherAgressoIdIPerioden = finnOTSomMatcherUpresisAgressoIdOgDekkerPerioden(
-                        navident, stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), stillingPeriode.stilling().agressoId().orElse("NOT_FOUND")
+                        navident, stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), requireNonNullElse(stillingPeriode.stilling().agressoId(), "NOT_FOUND")
                     );
                 }
                 if (OTSomMatcherAgressoIdIPerioden == null && stillingPeriode.isCurrentPeriod() && !stillingPeriode.manglerRessursAgressoId()) {
                     // Ref: 'Matche til enheter i NOM'  3.ii - Ingen match mellom stillingens agressoId og ressursAgressoId (OrgenhetPaaRessurs)
                     OTSomMatcherAgressoIdIPerioden =finnOTSomMatcherUpresisAgressoIdOgDekkerPerioden(
-                        navident, stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), stillingPeriode.stilling().ressursAgressoId().orElse("NOT_FOUND")
+                        navident, stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), requireNonNullElse(stillingPeriode.stilling().ressursAgressoId(), "NOT_FOUND")
                     );
                 }
                 if (OTSomMatcherAgressoIdIPerioden != null) {

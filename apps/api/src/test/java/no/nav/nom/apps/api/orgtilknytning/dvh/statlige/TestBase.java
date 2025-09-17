@@ -21,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Random;
 
 @SpringBootTest(classes = {
@@ -140,24 +139,24 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
         String ansettelseBeskType
     ) {
         return DvhRessursStilling.builder()
-            .navident(Optional.of(navid))
-            .stillingAgressoId(Optional.ofNullable(stillingAgressoId))
+            .navident(navid)
+            .stillingAgressoId(stillingAgressoId)
             .stillingOrgenhetNavn(stillingOrgenhetNavn)
-            .ressursAgressoId(Optional.ofNullable(ressursAgressoId))
-            .ressursOrgenhetNiv(Optional.ofNullable(ressursOrgenhetNiv))
+            .ressursAgressoId(ressursAgressoId)
+            .ressursOrgenhetNiv(ressursOrgenhetNiv)
             .stillingDatoFom(from)
             .stillingDatoTom(to)
-            .stillingAnsettelsesTypeBesk(Optional.ofNullable(ansettelseBeskType))
+            .stillingAnsettelsesTypeBesk(ansettelseBeskType)
             .build();
     }
 
     StillingPeriode stillingPeriode(String agressoId, String navn, LocalDate gyldigFom, LocalDate gyldigTom) {
         return new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                Optional.of(agressoId),
+                agressoId,
                 navn,
-                Optional.of(agressoId),
-                Optional.of("ORGENHET")
+                agressoId,
+                "ORGENHET"
             ),
             gyldigFom,
             gyldigTom,
@@ -168,10 +167,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     StillingPeriode stillingPeriode(String agressoId, String ressursAgressoId, String navn, LocalDate gyldigFom, LocalDate gyldigTom) {
         return new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                Optional.ofNullable(agressoId),
+                agressoId,
                 navn,
-                Optional.ofNullable(ressursAgressoId),
-                Optional.of("ORGENHET")
+                ressursAgressoId,
+                "ORGENHET"
             ),
             gyldigFom,
             gyldigTom,
@@ -182,10 +181,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom) {
         return new StillingPeriode(
                 new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                        Optional.ofNullable(orgenhet.getAgressoId()),
+                        orgenhet.getAgressoId(),
                         orgenhet.getNavn(),
-                        Optional.ofNullable(orgenhet.getAgressoId()),
-                        Optional.of("ORGENHET")
+                        orgenhet.getAgressoId(),
+                        "ORGENHET"
                 ),
                 gyldigFom,
                 gyldigTom,
@@ -196,10 +195,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom, StillingPeriode.DagligOppfolging dol) {
         return new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                Optional.ofNullable(orgenhet.getAgressoId()),
+                orgenhet.getAgressoId(),
                 orgenhet.getNavn(),
-                Optional.ofNullable(orgenhet.getAgressoId()),
-                Optional.of("ORGENHET")
+                orgenhet.getAgressoId(),
+                "ORGENHET"
             ),
             gyldigFom,
             gyldigTom,
@@ -213,10 +212,10 @@ public class TestBase extends OrgtilknytningCmdServiceTestBase {
     StillingPeriode stillingPeriode(IOrgenhet orgenhet, LocalDate gyldigFom, LocalDate gyldigTom, String ressursAgressoId) {
         return new StillingPeriode(
                 new StillingPeriode.StillingAgressoOrgIdOgNavn(
-                        Optional.ofNullable(orgenhet.getAgressoId()),
+                        orgenhet.getAgressoId(),
                         orgenhet.getNavn(),
-                        Optional.ofNullable(ressursAgressoId),
-                        Optional.of("ORGENHET")
+                        ressursAgressoId,
+                        "ORGENHET"
                 ),
                 gyldigFom,
                 gyldigTom,

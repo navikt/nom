@@ -45,9 +45,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -72,13 +72,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(2, result.stillingPerioder().size());
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
 
-        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv());
 
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2020, 8, 31), forsteStillingPeriode.gyldigTom());
@@ -107,11 +107,11 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(2, result.stillingPerioder().size());
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse("NULL"));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2020, 10, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId().orElse("NULL"));
+        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId());
         assertEquals(LocalDate.of(2020, 11, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
     }
@@ -136,13 +136,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(2, result.stillingPerioder().size());
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse("NULL"));
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2020, 10, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse("NULL"));
-        assertEquals("AGRID_x", andreStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId());
+        assertEquals("AGRID_x", andreStillingPeriode.stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 11, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
     }
@@ -164,10 +164,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AGRID", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AGRID", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -189,10 +189,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("AGRID", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -214,10 +214,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AID_2", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AID_2", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -239,10 +239,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AID_100", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("AID_100", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -264,10 +264,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AID_100", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AID_2", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("AID_100", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AID_2", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -289,10 +289,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("-4", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("-4", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Mangler", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -314,10 +314,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("-4", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("AID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("-4", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("AID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Mangler", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGNIV3", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -339,10 +339,10 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("-4", forsteStillingPeriode.stilling().agressoId().orElse(null));
-        assertEquals("-3", forsteStillingPeriode.stilling().ressursAgressoId().orElse(null));
+        assertEquals("-4", forsteStillingPeriode.stilling().agressoId());
+        assertEquals("-3", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals("Mangler", forsteStillingPeriode.stilling().enhetNavn());
-        assertNull(forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertNull(forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
     }
@@ -364,9 +364,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 11, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
 
@@ -391,9 +391,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 5, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
 
@@ -420,15 +420,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
         var andreStillingPeriode = result.stillingPerioder().getLast();
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2021, 11, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 12, 31), forsteStillingPeriode.gyldigTom());
 
-        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_2", andreStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2022, 1, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
 
@@ -454,9 +454,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2023, 12, 31), forsteStillingPeriode.gyldigTom());
 
@@ -481,9 +481,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 12, 31), forsteStillingPeriode.gyldigTom());
 
@@ -508,9 +508,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 8, 31), forsteStillingPeriode.gyldigTom());
 
@@ -537,7 +537,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
 
@@ -567,11 +567,11 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(2, result.stillingPerioder().size());
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
 
-        assertEquals("AGRID_2", andreStillingPeriode.stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("AGRID_2", andreStillingPeriode.stilling().ressursAgressoId());
         assertEquals(LocalDate.of(2020, 11, 1), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
 
@@ -597,17 +597,17 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(2, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 6, 15), forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
         assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype());
         var andreStillingPeriode = result.stillingPerioder().getLast();
-        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2021, 6, 16), andreStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, andreStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
@@ -631,9 +631,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
 
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
@@ -659,23 +659,23 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var andreStillingPeriode = result.stillingPerioder().get(1);
         var tredjeStillingPeriode = result.stillingPerioder().getLast();
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", forsteStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", forsteStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2020, 12, 31), forsteStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, forsteStillingPeriode.sektor());
         assertEquals(Tilknytningtype.MIDLERTIDIG, forsteStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", andreStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", andreStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2021, 1, 1), andreStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2021, 6, 15), andreStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, andreStillingPeriode.sektor());
         assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId());
         assertEquals("Enhet_1", tredjeStillingPeriode.stilling().enhetNavn());
-        assertEquals("ORGENHET", tredjeStillingPeriode.stilling().ressursAgressoOrgNiv().orElse(null));
+        assertEquals("ORGENHET", tredjeStillingPeriode.stilling().ressursAgressoOrgNiv());
         assertEquals(LocalDate.of(2021, 6, 16), tredjeStillingPeriode.gyldigFom());
         assertEquals(MAX_DATE, tredjeStillingPeriode.gyldigTom());
         assertEquals(Sektor.NAV_STATLIG, tredjeStillingPeriode.sektor());
@@ -703,13 +703,13 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var tredjeStillingPeriode = result.stillingPerioder().get(2);
         var fjerdeStillingPeriode = result.stillingPerioder().getLast();
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.MIDLERTIDIG, andreStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_2", tredjeStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_2", tredjeStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.FAST, tredjeStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_2", fjerdeStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_2", fjerdeStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.UTDANNINGSSTILLINGER, fjerdeStillingPeriode.tilknytningtype());
     }
 
@@ -732,9 +732,9 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
         var andreStillingPeriode = result.stillingPerioder().getLast();
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
-        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.UFORUTSETT_BEHOV, andreStillingPeriode.tilknytningtype());
     }
 
@@ -756,7 +756,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals(1, result.stillingPerioder().size());
         var forsteStillingPeriode = result.stillingPerioder().getFirst();
 
-        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null));
+        assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
         assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom());
         assertEquals(LocalDate.of(2022, 12, 31), forsteStillingPeriode.gyldigTom());
@@ -783,15 +783,15 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         var tredjeStillingPeriode = result.stillingPerioder().getLast();
 
         assertAll(
-            () -> assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId().orElse(null)),
+            () -> assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId()),
             () -> assertNull(forsteStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2020, 1, 1), forsteStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2020, 12, 31), forsteStillingPeriode.gyldigTom()),
-            () -> assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId().orElse(null)),
+            () -> assertEquals("AGRID_1", andreStillingPeriode.stilling().agressoId()),
             () -> assertEquals(Tilknytningtype.FAST, andreStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2021, 1, 1), andreStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2021, 12, 31), andreStillingPeriode.gyldigTom()),
-            () -> assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId().orElse(null)),
+            () -> assertEquals("AGRID_1", tredjeStillingPeriode.stilling().agressoId()),
             () -> assertNull(tredjeStillingPeriode.tilknytningtype()),
             () -> assertEquals(LocalDate.of(2022, 1, 1), tredjeStillingPeriode.gyldigFom()),
             () -> assertEquals(LocalDate.of(2022, 12, 31), tredjeStillingPeriode.gyldigTom())

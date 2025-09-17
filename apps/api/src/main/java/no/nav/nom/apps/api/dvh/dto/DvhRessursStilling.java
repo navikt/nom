@@ -9,23 +9,25 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Optional;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Value
 @Builder
 public class DvhRessursStilling {
-    Optional<String> navident;
+    String navident;
     LocalDate stillingDatoFom;                          // DVH sin HRRES_STILLINGER.FRA_DATO            Fra dato for brekkpunktet for dette datapunktet
     LocalDate stillingDatoTom;                          // DVH sin HRRES_STILLINGER.TIL_DATO            Fra dato for brekkpunktet for dette datapunktet
-    Optional<String> stillingAgressoId;                 // DVH sin HRRES_STILLINGER.ORGENHET            Agresso id som unit4-stillingen er knyttet til i perioden for FRA/TIL_DATO.
-    Optional<String> stillingAnsettelsesTypeBesk;       // DVH sin HRRES_STILLINGER.ANSETELSESTYPE_BESK  Beskrivelse av ansettelsestype
+    String stillingAgressoId;                 // DVH sin HRRES_STILLINGER.ORGENHET            Agresso id som unit4-stillingen er knyttet til i perioden for FRA/TIL_DATO.
+    String stillingAnsettelsesTypeBesk;       // DVH sin HRRES_STILLINGER.ANSETELSESTYPE_BESK  Beskrivelse av ansettelsestype
                                                 //                                              Kan være NULL/TOM/MANGLENDE
     String stillingOrgenhetNavn;
-    Optional<String> ressursAgressoId;                  // DVH sin HRRES_RESSURS.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til NÅ
+    String ressursAgressoId;                  // DVH sin HRRES_RESSURS.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til NÅ
                                                 //                                              Kan være NULL/TOM/MANGLENDE
-    Optional<String> ressursOrgenhetNiv;
-    Optional<String> ressursRemedyEnhetId;
-    Optional<String> stillingRessursAgressoId;  // DVH sin HRRES_STILLINGER.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til i perioden for FRA/TIL_DATO
+    String ressursOrgenhetNiv;
+    String ressursRemedyEnhetId;
+    String stillingRessursAgressoId;  // DVH sin HRRES_STILLINGER.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til i perioden for FRA/TIL_DATO
                                                 //                                                 Kan være NULL/TOM/MANGLENDE
 
     LocalDate ressursAgressoDatoFom;            // DVH sin HRRES_RESSURS.AGRESSO_DATE_FROM         Fra dato på ressurs i Unit4  - NÅ
@@ -41,31 +43,33 @@ public class DvhRessursStilling {
     // -4 = Manlger - Feltet er blankt i kilden, men det burde ha vært en verdi der.
     // -5 = Skjult - Kode 6 / 7 eller annet grunnlag for å skjule denne opplysningen.
 
-    private static Optional<String> getNullableOrErrorStringNode(JsonNode json, String field_name) {
+    private static String getNullableOrErrorStringNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
         return (node.isNull() || node.asText().startsWith("-")) ?
-            Optional.empty() :
-            Optional.of(node.asText());
+            null :
+            node.asText();
     }
 
     public Sektor getSektor() {
-        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk().orElse("");
+        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk();
+        if (isNull(ansettelsesBeskTypeValue)) { return null; }
         return switch (ansettelsesBeskTypeValue) {
             case "Fast", "Midlertidig karakter § 9a", "Uforutsett behov § 9e", "Vikar § 9b" -> Sektor.NAV_STATLIG;
             default -> null;
         };
     }
 
-    public Optional<Tilknytningtype> getTilknytningtype() {
-        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk().orElse("");
+    public Tilknytningtype getTilknytningtype() {
+        var ansettelsesBeskTypeValue = this.getStillingAnsettelsesTypeBesk();
+        if (isNull(ansettelsesBeskTypeValue)) { return null; }
         return switch (ansettelsesBeskTypeValue) {
-            case "Fast" -> Optional.of(Tilknytningtype.FAST);
-            case "Midlertidig karakter § 9a" -> Optional.of(Tilknytningtype.MIDLERTIDIG);
-            case "Uforutsett behov § 9e" -> Optional.of(Tilknytningtype.UFORUTSETT_BEHOV);
-            case "Vikar § 9b" -> Optional.of(Tilknytningtype.VIKAR);
-            case "Utdanningsstillinger § 9d" -> Optional.of(Tilknytningtype.UTDANNINGSSTILLINGER);
-            case "Praksisarbeid § 9c" -> Optional.of(Tilknytningtype.PRAKSISARBEID);
-            default -> Optional.empty();
+            case "Fast" -> Tilknytningtype.FAST;
+            case "Midlertidig karakter § 9a" -> Tilknytningtype.MIDLERTIDIG;
+            case "Uforutsett behov § 9e" -> Tilknytningtype.UFORUTSETT_BEHOV;
+            case "Vikar § 9b" -> Tilknytningtype.VIKAR;
+            case "Utdanningsstillinger § 9d" -> Tilknytningtype.UTDANNINGSSTILLINGER;
+            case "Praksisarbeid § 9c" -> Tilknytningtype.PRAKSISARBEID;
+            default -> null;
         };
     }
 
@@ -76,7 +80,7 @@ public class DvhRessursStilling {
             .payload(json.toPrettyString())
             .navident(navident);
 
-        if (navident.isPresent()) {
+        if (nonNull(navident)) {
             dvhRessursStillingBuilder
                 .stillingDatoFom(localDateOf(json.get("fra_dato").asText()))
                 .stillingDatoTom(localDateOf(json.get("til_dato").asText()))

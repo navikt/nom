@@ -17,7 +17,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -205,28 +204,28 @@ class DvhOrdsServiceTest {
         assertNotNull(ressursStillinger);
         assertEquals(7, ressursStillinger.size());
 
-        assertEquals("A100036", ressursStillinger.getFirst().getNavident().get());
-        assertEquals("0499000", ressursStillinger.getFirst().getStillingAgressoId().get());
+        assertEquals("A100036", ressursStillinger.getFirst().getNavident());
+        assertEquals("0499000", ressursStillinger.getFirst().getStillingAgressoId());
         assertEquals("Innlandet Arbeidslivssenter", ressursStillinger.getFirst().getStillingOrgenhetNavn());
         assertEquals(LocalDate.of(2021,7,1), ressursStillinger.getFirst().getStillingDatoFom());
         assertEquals(LocalDate.of(2021,12,31), ressursStillinger.getFirst().getStillingDatoTom());
         assertEquals(LocalDate.of(2006,4,4), ressursStillinger.getFirst().getRessursDvhDatoFom());
         assertEquals(LocalDate.of(2099,12,31), ressursStillinger.getFirst().getRessursDvhDatoTom());
 
-        assertEquals("A100180", ressursStillinger.get(4).getNavident().get());
-        assertEquals("0521000", ressursStillinger.get(4).getStillingAgressoId().get());
+        assertEquals("A100180", ressursStillinger.get(4).getNavident());
+        assertEquals("0521000", ressursStillinger.get(4).getStillingAgressoId());
         assertEquals("Øyer", ressursStillinger.get(4).getStillingOrgenhetNavn());
         assertEquals(LocalDate.of(2024,6,1), ressursStillinger.get(4).getStillingDatoFom());
         assertEquals(LocalDate.of(2024,6,30), ressursStillinger.get(4).getStillingDatoTom());
         assertEquals(LocalDate.of(1980,5,19), ressursStillinger.get(4).getRessursDvhDatoFom());
         assertEquals(LocalDate.of(2099,12,31), ressursStillinger.get(4).getRessursDvhDatoTom());
 
-        assertEquals("A100180", ressursStillinger.get(5).getNavident().get());
-        assertEquals("0521000", ressursStillinger.get(5).getStillingAgressoId().get());
-        assertEquals("Innlån/utlån", ressursStillinger.get(5).getStillingAnsettelsesTypeBesk().get());
+        assertEquals("A100180", ressursStillinger.get(5).getNavident());
+        assertEquals("0521000", ressursStillinger.get(5).getStillingAgressoId());
+        assertEquals("Innlån/utlån", ressursStillinger.get(5).getStillingAnsettelsesTypeBesk());
 
-        assertEquals("A100180", ressursStillinger.get(6).getNavident().get());
-        assertEquals("0521000", ressursStillinger.get(6).getStillingAgressoId().get());
-        assertEquals(Optional.of(""), ressursStillinger.get(6).getStillingAnsettelsesTypeBesk());
+        assertEquals("A100180", ressursStillinger.get(6).getNavident());
+        assertEquals("0521000", ressursStillinger.get(6).getStillingAgressoId());
+        assertEquals("", ressursStillinger.get(6).getStillingAnsettelsesTypeBesk());
     }
 }

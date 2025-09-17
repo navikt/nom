@@ -58,7 +58,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
                         rs.getRessursOrgenhetNiv()
                     ),
                     rs.getSektor(),
-                    rs.getTilknytningtype().orElse(null)
+                    rs.getTilknytningtype()
                 )
             ));
 
