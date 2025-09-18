@@ -1,9 +1,8 @@
 import { css } from "@emotion/react";
-import { Button, Modal } from "@navikt/ds-react";
+import { Button, HGrid, Modal } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
-import { format } from "date-fns";
 
 import { createRessurs, getOrgEnhet } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
@@ -20,7 +19,7 @@ import type {
 } from "~/types/api-models";
 import { IdentType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
-import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
@@ -110,7 +109,6 @@ export function ConfirmStep() {
   return (
     <Modal
       css={css`
-        width: 600px;
         padding: var(--a-spacing-4);
       `}
       header={{ heading: "Bekreft registrering" }}
@@ -124,31 +122,31 @@ export function ConfirmStep() {
           gap: var(--a-spacing-9);
         `}
       >
-        <div>
-          <span>
-            Ved å bekrefte disse detaljene vil personen blir registrert som
-            medarbeider i NOM.{" "}
-          </span>
-          {navident && (
-            <span>Nav-ident blir videreført fra tidligere arbeidsforhold.</span>
-          )}
-        </div>
-        <div
+        <span
           css={css`
-            display: grid;
-            grid-template-columns: max-content 1fr;
-            gap: var(--a-spacing-4);
+            max-width: 400px;
           `}
         >
-          <LabelWithValue label="Navn" value={formattedName} />
-          <LabelWithValue label="Telefonnummer" value={primaryTelefonnummer} />
+          {`Ved å bekrefte disse detaljene vil personen bli registrert som
+            medarbeider i NOM.${!!navident ? " Nav-ident blir videreført fra tidligere arbeidsforhold." : ""}`}
+        </span>
+
+        <HGrid columns="max-content max-content" gap="2 2">
+          <LabelWithValue label="Navn" split value={formattedName} />
+          <LabelWithValue
+            label="Telefonnummer"
+            split
+            value={primaryTelefonnummer}
+          />
           <LabelWithValue
             label="Sektor"
+            split
             value={sektor && SektorNameMapping[sektor]}
           />
-          <LabelWithValue label="Nav-ident" value={navident} />
+          <LabelWithValue label="Nav-ident" split value={navident} />
           <LabelWithValue
             label="Tilknytningstype"
+            split
             value={
               tilknytningtype &&
               (tilknytningtype === Tilknytningtype.INGEN
@@ -158,15 +156,20 @@ export function ConfirmStep() {
           />
           <LabelWithValue
             label="Ansettelsestype"
+            split
             value={
               ansettelsesType && AnsettelsesTypeNameMapping[ansettelsesType]
             }
           />
-          <LabelWithValue label="Org.enhet" value={selectOrgEnhet?.navn} />
-          <LabelWithValue label="Leder" value={lederNavn} />
-
+          <LabelWithValue
+            label="Org.enhet"
+            split
+            value={selectOrgEnhet?.navn}
+          />
+          <LabelWithValue label="Leder" split value={lederNavn} />
           <LabelWithValue
             label="Fysisk brukersted"
+            split
             value={
               selectedFysiskBrukersted &&
               `${selectedFysiskBrukersted.brukerstedNavn} (${selectedFysiskBrukersted.brukerstedNr})`
@@ -174,19 +177,23 @@ export function ConfirmStep() {
           />
           <LabelWithValue
             label="Remedy-enhet"
+            split
             value={selectOrgEnhet?.remedyEnhetId}
           />
           <LabelWithValue
             label="Startdato (første arbeidsdag)"
-            value={gyldigFom && format(new Date(gyldigFom), DATE_FORMATS.no)}
+            split
+            value={gyldigFom && formatDisplayDate(gyldigFom)}
           />
           <LabelWithValue
             label="Sluttdato"
-            value={gyldigTom && format(new Date(gyldigTom), DATE_FORMATS.no)}
+            split
+            value={gyldigTom && formatDisplayDate(gyldigTom)}
           />
-        </div>
+        </HGrid>
         <ApiResponseError error={opprettRessursMutation.error} />
       </Modal.Body>
+
       <Modal.Footer>
         <Button
           data-cy="opprett-medarbeider-button"

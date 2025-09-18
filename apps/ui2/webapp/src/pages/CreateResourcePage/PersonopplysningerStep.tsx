@@ -23,11 +23,7 @@ import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchFor
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
-import type {
-  FolkeregisterPerson,
-  GetPersonRequest,
-  Person,
-} from "~/types/api-models";
+import type { GetPersonRequest, Person } from "~/types/api-models";
 import { IdentType } from "~/types/api-models";
 import { capitalizeName } from "~/utils";
 
@@ -124,7 +120,7 @@ function CreateResourceForm({ personident }: { personident: string }) {
         <FolkeregisterPersonInfo
           folkeregisterPerson={person.folkeregisterPerson}
         />
-        <VisningsnavnForm folkeregisterPerson={person.folkeregisterPerson} />
+        <VisningsnavnForm person={person} />
       </>
     );
   }
@@ -132,12 +128,10 @@ function CreateResourceForm({ personident }: { personident: string }) {
   return <></>;
 }
 
-function VisningsnavnForm({
-  folkeregisterPerson,
-}: {
-  folkeregisterPerson: FolkeregisterPerson;
-}) {
+function VisningsnavnForm({ person }: { person: Person }) {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
+
+  const folkeregisterPerson = person.folkeregisterPerson;
 
   const {
     visningsfornavn,
@@ -208,6 +202,7 @@ function VisningsnavnForm({
               ...oldSearch,
               ...values,
               primaryTelefonnummer: nummerUtenSpaces,
+              navident: person.navident,
             }),
           }).then();
         })}

@@ -7,6 +7,7 @@ import {
   Button,
   DatePicker,
   HelpText,
+  HGrid,
   Label,
   Loader,
   Modal,
@@ -517,7 +518,6 @@ function CreateSpecialConfirmModal({
   return (
     <Modal
       css={css`
-        width: 600px;
         padding: var(--a-spacing-4);
       `}
       header={{ heading: "Bekreft registrering", closeButton: false }}
@@ -531,28 +531,30 @@ function CreateSpecialConfirmModal({
           gap: var(--a-spacing-9);
         `}
       >
-        <div>
-          <span>
-            Ved å bekrefte disse detaljene vil ressursen blir registrert som
-            medarbeider i NOM.
-          </span>
-        </div>
-
-        <div
+        <span
           css={css`
-            display: grid;
-            grid-template-columns: max-content 1fr;
-            gap: var(--a-spacing-4);
+            max-width: 400px;
           `}
         >
-          <LabelWithValue label="Navn" value={formattedName} />
-          <LabelWithValue label="Identifikasjonsnummer" value={personident} />
+          Ved å bekrefte disse detaljene vil ressursen bli registrert som
+          medarbeider i NOM.
+        </span>
+
+        <HGrid columns="max-content max-content" gap="2 2">
+          <LabelWithValue label="Navn" split value={formattedName} />
+          <LabelWithValue
+            label="Identifikasjonsnummer"
+            split
+            value={personident}
+          />
           <LabelWithValue
             label="Sektor"
+            split
             value={sektor && SektorNameMapping[sektor]}
           />
           <LabelWithValue
             label="Tilknytningstype"
+            split
             value={
               tilknytningtype &&
               (tilknytningtype === Tilknytningtype.INGEN
@@ -560,11 +562,15 @@ function CreateSpecialConfirmModal({
                 : TilknytningtypeNameMapping[tilknytningtype])
             }
           />
-          <LabelWithValue label="Org.enhet" value={selectOrgEnhet?.navn} />
-          <LabelWithValue label="Leder" value={lederNavn} />
-
+          <LabelWithValue
+            label="Org.enhet"
+            split
+            value={selectOrgEnhet?.navn}
+          />
+          <LabelWithValue label="Leder" split value={lederNavn} />
           <LabelWithValue
             label="Fysisk brukersted"
+            split
             value={
               selectedFysiskBrukersted &&
               `${selectedFysiskBrukersted.brukerstedNavn} (${selectedFysiskBrukersted.brukerstedNr})`
@@ -572,17 +578,20 @@ function CreateSpecialConfirmModal({
           />
           <LabelWithValue
             label="Remedy-enhet"
+            split
             value={selectOrgEnhet?.remedyEnhetId}
           />
           <LabelWithValue
             label="Startdato (første arbeidsdag)"
+            split
             value={startDato && formatDisplayDate(startDato)}
           />
           <LabelWithValue
             label="Sluttdato"
+            split
             value={sluttDato && formatDisplayDate(sluttDato)}
           />
-        </div>
+        </HGrid>
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={onConfirm} type="button">
