@@ -380,7 +380,6 @@ function OrgEnheterStatistikk({
         <div
           css={css`
             display: flex;
-            justify-content: space-between;
             align-items: center;
             margin-bottom: var(--a-spacing-6);
           `}
@@ -395,15 +394,11 @@ function OrgEnheterStatistikk({
             <div
               css={css`
                 width: 100%;
+                justify-content: end;
+                display: flex;
               `}
             >
-              <HelpText
-                css={css`
-                  justify-self: end;
-                `}
-              >
-                {helpText}
-              </HelpText>
+              <HelpText>{helpText}</HelpText>
             </div>
           )}
         </div>
