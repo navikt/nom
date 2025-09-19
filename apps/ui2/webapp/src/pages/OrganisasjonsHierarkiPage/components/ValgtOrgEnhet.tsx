@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { MenuElipsisHorizontalCircleIcon } from "@navikt/aksel-icons";
+import { ChevronDownDoubleIcon } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
@@ -537,14 +537,12 @@ function DropdownMeny({
       <Dropdown>
         <Button
           as={Dropdown.Toggle}
-          css={css`
-            color: black;
-            justify-self: end;
-            padding: var(--a-spacing-1);
-          `}
-          icon={<MenuElipsisHorizontalCircleIcon title="Rediger" />}
-          variant="tertiary"
-        />
+          icon={<ChevronDownDoubleIcon title="Alternativer" />}
+          size="small"
+          variant="secondary"
+        >
+          Alternativer
+        </Button>
 
         <Dropdown.Menu
           css={css`
