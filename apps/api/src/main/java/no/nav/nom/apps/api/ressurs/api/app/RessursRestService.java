@@ -683,6 +683,7 @@ public class RessursRestService {
     }
 
     private static boolean isUserLoggedIn() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) return false;
         return SecurityUtil.getNavIdent(SecurityContextHolder.getContext().getAuthentication()).isPresent();
     }
 
