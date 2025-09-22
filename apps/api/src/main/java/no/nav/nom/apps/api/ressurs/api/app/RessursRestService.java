@@ -403,7 +403,7 @@ public class RessursRestService {
         return createdRessurs;
     }
 
-    private boolean isActive(RessursState ressursState) {
+    public boolean isActive(RessursState ressursState) {
         return orgtilknytningStateRepository.findByNavident(ressursState.navident()).stream()
             .anyMatch(state -> !(state.gyldigTom() != null && state.gyldigTom().isBefore(LocalDate.now())));
     }

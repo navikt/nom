@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.api.app.AvvikleRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.app.OpprettRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
+import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.AnsettelsesType;
@@ -71,6 +72,14 @@ public class DollyService {
                 SecurityUtil.getAuthenticatedAzpName()
             )
         );
+
+        final var existingRessursByNavident = ressursStateRepository.findByPersonident(request.personident());
+
+        if (existingRessursByNavident.isPresent() && ressursRestService.isActive(existingRessursByNavident.get())) {
+            throw new DuplicateRessursException(
+                String.format("Det finnes allerede en aktiv ressurs med personident %s", request.personident())
+            );
+        }
 
         ressursRestService.validateOpprettRessursRequest(opprettReq);
         dollyAsyncOpprettRessurs.opprettRessurs(opprettReq, metaData);
