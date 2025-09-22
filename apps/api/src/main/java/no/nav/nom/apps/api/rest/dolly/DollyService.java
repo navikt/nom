@@ -28,13 +28,15 @@ public class DollyService {
 
     private final RessursStateRepository ressursStateRepository;
     private final RessursRestService ressursRestService;
+    private final DollyAsyncOpprettRessurs dollyAsyncOpprettRessurs;
     private final AppProperties appProperties;
 
     public DollyService(RessursStateRepository ressursStateRepository,
-                        RessursRestService ressursRestService, AppProperties appProperties
+                        RessursRestService ressursRestService, DollyAsyncOpprettRessurs dollyAsyncOpprettRessurs, AppProperties appProperties
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursRestService = ressursRestService;
+        this.dollyAsyncOpprettRessurs = dollyAsyncOpprettRessurs;
         this.appProperties = appProperties;
     }
 
@@ -71,12 +73,7 @@ public class DollyService {
         );
 
         ressursRestService.validateOpprettRessursRequest(opprettReq);
-        opprettRessurs(opprettReq, metaData);
-    }
-
-    @Async
-    void opprettRessurs(OpprettRessursRequest request, InputMetadata metaData) {
-        ressursRestService.createRessursAndNotify(request, metaData);
+        dollyAsyncOpprettRessurs.opprettRessurs(opprettReq, metaData);
     }
 
     public void avvikleRessurs(DollyRessursRequest request) {

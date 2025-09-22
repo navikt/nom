@@ -109,19 +109,8 @@ public class DollyControllerTest extends RestTestBase {
 
         var request = new DollyRessursRequest(personident, navn.getFornavn(), navn.getMellomnavn(), navn.getEtternavn(), null, null);
 
-        var orgEnhet = orgEnhetState().toBuilder()
-            .agressoId("123456")
-            .agressoOrgNivaa("4")
-            .navn("NAV")
-            .build();
-
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(appProperties.dollyRessurs().fysiskBrukerstedNr()))))
             .thenReturn(Set.of(appProperties.dollyRessurs().fysiskBrukerstedNr()));
-
-        when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
-            .thenReturn(ressursState());
-
-        when(orgEnhetStateRepository.findById(appProperties.dollyRessurs().orgenhetId())).thenReturn(Optional.of(orgEnhet));
 
         postOpprettRessursRequest(
             testToken.dollyClient(),
@@ -129,11 +118,6 @@ public class DollyControllerTest extends RestTestBase {
         )
             .expectStatus().is2xxSuccessful()
             .expectBody(OpprettRessursResponse.class);
-
-        verify(ressursCommandService, times(1)).createRessursSync(any());
-
-        verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
-        verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
     }
 
     private WebTestClient.ResponseSpec postOpprettRessursRequest(String accessToken, DollyRessursRequest opprettRessursRequest) {
