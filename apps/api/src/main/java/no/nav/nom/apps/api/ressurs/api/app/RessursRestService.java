@@ -740,7 +740,7 @@ public class RessursRestService {
         nomMastered.markRessursAsMasteredInNom(ressursState.navident());
     }
 
-    private void validateOpprettRessursRequest(OpprettRessursRequest request) {
+    public void validateOpprettRessursRequest(OpprettRessursRequest request) {
         if (Objects.requireNonNull(request.sektor()) == Sektor.EKSTERN) {
             validateOpprettEksternRessursRequest(request);
         } else if (request.sluttDato() != null) {

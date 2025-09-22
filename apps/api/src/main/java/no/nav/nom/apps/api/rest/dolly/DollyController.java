@@ -122,7 +122,7 @@ public class DollyController {
             )
         }
     )
-    public ResponseEntity<RessursDTO> opprettRessurs(
+    public void opprettRessurs(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Ressurs som skal opprettes", required = true,
                 content = @Content(
@@ -135,7 +135,7 @@ public class DollyController {
         log.info(TEAM_LOGS, "opprettRessurs kalt fra Dolly:\n{}", request);
         if (personidentIsIllegal(request.personident())) ResponseEntity.badRequest().build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(dollyService.opprettRessurs(request));
+        dollyService.opprettRessurs(request);
     }
 
     @PostMapping("/avsluttRessurs")

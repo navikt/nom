@@ -16,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -43,7 +44,7 @@ public class DollyService {
                 .orElseThrow(() -> new RessursNotFoundException("Ressurs med angitt personident finnes ikke"));
     }
 
-    public RessursDTO opprettRessurs(DollyRessursRequest request) {
+    public void opprettRessurs(DollyRessursRequest request) {
         var opprettReq = OpprettRessursRequest.builder()
             .personident(request.personident())
             .identType(IdentType.STANDARD)
@@ -69,7 +70,13 @@ public class DollyService {
             )
         );
 
-        return from(ressursRestService.createRessursAndNotify(opprettReq, metaData));
+        ressursRestService.validateOpprettRessursRequest(opprettReq);
+        opprettRessurs(opprettReq, metaData);
+    }
+
+    @Async
+    void opprettRessurs(OpprettRessursRequest request, InputMetadata metaData) {
+        ressursRestService.createRessursAndNotify(request, metaData);
     }
 
     public void avvikleRessurs(DollyRessursRequest request) {
