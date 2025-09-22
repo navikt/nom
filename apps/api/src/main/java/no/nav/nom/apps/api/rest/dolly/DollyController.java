@@ -96,14 +96,7 @@ public class DollyController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "201", description = "Opprettet",
-                content = {
-                    @Content(
-                        mediaType = "application/json",
-                        schema = @Schema(implementation = RessursDTO.class)
-                    )
-                }
-            ),
+            @ApiResponse(responseCode = "200", description = "Opprettet request mottatt"),
             @ApiResponse(responseCode = "409", description = "Ressurs allerede opprettet",
                 content = {
                     @Content(
