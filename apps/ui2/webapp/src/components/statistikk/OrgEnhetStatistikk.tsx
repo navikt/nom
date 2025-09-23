@@ -20,29 +20,27 @@ import {
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import type { GlobalStatistikkResponse, OrgEnhet } from "~/types/api-models";
+import type { GlobalStatistikkResponse } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export function OrgEnhetStatistikk({
-  orgEnhet,
+  orgEnhetId,
   gittStatistikk,
   header,
   expandable = false,
   className,
 }: {
-  orgEnhet: OrgEnhet | undefined;
+  orgEnhetId: string;
   gittStatistikk?: GlobalStatistikkResponse | undefined;
   header?: string;
   expandable?: boolean;
   className?: string;
 }) {
-  if (!orgEnhet) {
-    return;
-  }
+  const inDevelopment = isInDevelopment();
 
   const orgEnhetStatistikkQuery = useQuery({
-    queryKey: getStatistikkForOrgEnhet.queryKey(orgEnhet.id),
-    queryFn: () => getStatistikkForOrgEnhet.queryFn(orgEnhet.id),
+    queryKey: getStatistikkForOrgEnhet.queryKey(orgEnhetId ?? ""),
+    queryFn: () => getStatistikkForOrgEnhet.queryFn(orgEnhetId ?? ""),
     enabled: !gittStatistikk,
   });
 
@@ -50,12 +48,19 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
+  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
+
   const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,
     kommunale: ressursStatistikk?.antallKommunaleRessurser ?? 0,
     eksterne: ressursStatistikk?.antallEksterneRessurser ?? 0,
     totalt: ressursStatistikk?.antallAktiveRessurser ?? 0,
   };
+
+  const enheterUnderTekAvdQuery = useQuery({
+    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
+    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
+  });
 
   const isLoading = orgEnhetStatistikkQuery.isLoading && !gittStatistikk;
 
@@ -75,19 +80,10 @@ export function OrgEnhetStatistikk({
     return;
   }
 
-  const inDevelopment = isInDevelopment();
-
-  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
-
-  const enheterUnderTekAvdQuery = useQuery({
-    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
-    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
-  });
-
   const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
 
   const underTeknologiavdelingen =
-    orgEnhet.id === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhet.id);
+    orgEnhetId === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhetId);
 
   const innerContent = isLoading ? (
     <div

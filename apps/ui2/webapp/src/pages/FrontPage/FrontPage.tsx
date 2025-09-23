@@ -44,7 +44,7 @@ export const FrontPage = () => {
         <OrgEnhetStatistikk
           gittStatistikk={globalStatistikk}
           header="Nøkkelinfo for hele Nav"
-          orgEnhet={orgEnhet}
+          orgEnhetId={orgEnhet?.id ?? ""}
         />
       </VStack>
     </ContentWrapper>

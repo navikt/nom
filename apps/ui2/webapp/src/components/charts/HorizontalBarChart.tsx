@@ -1,18 +1,11 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
-import { BodyShort, Heading, HelpText } from "@navikt/ds-react";
+import { BodyShort, Heading, HelpText, HGrid } from "@navikt/ds-react";
 import maxBy from "lodash/maxBy";
 import type { ReactNode } from "react";
 import React from "react";
-import { useEffect, useRef, useState } from "react";
 
 import { formatDisplayNumber } from "~/utils";
-
-export type ChartRow = {
-  label: string;
-  value: number;
-  percentage?: number;
-};
 
 export function HorizontalBarChart({
   rows,
@@ -26,17 +19,6 @@ export function HorizontalBarChart({
   helpText?: string | ReactNode;
 }) {
   const data = normalizeData(rows);
-  const maxValueRow = maxBy(data, "normalizedPercentage");
-
-  const widestBarReference = useRef<HTMLSpanElement | null>(null);
-  const [widestBarWidth, setWidestBarWidth] = useState(0);
-
-  useEffect(() => {
-    if (widestBarReference.current) {
-      const width = widestBarReference.current.getBoundingClientRect().width;
-      setWidestBarWidth(width);
-    }
-  }, [data]);
 
   return (
     <div
@@ -79,6 +61,7 @@ export function HorizontalBarChart({
             display: flex;
             align-items: center;
             font-size: var(--a-font-size-large);
+            margin-bottom: var(--a-spacing-4);
           `}
         >
           <div
@@ -128,70 +111,41 @@ export function HorizontalBarChart({
         </div>
       )}
 
-      <div
+      <HGrid
+        columns="max-content auto max-content"
         css={css`
-          gap: 1rem;
-          display: grid;
-          grid-template-columns: max-content 1fr;
-          margin-top: 1rem;
+          width: 100%;
+        `}
+        gap="4"
+      >
+        {data.map((row, index) => (
+          <BarChartRow key={index} row={row} />
+        ))}
+      </HGrid>
+    </div>
+  );
+}
+
+function BarChartRow({ row }: { row: PercentageChartRow }) {
+  return (
+    <>
+      <BodyShort>{row.label}</BodyShort>
+      <span
+        css={css`
+          background: var(--a-deepblue-500);
+          width: ${row.percentage}%;
+          border-radius: 5px;
+        `}
+      />
+      <BodyShort
+        css={css`
+          display: flex;
+          justify-content: end;
         `}
       >
-        {data.map((row) => {
-          const isWidest =
-            row.normalizedPercentage === maxValueRow?.normalizedPercentage;
-
-          if (!isWidest && widestBarWidth === 0) return;
-
-          const barWidth = isWidest
-            ? "100%"
-            : `${widestBarWidth * (row.value / (maxValueRow?.value ?? 1))}px`;
-
-          return (
-            <div
-              css={css`
-                display: contents;
-
-                a {
-                  color: var(--a-gray-900);
-                  text-decoration: none;
-
-                  &:hover {
-                    text-decoration: underline;
-                  }
-                }
-              `}
-              key={row.label}
-            >
-              <span>{row.label}</span>
-
-              <div
-                css={css`
-                  display: inline-flex;
-                  gap: 1rem;
-                `}
-              >
-                <span
-                  css={css`
-                    background: var(--a-deepblue-500);
-                    width: ${barWidth};
-                    border-radius: 5px;
-                  `}
-                  ref={isWidest ? widestBarReference : null}
-                />
-                <span
-                  css={css`
-                    white-space: nowrap;
-                  `}
-                >
-                  {formatDisplayNumber(row.value)}&nbsp;
-                  {row.percentage === undefined ? "" : `(${row.percentage}%)`}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+        {formatDisplayNumber(row.value)}
+      </BodyShort>
+    </>
   );
 }
 
@@ -201,11 +155,22 @@ function normalize(value: number, max: number, min: number) {
   return normalizedValue * 100;
 }
 
-function normalizeData(rows: ChartRow[]) {
+function normalizeData(rows: ChartRow[]): PercentageChartRow[] {
   const maxValue = maxBy(rows, "value")?.value ?? 0;
 
   return rows.map((row) => ({
     ...row,
-    normalizedPercentage: normalize(row.value, maxValue, 0),
+    percentage: normalize(row.value, maxValue, 0),
   }));
 }
+
+export type ChartRow = {
+  label: string;
+  value: number;
+};
+
+type PercentageChartRow = {
+  label: string;
+  value: number;
+  percentage: number;
+};

@@ -249,7 +249,7 @@ export const ValgtOrgEnhet = ({
           `}
           expandable
           header="Statistikk"
-          orgEnhet={orgEnhet}
+          orgEnhetId={orgEnhet.id}
         />
       </div>
     </div>
