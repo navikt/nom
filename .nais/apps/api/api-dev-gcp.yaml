@@ -245,7 +245,10 @@ spec:
         - application: prim-brukerstyring-test
           namespace: pim
           cluster: dev-gcp
-        - application: idm-kafka-omada-integration
+        - application: idm-kafka-omada-integration-sandbox
+          namespace: idm
+          cluster: dev-fss
+        - application: idm-kafka-omada-integration-test
           namespace: idm
           cluster: dev-fss
         - application: shout-out-api
