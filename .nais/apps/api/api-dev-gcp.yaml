@@ -302,6 +302,9 @@ spec:
         - application: fagarkiv-administrasjon-q2
           namespace: isa
           cluster: dev-gcp
+        - application: idm-kafka-omada-integration-test
+          namespace: idm
+          cluster: dev-fss
 
     outbound:
       rules:
