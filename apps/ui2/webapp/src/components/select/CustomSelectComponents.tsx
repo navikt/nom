@@ -129,6 +129,26 @@ export const AsyncSearch = forwardRef(
   },
 ) as AsyncSearch;
 
+export function BasicSelect<
+  Option,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>,
+>(properties: Props<Option, IsMulti, Group>) {
+  return (
+    <Select
+      isClearable
+      {...properties}
+      components={{ MenuList: CustomMenuList, ...properties.components }}
+      css={commonSelectCss}
+      escapeClearsValue
+      isSearchable
+      menuPosition="fixed"
+      placeholder={properties.placeholder ?? ""}
+      styles={commonSelectOverwriteStyles}
+    />
+  );
+}
+
 /**
  * Limit the number of items in the displayed list to 30 to help performance.
  * It is much more efficient to type a more specific search rather than look through a dropdown list of more than 100 items.
@@ -199,26 +219,6 @@ export function SelectLayoutWrapper({
       {children}
       {error && <ErrorMessage>{error.message}</ErrorMessage>}
     </div>
-  );
-}
-
-export function BasicSelect<
-  Option,
-  IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>,
->(properties: Props<Option, IsMulti, Group>) {
-  return (
-    <Select
-      isClearable
-      {...properties}
-      components={{ MenuList: CustomMenuList, ...properties.components }}
-      css={commonSelectCss}
-      escapeClearsValue
-      isSearchable
-      menuPosition="fixed"
-      placeholder={properties.placeholder ?? ""}
-      styles={commonSelectOverwriteStyles}
-    />
   );
 }
 

@@ -106,7 +106,7 @@ export const OrgEnhetSelect = forwardRef(
           loadOptions={search(options)}
           noOptionsMessage={({ inputValue }) =>
             inputValue.length === 0
-              ? "Skriv minst 1 tegn for å søke"
+              ? "Skriv minst ett tegn for å søke"
               : `Fant ingen resultater for "${inputValue}"`
           }
           onChange={(option) =>

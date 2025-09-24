@@ -73,6 +73,7 @@ export function FysiskBrukerstedSelect({
         inputId="Fysisk brukersted"
         onChange={(option) => onChange(option?.value ?? null)}
         options={options}
+        placeholder="Søk etter fysisk brukersted"
         value={currentOption ?? null}
       />
     </SelectLayoutWrapper>
