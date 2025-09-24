@@ -91,7 +91,7 @@ public class FjerneSluttdatoPaaStatlige {
         var ressurserIUtvalg = getAlleStatligeMastrede().stream()
             .filter(ressurs -> ressurs.sluttDato() != null && etter(ressurs.sluttDato(), sluttDatoEtter))
             .filter(ressurs -> !ekskluderNavidenter.contains(ressurs.navident))
-            .filter(this::harTilknytningstypeFastPaaSisteOT)
+//            .filter(this::harTilknytningstypeFastPaaSisteOT)
             .sorted(Comparator.comparing(Ressurs::navident))
             .toList();
 
