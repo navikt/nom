@@ -26,8 +26,59 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
-    private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);   // Den siste registrerte OrganiseringState event for orgEnhet id
+    private final Map<String, List<OrganiseringState>> organiseringerById = new ConcurrentHashMap<>(16, 0.9f, 1);   // Alle organiseringer for orgEnhet id
     private final Map<String, List<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>(16, 0.9f, 1);
+
+    @Override
+    public Optional<OrganiseringState> findByFid(String fid) {
+        return Optional.ofNullable(organiseringByFid.get(fid));
+    }
+
+    @Override
+    public Optional<OrganiseringState> findActiveByFid(String fid) {
+        var organisering = organiseringByFid.get(fid);
+        if (organisering != null) {
+            return isActive(organisering) ? Optional.of(organisering) : Optional.empty();
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<OrganiseringState> findActiveById(String id) {
+        var organiseringer = organiseringerById.getOrDefault(id, Collections.emptyList());
+        return organiseringer.stream()
+            .filter(this::isActive)
+            .findFirst();
+    }
+
+    @Override
+    public List<OrganiseringState> findById(String id) {
+        return organiseringerById.getOrDefault(id, Collections.emptyList());
+    }
+
+    @Override
+    public void clear() {
+        organiseringByFid.clear();
+        organiseringById.clear();
+        organiseringerById.clear();
+        allOrganiseringerContainingId.clear();
+    }
+
+    @Override
+    public void update(OrganiseringState organiseringState) {
+        putEventAggregate(organiseringState);
+    }
+
+    @Override
+    public void putEventAggregate(OrganiseringState organiseringState) {
+        organiseringByFid.put(organiseringState.fid(), organiseringState);
+        organiseringById.put(organiseringState.id(), organiseringState);
+
+        putOrUpdateOrganiseringerForId(organiseringState);
+        putOrUpdateAllOrganiseringer(organiseringState);
+    }
 
     private void putOrUpdateAllOrganiseringer(OrganiseringState newOrganisering) {
         String id = newOrganisering.id();
@@ -54,7 +105,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
             }
         } else {
             logger.trace("Oppretter key {} med {}", id, newOrganisering);
-            allOrganiseringerContainingId.put(id, new ArrayList<>(List.of(newOrganisering)));
+            allOrganiseringerContainingId.put(id, new CopyOnWriteArrayList<>(List.of(newOrganisering)));
         }
 
         if (allOrganiseringerContainingId.containsKey(idOver)) {
@@ -73,58 +124,25 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
             }
         } else {
             logger.trace("Oppretter key {} med {}", idOver, newOrganisering);
-            allOrganiseringerContainingId.put(idOver, new ArrayList<>(List.of(newOrganisering)));
+            allOrganiseringerContainingId.put(idOver, new CopyOnWriteArrayList<>(List.of(newOrganisering)));
         }
     }
 
-    @Override
-    public Optional<OrganiseringState> findByFid(String fid) {
-        return Optional.ofNullable(organiseringByFid.get(fid));
-    }
-
-    @Override
-    public Optional<OrganiseringState> findActiveByFid(String fid) {
-        return getActiveOrganisering().containsKey(fid) ? Optional.ofNullable(getActiveOrganisering().get(fid)) : Optional.empty();
-    }
-
-    @Override
-    public Optional<OrganiseringState> findActiveById(String id) {
-        var organisering = organiseringById.get(id);
-
-        if (organisering != null) {
-            return isActive(organisering) ? Optional.of(organisering) : Optional.empty();
+    private void putOrUpdateOrganiseringerForId(OrganiseringState organiseringState) {
+        if (organiseringerById.containsKey(organiseringState.id())) {
+            var organiseringerForId = organiseringerById.get(organiseringState.id());
+            var organiseringForSammeFid = organiseringerForId.stream()
+                .filter(o -> o.fid().equals(organiseringState.fid()))
+                .findFirst();
+            if (organiseringForSammeFid.isEmpty()) {
+                organiseringerById.put(organiseringState.id(), new CopyOnWriteArrayList<>(List.of(organiseringState)));
+            } else {
+                organiseringerForId.remove(organiseringForSammeFid.get());
+                organiseringerForId.add(organiseringState);
+            }
         } else {
-            return Optional.empty();
+            organiseringerById.put(organiseringState.id(), new CopyOnWriteArrayList<>(List.of(organiseringState)));
         }
-    }
-
-    @Override
-    public Optional<OrganiseringState> findById(String id) {
-        return Optional.ofNullable(organiseringById.get(id));
-    }
-
-    @Override
-    public void clear() {
-        organiseringByFid.clear();
-        organiseringById.clear();
-        allOrganiseringerContainingId.clear();
-    }
-
-    @Override
-    public void update(OrganiseringState organiseringState) {
-        if(nonNull(organiseringState.gyldigTom()) && organiseringState.gyldigTom().isBefore(LocalDate.now())){
-            removeEventAggregate(organiseringState);
-        } else {
-            putEventAggregate(organiseringState);
-        }
-    }
-
-    @Override
-    public void putEventAggregate(OrganiseringState organiseringState) {
-        organiseringByFid.put(organiseringState.fid(), organiseringState);
-        organiseringById.put(organiseringState.id(), organiseringState);
-
-        putOrUpdateAllOrganiseringer(organiseringState);
     }
 
     @Override
@@ -148,6 +166,19 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
                 }
             }
         }));
+        organiseringerById.forEach((key, value) -> value.forEach(state -> {
+            if (state.id().equals(organiseringState.id())) {
+                // delete the matched element from list and update organiseringerById with new list
+                // if list become empty then remove the key from allOrganiseringerContainingId
+                List<OrganiseringState> matchedList = new CopyOnWriteArrayList<>(value);
+                matchedList.remove(state);
+                if(matchedList.isEmpty()) {
+                    organiseringerById.remove(key);
+                } else {
+                    organiseringerById.put(key, matchedList);
+                }
+            }
+        }));
     }
 
     @Override
@@ -157,6 +188,8 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
 
     @Override
     public void logRepositoryState() {
+        if (!logger.isDebugEnabled()) return;
+
         logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
 
         // Note: detailed information about organiseringByFid, organiseringById and allOrganiseringerContainingId is logged at TRACE level
@@ -217,16 +250,26 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
 
     @Override
     public List<OrganiseringState> getOrganiseringerContainingId(String id) {
+        return getOrganiseringerContainingId(id, true);
+    }
+
+    @Override
+    public List<OrganiseringState> getOrganiseringerContainingId(String id, boolean kunAktive) {
         var organiseringerWithId = allOrganiseringerContainingId.get(id);
 
         if (organiseringerWithId != null) {
-            return organiseringerWithId.stream()
-                .filter(this::isActive)
-                .toList();
+            if(kunAktive) {
+                return organiseringerWithId.stream()
+                    .filter(this::isActive)
+                    .toList();
+            } else {
+                return organiseringerWithId;
+            }
         } else {
             return Collections.emptyList();
         }
     }
+
 
     @Override
     public Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids) {

@@ -150,7 +150,7 @@ public class OTUtenforHierarki {
     // Og ny orgenhet gyldigFom kan være før dette
     private LocalDate getEnhetsOrganiseringGyldigFom(String orgenhetId) {
         return organiseringStateRepository
-            .findById(orgenhetId)
+            .findActiveById(orgenhetId)
             .map(OrganiseringState::gyldigFom).orElse(null);
     }
 

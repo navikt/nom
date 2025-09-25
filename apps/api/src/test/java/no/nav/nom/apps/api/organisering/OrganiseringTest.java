@@ -212,7 +212,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
     @Test
     @DisplayName("Avslutt en organisering og opprett på nytt")
-    void avslutt_og_opprett_en_organisering() throws JsonProcessingException {
+    void avslutt_og_opprett_en_organisering() {
 
         // Receive organisering from DVH
         var dvhOrganisering = DvhOrganisering.builder()
@@ -222,6 +222,15 @@ public class OrganiseringTest extends OrganiseringTestBase {
             .agressoIdOver("2")
             .navnOver("Navn_2")
             .orgNivOver("Niva_2")
+            .build();
+
+        var dummyDvhOrganisering = DvhOrganisering.builder()   // Enheter ikke tilgjengelig i Orgenhet state - vil da ikke bli prosessert
+            .agressoIdUnder("1x")
+            .navnUnder("Navn_1x")
+            .orgNivUnder("Niva_1x")
+            .agressoIdOver("2x")
+            .navnOver("Navn_2x")
+            .orgNivOver("Niva_2x")
             .build();
 
         when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
@@ -243,7 +252,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         organiseringStateRepository.update(organiseringState);
 
         // 2. No longer receive organisering from DVH
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(emptyList());
+        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dummyDvhOrganisering));
 
         // Second import from DVH, this should not create avslutt organisering event
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();

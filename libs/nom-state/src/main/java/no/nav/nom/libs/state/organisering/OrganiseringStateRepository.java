@@ -13,7 +13,7 @@ public interface OrganiseringStateRepository {
 
     Optional<OrganiseringState> findActiveById(String id);
 
-    Optional<OrganiseringState> findById(String id);
+    List<OrganiseringState> findById(String id);
 
     void clear();
 
@@ -31,6 +31,8 @@ public interface OrganiseringStateRepository {
     List<OrganiseringState> getOrganiseringer();
 
     List<OrganiseringState> getOrganiseringerContainingId(String id);
+
+    List<OrganiseringState> getOrganiseringerContainingId(String id, boolean kunAktive);
 
     Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids);
     

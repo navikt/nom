@@ -126,6 +126,7 @@ public class OrganiseringService {
         String idOver
     ) {}
 
+    // Brukes kun  av DvhLast - og det er fine - kun eksisterende aktive fid for orgenhet som skal behandles
     private Optional<OrganiseringState> getOrganiseringState(DvhOrganisering dvhOrganisering) {
         Optional<IOrgenhet> orgEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
             dvhOrganisering.getAgressoIdUnder(),
@@ -135,7 +136,7 @@ public class OrganiseringService {
         if (orgEnhet.isEmpty()) {
             return Optional.empty();
         }
-        return organiseringStateRepository.findById(orgEnhet.get().getId());
+        return organiseringStateRepository.findActiveById(orgEnhet.get().getId());
     }
 
     public List<OrganiseringState> organiseringerInStateNotInDvhOrganiseringer(
@@ -152,7 +153,7 @@ public class OrganiseringService {
 
         if (fid.startsWith("organisering")) {
             Optional<OrganiseringState> eksisterendeAktivOrganisering = organiseringStateRepository.findActiveByFid(fid);
-            // hvis organisergingen er aktiv
+            // hvis organiseringen er aktiv
             if (eksisterendeAktivOrganisering.isPresent()) {
                 OrganiseringState eksisterendeOrg = eksisterendeAktivOrganisering.get();
 
@@ -160,8 +161,7 @@ public class OrganiseringService {
                     !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId())) {
                     organiseringEndret = true;
                 }
-            }
-            else {
+            } else {
                 Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
                 // hvis organiseringen er inaktiv
                 if(eksisterendeOrganisering.isPresent()){
