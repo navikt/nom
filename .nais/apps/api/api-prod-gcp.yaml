@@ -250,6 +250,9 @@ spec:
         - application: oppgave
           namespace: aap
           cluster: prod-gcp
+        - application: kii-dashboard
+          namespace: polaris
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
