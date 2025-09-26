@@ -166,9 +166,6 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
-        - application: oh-ressurs-behandler
-          namespace: oppgavehandtering
-          cluster: prod-gcp
         - application: nks-statistikk
           namespace: nks-statistikk
           cluster: knada
@@ -190,9 +187,6 @@ spec:
         - application: nom-remedy-integrasjon
           namespace: org
           cluster: prod-fss
-        - application: oppgavebehandling-api
-          namespace: oppgavehandtering
-          cluster: prod-gcp
         - application: saas-proxy
           namespace: teamcrm
           cluster: prod-gcp

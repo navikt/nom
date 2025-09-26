@@ -200,12 +200,6 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: dev-gcp
-        - application: oh-ressurs-behandler
-          namespace: oppgavehandtering
-          cluster: dev-gcp
-        - application: oppgavebehandling-api
-          namespace: oppgavehandtering
-          cluster: dev-gcp
         - application: melosys
           namespace: teammelosys
           cluster: dev-fss
