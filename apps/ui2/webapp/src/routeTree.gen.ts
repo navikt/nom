@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TilgangerRouteImport } from './routes/tilganger'
+import { Route as OrganisasjonsmastringRouteImport } from './routes/organisasjonsmastring'
+import { Route as OpprettOrganisasjonsenhetRouteImport } from './routes/opprett-organisasjonsenhet'
 import { Route as MasseflyttingFysiskBrukerstedRouteImport } from './routes/masseflytting-fysisk-brukersted'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
@@ -27,6 +29,17 @@ const TilgangerRoute = TilgangerRouteImport.update({
   path: '/tilganger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrganisasjonsmastringRoute = OrganisasjonsmastringRouteImport.update({
+  id: '/organisasjonsmastring',
+  path: '/organisasjonsmastring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpprettOrganisasjonsenhetRoute =
+  OpprettOrganisasjonsenhetRouteImport.update({
+    id: '/opprett-organisasjonsenhet',
+    path: '/opprett-organisasjonsenhet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MasseflyttingFysiskBrukerstedRoute =
   MasseflyttingFysiskBrukerstedRouteImport.update({
     id: '/masseflytting-fysisk-brukersted',
@@ -87,6 +100,8 @@ const OrgTableIdRoute = OrgTableIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
+  '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
+  '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
@@ -101,6 +116,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
+  '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
+  '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
@@ -116,6 +133,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
+  '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
+  '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
@@ -132,6 +151,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/masseflytting-fysisk-brukersted'
+    | '/opprett-organisasjonsenhet'
+    | '/organisasjonsmastring'
     | '/tilganger'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
@@ -146,6 +167,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/masseflytting-fysisk-brukersted'
+    | '/opprett-organisasjonsenhet'
+    | '/organisasjonsmastring'
     | '/tilganger'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
@@ -160,6 +183,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/masseflytting-fysisk-brukersted'
+    | '/opprett-organisasjonsenhet'
+    | '/organisasjonsmastring'
     | '/tilganger'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
@@ -175,6 +200,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MasseflyttingFysiskBrukerstedRoute: typeof MasseflyttingFysiskBrukerstedRoute
+  OpprettOrganisasjonsenhetRoute: typeof OpprettOrganisasjonsenhetRoute
+  OrganisasjonsmastringRoute: typeof OrganisasjonsmastringRoute
   TilgangerRoute: typeof TilgangerRoute
   KontaktpersonerIdRoute: typeof KontaktpersonerIdRoute
   MasseflyttingIdRoute: typeof MasseflyttingIdRoute
@@ -194,6 +221,20 @@ declare module '@tanstack/react-router' {
       path: '/tilganger'
       fullPath: '/tilganger'
       preLoaderRoute: typeof TilgangerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organisasjonsmastring': {
+      id: '/organisasjonsmastring'
+      path: '/organisasjonsmastring'
+      fullPath: '/organisasjonsmastring'
+      preLoaderRoute: typeof OrganisasjonsmastringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opprett-organisasjonsenhet': {
+      id: '/opprett-organisasjonsenhet'
+      path: '/opprett-organisasjonsenhet'
+      fullPath: '/opprett-organisasjonsenhet'
+      preLoaderRoute: typeof OpprettOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/masseflytting-fysisk-brukersted': {
@@ -279,6 +320,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MasseflyttingFysiskBrukerstedRoute: MasseflyttingFysiskBrukerstedRoute,
+  OpprettOrganisasjonsenhetRoute: OpprettOrganisasjonsenhetRoute,
+  OrganisasjonsmastringRoute: OrganisasjonsmastringRoute,
   TilgangerRoute: TilgangerRoute,
   KontaktpersonerIdRoute: KontaktpersonerIdRoute,
   MasseflyttingIdRoute: MasseflyttingIdRoute,

@@ -6,6 +6,7 @@ import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import {
   OverEnheterDivider,
   VerticalEdge,
@@ -19,12 +20,12 @@ export function CompactOrganisasjonHierarki({
   ressurs,
 }: {
   orgEnhet: OrgEnhet;
-  ressurs: Ressurs;
+  ressurs?: Ressurs;
 }) {
   return (
     <>
-      <OverEnheter isRoot orgEnhetId={orgEnhet.id} />
-      <SelectedResource ressurs={ressurs} />
+      <OverEnheter hasRessurs={!!ressurs} isRoot orgEnhetId={orgEnhet.id} />
+      {!!ressurs && <SelectedResource ressurs={ressurs} />}
     </>
   );
 }
@@ -32,9 +33,11 @@ export function CompactOrganisasjonHierarki({
 function OverEnheter({
   orgEnhetId,
   isRoot,
+  hasRessurs,
 }: {
   orgEnhetId: string;
   isRoot: boolean;
+  hasRessurs: boolean;
 }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgEnhetId),
@@ -45,9 +48,15 @@ function OverEnheter({
 
   return (
     <>
-      {overEnhetId && <OverEnheter isRoot={false} orgEnhetId={overEnhetId} />}
+      {overEnhetId && (
+        <OverEnheter
+          hasRessurs={false}
+          isRoot={false}
+          orgEnhetId={overEnhetId}
+        />
+      )}
       <CompactOrgEnhet orgEnhetId={orgEnhetId} selected={isRoot} />
-      <OverEnheterDivider />
+      {(!isRoot || hasRessurs) && <OverEnheterDivider />}
     </>
   );
 }
@@ -92,6 +101,7 @@ function CompactOrgEnhet({
       <VerticalEdge>
         <img alt="" src={building} />
       </VerticalEdge>
+
       <div
         css={css`
           padding: var(--a-spacing-2) 0;
@@ -99,20 +109,18 @@ function CompactOrgEnhet({
           flex-direction: column;
         `}
       >
-        <ReactRouterLink params={{ id: orgEnhet.id }} search={{}} to="/org/$id">
-          <Link as={Heading} level="3" size="small">
+        <SmartLink href={`/org/${orgEnhet.id}`}>
+          <Heading level="3" size="small">
             {orgEnhet.navn}
-          </Link>
-        </ReactRouterLink>
-        <ReactRouterLink
-          params={{ id: orgEnhet.ledere[0]?.navident }}
-          search={{}}
-          to="/ressurs/$id"
-        >
-          <Link as="span">
-            Leder: {formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
-          </Link>
-        </ReactRouterLink>
+          </Heading>
+        </SmartLink>
+
+        <span>
+          Leder:{" "}
+          <SmartLink href={`/ressurs/${orgEnhet.ledere[0]?.navident}`} inline>
+            {formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
+          </SmartLink>
+        </span>
       </div>
     </div>
   );

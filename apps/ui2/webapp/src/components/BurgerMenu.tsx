@@ -146,6 +146,7 @@ export function BurgerMenu() {
               {!showOpprettLink && !showOpprettSpecialLink && (
                 <Dropdown.Menu.Divider />
               )}
+
               <Dropdown.Menu.List.Item
                 onClick={() =>
                   navigate({ to: "/masseflytting-fysisk-brukersted" })
@@ -161,6 +162,19 @@ export function BurgerMenu() {
                   src={flyttFysiskBrukersted}
                 />
                 <span>Masseflytting fysisk brukersted</span>
+              </Dropdown.Menu.List.Item>
+            </>
+          )}
+
+          {hasAdminAccess && (
+            <>
+              <Dropdown.Menu.Divider />
+
+              <Dropdown.Menu.List.Item
+                onClick={() => navigate({ to: "/organisasjonsmastring" })}
+              >
+                <img alt="hierarki" src={hierarchyFilled} />
+                <span>Organisasjonsmastring</span>
               </Dropdown.Menu.List.Item>
             </>
           )}

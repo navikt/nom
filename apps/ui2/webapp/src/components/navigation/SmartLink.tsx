@@ -20,6 +20,10 @@ export function SmartLink({
   externalIcon?: boolean;
   className?: string;
 }) {
+  if (!href) {
+    return <>{children}</>;
+  }
+
   const isInternal = href.startsWith("/");
 
   if (isInternal) {
