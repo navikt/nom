@@ -783,7 +783,6 @@ public class RessursRestService {
     }
 
     public List<Ressurs.Telefon> getTelefonnummere(String navident) {
-        logger.info("Fetching telefonnumre for navident: {}", navident);
         var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
         var ressursState = findRessursStateByNavident(navident);
         if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
@@ -791,7 +790,6 @@ public class RessursRestService {
     }
 
     public String getTelefonnummer(String navident) {
-        logger.info("Fetching telefonnummer for navident: {}", navident);
         var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
         var ressursState = findRessursStateByNavident(navident);
         if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
