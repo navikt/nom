@@ -39,14 +39,14 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
 
     @Override
     public Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId) {
-        return orgEnhetLederByOrgEnhetId.get(orgEnhetId).stream()
+        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyList()).stream()
             .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
             .findFirst();
     }
 
     @Override
     public boolean hasActiveInPeriodByOrgEnhetId(String orgEnhetId, LocalDate startdato, LocalDate sluttdato) {
-        return orgEnhetLederByOrgEnhetId.get(orgEnhetId).stream().anyMatch(orgEnhetLederState -> isActive(startdato, sluttdato));
+        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyList()).stream().anyMatch(orgEnhetLederState -> isActive(startdato, sluttdato));
     }
 
     @Override
