@@ -38,7 +38,7 @@ public class DvhService {
         this.orgenhetService = orgenhetService;
     }
 
-    public void saveLedere(List<DvhLeder> ledere) {
+    public List<DvhLeder> saveLedere(List<DvhLeder> ledere) {
         val cachedEnheter =
             orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
@@ -71,9 +71,15 @@ public class DvhService {
                 .toList()
         );
 
+        ledere.removeAll(enhetAndRessursMissing);
+        ledere.removeAll(ressursMissing);
+        ledere.removeAll(enhetMissing);
+
         log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
         log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
+
+        return ledere;
     }
 
     // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState

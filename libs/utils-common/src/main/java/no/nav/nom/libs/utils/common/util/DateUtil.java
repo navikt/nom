@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @UtilityClass
 public class DateUtil {
 
-    public static boolean isNow(LocalDate start, LocalDate end) {
+    public static boolean isActive(LocalDate start, LocalDate end) {
         return (start == null || start.minusDays(1).isBefore(LocalDate.now())) &&
                 (end == null || end.plusDays(1).isAfter(LocalDate.now()));
     }
@@ -18,10 +18,6 @@ public class DateUtil {
 
     public static boolean startdatoIsAfterToday(LocalDate startdato) {
         return startdato != null ? startdato.isAfter(LocalDate.now()) : LocalDate.MIN.isAfter(LocalDate.now());
-    }
-
-    public static boolean sluttdatoIsPassed(LocalDate sluttdato) {
-        return sluttdato != null ? sluttdato.isBefore(LocalDate.now()) : LocalDate.MAX.isBefore(LocalDate.now());
     }
 
     public static boolean sluttdatoIsNotPassed(LocalDate sluttdato) {

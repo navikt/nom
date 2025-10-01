@@ -9,7 +9,6 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Builder(toBuilder = true)
 public record RessursStateKafkaDTO (

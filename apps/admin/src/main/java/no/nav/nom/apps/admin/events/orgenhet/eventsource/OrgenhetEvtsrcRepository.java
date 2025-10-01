@@ -12,10 +12,6 @@ import java.util.List;
 public class OrgenhetEvtsrcRepository {
     private final List<OrgEnhetEvent> OrgenhetEvtsrc = new ArrayList<>();
 
-    public void addOrgEnhetEvent(OrgEnhetEvent OrgEnhetEvent) {
-        OrgenhetEvtsrc.add(OrgEnhetEvent);
-    }
-
     public void addOrgEnhetEvents(List<OrgEnhetEvent> OrgEnhetEvents) {
         OrgenhetEvtsrc.addAll(OrgEnhetEvents);
     }

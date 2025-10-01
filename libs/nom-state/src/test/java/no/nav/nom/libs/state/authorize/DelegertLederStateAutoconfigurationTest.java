@@ -1,9 +1,6 @@
 package no.nav.nom.libs.state.authorize;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration;
-import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
-import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;

@@ -73,4 +73,11 @@ public class PropertiesAutoConfig {
             log.debug("loading delegert-leder-state.yaml");
         }
     }
+
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(value = "nom.libs.state.orgenhet-leder.enabled")
+    @PropertySource(value = "orgenhet-leder-state.yaml", factory = YamlPropertySourceFactory.class)
+    public static class OrgenhetLederStateConfig {
+        public OrgenhetLederStateConfig() { log.debug("loading orgenhet-leder-state.yaml"); }
+    }
 }

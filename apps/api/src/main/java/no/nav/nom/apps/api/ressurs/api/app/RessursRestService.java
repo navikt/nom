@@ -27,7 +27,6 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
-import no.nav.nom.apps.api.ressurs.api.v1.navident.NavidentResponse;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;

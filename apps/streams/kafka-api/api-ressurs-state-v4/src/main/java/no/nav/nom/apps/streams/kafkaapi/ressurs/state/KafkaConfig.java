@@ -12,20 +12,13 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.config.KafkaStreamsCustomizer;
-import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.kafka.support.serializer.JsonSerde;
-
-import java.util.Properties;
 
 @EnableKafka
 @Configuration

@@ -21,10 +21,14 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.util.Map;
+
 @Slf4j
 @AutoConfiguration
 @Conditional(DelegertLederStateAutoconfiguration.DelegertLederStateEnabledCondition.class)
 public class DelegertLederStateAutoconfiguration extends DefaultStateAutoconfiguration<AuthorizationEvent> {
+
+
     public DelegertLederStateAutoconfiguration(Environment environment, @Value("${nom.libs.state.idle-event-interval-seconds}") int idleEventIntervalSeconds) {
         super(environment, idleEventIntervalSeconds);
     }
@@ -61,7 +65,7 @@ public class DelegertLederStateAutoconfiguration extends DefaultStateAutoconfigu
         return getDefaultDelegertLederConsumerFactory(properties.buildConsumerProperties(), objectMapper);
     }
 
-    static ConsumerFactory<String, AuthorizationEvent> getDefaultDelegertLederConsumerFactory(java. util. Map<String, Object> configs, ObjectMapper objectMapper) {
+    static ConsumerFactory<String, AuthorizationEvent> getDefaultDelegertLederConsumerFactory(Map<String, Object> configs, ObjectMapper objectMapper) {
         return new DefaultKafkaConsumerFactory<>(configs,
             new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(AuthorizationEvent.class, objectMapper))
         );

@@ -1,0 +1,32 @@
+name: 'deploy: nom-intern-orgenhet-leder-state'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/streams/internal/orgenhetleder-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.nais/streams/intern-orgenhet-leder-state.yaml'
+      - '.github/*/deploy-streams-intern-orgenhet-leder-state.yaml'
+      - 'Dockerfile_distroless'
+  workflow_dispatch:
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: orgenhetleder-state
+      jar-path: apps/streams/internal/orgenhetleder-state/target/app.jar
+      image-suffix: nom-intern-orgenhet-leder-state
+      nais-config-file-path-dev: .nais/streams/intern-orgenhet-leder-state.yaml
+      nais-config-file-path-prod: .nais/streams/intern-orgenhet-leder-state.yaml
+      additional-nais-vars-dev: ',kafka-pool=nav-dev'
+      additional-nais-vars-prod: ',kafka-pool=nav-prod'
+      dockerfile: Dockerfile_distroless
+    secrets:
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

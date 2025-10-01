@@ -9,12 +9,17 @@ import java.time.LocalDate;
 public class OrgtilknytningDatoEndretEventV2 extends OrgtilknytningEvent {
 
     @JsonCreator
-    public OrgtilknytningDatoEndretEventV2(String fid, OrgtilknytningDatoEndretEventData data, Metadata metadata, OrgtilknytningEvent.AdditionalAgressoData additionalData){
+    public OrgtilknytningDatoEndretEventV2(
+            String fid,
+            OrgtilknytningDatoEndretEventData data,
+            Event.Metadata metadata,
+            OrgtilknytningEvent.AdditionalAgressoData additionalData
+    ) {
         super(fid, data, metadata, additionalData);
     }
 
     public OrgtilknytningDatoEndretEventV2(String fid, OrgtilknytningDatoEndretEventData data, InputMetadata inputMetadata, OrgtilknytningEvent.AdditionalAgressoData additionalData) {
-        this(fid, data, Metadata.from(inputMetadata), additionalData);
+        this(fid, data, Event.Metadata.from(inputMetadata), additionalData);
     }
 
     @JsonIgnore

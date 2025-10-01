@@ -143,7 +143,6 @@ public class StatistikkRestService {
                 (iOrgenhet.getNomNivaa().equals(NomNivaa.LINJEENHET) || iOrgenhet.getNomNivaa().equals(NomNivaa.DRIFTSENHET)))
             .map(IOrgenhet::getId)
             .toList();
-
         alleOrgEnheterSomErLinjeEllerDriftId.forEach(this::getStatistikkForOrgEnhetCache);
     }
 

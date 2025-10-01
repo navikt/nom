@@ -31,6 +31,11 @@
       "description": "Enable/disable delegert-leder state autoconfiguration."
     },
     {
+      "name": "nom.libs.state.orgenhet-leder.enabled",
+      "type": "java.lang.String",
+      "description": "Enable/disable orgenhet-leder state autoconfiguration"
+    },
+    {
       "name": "nom.libs.state.idle-event-interval-seconds",
       "type": "java.lang.String",
       "description": "Idle tid på kafka meldinger før idle event sendes."

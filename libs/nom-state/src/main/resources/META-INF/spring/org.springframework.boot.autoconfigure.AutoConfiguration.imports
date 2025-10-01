@@ -4,4 +4,5 @@ no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration
 no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration
 no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration
 no.nav.nom.libs.state.authorize.DelegertLederStateAutoconfiguration
+no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateAutoconfiguration
 no.nav.nom.libs.state.common.PropertiesAutoConfig

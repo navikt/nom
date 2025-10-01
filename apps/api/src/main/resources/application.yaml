@@ -8,6 +8,8 @@ app:
       nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
     orgEnhet:
       eventsourceTopic: org.nom.orgenhet-eventsource
+    orgEnhetLeder:
+      eventsource-topic: org.nom.orgenhet-leder-eventsource
     orgtilknytning:
       eventsource-topic: org.nom.orgtilknytning-eventsource
       dvhLastResultTopic: org.nom.intern-dvh-last-result
@@ -67,6 +69,7 @@ nom.libs.state.orgtilknytning.enabled: true
 nom.libs.state.organisering.enabled: true
 nom.libs.state.mastered-ressurs.enabled: true
 nom.libs.state.delegert-leder.enabled: true
+nom.libs.state.orgenhet-leder.enabled: true
 
 authentication:
   aad:

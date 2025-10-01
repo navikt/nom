@@ -10,7 +10,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrgtilknytningEvtsrcListenerTest {
     private ObjectMapper objectMapper = configureObjectMapper();

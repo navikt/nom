@@ -18,5 +18,6 @@
         <module>orgenhet-state</module>
         <module>orgtilknytning-state</module>
         <module>organisering-state</module>
+        <module>orgenhetleder-state</module>
     </modules>
 </project>

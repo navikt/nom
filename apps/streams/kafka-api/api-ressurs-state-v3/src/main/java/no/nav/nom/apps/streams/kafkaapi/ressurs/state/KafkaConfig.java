@@ -2,6 +2,8 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
@@ -39,6 +41,8 @@ class KafkaConfig {
             RessursTekniskSlettetEventV1.class
         );
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(RessursEvent.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(OrgtilknytningEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursEventExt.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(com.fasterxml.jackson.databind.node.ObjectNode.class.getPackageName());

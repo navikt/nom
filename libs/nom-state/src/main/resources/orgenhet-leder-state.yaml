@@ -1,0 +1,6 @@
+nom:
+  libs:
+    state:
+      orgenhet-leder:
+        state-topic: org.nom.intern-orgenhet-leder-state
+        listener-id: nomStateOrgEnhetLederListener_${HOSTNAME:dummy}

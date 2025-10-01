@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.metadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Random;
 
 @Configuration

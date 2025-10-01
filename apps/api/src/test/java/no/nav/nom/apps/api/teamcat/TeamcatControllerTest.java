@@ -331,6 +331,7 @@ public class TeamcatControllerTest extends RestTestBase {
                 prev != null ? prev.getId() : null,
                 null,
                 List.of(),
+                null,
                 null
             ));
             prev = oe;

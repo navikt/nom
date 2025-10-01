@@ -1,0 +1,51 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: nom-intern-orgenhet-leder-state
+  namespace: org
+  annotations:
+    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  env:
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+  port: 8080
+  replicas:
+    min: 1
+    max: 1
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1024Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  kafka:
+    pool: {{kafka-pool}}
+    streams: true

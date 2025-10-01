@@ -4,4 +4,5 @@ nom.libs.state.orgtilknytning.enabled: true
 nom.libs.state.organisering.enabled: true
 nom.libs.state.mastered-ressurs.enabled: true
 nom.libs.state.delegert-leder.enabled: true
+nom.libs.state.orgenhet-leder.enabled: true
 nom.libs.state.idle-event-interval-seconds: 1

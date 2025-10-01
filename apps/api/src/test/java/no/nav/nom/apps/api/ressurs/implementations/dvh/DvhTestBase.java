@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
@@ -31,6 +32,7 @@ import no.nav.nom.apps.api.u4diff.U4DiffPaaMastrede;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -103,6 +105,8 @@ public abstract class DvhTestBase {
     @MockitoBean
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockitoBean
+    NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+    @MockitoBean
     LeaderElection leaderElection;
     @MockitoBean
     DvhOrgenhetsLast dvhOrgenhetsLast;
@@ -138,4 +142,6 @@ public abstract class DvhTestBase {
     U4DiffPaaMastrede u4DiffPaaMastrede;
     @MockitoBean
     OTUtenforHierarki oTUtenforHierarki;
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
 }

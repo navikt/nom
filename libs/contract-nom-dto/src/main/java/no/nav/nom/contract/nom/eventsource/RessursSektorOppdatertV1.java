@@ -5,7 +5,7 @@ import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDateTime;
 
-public class RessursSektorOppdatertV1 extends RessursEvent{
+public class RessursSektorOppdatertV1 extends RessursEvent {
     @JsonCreator
     public RessursSektorOppdatertV1(String fid, SektorOppdatertEventData data, Metadata metadata) {
         super(fid, data, metadata, null);

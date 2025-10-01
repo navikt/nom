@@ -2,9 +2,6 @@ package no.nav.nom.apps.admin.events.orgtilknytning.eventsource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -14,8 +11,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.time.Duration;
 

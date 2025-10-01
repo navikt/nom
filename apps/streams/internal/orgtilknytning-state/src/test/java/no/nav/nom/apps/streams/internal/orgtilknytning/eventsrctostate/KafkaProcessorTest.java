@@ -757,33 +757,6 @@ public class KafkaProcessorTest {
         LocalDate gyldigFom,
         LocalDate gyldigTom,
         Tilknytningtype tilknytningtype,
-        String masseflyttetFraFid
-    ) {
-
-        return OrgtilknytningState
-            .builder()
-            .fid(fid)
-            .navident(navident)
-            .orgEnhetId(orgEnhetId)
-            .sektor(sektor)
-            .erDagligOppfolging(erDagligOppfolging)
-            .gyldigFom(gyldigFom)
-            .gyldigTom(gyldigTom)
-            .orgtilknytningType(tilknytningtype)
-            .masseflyttetFraFid(masseflyttetFraFid)
-            .sistEndretAv(null)
-            .build();
-    }
-
-    private static OrgtilknytningState lagStateObjekt(
-        String fid,
-        String navident,
-        String orgEnhetId,
-        Sektor sektor,
-        boolean erDagligOppfolging,
-        LocalDate gyldigFom,
-        LocalDate gyldigTom,
-        Tilknytningtype tilknytningtype,
         String masseflyttetFraFid,
         String sistEndretAv
     ) {

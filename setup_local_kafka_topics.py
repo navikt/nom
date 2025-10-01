@@ -1,8 +1,7 @@
+import argparse
 import subprocess as sp
 from dataclasses import dataclass
-import argparse
 from typing import Optional
-
 
 kafka_bootstrap_server = "localhost:39092"
 
@@ -80,6 +79,11 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
         ),
         "authorize": EntityTopics(
             event_source_topic="org.nom.nom-authorize-eventsource",
+        ),
+        "orgenhetLeder": EntityTopics(
+            event_source_topic="org.nom.orgenhet-leder-eventsource",
+            state_topic="org.nom.intern-orgenhet-leder-state",
+            streams_application_id="orgenhet-leder-state"
         ),
         "dvhLast": EntityTopics(
             state_topic="org.nom.intern-dvh-last-result"

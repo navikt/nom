@@ -12,10 +12,6 @@ import java.util.List;
 public class TilgangEvtsrcRepository {
     private final List<AuthorizationEvent> tilgangEvtsrc = new ArrayList<>();
 
-    public void addTilgangEvent(AuthorizationEvent tilgangEvent) {
-        tilgangEvtsrc.add(tilgangEvent);
-    }
-
     public void addTilgangEvents(List<AuthorizationEvent> tilgangEvents) {
         tilgangEvtsrc.addAll(tilgangEvents);
     }

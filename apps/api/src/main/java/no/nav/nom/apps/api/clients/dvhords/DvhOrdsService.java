@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -68,7 +69,7 @@ public class DvhOrdsService {
             .filter(this::determineEnhetNotIgnored)
             .filter(this::validateLeder)
             .map(DvhLeder::fromOrds)
-            .toList();
+            .collect(Collectors.toList());
 
         log.info("Antall ledere hentet fra DVH: {}", ledere.size());
         return ledere;

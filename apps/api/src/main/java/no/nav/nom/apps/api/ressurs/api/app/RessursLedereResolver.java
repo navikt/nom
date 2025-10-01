@@ -55,7 +55,7 @@ public class RessursLedereResolver {
 
         var aktiveKoblinger = orgtilknytningService.getByNavIdent(navident)
             .stream()
-            .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom())).toList();
+            .filter(kobling -> DateUtil.isActive(kobling.gyldigFom(), kobling.gyldigTom())).toList();
 
         // If there are no active koblinger, we find which date the earliest kobling will start, and select all koblinger starting that day.
         var dateForNextKobling = orgtilknytningService.getByNavIdent(navident)

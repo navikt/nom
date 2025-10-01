@@ -11,8 +11,10 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -28,7 +30,8 @@ public class OrgEnhetMapper {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService orgtilknytningService;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+    private final OrgtilknytningService orgtilknytningService;
 
     private final OrgEnhetOverordnetResolver overordnetResolver;
 
@@ -38,6 +41,7 @@ public class OrgEnhetMapper {
         RemedyEnhetMapperService remedyEnhetMapperService,
         DvhRepository dvhRepository,
         RessursStateRepository ressursStateRepository,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
         OrgtilknytningService orgtilknytningService,
         OrgEnhetOverordnetResolver overordnetResolver,
         OrgEnhetUnderordnetResolver underordnetResolver
@@ -45,6 +49,7 @@ public class OrgEnhetMapper {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.overordnetResolver = overordnetResolver;
         this.underordnetResolver = underordnetResolver;
@@ -60,6 +65,10 @@ public class OrgEnhetMapper {
 
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
         var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id).orElse(null);
+        var orgEnhetLeder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhet.getId())
+            .flatMap(orgEnhetLederState -> ressursStateRepository.findByNavident(orgEnhetLederState.navident()))
+            .map(ressursState -> new MinimalRessurs(ressursState.navident(), ressursState.visningsnavn()
+                .getFormattedVisningsnavn())).orElse(null);
 
         Collator norwegianCollator = Collator.getInstance(new Locale.Builder().setLanguage("no").setRegion("NO").build());
         var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
@@ -83,6 +92,7 @@ public class OrgEnhetMapper {
             overordnetId,
             underordnedeOrgEnhetIds,
             hentOrgEnhetLedere(orgEnhet),
+            orgEnhetLeder,
             orgtilknytningService.getByEnhet(orgEnhet.getId())
         );
     }

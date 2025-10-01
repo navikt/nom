@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
@@ -11,6 +12,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
@@ -62,6 +64,9 @@ public class OrgEnhetTestBase {
     @Autowired
     public OrgEnhetStateRepository orgEnhetStateRepository;
 
+    @MockitoBean
+    public OrgEnhetLederService orgEnhetLederService;
+
     @Autowired
     KafkaUtils kafkaUtils;
 
@@ -75,6 +80,8 @@ public class OrgEnhetTestBase {
     NomStateMasteredRessursListener nomStateMasteredRessursListener;
     @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
+    @MockitoBean
+    NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
 
     @BeforeEach
     void setup() {

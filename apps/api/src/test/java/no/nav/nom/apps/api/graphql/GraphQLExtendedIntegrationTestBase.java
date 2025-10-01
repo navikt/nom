@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
@@ -23,6 +24,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateAutoconfiguration;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
@@ -83,7 +85,8 @@ import static java.util.Collections.emptyMap;
         "nom.libs.state.orgtilknytning.listener-id: nomStateOrgtilknytningListener_test",
         "nom.libs.state.mastered-ressurs.enabled: true",
         "nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs",
-        "nom.libs.state.mastered-ressurs.listener-id: nomStateMasteredRessursListener_test"
+        "nom.libs.state.mastered-ressurs.listener-id: nomStateMasteredRessursListener_test",
+        "nom.libs.state.orgenhet-leder.listener-id: nomStateOrgEnhetLederListener_test"
     }
     , controllers = {GraphQLRessursController.class, GraphQLOrgEnhetController.class, GraphQLSearchController.class})
 public class GraphQLExtendedIntegrationTestBase {
@@ -149,6 +152,9 @@ public class GraphQLExtendedIntegrationTestBase {
     NomStateDelegertLederListener nomStateDelegertLederListener;
 
     @MockitoBean
+    NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+
+    @MockitoBean
     RessursEventSourceRepository ressursEventSourceRepository;
 
     @MockitoBean
@@ -156,6 +162,9 @@ public class GraphQLExtendedIntegrationTestBase {
 
     @MockitoBean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
+
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
 
     @BeforeEach
     protected void setup() {

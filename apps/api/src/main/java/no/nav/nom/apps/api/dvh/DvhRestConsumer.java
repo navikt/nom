@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
@@ -23,6 +24,7 @@ import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
@@ -77,6 +79,8 @@ public class DvhRestConsumer {
 
     private final OTUtenforHierarki otUtenforHierarki;
     private final TelefonService telefonService;
+    private final OrgEnhetLederService orgEnhetLederService;
+    private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -92,11 +96,12 @@ public class DvhRestConsumer {
                 Thread.sleep(5_000);
                 log.debug("InitialState er ikke klar enda");
                 log.debug(
-                    "Ressurs state: {}  Orgtilkn. state: {} Organisering state: {} Orgenhet state: {}",
+                    "Ressurs state: {}  Orgtilkn. state: {} Organisering state: {} Orgenhet state: {} OrgEnhetLederState: {}",
                     nomStateMasteredRessursListener.hasReadToEndOnStartup(),
                     nomStateOrgtilknytningListener.hasReadToEndOnStartup(),
                     nomStateOrganiseringListener.hasReadToEndOnStartup(),
-                    nomStateOrgEnhetListener.hasReadToEndOnStartup()
+                    nomStateOrgEnhetListener.hasReadToEndOnStartup(),
+                    nomStateOrgEnhetLederListener.hasReadToEndOnStartup()
                 );
             } catch (Exception logMe) {
                 log.error("Waiting for initialState last feilet", logMe);
@@ -182,7 +187,7 @@ public class DvhRestConsumer {
                     if (l.size() > 1) {
                         l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
                         if (l.size() > 1) {
-                            var personIdent = l.get(0).getPersonIdent();
+                            var personIdent = l.getFirst().getPersonIdent();
                             var navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
                             log.warn(TEAM_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
                             l.clear();
@@ -308,10 +313,12 @@ public class DvhRestConsumer {
             var ledere = dvhOrdsService.getLedere();
             var organiseringer = dvhOrdsService.getOrganiseringer();
 
-            dvhService.saveLedere(ledere);
+            var filteredLedere = dvhService.saveLedere(ledere);
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
             organiseringService.saveOrganiseringer(organiseringer);
+            orgEnhetLederService.persisterLedereForOrgenheter(filteredLedere);
+
             return true;
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
@@ -335,7 +342,8 @@ public class DvhRestConsumer {
             && nomStateOrganiseringListener.hasReadToEndOnStartup()
             && nomStateOrgtilknytningListener.hasReadToEndOnStartup()
             && nomStateMasteredRessursListener.hasReadToEndOnStartup()
-            && nomStateDelegertLederListener.hasReadToEndOnStartup();
+            && nomStateDelegertLederListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetLederListener.hasReadToEndOnStartup();
     }
 
     private String durationAsH24(LocalDateTime start) {

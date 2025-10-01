@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.dvh;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -35,6 +36,9 @@ public class DvhTestBase {
 
     @MockitoBean
     protected TelefonService telefonService;
+
+    @MockitoBean
+    protected OrgEnhetLederService orgEnhetLederService;
 
     @Autowired
     protected RessursStateRepository ressursStateRepository;

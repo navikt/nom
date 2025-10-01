@@ -1,12 +1,14 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateAutoconfiguration;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateAutoconfiguration;
@@ -57,6 +59,9 @@ public class OrganiseringTestBase {
     TelefonService telefonService;
 
     @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
+
+    @MockitoBean
     NomStateRessursListener nomStateRessursListener;
 
     @MockitoBean
@@ -73,5 +78,8 @@ public class OrganiseringTestBase {
 
     @MockitoBean
     NomStateDelegertLederListener nomStateDelegertLederListener;
+
+    @MockitoBean
+    NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
 }
 

@@ -2,6 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.orgenhet.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ public class KafkaConfig {
     public JsonSerde<Object> objectSerde(ObjectMapper objectMapper){
         final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(OrgEnhetEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
         return objectSerde;
     }

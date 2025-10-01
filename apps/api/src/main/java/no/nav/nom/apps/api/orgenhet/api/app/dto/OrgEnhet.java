@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet.api.app.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -28,5 +29,6 @@ public record OrgEnhet(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String overordnetEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> underordnedeOrgEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<RessursState> ledere,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) MinimalRessurs leder,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<OrgtilknytningState> ressursKoblinger
 ) { }

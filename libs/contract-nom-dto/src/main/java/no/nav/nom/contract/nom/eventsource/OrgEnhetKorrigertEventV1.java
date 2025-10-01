@@ -7,12 +7,17 @@ import java.time.LocalDate;
 public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
 
     @JsonCreator
-    public OrgEnhetKorrigertEventV1(String fid, OrgEnhetKorrigertEventData data, Metadata metadata, OrgEnhetKorrigertAdditionalAgressoData additionalData){
+    public OrgEnhetKorrigertEventV1(
+        String fid,
+        OrgEnhetKorrigertEventData data,
+        Event.Metadata metadata,
+        OrgEnhetKorrigertAdditionalAgressoData additionalData
+    ) {
         super(fid, data, metadata, additionalData);
     }
 
     public OrgEnhetKorrigertEventV1(String fid, OrgEnhetKorrigertEventData data, InputMetadata inputMetadata, OrgEnhetKorrigertAdditionalAgressoData additionalData) {
-        this(fid, data, Metadata.from(inputMetadata), additionalData);
+        this(fid, data, Event.Metadata.from(inputMetadata), additionalData);
     }
 
     public record OrgEnhetKorrigertEventData(

@@ -3,6 +3,10 @@ package no.nav.nom.apps.streams.kafkaapi.hendelser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
@@ -23,6 +27,10 @@ public class KafkaConfig {
     public JsonSerde<Object> objectSerde(ObjectMapper objectMapper) {
         final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(RessursEvent.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(OrgEnhetEvent.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(OrganiseringEvent.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(OrgtilknytningEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(Hendelse.class.getPackageName());

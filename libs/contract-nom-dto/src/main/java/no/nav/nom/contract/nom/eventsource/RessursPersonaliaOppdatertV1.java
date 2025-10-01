@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
-public class RessursPersonaliaOppdatertV1 extends RessursEvent{
+public class RessursPersonaliaOppdatertV1 extends RessursEvent {
     @JsonCreator
     public RessursPersonaliaOppdatertV1(String fid, PersonaliaOppdatertEventData data, Metadata metadata) {
         super(fid, data, metadata, null);

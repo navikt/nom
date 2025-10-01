@@ -6,12 +6,12 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 public class OrgEnhetTypeEndretEventV1 extends OrgEnhetEvent {
 
     @JsonCreator
-    public OrgEnhetTypeEndretEventV1(String fid, OrgEnhetTypeEndretEventData data, Metadata metadata) {
+    public OrgEnhetTypeEndretEventV1(String fid, OrgEnhetTypeEndretEventData data, Event.Metadata metadata) {
         super(fid, data, metadata, null);
     }
 
     public OrgEnhetTypeEndretEventV1(String fid, OrgEnhetTypeEndretEventData data, InputMetadata inputMetadata) {
-        this(fid, data, Metadata.from(inputMetadata));
+        this(fid, data, Event.Metadata.from(inputMetadata));
     }
 
     public OrgEnhetTypeEndretEventData getData() {

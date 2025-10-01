@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @Import({
-    KafkaTestFactoryConfiguration.class
-    , NomStateDelegertLederListener.class
-    , DelegertLederStateAutoconfiguration.class
+    KafkaTestFactoryConfiguration.class,
+    NomStateDelegertLederListener.class,
+    DelegertLederStateAutoconfiguration.class
 })
 public class DelegertLederStateTopicConsumerTest extends StateTopicConsumerTestBase<AuthorizationEvent> {
 

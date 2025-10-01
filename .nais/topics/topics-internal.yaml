@@ -494,3 +494,68 @@ spec:
     - team: org
       application: nom-admin
       access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.orgenhet-leder-eventsource
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nom-intern-orgenhet-leder-state
+      access: readwrite
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgenhet-leder-state
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+  acl:
+    - team: org
+      application: nom-intern-orgenhet-leder-state
+      access: readwrite
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-admin
+      access: read
+    - team: org
+      application: nom-rdbms-data
+      access: read

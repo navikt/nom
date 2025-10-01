@@ -22,7 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     NomStateDelegertLederListener.class,
     DelegertLederStateAutoconfiguration.class,
     KafkaProperties.class,
-    LocalConfiguration.class,
+    LocalConfiguration.class
 })
 @EnableKafka
 @AutoConfigureJson

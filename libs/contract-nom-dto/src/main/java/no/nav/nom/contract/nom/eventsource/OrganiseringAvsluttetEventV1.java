@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDate;
 
-public class OrganiseringAvsluttetEventV1 extends OrganiseringEvent{
+public class OrganiseringAvsluttetEventV1 extends OrganiseringEvent {
     @JsonCreator
     public OrganiseringAvsluttetEventV1(String fid, OrganiseringAvsluttetEventData data, Metadata metadata) {
         super(fid, data, metadata, null);
