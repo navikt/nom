@@ -342,7 +342,6 @@ public class StatistikkRestService {
 
     @Cacheable(cacheNames = STATISTIKK_REST_SERVICE_CACHE_NAME, cacheManager = "cacheManager")
     public OrgEnhetStatistikkResponse getStatistikkForOrgEnhetCache(String orgEnhet) {
-        log.info("Fetching statistikk for org enhet: {}", orgEnhet);
         return hentStatistikkForOrgEnhet(orgEnhet);
     }
 
