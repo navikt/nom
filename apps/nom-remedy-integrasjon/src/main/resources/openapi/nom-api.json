@@ -63,6 +63,29 @@
         ]
       }
     },
+    "/app/authorizedRessursRedigering/getLederTilgangerDelegertForOrgEnhet": {
+      "get": {
+        "operationId": "getLederTilgangerForOrgEnhet",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LederTilgangState"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Controller metode for å verifisere redigere ressurs tilgang og administrere delegerering av tilganger"
+        ]
+      }
+    },
     "/app/authorizedRessursRedigering/getLederTilgangerDelegertTilMeg": {
       "get": {
         "operationId": "getLederTilgangerForUser",
@@ -547,7 +570,7 @@
     },
     "/app/orgenheter/exportKontaktpersonerFor/{orgenhetId}": {
       "get": {
-        "description": "Genererer regneark med oversikt over kontakt personer for en orgenhet",
+        "description": "Genererer regneark med oversikt over kontaktpersoner for en orgenhet",
         "operationId": "exportKontaktpersonerForOrgenhetId",
         "parameters": [
           {
@@ -941,6 +964,120 @@
         ],
         "tags": [
           "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenhetleder/by-navident/{navident}": {
+      "get": {
+        "description": "Henter alle orgenheter en er leder for med navident",
+        "operationId": "getLederByNavident",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgEnhetLederResponse"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnhetLedere"
+        ]
+      }
+    },
+    "/app/orgenhetleder/byOrgEnhetId/{orgenhetId}": {
+      "get": {
+        "description": "Henter alle periodiserte ledere for gitt orgenhet",
+        "operationId": "getLedereByOrgenhetId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgEnhetLederResponse"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnhetLedere"
+        ]
+      }
+    },
+    "/app/orgenhetleder/{orgenhetId}": {
+      "get": {
+        "description": "Hent aktiv leder for orgenhet",
+        "operationId": "getLederByOrgEnhetId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnhetLederResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnhetLedere"
         ]
       }
     },
@@ -2519,8 +2656,7 @@
           }
         }
       },
-      "JsonNode": {
-      },
+      "JsonNode": {},
       "LederTilgangForOrgenhetRequest": {
         "type": "object",
         "properties": {
@@ -2810,6 +2946,9 @@
           "id": {
             "type": "string"
           },
+          "leder": {
+            "$ref": "#/components/schemas/MinimalRessurs"
+          },
           "ledere": {
             "type": "array",
             "items": {
@@ -2853,12 +2992,41 @@
           "fid",
           "gyldigFom",
           "id",
+          "leder",
           "ledere",
           "navn",
           "orgNiv",
           "ressursKoblinger",
           "underordnedeOrgEnhetId"
         ]
+      },
+      "OrgEnhetLederResponse": {
+        "type": "object",
+        "properties": {
+          "fid": {
+            "type": "string"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "orgEnhetId": {
+            "type": "string"
+          },
+          "orgEnhetNavn": {
+            "type": "string"
+          },
+          "sluttdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "startdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "visningsnavn": {
+            "$ref": "#/components/schemas/Visningsnavn"
+          }
+        }
       },
       "OrgEnhetMedLedernavn": {
         "type": "object",
