@@ -261,7 +261,7 @@ public class KontaktpersonerExcelGenerator {
             String ressursEtternavn = visningsnavn.map(Visningsnavn::etternavn).orElse("");
 
             String ressursJobbtelefon = getTelefonForRessursByType(ressurser.get(ressursKontaktinfo.ressursNavident()), TelefonType.NAV_TJENESTE_TELEFON);
-            String ressursPrivattelefon = getTelefonForRessursByType(ressurser.get(ressursKontaktinfo.ressursNavident()), TelefonType.PRIVAT_TELEFON);
+            String ressursPrimarytelefon = getPrimaryTelefonForRessurs(ressurser.get(ressursKontaktinfo.ressursNavident()));
 
             if (ressursKontaktinfo.kontaktinfo().isEmpty()) {
                 LinkedHashMap<String, Object> map = new LinkedHashMap<>();
@@ -271,7 +271,7 @@ public class KontaktpersonerExcelGenerator {
                 map.put("Medarbeider-etternavn", ressursEtternavn);
 
                 map.put("Medarbeider-jobbtelefon", ressursJobbtelefon);
-                map.put("Medarbeider-privattelefon", ressursPrivattelefon);
+                map.put("Medarbeider-privattelefon", ressursPrimarytelefon);
 
                 map.put("Kontaktperson-navn", "");
                 map.put("Kontaktperson-relasjon", "");
@@ -288,7 +288,7 @@ public class KontaktpersonerExcelGenerator {
                     map.put("Medarbeider-etternavn", ressursEtternavn);
 
                     map.put("Medarbeider-jobbtelefon", ressursJobbtelefon);
-                    map.put("Medarbeider-privattelefon", ressursPrivattelefon);
+                    map.put("Medarbeider-privattelefon", ressursPrimarytelefon);
 
                     map.put("Kontaktperson-navn", kontaktpersonNavn(kontaktinfo));
                     map.put("Kontaktperson-relasjon", kontaktinfo.relasjon() != null ? kontaktinfo.relasjon() : "");
@@ -312,6 +312,13 @@ public class KontaktpersonerExcelGenerator {
             .findFirst()
             .map(Ressurs.Telefon::nummer)
             .orElse("");
+    }
+
+    private String getPrimaryTelefonForRessurs(Ressurs ressurs) {
+        if (ressurs == null || ressurs.state() == null || ressurs.state().primaryTelefonnummer() == null) {
+            return "";
+        }
+        return ressurs.state().primaryTelefonnummer();
     }
 
     private String kontaktpersonNavn(Kontaktinfo kontaktinfo) {
