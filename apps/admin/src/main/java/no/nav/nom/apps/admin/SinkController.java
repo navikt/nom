@@ -1,6 +1,5 @@
 package no.nav.nom.apps.admin;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.admin.dto.EventSearchParams;
 import no.nav.nom.apps.admin.dto.deadletter.DeadLetterDTO;
 import no.nav.nom.apps.admin.dto.hendelse.HendelseDTO;
@@ -50,7 +49,6 @@ public class SinkController {
     private final HendelserApiStateRepository hendelserApiStateRepository;
     private final OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository;
     private final RessursHendelseApiRepository ressursHendelseApiRepository;
-    private final Unleash unleash;
     private final DeadLetterRepository deadLetterRepository;
 
     public SinkController(
@@ -62,7 +60,6 @@ public class SinkController {
         HendelserApiStateRepository hendelserApiStateRepository,
         OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository,
         RessursHendelseApiRepository ressursHendelseApiRepository,
-        Unleash unleash,
         DeadLetterRepository deadLetterRepository
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
@@ -73,7 +70,6 @@ public class SinkController {
         this.hendelserApiStateRepository = hendelserApiStateRepository;
         this.orgtilknytningEvtsrcRepository = orgtilknytningEvtsrcRepository;
         this.ressursHendelseApiRepository = ressursHendelseApiRepository;
-        this.unleash = unleash;
         this.deadLetterRepository = deadLetterRepository;
     }
 
@@ -82,12 +78,7 @@ public class SinkController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<RessursEvent> getRessursEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
-        List<RessursEvent> events = unleash.isEnabled("nom-admin.ny-soke-funksjonalitet") ?
-            getAllMatchingRessursEvents(eventSearchParams) :
-            ressursEvtsrcRepository.getRessursEvtsrc().stream()
-            .filter(eventFilter(eventSearchParams))
-            .toList();
-
+        List<RessursEvent> events = getAllMatchingRessursEvents(eventSearchParams);
         return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
@@ -104,9 +95,7 @@ public class SinkController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgtilknytningEvent> getOrgtilknytningEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
-        List<OrgtilknytningEvent> events = unleash.isEnabled("nom-admin.ny-soke-funksjonalitet") ?
-            getAllMatchingOrgtilknytningEvents(eventSearchParams) :
-            orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
+        List<OrgtilknytningEvent> events = getAllMatchingOrgtilknytningEvents(eventSearchParams);
 
         return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
