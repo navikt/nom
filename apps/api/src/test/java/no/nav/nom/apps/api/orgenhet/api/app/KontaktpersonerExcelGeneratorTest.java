@@ -174,11 +174,11 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
             var headerRow = sheet.getRow(0);
             assertThat(headerRow.getCell(0).getStringCellValue()).isEqualTo("Medarbeider-navident");
-            assertThat(headerRow.getCell(3).getStringCellValue()).isEqualTo("Kontaktperson-navn");
+            assertThat(headerRow.getCell(5).getStringCellValue()).isEqualTo("Kontaktperson-navn");
 
             var dataRow1 = sheet.getRow(1);
             assertThat(dataRow1.getCell(0).getStringCellValue()).isEqualTo(ANSATT_1_NAVIDENT);
-            assertThat(dataRow1.getCell(3).getStringCellValue()).isEqualTo(KONTAKTPERSON_1_FORNAVN + " " + KONTAKTPERSON_1_ETTERNAVN);
+            assertThat(dataRow1.getCell(5).getStringCellValue()).isEqualTo(KONTAKTPERSON_1_FORNAVN + " " + KONTAKTPERSON_1_ETTERNAVN);
 
             // assert that there total 3 rows in the Excel file
             assertThat(sheet.getPhysicalNumberOfRows()).isEqualTo(3);

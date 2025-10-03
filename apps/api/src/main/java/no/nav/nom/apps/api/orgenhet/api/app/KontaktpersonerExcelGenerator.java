@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -259,12 +260,18 @@ public class KontaktpersonerExcelGenerator {
             String ressursFornavn = visningsnavn.map(Visningsnavn::fornavn).orElse("");
             String ressursEtternavn = visningsnavn.map(Visningsnavn::etternavn).orElse("");
 
+            String ressursJobbtelefon = getTelefonForRessursByType(ressurser.get(ressursKontaktinfo.ressursNavident()), TelefonType.NAV_TJENESTE_TELEFON);
+            String ressursPrivattelefon = getTelefonForRessursByType(ressurser.get(ressursKontaktinfo.ressursNavident()), TelefonType.PRIVAT_TELEFON);
+
             if (ressursKontaktinfo.kontaktinfo().isEmpty()) {
                 LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 
                 map.put("Medarbeider-navident", ressursKontaktinfo.ressursNavident());
                 map.put("Medarbeider-fornavn", ressursFornavn);
                 map.put("Medarbeider-etternavn", ressursEtternavn);
+
+                map.put("Medarbeider-jobbtelefon", ressursJobbtelefon);
+                map.put("Medarbeider-privattelefon", ressursPrivattelefon);
 
                 map.put("Kontaktperson-navn", "");
                 map.put("Kontaktperson-relasjon", "");
@@ -280,6 +287,9 @@ public class KontaktpersonerExcelGenerator {
                     map.put("Medarbeider-fornavn", ressursFornavn);
                     map.put("Medarbeider-etternavn", ressursEtternavn);
 
+                    map.put("Medarbeider-jobbtelefon", ressursJobbtelefon);
+                    map.put("Medarbeider-privattelefon", ressursPrivattelefon);
+
                     map.put("Kontaktperson-navn", kontaktpersonNavn(kontaktinfo));
                     map.put("Kontaktperson-relasjon", kontaktinfo.relasjon() != null ? kontaktinfo.relasjon() : "");
                     map.put("Kontaktperson-telefonnr", kontaktinfo.telefon() != null ? kontaktinfo.telefon() : "");
@@ -291,6 +301,17 @@ public class KontaktpersonerExcelGenerator {
         }
 
         return result;
+    }
+
+    private String getTelefonForRessursByType(Ressurs ressurs, TelefonType type) {
+        if (ressurs == null || ressurs.telefoner() == null || ressurs.telefoner().isEmpty()) {
+            return "";
+        }
+        return ressurs.telefoner().stream()
+            .filter(t -> t.type().equals(type))
+            .findFirst()
+            .map(Ressurs.Telefon::nummer)
+            .orElse("");
     }
 
     private String kontaktpersonNavn(Kontaktinfo kontaktinfo) {
