@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
@@ -48,9 +47,8 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSekto
 import static org.apache.commons.lang3.StringUtils.deleteWhitespace;
 
 @Service
-public class NomRemedyIntegrasjonServiceNew {
-    private final static String UNLEASH_TOGGLE = "nom-remedy.ny-remedy-integrasjon";
-    private final static Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonServiceNew.class);
+public class NomRemedyIntegrasjonService {
+    private final static Logger logger = LoggerFactory.getLogger(NomRemedyIntegrasjonService.class);
     private final LeaderElection leaderElection;
     private final RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
     private final NomApiClient nomApiClient;
@@ -58,11 +56,10 @@ public class NomRemedyIntegrasjonServiceNew {
     private final ErrorStateRepository errorStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
-    private final Unleash unleash;
     private final DelayedEventRepository delayedEventRepository;
     private final DelayedEventReactiveRepository delayedEventReactiveRepository;
 
-    public NomRemedyIntegrasjonServiceNew(
+    public NomRemedyIntegrasjonService(
         LeaderElection leaderElection,
         RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService,
         NomApiClient nomApiClient,
@@ -70,7 +67,6 @@ public class NomRemedyIntegrasjonServiceNew {
         ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        Unleash unleash,
         DelayedEventRepository delayedEventRepository,
         DelayedEventReactiveRepository delayedEventReactiveRepository
     ) {
@@ -81,7 +77,6 @@ public class NomRemedyIntegrasjonServiceNew {
         this.errorStateRepository = errorStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
-        this.unleash = unleash;
         this.delayedEventRepository = delayedEventRepository;
         this.delayedEventReactiveRepository = delayedEventReactiveRepository;
     }
@@ -261,20 +256,17 @@ public class NomRemedyIntegrasjonServiceNew {
             var sluttdato = ressursState.sluttdato();
             if (sluttdato.isBefore(LocalDate.now())) {
                 logger.info("RessursState med navident {} har en sluttdato før dagens dato, sletter ressurs i IR", navident);
-                if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                    remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
-                        nomIntegrasjonEntity -> {
-                            if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
-                                logger.info("Ressurs {} er allerede slettet i IR", navident);
-                            } else {
-                                remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
-                                logger.info("Ressurs {} er merket for sletting i IR", navident);
-                            }
-                        }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv())
-                    );
-                } else {
-                    logger.info("Ressurs {} er merket for sletting i IR", navident);
-                }
+                remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
+                    nomIntegrasjonEntity -> {
+                        if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
+                            logger.info("Ressurs {} er allerede slettet i IR", navident);
+                        } else {
+                            remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
+                            logger.info("Ressurs {} er merket for sletting i IR", navident);
+                        }
+                    }, () -> remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv())
+                );
+
             } else if (!sluttdato.isBefore(LocalDate.now())) {
                 logger.info("Ressurs {} har en sluttdato i fremtiden, oppdaterer ressurs i aggregate_state tabellen", navident);
                 aggregateStateRepository.save(
@@ -288,7 +280,9 @@ public class NomRemedyIntegrasjonServiceNew {
                 );
                 var orgtilknytningState = currentDolOrgtilknytning.orElseGet(() -> futureDolOrgtilknytning.orElse(null));
                 var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, orgtilknytningState, erMasseflytting);
-                var entryBestiller = (ressursState.sistEndretAv() != null && !ressursState.sistEndretAv().isEmpty())  ? ressursState.sistEndretAv() : (orgtilknytningState != null && orgtilknytningState.sistEndretAv() != null && !orgtilknytningState.sistEndretAv().isEmpty()) ? orgtilknytningState.sistEndretAv() : "nom-api";
+                var entryBestiller = (ressursState.sistEndretAv() != null && !ressursState.sistEndretAv()
+                    .isEmpty()) ? ressursState.sistEndretAv() : (orgtilknytningState != null && orgtilknytningState.sistEndretAv() != null && !orgtilknytningState.sistEndretAv()
+                    .isEmpty()) ? orgtilknytningState.sistEndretAv() : "nom-api";
                 saveStateToRemedy(nomIntegrasjonEntity, entryBestiller);
                 return false;
             }
@@ -311,28 +305,22 @@ public class NomRemedyIntegrasjonServiceNew {
     private void saveStateToRemedyIfNewOrReactivatedRessurs(RessursState ressursState, OrgtilknytningState dolOrgtilknytning) {
         if ((ressursState.startdato() != null && dolOrgtilknytning.gyldigFom() != null)
             && (ressursState.startdato().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
-            if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
-                        nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
-                logger.info(
-                    "Opprettet ressurs i IR med navident {}, startdato {}",
-                    ressursState.navident(),
-                    ressursState.startdato()
-                );
-            } else {
-                logger.info("Opprettet ressurs i IR med navident {}, startdato {}", ressursState.navident(), ressursState.startdato());
-            }
+
+            remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
+                nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
+            logger.info(
+                "Opprettet ressurs i IR med navident {}, startdato {}",
+                ressursState.navident(),
+                ressursState.startdato()
+            );
+
         } else {
             throw new RequiredValueMissingException(String.format("Ressursen %s manglet tiltredato", ressursState.navident()));
         }
     }
 
     private void saveStateToRemedy(NomIntegrasjonEntity nomIntegrasjonEntity, String initatedBy) {
-        if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, initatedBy);
-        } else {
-            logger.info("Lagret ny rad for ressurs {} med enhetsId {}", nomIntegrasjonEntity.getNavId(), nomIntegrasjonEntity.getEnhetsId());
-        }
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, initatedBy);
     }
 
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(RessursState ressursState, OrgtilknytningState dolOrgtilknytning, boolean isMasseflytting) {
@@ -453,5 +441,9 @@ public class NomRemedyIntegrasjonServiceNew {
         return delayedEventRepository.findAll().stream()
             .map(DelayedEventJpa::getEvent)
             .toList();
+    }
+
+    public List<NomIntegrasjonEntity> getNomIntegrasjonEntities() {
+        return remedyIntegrasjonRepositoryService.findAll();
     }
 }

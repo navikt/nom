@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
@@ -46,10 +45,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class NomRemedyIntegrasjonServiceNewTest {
+public class NomRemedyIntegrasjonServiceTest {
 
     @InjectMocks
-    private NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonService;
+    private NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
 
     @Mock
     private RemedyIntegrasjonRepositoryService remedyIntegrasjonRepositoryService;
@@ -72,13 +71,9 @@ public class NomRemedyIntegrasjonServiceNewTest {
     @Mock
     private ErrorStateRepository errorStateRepository;
 
-    @Mock
-    private Unleash unleash;
-
     @BeforeEach
     public void setUp() {
         // Clear the repositories before each test
-        lenient().doReturn(true).when(unleash).isEnabled(anyString());
         lenient().doReturn(true).when(leaderElection).isLeader();
         lenient().doReturn("2990").when(nomApiClient).getRemedyEnhetId(anyString());
         lenient().doReturn("12345678").when(nomApiClient).getTelefonnummer(anyString());

@@ -1,8 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -21,12 +19,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,45 +34,11 @@ import static no.nav.nom.apps.nomremedyintegrasjon.config.SwaggerConfig.BEARER_T
 @RequestMapping(value = {"/admin"})
 public class AdminController {
 
-    private final NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld;
-    private final NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew;
-    private final Unleash unleash;
+    private final NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
 
-    public AdminController(NomRemedyIntegrasjonServiceOld nomRemedyIntegrasjonServiceOld,
-                           NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew, Unleash unleash
-    ) {
-        this.nomRemedyIntegrasjonServiceOld = nomRemedyIntegrasjonServiceOld;
-        this.nomRemedyIntegrasjonServiceNew = nomRemedyIntegrasjonServiceNew;
-        this.unleash = unleash;
+    public AdminController(NomRemedyIntegrasjonService nomRemedyIntegrasjonService) {
+        this.nomRemedyIntegrasjonService = nomRemedyIntegrasjonService;
     }
-
-    @Operation(
-        description = "Leter opp eksterne ressurser med angitt sluttdato og sletter de fra remedy",
-        security = @SecurityRequirement(name = BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success"),
-            @ApiResponse(responseCode = "400", description = "Bad request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-        }
-    )
-    @PostMapping(value = "/slettFraRemedy")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<String> slettFraRemedy(
-        @Parameter(description = "Sluttdato for ressurser som skal slettes")
-        @RequestParam LocalDate sluttdato
-    ) {
-        if (sluttdato.isAfter(LocalDate.now().minusDays(1))) {
-            return ResponseEntity.badRequest().body("Ikke mulig å slette aktive ressurser fra remedy");
-        }
-
-        nomRemedyIntegrasjonServiceOld.findRessurserWithSluttdatoAndMarkForDeletion(sluttdato, getAuthenticatedNavIdent());
-
-        return ResponseEntity.ok("Fjernet ressurser med spesifisert sluttdato");
-    }
-
 
     @Operation(
         description = "Lister alle bestillinger sendt til remedy",
@@ -92,7 +54,7 @@ public class AdminController {
     @GetMapping(value = "/bestillinger")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<NomIntegrasjonEntity>> getBestillinger() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonServiceOld.getNomIntegrasjonEntities());
+        return ResponseEntity.ok(nomRemedyIntegrasjonService.getNomIntegrasjonEntities());
     }
 
     @Operation(
@@ -109,42 +71,38 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(value = "lesOgEksekverRessursState/{navident}")
     public ResponseEntity<String> lesOgEksekverRessursState(@PathVariable String navident) {
-        if (unleash.isEnabled("nom-remedy.ny-remedy-integrasjon")) {
-            nomRemedyIntegrasjonServiceNew.lesStatePaaNytt(navident);
-        } else {
-            nomRemedyIntegrasjonServiceOld.lesStatePaaNytt(getAuthenticatedNavIdent(), navident);
-        }
+        nomRemedyIntegrasjonService.lesStatePaaNytt(navident);
         return ResponseEntity.ok("RessursState er lest og eksekvert");
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping(value = "getAllErrorState")
     public ResponseEntity<List<ErrorState>> getAllErrorState() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllErrorStates());
+        return ResponseEntity.ok(nomRemedyIntegrasjonService.getAllErrorStates());
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "deleteAllErrorStates")
     public ResponseEntity<String> deleteAllErrorStates() {
-        nomRemedyIntegrasjonServiceNew.deleteAllErrorStates();
+        nomRemedyIntegrasjonService.deleteAllErrorStates();
         return ResponseEntity.ok("Slettet alle error states");
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping(value = "deleteErrorState/{fid}")
     public ResponseEntity<String> deleteErrorState(@PathVariable String fid) {
-        nomRemedyIntegrasjonServiceNew.deleteErrorState(fid);
+        nomRemedyIntegrasjonService.deleteErrorState(fid);
         return ResponseEntity.ok("Slettet error state med id: " + fid);
     }
 
     @GetMapping(value = "getAllDelayStates")
     public ResponseEntity<Flux<Event>> getAllDelayStates() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonServiceNew.getAllDelayedEvents());
+        return ResponseEntity.ok(nomRemedyIntegrasjonService.getAllDelayedEvents());
     }
 
     @GetMapping(value = "getAllDelayedEventsBlocking")
     public ResponseEntity<List<Event>> getAllDelayedEventsBlocking() {
-        List<Event> events = nomRemedyIntegrasjonServiceNew.getAllDelayedEventsBlocking();
+        List<Event> events = nomRemedyIntegrasjonService.getAllDelayedEventsBlocking();
         return ResponseEntity.ok(events);
     }
 
