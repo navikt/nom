@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.statistikk.api;
 
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -13,11 +12,9 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
@@ -32,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -45,7 +41,6 @@ import static no.nav.nom.apps.api.common.SpringCacheConfig.STATISTIKK_REST_SERVI
 public class StatistikkRestService {
 
     private final RessursStateRepository ressursStateRepository;
-    private final OrganiseringStateRepository organiseringStateRepository;
 
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
@@ -56,22 +51,17 @@ public class StatistikkRestService {
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
-    private final Unleash unleash;
-
     public StatistikkRestService(
         RessursStateRepository ressursStateRepository,
-        OrganiseringStateRepository organiseringStateRepository,
         OrgenhetService orgenhetService,
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgEnhetMapper orgEnhetMapper,
         NomStateRessursListener nomStateRessursListener,
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrganiseringListener nomStateOrganiseringListener,
-        NomStateOrgEnhetListener nomStateOrgEnhetListener,
-        Unleash unleash
+        NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
         this.ressursStateRepository = ressursStateRepository;
-        this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgEnhetMapper = orgEnhetMapper;
@@ -79,7 +69,6 @@ public class StatistikkRestService {
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateOrganiseringListener = nomStateOrganiseringListener;
         this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
-        this.unleash = unleash;
     }
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
@@ -105,12 +94,8 @@ public class StatistikkRestService {
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
         var antallFylker = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
-        int antallNavKontorer;
-        if (unleash.isEnabled("nom-api.nav-kontor-alternativ-telling")) {
-            antallNavKontorer = finnAlleNavKontorer(alleOrgEnheter);
-        } else {
-            antallNavKontorer = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
-        }
+        int antallNavKontorer = createNewIOrgenhetList(alleOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
+
         return new GlobalStatistikkResponse(
             ressursStatistikk,
             antallNavArbeidOgYtelser,
@@ -293,31 +278,6 @@ public class StatistikkRestService {
             .filter(navKontor -> enheterToIgnore.stream()
                 .noneMatch(fylkeEnhet -> fylkeEnhet.remedyEnhetId().equals(navKontor.remedyEnhetId())))
             .toList().size();
-    }
-
-    private int finnAlleNavKontorer(Collection<IOrgenhet> alleOrgenheter) {
-
-        var alleNavKontorer = alleOrgenheter.stream()
-            .filter(iOrgenhet -> nonNull(iOrgenhet.getOrgEnhetsType()))
-            .filter(iOrgenhet -> iOrgenhet.getOrgEnhetsType().equals(OrgEnhetsType.NAV_KONTOR))
-            .toList();
-
-        var navKontorOverordnetId = alleNavKontorer.stream()
-            .map(IOrgenhet::getId)
-            .map(organiseringStateRepository::findActiveById)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(OrganiseringState::idOver)
-            .toList();
-
-        var antallNavKontorer = navKontorOverordnetId.stream()
-            .filter(nomId -> alleOrgenheter.stream()
-                .anyMatch(iOrgenhet -> iOrgenhet.getId().equals(nomId)
-                    && nonNull(iOrgenhet.getNomNivaa())
-                    && (!iOrgenhet.getNomNivaa().equals(NomNivaa.ARBEIDSOMRAADE) && nonNull(iOrgenhet.getNomNivaa()))))
-            .toList();
-
-        return antallNavKontorer.size();
     }
 
     private List<IOrgenhet> createNewIOrgenhetList(Collection<IOrgenhet> allOrgenheter, NomNivaa nomNivaa, OrgEnhetsType orgEnhetsType) {

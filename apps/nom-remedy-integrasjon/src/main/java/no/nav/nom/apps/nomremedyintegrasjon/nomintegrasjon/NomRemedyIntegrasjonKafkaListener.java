@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class NomRemedyIntegrasjonKafkaListenerNew {
-    private final static Logger log = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListenerNew.class);
+public class NomRemedyIntegrasjonKafkaListener {
+    private final static Logger log = LoggerFactory.getLogger(NomRemedyIntegrasjonKafkaListener.class);
     private final NomStateRessursListener nomStateRessursListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateMasteredRessursListener nomStateMasteredRessursListener;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final AggregateStateRepository aggregateStateRepository;
 
-    public NomRemedyIntegrasjonKafkaListenerNew(
+    public NomRemedyIntegrasjonKafkaListener(
         NomStateRessursListener nomStateRessursListener,
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateMasteredRessursListener nomStateMasteredRessursListener,

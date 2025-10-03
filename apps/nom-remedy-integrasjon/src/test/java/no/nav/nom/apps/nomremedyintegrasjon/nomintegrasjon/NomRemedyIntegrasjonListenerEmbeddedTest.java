@@ -82,7 +82,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
     @MockitoBean
     ErrorStateRepository errorStateRepository;
     @MockitoBean
-    NomRemedyIntegrasjonServiceNew nomRemedyIntegrasjonServiceNew;
+    NomRemedyIntegrasjonService nomRemedyIntegrasjonService;
     @MockitoBean
     AdminController adminController;
     @Autowired

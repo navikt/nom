@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
@@ -28,7 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class NomRemedyIntegrasjonKafkaListenerNewTest {
+public class NomRemedyIntegrasjonKafkaListenerTest {
 
     @Mock
     MasteredRessursStateRepository masteredRessursStateRepository;
@@ -41,7 +40,7 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
     @Mock
     AggregateStateRepository aggregateStateRepository;
     @InjectMocks
-    private NomRemedyIntegrasjonKafkaListenerNew nomRemedyIntegrasjonKafkaListenerNew;
+    private NomRemedyIntegrasjonKafkaListener nomRemedyIntegrasjonKafkaListener;
 
     @BeforeEach
     void setUp() {
@@ -76,7 +75,7 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
             .hasReadToEndOnStartup();
 
         // When
-        nomRemedyIntegrasjonKafkaListenerNew.ressursStateListener(ressursState, ressursState.fid());
+        nomRemedyIntegrasjonKafkaListener.ressursStateListener(ressursState, ressursState.fid());
 
         // Then
         verify(aggregateStateRepository, times(1)).save(any(AggregateState.class));
@@ -119,7 +118,7 @@ public class NomRemedyIntegrasjonKafkaListenerNewTest {
             .hasReadToEndOnStartup();
 
         // When
-        nomRemedyIntegrasjonKafkaListenerNew.orgtilknytningStateListener(orgtilknytningState, orgtilknytningState.fid());
+        nomRemedyIntegrasjonKafkaListener.orgtilknytningStateListener(orgtilknytningState, orgtilknytningState.fid());
 
         // Then
         verify(aggregateStateRepository, times(1)).save(any(AggregateState.class));

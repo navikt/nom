@@ -1,8 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.RessursState;
 import org.apache.kafka.common.TopicPartition;
@@ -31,58 +29,8 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.backoff.FixedBackOff;
 
-import java.time.LocalDateTime;
-
 @Configuration
 public class KafkaConfig {
-
-    @Bean
-    public ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<RessursEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, RessursEvent>>
-    ressursEventKafkaListenerContainerFactory(ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, RessursEvent>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(ressursEventConsumerFactory);
-        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-
-        return concurrentKafkaListenerContainerFactory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<OrgtilknytningEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OrgtilknytningEvent>>
-    orgtilknytningEventKafkaListenerContainerFactory(ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEventConsumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(orgtilknytningEventConsumerFactory);
-        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-
-        return concurrentKafkaListenerContainerFactory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, LocalDateTime> nomMasteredRessursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<LocalDateTime> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, LocalDateTime>>
-    nomMasteredRessursEventKafkaListenerContainerFactory(ConsumerFactory<String, LocalDateTime> nomMasteredRessursEventConsumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, LocalDateTime>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(nomMasteredRessursEventConsumerFactory);
-        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-
-        return concurrentKafkaListenerContainerFactory;
-    }
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, no.nav.nom.contract.nom.state.RessursState>>
@@ -179,5 +127,4 @@ public class KafkaConfig {
         eventsourceTemplate.setDefaultTopic(dltTopic);
         return eventsourceTemplate;
     }
-
 }
