@@ -253,6 +253,9 @@ spec:
         - application: kii-dashboard
           namespace: polaris
           cluster: prod-gcp
+        - application: fagarkiv-administrasjon
+          namespace: isa
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
