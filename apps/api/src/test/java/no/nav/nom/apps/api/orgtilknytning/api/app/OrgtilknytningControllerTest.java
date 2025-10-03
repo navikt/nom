@@ -577,7 +577,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning som er over 2 maaneder gammel for ressurs")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning som er over 6 maaneder gammel for ressurs")
     void test_rediger_orgtilknytning_som_er_over_to_mnd_gammel() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
@@ -593,7 +593,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
             .navident(tilknyttetRessurs.navident())
             .gyldigFom(LocalDate.now())
-            .gyldigTom(LocalDate.now().minusMonths(2).minusDays(1))
+            .gyldigTom(LocalDate.now().minusMonths(6).minusDays(1))
             .build();
 
 

@@ -243,16 +243,16 @@ function OrgTilknytningSection({
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
-  const sluttetOverToMndSiden = nomDateIsBefore(
+  const sluttetOverSeksMndSiden = nomDateIsBefore(
     ressurs.sluttdato,
-    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
   );
 
   const canEditOrgtilknytninger = (() => {
     switch (ressurs.identType) {
       case IdentType.ROBOT: {
         return (
-          (!sluttetOverToMndSiden && hasRobotAccess) ||
+          (!sluttetOverSeksMndSiden && hasRobotAccess) ||
           (!harSluttet && hasWriteAccess) ||
           tidligereLeder ||
           hasAdminAccess
@@ -261,13 +261,13 @@ function OrgTilknytningSection({
 
       case IdentType.VIKAFOSSEN: {
         return (
-          (!sluttetOverToMndSiden && hasVikafossenAccess) || hasAdminAccess
+          (!sluttetOverSeksMndSiden && hasVikafossenAccess) || hasAdminAccess
         );
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
         return (
-          (!sluttetOverToMndSiden && hasUtenlandskKonsulentAccess) ||
+          (!sluttetOverSeksMndSiden && hasUtenlandskKonsulentAccess) ||
           (!harSluttet && hasWriteAccess) ||
           tidligereLeder ||
           hasAdminAccess
