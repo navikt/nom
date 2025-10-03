@@ -1,6 +1,5 @@
 package no.nav.nom.apps.admin;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.admin.dto.EventSearchParams;
 import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.contract.nom.AnsettelsesType;
@@ -24,16 +23,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class SinkControllerTest {
 
     @Mock
     private RessursEvtsrcRepository ressursEvtsrcRepository;
-
-    @Mock
-    private Unleash unleash;
 
     @InjectMocks
     private SinkController sinkController;
@@ -78,7 +73,6 @@ class SinkControllerTest {
         );
         when(ressursEvtsrcRepository.getNavidentToFidMap()).thenReturn(Map.of("A123456", List.of("fid1")));
         when(ressursEvtsrcRepository.getRessursEvtsrc()).thenReturn(List.of(event1, event2));
-        when(unleash.isEnabled(any())).thenReturn(true);
 
         // Act
         List<RessursEvent> result = sinkController.getRessursEvents(searchParams);
