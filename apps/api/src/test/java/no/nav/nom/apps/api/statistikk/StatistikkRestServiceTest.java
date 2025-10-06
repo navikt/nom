@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.statistikk;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -12,9 +11,7 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,12 +25,10 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,34 +38,21 @@ public class StatistikkRestServiceTest {
     RessursStateRepository ressursStateRepository;
 
     @Mock
-    OrganiseringStateRepository organiseringStateRepository;
-
-    @Mock
     OrgenhetService orgenhetService;
-
-    @Mock
-    Unleash unleash;
 
     @InjectMocks
     StatistikkRestService statistikkRestService;
 
     @BeforeEach
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
-        when(unleash.isEnabled(any())).thenReturn(true);
         ressursStateRepository.clear();
     }
 
     @Test
     @DisplayName("Test hentGlobalStatistikk")
     public void testHentGlobalStatistikk() {
-        var alleOrgEnheter = getAllOrgEnheter().stream().toList();
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(mapOfActiveRessurser());
         when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(getAllOrgEnheter());
-        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(2).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(2)));
-        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(3).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(3)));
-        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(4).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(4)));
-        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(5).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(5)));
-        when(organiseringStateRepository.findActiveById(alleOrgEnheter.get(6).getId())).thenReturn(Optional.ofNullable(getAllOrganiseringer().get(6)));
         when(orgenhetService.getAllOrgEnheterThatCanHaveRessurser()).thenReturn(getAllOrgEnheter());
 
         var expectedGlobalStatistikkResponse = new GlobalStatistikkResponse(
@@ -191,73 +173,5 @@ public class StatistikkRestServiceTest {
 
     private IOrgenhet map(OrgEnhetState orgEnhetState) {
         return new OrgEnhet(orgEnhetState);
-    }
-
-    private List<OrganiseringState> getAllOrganiseringer() {
-        return List.of(
-            OrganiseringState.builder()
-                .fid("fid-123")
-                .id("orgEnhet123")
-                .navn("Test enhet123")
-                .idOver("NAV123")
-                .navnOver("Nav")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-456")
-                .id("orgEnhet456")
-                .navn("Test enhet456")
-                .idOver("orgEnhet123")
-                .navnOver("Test enhet123")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-789")
-                .id("orgEnhet789")
-                .navn("Test enhet789")
-                .idOver("orgEnhet456")
-                .navnOver("Test enhet456")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-101112")
-                .id("orgEnhet101112")
-                .navn("Test enhet101112")
-                .idOver("orgEnhet456")
-                .navnOver("Test enhet456")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-131415")
-                .id("orgEnhet131415")
-                .navn("Test enhet131415")
-                .idOver("orgEnhet456")
-                .navnOver("Test enhet456")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-161718")
-                .id("orgEnhet161718")
-                .navn("Test enhet161718")
-                .idOver("orgEnhet456")
-                .navnOver("Test enhet456")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build(),
-            OrganiseringState.builder()
-                .fid("fid-192021")
-                .id("orgEnhet192021")
-                .navn("Test enhet192021")
-                .idOver("orgEnhet161718")
-                .navnOver("Test enhet161718")
-                .gyldigFom(LocalDate.now().minusMonths(1))
-                .gyldigTom(null)
-                .build()
-        );
     }
 }

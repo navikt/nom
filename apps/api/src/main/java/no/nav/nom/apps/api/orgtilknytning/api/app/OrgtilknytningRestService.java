@@ -258,7 +258,7 @@ public class OrgtilknytningRestService {
         if (!unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
             validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, isLoggedInUserLederForNavident);
         }
-        validateEndreOrgtilknytningUnderToMaaneder(oppdaterOrgtilknytningerForRessursRequest);
+        validateEndreOrgtilknytningUnderSeksMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
 
@@ -324,11 +324,11 @@ public class OrgtilknytningRestService {
         });
     }
 
-    private void validateEndreOrgtilknytningUnderToMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+    private void validateEndreOrgtilknytningUnderSeksMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         if (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) return;
         log.info("Validerer at nyeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(leggTilOrgtilknytningRequest -> {
-            if (nonNull(leggTilOrgtilknytningRequest.gyldigTom()) && leggTilOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+            if (nonNull(leggTilOrgtilknytningRequest.gyldigTom()) && leggTilOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(6))) {
                 throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + leggTilOrgtilknytningRequest.orgEnhetId());
             }
         });
@@ -336,7 +336,7 @@ public class OrgtilknytningRestService {
         log.info("Validerer at eksisterendeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
             if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) return;
-            if (nonNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(2))) {
+            if (nonNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(6))) {
                 throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
             }
         }));
