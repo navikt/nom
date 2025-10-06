@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
-import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -260,7 +259,7 @@ public class KontaktpersonerExcelGenerator {
             String ressursFornavn = visningsnavn.map(Visningsnavn::fornavn).orElse("");
             String ressursEtternavn = visningsnavn.map(Visningsnavn::etternavn).orElse("");
 
-            String ressursJobbtelefon = getTelefonForRessursByType(ressurser.get(ressursKontaktinfo.ressursNavident()), TelefonType.NAV_TJENESTE_TELEFON);
+            String ressursJobbtelefon = ressursRestService.getTelefonnummer(ressursKontaktinfo.ressursNavident());
             String ressursPrimarytelefon = getPrimaryTelefonForRessurs(ressurser.get(ressursKontaktinfo.ressursNavident()));
 
             if (ressursKontaktinfo.kontaktinfo().isEmpty()) {
@@ -301,17 +300,6 @@ public class KontaktpersonerExcelGenerator {
         }
 
         return result;
-    }
-
-    private String getTelefonForRessursByType(Ressurs ressurs, TelefonType type) {
-        if (ressurs == null || ressurs.telefoner() == null || ressurs.telefoner().isEmpty()) {
-            return "";
-        }
-        return ressurs.telefoner().stream()
-            .filter(t -> t.type().equals(type))
-            .findFirst()
-            .map(Ressurs.Telefon::nummer)
-            .orElse("");
     }
 
     private String getPrimaryTelefonForRessurs(Ressurs ressurs) {
