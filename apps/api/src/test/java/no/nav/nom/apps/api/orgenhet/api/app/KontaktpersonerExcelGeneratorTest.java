@@ -4,6 +4,7 @@ import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
 import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.TelefonType;
@@ -11,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,15 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
     @MockitoBean
     KontaktinfoClient kontaktinfoClient;
+
+    @MockitoBean
+    RessursRestService ressursRestService;
+
+    @BeforeEach
+    void setup() {
+        when(ressursRestService.getTelefonnummer(ANSATT_1_NAVIDENT))
+            .thenReturn("99999999");
+    }
 
     @Test
     @DisplayName("Kontakt info excel report should be generated correctly")
