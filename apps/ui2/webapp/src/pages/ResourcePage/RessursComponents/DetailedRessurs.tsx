@@ -122,7 +122,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         .filter((tilknytning) =>
           nomDateIsSameOrAfter(
             tilknytning.gyldigTom,
-            dateWithoutTimezone(subMonths(todayWithoutTimezone(), 2)),
+            dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
           ),
         )
         .map((tilknytning) => tilknytning.orgEnhetId),

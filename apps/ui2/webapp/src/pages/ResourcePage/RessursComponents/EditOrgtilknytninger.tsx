@@ -480,9 +480,9 @@ function OrgtilknytningForm({
 
           const avsluttet = nomDateIsBeforeToday(gyldigTom);
 
-          const overToMndGammel = nomDateIsBefore(
+          const overSeksMndGammel = nomDateIsBefore(
             field.gyldigTom,
-            subMonths(todayWithoutTimezone(), 2),
+            subMonths(todayWithoutTimezone(), 6),
           );
 
           const fremtidig = !!gyldigFom && nomDateIsAfterToday(gyldigFom);
@@ -490,7 +490,7 @@ function OrgtilknytningForm({
           const editOtDisabled =
             existingOt &&
             !hasOtTomChanged(field) &&
-            overToMndGammel &&
+            overSeksMndGammel &&
             !hasAdminAccess;
 
           const originalOt = otBeforeEdit(field);
