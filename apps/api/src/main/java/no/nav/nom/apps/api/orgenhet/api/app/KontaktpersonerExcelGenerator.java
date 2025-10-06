@@ -259,7 +259,7 @@ public class KontaktpersonerExcelGenerator {
             String ressursFornavn = visningsnavn.map(Visningsnavn::fornavn).orElse("");
             String ressursEtternavn = visningsnavn.map(Visningsnavn::etternavn).orElse("");
 
-            String ressursJobbtelefon = ressursRestService.getTelefonnummer(ressursKontaktinfo.ressursNavident());
+            String ressursJobbtelefon = ""; //ressursRestService.getTelefonnummer(ressursKontaktinfo.ressursNavident());
             String ressursPrimarytelefon = getPrimaryTelefonForRessurs(ressurser.get(ressursKontaktinfo.ressursNavident()));
 
             if (ressursKontaktinfo.kontaktinfo().isEmpty()) {
