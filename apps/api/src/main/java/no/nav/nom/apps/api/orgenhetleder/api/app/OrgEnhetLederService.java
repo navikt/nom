@@ -17,7 +17,6 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -37,7 +36,6 @@ public class OrgEnhetLederService {
     private final RessursStateRepository ressursStateRepository;
     private final Unleash unleash;
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
-    private final LeaderElection leaderElection;
     private final OrgenhetService orgenhetService;
 
 
@@ -46,71 +44,84 @@ public class OrgEnhetLederService {
         Origination origination = new Origination("nom-api", "nom-api");
         InputMetadata inputMetadata = new InputMetadata("nom-api BatchJob", "persisterLedereForOrgenheter", null, origination);
 
-        if (leaderElection.isLeader() && !filteredLedere.isEmpty()) {
+        if (!filteredLedere.isEmpty()) {
             filteredLedere.forEach(dvhLedere -> {
-                var orgEnhetId = orgenhetService.getEnhetByAgressoIdNivaAndName(dvhLedere.getOrgEnhetNr(), dvhLedere.getOrgNiv(), dvhLedere.getOrgenhetNavn())
-                    .orElseThrow(() -> OrgEnhetNotFoundException.agressoIdNivaaNavn(
-                        dvhLedere.getOrgEnhetNr(),
-                        dvhLedere.getOrgNiv(),
-                        dvhLedere.getOrgenhetNavn()
-                )).getId();
+                try {
+                    var orgEnhetId = orgenhetService.getEnhetByAgressoIdNivaAndName(dvhLedere.getOrgEnhetNr(), dvhLedere.getOrgNiv(), dvhLedere.getOrgenhetNavn())
+                        .orElseThrow(() -> OrgEnhetNotFoundException.agressoIdNivaaNavn(
+                            dvhLedere.getOrgEnhetNr(),
+                            dvhLedere.getOrgNiv(),
+                            dvhLedere.getOrgenhetNavn()
+                        )).getId();
 
-                var orgEnhetLedere = orgEnhetLederStateRepository.findByOrgEnhetId(orgEnhetId);
-                inputMetadata.toBuilder().inputInterfaceMethodArguments(dvhLedere).build();
+                    var orgEnhetLedere = orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId);
+                    inputMetadata.toBuilder().inputInterfaceMethodArguments(dvhLedere).build();
 
-                if (orgEnhetLedere.isEmpty()) {
-                    var fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(new OpprettOrgEnhetLeder(
-                        dvhLedere.getNavIdent(),
-                        orgEnhetId,
-                        inputMetadata
-                    ));
-                    orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata));
-                } else {
-                    var aktivLedere = orgEnhetLedere.stream()
-                        .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
-                        .collect(Collectors.toList());
-
-                    var oneOfCurrentLeadersMatchDvhLeader = aktivLedere.stream()
-                        .filter(orgEnhetLederState -> orgEnhetLederState.navident().equals(dvhLedere.getNavIdent()))
-                        .findFirst();
-
-                    if (oneOfCurrentLeadersMatchDvhLeader.isPresent()) {
-                        aktivLedere.remove(oneOfCurrentLeadersMatchDvhLeader.get());
-                    } else {
-                        var newFid = orgEnhetLederCommandService.opprettOrgEnhetLeder(new OpprettOrgEnhetLeder(
+                    if (orgEnhetLedere.isEmpty()) {
+                        log.info("Fant ingen ledere for orgenhet, lagrer {} for orgenhet {}", dvhLedere.getNavIdent(), orgEnhetId);
+                        var fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(new OpprettOrgEnhetLeder(
                             dvhLedere.getNavIdent(),
                             orgEnhetId,
                             inputMetadata
                         ));
-                        orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
-                            newFid,
-                            new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata)
-                        );
-                    }
-                    aktivLedere.forEach(orgEnhetLederState -> {
-                        var fid = orgEnhetLederState.fid();
-                        if (isNull(orgEnhetLederState.startdato())) {
+                        orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata));
+                    } else {
+                        var aktivLedere = orgEnhetLedere.stream()
+                            .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
+                            .collect(Collectors.toList());
+
+                        log.info("Fant {} ledere for orgenheten {}", aktivLedere.size(), orgEnhetId);
+
+                        var oneOfCurrentLeadersMatchDvhLeader = aktivLedere.stream()
+                            .filter(orgEnhetLederState -> orgEnhetLederState.navident().equals(dvhLedere.getNavIdent()))
+                            .findFirst();
+
+                        if (oneOfCurrentLeadersMatchDvhLeader.isPresent()) {
+                            log.info("Fant matchende aktiv leder i DVH og NOM: {}", oneOfCurrentLeadersMatchDvhLeader.get());
+                            aktivLedere.remove(oneOfCurrentLeadersMatchDvhLeader.get());
+                        } else {
+                            log.info("Fant ingen matchende leder i NOM, lagrer {}", dvhLedere.getNavIdent());
+                            var newFid = orgEnhetLederCommandService.opprettOrgEnhetLeder(new OpprettOrgEnhetLeder(
+                                dvhLedere.getNavIdent(),
+                                orgEnhetId,
+                                inputMetadata
+                            ));
                             orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
-                                fid,
-                                new OppdaterOrgEnhetLederStartdato(LocalDate.now().minusDays(2), inputMetadata)
+                                newFid,
+                                new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata)
                             );
                         }
-                        orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
-                            fid,
-                            new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
-                        );
-                    });
+                        aktivLedere.forEach(orgEnhetLederState -> {
+                            log.info("Avslutter {} som leder i OrgEnhet {}", orgEnhetLederState.navident(), orgEnhetLederState.orgEnhetId());
+                            var fid = orgEnhetLederState.fid();
+                            if (isNull(orgEnhetLederState.startdato())) {
+                                orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
+                                    fid,
+                                    new OppdaterOrgEnhetLederStartdato(LocalDate.now().minusDays(2), inputMetadata)
+                                );
+                            }
+                            var sluttdato = orgEnhetLederState.startdato() != null && !orgEnhetLederState.startdato().isAfter(LocalDate.now()) ? LocalDate.now() : LocalDate.now().minusDays(1);
+                            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+                                fid,
+                                new OppdaterOrgEnhetLederSluttdato(sluttdato, inputMetadata)
+                            );
+                        });
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage());
                 }
             });
+        } else {
+            log.info("Ingen ledere funnet fra DVH");
         }
     }
 
     public List<OrgEnhetLederResponse> getLederByNavident(String navident) {
-        return orgEnhetLederStateRepository.findByNavident(navident).stream().map(this::enrichWithData).toList();
+        return orgEnhetLederStateRepository.findAllByNavident(navident).stream().map(this::enrichWithData).toList();
     }
 
     public List<OrgEnhetLederResponse> getLederByOrgEnhetId(String orgEnhetId) {
-        return orgEnhetLederStateRepository.findByOrgEnhetId(orgEnhetId).stream().map(this::enrichWithData).toList();
+        return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream().map(this::enrichWithData).toList();
     }
 
     public Optional<OrgEnhetLederResponse> getActivLederForOrgEnhet(String orgEnhetId) {

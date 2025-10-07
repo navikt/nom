@@ -11,7 +11,6 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Opprett
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,9 +43,6 @@ public class OrgEnhetLederServiceTest {
     private OrgEnhetLederCommandService orgEnhetLederCommandService;
 
     @Mock
-    private LeaderElection leaderElection;
-
-    @Mock
     private OrgenhetService orgenhetService;
 
     @InjectMocks
@@ -54,7 +50,6 @@ public class OrgEnhetLederServiceTest {
 
     @BeforeEach
     void setUp() {
-        doReturn(true).when(leaderElection).isLeader();
         doReturn(true).when(unleash).isEnabled(any());
     }
 
@@ -68,7 +63,7 @@ public class OrgEnhetLederServiceTest {
         );
 
         // And
-        doReturn(Collections.emptyList()).when(orgEnhetLederStateRepository).findByOrgEnhetId(orgEnhetId);
+        doReturn(Collections.emptyList()).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
         doReturn("FID-001").when(orgEnhetLederCommandService).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
         doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
 
@@ -95,7 +90,7 @@ public class OrgEnhetLederServiceTest {
 
         // And
         doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
-        doReturn(nomLeder).when(orgEnhetLederStateRepository).findByOrgEnhetId(orgEnhetId);
+        doReturn(nomLeder).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
 
         // When
         orgEnhetLederService.persisterLedereForOrgenheter(dvhLeder);
@@ -120,7 +115,7 @@ public class OrgEnhetLederServiceTest {
         );
 
         // And
-        doReturn(nomLeder).when(orgEnhetLederStateRepository).findByOrgEnhetId(orgEnhetId);
+        doReturn(nomLeder).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
         doReturn("FID-002").when(orgEnhetLederCommandService).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
         doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
 
@@ -149,7 +144,7 @@ public class OrgEnhetLederServiceTest {
         );
 
         // And
-        doReturn(nomLeder).when(orgEnhetLederStateRepository).findByOrgEnhetId(orgEnhetId);
+        doReturn(nomLeder).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
         doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
 
         // When
@@ -179,7 +174,7 @@ public class OrgEnhetLederServiceTest {
         );
 
         // And
-        doReturn(nomLeder).when(orgEnhetLederStateRepository).findByOrgEnhetId(orgEnhetId);
+        doReturn(nomLeder).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
         doReturn("FID-004").when(orgEnhetLederCommandService).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
         doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
 
@@ -190,5 +185,34 @@ public class OrgEnhetLederServiceTest {
         verify(orgEnhetLederCommandService, times(1)).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederStartdato(anyString(), any(OppdaterOrgEnhetLederStartdato.class));
         verify(orgEnhetLederCommandService, times(0)).oppdaterOrgEnhetLederSluttdato(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("Test at det finnes flere ledere og er samme leder som er aktive og bare en matcher den fra DVH")
+    void test_006() {
+        // Given
+        var orgEnhetId = "ab123c";
+        var dvhLeder = List.of(
+            DvhLeder.builder().navIdent("A000001").orgEnhetNr("1000000").orgNiv("ORGNIV4").orgenhetNavn("Utvikling 3B").build()
+        );
+        var nomLeder = List.of(
+            OrgEnhetLederState.builder().fid("FID-001").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now().minusMonths(1)).sluttdato(LocalDate.now().minusDays(15)).build(),
+            OrgEnhetLederState.builder().fid("FID-002").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now()).build(),
+            OrgEnhetLederState.builder().fid("FID-003").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now().minusMonths(1)).sluttdato(LocalDate.now().minusMonths(1).minusDays(1)).build(),
+            OrgEnhetLederState.builder().fid("FID-004").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now().minusMonths(1)).sluttdato(LocalDate.now().minusMonths(1)).build(),
+            OrgEnhetLederState.builder().fid("FID-005").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now()).build()
+        );
+
+        // And
+        doReturn(nomLeder).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgEnhetId);
+        doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetId).build()))).when(orgenhetService).getEnhetByAgressoIdNivaAndName(dvhLeder.getFirst().getOrgEnhetNr(), dvhLeder.getFirst().getOrgNiv(), dvhLeder.getFirst().getOrgenhetNavn());
+
+        // When
+        orgEnhetLederService.persisterLedereForOrgenheter(dvhLeder);
+
+        // Then
+        verify(orgEnhetLederCommandService, times(0)).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
+        verify(orgEnhetLederCommandService, times(0)).oppdaterOrgEnhetLederStartdato(anyString(), any(OppdaterOrgEnhetLederStartdato.class));
+        verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(anyString(), any());
     }
 }

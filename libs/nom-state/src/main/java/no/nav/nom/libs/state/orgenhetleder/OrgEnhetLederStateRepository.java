@@ -10,9 +10,9 @@ public interface OrgEnhetLederStateRepository {
 
     Optional<OrgEnhetLederState> findByFid(String fid);
 
-    List<OrgEnhetLederState> findByNavident(String navident);
+    List<OrgEnhetLederState> findAllByNavident(String navident);
 
-    List<OrgEnhetLederState> findByOrgEnhetId(String orgEnhetId);
+    List<OrgEnhetLederState> findAllByOrgEnhetId(String orgEnhetId);
 
     Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId);
 

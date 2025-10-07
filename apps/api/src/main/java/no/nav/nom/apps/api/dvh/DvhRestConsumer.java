@@ -96,7 +96,7 @@ public class DvhRestConsumer {
                 Thread.sleep(5_000);
                 log.debug("InitialState er ikke klar enda");
                 log.debug(
-                    "Ressurs state: {}  Orgtilkn. state: {} Organisering state: {} Orgenhet state: {} OrgEnhetLederState: {}",
+                    "\n Ressurs state: {} \n Orgtilkn. state: {} \n Organisering state: {} \n Orgenhet state: {} \n OrgEnhetLederState: {}",
                     nomStateMasteredRessursListener.hasReadToEndOnStartup(),
                     nomStateOrgtilknytningListener.hasReadToEndOnStartup(),
                     nomStateOrganiseringListener.hasReadToEndOnStartup(),
@@ -129,6 +129,7 @@ public class DvhRestConsumer {
 
             // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
             loadLedereAndOrganiseringerFromDvh();
+
             // Finn OTer utenfor hierarki - og autoflytt om mulig
             findOTUtenforHierarki();
 
@@ -140,6 +141,7 @@ public class DvhRestConsumer {
 
             updateOrgtilknytningerForEksterneFromDvh();
             oppdaterTelefonerFraDvh(dvhTelefoner);
+            orgEnhetLederService.persisterLedereForOrgenheter(dvhRepository.getLedere());
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
@@ -313,11 +315,10 @@ public class DvhRestConsumer {
             var ledere = dvhOrdsService.getLedere();
             var organiseringer = dvhOrdsService.getOrganiseringer();
 
-            var filteredLedere = dvhService.saveLedere(ledere);
+            dvhService.saveLedere(ledere);
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
             organiseringService.saveOrganiseringer(organiseringer);
-            orgEnhetLederService.persisterLedereForOrgenheter(filteredLedere);
 
             return true;
         } catch (Exception e) {

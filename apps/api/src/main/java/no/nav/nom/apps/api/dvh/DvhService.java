@@ -38,7 +38,7 @@ public class DvhService {
         this.orgenhetService = orgenhetService;
     }
 
-    public List<DvhLeder> saveLedere(List<DvhLeder> ledere) {
+    public void saveLedere(List<DvhLeder> ledere) {
         val cachedEnheter =
             orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
@@ -79,7 +79,6 @@ public class DvhService {
         log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
 
-        return ledere;
     }
 
     // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState

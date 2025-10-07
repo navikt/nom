@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 
 public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepository {
     private final Map<String, OrgEnhetLederState> orgEnhetLederByFid = new ConcurrentHashMap<>();
-    private final Map<String, List<OrgEnhetLederState>> orgEnhetLederByNavident = new ConcurrentHashMap<>();
-    private final Map<String, List<OrgEnhetLederState>> orgEnhetLederByOrgEnhetId = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederByNavident = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederByOrgEnhetId = new ConcurrentHashMap<>();
 
     @Override
     public Optional<OrgEnhetLederState> findByFid(String fid) {
@@ -24,13 +23,13 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     @Override
-    public List<OrgEnhetLederState> findByNavident(String navident) {
-        return orgEnhetLederByNavident.getOrDefault(navident, Collections.emptyList());
+    public List<OrgEnhetLederState> findAllByNavident(String navident) {
+        return orgEnhetLederByNavident.getOrDefault(navident, Collections.emptyMap()).values().stream().toList();
     }
 
     @Override
-    public List<OrgEnhetLederState> findByOrgEnhetId(String orgEnhetId) {
-        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyList()).stream()
+    public List<OrgEnhetLederState> findAllByOrgEnhetId(String orgEnhetId) {
+        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
             .sorted(Comparator
                     .comparing(OrgEnhetLederState::startdato, Comparator.nullsLast(LocalDate::compareTo))
                     .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo)))
@@ -39,14 +38,17 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
 
     @Override
     public Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId) {
-        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyList()).stream()
+        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
             .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
             .findFirst();
     }
 
     @Override
     public boolean hasActiveInPeriodByOrgEnhetId(String orgEnhetId, LocalDate startdato, LocalDate sluttdato) {
-        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyList()).stream().anyMatch(orgEnhetLederState -> isActive(startdato, sluttdato));
+        return orgEnhetLederByOrgEnhetId.getOrDefault(orgEnhetId, Collections.emptyMap())
+            .values()
+            .stream()
+            .anyMatch(orgEnhetLederState -> isActive(startdato, sluttdato));
     }
 
     @Override
@@ -55,17 +57,28 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     @Override
-    public void update(String fid, OrgEnhetLederState state) {
-        var oldState = orgEnhetLederByFid.get(fid);
-        orgEnhetLederByFid.put(fid, state);
-
-        if (oldState != null) {
-            removeFromOrgEnhetLederByNavident(oldState);
-            removeFromOrgEnhetLederByOrgEnhetId(oldState);
+    public void update(String fid, OrgEnhetLederState newOrgEnhetLederState) {
+        if (newOrgEnhetLederState == null) {
+            removeFromState(fid);
+        } else {
+            addToState(newOrgEnhetLederState);
         }
+    }
 
-        addToByNavident(state);
-        addToByOrgEnhetId(state);
+    private void addToState(OrgEnhetLederState newOrgEnhetLederState) {
+        orgEnhetLederByFid.put(newOrgEnhetLederState.fid(),  newOrgEnhetLederState);
+
+        addToByNavident(newOrgEnhetLederState);
+        addToByOrgEnhetId(newOrgEnhetLederState);
+    }
+
+    private void removeFromState(String fid) {
+        var eksisterende = orgEnhetLederByFid.get(fid);
+        if (eksisterende != null) {
+            removeFromOrgEnhetLederByNavident(eksisterende);
+            removeFromOrgEnhetLederByOrgEnhetId(eksisterende);
+        }
+        orgEnhetLederByFid.remove(fid);
     }
 
     @Override
@@ -76,18 +89,26 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     private void addToByNavident(OrgEnhetLederState newState) {
-        orgEnhetLederByNavident.computeIfAbsent(newState.navident(), k -> new CopyOnWriteArrayList<>()).add(newState);
+        var navidentOrgEnheterLeder = orgEnhetLederByNavident.computeIfAbsent(newState.navident(), k -> new ConcurrentHashMap<>());
+        navidentOrgEnheterLeder.put(newState.fid(), newState);
     }
 
     private void addToByOrgEnhetId(OrgEnhetLederState newState) {
-        orgEnhetLederByOrgEnhetId.computeIfAbsent(newState.orgEnhetId(), k -> new CopyOnWriteArrayList<>()).add(newState);
+        var orgEnhetidOrgEnhetLedere = orgEnhetLederByOrgEnhetId.computeIfAbsent(newState.orgEnhetId(), k -> new ConcurrentHashMap<>());
+        orgEnhetidOrgEnhetLedere.put(newState.fid(), newState);
     }
 
     private void removeFromOrgEnhetLederByNavident(OrgEnhetLederState oldState) {
-        orgEnhetLederByNavident.getOrDefault(oldState.navident(), Collections.emptyList()).remove(oldState);
+        var navidentOrgEnhetLeder = orgEnhetLederByNavident.get(oldState.navident());
+        if (navidentOrgEnhetLeder != null) {
+            navidentOrgEnhetLeder.remove(oldState.fid());
+        }
     }
 
     private void removeFromOrgEnhetLederByOrgEnhetId(OrgEnhetLederState oldState) {
-        orgEnhetLederByOrgEnhetId.remove(oldState.orgEnhetId());
+        var orgEnhetIdOrgEnhetLeder = orgEnhetLederByOrgEnhetId.get(oldState.fid());
+        if (orgEnhetIdOrgEnhetLeder != null) {
+            orgEnhetIdOrgEnhetLeder.remove(oldState.fid());
+        }
     }
 }
