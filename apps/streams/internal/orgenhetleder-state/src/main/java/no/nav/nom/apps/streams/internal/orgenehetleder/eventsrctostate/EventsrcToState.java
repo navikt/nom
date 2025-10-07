@@ -63,6 +63,9 @@ public class EventsrcToState {
 
     public OrgEnhetLederState toOrgEnhetLederState(String fid, JsonNode eventStateAggregate) {
         try {
+            if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
+                return null;
+            }
             return new  OrgEnhetLederState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
