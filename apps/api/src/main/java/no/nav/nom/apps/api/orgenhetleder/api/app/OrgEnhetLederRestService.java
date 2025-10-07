@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhetleder.api.app;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
-import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;

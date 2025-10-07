@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhetleder.api.app;
+package no.nav.nom.apps.api.orgenhetleder;
 
 import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederResponse;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCommandService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederSluttdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;

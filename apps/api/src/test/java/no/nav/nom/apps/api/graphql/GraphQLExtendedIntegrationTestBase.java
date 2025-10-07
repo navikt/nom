@@ -13,7 +13,7 @@ import no.nav.nom.apps.api.graphql.controller.GraphQLOrgEnhetController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.apps.api.graphql.controller.GraphQLSearchController;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
