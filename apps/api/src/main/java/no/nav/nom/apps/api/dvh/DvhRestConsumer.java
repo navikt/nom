@@ -113,8 +113,6 @@ public class DvhRestConsumer {
         var ledereLastOk = loadLedereAndOrganiseringerFromDvh();
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
 
-        manuelleRessurserOgLedereTilState.oppdater();
-
         authorizedNavident.oppdaterLedereForOrgenheter();
 
         if (!dvhStartupLoadMonitor.hasCompleted() && ledereLastOk) { // Pod kan markeres som klar etter oppstart
@@ -143,6 +141,8 @@ public class DvhRestConsumer {
             oppdaterTelefonerFraDvh(dvhTelefoner);
             orgEnhetLederService.persisterLedereForOrgenheter(dvhRepository.getLedere());
         }
+
+        manuelleRessurserOgLedereTilState.oppdater();
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
