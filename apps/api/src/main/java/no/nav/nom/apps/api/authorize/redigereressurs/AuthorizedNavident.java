@@ -81,6 +81,9 @@ public class AuthorizedNavident {
     //   map <leder navident> -> Set<orgenhet-id>
     Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
 
+    //  map <orgnhet> -> Set<leder navident>
+    Map<String, HashSet<String>> mapOrgenhetToLedereMedRedigeringsTilgang = new ConcurrentHashMap<>();
+
     public AuthorizedNavident(
             AuthorizeCommandService authorizeCommandService,
             DelegertLederStateRepository delegertLederStateRepository,
@@ -336,14 +339,18 @@ public class AuthorizedNavident {
     public void oppdaterLedereForOrgenheter() {
         log.info("Oppdaterer ledere for orgenheter i redigere ressurs auth liste");
         var enheterIHierarkiFraDriftsenhet = alleEnheterIHierarkiFraDriftsenhet();
-        Map<String, HashSet<String>> nyLederForOrgenhetListe = new HashMap<>();
+        Map<String, HashSet<String>> nyMapLederToRedigerbarOrgenhet = new HashMap<>();
+//        Map<String, HashSet<String>> nyMapOrgenhetToLederMedRedigeringsTilgang = new HashMap<>();
+
+        // for hver enhetId
+        //      finn alle lederne som
 
         enheterIHierarkiFraDriftsenhet.forEach(
             enhetId -> orgenhetService.getById(enhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
                 .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
                     .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
                 .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, enhetId))
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
         );
 
         List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
@@ -351,11 +358,11 @@ public class AuthorizedNavident {
                 .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
                     .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
                 .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, orgenhetId))
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
         );
         synchronized (this) {
             lederForOrgenhetSomKanRedigere.clear();
-            lederForOrgenhetSomKanRedigere.putAll(nyLederForOrgenhetListe);
+            lederForOrgenhetSomKanRedigere.putAll(nyMapLederToRedigerbarOrgenhet);
         }
         log.info(
             "Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
@@ -415,10 +422,10 @@ public class AuthorizedNavident {
         return delegertLederStateRepository.count();
     }
 
-    private void addLederForOrgenhetToList(Map<String, HashSet<String>> lederForEnhet, String navident, String orgenhetId) {
-        HashSet<String> orgenheter = lederForEnhet.containsKey(navident) ? lederForEnhet.get(navident) : new HashSet<>();
-        orgenheter.add(orgenhetId);
-        lederForEnhet.put(navident, orgenheter);
+    private void appendToMapValueSet(Map<String, HashSet<String>> targetMap, String key, String valueToAppendToSet) {
+        HashSet<String> valueSet = targetMap.containsKey(key) ? targetMap.get(key) : new HashSet<>();
+        valueSet.add(valueToAppendToSet);
+        targetMap.put(key, valueSet);
     }
 
     private boolean erRessursInnunderOrgenhet(String ressursNavident, String orgenhetId) {
