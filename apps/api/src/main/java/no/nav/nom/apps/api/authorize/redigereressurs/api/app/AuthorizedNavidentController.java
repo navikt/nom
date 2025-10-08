@@ -207,7 +207,11 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
-    public List<IOrgenhet> getOrgEnheterLederCanEdit() {
+    public List<IOrgenhet> getOrgEnheterLederCanEdit(@RequestParam(required = false) String navident) {
+        // if navident is provided, check for that user, otherwise use the authenticated user
+        if (navident != null && !navident.isBlank()) {
+            return authorizedNavident.orgenheterLederKanRedigere(navident);
+        }
         return authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
     }
 
