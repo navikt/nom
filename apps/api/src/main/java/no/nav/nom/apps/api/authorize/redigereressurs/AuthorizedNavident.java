@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
+import io.getunleash.Unleash;
+import io.getunleash.variant.Variant;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
@@ -10,6 +12,7 @@ import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrge
 import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
+import no.nav.nom.apps.api.common.UnleashContextSupplier;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -46,6 +49,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -75,6 +79,7 @@ public class AuthorizedNavident {
     private final MicrosoftGraphClient microsoftGraphClient;
     private final String nomWriteDelegertAdGroup;
     private final String nomWriteLederAdGroup;
+    private final Unleash unleash;
     @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
     @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
     @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
@@ -96,7 +101,8 @@ public class AuthorizedNavident {
             TilgangDelegertEmailService tilgangDelegertEmailService,
             MicrosoftGraphClient microsoftGraphClient,
             @Value("${app.clients.microsoft-graph.groups.nom-delegert}") String nomWriteDelegertAdGroup,
-            @Value("${app.clients.microsoft-graph.groups.nom-leder}") String nomWriteLederAdGroup
+            @Value("${app.clients.microsoft-graph.groups.nom-leder}") String nomWriteLederAdGroup,
+            Unleash unleash
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -109,6 +115,7 @@ public class AuthorizedNavident {
         this.microsoftGraphClient = microsoftGraphClient;
         this.nomWriteDelegertAdGroup = nomWriteDelegertAdGroup;
         this.nomWriteLederAdGroup = nomWriteLederAdGroup;
+        this.unleash = unleash;
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -173,9 +180,29 @@ public class AuthorizedNavident {
 
     public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
         var out = new HashMap<String, List<MinimalRessurs>>();
+        var toggleIncludeDriftsEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderdriftsenhet",true);
+        var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet",true);
+
         for (var oeId : orgenhetIdSet) {
-            var navidentList = this.mapOrgenhetToLedereMedRedigeringsTilgang.get(oeId);
-            if(navidentList == null){
+            var hierarkiOppover = stiTilRotForEnhet(oeId);
+            var hierarkiOppoverFiltrertStream = hierarkiOppover.stream().filter(it -> {
+
+                var orgenhet = this.orgenhetService.getById(it).orElse(null);
+                if (orgenhet == null) {
+                    return false;
+                }
+                var nomNivaa = orgenhet.getNomNivaa();
+                return NomNivaa.ARBEIDSOMRAADE == nomNivaa
+                    || NomNivaa.DRIFTSENHET == nomNivaa && toggleIncludeDriftsEnhet
+                    || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet;
+
+            });
+            // todo antagelse som må avklares, gir delgering av tilgang, også tilgang nedover i hierarkiet?
+            var navidentList = hierarkiOppoverFiltrertStream.map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .toList();
+            if(navidentList.isEmpty()) {
                 continue;
             }
             var ressursStream = navidentList.stream().map(ressursStateRepository::findByNavident).filter(Optional::isPresent).map(Optional::get);
@@ -355,10 +382,6 @@ public class AuthorizedNavident {
         log.info("Oppdaterer ledere for orgenheter i redigere ressurs auth liste");
         var enheterIHierarkiFraDriftsenhet = alleEnheterIHierarkiFraDriftsenhet();
         Map<String, HashSet<String>> nyMapLederToRedigerbarOrgenhet = new HashMap<>();
-//        Map<String, HashSet<String>> nyMapOrgenhetToLederMedRedigeringsTilgang = new HashMap<>();
-
-        // for hver enhetId
-        //      finn alle lederne som
 
         enheterIHierarkiFraDriftsenhet.forEach(
             enhetId -> orgenhetService.getById(enhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
@@ -515,4 +538,24 @@ public class AuthorizedNavident {
             .map(OrganiseringState::id)
             .toList();
     }
+
+    private List<String> stiTilRotForEnhet(String orgenhetId){
+        final var out = new ArrayList<String>();
+        out.add(orgenhetId);
+        var targetOrgEnhetId = orgenhetId;
+        while(targetOrgEnhetId != null){
+            final var target = targetOrgEnhetId;
+            var organisering = organiseringStateRepository.getActiveOrganisering().values().stream()
+                .filter(it -> it.id().equals(target))
+                .findFirst();
+            if(organisering.isEmpty()){
+                break;
+            }
+            var idOver = organisering.get().idOver();
+            out.add(idOver);
+            targetOrgEnhetId = idOver;
+        }
+        return out;
+    }
+
 }

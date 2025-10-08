@@ -322,7 +322,13 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         when(ressursStateRepository.findByNavident("C3")).thenReturn(Optional.of(createRessurs.apply("C3")));
         var enheterLederKanRedigere = authorizedNavident.ledereSomKanRedigereOrgenhet(Set.of("C11","C1","C2","C22","C"));
         assertThat(enheterLederKanRedigere.size()).isEqualTo(5);
-        assertThat(enheterLederKanRedigere.get("C1").size()).isEqualTo(1); // todo, lage eksempel som gir flere enn 1 ressurs som kan redigere en enhet
+        assertThat(enheterLederKanRedigere.get("C").size()).isEqualTo(1);
+        assertThat(enheterLederKanRedigere.get("C1").size()).isEqualTo(2);
+        assertThat(enheterLederKanRedigere.get("C11").size()).isEqualTo(3);
+        assertThat(enheterLederKanRedigere.get("C22").size()).isEqualTo(3);
+
+        // todo, hvis filtrering på nom-nivå blir tatt i bruk må dette testes også
+
     }
 
     @Test
