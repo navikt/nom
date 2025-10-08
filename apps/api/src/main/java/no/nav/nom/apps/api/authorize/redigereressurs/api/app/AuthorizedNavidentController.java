@@ -216,7 +216,7 @@ public class AuthorizedNavidentController {
         return authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
     }
 
-    @GetMapping("getLedereForOrgenheter")
+    @PostMapping("getLedereForOrgenheter")
     @Operation(
         description = "Returner et map fra gitte orgenhetIDer til tilhørende ressurser med redigeringstilgang.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
