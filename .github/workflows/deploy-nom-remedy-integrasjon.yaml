@@ -12,7 +12,7 @@ on:
       - '.github/workflows/deploy-nom-remedy-integrasjon.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
-      - 'Dockerfile_distroless'
+      - 'Dockerfile_chainguard'
   workflow_dispatch:
     inputs:
       skip-tests:
@@ -37,6 +37,6 @@ jobs:
       dev-cluster: dev-fss
       prod-cluster: prod-fss
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
-      dockerfile: Dockerfile_distroless
+      dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

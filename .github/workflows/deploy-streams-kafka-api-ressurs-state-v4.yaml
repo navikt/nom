@@ -10,7 +10,7 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/kafka-api-ressurs-state-v4.yaml'
       - '.github/*/deploy-streams-kafka-api-ressurs-state-v4.yaml'
-      - 'Dockerfile_distroless'
+      - 'Dockerfile_chainguard'
   workflow_dispatch:
 
 jobs:
@@ -27,6 +27,6 @@ jobs:
       nais-config-file-path-prod: .nais/streams/kafka-api-ressurs-state-v4-prod.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'
-      dockerfile: Dockerfile_distroless
+      dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

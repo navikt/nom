@@ -12,7 +12,7 @@ on:
       - '.github/*/deploy-admin.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
-      - 'Dockerfile_distroless'
+      - 'Dockerfile_chainguard'
   workflow_dispatch:
     inputs:
       skip-tests:
@@ -36,7 +36,7 @@ jobs:
       unleash-vars-file-path: .nais/apps/admin/unleash-vars.yaml
       deploy-timeout: 20m
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
-      dockerfile: Dockerfile_distroless
+      dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 
