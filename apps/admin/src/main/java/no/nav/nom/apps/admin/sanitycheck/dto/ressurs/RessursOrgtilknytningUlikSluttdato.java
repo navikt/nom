@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public record RessursOrgtilknytningUlikSluttdato(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgEnhetId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String remedyEnhetId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate ressursSluttdato,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate orgtilknytningSluttdato
 ) {

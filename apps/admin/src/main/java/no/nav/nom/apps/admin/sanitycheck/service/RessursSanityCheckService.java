@@ -6,6 +6,7 @@ import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RobotRessurs;
+import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
@@ -53,18 +54,21 @@ public class RessursSanityCheckService {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final NomRemedyApiClient nomRemedyApiClient;
+    private final NomApiClient nomApiClient;
 
     public RessursSanityCheckService(RessursStateRepository ressursStateRepository,
                                      OrgEnhetStateRepository orgEnhetStateRepository,
                                      OrganiseringStateRepository organiseringStateRepository,
                                      OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                     NomRemedyApiClient nomRemedyApiClient
+                                     NomRemedyApiClient nomRemedyApiClient,
+                                     NomApiClient nomApiClient
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.nomRemedyApiClient = nomRemedyApiClient;
+        this.nomApiClient = nomApiClient;
     }
 
     public RessursOrgtilknytningKoblingInfo aktiveRessurser() {
@@ -213,7 +217,7 @@ public class RessursSanityCheckService {
         Map<String, RessursState> alleRessurserSomErAktive = ressursStateRepository.findAllActiveRessurser();
 
         Map<String, Collection<OrgtilknytningState>> alleOrgTilknytninger =
-            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2099);
+            getOrgtilknytningerForNavidenter(alleRessurserSomErAktive.keySet(), gyldigTomEmptyOrBefore2100);
 
         Map<String, Collection<OrgtilknytningState>> sisteOrgtilknytninger = getSisteOrgtilknytninger(alleOrgTilknytninger);
 
@@ -254,6 +258,7 @@ public class RessursSanityCheckService {
         return RessursOrgtilknytningUlikSluttdato.builder()
                 .navident(ressurs.navident())
                 .orgEnhetId(orgtilknytning.orgEnhetId())
+                .remedyEnhetId(nomApiClient.getOrgEnhetRemedyEnhet(orgtilknytning.orgEnhetId()))
                 .ressursSluttdato(ressurs.sluttdato())
                 .orgtilknytningSluttdato(orgtilknytning.gyldigTom())
                 .build();
@@ -288,7 +293,7 @@ public class RessursSanityCheckService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Map<String, Collection<OrgtilknytningState>> alleOrgtilknytningerKobletTilRobotRessurs =
-                getOrgtilknytningerForNavidenter(alleAktiveRoboter.keySet(), gyldigTomEmptyOrBefore2099);
+                getOrgtilknytningerForNavidenter(alleAktiveRoboter.keySet(), gyldigTomEmptyOrBefore2100);
 
         ArrayList<RobotRessurs> result = new ArrayList<>();
 
@@ -510,9 +515,9 @@ public class RessursSanityCheckService {
                 }).toList();
     }
 
-    private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2099 = orgtilknytningState ->
+    private final Predicate<OrgtilknytningState> gyldigTomEmptyOrBefore2100 = orgtilknytningState ->
         isNull(orgtilknytningState.gyldigTom()) ||
-            orgtilknytningState.gyldigTom().isBefore(LocalDate.of(2099, 1, 1));
+            orgtilknytningState.gyldigTom().isBefore(LocalDate.of(2100, 1, 1));
 
     public List<RessursState> ressurserMedBlankMellomnavn() {
         return ressursStateRepository.getAll().stream()
