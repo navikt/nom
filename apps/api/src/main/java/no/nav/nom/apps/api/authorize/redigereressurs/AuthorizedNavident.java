@@ -194,7 +194,8 @@ public class AuthorizedNavident {
                 var nomNivaa = orgenhet.getNomNivaa();
                 return NomNivaa.ARBEIDSOMRAADE == nomNivaa
                     || NomNivaa.DRIFTSENHET == nomNivaa && toggleIncludeDriftsEnhet
-                    || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet;
+                    || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet
+                    || null == nomNivaa; // nødvendig linje i testene. Nødvendig i miljø også?
 
             });
             // todo antagelse som må avklares, gir delgering av tilgang, også tilgang nedover i hierarkiet?

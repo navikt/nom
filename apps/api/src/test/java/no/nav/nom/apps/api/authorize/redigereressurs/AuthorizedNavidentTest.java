@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
@@ -9,6 +10,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -23,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = AuthorizedNavident.class)
@@ -48,6 +52,9 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
 
     @MockitoBean
     DelegertLederStateRepository delegertLederStateRepository;
+
+    @Mock
+    Unleash unleash;
 
     @Test
     @DisplayName("Verifiser at Leder B har auth til å redigere ressurser B110001 og B110002")
@@ -317,6 +324,7 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
 
         Function<String,RessursState> createRessurs = (navident) -> RessursState.builder().navident(navident).visningsnavn(new Visningsnavn(navident,Optional.of(navident),navident)).build();
 
+        when(unleash.isEnabled(anyString(),anyBoolean())).thenReturn(true);
         when(ressursStateRepository.findByNavident("C")).thenReturn(Optional.of(createRessurs.apply("C")));
         when(ressursStateRepository.findByNavident("C2")).thenReturn(Optional.of(createRessurs.apply("C2")));
         when(ressursStateRepository.findByNavident("C3")).thenReturn(Optional.of(createRessurs.apply("C3")));
