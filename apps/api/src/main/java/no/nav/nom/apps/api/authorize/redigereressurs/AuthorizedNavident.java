@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,10 +80,10 @@ public class AuthorizedNavident {
     @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     //   map <leder navident> -> Set<orgenhet-id>
-    Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
+    private final Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
 
     //  map <orgnhet> -> Set<leder navident>
-    Map<String, HashSet<String>> mapOrgenhetToLedereMedRedigeringsTilgang = new ConcurrentHashMap<>();
+    private final Map<String, HashSet<String>> mapOrgenhetToLedereMedRedigeringsTilgang = new ConcurrentHashMap<>();
 
     public AuthorizedNavident(
             AuthorizeCommandService authorizeCommandService,
@@ -170,6 +171,20 @@ public class AuthorizedNavident {
         return orgenhetService.getByIdBulk(orgenhetIderMedUnderEnheter.stream().toList()).values().stream().toList();
     }
 
+    public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
+        var out = new HashMap<String, List<MinimalRessurs>>();
+        for (var oeId : orgenhetIdSet) {
+            var navidentList = this.mapOrgenhetToLedereMedRedigeringsTilgang.get(oeId);
+            if(navidentList == null){
+                continue;
+            }
+            var ressursStream = navidentList.stream().map(ressursStateRepository::findByNavident).filter(Optional::isPresent).map(Optional::get);
+            var minimalRessursList = ressursStream.map(it -> new MinimalRessurs(it.navident(), it.visningsnavn().getFormattedVisningsnavn())).toList();
+            out.put(oeId, minimalRessursList);
+        }
+        return out;
+
+    }
 
     public boolean addLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
         sjekkParametereForAddLederTilgang(leder, request);
@@ -364,6 +379,7 @@ public class AuthorizedNavident {
             lederForOrgenhetSomKanRedigere.clear();
             lederForOrgenhetSomKanRedigere.putAll(nyMapLederToRedigerbarOrgenhet);
         }
+        updateMapOrgenhetToLedereMedRedigeringsTilgang();
         log.info(
             "Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
             lederForOrgenhetSomKanRedigere.size(), orgenheterMedAuthedLederCount()
@@ -444,6 +460,19 @@ public class AuthorizedNavident {
         Set<String> orgenheter = new HashSet<>();
         arbeidsomraadeEnheter.forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
         return orgenheter.stream().toList();
+    }
+
+
+    private synchronized void updateMapOrgenhetToLedereMedRedigeringsTilgang(){
+        mapOrgenhetToLedereMedRedigeringsTilgang.clear();
+        // invertering av annet map
+        for(var entry : this.lederForOrgenhetSomKanRedigere.entrySet()){
+            var leder = entry.getKey();
+            var orgenheterLederKanRedigere = entry.getValue();
+            for (var orgenhet : orgenheterLederKanRedigere) {
+                appendToMapValueSet(this.mapOrgenhetToLedereMedRedigeringsTilgang, orgenhet, leder);
+            }
+        }
     }
 
     private void alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(IOrgenhet orgenhet, Set<String> orgenheter) {

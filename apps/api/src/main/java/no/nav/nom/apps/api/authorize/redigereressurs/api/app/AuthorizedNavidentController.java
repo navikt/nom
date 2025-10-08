@@ -31,7 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -207,6 +209,16 @@ public class AuthorizedNavidentController {
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
     public List<IOrgenhet> getOrgEnheterLederCanEdit() {
         return authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
+    }
+
+    @GetMapping("getLedereForOrgenheter")
+    @Operation(
+        description = "Returner et map fra gitte orgenhetIDer til tilhørende ressurser med redigeringstilgang.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('NOM_UI_APP')")
+    public Map<String,List<MinimalRessurs>> getLedereMedRedigeringsTilgangForEnhet(Set<String> orgenhetIdSet) {
+        return authorizedNavident.ledereSomKanRedigereOrgenhet(orgenhetIdSet);
     }
 
     @ExceptionHandler(
