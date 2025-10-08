@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,7 +80,10 @@ public class AuthorizedNavident {
     @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     //   map <leder navident> -> Set<orgenhet-id>
-    Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
+    private final Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
+
+    //  map <orgnhet> -> Set<leder navident>
+    private final Map<String, HashSet<String>> mapOrgenhetToLedereMedRedigeringsTilgang = new ConcurrentHashMap<>();
 
     public AuthorizedNavident(
             AuthorizeCommandService authorizeCommandService,
@@ -167,6 +171,20 @@ public class AuthorizedNavident {
         return orgenhetService.getByIdBulk(orgenhetIderMedUnderEnheter.stream().toList()).values().stream().toList();
     }
 
+    public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
+        var out = new HashMap<String, List<MinimalRessurs>>();
+        for (var oeId : orgenhetIdSet) {
+            var navidentList = this.mapOrgenhetToLedereMedRedigeringsTilgang.get(oeId);
+            if(navidentList == null){
+                continue;
+            }
+            var ressursStream = navidentList.stream().map(ressursStateRepository::findByNavident).filter(Optional::isPresent).map(Optional::get);
+            var minimalRessursList = ressursStream.map(it -> new MinimalRessurs(it.navident(), it.visningsnavn().getFormattedVisningsnavn())).toList();
+            out.put(oeId, minimalRessursList);
+        }
+        return out;
+
+    }
 
     public boolean addLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
         sjekkParametereForAddLederTilgang(leder, request);
@@ -336,14 +354,18 @@ public class AuthorizedNavident {
     public void oppdaterLedereForOrgenheter() {
         log.info("Oppdaterer ledere for orgenheter i redigere ressurs auth liste");
         var enheterIHierarkiFraDriftsenhet = alleEnheterIHierarkiFraDriftsenhet();
-        Map<String, HashSet<String>> nyLederForOrgenhetListe = new HashMap<>();
+        Map<String, HashSet<String>> nyMapLederToRedigerbarOrgenhet = new HashMap<>();
+//        Map<String, HashSet<String>> nyMapOrgenhetToLederMedRedigeringsTilgang = new HashMap<>();
+
+        // for hver enhetId
+        //      finn alle lederne som
 
         enheterIHierarkiFraDriftsenhet.forEach(
             enhetId -> orgenhetService.getById(enhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
                 .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
                     .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
                 .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, enhetId))
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
         );
 
         List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
@@ -351,12 +373,13 @@ public class AuthorizedNavident {
                 .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
                     .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
                 .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> addLederForOrgenhetToList(nyLederForOrgenhetListe, lederNavident, orgenhetId))
+                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
         );
         synchronized (this) {
             lederForOrgenhetSomKanRedigere.clear();
-            lederForOrgenhetSomKanRedigere.putAll(nyLederForOrgenhetListe);
+            lederForOrgenhetSomKanRedigere.putAll(nyMapLederToRedigerbarOrgenhet);
         }
+        updateMapOrgenhetToLedereMedRedigeringsTilgang();
         log.info(
             "Oppdatert {} ledere for {} orgenheter i redigere ressurs auth liste",
             lederForOrgenhetSomKanRedigere.size(), orgenheterMedAuthedLederCount()
@@ -415,10 +438,10 @@ public class AuthorizedNavident {
         return delegertLederStateRepository.count();
     }
 
-    private void addLederForOrgenhetToList(Map<String, HashSet<String>> lederForEnhet, String navident, String orgenhetId) {
-        HashSet<String> orgenheter = lederForEnhet.containsKey(navident) ? lederForEnhet.get(navident) : new HashSet<>();
-        orgenheter.add(orgenhetId);
-        lederForEnhet.put(navident, orgenheter);
+    private void appendToMapValueSet(Map<String, HashSet<String>> targetMap, String key, String valueToAppendToSet) {
+        HashSet<String> valueSet = targetMap.containsKey(key) ? targetMap.get(key) : new HashSet<>();
+        valueSet.add(valueToAppendToSet);
+        targetMap.put(key, valueSet);
     }
 
     private boolean erRessursInnunderOrgenhet(String ressursNavident, String orgenhetId) {
@@ -437,6 +460,19 @@ public class AuthorizedNavident {
         Set<String> orgenheter = new HashSet<>();
         arbeidsomraadeEnheter.forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
         return orgenheter.stream().toList();
+    }
+
+
+    private synchronized void updateMapOrgenhetToLedereMedRedigeringsTilgang(){
+        mapOrgenhetToLedereMedRedigeringsTilgang.clear();
+        // invertering av annet map
+        for(var entry : this.lederForOrgenhetSomKanRedigere.entrySet()){
+            var leder = entry.getKey();
+            var orgenheterLederKanRedigere = entry.getValue();
+            for (var orgenhet : orgenheterLederKanRedigere) {
+                appendToMapValueSet(this.mapOrgenhetToLedereMedRedigeringsTilgang, orgenhet, leder);
+            }
+        }
     }
 
     private void alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(IOrgenhet orgenhet, Set<String> orgenheter) {

@@ -55,6 +55,7 @@ export enum Tilknytningtype {
   ARBEIDSTRENING = "ARBEIDSTRENING",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
   FAST = "FAST",
+  HELFO = "HELFO",
   INGEN = "INGEN",
   JOBBSPESIALIST = "JOBBSPESIALIST",
   KONSULENT = "KONSULENT",
@@ -62,6 +63,9 @@ export enum Tilknytningtype {
   MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
   PRAKSISARBEID = "PRAKSISARBEID",
+  RIKSREVISJONEN = "RIKSREVISJONEN",
+  SKATTEETATEN = "SKATTEETATEN",
+  STATSFORVALTEREN = "STATSFORVALTEREN",
   STUDENT = "STUDENT",
   UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
   UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
@@ -335,6 +339,7 @@ export interface RessursHendelseKafkaDTO {
   sluttdato?: string;
   sektor: Sektor;
   orgtilknytning: RessursHendelseOrgtilknytningKafkaDTO;
+  eventtype: string;
 }
 
 export interface RessursHendelseOrgtilknytningKafkaDTO {
@@ -355,6 +360,8 @@ export interface OrgtilknytningKafkaDTO {
   /** @format date */
   gyldigTom?: string;
   dagligOppfolging: boolean;
+  sektor?: Sektor;
+  tilknytningType?: Tilknytningtype;
 }
 
 export interface RessursStateKafkaDTO {
@@ -364,7 +371,9 @@ export interface RessursStateKafkaDTO {
   personident: string;
   navident: string;
   visningsnavn: Visningsnavn;
+  identType?: IdentType;
   primaryTelefonnummer?: string;
+  primaryFysiskBrukersted?: string;
   sektor: Sektor;
   orgtilknytninger?: OrgtilknytningKafkaDTO[];
   /** @format date */
@@ -439,6 +448,7 @@ export interface RessursOrgtilknytningKoblingInfo {
 export interface RessursOrgtilknytningUlikSluttdato {
   navident: string;
   orgEnhetId: string;
+  remedyEnhetId: string;
   /** @format date */
   ressursSluttdato: string;
   /** @format date */

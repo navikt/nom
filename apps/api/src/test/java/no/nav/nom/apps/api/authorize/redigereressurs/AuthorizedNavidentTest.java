@@ -16,6 +16,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
@@ -307,6 +309,20 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         boolean kanRedigereH100001 = authorizedNavident.kanBrukerRedigereRessurs("A1", "H100001");
 
         assertFalse(kanRedigereH100001, "Leder A1 har ikke auth til å redigere ressurs H100001");
+    }
+
+    @Test
+    @DisplayName("kan hente hvilke ledere som kan redigere gitte orgenheter")
+    void test_0033() {
+
+        Function<String,RessursState> createRessurs = (navident) -> RessursState.builder().navident(navident).visningsnavn(new Visningsnavn(navident,Optional.of(navident),navident)).build();
+
+        when(ressursStateRepository.findByNavident("C")).thenReturn(Optional.of(createRessurs.apply("C")));
+        when(ressursStateRepository.findByNavident("C2")).thenReturn(Optional.of(createRessurs.apply("C2")));
+        when(ressursStateRepository.findByNavident("C3")).thenReturn(Optional.of(createRessurs.apply("C3")));
+        var enheterLederKanRedigere = authorizedNavident.ledereSomKanRedigereOrgenhet(Set.of("C11","C1","C2","C22","C"));
+        assertThat(enheterLederKanRedigere.size()).isEqualTo(5);
+        assertThat(enheterLederKanRedigere.get("C1").size()).isEqualTo(1); // todo, lage eksempel som gir flere enn 1 ressurs som kan redigere en enhet
     }
 
     @Test

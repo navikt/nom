@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -55,6 +56,9 @@ class RessursSanityCheckServiceTest {
     @Mock
     private NomRemedyApiClient nomRemedyApiClientMock;
 
+    @Mock
+    private NomApiClient nomApiClientMock;
+
 
     private RessursSanityCheckService service;
 
@@ -66,7 +70,8 @@ class RessursSanityCheckServiceTest {
                 orgEnhetStateRepositoryMock,
                 organiseringStateRepositoryMock,
                 orgtilknytningStateRepositoryMock,
-                nomRemedyApiClientMock
+                nomRemedyApiClientMock,
+                nomApiClientMock
         );
     }
 
@@ -125,7 +130,7 @@ class RessursSanityCheckServiceTest {
     }
 
     @Test
-    @DisplayName("Filtere bort orgtilknytning.tomDato > 01.01.2099 i sjekk for ulik sluttdato")
+    @DisplayName("Filtere bort orgtilknytning.tomDato > 31.12.2099 i sjekk for ulik sluttdato")
     void should_remove_ot_far_in_the_future_when_comparing_to_ressurs() {
         RessursState ressurs = getMockRessursEkstern();
 
@@ -135,7 +140,7 @@ class RessursSanityCheckServiceTest {
 
         var otLangtFremITid = getMockOrgtilknytningEkstern().toBuilder()
                 .gyldigFom(LocalDate.of(2024, 1, 1))
-                .gyldigTom(LocalDate.of(2099, 1, 1))
+                .gyldigTom(LocalDate.of(2100, 1, 1))
                 .build();
         when(orgtilknytningStateRepositoryMock.findByNavident(ressurs.navident())).thenReturn(List.of(otLangtFremITid));
 

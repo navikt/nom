@@ -15,6 +15,7 @@ export enum Tilknytningtype {
   ARBEIDSTRENING = "ARBEIDSTRENING",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
   FAST = "FAST",
+  HELFO = "HELFO",
   INGEN = "INGEN",
   JOBBSPESIALIST = "JOBBSPESIALIST",
   KONSULENT = "KONSULENT",
@@ -22,6 +23,9 @@ export enum Tilknytningtype {
   MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
   PRAKSISARBEID = "PRAKSISARBEID",
+  RIKSREVISJONEN = "RIKSREVISJONEN",
+  SKATTEETATEN = "SKATTEETATEN",
+  STATSFORVALTEREN = "STATSFORVALTEREN",
   STUDENT = "STUDENT",
   UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
   UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
@@ -34,13 +38,7 @@ export enum Sektor {
   EKSTERN = "EKSTERN",
 }
 
-export interface EnhetsOrganisasjonSanityCheckResponse {
-  agressoId?: string;
-  id?: string;
-  navn?: string;
-}
-
-export interface EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse {
+export interface EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse {
   enhetsOrganisasjonSanityCheckResponse?: EnhetsOrganisasjonSanityCheckResponse[];
   navident?: string;
   /** @format date */
@@ -48,19 +46,10 @@ export interface EnhtetMedRessursSomHarSluttetOgErLederSanityCheckResponse {
   visningsnavn?: string;
 }
 
-export interface OrgtilknytningState {
-  erDagligOppfolging: boolean;
-  fid: string;
-  /** @format date */
-  gyldigFom: string;
-  /** @format date */
-  gyldigTom?: string;
-  masseflyttetFraFid?: string;
-  navident: string;
-  orgEnhetId: string;
-  orgtilknytningType?: Tilknytningtype;
-  sektor?: Sektor;
-  sistEndretAv?: string;
+export interface EnhetsOrganisasjonSanityCheckResponse {
+  agressoId?: string;
+  id?: string;
+  navn?: string;
 }
 
 export interface OrgtilknytningerUtenforHierarkiResponse {
@@ -82,24 +71,8 @@ export interface OrgtilknytningerUtenforHierarkiResponse {
   visningsnavn: string;
 }
 
-export interface RobotOrgtilknytningSanityCheckResponse {
-  /** @format date */
-  gyldigFom?: string;
-  /** @format date */
-  gyldigTom?: string;
-  orgenhetId?: string;
-  orgenhetNavn?: string;
-}
-
-export interface RobotRessursSanityCheckResponse {
-  navident?: string;
-  robotOrgtilknytningSanityCheckResponse?: RobotOrgtilknytningSanityCheckResponse[];
-  sektor?: Sektor;
-  /** @format date */
-  sluttdato?: string;
-  /** @format date */
-  startdato?: string;
-  visningsnavn?: string;
+export interface StandardResponse {
+  message: string;
 }
 
 export interface U4Diff {

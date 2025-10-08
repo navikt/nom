@@ -26,6 +26,7 @@ export enum Tilknytningtype {
   ARBEIDSTRENING = "ARBEIDSTRENING",
   EKSTERN_SAMARBEIDSPARTNER = "EKSTERN_SAMARBEIDSPARTNER",
   FAST = "FAST",
+  HELFO = "HELFO",
   INGEN = "INGEN",
   JOBBSPESIALIST = "JOBBSPESIALIST",
   KONSULENT = "KONSULENT",
@@ -33,6 +34,9 @@ export enum Tilknytningtype {
   MIDLERTIDIG = "MIDLERTIDIG",
   PENSJONIST = "PENSJONIST",
   PRAKSISARBEID = "PRAKSISARBEID",
+  RIKSREVISJONEN = "RIKSREVISJONEN",
+  SKATTEETATEN = "SKATTEETATEN",
+  STATSFORVALTEREN = "STATSFORVALTEREN",
   STUDENT = "STUDENT",
   UFORUTSETT_BEHOV = "UFORUTSETT_BEHOV",
   UTDANNINGSSTILLINGER = "UTDANNINGSSTILLINGER",
@@ -273,6 +277,7 @@ export interface OrgEnhet {
   /** @format date */
   gyldigTom?: string;
   id: string;
+  leder: MinimalRessurs;
   ledere: RessursState[];
   navn: string;
   nomNivaa?: NomNivaa;
@@ -282,6 +287,18 @@ export interface OrgEnhet {
   remedyEnhetId?: string;
   ressursKoblinger: OrgtilknytningState[];
   underordnedeOrgEnhetId: string[];
+}
+
+export interface OrgEnhetLederResponse {
+  fid?: string;
+  navident?: string;
+  orgEnhetId?: string;
+  orgEnhetNavn?: string;
+  /** @format date */
+  sluttdato?: string;
+  /** @format date */
+  startdato?: string;
+  visningsnavn?: Visningsnavn;
 }
 
 export interface OrgEnhetMedLedernavn {

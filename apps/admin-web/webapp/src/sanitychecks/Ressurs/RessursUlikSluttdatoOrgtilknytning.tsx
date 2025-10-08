@@ -42,13 +42,20 @@ export function RessursUlikSluttdatoOrgtilknytning() {
           <Table.ColumnHeader scope="col" sortKey="navident" sortable>
             Nav ident
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="orgEnhet" sortable>
+          <Table.ColumnHeader scope="col" sortKey="orgEnhetId" sortable>
             Orgenhet
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
+          <Table.ColumnHeader scope="col" sortKey="remedyEnhetId" sortable>
+            Remedy Enhet ID
+          </Table.ColumnHeader>
+          <Table.ColumnHeader scope="col" sortKey="ressursSluttdato" sortable>
             Ressurs sluttdato
           </Table.ColumnHeader>
-          <Table.ColumnHeader scope="col" sortKey="gyldigTom" sortable>
+          <Table.ColumnHeader
+            scope="col"
+            sortKey="orgtilknytningSluttdato"
+            sortable
+          >
             Orgtilknytning gyldig TOM
           </Table.ColumnHeader>
         </Table.Header>
@@ -61,6 +68,7 @@ export function RessursUlikSluttdatoOrgtilknytning() {
                 </NomLink>
               </Table.DataCell>
               <Table.DataCell>{ulikDato.orgEnhetId}</Table.DataCell>
+              <Table.DataCell>{ulikDato.remedyEnhetId}</Table.DataCell>
               <Table.DataCell>{ulikDato.ressursSluttdato}</Table.DataCell>
               <Table.DataCell>
                 {ulikDato.orgtilknytningSluttdato}
