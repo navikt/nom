@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -221,8 +222,8 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
-    public Map<String,List<MinimalRessurs>> getLedereMedRedigeringsTilgangForEnhet(Set<String> orgenhetIdSet) {
-        return authorizedNavident.ledereSomKanRedigereOrgenhet(orgenhetIdSet);
+    public Map<String,List<MinimalRessurs>> getLedereMedRedigeringsTilgangForEnhet(@RequestBody List<String> orgenhetIdSet) {
+        return authorizedNavident.ledereSomKanRedigereOrgenhet(Set.copyOf(orgenhetIdSet));
     }
 
     @ExceptionHandler(
