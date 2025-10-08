@@ -39,4 +39,16 @@ public class NomApiClient {
             .retryWhen(defaultRetry)
             .block();
     }
+
+    public String getOrgEnhetRemedyEnhet(String orgEnhetId) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgenheter/getRemedyEnhetId/{orgenhetId}")
+                .build(orgEnhetId)
+            )
+            .retrieve()
+            .bodyToMono(String.class)
+            .retryWhen(defaultRetry)
+            .block();
+    }
 }
