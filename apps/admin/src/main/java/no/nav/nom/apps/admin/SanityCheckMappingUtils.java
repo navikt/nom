@@ -108,6 +108,7 @@ public class SanityCheckMappingUtils {
             LinkedHashMap<String, Object> map = new LinkedHashMap<>();
             map.put("Navident", ressurs.navident());
             map.put("OrgEnhet ID", ressurs.orgEnhetId());
+            map.put("Remedy Enhet ID", ressurs.remedyEnhetId());
             map.put("Ressurs Sluttdato", ressurs.ressursSluttdato());
             map.put("Orgtilknytning Sluttdato", ressurs.orgtilknytningSluttdato());
             result.add(map);
