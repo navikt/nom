@@ -11,6 +11,12 @@ gcloud auth login
 python3 setup_local_azure_secrets.py
 ```
 
+### Autentiser mot GCP for å ta i bruk Chainguard docker image
+```
+gcloud auth configure-docker europe-north1-docker.pkg.dev
+gcloud auth login
+```
+
 ### Deretter starte Express+Wonderwall
 
 ```bash

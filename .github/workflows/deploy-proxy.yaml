@@ -11,7 +11,7 @@ on:
       - '.github/workflows/deploy-proxy.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
-      - 'Dockerfile_distroless'
+      - 'Dockerfile_chainguard'
   workflow_dispatch:
 
 jobs:
@@ -28,6 +28,6 @@ jobs:
       nais-config-file-path-prod: .nais/apps/proxy/proxy-prod-fss.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
-      dockerfile: Dockerfile_distroless
+      dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
