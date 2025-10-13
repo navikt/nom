@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrge
 import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -328,12 +329,15 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         when(ressursStateRepository.findByNavident("C")).thenReturn(Optional.of(createRessurs.apply("C")));
         when(ressursStateRepository.findByNavident("C2")).thenReturn(Optional.of(createRessurs.apply("C2")));
         when(ressursStateRepository.findByNavident("C3")).thenReturn(Optional.of(createRessurs.apply("C3")));
+        when(ressursStateRepository.findByNavident("delegertleder")).thenReturn(Optional.of(createRessurs.apply("delegertleder")));
+        when(delegertLederStateRepository.getDelegertLederByEnhet("C22")).thenReturn(List.of(new LederTilgangState("N/A","delegertleder","N/A","N/A",null,null)));
+
         var enheterLederKanRedigere = authorizedNavident.ledereSomKanRedigereOrgenhet(Set.of("C11","C1","C2","C22","C"));
         assertThat(enheterLederKanRedigere.size()).isEqualTo(5);
         assertThat(enheterLederKanRedigere.get("C").size()).isEqualTo(1);
         assertThat(enheterLederKanRedigere.get("C1").size()).isEqualTo(2);
         assertThat(enheterLederKanRedigere.get("C11").size()).isEqualTo(3);
-        assertThat(enheterLederKanRedigere.get("C22").size()).isEqualTo(3);
+        assertThat(enheterLederKanRedigere.get("C22").size()).isEqualTo(4); // sjekker også om delegert leder blir med
 
         // todo, hvis filtrering på nom-nivå blir tatt i bruk må dette testes også
 

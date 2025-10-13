@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import io.getunleash.Unleash;
-import io.getunleash.variant.Variant;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
@@ -12,7 +11,6 @@ import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrge
 import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
-import no.nav.nom.apps.api.common.UnleashContextSupplier;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -49,7 +47,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -180,30 +178,24 @@ public class AuthorizedNavident {
 
     public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
         var out = new HashMap<String, List<MinimalRessurs>>();
-        var toggleIncludeDriftsEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderdriftsenhet",true);
-        var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet",true);
+        var toggleIncludeDriftsEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderdriftsenhet", true);
+        var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet", true);
 
         for (var oeId : orgenhetIdSet) {
             var hierarkiOppover = stiTilRotForEnhet(oeId);
-            var hierarkiOppoverFiltrertStream = hierarkiOppover.stream().filter(it -> {
-
-                var orgenhet = this.orgenhetService.getById(it).orElse(null);
-                if (orgenhet == null) {
-                    return false;
-                }
-                var nomNivaa = orgenhet.getNomNivaa();
-                return NomNivaa.ARBEIDSOMRAADE == nomNivaa
-                    || NomNivaa.DRIFTSENHET == nomNivaa && toggleIncludeDriftsEnhet
-                    || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet
-                    || null == nomNivaa; // nødvendig linje i testene. Nødvendig i miljø også?
-
-            });
-            // todo antagelse som må avklares, gir delgering av tilgang, også tilgang nedover i hierarkiet?
-            var navidentList = hierarkiOppoverFiltrertStream.map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
+            var hierarkiOppoverFiltrertList = hierarkiOppover.stream()
+                .filter(hierarkiElementPredicate(toggleIncludeDriftsEnhet, toggleIncludeLinjeEnhet))
                 .toList();
-            if(navidentList.isEmpty()) {
+
+            var delegerteLedereNavidenter = hierarkiOppoverFiltrertList.stream()
+                .flatMap(hierarkiOeId -> delegertLederStateRepository.getDelegertLederByEnhet(hierarkiOeId).stream().map(LederTilgangState::til));
+
+            var vanligLedereNavidenter = hierarkiOppoverFiltrertList.stream().map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream);
+
+            var navidentList = Stream.concat(vanligLedereNavidenter, delegerteLedereNavidenter).toList();
+            if (navidentList.isEmpty()) {
                 continue;
             }
             var ressursStream = navidentList.stream().map(ressursStateRepository::findByNavident).filter(Optional::isPresent).map(Optional::get);
@@ -212,6 +204,21 @@ public class AuthorizedNavident {
         }
         return out;
 
+    }
+
+    private Predicate<String> hierarkiElementPredicate(boolean toggleIncludeDriftsEnhet, boolean toggleIncludeLinjeEnhet) {
+        return orgenhetId -> {
+            var orgenhet = this.orgenhetService.getById(orgenhetId).orElse(null);
+            if (orgenhet == null) {
+                return false;
+            }
+            var nomNivaa = orgenhet.getNomNivaa();
+            return NomNivaa.ARBEIDSOMRAADE == nomNivaa
+                || NomNivaa.DRIFTSENHET == nomNivaa && toggleIncludeDriftsEnhet
+                || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet
+                || null == nomNivaa; // nødvendig linje i testene. Nødvendig i miljø også?
+
+        };
     }
 
     public boolean addLederTilgangForOrgenhet(String leder, LederTilgangForOrgenhetRequest request) {
