@@ -6,6 +6,7 @@ import {
   TrashIcon,
 } from "@navikt/aksel-icons";
 import {
+  BodyShort,
   Button,
   ExpansionCard,
   Heading,
@@ -18,16 +19,20 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
-import { getOrgEnhetList } from "~/api/react-query-endpoints";
+import {
+  getLedereForOrgEnhet,
+  getOrgEnheterNavidentKanRedigere,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { Divider } from "~/components/Divider";
 import { LabelWithValue } from "~/components/LabelWithValue";
+import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OrgEnhet } from "~/types/api-models";
+import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
@@ -39,7 +44,7 @@ export const OrganisasjonMastringForside = () => {
 
   return (
     <>
-      <PageBanner text="Organisasjonsadmin dashboard" />
+      <PageBanner text="Organisasjonsadministrasjon dashboard" />
 
       <ContentWrapper>
         <VStack gap="12">
@@ -53,6 +58,8 @@ export const OrganisasjonMastringForside = () => {
 };
 
 function AdministreringAvOrgEnheterSeksjon() {
+  const hasAdminAccess = useHasAdminAccess();
+
   return (
     <VStack gap="6">
       <Heading level="2" size="large">
@@ -61,7 +68,7 @@ function AdministreringAvOrgEnheterSeksjon() {
 
       <HGrid columns="50% 50%" gap="4">
         <NavigationButton
-          disabled
+          disabled={!hasAdminAccess}
           href="/opprett-organisasjonsenhet"
           icon={<PlusCircleIcon fontSize="1.5rem" />}
         >
@@ -184,27 +191,58 @@ function ExternalLinkCard({
 }
 
 function DineOrgEnheterSeksjon() {
-  const orgEnhetIdList = ["pe225k", "ve565g", "ty476u", "ta261a", "ka383w"];
+  const hasAdminAccess = useHasAdminAccess();
 
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(orgEnhetIdList),
-    queryFn: () => getOrgEnhetList.queryFn(orgEnhetIdList),
-    enabled: orgEnhetIdList.length > 0,
+  const [perspectiveSelected, setPerspectiveSelected] = useState("");
+
+  const handlePerpectiveSelect = (input: string) =>
+    setPerspectiveSelected(input);
+
+  const getOrgEnheterNavidentKanRedigereQuery = useQuery({
+    queryKey: getOrgEnheterNavidentKanRedigere.queryKey(perspectiveSelected),
+    queryFn: () =>
+      getOrgEnheterNavidentKanRedigere.queryFn(perspectiveSelected),
+    enabled: !!perspectiveSelected,
   });
 
-  const orgEnheter = orgEnhetQuery?.data;
+  const redigerbareOrgEnheter = getOrgEnheterNavidentKanRedigereQuery?.data;
 
-  const sorterteOrgEnheter = orgEnheter?.sort((a, b) =>
+  const sorterteOrgEnheter = redigerbareOrgEnheter?.sort((a, b) =>
     a.navn.localeCompare(b.navn),
   );
 
   return (
     <VStack gap="6">
+      {hasAdminAccess && (
+        <div
+          css={css`
+            width: 35%;
+          `}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Search
+              autoComplete="off"
+              hideLabel={false}
+              label="Se perspektivet til ressurs"
+              onSearchClick={handlePerpectiveSelect}
+            />
+          </form>
+        </div>
+      )}
+
       <Heading level="2" size="large">
         Dine organisasjonsenheter
       </Heading>
 
-      <DineOrgEnheter orgEnheter={sorterteOrgEnheter} />
+      {getOrgEnheterNavidentKanRedigereQuery.isLoading ? (
+        <LoaderWithText>Laster...</LoaderWithText>
+      ) : (
+        <DineOrgEnheter orgEnheter={sorterteOrgEnheter} />
+      )}
     </VStack>
   );
 }
@@ -220,6 +258,14 @@ function DineOrgEnheter({
     orgEnhet.navn.toLowerCase().includes(searchInput.toLowerCase()),
   );
 
+  const handleClear = async () => {
+    setSearchInput("");
+  };
+
+  const handleSearch = async (input: string) => {
+    setSearchInput(input);
+  };
+
   return (
     <VStack gap="4">
       <div
@@ -227,14 +273,21 @@ function DineOrgEnheter({
           width: 35%;
         `}
       >
-        <Search
-          clearButton
-          label="Finn enhet"
-          onChange={(input) => setSearchInput(input)}
-          size="medium"
-          value={searchInput}
-          variant="simple"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <Search
+            autoComplete="off"
+            clearButton
+            hideLabel={false}
+            label="Søk blant enheter"
+            onClear={handleClear}
+            onSearchClick={handleSearch}
+            size="medium"
+          />
+        </form>
       </div>
 
       {filteredOrgEnheter?.map((orgEnhet) => (
@@ -245,6 +298,17 @@ function DineOrgEnheter({
 }
 
 function OrgEnhetKort({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const testId: string[] = [orgEnhet.id];
+
+  const ledereForOrgEnhetQuery = useQuery({
+    queryKey: getLedereForOrgEnhet.queryKey(testId),
+    queryFn: () => getLedereForOrgEnhet.queryFn(testId),
+  });
+
+  const ledereForOrgEnhetResponse = ledereForOrgEnhetQuery?.data ?? undefined;
+
+  const ledereForOrgEnhet = ledereForOrgEnhetResponse?.[orgEnhet.id] ?? [];
+
   return (
     <ExpansionCard aria-label={orgEnhet.navn}>
       <ExpansionCard.Header>
@@ -255,7 +319,11 @@ function OrgEnhetKort({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           <div>
             <ExpansionCard.Title>{orgEnhet.navn}</ExpansionCard.Title>
             <ExpansionCard.Description>
-              {`Leder: ${formatVisningsnavn(orgEnhet.ledere[0].visningsnavn)}`}
+              {`Leder: ${
+                orgEnhet?.ledere?.length > 0
+                  ? formatVisningsnavn(orgEnhet.ledere[0].visningsnavn)
+                  : ""
+              }`}
             </ExpansionCard.Description>
           </div>
         </HStack>
@@ -277,6 +345,8 @@ function OrgEnhetKort({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             <LabelWithValue label="Org.-nivå" value={orgEnhet.orgNiv} />
           </HStack>
 
+          <HvemKanAdministrereSection kanAdministrere={ledereForOrgEnhet} />
+
           <div>
             <Divider size="small" />
 
@@ -285,5 +355,34 @@ function OrgEnhetKort({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         </VStack>
       </ExpansionCard.Content>
     </ExpansionCard>
+  );
+}
+
+function HvemKanAdministrereSection({
+  kanAdministrere,
+}: {
+  kanAdministrere: MinimalRessurs[];
+}) {
+  return (
+    <div>
+      <BodyShort>
+        <b>Administratorer for denne enheten:</b>
+      </BodyShort>
+
+      {kanAdministrere.length > 0 ? (
+        <VStack>
+          {kanAdministrere.map((ressurs, index) => (
+            <SmartLink
+              href={`/ressurs/${ressurs.navident}`}
+              key={`${ressurs.navident}${index}`}
+            >
+              {ressurs.visningsnavn}
+            </SmartLink>
+          ))}
+        </VStack>
+      ) : (
+        <BodyShort>Ingen administratorer registrert.</BodyShort>
+      )}
+    </div>
   );
 }

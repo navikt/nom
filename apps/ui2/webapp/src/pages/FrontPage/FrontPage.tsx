@@ -37,7 +37,7 @@ export const FrontPage = () => {
     <ContentWrapper>
       <VStack gap="12">
         <Orghierarki
-          lenker={isInDevelopment() ? developmentLenker : productionLenker}
+          lenker={inDevelopment ? developmentLenker : productionLenker}
           orgEnhet={orgEnhet}
         />
 

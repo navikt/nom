@@ -294,37 +294,16 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
   return (
     <VStack gap="4">
-      <VStack
+      <div
         css={css`
           background-color: #deecef;
           padding: var(--a-spacing-4) var(--a-spacing-6);
           border-radius: var(--a-border-radius-large);
           display: grid;
         `}
-        gap="2"
       >
-        <Heading level="1" size="medium">
-          Flytt fra
-        </Heading>
-
-        <VStack gap="2">
-          <BodyShort
-            css={css`
-              font-size: var(--a-font-size-xlarge);
-              padding: 0.5rem;
-              border-radius: 0.5rem;
-            `}
-          >
-            {orgEnhet.navn}
-          </BodyShort>
-
-          <EnhetKontekstInfo
-            orgEnhet={orgEnheterSomKanHaRessurser.find(
-              (ressursEnhet) => ressursEnhet.id === orgEnhet.id,
-            )}
-          />
-        </VStack>
-      </VStack>
+        <OrgEnhetVisning heading="Flytt fra" orgEnhet={orgEnhet} />
+      </div>
 
       <VStack
         css={css`
@@ -565,6 +544,38 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           </BodyShort>
         </div>
       )}
+    </VStack>
+  );
+}
+
+export function OrgEnhetVisning({
+  orgEnhet,
+  heading,
+}: {
+  orgEnhet: OrgEnhet;
+  heading?: string;
+}) {
+  return (
+    <VStack gap="2">
+      {!!heading && (
+        <Heading level="2" size="medium">
+          {heading}
+        </Heading>
+      )}
+
+      <VStack gap="2">
+        <BodyShort
+          css={css`
+            font-size: var(--a-font-size-xlarge);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+          `}
+        >
+          {orgEnhet.navn}
+        </BodyShort>
+
+        <EnhetKontekstInfo orgEnhet={orgEnhet} />
+      </VStack>
     </VStack>
   );
 }

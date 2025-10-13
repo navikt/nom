@@ -7,17 +7,18 @@ import {
 import { Heading, List } from "@navikt/ds-react";
 import React, { useState } from "react";
 
-import { todayWithoutTimezone } from "~/dateUtils/dateUtils";
-import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
-export const pilotBannerHeight = "50px";
+const latestDisplayDate = "2025-09-30";
+
+const displayBanner = nomDateIsTodayOrAfter(latestDisplayDate);
+
+export const pilotBannerHeight = displayBanner ? "50px" : "0px";
 
 export function PilotBanner() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const latestDisplayDate = "2025-09-30";
-
-  if (nomDateIsAfter(todayWithoutTimezone(), latestDisplayDate)) {
+  if (!displayBanner) {
     return;
   }
 

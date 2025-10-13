@@ -482,6 +482,34 @@ export const getOrgEnheterLederKanRedigere = {
     ).data,
 };
 
+export const getOrgEnheterNavidentKanRedigere = {
+  queryKey: (navident: string) => [
+    "ORGENHETER_NAVIDENT_KAN_REDIGERE",
+    navident,
+  ],
+  queryFn: async (navident: string) =>
+    (
+      await axios.get<OrgEnhet[]>(
+        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit`,
+        { params: { navident } },
+      )
+    ).data,
+};
+
+export const getLedereForOrgEnhet = {
+  queryKey: (orgEnhetIder: string[]) => ["LEDERE_FOR_ORGENHET", orgEnhetIder],
+  queryFn: async (orgEnhetIder: string[]) =>
+    (
+      await axios.post<
+        string[],
+        AxiosResponse<Record<string, MinimalRessurs[]>>
+      >(
+        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLedereForOrgenheter`,
+        orgEnhetIder,
+      )
+    ).data,
+};
+
 export function harLederTilgangForNavidentOptions(navident: string) {
   return queryOptions({
     queryKey: ["TILGANG", "NAVIDENT", navident],

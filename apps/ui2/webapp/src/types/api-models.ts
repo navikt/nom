@@ -277,6 +277,7 @@ export interface OrgEnhet {
   /** @format date */
   gyldigTom?: string;
   id: string;
+  leder: MinimalRessurs;
   ledere: RessursState[];
   navn: string;
   nomNivaa?: NomNivaa;
@@ -286,6 +287,18 @@ export interface OrgEnhet {
   remedyEnhetId?: string;
   ressursKoblinger: OrgtilknytningState[];
   underordnedeOrgEnhetId: string[];
+}
+
+export interface OrgEnhetLederResponse {
+  fid?: string;
+  navident?: string;
+  orgEnhetId?: string;
+  orgEnhetNavn?: string;
+  /** @format date */
+  sluttdato?: string;
+  /** @format date */
+  startdato?: string;
+  visningsnavn?: Visningsnavn;
 }
 
 export interface OrgEnhetMedLedernavn {
