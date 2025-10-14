@@ -10,7 +10,7 @@ import {
 } from "./apiProxy.js";
 import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
-import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
+import { setupPlayground } from "./gqlPlayground";
 import { verifyToken } from "./tokenValidation.js";
 import { setupUnleashProxy } from "./unleash.js";
 
@@ -23,8 +23,6 @@ setupActuators(app);
 
 app.set("trust proxy", 1);
 
-setupGqlPlaygroundProxy(app);
-
 app.use(verifyToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
@@ -32,6 +30,7 @@ setupNomAzureProxy(app);
 setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
 setupUnleashProxy(app);
+setupPlayground(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

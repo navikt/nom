@@ -36,13 +36,27 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
+      - name: Install graphiql (playground) dependencies
+        working-directory: apps/ui2/gql-playground
+        run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
       - name: Build webapp
         working-directory: apps/ui2/webapp
+        run: npm run build
+
+      - name: Build graphiql (playground)
+        working-directory: apps/ui2/gql-playground
         run: npm run build
 
       - name: Copy webapp dist into public directory of frackend
         working-directory: apps/ui2/webapp
         run: cp -r dist/ ../frackend/public
+
+      - name: Copy graphiql (playground) dist into graphiql bundle directory of frackend
+        working-directory: apps/ui2/webapp
+        run: cp -r dist/ ../frackend/graphiqlbundle
 
       - name: Install frackend dependencies
         working-directory: apps/ui2/frackend
