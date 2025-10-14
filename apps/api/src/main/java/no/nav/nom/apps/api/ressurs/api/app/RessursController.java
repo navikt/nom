@@ -494,7 +494,7 @@ public class RessursController {
     }
 
     private void validateKanEndreRessurs(String navident, RessursState ressurs) {
-        if (!ressursRestService.kanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
+        if (!ressursRestService.innloggetBrukerKanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
             log.warn("{} med roller {} har ikke tilgang til å redigere ressurs - {} - {}, ",
                 getAuthenticatedNavIdent(), getAuthenticatedRoller(), navident, ressurs.identType());
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
@@ -509,7 +509,7 @@ public class RessursController {
 
     private void validateKanAvvikleRessurs(String fid) {
         RessursState ressurs = ressursRestService.findRessursByFid(fid).state();
-        if (!ressursRestService.kanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
+        if (!ressursRestService.innloggetBrukerKanEndreEllerAvvikleAngittRessurs(ressurs.identType(), ressurs.navident())) {
             log.warn("{} med roller {} har ikke tilgang til å avvikle ressurs - {} - {}, ",
                 getAuthenticatedNavIdent(), getAuthenticatedRoller(), fid, ressurs.identType());
             throw new AccessDeniedException("Ikke tilgang til å avvikle ressurs");

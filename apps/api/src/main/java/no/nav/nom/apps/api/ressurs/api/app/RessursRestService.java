@@ -904,7 +904,7 @@ public class RessursRestService {
         };
     }
 
-    public boolean kanEndreEllerAvvikleAngittRessurs(IdentType identType, String navident) {
+    public boolean innloggetBrukerKanEndreEllerAvvikleAngittRessurs(IdentType identType, String navident) {
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
