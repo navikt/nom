@@ -229,6 +229,7 @@ public class RessursRestService {
             loggedInUserHasAccessScope(NomApiAccessScope.READONLY) ||
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             authResolver.kanRedigereRessurs(ressursState.navident()) ||
+            innloggetBrukerKanEndreEllerAvvikleAngittRessurs(ressursState.identType(), ressursState.navident()) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
     }
 

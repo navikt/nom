@@ -2,6 +2,7 @@ package no.nav.nom.apps.api;
 
 import com.nimbusds.jose.JOSEObjectType;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,20 @@ public class TestTokensGenerator {
         claims.put("groups", List.of("nomWriteVikafossenGroup"));
         claims.put("azp_name", "nomUiClient");
         return validToken(claims);
+    }
+
+    public String nomWriteByIdentType(IdentType identType){
+        switch(identType){
+            case ROBOT -> {
+                return this.nomWriteRobotGroupAndNomUiAzp();
+            }
+            case VIKAFOSSEN -> {
+                return this.nomWriteVikafossenGroupAndNomUiAzp();
+            }
+            default -> {
+                throw new RuntimeException("Not implemented for identtype " + identType);
+            }
+        }
     }
 
     public String nomWriteUtlKonsulentGroupAndNomUiAzp() {

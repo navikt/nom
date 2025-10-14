@@ -39,6 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2010,5 +2011,47 @@ public class RessursControllerTest extends RestTestBase {
 
         verifyNoInteractions(ressursCommandService);
         verifyNoInteractions(orgtilknytningCommandService);
+    }
+
+    @DisplayName("Display fysisk brukersted for {IdentType} ressurs if logged-in user has edit-privileges for {IdentType}")
+    @ParameterizedTest()
+    @EnumSource(value= IdentType.class, names = {"ROBOT", "VIKAFOSSEN"})
+    void shouldDisplayFysiskBrukerstedIfLoggedinUserHasEditPriviliges(IdentType identTypeParam){
+        var endpointPath = "/app/ressurser/byNavident/whatever";
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident)
+            .primaryTelefonnummer("12345678")
+            .primaryFysiskBrukersted("1234")
+            .fysiskeBrukersteder(List.of("1234"))
+            .identType(identTypeParam)
+            .build();
+
+        when(authResolver.kanRedigereRessurs(anyString())).thenReturn(false);
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteByIdentType(identTypeParam)))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
+            .jsonPath("primaryFysiskBrukersted")
+            .value(it -> {
+                assertThat(it).isEqualTo("1234");
+            })
+            .jsonPath("fysiskeBrukersteder")
+            .isArray()
+            .jsonPath("fysiskeBrukersteder")
+            .isNotEmpty();
     }
 }
