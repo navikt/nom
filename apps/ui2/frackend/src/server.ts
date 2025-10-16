@@ -10,7 +10,7 @@ import {
 } from "./apiProxy.js";
 import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
-import { setupPlayground } from "./gqlPlayground";
+import { setupPlayground } from "./gqlPlayground.js";
 import { verifyToken } from "./tokenValidation.js";
 import { setupUnleashProxy } from "./unleash.js";
 
