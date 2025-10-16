@@ -3,11 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; media-src http: file: data:;" />    
-    <title>gql-playground</title>
+    <title>NOM GraphQL-Playground</title>
+      <style>
+          #root {
+              height: 100vh;
+              display: grid;
+          }
+          body {
+              margin: 0;
+          }
+      </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">... Loading GraphiQL playground</div>
     <script type="module" src="src/main.tsx"></script>
   </body>
 </html>
