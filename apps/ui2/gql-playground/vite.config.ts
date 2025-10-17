@@ -5,9 +5,10 @@ import monacoEditorEsmPlugin from 'vite-plugin-monaco-editor-esm'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/playground/",
+  base: "/playground",
   plugins: [react(), monacoEditorEsmPlugin({
-    customDistPath: () => "./dist", // workaround for å unngå at worker bundles blir lagt på http path `/playground/playground/....`
+    // workaround for å sette reell path (pga vite base) for monaco js-bundle, i bundle sin index.html
+    customDistPath: () => "./dist/monacoeditorwork",
     languageWorkers: ["editorWorkerService", "json"],
     customWorkers: [
       {
