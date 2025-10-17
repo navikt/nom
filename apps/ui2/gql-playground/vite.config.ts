@@ -7,7 +7,7 @@ import monacoEditorEsmPlugin from 'vite-plugin-monaco-editor-esm'
 export default defineConfig({
   base: "/playground/",
   plugins: [react(), monacoEditorEsmPlugin({
-    publicPath: "../", // workaround for å unngå at worker bundles blir lagt på `/playground/playground/....`
+    customDistPath: () => "./dist", // workaround for å unngå at worker bundles blir lagt på http path `/playground/playground/....`
     languageWorkers: ["editorWorkerService", "json"],
     customWorkers: [
       {
