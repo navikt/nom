@@ -1,13 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import $monacoEditorPlugin from "vite-plugin-monaco-editor";
+import monacoEditorEsmPlugin from 'vite-plugin-monaco-editor-esm'
 
-const monacoEditorPlugin = ($monacoEditorPlugin as any)["default"] ?? $monacoEditorPlugin;
 
 // https://vite.dev/config/
 export default defineConfig({
   base: "/playground/",
-  plugins: [react(), monacoEditorPlugin({
+  plugins: [react(), monacoEditorEsmPlugin({
+    publicPath: "../", // workaround for å unngå at worker bundles blir lagt på `/playground/playground/....`
     languageWorkers: ["editorWorkerService", "json"],
     customWorkers: [
       {
