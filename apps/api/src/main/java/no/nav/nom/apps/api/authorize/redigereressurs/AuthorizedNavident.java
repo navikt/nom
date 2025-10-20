@@ -192,7 +192,7 @@ public class AuthorizedNavident {
         var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet", true);
 
         for (var oeId : orgenhetIdSet) {
-            var hierarkiOppover = stiTilRotForEnhet(oeId);
+            var hierarkiOppover = stiTilRotForEnhet(oeId, true);
             var hierarkiOppoverFiltrertList = hierarkiOppover.stream()
                 .filter(hierarkiElementPredicate(toggleIncludeDriftsEnhet, toggleIncludeLinjeEnhet))
                 .toList();
@@ -557,9 +557,11 @@ public class AuthorizedNavident {
             .toList();
     }
 
-    private List<String> stiTilRotForEnhet(String orgenhetId){
+    private List<String> stiTilRotForEnhet(String orgenhetId, boolean inkluderStart){
         final var out = new ArrayList<String>();
-        out.add(orgenhetId);
+        if(inkluderStart){
+            out.add(orgenhetId);
+        }
         var targetOrgEnhetId = orgenhetId;
         while(targetOrgEnhetId != null){
             final var target = targetOrgEnhetId;
@@ -579,7 +581,7 @@ public class AuthorizedNavident {
     private <C extends Collection<String>> C beholdKunOrgenheterOverstIHierarkiet(C orgenhetIdList, Supplier<C> outputCollectionSupplier){
         var out = outputCollectionSupplier.get();
         for(var orgenhetId : orgenhetIdList){
-            var stiOver = stiTilRotForEnhet(orgenhetId).subList(1,orgenhetId.length());
+            var stiOver = stiTilRotForEnhet(orgenhetId,false);
             var ingenAnnenEnhetOver = stiOver.stream().noneMatch(orgenhetIdList::contains);
             if(ingenAnnenEnhetOver){
                 out.add(orgenhetId);
