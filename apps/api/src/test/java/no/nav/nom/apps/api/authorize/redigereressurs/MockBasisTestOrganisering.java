@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +31,6 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
-import static wiremock.org.hamcrest.Matchers.containsInAnyOrder;
 
 abstract public class MockBasisTestOrganisering {
     @MockitoBean
@@ -260,13 +260,22 @@ abstract public class MockBasisTestOrganisering {
         lenient().when(orgenhetService.getById("dummySkattId")).thenReturn(Optional.of(orgenhet_skatt));
         lenient().when(orgenhetService.getById("dummyRiksrevisjonId")).thenReturn(Optional.of(orgenhet_riksrev));
 
-        when(orgenhetService.getByIdBulk(argThat(list -> containsInAnyOrder("C", "C1", "C11", "C2", "C22").matches(list)))).thenReturn(Map.of(
-            "C", orgenhet_C,
-            "C1", orgenhet_C1,
-            "C11", orgenhet_C11,
-            "C2", orgenhet_C2,
-            "C22", orgenhet_C22
-        ));
+
+        when(orgenhetService.getByIdBulk(argThat(list -> !list.isEmpty()))).thenAnswer(it -> {
+            var outMap = new HashMap<>(Map.of(
+                "C", orgenhet_C,
+                "C1", orgenhet_C1,
+                "C11", orgenhet_C11,
+                "C2", orgenhet_C2,
+                "C22", orgenhet_C22
+            ));
+
+            {// fjern orgenheter fra output det ikke ble bedt om
+                List<String> args = it.getArgument(0);
+                outMap.keySet().stream().filter(k -> !args.contains(k)).toList().forEach(outMap::remove);
+            }
+            return outMap;
+        });
 
         when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(
             orgenhet_X,

@@ -344,6 +344,15 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     }
 
     @Test
+    @DisplayName("Verifiser at man kan hente ut de øverste enhetene Leder C får redigering til (kun orgenhet C)")
+    void test_0034() {
+        var enheterLederKanRedigere = authorizedNavident.orgenheterLederKanRedigere("C",true);
+        assertThat(enheterLederKanRedigere).hasSize(1);
+        assertThat(enheterLederKanRedigere.getFirst().getId()).isNotNull().isEqualTo("C");
+    }
+
+
+    @Test
     @DisplayName("Verifiserer at medarbeidere fra NOM_WRITE_DELEGERT og NOM_WRITE_LEDER hentes fra Azure AD og returneres samlet")
     void should_join_results_for_ad_groups() {
         when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));

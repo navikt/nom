@@ -48,6 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -161,6 +162,10 @@ public class AuthorizedNavident {
     }
 
     public List<IOrgenhet> orgenheterLederKanRedigere(String navident) {
+        return this.orgenheterLederKanRedigere(navident,false);
+    }
+
+    public List<IOrgenhet> orgenheterLederKanRedigere(String navident, boolean kunToppNoder) {
         Set<String> orgenhetIder = new HashSet<>();
         synchronized (this) {
             var orgenheter = lederForOrgenhetSomKanRedigere.get(navident);
@@ -171,9 +176,14 @@ public class AuthorizedNavident {
 
         orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(navident));
 
-        Set<String> orgenhetIderMedUnderEnheter = new HashSet<>();
-        orgenhetIder.forEach(o -> orgenhetIderMedUnderEnheter.addAll(alleEnheterIHierarkiFra(o)));
-        return orgenhetService.getByIdBulk(orgenhetIderMedUnderEnheter.stream().toList()).values().stream().toList();
+        Set<String> outOrgenhetIder = new HashSet<>();
+        if (kunToppNoder) {
+            outOrgenhetIder.addAll(beholdKunOrgenheterOverstIHierarkiet(orgenhetIder,HashSet::new));
+
+        } else {
+            orgenhetIder.forEach(o -> outOrgenhetIder.addAll(alleEnheterIHierarkiFra(o)));
+        }
+        return orgenhetService.getByIdBulk(outOrgenhetIder.stream().toList()).values().stream().toList();
     }
 
     public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
@@ -182,7 +192,7 @@ public class AuthorizedNavident {
         var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet", true);
 
         for (var oeId : orgenhetIdSet) {
-            var hierarkiOppover = stiTilRotForEnhet(oeId);
+            var hierarkiOppover = stiTilRotForEnhet(oeId, true);
             var hierarkiOppoverFiltrertList = hierarkiOppover.stream()
                 .filter(hierarkiElementPredicate(toggleIncludeDriftsEnhet, toggleIncludeLinjeEnhet))
                 .toList();
@@ -547,9 +557,11 @@ public class AuthorizedNavident {
             .toList();
     }
 
-    private List<String> stiTilRotForEnhet(String orgenhetId){
+    private List<String> stiTilRotForEnhet(String orgenhetId, boolean inkluderStart){
         final var out = new ArrayList<String>();
-        out.add(orgenhetId);
+        if(inkluderStart){
+            out.add(orgenhetId);
+        }
         var targetOrgEnhetId = orgenhetId;
         while(targetOrgEnhetId != null){
             final var target = targetOrgEnhetId;
@@ -562,6 +574,18 @@ public class AuthorizedNavident {
             var idOver = organisering.get().idOver();
             out.add(idOver);
             targetOrgEnhetId = idOver;
+        }
+        return out;
+    }
+
+    private <C extends Collection<String>> C beholdKunOrgenheterOverstIHierarkiet(C orgenhetIdList, Supplier<C> outputCollectionSupplier){
+        var out = outputCollectionSupplier.get();
+        for(var orgenhetId : orgenhetIdList){
+            var stiOver = stiTilRotForEnhet(orgenhetId,false);
+            var ingenAnnenEnhetOver = stiOver.stream().noneMatch(orgenhetIdList::contains);
+            if(ingenAnnenEnhetOver){
+                out.add(orgenhetId);
+            }
         }
         return out;
     }
