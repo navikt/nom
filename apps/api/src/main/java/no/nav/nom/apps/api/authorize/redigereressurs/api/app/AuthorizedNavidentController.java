@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -208,12 +209,11 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
-    public List<IOrgenhet> getOrgEnheterLederCanEdit(@RequestParam(required = false) String navident) {
+    public List<IOrgenhet> getOrgEnheterLederCanEdit(@RequestParam(required = false) String navident, @RequestParam(required = false) String kuntoppnoder) {
+        var kunToppNoder = List.of("true", "True", "TRUE").contains(kuntoppnoder);
+        var isProvidedNavident = navident != null && !navident.isBlank();
         // if navident is provided, check for that user, otherwise use the authenticated user
-        if (navident != null && !navident.isBlank()) {
-            return authorizedNavident.orgenheterLederKanRedigere(navident);
-        }
-        return authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
+        return authorizedNavident.orgenheterLederKanRedigere(isProvidedNavident ? navident : getAuthenticatedNavIdent(), kunToppNoder);
     }
 
     @PostMapping("getLedereForOrgenheter")
