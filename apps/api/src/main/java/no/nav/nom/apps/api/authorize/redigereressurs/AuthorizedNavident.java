@@ -48,6 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -177,7 +178,8 @@ public class AuthorizedNavident {
 
         Set<String> outOrgenhetIder = new HashSet<>();
         if (kunToppNoder) {
-            outOrgenhetIder.addAll(orgenhetIder);
+            outOrgenhetIder.addAll(beholdKunOrgenheterOverstIHierarkiet(orgenhetIder,HashSet::new));
+
         } else {
             orgenhetIder.forEach(o -> outOrgenhetIder.addAll(alleEnheterIHierarkiFra(o)));
         }
@@ -570,6 +572,18 @@ public class AuthorizedNavident {
             var idOver = organisering.get().idOver();
             out.add(idOver);
             targetOrgEnhetId = idOver;
+        }
+        return out;
+    }
+
+    private <C extends Collection<String>> C beholdKunOrgenheterOverstIHierarkiet(C orgenhetIdList, Supplier<C> outputCollectionSupplier){
+        var out = outputCollectionSupplier.get();
+        for(var orgenhetId : orgenhetIdList){
+            var stiOver = stiTilRotForEnhet(orgenhetId).subList(1,orgenhetId.length());
+            var ingenAnnenEnhetOver = stiOver.stream().noneMatch(orgenhetIdList::contains);
+            if(ingenAnnenEnhetOver){
+                out.add(orgenhetId);
+            }
         }
         return out;
     }
