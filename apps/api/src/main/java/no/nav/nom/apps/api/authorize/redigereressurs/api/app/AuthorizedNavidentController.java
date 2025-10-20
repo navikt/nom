@@ -210,7 +210,7 @@ public class AuthorizedNavidentController {
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
     public List<IOrgenhet> getOrgEnheterLederCanEdit(@RequestParam(required = false) String navident, @RequestParam(required = false) String kuntoppnoder) {
-        var kunToppNoder = List.of("true", "True", "TRUE").contains(kuntoppnoder);
+        var kunToppNoder = kuntoppnoder != null && List.of("true", "True", "TRUE").contains(kuntoppnoder);
         var isProvidedNavident = navident != null && !navident.isBlank();
         // if navident is provided, check for that user, otherwise use the authenticated user
         return authorizedNavident.orgenheterLederKanRedigere(isProvidedNavident ? navident : getAuthenticatedNavIdent(), kunToppNoder);
