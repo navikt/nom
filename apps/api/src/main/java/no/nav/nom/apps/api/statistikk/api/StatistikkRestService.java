@@ -116,6 +116,7 @@ public class StatistikkRestService {
         while (!isInitialStateReady()) {
             log.info("Waiting for NomState listeners to be ready before loading statistikk cache");
             try {
+                //noinspection BusyWait
                 Thread.sleep(10000L); // Wait for 10 seconds before checking again
             } catch (InterruptedException e) {
                 log.error("Thread interrupted while waiting for NomState listeners to be ready", e);
@@ -169,7 +170,7 @@ public class StatistikkRestService {
             if (optionalOrgEnhet.get().getNomNivaa().equals(NomNivaa.LINJEENHET)) {
                 return hentStatistikkForLinjeenhet(ressursStatistikk, antallLovnoder, orgEnheter);
             } else if (optionalOrgEnhet.get().getNomNivaa().equals(NomNivaa.DRIFTSENHET)) {
-                return hentStatistikkForDriftsenhet(ressursStatistikk, antallLovnoder, orgEnheter);
+                return hentStatistikkForDriftsenhet(optionalOrgEnhet.get(), ressursStatistikk, antallLovnoder, orgEnheter);
             }
         }
         return new OrgEnhetStatistikkResponse(
@@ -230,6 +231,7 @@ public class StatistikkRestService {
     }
 
     private OrgEnhetStatistikkResponse hentStatistikkForDriftsenhet(
+        IOrgenhet orgEnhet,
         RessursStatistikk ressursStatistikk,
         int antallLovnoder,
         Collection<IOrgenhet> underliggendeOrgEnheter
@@ -246,7 +248,12 @@ public class StatistikkRestService {
         var antallKlageinstanser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KLAGEINSTANS);
         var antallNavKontaktsenter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.NAV_KONTAKTSENTER);
         var antallKontrollKonrollenheter = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(underliggendeOrgEnheter, OrgEnhetsType.KONTROLL_KONTROLLENHET);
-        var antallFylker = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
+
+        var antallFylker = 0;
+        if (orgEnhet.getOrgEnhetsType() != OrgEnhetsType.FYLKE) {
+            antallFylker = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.DRIFTSENHET, OrgEnhetsType.FYLKE).size();
+        }
+
         var antallNavKontorer = createNewIOrgenhetList(underliggendeOrgEnheter, NomNivaa.ARBEIDSOMRAADE, OrgEnhetsType.NAV_KONTOR).size();
 
         return new OrgEnhetStatistikkResponse(
