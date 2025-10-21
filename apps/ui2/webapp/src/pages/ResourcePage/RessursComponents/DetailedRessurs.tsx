@@ -27,8 +27,8 @@ import React, { useState } from "react";
 
 import {
   getOrgEnhet,
-  getOrgEnheterLederKanRedigere,
   getOrgEnheterLedetAvOptions,
+  getOrgEnheterRessursKanRedigere,
   getOrgTilknytninger,
   getTeamcatMemberships,
   harLederTilgangForNavidentOptions,
@@ -106,8 +106,8 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER;
 
   const orgenheterLederKanRedigereQuery = useQuery({
-    queryKey: getOrgEnheterLederKanRedigere.queryKey(),
-    queryFn: () => getOrgEnheterLederKanRedigere.queryFn(),
+    queryKey: getOrgEnheterRessursKanRedigere.queryKey(),
+    queryFn: () => getOrgEnheterRessursKanRedigere.queryFn(),
   });
 
   const orgenheterLederKanRedigere = orgenheterLederKanRedigereQuery.data ?? [];

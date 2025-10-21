@@ -14,14 +14,14 @@ import { isInDevelopment } from "~/utils";
 export const FrontPage = () => {
   const inDevelopment = isInDevelopment();
 
-  const orgEnhetId = inDevelopment ? "sa312u" : "py437s";
+  const navOrgEnhetId = inDevelopment ? "sa312u" : "py437s";
 
   const developmentLenker = ["fa965e", "me177r", "ju219d", "hu797w", "tu734a"];
   const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];
 
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+    queryKey: getOrgEnhet.queryKey(navOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(navOrgEnhetId),
   });
 
   const globalStatistikkQuery = useQuery({

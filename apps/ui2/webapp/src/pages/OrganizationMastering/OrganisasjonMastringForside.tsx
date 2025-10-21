@@ -1,14 +1,12 @@
 import { css } from "@emotion/react";
 import {
   ArrowRightLeftIcon,
-  Buildings2FillIcon,
   PlusCircleIcon,
   TrashIcon,
 } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
-  ExpansionCard,
   Heading,
   HGrid,
   HStack,
@@ -21,36 +19,58 @@ import React, { useState } from "react";
 
 import {
   getLedereForOrgEnhet,
-  getOrgEnheterNavidentKanRedigere,
+  getOrgEnheterLedetAvOptions,
+  getOrgEnheterRessursKanRedigere,
+  getOrgEnhetList,
+  getTilgangerDelegertTilMegOptions,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import {
+  useGetSession,
+  useHasAdminAccess,
+  useHasWriteAccess,
+} from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { Divider } from "~/components/Divider";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import { formatDisplayDate } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
+  const hasWriteAccess = useHasWriteAccess();
 
-  if (!hasAdminAccess) {
+  const ledetAvMeg = useGetSession().data?.navident
+    ? (useQuery(
+        getOrgEnheterLedetAvOptions(useGetSession().data?.navident as string),
+      ).data ?? [])
+    : [];
+
+  const delegertTilMeg =
+    useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
+
+  const lederEllerDelegert =
+    ledetAvMeg?.length > 0 || delegertTilMeg?.length > 0;
+
+  const harRedigeringstilgang =
+    hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+
+  if (!harRedigeringstilgang) {
     return;
   }
 
   return (
     <>
-      <PageBanner text="Organisasjonsadministrasjon dashboard" />
+      <PageBanner text="Organisasjonsadministrasjon" />
 
       <ContentWrapper>
         <VStack gap="12">
           <AdministreringAvOrgEnheterSeksjon />
 
-          <DineOrgEnheterSeksjon />
+          <MineOrgEnheterSeksjon />
         </VStack>
       </ContentWrapper>
     </>
@@ -190,7 +210,7 @@ function ExternalLinkCard({
   );
 }
 
-function DineOrgEnheterSeksjon() {
+function MineOrgEnheterSeksjon() {
   const hasAdminAccess = useHasAdminAccess();
 
   const [perspectiveSelected, setPerspectiveSelected] = useState("");
@@ -198,18 +218,22 @@ function DineOrgEnheterSeksjon() {
   const handlePerpectiveSelect = (input: string) =>
     setPerspectiveSelected(input);
 
-  const getOrgEnheterNavidentKanRedigereQuery = useQuery({
-    queryKey: getOrgEnheterNavidentKanRedigere.queryKey(perspectiveSelected),
+  const redigerbareToppnoderQuery = useQuery({
+    queryKey: getOrgEnheterRessursKanRedigere.queryKey(
+      hasAdminAccess ? perspectiveSelected : undefined,
+      true,
+    ),
     queryFn: () =>
-      getOrgEnheterNavidentKanRedigere.queryFn(perspectiveSelected),
-    enabled: !!perspectiveSelected,
+      getOrgEnheterRessursKanRedigere.queryFn(
+        hasAdminAccess ? perspectiveSelected : undefined,
+        true,
+      ),
   });
 
-  const redigerbareOrgEnheter = getOrgEnheterNavidentKanRedigereQuery?.data;
+  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
 
-  const sorterteOrgEnheter = redigerbareOrgEnheter?.sort((a, b) =>
-    a.navn.localeCompare(b.navn),
-  );
+  const toppnodeIder =
+    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
 
   return (
     <VStack gap="6">
@@ -235,126 +259,164 @@ function DineOrgEnheterSeksjon() {
       )}
 
       <Heading level="2" size="large">
-        Dine organisasjonsenheter
+        Mine organisasjonsenheter
       </Heading>
 
-      {getOrgEnheterNavidentKanRedigereQuery.isLoading ? (
-        <LoaderWithText>Laster...</LoaderWithText>
-      ) : (
-        <DineOrgEnheter orgEnheter={sorterteOrgEnheter} />
-      )}
+      <MineOrgEnheter toppnodeIder={toppnodeIder} />
     </VStack>
   );
 }
 
-function DineOrgEnheter({
-  orgEnheter,
-}: {
-  orgEnheter: OrgEnhet[] | undefined;
-}) {
-  const [searchInput, setSearchInput] = useState("");
+function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
+  const orgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(toppnodeIder),
+    queryFn: () => getOrgEnhetList.queryFn(toppnodeIder),
+    enabled: toppnodeIder.length > 0,
+  });
 
-  const filteredOrgEnheter = orgEnheter?.filter((orgEnhet) =>
-    orgEnhet.navn.toLowerCase().includes(searchInput.toLowerCase()),
+  const orgEnheter = orgEnheterQuery?.data;
+
+  if (toppnodeIder.length === 0) {
+    return;
+  }
+
+  const sorterteOrgEnheter = orgEnheter?.sort((a, b) =>
+    a.navn.localeCompare(b.navn),
   );
 
-  const handleClear = async () => {
-    setSearchInput("");
-  };
-
-  const handleSearch = async (input: string) => {
-    setSearchInput(input);
-  };
+  if (orgEnheterQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
 
   return (
     <VStack gap="4">
-      <div
-        css={css`
-          width: 35%;
-        `}
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <Search
-            autoComplete="off"
-            clearButton
-            hideLabel={false}
-            label="Søk blant enheter"
-            onClear={handleClear}
-            onSearchClick={handleSearch}
-            size="medium"
-          />
-        </form>
-      </div>
-
-      {filteredOrgEnheter?.map((orgEnhet) => (
-        <OrgEnhetKort key={orgEnhet.id} orgEnhet={orgEnhet} />
+      {sorterteOrgEnheter?.map((orgEnhet) => (
+        <UtvidOrgEnhetKort
+          defaultOpen={sorterteOrgEnheter?.length === 1}
+          key={orgEnhet.id}
+          orgEnhet={orgEnhet}
+        />
       ))}
     </VStack>
   );
 }
 
-function OrgEnhetKort({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const testId: string[] = [orgEnhet.id];
+function UtvidOrgEnhetKort({
+  orgEnhet,
+  defaultOpen = false,
+}: {
+  orgEnhet: OrgEnhet;
+  defaultOpen?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultOpen);
 
   const ledereForOrgEnhetQuery = useQuery({
-    queryKey: getLedereForOrgEnhet.queryKey(testId),
-    queryFn: () => getLedereForOrgEnhet.queryFn(testId),
+    queryKey: getLedereForOrgEnhet.queryKey([orgEnhet.id]),
+    queryFn: () => getLedereForOrgEnhet.queryFn([orgEnhet.id]),
   });
 
   const ledereForOrgEnhetResponse = ledereForOrgEnhetQuery?.data ?? undefined;
 
   const ledereForOrgEnhet = ledereForOrgEnhetResponse?.[orgEnhet.id] ?? [];
 
+  const underliggendeOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(orgEnhet.underordnedeOrgEnhetId),
+    queryFn: () => getOrgEnhetList.queryFn(orgEnhet.underordnedeOrgEnhetId),
+    enabled: orgEnhet.underordnedeOrgEnhetId.length > 0,
+  });
+
+  const underliggendeOrgEnheter = underliggendeOrgEnheterQuery?.data;
+
+  const sorterteOrgEnheter = underliggendeOrgEnheter?.sort((a, b) =>
+    a.navn.localeCompare(b.navn),
+  );
+
   return (
-    <ExpansionCard aria-label={orgEnhet.navn}>
-      <ExpansionCard.Header>
-        <HStack align="center" gap="space-16" wrap={false}>
+    <div
+      css={css`
+        width: 100%;
+      `}
+    >
+      <div
+        css={css`
+          background: white;
+          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--a-border-radius-large);
+          border: 1px solid var(--a-border-default);
+          display: block;
+        `}
+      >
+        <div
+          css={css`
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: ${expanded ? "var(--a-spacing-4)" : "0"};
+          `}
+        >
           <div>
-            <Buildings2FillIcon fontSize="3rem" title="a11y-title" />
-          </div>
-          <div>
-            <ExpansionCard.Title>{orgEnhet.navn}</ExpansionCard.Title>
-            <ExpansionCard.Description>
-              {`Leder: ${
-                orgEnhet?.ledere?.length > 0
-                  ? formatVisningsnavn(orgEnhet.ledere[0].visningsnavn)
-                  : ""
-              }`}
-            </ExpansionCard.Description>
-          </div>
-        </HStack>
-      </ExpansionCard.Header>
+            <Heading level="3" size="medium">
+              {orgEnhet.navn}
+            </Heading>
 
-      <ExpansionCard.Content>
-        <VStack gap="4">
-          <EnhetKontekstInfo displayLeder={false} orgEnhet={orgEnhet} />
+            <BodyShort>
+              Leder: <b>{orgEnhet?.leder?.visningsnavn ?? ""}</b>
+            </BodyShort>
+          </div>
 
-          <HStack gap="4">
-            <LabelWithValue
-              label="Startdato"
-              value={formatDisplayDate(orgEnhet.gyldigFom)}
+          <Button
+            css={css`
+              height: fit-content;
+              align-self: center;
+            `}
+            onClick={() => setExpanded(!expanded)}
+            type="button"
+            variant={expanded ? "primary" : "secondary"}
+          >
+            {expanded ? "Minimer" : "Utvid"}
+          </Button>
+        </div>
+
+        {expanded && (
+          <VStack gap="4">
+            <Divider noMargins />
+
+            <EnhetKontekstInfo displayLeder={false} orgEnhet={orgEnhet} />
+
+            <HStack gap="4">
+              <LabelWithValue
+                label="Startdato"
+                value={formatDisplayDate(orgEnhet.gyldigFom)}
+              />
+              <LabelWithValue
+                label="Sluttdato"
+                value={formatDisplayDate(orgEnhet.gyldigTom)}
+              />
+              <LabelWithValue label="Org.-nivå" value={orgEnhet.orgNiv} />
+            </HStack>
+
+            <HvemKanAdministrereSection kanAdministrere={ledereForOrgEnhet} />
+          </VStack>
+        )}
+      </div>
+
+      {expanded && !!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
+        <VStack
+          css={css`
+            margin-top: var(--a-spacing-4);
+            margin-left: var(--a-spacing-10);
+          `}
+          gap="4"
+        >
+          {sorterteOrgEnheter.map((underliggendeOrgEnhet, index) => (
+            <UtvidOrgEnhetKort
+              key={`${orgEnhet.id}${index}`}
+              orgEnhet={underliggendeOrgEnhet}
             />
-            <LabelWithValue
-              label="Sluttdato"
-              value={formatDisplayDate(orgEnhet.gyldigTom)}
-            />
-            <LabelWithValue label="Org.-nivå" value={orgEnhet.orgNiv} />
-          </HStack>
-
-          <HvemKanAdministrereSection kanAdministrere={ledereForOrgEnhet} />
-
-          <div>
-            <Divider size="small" />
-
-            <CompactOrganisasjonHierarki orgEnhet={orgEnhet} />
-          </div>
+          ))}
         </VStack>
-      </ExpansionCard.Content>
-    </ExpansionCard>
+      )}
+    </div>
   );
 }
 

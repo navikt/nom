@@ -70,7 +70,9 @@ function OrgHierarki({
     enabled: topOrgEnhetIder.length > 0,
   });
 
-  const topOrgEnheter = topOrgEnhetQuery.data ?? [];
+  const topOrgEnheter = (topOrgEnhetQuery.data ?? []).sort(
+    (a, b) => topOrgEnhetIder.indexOf(a.id) - topOrgEnhetIder.indexOf(b.id),
+  );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 

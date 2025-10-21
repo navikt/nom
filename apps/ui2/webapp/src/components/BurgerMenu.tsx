@@ -42,20 +42,22 @@ export function BurgerMenu() {
     ? "https://nom-admin.ansatt.nav.no/sinks/ressurs"
     : "https://nom-admin.intern.dev.nav.no/sinks/ressurs";
 
-  const delegertTilMeg =
-    useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
-
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(
         getOrgEnheterLedetAvOptions(useGetSession().data?.navident as string),
       ).data ?? [])
     : [];
 
+  const delegertTilMeg =
+    useQuery(getTilgangerDelegertTilMegOptions()).data ?? [];
+
   const lederEllerDelegert =
     ledetAvMeg?.length > 0 || delegertTilMeg?.length > 0;
 
-  const showOpprettLink =
+  const harRedigeringstilgang =
     hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+
+  const showOpprettLink = harRedigeringstilgang;
 
   const showOpprettSpecialLink =
     hasRobotAccess ||
@@ -63,8 +65,9 @@ export function BurgerMenu() {
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
 
-  const showTilgangerLink =
-    (hasWriteAccess && lederEllerDelegert) || hasAdminAccess;
+  const showOrgMastringLink = harRedigeringstilgang;
+
+  const showTilgangerLink = harRedigeringstilgang;
 
   return (
     <Dropdown>
@@ -166,7 +169,7 @@ export function BurgerMenu() {
             </>
           )}
 
-          {hasAdminAccess && (
+          {showOrgMastringLink && (
             <>
               <Dropdown.Menu.Divider />
 
@@ -174,7 +177,7 @@ export function BurgerMenu() {
                 onClick={() => navigate({ to: "/organisasjonsmastring" })}
               >
                 <img alt="hierarki" src={hierarchyFilled} />
-                <span>Organisasjonsmastring</span>
+                <span>Mine organisasjonsenheter</span>
               </Dropdown.Menu.List.Item>
             </>
           )}

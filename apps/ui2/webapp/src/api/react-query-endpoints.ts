@@ -472,28 +472,25 @@ export function harLederTilgangForOrgenhetOptions(orgenhetId: string) {
   });
 }
 
-export const getOrgEnheterLederKanRedigere = {
-  queryKey: () => ["ORGENHETER_LEDER_KAN_REDIGERE"],
-  queryFn: async () =>
-    (
-      await axios.get<OrgEnhet[]>(
-        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit`,
-      )
-    ).data,
-};
-
-export const getOrgEnheterNavidentKanRedigere = {
-  queryKey: (navident: string) => [
-    "ORGENHETER_NAVIDENT_KAN_REDIGERE",
+export const getOrgEnheterRessursKanRedigere = {
+  queryKey: (navident?: string, kunToppnoder?: boolean) => [
+    "ORGENHETER_RESSURS_KAN_REDIGERE",
     navident,
+    kunToppnoder,
   ],
-  queryFn: async (navident: string) =>
-    (
-      await axios.get<OrgEnhet[]>(
-        `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit`,
-        { params: { navident } },
-      )
-    ).data,
+  queryFn: async (navident?: string, kunToppnoder?: boolean) => {
+    const response = await axios.get<OrgEnhet[]>(
+      `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getOrgEnheterLederCanEdit`,
+      {
+        params: {
+          ...(!!navident && { navident }),
+          ...(!!kunToppnoder && { kuntoppnoder: true }),
+        },
+      },
+    );
+
+    return response.data;
+  },
 };
 
 export const getLedereForOrgEnhet = {

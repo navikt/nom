@@ -126,18 +126,18 @@ function FysiskBrukerstedFlyttingTable() {
     ...new Set(orgtilknytninger.map((tilknytning) => tilknytning.orgEnhetId)),
   ];
 
-  const orgEnhetQuery = useQuery({
+  const orgEnheterQuery = useQuery({
     queryKey: getOrgEnhetList.queryKey(orgEnhetIder),
     queryFn: () => getOrgEnhetList.queryFn(orgEnhetIder),
     enabled: orgEnhetIder.length > 0,
   });
 
-  const orgEnheter = orgEnhetQuery?.data;
+  const orgEnheter = orgEnheterQuery?.data;
 
   const isLoading =
     getFysiskBrukerstedRessurserQuery.isLoading ||
     orgtilknytningerQuery.isLoading ||
-    orgEnhetQuery.isLoading;
+    orgEnheterQuery.isLoading;
 
   const customRessurser: CustomRessurs[] = isLoading
     ? []
