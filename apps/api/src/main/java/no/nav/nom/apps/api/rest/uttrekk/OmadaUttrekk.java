@@ -351,8 +351,8 @@ public class OmadaUttrekk {
             .orElse("");
 
         String orgEnhetLeder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident).orElse("");
-        if (Objects.equals(dvhRepositoryLeder, orgEnhetLeder)) {
-            log.info("Leder for orgEnhet {} er lik i DVH ({})  og OrgEnhetLederState ({})", orgenhet.getId(), dvhRepositoryLeder, orgEnhetLeder);
+        if (!Objects.equals(dvhRepositoryLeder, orgEnhetLeder)) {
+            log.info("Leder for orgEnhet {} er ulik i DVH ({})  og OrgEnhetLederState ({})", orgenhet.getId(), dvhRepositoryLeder, orgEnhetLeder);
             diffDvhVsLederRepo.set(true);
         }
 
