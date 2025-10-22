@@ -31,6 +31,7 @@ public class MappingUtils {
                 .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .primaryTelefon(primaryTelefonnummer)
+                .tilknytningstype(ressursState.sektor().name()) // TODO implement mapping
                 .build();
     }
 

@@ -25,4 +25,5 @@ public class Ressurs {
     String visningsNavn;
     String visningsnavn;
     String primaryTelefon;
+    String tilknytningstype;
 }
