@@ -15,8 +15,10 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.ShadowOrgtilknytningerKommunaleRepository;
 import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -35,6 +37,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.Objects.nonNull;
 
@@ -54,18 +57,21 @@ public class OmadaUttrekk {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private final TelefonService telefonService;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final Unleash unleash;
 
+    private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
+
     public OmadaUttrekk(
-            RessursStateRepository ressursStateRepository,
-            OrgenhetService orgenhetService,
-            OrgtilknytningService orgtilknytningService,
-            ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
-            RemedyEnhetIdResolver remedyEnhetIdResolver,
-            DvhRepository dvhRepository,
-            OrganiseringStateRepository organiseringStateRepository,
-            TelefonService telefonService,
-            Unleash unleash
+        RessursStateRepository ressursStateRepository,
+        OrgenhetService orgenhetService,
+        OrgtilknytningService orgtilknytningService,
+        ShadowOrgtilknytningerKommunaleRepository shadowOrgtilknytningerKommunaleRepository,
+        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        DvhRepository dvhRepository,
+        OrganiseringStateRepository organiseringStateRepository,
+        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -75,6 +81,7 @@ public class OmadaUttrekk {
         this.dvhRepository = dvhRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.telefonService = telefonService;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.unleash = unleash;
     }
 
@@ -313,12 +320,7 @@ public class OmadaUttrekk {
                             orgenhet.getNavn(),
                             orgenhet.getGyldigFom().format(dateTimeFormatter),
                             nonNull(orgenhet.getGyldigTom()) ? orgenhet.getGyldigTom().format(dateTimeFormatter) : "",
-                            dvhRepository.getLedere().stream()
-                                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                                .findAny()
-                                .map(DvhLeder::getNavIdent)
-                                .orElse(""),
+                            getLederNavident(orgenhet),
                             nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : "",
                             nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
                             orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
@@ -332,8 +334,29 @@ public class OmadaUttrekk {
                     }
                 });
 
+            if (diffDvhVsLederRepo.get()) {
+                log.warn("Det var forskjell mellom DVH leder og OrgEnhetLederState for en eller flere orgenheter");
+            }
+
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
+    }
+
+    private String getLederNavident(IOrgenhet orgenhet) {
+        String dvhRepositoryLeder = dvhRepository.getLedere().stream()
+            .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+            .findAny()
+            .map(DvhLeder::getNavIdent)
+            .orElse("");
+
+        String orgEnhetLeder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident).orElse("");
+        if (Objects.equals(dvhRepositoryLeder, orgEnhetLeder)) {
+            log.info("Leder for orgEnhet {} er lik i DVH ({})  og OrgEnhetLederState ({})", orgenhet.getId(), dvhRepositoryLeder, orgEnhetLeder);
+            diffDvhVsLederRepo.set(true);
+        }
+
+        return dvhRepositoryLeder;
     }
 
     String formaterTelefonnummer(String telefon) {

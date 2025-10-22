@@ -17,7 +17,7 @@ class OmadaUttrekkTest {
         omadaUttrekk = new OmadaUttrekk(
             null, null, null,
             null, null, null,
-            null, null, null
+            null, null, null, null
         );
     }
 
