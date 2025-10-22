@@ -17,6 +17,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasAdminReadOnlyAccess,
   useHasRobotAccess,
   useHasUtenlandskKonsulentAccess,
   useHasVikafossenAccess,
@@ -29,6 +30,7 @@ import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 export function BurgerMenu() {
   const hasAdminAccess = useHasAdminAccess();
   const hasWriteAccess = useHasWriteAccess();
+  const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
 
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
@@ -65,7 +67,7 @@ export function BurgerMenu() {
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
 
-  const showOrgMastringLink = harRedigeringstilgang;
+  const showOrgMastringLink = harRedigeringstilgang || hasAdminReadOnlyAccess;
 
   const showTilgangerLink = harRedigeringstilgang;
 

@@ -55,7 +55,6 @@ import type {
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Ressurs,
-  RessursState,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
@@ -150,9 +149,11 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   const sortedRessurser = data;
 
   const [valgteRessurser, setValgteRessurser] = useState<string[]>([]);
+
   const [masseflyttingTilOrgEnhet, setMasseflyttingTilOrgEnhet] = useState<
     OrgEnhetMedLedernavn | undefined
   >();
+
   const [beholdTilganger, setBeholdTilganger] = useState<boolean>(true);
   const [fraDato, setFraDato] = useState<string | null>(
     formatDateWithoutTimezone(
@@ -161,6 +162,14 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         : todayWithoutTimezone(),
     ),
   );
+
+  const valgtTilOrgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(masseflyttingTilOrgEnhet?.id ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(masseflyttingTilOrgEnhet?.id ?? ""),
+    enabled: !!masseflyttingTilOrgEnhet?.id,
+  });
+
+  const valgtTilOrgEnhet = valgtTilOrgEnhetQuery.data;
 
   const datePickerProperties = useDatepicker({
     onDateChange: async (date) => {
@@ -328,7 +337,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
             value={masseflyttingTilOrgEnhet?.id}
           />
 
-          <EnhetKontekstInfo orgEnhet={masseflyttingTilOrgEnhet} />
+          <EnhetKontekstInfo displayUni4Niv orgEnhet={valgtTilOrgEnhet} />
         </VStack>
 
         <Checkbox
@@ -584,19 +593,16 @@ export function EnhetKontekstInfo({
   orgEnhet,
   fallbackMessage,
   displayLeder = true,
+  displayUni4Niv = false,
 }: {
-  orgEnhet: OrgEnhetMedLedernavn | OrgEnhet | undefined;
+  orgEnhet: OrgEnhet | undefined;
   fallbackMessage?: string;
   displayLeder?: boolean;
+  displayUni4Niv?: boolean;
 }) {
   const ledere =
-    "ledere" in (orgEnhet ?? {})
-      ? Array.isArray(orgEnhet?.ledere) &&
-        typeof orgEnhet?.ledere[0] === "string"
-        ? (orgEnhet?.ledere as string[])
-        : (orgEnhet?.ledere as RessursState[]).map((leder) =>
-            formatVisningsnavn(leder.visningsnavn),
-          )
+    Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
+      ? orgEnhet.ledere.map((leder) => formatVisningsnavn(leder.visningsnavn))
       : [];
 
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
@@ -615,7 +621,10 @@ export function EnhetKontekstInfo({
       <LabelWithValue label="NOM-ID" value={orgEnhet.id} />
       {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
       <LabelWithValue label="Enhet i Remedy" value={orgEnhet.remedyEnhetId} />
-      <LabelWithValue label="Agresso-ID" value={extraAgressoInfo?.agressoId} />
+      <LabelWithValue label="Unit4-ID" value={extraAgressoInfo?.agressoId} />
+      {displayUni4Niv && (
+        <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />
+      )}
     </HStack>
   );
 }
