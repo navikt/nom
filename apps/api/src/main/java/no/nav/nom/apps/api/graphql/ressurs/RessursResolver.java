@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
+import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -31,15 +32,18 @@ public class RessursResolver {
     private final RessursStateRepository ressursStateRepository;
     private final RessursMetadataRepository ressursMetadataRepository;
     private final DvhRepository dvhRepository;
+    private final DvhRessursRestService dvhRessursRestService;
 
     RessursResolver(
         RessursStateRepository ressursStateRepository,
         RessursMetadataRepository ressursMetadataRepository,
-        DvhRepository dvhRepository
+        DvhRepository dvhRepository,
+        DvhRessursRestService dvhRessursRestService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursMetadataRepository = ressursMetadataRepository;
         this.dvhRepository = dvhRepository;
+        this.dvhRessursRestService = dvhRessursRestService;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
