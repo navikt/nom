@@ -31,6 +31,7 @@ export function DelegeringNavidentSelectFormPart({
         const selectedOption = alleOptions.find(
           (option) => option?.value === field.value,
         );
+
         return (
           <UNSAFE_Combobox
             error={fieldState.error?.message?.toString()}

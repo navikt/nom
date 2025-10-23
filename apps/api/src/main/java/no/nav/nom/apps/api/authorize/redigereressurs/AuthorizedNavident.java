@@ -531,7 +531,7 @@ public class AuthorizedNavident {
 
     private List<String> alleEnheterIHierarkiFraDriftsenhet() {
         var driftsenhetEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
-            .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.DRIFTSENHET));
+            .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.DRIFTSENHET) && orgenhetHarAktivOrganisering(orgenhet.getId()));
         List<String> orgenheter = new ArrayList<>();
         driftsenhetEnheter.forEach(orgenhet -> orgenheter.addAll(alleEnheterIHierarkiFra(orgenhet.getId())));
         return orgenheter;
@@ -555,6 +555,10 @@ public class AuthorizedNavident {
             .filter(organisering -> organisering.idOver().equals(orgenhetId))
             .map(OrganiseringState::id)
             .toList();
+    }
+
+    private boolean orgenhetHarAktivOrganisering(String orgenhetId){
+        return organiseringStateRepository.getActiveOrganisering().values().stream().anyMatch(it -> it.containsOrgEnhet(orgenhetId));
     }
 
     private List<String> stiTilRotForEnhet(String orgenhetId, boolean inkluderStart){

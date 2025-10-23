@@ -27,6 +27,11 @@ export function useHasPilotAccess() {
   return !!session.data?.roles.includes(UserRoles.ROLE_PILOT);
 }
 
+export function useHasAdminReadOnlyAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(UserRoles.ROLE_READONLY);
+}
+
 export function useHasSelvbetjeningAccess(navident: string) {
   return useGetSession().data?.navident === navident;
 }

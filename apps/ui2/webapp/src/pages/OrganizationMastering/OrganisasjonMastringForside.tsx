@@ -12,6 +12,7 @@ import {
   HStack,
   LinkCard,
   Search,
+  UNSAFE_Combobox,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,11 +23,14 @@ import {
   getOrgEnheterLedetAvOptions,
   getOrgEnheterRessursKanRedigere,
   getOrgEnhetList,
+  getRessurs,
+  getRessurserWhichCanBeDelegatedTo,
   getTilgangerDelegertTilMegOptions,
 } from "~/api/react-query-endpoints";
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasAdminReadOnlyAccess,
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -35,13 +39,15 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
-import { formatDisplayDate } from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
   const hasWriteAccess = useHasWriteAccess();
+  const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
 
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(
@@ -55,16 +61,18 @@ export const OrganisasjonMastringForside = () => {
   const lederEllerDelegert =
     ledetAvMeg?.length > 0 || delegertTilMeg?.length > 0;
 
-  const harRedigeringstilgang =
-    hasAdminAccess || (hasWriteAccess && lederEllerDelegert);
+  const visInnhold =
+    hasAdminAccess ||
+    (hasWriteAccess && lederEllerDelegert) ||
+    hasAdminReadOnlyAccess;
 
-  if (!harRedigeringstilgang) {
+  if (!visInnhold) {
     return;
   }
 
   return (
     <>
-      <PageBanner text="Organisasjonsadministrasjon" />
+      <PageBanner text="Administrering av organisasjonsenheter" />
 
       <ContentWrapper>
         <VStack gap="12">
@@ -82,10 +90,6 @@ function AdministreringAvOrgEnheterSeksjon() {
 
   return (
     <VStack gap="6">
-      <Heading level="2" size="large">
-        Administrering av organisasjonsenheter
-      </Heading>
-
       <HGrid columns="50% 50%" gap="4">
         <NavigationButton
           disabled={!hasAdminAccess}
@@ -212,6 +216,16 @@ function ExternalLinkCard({
 
 function MineOrgEnheterSeksjon() {
   const hasAdminAccess = useHasAdminAccess();
+  const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
+
+  const visPerspektivSearch = hasAdminAccess || hasAdminReadOnlyAccess;
+
+  const simpleSearchEnabled = useUnleashToggle(
+    "nom-fe.orgmastring.simple-search",
+  );
+  const advancedSearchEnabled = useUnleashToggle(
+    "nom-fe.orgmastring.advanced-search",
+  );
 
   const [perspectiveSelected, setPerspectiveSelected] = useState("");
 
@@ -220,42 +234,102 @@ function MineOrgEnheterSeksjon() {
 
   const redigerbareToppnoderQuery = useQuery({
     queryKey: getOrgEnheterRessursKanRedigere.queryKey(
-      hasAdminAccess ? perspectiveSelected : undefined,
+      visPerspektivSearch ? perspectiveSelected : undefined,
       true,
     ),
     queryFn: () =>
       getOrgEnheterRessursKanRedigere.queryFn(
-        hasAdminAccess ? perspectiveSelected : undefined,
+        visPerspektivSearch ? perspectiveSelected : undefined,
         true,
       ),
   });
+
+  const valgtRessursQuery = useQuery({
+    queryKey: getRessurs.queryKey(perspectiveSelected),
+    queryFn: () => getRessurs.queryFn(perspectiveSelected),
+    enabled: !!perspectiveSelected,
+  });
+
+  const valgtRessurs = valgtRessursQuery.data;
 
   const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
 
   const toppnodeIder =
     redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
 
+  const delegerbareRessurserQuery = useQuery({
+    queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
+    queryFn: () => getRessurserWhichCanBeDelegatedTo.queryFn(),
+    enabled: advancedSearchEnabled && visPerspektivSearch,
+  });
+
+  const delegerbareRessurser = delegerbareRessurserQuery?.data;
+
+  const alleOptions =
+    delegerbareRessurser?.map((option) => {
+      return {
+        value: option.navident,
+        label: `${option.visningsnavn} (${option.navident})`,
+      };
+    }) ?? [];
+
   return (
     <VStack gap="6">
-      {hasAdminAccess && (
-        <div
-          css={css`
-            width: 35%;
-          `}
-        >
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
+      {visPerspektivSearch && (
+        <>
+          <VStack
+            css={css`
+              width: 35%;
+            `}
+            gap="4"
           >
-            <Search
-              autoComplete="off"
-              hideLabel={false}
-              label="Se perspektivet til ressurs"
-              onSearchClick={handlePerpectiveSelect}
-            />
-          </form>
-        </div>
+            {simpleSearchEnabled && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <Search
+                  autoComplete="off"
+                  hideLabel={false}
+                  label="Se perspektivet til ressurs"
+                  onSearchClick={handlePerpectiveSelect}
+                />
+              </form>
+            )}
+
+            {advancedSearchEnabled &&
+              (delegerbareRessurserQuery.isLoading ? (
+                <LoaderWithText>Laster...</LoaderWithText>
+              ) : (
+                <UNSAFE_Combobox
+                  label="Se perspektivet til ledere eller lederstøtte"
+                  onToggleSelected={handlePerpectiveSelect}
+                  options={alleOptions}
+                  size="medium"
+                />
+              ))}
+          </VStack>
+
+          {!!valgtRessurs && (
+            <BodyShort
+              css={css`
+                margin-bottom: var(--a-spacing-3);
+              `}
+              size="large"
+            >
+              Perspektiv:
+              <b>
+                {" "}
+                <SmartLink
+                  href={`/ressurs/${valgtRessurs.navident}`}
+                  target="_blank"
+                >{`${formatVisningsnavn(valgtRessurs.visningsnavn)}`}</SmartLink>
+                {` (${valgtRessurs.navident})`}
+              </b>
+            </BodyShort>
+          )}
+        </>
       )}
 
       <Heading level="2" size="large">
@@ -381,7 +455,12 @@ function UtvidOrgEnhetKort({
           <VStack gap="4">
             <Divider noMargins />
 
-            <EnhetKontekstInfo displayLeder={false} orgEnhet={orgEnhet} />
+            <EnhetKontekstInfo
+              displayLeder={false}
+              displayUni4Niv
+              nomIdLink
+              orgEnhet={orgEnhet}
+            />
 
             <HStack gap="4">
               <LabelWithValue
@@ -392,10 +471,9 @@ function UtvidOrgEnhetKort({
                 label="Sluttdato"
                 value={formatDisplayDate(orgEnhet.gyldigTom)}
               />
-              <LabelWithValue label="Org.-nivå" value={orgEnhet.orgNiv} />
             </HStack>
 
-            <HvemKanAdministrereSection kanAdministrere={ledereForOrgEnhet} />
+            <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
           </VStack>
         )}
       </div>
@@ -420,20 +498,28 @@ function UtvidOrgEnhetKort({
   );
 }
 
-function HvemKanAdministrereSection({
+function HvemKanRedigereSection({
   kanAdministrere,
 }: {
   kanAdministrere: MinimalRessurs[];
 }) {
+  const direktorNavident = "H158936";
+
+  const unikeFiltrerteRessurser = Array.from(
+    new Map(kanAdministrere.map((r) => [r.navident, r]))
+      .values()
+      .filter((ressurs) => ressurs.navident !== direktorNavident),
+  );
+
   return (
     <div>
       <BodyShort>
-        <b>Administratorer for denne enheten:</b>
+        <b>Personer som kan redigere medarbeidere på denne enheten:</b>
       </BodyShort>
 
-      {kanAdministrere.length > 0 ? (
+      {unikeFiltrerteRessurser.length > 0 ? (
         <VStack>
-          {kanAdministrere.map((ressurs, index) => (
+          {unikeFiltrerteRessurser.map((ressurs, index) => (
             <SmartLink
               href={`/ressurs/${ressurs.navident}`}
               key={`${ressurs.navident}${index}`}
@@ -443,7 +529,7 @@ function HvemKanAdministrereSection({
           ))}
         </VStack>
       ) : (
-        <BodyShort>Ingen administratorer registrert.</BodyShort>
+        <BodyShort>Ingen registrert</BodyShort>
       )}
     </div>
   );
