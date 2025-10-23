@@ -60,7 +60,7 @@ public class RessursResolver {
             ident = search.resolveIdent().flatMap(ressursStateRepository::findByPersonident);
         }
 
-        String navident = ident.map(RessursState::navident).orElse("ukjent");
+        //String navident = ident.map(RessursState::navident).orElse("ukjent");
         //String tilknytningstype = dvhRessursRestService.getTilknyttingsType(navident);
 
         /*
