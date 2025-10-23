@@ -67,7 +67,10 @@ public class RessursResolver {
             .map(MappingUtils::toRessurs)
             .map(r -> r.toBuilder().tilknytningstype(tilknytningstype).build());
 
-        return ident.map(MappingUtils::toRessurs);
+
+        return ressurs;
+
+        //return ident.map(MappingUtils::toRessurs);
 
         /*
         String navident = ident.map(RessursState::navident).orElse("ukjent");
