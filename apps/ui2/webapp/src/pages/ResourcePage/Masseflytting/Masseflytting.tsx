@@ -594,11 +594,13 @@ export function EnhetKontekstInfo({
   fallbackMessage,
   displayLeder = true,
   displayUni4Niv = false,
+  nomIdLink = false,
 }: {
   orgEnhet: OrgEnhet | undefined;
   fallbackMessage?: string;
   displayLeder?: boolean;
   displayUni4Niv?: boolean;
+  nomIdLink?: boolean;
 }) {
   const ledere =
     Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
@@ -618,7 +620,11 @@ export function EnhetKontekstInfo({
       `}
       gap="4"
     >
-      <LabelWithValue label="NOM-ID" value={orgEnhet.id} />
+      <LabelWithValue
+        label="NOM-ID"
+        value={orgEnhet.id}
+        valueHref={nomIdLink ? `/org/${orgEnhet.id}` : undefined}
+      />
       {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
       <LabelWithValue label="Enhet i Remedy" value={orgEnhet.remedyEnhetId} />
       <LabelWithValue label="Unit4-ID" value={extraAgressoInfo?.agressoId} />

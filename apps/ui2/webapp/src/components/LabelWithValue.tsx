@@ -2,6 +2,8 @@ import { css } from "@emotion/react";
 import { CopyButton, HelpText, HStack } from "@navikt/ds-react";
 import React from "react";
 
+import { SmartLink } from "~/components/navigation/SmartLink";
+
 export function LabelWithValue({
   label,
   value,
@@ -9,6 +11,7 @@ export function LabelWithValue({
   split = false,
   displayEmpty = false,
   copyButton = false,
+  valueHref,
 }: {
   label: string;
   value: string | null | undefined;
@@ -16,6 +19,7 @@ export function LabelWithValue({
   split?: boolean;
   displayEmpty?: boolean;
   copyButton?: boolean;
+  valueHref?: string;
 }) {
   if (!value && !displayEmpty) {
     return <></>;
@@ -29,6 +33,7 @@ export function LabelWithValue({
           copyButton={copyButton}
           helpText={helpText}
           value={value}
+          valueHref={valueHref}
         />
       </>
     );
@@ -45,6 +50,7 @@ export function LabelWithValue({
         helpText={helpText}
         label={label}
         value={value}
+        valueHref={valueHref}
       />
     </span>
   );
@@ -55,17 +61,27 @@ function InformationView({
   value,
   helpText,
   copyButton,
+  valueHref,
 }: {
   label?: string;
   value: string | null | undefined;
   helpText?: string;
   copyButton: boolean;
+  valueHref?: string;
 }) {
   return (
     <HStack gap="2">
       <span>
         {label && <>{label}: </>}
-        <b>{value}</b>
+        <b>
+          {!!valueHref ? (
+            <SmartLink href={valueHref} target="_blank">
+              {value}
+            </SmartLink>
+          ) : (
+            value
+          )}
+        </b>
       </span>
       {copyButton && value && <CopyButton copyText={value} size="xsmall" />}
       {helpText && <HelpText>{helpText}</HelpText>}

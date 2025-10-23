@@ -319,7 +319,14 @@ function MineOrgEnheterSeksjon() {
               size="large"
             >
               Perspektiv:
-              <b>{` ${formatVisningsnavn(valgtRessurs.visningsnavn)} (${valgtRessurs.navident})`}</b>
+              <b>
+                {" "}
+                <SmartLink
+                  href={`/ressurs/${valgtRessurs.navident}`}
+                  target="_blank"
+                >{`${formatVisningsnavn(valgtRessurs.visningsnavn)}`}</SmartLink>
+                {` (${valgtRessurs.navident})`}
+              </b>
             </BodyShort>
           )}
         </>
@@ -451,6 +458,7 @@ function UtvidOrgEnhetKort({
             <EnhetKontekstInfo
               displayLeder={false}
               displayUni4Niv
+              nomIdLink
               orgEnhet={orgEnhet}
             />
 
