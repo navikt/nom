@@ -55,6 +55,7 @@ import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventKafkaConfig;
@@ -109,6 +110,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OrgEnhetIdGenerator.class
     , OrgenhetService.class
     , OrgtilknytningService.class
+    , DvhRessursRestService.class
     , RessursHendelseForEventsourceService.class
     , RessursMetadataRepositoryImpl.class
     , LuceneService.class

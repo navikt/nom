@@ -58,7 +58,11 @@ public class RessursResolver {
             ident = search.resolveIdent().flatMap(ressursStateRepository::findByNavident);
         } else if (search.isPersonidentPresent()) {
             ident = search.resolveIdent().flatMap(ressursStateRepository::findByPersonident);
+
         }
+
+        String navident = ident.map(RessursState::navident).orElse(null);
+        //String tilknytningstype = dvhRessursRestService.getTilknyttingsType(navient);
 
         return ident.map(MappingUtils::toRessurs);
     }
