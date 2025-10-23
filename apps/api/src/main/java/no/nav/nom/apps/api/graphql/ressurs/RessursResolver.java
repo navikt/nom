@@ -64,7 +64,9 @@ public class RessursResolver {
         String navident = ident.map(RessursState::navident).orElse(null);
         String tilknytningstype = dvhRessursRestService.getTilknyttingsType(navident);
 
-        return ident.map(MappingUtils::toRessurs);
+        return ident
+            .map(MappingUtils::toRessurs)
+            .map(r -> r.toBuilder().tilknytningstype(tilknytningstype).build());
     }
 
     public List<RessursResult> ressurser(RessurserSearch search) {
