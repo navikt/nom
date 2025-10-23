@@ -506,7 +506,7 @@ function HvemKanRedigereSection({
   return (
     <div>
       <BodyShort>
-        <b>Personer som kan redigere medarbeidere på denne eheten:</b>
+        <b>Personer som kan redigere medarbeidere på denne enheten:</b>
       </BodyShort>
 
       {unikeFiltrerteRessurser.length > 0 ? (
