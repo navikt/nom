@@ -120,7 +120,7 @@ public class DvhRessursRestService {
             .orElse(null);
     }
 
-    private String getTilknyttingsType(String navident) {
+    public String getTilknyttingsType(String navident) {
         OrgtilknytningState aktivDolOT = orgtilknytningService.getAktivDolOTForRessurs(navident);
         return aktivDolOT != null
             ? (aktivDolOT.orgtilknytningType() != null
