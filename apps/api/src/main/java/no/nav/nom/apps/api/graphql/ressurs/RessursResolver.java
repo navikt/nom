@@ -60,10 +60,15 @@ public class RessursResolver {
             ident = search.resolveIdent().flatMap(ressursStateRepository::findByPersonident);
         }
 
+        return ident.map(MappingUtils::toRessurs);
+
+        /*
         String navident = ident.map(RessursState::navident).orElse("ukjent");
         return ident
             .map(MappingUtils::toRessurs)
             .map(r -> r.toBuilder().tilknytningstype(dvhRessursRestService.getTilknyttingsType(navident)).build());
+
+         */
     }
 
     public List<RessursResult> ressurser(RessurserSearch search) {
