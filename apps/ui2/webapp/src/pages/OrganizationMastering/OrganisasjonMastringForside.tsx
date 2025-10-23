@@ -12,6 +12,7 @@ import {
   HStack,
   LinkCard,
   Search,
+  UNSAFE_Combobox,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +24,7 @@ import {
   getOrgEnheterRessursKanRedigere,
   getOrgEnhetList,
   getRessurs,
+  getRessurserWhichCanBeDelegatedTo,
   getTilgangerDelegertTilMegOptions,
 } from "~/api/react-query-endpoints";
 import {
@@ -37,6 +39,7 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
@@ -87,10 +90,6 @@ function AdministreringAvOrgEnheterSeksjon() {
 
   return (
     <VStack gap="6">
-      <Heading level="2" size="medium">
-        Redigering
-      </Heading>
-
       <HGrid columns="50% 50%" gap="4">
         <NavigationButton
           disabled={!hasAdminAccess}
@@ -221,6 +220,13 @@ function MineOrgEnheterSeksjon() {
 
   const visPerspektivSearch = hasAdminAccess || hasAdminReadOnlyAccess;
 
+  const simpleSearchEnabled = useUnleashToggle(
+    "nom-fe.orgmastring.simple-search",
+  );
+  const advancedSearchEnabled = useUnleashToggle(
+    "nom-fe.orgmastring.advanced-search",
+  );
+
   const [perspectiveSelected, setPerspectiveSelected] = useState("");
 
   const handlePerpectiveSelect = (input: string) =>
@@ -251,33 +257,59 @@ function MineOrgEnheterSeksjon() {
   const toppnodeIder =
     redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
 
+  const delegerbareRessurserQuery = useQuery({
+    queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
+    queryFn: () => getRessurserWhichCanBeDelegatedTo.queryFn(),
+    enabled: advancedSearchEnabled && visPerspektivSearch,
+  });
+
+  const delegerbareRessurser = delegerbareRessurserQuery?.data;
+
+  const alleOptions =
+    delegerbareRessurser?.map((option) => {
+      return {
+        value: option.navident,
+        label: `${option.visningsnavn} (${option.navident})`,
+      };
+    }) ?? [];
+
   return (
     <VStack gap="6">
       {visPerspektivSearch && (
-        <HStack
-          css={css`
-            align-items: end;
-          `}
-          gap="4"
-        >
-          <div
+        <>
+          <VStack
             css={css`
               width: 35%;
             `}
+            gap="4"
           >
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <Search
-                autoComplete="off"
-                hideLabel={false}
-                label="Se perspektivet til ressurs"
-                onSearchClick={handlePerpectiveSelect}
-              />
-            </form>
-          </div>
+            {simpleSearchEnabled && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <Search
+                  autoComplete="off"
+                  hideLabel={false}
+                  label="Se perspektivet til ressurs"
+                  onSearchClick={handlePerpectiveSelect}
+                />
+              </form>
+            )}
+
+            {advancedSearchEnabled &&
+              (delegerbareRessurserQuery.isLoading ? (
+                <LoaderWithText>Laster...</LoaderWithText>
+              ) : (
+                <UNSAFE_Combobox
+                  label="Se perspektivet til ledere eller lederstøtte"
+                  onToggleSelected={handlePerpectiveSelect}
+                  options={alleOptions}
+                  size="medium"
+                />
+              ))}
+          </VStack>
 
           {!!valgtRessurs && (
             <BodyShort
@@ -286,11 +318,11 @@ function MineOrgEnheterSeksjon() {
               `}
               size="large"
             >
-              Valgt ressurs:
+              Perspektiv:
               <b>{` ${formatVisningsnavn(valgtRessurs.visningsnavn)} (${valgtRessurs.navident})`}</b>
             </BodyShort>
           )}
-        </HStack>
+        </>
       )}
 
       <Heading level="2" size="large">
