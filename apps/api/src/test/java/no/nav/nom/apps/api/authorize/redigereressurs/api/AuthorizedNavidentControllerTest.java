@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.authorize.redigereressurs.DelegationAdService;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -26,14 +27,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthorizedNavidentControllerTest extends RestTestBase {
     private static final String API_URL ="/app/authorizedRessursRedigering";
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    AuthorizedNavident authorizedNavident;
+
+
     @MockitoBean
     AuthorizeCommandService authorizeCommandService;
     @MockitoBean
     DelegertLederStateRepository delegertLederStateRepository;
+
+    @MockitoBean
+    DelegationAdService delegationAdService;
+
+    @Autowired
+    AuthorizedNavident authorizedNavident;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     @Test
     @DisplayName("Godkjenne NOM-WRITE user token hvor leder er leder for aktuell ressurs for 'isAuthorizedForNavident'")

@@ -8,8 +8,6 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDele
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
-import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
-import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -21,10 +19,8 @@ import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
@@ -35,8 +31,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,9 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -75,9 +67,7 @@ public class AuthorizedNavident {
     private final OrgenhetService orgenhetService;
     private final DvhRepository dvhRepository;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
-    private final MicrosoftGraphClient microsoftGraphClient;
-    private final String nomWriteDelegertAdGroup;
-    private final String nomWriteLederAdGroup;
+
     private final Unleash unleash;
     @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
     @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
@@ -98,9 +88,6 @@ public class AuthorizedNavident {
             OrgenhetService orgenhetService,
             DvhRepository dvhRepository,
             TilgangDelegertEmailService tilgangDelegertEmailService,
-            MicrosoftGraphClient microsoftGraphClient,
-            @Value("${app.clients.microsoft-graph.groups.nom-delegert}") String nomWriteDelegertAdGroup,
-            @Value("${app.clients.microsoft-graph.groups.nom-leder}") String nomWriteLederAdGroup,
             Unleash unleash
     ) {
         this.authorizeCommandService = authorizeCommandService;
@@ -111,9 +98,6 @@ public class AuthorizedNavident {
         this.orgenhetService = orgenhetService;
         this.dvhRepository = dvhRepository;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
-        this.microsoftGraphClient = microsoftGraphClient;
-        this.nomWriteDelegertAdGroup = nomWriteDelegertAdGroup;
-        this.nomWriteLederAdGroup = nomWriteLederAdGroup;
         this.unleash = unleash;
     }
 
@@ -436,40 +420,9 @@ public class AuthorizedNavident {
             .toList();
     }
     
-    public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
-        CompletableFuture<List<EntraIdUser>> ansatteCompletable = getRessurserWhichCanBeDelegatedToAsync(nomWriteDelegertAdGroup);
-        CompletableFuture<List<EntraIdUser>> ledereCompletable = getRessurserWhichCanBeDelegatedToAsync(nomWriteLederAdGroup);
 
-        CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(ansatteCompletable, ledereCompletable);
-        combinedFuture.join();
-
-        try {
-            return Stream.concat(ansatteCompletable.get().stream(), ledereCompletable.get().stream())
-                    .map(entraIdUser -> {
-                        String visningsnavn = ressursStateRepository
-                                .findByNavident(entraIdUser.navIdent())
-                                .map(RessursState::visningsnavn)
-                                .map(Visningsnavn::getFormattedVisningsnavn).orElse("Navn mangler");
-
-                        return new MinimalRessurs(entraIdUser.navIdent(), visningsnavn);
-                    })
-                    .distinct()
-                    .sorted(Comparator.comparing(MinimalRessurs::visningsnavn))
-                    .toList();
-        } catch (InterruptedException | ExecutionException ex) {
-            log.error("Feil ved henting av Future med delegerbare ansatte: {}", ex.getMessage(), ex);
-            return Collections.emptyList();
-        }
-    }
     
-    public CompletableFuture<List<EntraIdUser>> getRessurserWhichCanBeDelegatedToAsync(String adGroup) {
-        return CompletableFuture.supplyAsync(
-                        () -> microsoftGraphClient.getUsersForGroup(adGroup))
-                .exceptionally(ex -> {
-                    log.warn("Henting av delegerbare ansatte fra gruppen '{}' feilet: {}", adGroup, ex.getMessage(), ex);
-                    return Collections.emptyList();
-                });
-    }
+
 
     private int orgenheterMedAuthedLederCount() {
         return lederForOrgenhetSomKanRedigere.values().stream().mapToInt(Collection::size).sum();

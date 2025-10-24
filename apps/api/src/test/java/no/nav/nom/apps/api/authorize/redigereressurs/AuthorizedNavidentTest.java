@@ -42,11 +42,7 @@ import static org.mockito.Mockito.when;
 )
 class AuthorizedNavidentTest extends MockBasisTestOrganisering {
 
-    private static final String ENTRA_USER_1_NAVIDENT = "A123456";
-    private static final String ENTRA_USER_2_NAVIDENT = "B234567";
-    private static final String ENTRA_MANAGER_NAVIDENT = "C345678";
-    public static final String AD_GROUP_NOM_WRITE_DELEGERT = "42d11885-1e29-4fc4-9eed-1b339c2c8e36";
-    public static final String AD_GROUP_NOM_WRITE_LEDER = "e9cd9267-9baf-4078-abb8-7251c4313d32";
+
 
     @MockitoBean
     AuthorizeCommandService authorizeCommandService;
@@ -349,67 +345,5 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         var enheterLederKanRedigere = authorizedNavident.orgenheterLederKanRedigere("C",true);
         assertThat(enheterLederKanRedigere).hasSize(1);
         assertThat(enheterLederKanRedigere.getFirst().getId()).isNotNull().isEqualTo("C");
-    }
-
-
-    @Test
-    @DisplayName("Verifiserer at medarbeidere fra NOM_WRITE_DELEGERT og NOM_WRITE_LEDER hentes fra Azure AD og returneres samlet")
-    void should_join_results_for_ad_groups() {
-        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));
-        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_LEDER)).thenReturn(List.of(manager()));
-
-        when(ressursStateRepository.findByNavident(ENTRA_USER_1_NAVIDENT)).
-            thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
-        when(ressursStateRepository.findByNavident(ENTRA_USER_2_NAVIDENT)).
-            thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
-        when(ressursStateRepository.findByNavident(ENTRA_MANAGER_NAVIDENT)).
-            thenReturn(Optional.of(getRessursState("Leder", "Leder")));
-
-        List<MinimalRessurs> ressurser = authorizedNavident.getRessurserWhichCanBeDelegatedTo();
-        assertThat(ressurser).hasSize(3);
-        assertThat(ressurser).anyMatch(ressurs -> ressurs.navident().equals(ENTRA_USER_1_NAVIDENT));
-    }
-
-    @Test
-    @DisplayName("Verifiserer at exception i ett av kallene til Azure AD håndteres og det fortsatt returneres medarbeidere")
-    void should_handle_exception_in_one_of_the_api_calls_when_getting_ad_groups() {
-        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_DELEGERT)).thenReturn(List.of(user1(), user2()));
-        when(microsoftGraphClient.getUsersForGroup(AD_GROUP_NOM_WRITE_LEDER))
-            .thenThrow(new RuntimeException("Something went wrong"));
-
-        when(ressursStateRepository.findByNavident(ENTRA_USER_1_NAVIDENT)).
-            thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
-        when(ressursStateRepository.findByNavident(ENTRA_USER_2_NAVIDENT)).
-            thenReturn(Optional.of(getRessursState("Ansatt1", "Ansatt")));
-
-        List<MinimalRessurs> ressurser = authorizedNavident.getRessurserWhichCanBeDelegatedTo();
-        assertThat(ressurser).hasSize(2);
-    }
-
-    private EntraIdUser user1() {
-        return EntraIdUser.builder()
-            .email("user1@nav.no")
-            .navIdent(ENTRA_USER_1_NAVIDENT)
-            .build();
-    }
-
-    private EntraIdUser user2() {
-        return EntraIdUser.builder()
-            .email("user2@nav.no")
-            .navIdent(ENTRA_USER_2_NAVIDENT)
-            .build();
-    }
-
-    private EntraIdUser manager() {
-        return EntraIdUser.builder()
-            .email("manager@nav.no")
-            .navIdent(ENTRA_MANAGER_NAVIDENT)
-            .build();
-    }
-
-    private RessursState getRessursState(String fornavn, String etternavn) {
-        return RessursState.builder()
-            .visningsnavn(new Visningsnavn(fornavn, Optional.empty(), etternavn))
-            .build();
     }
 }
