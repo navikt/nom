@@ -61,24 +61,11 @@ public class RessursResolver {
 
         }
 
-        /*
         String navident = ident.map(RessursState::navident).orElse(null);
         String tilknytningstype = dvhRessursRestService.getTilknyttingsType(navident);
-
         return ident
             .map(MappingUtils::toRessurs)
             .map(r -> r.toBuilder().tilknytningstype(tilknytningstype).build());
-        */
-
-        return ident
-            .map(r -> {
-                Ressurs ressurs = MappingUtils.toRessurs(r);
-                if (ressurs == null) {
-                    String tilknytningstype = dvhRessursRestService.getTilknyttingsType(r.navident());
-                    ressurs = ressurs.toBuilder().tilknytningstype(tilknytningstype).build();
-                }
-                return ressurs;
-            });
     }
 
     public List<RessursResult> ressurser(RessurserSearch search) {
