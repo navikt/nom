@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.hierarki;
 
+import no.nav.nom.contract.nom.state.RessursState;
+
 public record NavIdent(String navIdent) {
     public NavIdent {
         if (navIdent == null || navIdent.isEmpty()) {
@@ -13,5 +15,9 @@ public record NavIdent(String navIdent) {
 
     public static NavIdent create(String navIdent) {
         return new NavIdent(navIdent);
+    }
+
+    public static NavIdent create(RessursState ressursState) {
+        return new NavIdent(ressursState.navident());
     }
 }

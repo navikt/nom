@@ -15,7 +15,11 @@ import java.util.Random;
 import java.util.random.RandomGenerator;
 
 public interface InitHierarkiInterface {
-    void upsertInitHierarki(HierarkiService.Upserts upserts);
+    void upsertInitHierarki(HierarkiService.Upserts upserts, Long seed);
+
+    default void upsertInitHierarki(HierarkiService.Upserts upserts) {
+        upsertInitHierarki(upserts, System.currentTimeMillis());
+    }
 
     default void upsertItemsInRandomOrder(List<Record> upsertStateObjectList, HierarkiService.Upserts upserts, long randomSeed) {
 
@@ -40,4 +44,5 @@ public interface InitHierarkiInterface {
             }
         }
     }
+
 }

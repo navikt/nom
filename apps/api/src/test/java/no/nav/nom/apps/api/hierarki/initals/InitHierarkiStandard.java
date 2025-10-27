@@ -411,7 +411,11 @@ public class InitHierarkiStandard implements InitHierarkiInterface {
 
 
     public final String MEDARBEIDER_B_NAVIDENT = "B000000";
-    public final RessursState MEDARBEIDER_B = RessursState.builder().navident(MEDARBEIDER_B_NAVIDENT).sektor(Sektor.NAV_STATLIG).build();
+    public final RessursState MEDARBEIDER_B = RessursState.builder()
+        .navident(MEDARBEIDER_B_NAVIDENT)
+        .sektor(Sektor.NAV_STATLIG)
+        .visningsnavn(new Visningsnavn("Navn", Optional.empty(), MEDARBEIDER_B_NAVIDENT))
+        .build();
 
 
     public final String MEDARBEIDER_B1_NAVIDENT = "B100000";
@@ -514,7 +518,7 @@ public class InitHierarkiStandard implements InitHierarkiInterface {
 
     public final OrgtilknytningState ot_B11_B110001 = OrgtilknytningState.builder()
         .fid("FID_B11_B110001")
-        .navident(MEDARBEIDER_B110001_NAVIDENT)
+        .navident(MEDARBEIDER_B110001.navident())
         .orgEnhetId(B11_ENHET.id())
         .gyldigFom(LocalDate.now().minusDays(5))
         .gyldigTom(null)
@@ -525,6 +529,24 @@ public class InitHierarkiStandard implements InitHierarkiInterface {
         .fid("FID_B11_B110002")
         .navident(MEDARBEIDER_B110002_NAVIDENT)
         .orgEnhetId(B11_ENHET.id())
+        .gyldigFom(LocalDate.now().minusDays(5))
+        .gyldigTom(null)
+        .erDagligOppfolging(true)
+        .build();
+
+    public final OrgtilknytningState ot_B1_B1 = OrgtilknytningState.builder()
+        .fid("FID_B1_B1")
+        .navident(MEDARBEIDER_B1.navident())
+        .orgEnhetId(B1_ENHET.id())
+        .gyldigFom(LocalDate.now().minusDays(5))
+        .gyldigTom(null)
+        .erDagligOppfolging(true)
+        .build();
+
+    public final OrgtilknytningState ot_B_B = OrgtilknytningState.builder()
+        .fid("FID_B_B")
+        .navident(MEDARBEIDER_B.navident())
+        .orgEnhetId(B_ENHET.id())
         .gyldigFom(LocalDate.now().minusDays(5))
         .gyldigTom(null)
         .erDagligOppfolging(true)
@@ -744,7 +766,7 @@ public class InitHierarkiStandard implements InitHierarkiInterface {
 
 
     @Override
-    public void upsertInitHierarki(HierarkiService.Upserts upserts) {
+    public void upsertInitHierarki(HierarkiService.Upserts upserts, Long seed) {
         var organiseringer = List.of(organisering_A_X,
             organisering_A1_A,
             organisering_A11_A1,
@@ -805,6 +827,8 @@ public class InitHierarkiStandard implements InitHierarkiInterface {
         var orgtilknytninger = List.of(
             ot_B11_B110001 ,
             ot_B11_B110002 ,
+            ot_B1_B1 ,
+            ot_B_B,
             ot_C11_C110001 ,
             ot_C22_C220001 ,
             ot_D1_D100001 ,

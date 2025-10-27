@@ -2,10 +2,10 @@ package no.nav.nom.apps.api.hierarki;
 
 import no.nav.nom.apps.api.hierarki.initals.InitHierarkiStandard;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ class HierarkiServiceTest {
         // om upserts trekkes ut, så kan nye state oppdateringer sendes underveis i testene
         var upserts = new HierarkiService.Upserts() {};
         this.hierarkiService = new HierarkiService(upserts);
-        H.upsertInitHierarki(upserts);
+        H.upsertInitHierarki(upserts,1761651864758L);
     }
 
     /*
@@ -76,7 +76,7 @@ class HierarkiServiceTest {
     void lederPaaEnhet() {
         var enhet = hentOgVerifiserEnhetB11();
 
-        Medarbeider leder = enhet.enhetLeder();
+        Medarbeider leder = enhet.enhetLeder(LocalDate.now());
         assertThat(leder).isNotNull();
         assertThat(leder.toMinimalRessurs().navident()).isEqualTo(H.MEDARBEIDER_B1.navident());
     }
@@ -84,9 +84,9 @@ class HierarkiServiceTest {
     @Test
     @DisplayName("Kan hente en enhet sin leder (2)")
     void lederPaaEnhe2t() {
-        var enhet = this.hierarkiService.enhetByNomId(NomId.create(H.A_ENHET_NOMID)).get();
+        var enhet = this.hierarkiService.enhetByNomId(NomId.create(H.A_ENHET_NOMID)).orElseThrow();
 
-        Medarbeider leder = enhet.enhetLeder();
+        Medarbeider leder = enhet.enhetLeder(LocalDate.now());
         assertThat(leder).isNotNull();
         assertThat(leder.toMinimalRessurs().navident()).isEqualTo(H.MEDARBEIDER_A.navident());
     }
@@ -98,9 +98,19 @@ class HierarkiServiceTest {
         assertThat(medarbeiderMaybe).isNotEmpty();
         var medarbeider = medarbeiderMaybe.get();
 
-        HierarkiOrgenhet orgenhet = medarbeider.orgenhet();
+        HierarkiOrgenhet orgenhet = medarbeider.orgenhet(LocalDate.now());
         assertThat(orgenhet).isNotNull();
         assertThat(orgenhet.id().nomId()).isEqualTo(H.B11_ENHET.id());
+    }
+
+    @Test
+    @DisplayName("medarbeider.leder (henting)")
+    void medarbeiderSinLeder() {
+        var medarbeider = this.hierarkiService.medarbeiderByNavident(NavIdent.create(H.MEDARBEIDER_B110001_NAVIDENT)).orElseThrow();
+
+        Medarbeider leder = medarbeider.leder(LocalDate.now());
+        assertThat(leder).isNotNull();
+        assertThat(leder.toMinimalRessurs().navident()).isEqualTo(H.MEDARBEIDER_B1.navident());
     }
 
 }
