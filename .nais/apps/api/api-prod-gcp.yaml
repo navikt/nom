@@ -256,6 +256,9 @@ spec:
         - application: fagarkiv-administrasjon
           namespace: isa
           cluster: prod-gcp
+        - application: brev-sikkerhetsnett
+          namespace: isa
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
