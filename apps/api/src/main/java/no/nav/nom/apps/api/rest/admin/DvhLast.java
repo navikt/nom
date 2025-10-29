@@ -124,6 +124,19 @@ public class DvhLast {
     }
 
     @Operation(
+        description = "Trigger sjekk av OT'er utenfor hierarki",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/findOTUtenforHierarki")
+    public void findOTUtenforHierarki() {
+        triggerFindOTUtenforHierarki();
+    }
+
+
+    @Operation(
         description = "Start last av ledere og persister",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
