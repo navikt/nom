@@ -2,24 +2,31 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,23 +34,22 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
+import static no.nav.nom.apps.api.TestUtil.createRessursState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
-// TODO: Integrasjonstest - plasser og navngi riktig
-
-@DisplayName("GraphQL.HentEnhet")
-class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
-
+@ActiveProfiles("GraphQLTest")
+@GraphQlTest
+@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@DisplayName("GraphQL - Organisasjonsenhet spørringer")
+class OrganisasjonsenhetTest {
     @Autowired
-    private DvhRestConsumer dvhRestConsumer;
-
-    @Autowired
-    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+    protected GraphQLTestUtil gqlUtil;
 
     @Autowired
     protected OrgEnhetStateRepository orgEnhetStateRepository;
@@ -52,115 +58,102 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     protected OrganiseringStateRepository organiseringStateRepository;
 
     @Autowired
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
+    protected OrgtilknytningStateRepository orgtilknytningStateRepository;
+
+    @Autowired
+    private RessursStateRepository ressursStateRepository;
+
+    @Autowired
+    public ObjectMapper objectMapper;
+
+    @MockitoBean
+    protected OrgEnhetLederService orgEnhetLederService;
+
+    @BeforeEach
+    protected void setup() {
+        orgEnhetStateRepository.clear();
+        organiseringStateRepository.clear();
+        ressursStateRepository.clear();
+        orgtilknytningStateRepository.clear();
+    }
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
-            .ENHETTYPE_NAVN("TYPEEE").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+        orgEnhetStateRepository.update(orgenhet);
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        final var evAgg = dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()));
-        orgEnhetStateRepository.update(evAgg);
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql")
+        var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario1.graphql")
             .path("organisasjonsenhet")
             .entity(OrgEnhet.class)
             .get();
 
-        assertEquals(mockedEnhet.getORGENHET_KODE(), outputEnhet.getAgressoId());
-        assertEquals(mockedEnhet.getENHETTYPE_NAVN(), outputEnhet.getAgressoOrgenhetType());
+        assertEquals(orgenhet.navn(), outputEnhet.getNavn());
+        assertEquals(orgenhet.agressoId(), outputEnhet.getAgressoId());
+        assertEquals(orgenhet.agressoOrgenhetType(), outputEnhet.getAgressoOrgenhetType());
 
-        final var outputEnhet2 = postForResource("organisasjonsenhet/scenario13.graphql")
+        outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario13.graphql")
             .path("orgEnhet")
             .entity(OrgEnhet.class)
             .get();
 
-        assertEquals(evAgg.id(),outputEnhet2.getId());
+        assertEquals(orgenhet.id(),outputEnhet.getId());
+        assertEquals(orgenhet.navn(), outputEnhet.getNavn());
     }
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter bulk")
     void scenario112() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId1").build();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql")
+        final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario12.graphql")
             .path("organisasjonsenheter")
             .entityList(OrgEnhetResult.class)
             .get();
 
-        assertTrue(getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).isPresent());
-        assertEquals(mockedEnhet.getORGENHET_KODE(), getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).get().getId());
-        assertEquals(ResultCode.OK, getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).get().getCode());
+        assertTrue(getEnhetInList(orgenhet.agressoId(), outputEnhet).isPresent());
+        assertEquals(orgenhet.agressoId(), getEnhetInList(orgenhet.agressoId(), outputEnhet).get().getId());
+        assertEquals(ResultCode.OK, getEnhetInList(orgenhet.agressoId(), outputEnhet).get().getCode());
 
         assertTrue(getEnhetInList("notFoundIdent", outputEnhet).isPresent());
-        assertEquals(mockedEnhet.getORGENHET_KODE(), getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).get().getId());
+        assertEquals(orgenhet.agressoId(), getEnhetInList(orgenhet.agressoId(), outputEnhet).get().getId());
         assertEquals(ResultCode.NOT_FOUND, getEnhetInList("notFoundIdent", outputEnhet).get().getCode());
-
     }
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå")
     void scenario113() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql")
+        final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario113.graphql")
             .path("organisasjonsenheter")
             .entityList(OrgEnhetResult.class)
             .get();
 
-        assertEquals(mockedEnhet.getORGENHET_KODE(), outputEnhet.get(0).getId());
-        assertEquals(ResultCode.OK, outputEnhet.get(0).getCode());
-        assertEquals(mockedEnhet.getORGNODE_NIV(), outputEnhet.get(0).getOrgNiv());
+        assertEquals(orgenhet.agressoId(), outputEnhet.getFirst().getId());
+        assertEquals(ResultCode.OK, outputEnhet.getFirst().getCode());
+        assertEquals(orgenhet.agressoOrgNivaa(), outputEnhet.getFirst().getOrgNiv());
     }
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
     void scenario114() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql")
+        final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario114.graphql")
             .path("organisasjonsenheter")
             .entityList(OrgEnhetResult.class)
             .get();
 
-        final var actualTestId4 = getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet);
+        final var actualTestId4 = getEnhetInList(orgenhet.agressoId(), outputEnhet);
         final var actualNotFound = getEnhetInList("notFoundId", outputEnhet);
 
         assertTrue(actualTestId4.isPresent());
-        assertEquals(mockedEnhet.getORGENHET_KODE(), actualTestId4.get().getId());
-        assertEquals(mockedEnhet.getORGNODE_NIV(), actualTestId4.get().getOrgNiv());
+        assertEquals(orgenhet.agressoId(), actualTestId4.get().getId());
+        assertEquals(orgenhet.agressoOrgNivaa(), actualTestId4.get().getOrgNiv());
         assertEquals(ResultCode.OK, actualTestId4.get().getCode());
 
         assertTrue(actualNotFound.isPresent());
@@ -172,56 +165,39 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql uten id parameter")
     void scenario12() {
-        var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test1").ORGENHET_KODE("test1").ORGNODE_NIV("ORGENHET").build();
-        var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test2").ORGENHET_KODE("test2").ORGNODE_NIV("ORGENHET").build();
-        var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test3").ORGENHET_KODE("test3").ORGNODE_NIV("ORGENHET").build();
-        var mockedEnhet4 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test4").ORGENHET_KODE("test4").ORGNODE_NIV("ORGENHET").build();
-        var mockedEnhet5 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test5").ORGENHET_KODE("test5").ORGNODE_NIV("ORGENHET").build();
+        var orgenhet1 = OrgenhetTestUtils.createDefault().toBuilder().navn("test1").agressoId("test1").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet2 = OrgenhetTestUtils.createDefault().toBuilder().navn("test2").agressoId("test2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet3 = OrgenhetTestUtils.createDefault().toBuilder().navn("test3").agressoId("test3").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet4 = OrgenhetTestUtils.createDefault().toBuilder().navn("test4").agressoId("test4").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet5 = OrgenhetTestUtils.createDefault().toBuilder().navn("test5").agressoId("test5").agressoOrgNivaa("ORGENHET").build();
 
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3, mockedEnhet4, mockedEnhet5);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet1);
+        orgEnhetStateRepository.update(orgenhet2);
+        orgEnhetStateRepository.update(orgenhet3);
+        orgEnhetStateRepository.update(orgenhet4);
+        orgEnhetStateRepository.update(orgenhet5);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, String.valueOf(mockedEnhet1.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet1.getORGENHET_TIL_PERIODE())));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, String.valueOf(mockedEnhet2.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet2.getORGENHET_TIL_PERIODE())));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, String.valueOf(mockedEnhet3.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet3.getORGENHET_TIL_PERIODE())));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet4, 4, String.valueOf(mockedEnhet4.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet4.getORGENHET_TIL_PERIODE())));
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet5, 5, String.valueOf(mockedEnhet5.getORGENHET_FRA_PERIODE()), String.valueOf(mockedEnhet5.getORGENHET_TIL_PERIODE())));
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario2.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario2.graphql");
         assertEquals(5, response.path("organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
     }
 
     @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21() {
-        final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
-        final var mockEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
-        final var mockEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2, mockEnhet3);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet1 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn4").agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        var orgenhet2 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet3 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        var mockEnhetState1 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()));
-        var mockEnhetState2 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()));
-        var mockEnhetState3 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE()));
+        orgEnhetStateRepository.update(orgenhet1);
+        orgEnhetStateRepository.update(orgenhet2);
+        orgEnhetStateRepository.update(orgenhet3);
 
-        orgEnhetStateRepository.update(mockEnhetState1);
-        orgEnhetStateRepository.update(mockEnhetState2);
-        orgEnhetStateRepository.update(mockEnhetState3);
-
-        OrganiseringState organiseringState1 = getOrganiseringState("organisering_1", mockEnhetState2, mockEnhetState3, LocalDate.now(), null);
-        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", mockEnhetState3, mockEnhetState1, LocalDate.now(), null);
+        OrganiseringState organiseringState1 = getOrganiseringState("organisering_1", orgenhet2, orgenhet3, LocalDate.now(), null);
+        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgenhet3, orgenhet1, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState1);
         organiseringStateRepository.update(organiseringState2);
 
-        // The organisering is now present in the state
-
-        final var response = postForResource("organisasjonsenhet/scenario3.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -232,37 +208,25 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
                 )
             );
 
-        assertEquals(mockEnhet1.getORGENHET_KODE(), organiserteEnheter.get("over").getAgressoId());
-        assertEquals(mockEnhet2.getORGENHET_KODE(), organiserteEnheter.get("under").getAgressoId());
+        assertEquals(orgenhet1.agressoId(), organiserteEnheter.get("over").getAgressoId());
+        assertEquals(orgenhet2.agressoId(), organiserteEnheter.get("under").getAgressoId());
     }
 
     @Test
     @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21_new_organisering() {
-        final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdOver").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavnOver").build();
-        final var mockEnhetUnder = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdUnder").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavnUnder").build();
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhetOver, mockEnhetUnder, mockEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhetOver =  OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavnOver").agressoId("testIdOver").agressoOrgNivaa("ORGNIV2").build();
+        var orgenhetUnder = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavnUnder").agressoId("testIdUnder").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet =      OrgenhetTestUtils.createDefault().toBuilder().id("ID_3").navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state so it has to be done manually
-        // dvhMockToState() sets IDs to "ID_" + nr
-        var orgStateOver = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetOver, 1, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE()));
-        var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetUnder, 2, String.valueOf(mockEnhetUnder.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhetUnder.getORGENHET_TIL_PERIODE()));
-        var orgState = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 3, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()));
+        orgEnhetStateRepository.update(orgenhetOver);
+        orgEnhetStateRepository.update(orgenhetUnder);
+        orgEnhetStateRepository.update(orgenhet);
 
-        orgEnhetStateRepository.update(orgStateOver);
-        orgEnhetStateRepository.update(orgStateUnder);
-        orgEnhetStateRepository.update(orgState);
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgenhet, orgenhetOver));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgenhetUnder, orgenhet));
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        // Same as above - need to create state manually
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
-
-
-        final var response = postForResource("organisasjonsenhet/scenario3.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -273,37 +237,27 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
                 )
             );
 
-        assertThat(organiserteEnheter.get("over").getId()).isEqualTo("ID_1");
-        assertThat(organiserteEnheter.get("over").getAgressoId()).isEqualTo(mockEnhetOver.getORGENHET_KODE());
+        assertEquals("ID_1", organiserteEnheter.get("over").getId());
+        assertEquals(orgenhetOver.agressoId(), organiserteEnheter.get("over").getAgressoId());
 
-        assertThat(organiserteEnheter.get("under").getId()).isEqualTo("ID_2");
-        assertThat(organiserteEnheter.get("under").getAgressoId()).isEqualTo(mockEnhetUnder.getORGENHET_KODE());
+        assertEquals("ID_2", organiserteEnheter.get("under").getId());
+        assertEquals(orgenhetUnder.agressoId(), organiserteEnheter.get("under").getAgressoId());
     }
 
 
     @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33() {
-        final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var mockEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        var orgenhet1 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet2 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
 
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet1);
+        orgEnhetStateRepository.update(orgenhet2);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        var mockEnhetState1 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()));
-        var mockEnhetState2 = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()));
-
-        orgEnhetStateRepository.update(mockEnhetState1);
-        orgEnhetStateRepository.update(mockEnhetState2);
-
-        OrganiseringState organiseringState = getOrganiseringState("organisering_1", mockEnhetState1, mockEnhetState2, LocalDate.now(), null);
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgenhet1, orgenhet2, LocalDate.now(), null);
         organiseringStateRepository.update(organiseringState);
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario33.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario33.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -313,36 +267,24 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
-        assertEquals(mockEnhet2.getORGENHET_KODE(), organiserteEnheter.get("over").getAgressoId());
+        assertEquals(orgenhet2.agressoId(), organiserteEnheter.get("over").getAgressoId());
     }
 
     @Test
     @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33_new_organisering() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhetOver = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+        var orgenhetUnder = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
 
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet, mockEnhetOver);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet);
+        orgEnhetStateRepository.update(orgenhetOver);
+        orgEnhetStateRepository.update(orgenhetUnder);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgenhet, orgenhetOver));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgenhetUnder, orgenhet));
 
-        var orgState = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()));
-        var orgStateOver = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetOver, 2, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE()));
-        var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(DvhOrgEnhetMock.getBuilderWithDefault().build(), 3, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE()));
-
-        orgEnhetStateRepository.update(orgState);
-        orgEnhetStateRepository.update(orgStateOver);
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        // Same as above - need to create state manually
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgState, orgStateOver));
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgStateUnder, orgState));
-
-
-        final var response = postForResource("organisasjonsenhet/scenario33.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario33.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -353,93 +295,87 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
 
         assertThat(organiserteEnheter).hasSize(1);
 
-        assertThat(organiserteEnheter.get("over").getId()).isEqualTo("ID_2");
-        assertThat(organiserteEnheter.get("over").getAgressoId()).isEqualTo(mockEnhetOver.getORGENHET_KODE());
+        assertEquals("ID_2", organiserteEnheter.get("over").getId());
+        assertEquals(orgenhetOver.agressoId(), organiserteEnheter.get("over").getAgressoId());
     }
 
     @Test
-    @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
+    @DisplayName("Tester at graphQL spørring på leder hvor enhet har leder gir leder")
     void scenario31() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
 
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
+        orgEnhetStateRepository.update(orgenhet);
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
 
-        final var response = postForResource("organisasjonsenhet/scenario4.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
+        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
 
-        assertEquals(ressurs.navident(), outputLeder.getRessurs().getNavIdent());
-        assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.getRessurs().getPersonIdent());
+        assertEquals(ressurs.navident(), outputLeder.ressurs().getNavIdent());
+        assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.ressurs().getPersonIdent());
     }
 
     @Test
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        orgEnhetStateRepository.update(orgenhet);
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario32.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario32.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
 
         assertEquals(0, outputLedere.size());
-
     }
 
     @Test
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring - ikke slå opp mot PDL mer")
     void scenario34() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
-        kafkaUtils.createRessursHendelseEventSource("1"); // Trenger ressurs med navIdent "testNavIdent1" pga. orgTilknytning som "lekker inn" fra annen test
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
 
-        pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
 
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
+        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
 
-        final var leder = outputEnhetJson.get("leder").get(0).get("ressurs");
-
-        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), leder.get("fornavn").asText());
-        assertEquals(ressurs.visningsnavn().etternavn(), leder.get("etternavn").asText());
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asText());
+        assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asText());
     }
 
     @Test
-    @DisplayName("Leser kobling fra DVH og leser fra graphQl")
+    @DisplayName("Leser kobling fra graphQl")
     void scenario41() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
 
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
         orgtilknytningStateRepository.update(
             "FID_1",
@@ -451,9 +387,7 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
                 .build()
         );
 
-        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario41.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario41.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
@@ -472,17 +406,11 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn10").agressoId("testId10").agressoOrgNivaa("ORGENHET").build();
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 42, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
-        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario42.graphql");
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario42.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();
@@ -491,24 +419,28 @@ class OrganisasjonsenhetTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
 
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
-        pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+
+        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
 
-        final var leder = outputEnhetJson.get("leder").get(0).get("ressurs");
-
-        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), leder.get("fornavn").asText());
-        assertEquals(ressurs.visningsnavn().etternavn(), leder.get("etternavn").asText());
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asText());
+        assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asText());
     }
 
     private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {

@@ -8,10 +8,12 @@ import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetUnderordnetResolver;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
@@ -28,9 +30,9 @@ import java.util.Objects;
 @Component
 public class OrgEnhetMapper {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
-    private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+    private final OrgEnhetLederService orgEnhetLederService;
+//    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final OrgtilknytningService orgtilknytningService;
 
     private final OrgEnhetOverordnetResolver overordnetResolver;
@@ -39,17 +41,16 @@ public class OrgEnhetMapper {
 
     public OrgEnhetMapper(
         RemedyEnhetMapperService remedyEnhetMapperService,
-        DvhRepository dvhRepository,
-        RessursStateRepository ressursStateRepository,
-        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        RessursStateRepository ressursStateRepository, OrgEnhetLederService orgEnhetLederService,
+//        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
         OrgtilknytningService orgtilknytningService,
         OrgEnhetOverordnetResolver overordnetResolver,
         OrgEnhetUnderordnetResolver underordnetResolver
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
-        this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
-        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
+//        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.overordnetResolver = overordnetResolver;
         this.underordnetResolver = underordnetResolver;
@@ -65,10 +66,11 @@ public class OrgEnhetMapper {
 
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
         var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id).orElse(null);
-        var orgEnhetLeder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhet.getId())
+        var orgEnhetLeder = orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId())
             .flatMap(orgEnhetLederState -> ressursStateRepository.findByNavident(orgEnhetLederState.navident()))
             .map(ressursState -> new MinimalRessurs(ressursState.navident(), ressursState.visningsnavn()
                 .getFormattedVisningsnavn())).orElse(null);
+
 
         Collator norwegianCollator = Collator.getInstance(new Locale.Builder().setLanguage("no").setRegion("NO").build());
         var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
@@ -110,26 +112,41 @@ public class OrgEnhetMapper {
     }
 
     private List<RessursState> hentOrgEnhetLedere(IOrgenhet orgEnhet) {
-        return hentOrgEnhetLedere(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn());
-    }
-
-    public List<RessursState> hentOrgEnhetLedere(String agressoId, String orgNiv, String navn) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
-            .stream()
+        return orgEnhetLederService.getLedereForOrgEnhet(orgEnhet.getId()).stream()
             .map(this::ressursWithObscuredPersonident)
-            .filter(Objects::nonNull)
             .toList();
     }
 
-    public List<String> hentOrgEnhetLedereNavident(String agressoId, String orgNiv, String navn) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
-            .stream()
-            .map(DvhLeder::getNavIdent)
-            .toList();
-    }
+//    public List<RessursState> hentOrgEnhetLedere(String agressoId, String orgNiv, String navn) {
+//        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
+//            .stream()
+//
+//            .filter(Objects::nonNull)
+//            .toList();
+//    }
 
-    private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
-        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
+//    public List<String> hentOrgEnhetLedereNavident(String agressoId, String orgNiv, String navn) {
+//        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
+//            .stream()
+//            .map(DvhLeder::getNavIdent)
+//            .toList();
+//    }
+//
+//    private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
+//        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
+//        var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+//
+//        if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
+//            ressursState = ressursState.toBuilder()
+//                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+//                .build();
+//        }
+//
+//        return ressursState;
+//    }
+
+    private RessursState ressursWithObscuredPersonident(OrgEnhetLederState leder) {
+        var ressursState = ressursStateRepository.findByNavident(leder.navident()).orElse(null);
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
         if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
@@ -142,15 +159,16 @@ public class OrgEnhetMapper {
     }
 
     private List<String> getLedernavn(IOrgenhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
-                .stream()
-                .map(this::getLedernavnFromDvhLeder)
-                .filter(Objects::nonNull)
-                .toList();
+        return orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId())
+            .stream()
+            .map(OrgEnhetLederState::navident)
+            .map(this::getNavnForNavident)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
-    private String getLedernavnFromDvhLeder(DvhLeder dvhLeder) {
-        return ressursStateRepository.findByNavident(dvhLeder.getNavIdent())
+    private String getNavnForNavident(String navident) {
+        return ressursStateRepository.findByNavident(navident)
                 .map(r -> r.visningsnavn().getFormattedVisningsnavn())
                 .orElse(null);
     }

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -66,17 +67,18 @@ public class OrgEnhetResolver {
     }
 
     private List<OrgEnhetResult> orgenheterByAgressoData(OrgEnheterSearch search){
-        Stream<IOrgenhet> result;
+        Collection<IOrgenhet> result;
         final var agressoIder = search.resolveAgressoIder();
         if (agressoIder.isEmpty()) {
-            result = orgenhetService.getAllEnheter().stream();
+            result = orgenhetService.getAllEnheter();
         } else {
-            result = orgenhetService.findEnheterByAgressoIdIn(agressoIder).stream();
+            result = orgenhetService.findEnheterByAgressoIdIn(agressoIder);
         }
 
         final var orgNiv = search.getOrgNiv();
         final var orgenhetkategori = search.resolveNomNivaaEnum();
-        final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
+        final var orgEnhetResults = result.stream()
+            .filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
             .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa()))
             .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
             .map(MappingUtils::toOrgEnhet)

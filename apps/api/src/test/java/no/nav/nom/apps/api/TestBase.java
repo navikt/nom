@@ -10,6 +10,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateAutoconfiguration;
@@ -105,14 +106,14 @@ public abstract class TestBase {
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired
+    protected OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+
+    @Autowired
     protected MasteredRessursStateRepository masteredRessursStateRepository;
 
     @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
-//    @Autowired
-//    NomMastered nomMastered;
-//
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
@@ -120,10 +121,10 @@ public abstract class TestBase {
         organiseringStateRepository.clear();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
-        pdlUtils.reset();
         kafkaUtils.clearKafka();
         ressursStateRepository.clear();
         dvhRessursUtils.createEmptyResponse();
+        orgEnhetLederStateRepository.clear();
     }
 
     @BeforeEach

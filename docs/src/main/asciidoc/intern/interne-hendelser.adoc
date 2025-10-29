@@ -121,25 +121,26 @@ Dette vil være et edge case, men greit å være obs på det.
 
 ==== Data Access Objects
 
-[source,java]
-----
-include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/IHendelse.java[tag:class]
-----
-
-[source,java]
-----
-include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseType.java[tag:class]
-----
-
-[source,java]
-----
-include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseDataType.java[tag:class]
-----
-
-[source,java]
-----
-include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseMetadata.java[tag:class]
-----
+Source include finnes ikke mer
+// [source,java]
+// ----
+// include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/IHendelse.java[tag:class]
+// ----
+//
+// [source,java]
+// ----
+// include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseType.java[tag:class]
+// ----
+//
+// [source,java]
+// ----
+// include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseDataType.java[tag:class]
+// ----
+//
+// [source,java]
+// ----
+// include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseMetadata.java[tag:class]
+// ----
 
 Note:
 

@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,18 +32,17 @@ import static java.util.Objects.nonNull;
 @RequestMapping("/api/admin/SanityCheck")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class SanityCheck {
-    private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetLederService orgEnhetLederService;
 
     public SanityCheck(
-        DvhRepository dvhRepository,
         RessursStateRepository ressursStateRepository,
-        OrgenhetService orgenhetService
+        OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService
     ) {
-        this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
+        this.orgEnhetLederService = orgEnhetLederService;
     }
 
     @Operation(
@@ -59,15 +59,13 @@ public class SanityCheck {
         StringBuffer result = new StringBuffer();
         var alleEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList(); // Aktive enheter i organisasjonstreet
         List<IOrgenhet> alleOrgEnheterUtenLeder = new ArrayList<>();
-        for (IOrgenhet orgenhet : alleEnheter) {
-            List<DvhLeder> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn())
-                .stream()
-                .filter(Objects::nonNull)
-                .toList();
-            if (leaders.isEmpty()) {
-                alleOrgEnheterUtenLeder.add(orgenhet);
-            }
-        }
+
+        alleEnheter.forEach(orgenhet ->
+            orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).ifPresentOrElse(
+                leder -> {},// Har leder, gjør ingenting
+                () -> alleOrgEnheterUtenLeder.add(orgenhet) // Har ikke leder
+            )
+        );
 
         alleOrgEnheterUtenLeder.forEach(oe ->
             result.append(oe.getId())
@@ -98,7 +96,7 @@ public class SanityCheck {
         var alleRessurserWithSluttDatoBeforeToday = ressursStateRepository.findAllWithSluttdatoBeforeToday();
         Map<RessursState, List<IOrgenhet>> alleOrgEnheterMedLederSomHarSluttet = new HashMap<>();
         for (IOrgenhet orgenhet : alleEnheter) {
-            validerEnhetsledereSomHarSluttet(orgenhet, alleRessurserWithSluttDatoBeforeToday).ifPresent(ressursState -> {
+            validerEnhetsLedereSomHarSluttet(orgenhet, alleRessurserWithSluttDatoBeforeToday).ifPresent(ressursState -> {
                 if (!alleOrgEnheterMedLederSomHarSluttet.containsKey(ressursState)) {
                     alleOrgEnheterMedLederSomHarSluttet.computeIfAbsent(ressursState, org -> new ArrayList<>()).add(orgenhet);
                 } else {
@@ -109,11 +107,9 @@ public class SanityCheck {
         return EnhetMedRessursSomHarSluttetOgErLederSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
     }
 
-    private Optional<RessursState> validerEnhetsledereSomHarSluttet(IOrgenhet orgenhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-            .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.getNavIdent()))
-            .filter(Objects::nonNull)
-            .findFirst();
+    private Optional<RessursState> validerEnhetsLedereSomHarSluttet(IOrgenhet orgenhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {
+        return orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId())
+            .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.navident()));
     }
 }
 

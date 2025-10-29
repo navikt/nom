@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
@@ -15,4 +16,9 @@ public record OrgEnhetLederState(
     LocalDate sluttdato,
     String sistEndretAv
 ) {
+    @JsonIgnore
+    public boolean isActive() {
+        return (startdato == null || !startdato.isAfter(LocalDate.now())) &&
+            (sluttdato == null || !sluttdato.isBefore(LocalDate.now()));
+    }
 }

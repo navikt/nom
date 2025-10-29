@@ -10,6 +10,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class RessursStateBuilder {
     private String fid;
@@ -63,7 +64,7 @@ public class RessursStateBuilder {
 
     public RessursStateBuilder visningsnavn(String fornavn, String etternavn) {
         this.visningsnavn = new Visningsnavn(
-            fornavn, null, etternavn
+            fornavn, Optional.empty(), etternavn
         );
         return this;
     }
@@ -95,7 +96,7 @@ public class RessursStateBuilder {
         this.sektor = Sektor.NAV_STATLIG;
         this.visningsnavn = new Visningsnavn(
             "fornavn" + suffix,
-            null,
+            Optional.empty(),
             "etternavn" + suffix
         );
         this.jobbtelefon = new Jobbtelefon(

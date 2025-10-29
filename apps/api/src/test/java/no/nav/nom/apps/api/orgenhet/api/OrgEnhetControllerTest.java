@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -133,15 +134,12 @@ public class OrgEnhetControllerTest extends RestTestBase {
         RessursState lederRessurs = ressursState();
         ressursStateRepository.update(lederRessurs);
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        DvhLeder dvhLeder = DvhLeder.builder()
-                .orgEnhetNr(orgEnhet.agressoId())
-                .orgNiv(orgEnhet.agressoOrgNivaa())
-                .orgenhetNavn(orgEnhet.navn())
-                .navIdent(lederRessurs.navident())
-                .build();
-        dvhRepository.saveLedere(List.of(dvhLeder));
-
+        orgEnhetLederStateRepository.update("FID_1", OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident(lederRessurs.navident())
+                .orgEnhetId(orgEnhetId)
+                .startdato(LocalDate.now().minusMonths(3))
+                .build());
 
         List<OrgEnhetMedLedernavn> result = webTestClient.get()
                 .uri("/app/orgenheter/kanHaRessurser")

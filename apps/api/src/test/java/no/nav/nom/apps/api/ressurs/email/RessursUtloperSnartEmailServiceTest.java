@@ -5,7 +5,9 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -58,7 +60,7 @@ public class RessursUtloperSnartEmailServiceTest {
     private RessursStateRepository ressursStateRepository;
 
     @Mock
-    private OrgEnhetMapper orgEnhetMapper;
+    private OrgEnhetLederService orgEnhetLederService;
 
     @Test
     void testFreemarkerTemplate() throws TemplateException, IOException {
@@ -117,7 +119,8 @@ public class RessursUtloperSnartEmailServiceTest {
             )
         );
 
-        when(orgEnhetMapper.hentOrgEnhetLedereNavident(any(), any(), any())).thenReturn(List.of("L123456"));
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(any()))
+            .thenReturn(Optional.of(new OrgEnhetLederState("1", "L123456", orgEnhet, LocalDate.now().minusYears(1), null, null)));
 
         when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
             List.of(
@@ -215,13 +218,16 @@ public class RessursUtloperSnartEmailServiceTest {
             )
         );
 
-        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
-                RessursState.builder()
-                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
-                    .navident("L123456")
-                    .build()
-            )
-        );
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(any()))
+            .thenReturn(Optional.of(new OrgEnhetLederState("1", "L123456", orgEnhet, LocalDate.now().minusYears(1), null, null)));
+
+//        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
+//                RessursState.builder()
+//                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
+//                    .navident("L123456")
+//                    .build()
+//            )
+//        );
 
         when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
             List.of(

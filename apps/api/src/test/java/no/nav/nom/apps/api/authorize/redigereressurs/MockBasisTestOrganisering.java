@@ -9,9 +9,11 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -43,6 +45,8 @@ abstract public class MockBasisTestOrganisering {
     Unleash unleash;
     @MockitoBean
     OrgenhetService orgenhetService;
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
     @MockitoBean
     DvhRepository dvhRepository;
     @MockitoBean
@@ -286,28 +290,62 @@ abstract public class MockBasisTestOrganisering {
             orgenhet_E, orgenhet_E1
         ));
 
-        when(orgenhetService.getEnheterByLeder("A")).thenReturn(List.of(orgenhet_A));
-        when(orgenhetService.getEnheterByLeder("A1")).thenReturn(List.of(orgenhet_A1));
-        when(orgenhetService.getEnheterByLeder("A11")).thenReturn(List.of(orgenhet_A11));
-        when(orgenhetService.getEnheterByLeder("B")).thenReturn(List.of(orgenhet_B));
-        when(orgenhetService.getEnheterByLeder("B1")).thenReturn(List.of(orgenhet_B1));
-        when(orgenhetService.getEnheterByLeder("B11")).thenReturn(List.of(orgenhet_B11));
-        when(orgenhetService.getEnheterByLeder("C")).thenReturn(List.of(orgenhet_C));
-        when(orgenhetService.getEnheterByLeder("C1")).thenReturn(List.of(orgenhet_C1));
-        when(orgenhetService.getEnheterByLeder("C11")).thenReturn(List.of(orgenhet_C11));
-        when(orgenhetService.getEnheterByLeder("C2")).thenReturn(List.of(orgenhet_C2));
-        when(orgenhetService.getEnheterByLeder("C22")).thenReturn(List.of(orgenhet_C22));
-        when(orgenhetService.getEnheterByLeder("D")).thenReturn(List.of(orgenhet_D));
-        when(orgenhetService.getEnheterByLeder("D1")).thenReturn(List.of(orgenhet_D1));
-        when(orgenhetService.getEnheterByLeder("E")).thenReturn(List.of(orgenhet_E));
-        when(orgenhetService.getEnheterByLeder("E1")).thenReturn(List.of(orgenhet_E1));
-        when(orgenhetService.getEnheterByLeder("H1")).thenReturn(List.of(orgenhet_helfo));
-        when(orgenhetService.getEnheterByLeder("S1")).thenReturn(List.of(orgenhet_skatt));
-        when(orgenhetService.getEnheterByLeder("R1")).thenReturn(List.of(orgenhet_riksrev));
+        when(orgEnhetLederService.getEnheterByLeder("A")).thenReturn(List.of(orgenhet_A));
+        when(orgEnhetLederService.getEnheterByLeder("A1")).thenReturn(List.of(orgenhet_A1));
+        when(orgEnhetLederService.getEnheterByLeder("A11")).thenReturn(List.of(orgenhet_A11));
+        when(orgEnhetLederService.getEnheterByLeder("B")).thenReturn(List.of(orgenhet_B));
+        when(orgEnhetLederService.getEnheterByLeder("B1")).thenReturn(List.of(orgenhet_B1));
+        when(orgEnhetLederService.getEnheterByLeder("B11")).thenReturn(List.of(orgenhet_B11));
+        when(orgEnhetLederService.getEnheterByLeder("C")).thenReturn(List.of(orgenhet_C));
+        when(orgEnhetLederService.getEnheterByLeder("C1")).thenReturn(List.of(orgenhet_C1));
+        when(orgEnhetLederService.getEnheterByLeder("C11")).thenReturn(List.of(orgenhet_C11));
+        when(orgEnhetLederService.getEnheterByLeder("C2")).thenReturn(List.of(orgenhet_C2));
+        when(orgEnhetLederService.getEnheterByLeder("C22")).thenReturn(List.of(orgenhet_C22));
+        when(orgEnhetLederService.getEnheterByLeder("D")).thenReturn(List.of(orgenhet_D));
+        when(orgEnhetLederService.getEnheterByLeder("D1")).thenReturn(List.of(orgenhet_D1));
+        when(orgEnhetLederService.getEnheterByLeder("E")).thenReturn(List.of(orgenhet_E));
+        when(orgEnhetLederService.getEnheterByLeder("E1")).thenReturn(List.of(orgenhet_E1));
+        when(orgEnhetLederService.getEnheterByLeder("H1")).thenReturn(List.of(orgenhet_helfo));
+        when(orgEnhetLederService.getEnheterByLeder("S1")).thenReturn(List.of(orgenhet_skatt));
+        when(orgEnhetLederService.getEnheterByLeder("R1")).thenReturn(List.of(orgenhet_riksrev));
+
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("A")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_A.getId()).navident("A").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("A1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_A1.getId()).navident("A1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("A11")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_A11.getId()).navident("A11").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("B")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_B.getId()).navident("B").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("B1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_B1.getId()).navident("B1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("B11")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_B11.getId()).navident("B11").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("C")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_C.getId()).navident("C").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("C1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_C1.getId()).navident("C1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("C11")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_C11.getId()).navident("C11").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("C2")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_C2.getId()).navident("C2").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("C22")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_C22.getId()).navident("C22").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("D1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_D1.getId()).navident("D1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("E")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_E.getId()).navident("E").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("E1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_E1.getId()).navident("E1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("H1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_helfo.getId()).navident("H1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("S1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_skatt.getId()).navident("S1").startdato(LocalDate.now().minusYears(1)).build()));
+        when(orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor("R1")).thenReturn(List.of(
+            OrgEnhetLederState.builder().orgEnhetId(orgenhet_riksrev.getId()).navident("R1").startdato(LocalDate.now().minusYears(1)).build()));
     }
 
     private void setupBasisOrganisering() {
-
         OrganiseringState organisering_A_X = OrganiseringState.builder()
             .fid("FID_A_X")
             .id("A")
@@ -495,135 +533,50 @@ abstract public class MockBasisTestOrganisering {
     }
 
     private void setupBasisLedere() {
-        DvhLeder leder_A = DvhLeder.builder()
-            .navIdent("A")
-            .orgEnhetNr("A")
-            .orgenhetNavn("OrgEnhet A")
-            .orgNiv("NAV")
-            .build();
 
-        DvhLeder leder_A1 = DvhLeder.builder()
-            .navIdent("A1")
-            .orgEnhetNr("A1")
-            .orgenhetNavn("OrgEnhet A1")
-            .orgNiv("ORGNIV2")
-            .build();
+        var leder_A =OrgEnhetLederState.builder().orgEnhetId("A").navident("A").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_A1 =OrgEnhetLederState.builder().orgEnhetId("A1").navident("A1").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_A11 =OrgEnhetLederState.builder().orgEnhetId("A11").navident("A11").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_A11 = DvhLeder.builder()
-            .navIdent("A11")
-            .orgEnhetNr("A11")
-            .orgenhetNavn("OrgEnhet A11")
-            .orgNiv("ORGNIV3")
-            .build();
+        var leder_B =OrgEnhetLederState.builder().orgEnhetId("B").navident("B").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_B1 =OrgEnhetLederState.builder().orgEnhetId("B1").navident("B1").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_B11 =OrgEnhetLederState.builder().orgEnhetId("B11").navident("B1").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_B = DvhLeder.builder()
-            .navIdent("B")
-            .orgEnhetNr("B")
-            .orgenhetNavn("OrgEnhet B")
-            .orgNiv("ORGNIV3")
-            .build();
+        var leder_C =OrgEnhetLederState.builder().orgEnhetId("C").navident("C").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_C1 =OrgEnhetLederState.builder().orgEnhetId("C1").navident("C").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_C11 =OrgEnhetLederState.builder().orgEnhetId("C11").navident("C3").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_B1 = DvhLeder.builder()
-            .navIdent("B1")
-            .orgEnhetNr("B1")
-            .orgenhetNavn("OrgEnhet B1")
-            .orgNiv("ORGNIV4")
-            .build();
+        var leder_C2 =OrgEnhetLederState.builder().orgEnhetId("C2").navident("C2").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_C22 =OrgEnhetLederState.builder().orgEnhetId("C22").navident("C2").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_B11 = DvhLeder.builder()
-            .navIdent("B1")
-            .orgEnhetNr("B11")
-            .orgenhetNavn("OrgEnhet B11")
-            .orgNiv("ORGENHET")
-            .build();
+        var leder_D =OrgEnhetLederState.builder().orgEnhetId("D").navident("D").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_D1 =OrgEnhetLederState.builder().orgEnhetId("D1").navident("D").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_C = DvhLeder.builder()
-            .navIdent("C")
-            .orgEnhetNr("C")
-            .orgenhetNavn("OrgEnhet C")
-            .orgNiv("ORGNIV3")
-            .build();
+        var leder_E =OrgEnhetLederState.builder().orgEnhetId("E").navident("D").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_E1 =OrgEnhetLederState.builder().orgEnhetId("E1").navident("E1").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_C1 = DvhLeder.builder()
-            .navIdent("C")
-            .orgEnhetNr("C1")
-            .orgenhetNavn("OrgEnhet C1")
-            .orgNiv("ORGNIV4")
-            .build();
+        var leder_HELFO =OrgEnhetLederState.builder().orgEnhetId("dummyHelfoId").navident("H1").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_SKATT =OrgEnhetLederState.builder().orgEnhetId("dummySkattId").navident("S1").startdato(LocalDate.now().minusYears(1)).build();
+        var leder_RIKSREV =OrgEnhetLederState.builder().orgEnhetId("dummyRiksrevisjonId").navident("R1").startdato(LocalDate.now().minusYears(1)).build();
 
-        DvhLeder leder_C11 = DvhLeder.builder()
-            .navIdent("C3")
-            .orgEnhetNr("C11")
-            .orgenhetNavn("OrgEnhet C11")
-            .orgNiv("ORGENHET")
-            .build();
-
-        DvhLeder leder_C2 = DvhLeder.builder()
-            .navIdent("C2")
-            .orgEnhetNr("C2")
-            .orgenhetNavn("OrgEnhet C2")
-            .orgNiv("ORGNIV4")
-            .build();
-
-        DvhLeder leder_C22 = DvhLeder.builder()
-            .navIdent("C2")
-            .orgEnhetNr("C22")
-            .orgenhetNavn("OrgEnhet C22")
-            .orgNiv("ORGENHET")
-            .build();
-
-        DvhLeder leder_D = DvhLeder.builder()
-            .navIdent("D")
-            .orgEnhetNr("D")
-            .orgenhetNavn("OrgEnhet D")
-            .orgNiv("ORGNIV3")
-            .build();
-
-        DvhLeder leder_D1 = DvhLeder.builder()
-            .navIdent("D")
-            .orgEnhetNr("D1")
-            .orgenhetNavn("OrgEnhet D1")
-            .orgNiv("ORGENHET")
-            .build();
-
-        DvhLeder leder_E = DvhLeder.builder()
-            .navIdent("D")
-            .orgEnhetNr("E")
-            .orgenhetNavn("OrgEnhet E")
-            .orgNiv("ORGNIV3")
-            .build();
-
-        DvhLeder leder_E1 = DvhLeder.builder()
-            .navIdent("E1")
-            .orgEnhetNr("E1")
-            .orgenhetNavn("OrgEnhet E1")
-            .orgNiv("ORGENHET")
-            .build();
-
-        DvhLeder leder_HELFO = DvhLeder.builder()
-            .navIdent("H1")
-            .orgEnhetNr("HELFO")
-            .orgenhetNavn("OrgEnhet HELFO")
-            .orgNiv("NAV")
-            .build();
-
-        DvhLeder leder_SKATT = DvhLeder.builder()
-            .navIdent("S1")
-            .orgEnhetNr("SKATT")
-            .orgenhetNavn("OrgEnhet SKATT")
-            .orgNiv("NAV")
-            .build();
-
-        DvhLeder leder_RIKSREV = DvhLeder.builder()
-            .navIdent("R1")
-            .orgEnhetNr("RIKSREV")
-            .orgenhetNavn("OrgEnhet RIKSREV")
-            .orgNiv("NAV")
-            .build();
-
-        when(dvhRepository.getLedere()).thenReturn(List.of(
-            leder_A, leder_A1, leder_A11, leder_B, leder_B1, leder_B11, leder_C, leder_C1, leder_C11, leder_C2, leder_C22, leder_D, leder_D1, leder_E, leder_E1, leder_HELFO, leder_SKATT, leder_RIKSREV
-        ));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_A.orgEnhetId())).thenReturn(Optional.of(leder_A));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_A1.orgEnhetId())).thenReturn(Optional.of(leder_A1));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_A11.orgEnhetId())).thenReturn(Optional.of(leder_A11));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_B.orgEnhetId())).thenReturn(Optional.of(leder_B));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_B1.orgEnhetId())).thenReturn(Optional.of(leder_B1));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_B11.orgEnhetId())).thenReturn(Optional.of(leder_B11));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_C.orgEnhetId())).thenReturn(Optional.of(leder_C));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_C1.orgEnhetId())).thenReturn(Optional.of(leder_C1));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_C11.orgEnhetId())).thenReturn(Optional.of(leder_C11));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_C2.orgEnhetId())).thenReturn(Optional.of(leder_C2));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_C22.orgEnhetId())).thenReturn(Optional.of(leder_C22));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_D.orgEnhetId())).thenReturn(Optional.of(leder_D));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_D1.orgEnhetId())).thenReturn(Optional.of(leder_D1));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_E.orgEnhetId())).thenReturn(Optional.of(leder_E));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_E1.orgEnhetId())).thenReturn(Optional.of(leder_E1));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_HELFO.orgEnhetId())).thenReturn(Optional.of(leder_HELFO));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_SKATT.orgEnhetId())).thenReturn(Optional.of(leder_SKATT));
+        lenient().when(orgEnhetLederService.getAktivLederForOrgEnhet(leder_RIKSREV.orgEnhetId())).thenReturn(Optional.of(leder_RIKSREV));
     }
 
     private void setupBasisOrgtilknytninger() {

@@ -10,9 +10,9 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
-import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -48,7 +48,7 @@ public class TeamcatController {
     private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetOverordnetResolver overordnetResolver;
-    private final RessursLedereResolver ressursLedereResolver;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final String IT_AVDELING_ID;
     private final OrgEnhetMapper orgEnhetMapper;
 
@@ -60,7 +60,7 @@ public class TeamcatController {
         OrgenhetService orgenhetService,
         Environment env,
         OrgEnhetOverordnetResolver overordnetResolver,
-        RessursLedereResolver ressursLedereResolver,
+        OrgEnhetLederService orgEnhetLederService,
         OrgEnhetMapper orgEnhetMapper
     ) {
         this.adclient = adclient;
@@ -69,7 +69,7 @@ public class TeamcatController {
         this.orgtilknytningService = orgtilknytningService;
         this.ressursStateRepository = ressursStateRepository;
         this.overordnetResolver = overordnetResolver;
-        this.ressursLedereResolver = ressursLedereResolver;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.orgEnhetMapper = orgEnhetMapper;
         var isDev = "dev-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
         this.IT_AVDELING_ID = isDev ? "hu357k" : "ve673e";
@@ -156,14 +156,12 @@ public class TeamcatController {
             .findFirst()
             .map(OrgtilknytningState::orgEnhetId)
             .orElse(null);
-        var lederNavident = ressursLedereResolver.ledere(navident)
-            .stream()
-            .filter(RessursLeder::erDagligOppfolging)
-            .findFirst()
-            .map(RessursLeder::leder)
-            .map(RessursState::navident)
-            .orElse(null);
 
+        var lederNavident = orgEnhetLederService.getAktiveLedereForRessurs(navident, true)
+            .stream()
+            .findFirst()
+            .map(LederForRessurs::lederNavident)
+            .orElse(null);
 
         return new TeamcatRessursDTO(
             ressurs.startdato(),

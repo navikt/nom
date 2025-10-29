@@ -8,6 +8,10 @@ import java.util.UUID;
 
 public class OrgenhetTestUtils {
 
+    public static OrgEnhetState createDefault() {
+        return orgEnhetStateBuilderWithDefaultValues();
+    }
+
     public static OrgEnhetState orgEnhetStateBuilderWithDefaultValues() {
         return OrgEnhetState.builder()
             .fid(UUID.randomUUID().toString())
@@ -16,6 +20,7 @@ public class OrgenhetTestUtils {
             .uniqueAgressoId(UUID.randomUUID().toString())
             .agressoOrgNivaa(null)
             .agressoId(UUID.randomUUID().toString())
+            .gyldigFom(LocalDate.of(2022,1,1))
             .gyldigTom(LocalDate.now().plusDays(1))
             .orgEnhetsType(null)
             .build();

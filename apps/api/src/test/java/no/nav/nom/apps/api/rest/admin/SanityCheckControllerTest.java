@@ -1,15 +1,13 @@
 package no.nav.nom.apps.api.rest.admin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.redigereressurs.MockBasisTestOrganisering;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,10 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +41,7 @@ public class SanityCheckControllerTest extends RestTestBase {
     OrgenhetService orgenhetServiceMock;
 
     @MockitoBean
-    DvhRepository dvhRepositoryMock;
+    OrgEnhetLederService orgEnhetLederService;
 
     @MockitoBean
     OrgtilknytningService orgtilknytningServiceMock;
@@ -57,8 +55,8 @@ public class SanityCheckControllerTest extends RestTestBase {
 
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(Collections.emptyList());
-        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(any(), any(), any()))
-            .thenReturn(Collections.emptyList());
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
+
         webTestClient.get()
             .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
@@ -74,8 +72,7 @@ public class SanityCheckControllerTest extends RestTestBase {
 
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(getMockEnheterMedOrganisering());
-        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(any(), any(), any()))
-            .thenReturn(Collections.emptyList());
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
         webTestClient.get()
             .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
@@ -91,12 +88,11 @@ public class SanityCheckControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("Henter orgenheter med leder i NAV hierarkiet")
-    void test_listOrgenheterUtenLeder_with_leaders() throws JsonProcessingException {
+    void test_listOrgenheterUtenLeder_with_leaders() {
         when(orgenhetServiceMock.getAllEnheterMedOrganisering())
             .thenReturn(getMockEnheterMedOrganisering());
         // simulate that orgenhet B has a leader
-        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(AGRESSO_ID_B, AGRESSO_ORG_NIVAA_B, ORG_ENHET_NAVN_B))
-            .thenReturn(getMockLeaders());
+        when(orgEnhetLederService.getAktivLederForOrgEnhet("B")).thenReturn(getMockLederState());
 
         webTestClient.get()
             .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
@@ -111,15 +107,15 @@ public class SanityCheckControllerTest extends RestTestBase {
             });
     }
 
-    private List<DvhLeder> getMockLeaders() throws JsonProcessingException {
-        String jsonStr = "{" +
-            "\"leder_navident\": \"JohnDoe\"," +
-            "\"orgnode_kode\": \"B\"," +
-            "\"orgnode_niva\": \"ORGNIV3\"," +
-            "\"orgnode_navn\": \"OrgEnhet B\"" +
-            "}";
-        DvhLeder leder = DvhLeder.fromOrds(new ObjectMapper().readTree(jsonStr));
-        return new ArrayList<>(){{add(leder);}};
+    private Optional<OrgEnhetLederState> getMockLederState() {
+        return Optional.of(
+            OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident("JohnDoe")
+                .orgEnhetId("A")
+                .startdato(LocalDate.now().minusYears(1))
+                .build()
+        );
     }
 
     private Collection<IOrgenhet> getMockEnheterMedOrganisering() {

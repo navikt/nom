@@ -5,9 +5,12 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -54,9 +57,6 @@ public class OrgtilknytningEndretEmailServiceTest {
     private OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
 
     @Mock
-    private LederResolver lederResolver;
-
-    @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Mock
@@ -64,6 +64,12 @@ public class OrgtilknytningEndretEmailServiceTest {
 
     @Mock
     private RessursStateRepository ressursStateRepository;
+
+    @Mock
+    private OrgenhetService orgenhetService;
+
+    @Mock
+    private OrgEnhetLederService orgEnhetLederService;
 
     @Test
     public void tessFreemarkerTemplate() throws TemplateException, IOException {
@@ -174,15 +180,14 @@ public class OrgtilknytningEndretEmailServiceTest {
             )
         );
 
-        when(lederResolver.leder(any())).thenReturn(List.of(
-            OrgEnhetsLeder.builder()
-                .ressurs(Ressurs.builder()
-                    .navIdent(orgenhetLederNavIdent)
-                    .build()
-                )
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.of(
+            OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident(orgenhetLederNavIdent)
+                .orgEnhetId(orgEnhet)
+                .startdato(LocalDate.now().minusYears(1))
                 .build()
-            )
-        );
+        ));
 
         // test
         var result = orgtilknytningEndretEmailService.getRecipientNavidents(

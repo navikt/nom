@@ -10,7 +10,6 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.TestTokensGenerator;
-import no.nav.nom.apps.api.graphql.OldGraphQLTestBase;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,8 +26,10 @@ import static no.nav.nom.apps.api.TestTokensGenerator.LOGGED_IN_USER_NAVIDENT;
 import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_AUDIENCE;
 import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
 
+// TODO - Går det an å få lastet kun påkrevd context og ikke hele applikasjonen her for å få testene til å gå raskere?
+
 @DisplayName("GraphQL.Sikkerhet")
-class SecurityTest extends OldGraphQLTestBase {
+class SecurityTest extends GraphQLTestBase {
 
     private static final String organiseringResource = "organisasjonsenhet/scenario1.graphql";
     private static final String organiseringerResource = "organisasjonsenhet/scenario2.graphql";

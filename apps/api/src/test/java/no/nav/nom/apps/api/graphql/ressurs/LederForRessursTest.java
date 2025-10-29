@@ -1,300 +1,87 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
-import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
+import no.nav.nom.apps.api.common.RessursStateBuilder;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
-import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
+@ActiveProfiles("GraphQLTest")
+@GraphQlTest
+@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL.HentLederForRessursFlereNivaer")
-public class LederForRessursTest extends GraphQLExtendedIntegrationTestBase {
+public class LederForRessursTest {
+    @Autowired
+    protected GraphQLTestUtil gqlUtil;
 
     @Autowired
-    private DvhRestConsumer dvhRestConsumer;
-
+    RessursStateRepository ressursStateRepository;
     @Autowired
-    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
-
-    @MockitoBean
-    public DvhOrdsService dvhOrdsService;
-
+    OrgEnhetStateRepository orgEnhetStateRepository;
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
-    void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet() throws JsonProcessingException {
-
-        // Ressursen vi skal hente leder for er leder på to nivåer
-        final String ressursNedersteEnhetId = "idRessursEnhet";
-        final String ressursNedersteEnhetNavn = "Ressurs sin nederste enhet";
-        final String ressursNedersteEnhetNiva = "ORGENHET";
-
-        final String ressursOvreEnhetId = "idMellomEnhet";
-        final String ressursOvreEnhetNavn = "Ressurs sin øverste enhet";
-        final String ressursOvreEnhetNiva = "ORGNIV3";
-
+    void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet() {
         final String lederEnhetId = "idLederEnhet";
         final String lederEnhetNavn = "Leder sin enhet";
         final String lederEnhetNiva = "ORGNIV2";
 
+        var ressurs = new RessursStateBuilder(1).navident("testNavIdent1").build();
+        var leder = new RessursStateBuilder(1).personident("01011012345").build();
 
-        dvhOrgenhetMockUtils.createEmptyResponse(); // Ikke bruke Wiremock-responser fra JSON-konfig
+        ressursStateRepository.update(ressurs);
+        ressursStateRepository.update(leder);
 
-        var ressurs = kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
-        var leder = kafkaUtils.createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
+        var orgenhet = new OrgEnhetStateBuilder(1).id("ID_1").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var ledersEnhet = new OrgEnhetStateBuilder(1).id(lederEnhetId).navn(lederEnhetNavn).agressoOrgNivaa(lederEnhetNiva).lederFid(leder.fid()).build();
 
+        orgEnhetStateRepository.update(orgenhet);
+        orgEnhetStateRepository.update(ledersEnhet);
 
-        var ressursSinNedersteEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(ressursNedersteEnhetId)
-            .ORGNODE_NIV(ressursNedersteEnhetNiva)
-            .ORGENHET_NAVN(ressursNedersteEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent1")
-            .build();
-
-        var ressursSinOvreEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(ressursOvreEnhetId)
-            .ORGNODE_NIV(ressursOvreEnhetNiva)
-            .ORGENHET_NAVN(ressursOvreEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent1")
-            .build();
-
-        var ledersEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(lederEnhetId)
-            .ORGNODE_NIV(lederEnhetNiva)
-            .ORGENHET_NAVN(lederEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent2")
-            .build();
-
-        // Brukes bare for å få en gyldig organisering for ledersEnhet
-        var enhetPaHoyereNiva = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("id")
-            .ORGNODE_NIV("ORGNIV1")
-            .ORGENHET_NAVN("navn")
-            .LEDER_RESSURSNR("leder")
-            .build();
-
-        dvhOrgenhetMockUtils.addToResponse(ressursSinNedersteEnhet, ressursSinOvreEnhet, ledersEnhet);
-
-        // Streams-app er ikke aktiv, så må legge manuelt inn i repository
-        var ressursSinNedersteEnhetState = addToOrgEnhetStateRepository(1, ressursSinNedersteEnhet);
-        var ressursSinOvreEnhetState = addToOrgEnhetStateRepository(2, ressursSinOvreEnhet);
-        var ledersEnhetState = addToOrgEnhetStateRepository(3, ledersEnhet);
-        var enhetPaHoyereNivaState = addToOrgEnhetStateRepository(4, enhetPaHoyereNiva);
-
-        var dvhOrganisering1 = mockOrganisering(ressursSinNedersteEnhet, ressursSinOvreEnhet);
-        var dvhOrganisering2 = mockOrganisering(ressursSinOvreEnhet, ledersEnhet);
-        var dvhOrganisering3 = mockOrganisering(ledersEnhet, enhetPaHoyereNiva);
-
-        var dvhLeder1 = mockLeder(ressursSinNedersteEnhet);
-        var dvhLeder2 = mockLeder(ressursSinOvreEnhet);
-        var dvhLeder3 = mockLeder(ledersEnhet);
-
-        // Streams-app er ikke aktiv, så må legge manuelt inn i repository
-        addToOrganiseringStateRepository(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState);
-        addToOrganiseringStateRepository(2, ressursSinOvreEnhetState, ledersEnhetState);
-        addToOrganiseringStateRepository(3, ledersEnhetState, enhetPaHoyereNivaState);
-
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOrdsService.getLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
-
-        // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.update(
             "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
                 .navident(ressurs.navident())
-                .orgEnhetId("ID_1")
-                .erDagligOppfolging(true)
-                .build()
+                .orgEnhetId(orgenhet.id()).build()
         );
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        var lederForRessurs = new LederForRessurs(leder.navident(), ledersEnhet.id(), LocalDate.now().minusYears(1), null, true);
+        doReturn(List.of(lederForRessurs)).when(orgEnhetLederService).getLedereForRessurs(ressurs.navident(), false);
 
-        final var response = postForResource("ressurs/leder_over_rekursivt.graphql");
+        final var response = gqlUtil.postForResource("ressurs/leder_over_rekursivt.graphql");
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledere.size()).isEqualTo(1);
-
+        assertEquals(1, ledere.size());
 
         // Navident til leder på første nivå der ressurs ikke selv er leder skal returneres
-        assertThat(ledere.get(0).get("ressurs").get("navident").textValue()).isEqualTo(leder.navident());
+        assertEquals(leder.navident(), ledere.get(0).get("ressurs").get("navident").textValue());
 
         // Sjekk at personnummer er sladdet ut.
-        assertThat(ledere.get(0).get("ressurs").get("personident").textValue()).endsWith("*****");
-    }
-
-    @Test
-    @DisplayName("Ny organisering: Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
-    void hente_leder_gjennom_flere_nivaer_for_ressurs_som_leder_enhet_med_ny_organisering() throws JsonProcessingException {
-        // Ressursen vi skal hente leder for er leder på to nivåer
-        final String ressursNedersteEnhetId = "idRessursEnhet";
-        final String ressursNedersteEnhetNavn = "Ressurs sin nederste enhet";
-        final String ressursNedersteEnhetNiva = "ORGENHET";
-
-        final String ressursOvreEnhetId = "idMellomEnhet";
-        final String ressursOvreEnhetNavn = "Ressurs sin øverste enhet";
-        final String ressursOvreEnhetNiva = "ORGNIV3";
-
-        final String lederEnhetId = "idLederEnhet";
-        final String lederEnhetNavn = "Leder sin enhet";
-        final String lederEnhetNiva = "ORGNIV2";
-
-
-        dvhOrgenhetMockUtils.createEmptyResponse(); // Ikke bruke Wiremock-responser fra JSON-konfig
-
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen med ID "testNavIdent1"
-        RessursState leder = kafkaUtils.createRessursHendelseEventSource("2");     // Oppretter leder med ID "testNavIdent2"
-
-
-        DvhOrgEnhetMock ressursSinNedersteEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(ressursNedersteEnhetId)
-            .ORGNODE_NIV(ressursNedersteEnhetNiva)
-            .ORGENHET_NAVN(ressursNedersteEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent1")
-            .build();
-
-        DvhOrgEnhetMock ressursSinOvreEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(ressursOvreEnhetId)
-            .ORGNODE_NIV(ressursOvreEnhetNiva)
-            .ORGENHET_NAVN(ressursOvreEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent1")
-            .build();
-
-        DvhOrgEnhetMock ledersEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE(lederEnhetId)
-            .ORGNODE_NIV(lederEnhetNiva)
-            .ORGENHET_NAVN(lederEnhetNavn)
-            .LEDER_RESSURSNR("testNavIdent2")
-            .build();
-
-        // Brukes bare for å få en gyldig organisering for ledersEnhet
-        DvhOrgEnhetMock enhetPaHoyereNiva = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("idHoyereNiva")
-            .ORGNODE_NIV("ORGNIV1")
-            .ORGENHET_NAVN("Enhet høyere nivå")
-            .LEDER_RESSURSNR("lederHoyereNiva")
-            .build();
-
-        dvhOrgenhetMockUtils.addToResponse(ressursSinNedersteEnhet, ressursSinOvreEnhet, ledersEnhet, enhetPaHoyereNiva);
-
-
-        OrgEnhetState ressursSinNedersteEnhetState = toOrgEnhetStateWithId(1, ressursSinNedersteEnhet);
-        OrgEnhetState ressursSinOvreEnhetState = toOrgEnhetStateWithId(2, ressursSinOvreEnhet);
-        OrgEnhetState ledersEnhetState = toOrgEnhetStateWithId(3, ledersEnhet);
-
-        // Streams-app er ikke aktiv, så må legge manuelt inn i repository
-        orgEnhetStateRepository.update(ressursSinNedersteEnhetState);
-        orgEnhetStateRepository.update(ressursSinOvreEnhetState);
-        orgEnhetStateRepository.update(ledersEnhetState);
-
-        var dvhOrganisering1 = mockOrganisering(ressursSinNedersteEnhet, ressursSinOvreEnhet);
-        var dvhOrganisering2 = mockOrganisering(ressursSinOvreEnhet, ledersEnhet);
-        var dvhOrganisering3 = mockOrganisering(ledersEnhet, enhetPaHoyereNiva);
-
-        var dvhLeder1 = mockLeder(ressursSinNedersteEnhet);
-        var dvhLeder2 = mockLeder(ressursSinOvreEnhet);
-        var dvhLeder3 = mockLeder(ledersEnhet);
-
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering1, dvhOrganisering2, dvhOrganisering3));
-        when(dvhOrdsService.getLedere()).thenReturn(List.of(dvhLeder1, dvhLeder2, dvhLeder3));
-
-        // Knytte ressurs til org. enhet på laveste nivå
-        orgtilknytningStateRepository.update(
-            "FID_1",
-            orgtilknytningState().toBuilder()
-                .fid("FID_1")
-                .navident(ressurs.navident())
-                .orgEnhetId("ID_1")
-                .erDagligOppfolging(true)
-                .build()
-        );
-
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
-
-        // Samme som over - må lagre organisering state manuelt
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, ressursSinNedersteEnhetState, ressursSinOvreEnhetState));
-        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, ressursSinOvreEnhetState, ledersEnhetState));
-
-
-        final var response = postForResource("ressurs/leder_over_rekursivt.graphql");
-
-        final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledere.size()).isEqualTo(1);
-
-        // Navident til leder på første nivå der ressurs ikke selv er leder skal returneres
-        assertThat(ledere.get(0).get("ressurs").get("navident").textValue()).isEqualTo(leder.navident());
-    }
-
-    private OrgEnhetState addToOrgEnhetStateRepository(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
-        var state = dvhOrgenhetMockUtils.dvhMockToState(
-            dvhOrgEnhetMock,
-            idSuffix,
-            String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),
-            String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE())
-        );
-        orgEnhetStateRepository.update(state);
-        return state;
-    }
-
-    private void addToOrganiseringStateRepository(int idSuffix, OrgEnhetState enhetUnder, OrgEnhetState enhetOver) {
-        organiseringStateRepository.update(
-            orgEnhetStateToOrganiseringState(
-                idSuffix,
-                enhetUnder,
-                enhetOver
-            )
-        );
-
-    }
-
-    private OrgEnhetState toOrgEnhetStateWithId(int idSuffix, DvhOrgEnhetMock dvhOrgEnhetMock) {
-        return dvhOrgenhetMockUtils.dvhMockToState(
-            dvhOrgEnhetMock,
-            idSuffix,
-            String.valueOf(dvhOrgEnhetMock.getORGENHET_FRA_PERIODE()),
-            String.valueOf(dvhOrgEnhetMock.getORGENHET_TIL_PERIODE())
-        );
-    }
-
-    private DvhOrganisering mockOrganisering(DvhOrgEnhetMock underEnhet, DvhOrgEnhetMock overEnhet) {
-        return DvhOrganisering.builder()
-            .agressoIdOver(overEnhet.getORGENHET_KODE())
-            .orgNivOver(overEnhet.getORGNODE_NIV())
-            .navnOver(overEnhet.getORGENHET_NAVN())
-            .agressoIdUnder(underEnhet.getORGENHET_KODE())
-            .orgNivUnder(underEnhet.getORGNODE_NIV())
-            .navnUnder(underEnhet.getORGENHET_NAVN())
-            .gyldigFom(LocalDate.now().minusDays(1))
-            .build();
-    }
-
-    private DvhLeder mockLeder(DvhOrgEnhetMock enhet) {
-        return DvhLeder.builder()
-            .navIdent(enhet.getLEDER_RESSURSNR())
-            .orgEnhetNr(enhet.getORGENHET_KODE())
-            .orgNiv(enhet.getORGNODE_NIV())
-            .orgenhetNavn(enhet.getORGENHET_NAVN())
-            .build();
+        assertTrue(ledere.get(0).get("ressurs").get("personident").textValue().endsWith("*****"));
     }
 }

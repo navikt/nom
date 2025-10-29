@@ -11,10 +11,10 @@ public class LederOrgEnhet {
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 
-    public LederOrgEnhet(OrgEnhet orgEnhet) {
+    public LederOrgEnhet(OrgEnhet orgEnhet, LocalDate gyldigFom, LocalDate gyldigTom) {
         this.organisasjonsenhet = orgEnhet;
         this.orgEnhet = orgEnhet;
-        this.gyldigFom = LocalDate.now();
-        this.gyldigTom = null;
+        this.gyldigFom = gyldigFom;
+        this.gyldigTom = gyldigTom;
     }
 }

@@ -1,25 +1,22 @@
 package no.nav.nom.contract.nom.api.graphql;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Value;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 
 import java.time.LocalDate;
 
 @Value
-//@Builder
-//@AllArgsConstructor
 public class RessursLeder {
 
     Ressurs ressurs;
     boolean erDagligOppfolging;
-    private LocalDate gyldigFom;
-    private LocalDate gyldigTom;
+    LocalDate gyldigFom;
+    LocalDate gyldigTom;
 
-    public RessursLeder(Ressurs ressurs, boolean erDagligOppfolging) {
+    public RessursLeder(Ressurs ressurs, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
         this.ressurs = ressurs;
         this.erDagligOppfolging = erDagligOppfolging;
-        this.gyldigFom = LocalDate.now();
-        this.gyldigTom = null;
+        this.gyldigFom = gyldigFom;
+        this.gyldigTom = gyldigTom;
     }
 }

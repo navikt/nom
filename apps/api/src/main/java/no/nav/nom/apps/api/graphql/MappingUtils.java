@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -14,9 +16,9 @@ public class MappingUtils {
         final var sektor = singletonList(ressursState.sektor());
 
         var sladdetPersonIdent = ressursState.personident().replaceFirst(".{5}$","*****");
-        var startdato = isNull(ressursState.startdato()) ? null : ressursState.startdato();
-        var sluttdato = isNull(ressursState.sluttdato()) ? null : ressursState.sluttdato();
-        var primaryTelefonnummer = isNull(ressursState.primaryTelefonnummer()) ? null : ressursState.primaryTelefonnummer();
+        var startdato = ressursState.startdato();
+        var sluttdato = ressursState.sluttdato();
+        var primaryTelefonnummer = ressursState.primaryTelefonnummer();
         return Ressurs.builder()
                 .navident(ressursState.navident())
                 .navIdent(ressursState.navident())
@@ -24,6 +26,7 @@ public class MappingUtils {
                 .personIdent(sladdetPersonIdent)
                 .ressurstype(sektor)
                 .sektor(sektor)
+                .gjeldendeSektor(ressursState.sektor() != null ? ressursState.sektor() : Sektor.NAV_STATLIG)
                 .startdato(startdato)
                 .sluttdato(sluttdato)
                 .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
@@ -45,8 +48,14 @@ public class MappingUtils {
                 .gyldigTom(orgEnhet.getGyldigTom())
                 .orgEnhetsKategori(orgEnhet.getNomNivaa())
                 .nomNivaa(orgEnhet.getNomNivaa())
-                .orgEnhetsType(orgEnhet.getOrgEnhetsType())
+                .orgEnhetsType(getType(orgEnhet.getOrgEnhetsType()))
                 .build();
     }
 
+    private static OrgEnhetsType getType(OrgEnhetsType orgEnhetsType){
+        if (!isNull(orgEnhetsType) && orgEnhetsType == OrgEnhetsType.DIR) {
+            return OrgEnhetsType.DIREKTORAT;
+        }
+        return orgEnhetsType;
+    }
 }

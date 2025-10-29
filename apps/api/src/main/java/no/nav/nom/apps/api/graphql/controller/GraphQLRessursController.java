@@ -11,23 +11,22 @@ import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
-import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +43,6 @@ public class GraphQLRessursController {
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final GraphQLFieldConsumptionCounter counter;
 
-    private final RessursStateRepository ressursStateRepository;
-
     @Autowired
     public GraphQLRessursController(
             RessursResolver ressursResolver,
@@ -53,8 +50,7 @@ public class GraphQLRessursController {
             TelefonResolver telefonResolver,
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
-            OrgTilknytningResolver orgTilknytningResolver,
-            RessursStateRepository ressursStateRepository
+            OrgTilknytningResolver orgTilknytningResolver
     ) {
         this.ressursResolver = ressursResolver;
         this.propertyResolver = propertyResolver;
@@ -62,15 +58,8 @@ public class GraphQLRessursController {
         this.lederResolver = lederResolver;
         this.counter = graphQLFieldConsumptionCounter;
         this.orgTilknytningResolver = orgTilknytningResolver;
-        this.ressursStateRepository = ressursStateRepository;
     }
 
-    @PreAuthorize(
-            """
-            @securityUtil.checkAuth(authentication) &&
-            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
-            """
-    )
     @QueryMapping("ressurs")
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
@@ -78,24 +67,12 @@ public class GraphQLRessursController {
         return ressursResolver.ressurs(search);
     }
 
-    @PreAuthorize(
-            """
-            @securityUtil.checkAuth(authentication) &&
-            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
-            """
-    )
     @QueryMapping("ressurser")
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         counter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search);
     }
 
-    @PreAuthorize(
-            """
-            @securityUtil.checkAuth(authentication) &&
-            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
-            """
-    )
     @QueryMapping("ressurserWithMetadata")
     public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment dataFetchingEnvironment) {
         counter.count(dataFetchingEnvironment);
@@ -108,19 +85,45 @@ public class GraphQLRessursController {
         return orgTilknytning(ressurser);
     }
 
+    @Deprecated
     @BatchMapping(typeName = "Ressurs", field = "orgTilknytning")
     public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytning(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytning(ressurser));
     }
 
-    @BatchMapping(typeName = "Ressurs", field = "lederFor")
-    public Mono<Map<Ressurs, List<LederOrgEnhet>>> lederFor(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> lederResolver.load(ressurser, lederResolver::lederFor));
+    // NB! @BatchMapping støtter ikke filter argumenter - implementerer enn sålenge med plain @SchemaMapping enn sålenge.
+    // Alternativt se på senere å implementere med DataLoader manuelt i en @SchemaMapping metode.
+    // https://stackoverflow.com/questions/79503570/how-to-deal-with-input-arguments-as-part-of-a-batchmapping-in-spring-boot-graph
+    // Men usikker på om det faktisk vil gi noen ytelsesfordel her, siden alle batch kall ender opp med single kall og alt uansett går mot in-mem data
+
+//    @BatchMapping(typeName = "Ressurs", field = "orgTilknytninger")
+//    public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytninger(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
+//        return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytninger(ressurser, periodiskUtvalg));
+//    }
+
+    @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
+    public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return orgTilknytningResolver.getOrgTilknytningerForRessurs(ressurs, periodiskUtvalg);
     }
 
-    @BatchMapping(typeName = "Ressurs", field = "ledere")
-    public Mono<Map<Ressurs, List<RessursLeder>>> ledere(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> lederResolver.load(ressurser, lederResolver::ledere));
+//    @BatchMapping(typeName = "Ressurs", field = "lederFor")
+//    public Mono<Map<Ressurs, List<LederOrgEnhet>>> lederFor(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
+//        return Mono.fromSupplier(() -> lederResolver.load(ressurser, (r) -> lederResolver.lederFor(r, periodiskUtvalg)));
+//    }
+
+    @SchemaMapping(typeName = "Ressurs", field = "lederFor")
+    public List<LederOrgEnhet> lederFor(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return lederResolver.lederFor(ressurs, periodiskUtvalg);
+    }
+
+//    @BatchMapping(typeName = "Ressurs", field = "ledere")
+//    public Mono<Map<Ressurs, List<RessursLeder>>> ledere(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
+//        return Mono.fromSupplier(() -> lederResolver.load(ressurser, (r) -> lederResolver.ledere(r.getNavIdent(), periodiskUtvalg)));
+//    }
+
+    @SchemaMapping(typeName = "Ressurs", field = "ledere")
+    public List<RessursLeder> ledere(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return lederResolver.ledere(ressurs.getNavIdent(), periodiskUtvalg);
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")
@@ -132,15 +135,4 @@ public class GraphQLRessursController {
     public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
     }
-
-
-    private Map<Ressurs, String> getLookedupRessursPersonIdentMap(List<Ressurs> ressurser) {
-        var ressursPersonIdentMap = new HashMap<Ressurs,String>(ressurser.size());
-        for(Ressurs r : ressurser){
-            var lookedUpPersonident = ressursStateRepository.findByNavident(r.getNavIdent(), RessursState::personident);
-            ressursPersonIdentMap.put(r, lookedUpPersonident.orElse(null));
-        }
-        return ressursPersonIdentMap;
-    }
-
 }

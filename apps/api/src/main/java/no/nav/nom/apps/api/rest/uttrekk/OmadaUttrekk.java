@@ -343,20 +343,7 @@ public class OmadaUttrekk {
     }
 
     private String getLederNavident(IOrgenhet orgenhet) {
-        String dvhRepositoryLeder = dvhRepository.getLedere().stream()
-            .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-            .findAny()
-            .map(DvhLeder::getNavIdent)
-            .orElse("");
-
-        String orgEnhetLeder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident).orElse("");
-        if (!Objects.equals(dvhRepositoryLeder, orgEnhetLeder)) {
-            log.info("Leder for orgEnhet {} er ulik i DVH ({})  og OrgEnhetLederState ({})", orgenhet.getId(), dvhRepositoryLeder, orgEnhetLeder);
-            diffDvhVsLederRepo.set(true);
-        }
-
-        return dvhRepositoryLeder;
+        return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident).orElse("");
     }
 
     String formaterTelefonnummer(String telefon) {
