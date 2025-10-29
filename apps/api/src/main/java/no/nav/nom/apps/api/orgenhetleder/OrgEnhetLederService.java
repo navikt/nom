@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhetleder;
 
-import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -21,7 +20,9 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,18 +36,16 @@ public class OrgEnhetLederService {
 
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final Unleash unleash;
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
     private final OrgenhetService orgenhetService;
 
 
-    public void persisterLedereForOrgenheter(List<DvhLeder> filteredLedere) {
-        if (!unleash.isEnabled("nom.persistere-ledere")) return;
+    public void persisterLedereForOrgenheter(List<DvhLeder> filteredDvhLedere) {
         Origination origination = new Origination("nom-api", "nom-api");
         InputMetadata inputMetadata = new InputMetadata("nom-api BatchJob", "persisterLedereForOrgenheter", null, origination);
 
-        if (!filteredLedere.isEmpty()) {
-            filteredLedere.forEach(dvhLedere -> {
+        if (!filteredDvhLedere.isEmpty()) {
+            filteredDvhLedere.forEach(dvhLedere -> {
                 try {
                     var orgEnhetId = orgenhetService.getEnhetByAgressoIdNivaAndName(dvhLedere.getOrgEnhetNr(), dvhLedere.getOrgNiv(), dvhLedere.getOrgenhetNavn())
                         .orElseThrow(() -> OrgEnhetNotFoundException.agressoIdNivaaNavn(
@@ -112,8 +111,44 @@ public class OrgEnhetLederService {
                     log.error(e.getMessage());
                 }
             });
+
+            Map<String, List<DvhLeder>> dvhLedereForNavident = filteredDvhLedere.stream().collect(Collectors.groupingBy(DvhLeder::getNavIdent));
+            Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = orgEnhetLederStateRepository.getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
+
+            log.info("Starter å rydde i orgEnhetLederState");
+            orgEnhetLederStates.forEach((navident, orgEnhetLederStateByNavident) -> {
+                log.info("{} er leder i {} enheter", navident, orgEnhetLederStateByNavident.size());
+                var dvhLederByNavident = dvhLedereForNavident.get(navident);
+                if (isNull(dvhLederByNavident) || dvhLederByNavident.isEmpty()) {
+                    log.info("{} er ikke leder i Unit4, alle blir avsluttet hos oss", navident);
+                    orgEnhetLederStateByNavident.values().forEach(orgEnhetLederState -> orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+                        orgEnhetLederState.fid(),
+                        new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
+                    ));
+                    return;
+                }
+
+                var copyOforgEnhetLederStateByNavident = new HashMap<>(orgEnhetLederStateByNavident);
+
+                dvhLederByNavident.forEach(dvhLeder -> {
+                    var orgEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                        dvhLeder.getOrgEnhetNr(),
+                        dvhLeder.getOrgNiv(),
+                        dvhLeder.getOrgenhetNavn()
+                    );
+                    orgEnhet.ifPresent(iOrgenhet -> copyOforgEnhetLederStateByNavident.remove(iOrgenhet.getId()));
+                });
+
+                copyOforgEnhetLederStateByNavident.forEach((orgEnhetId, orgEnhetLederState) -> {
+                    log.info("{} er ikke leder for {} lenger, staten blir avsluttet", navident, orgEnhetId);
+                    orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+                        orgEnhetLederState.fid(),
+                        new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
+                    );
+                });
+            });
         } else {
-            log.info("Ingen ledere funnet fra DVH");
+            log.warn("Ingen ledere funnet fra DVH");
         }
     }
 

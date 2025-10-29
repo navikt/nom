@@ -60,6 +60,10 @@ export async function reberegnNomnivaa() {
   return ky.get(`${API_BASE_URL}/api/admin/utlednomnivaaer`);
 }
 
+export async function persisterLedere() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/persisterLedere`);
+}
+
 export async function oppdaterOrgEnhetType(data: {
   nomId: string | undefined;
   orgEnhetsType: OrgEnhetsType | undefined;

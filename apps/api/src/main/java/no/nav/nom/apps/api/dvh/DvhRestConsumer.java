@@ -336,6 +336,15 @@ public class DvhRestConsumer {
         }
     }
 
+    public void persisterLedereFraDvh() {
+        log.info("Persister ledere fra dvh");
+        try {
+            orgEnhetLederService.persisterLedereForOrgenheter(dvhRepository.getLedere());
+        } catch (Exception e) {
+            log.error("Feilet i 'Persister ledere fra dvh'", e);
+        }
+    }
+
 
     private boolean isInitialStateReady() {
         return  nomStateRessursListener.hasReadToEndOnStartup()

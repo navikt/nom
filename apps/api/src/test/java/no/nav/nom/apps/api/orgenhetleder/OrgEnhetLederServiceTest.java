@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhetleder;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -10,7 +9,6 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Opprett
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,9 +35,6 @@ public class OrgEnhetLederServiceTest {
     private OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     @Mock
-    private Unleash unleash;
-
-    @Mock
     private OrgEnhetLederCommandService orgEnhetLederCommandService;
 
     @Mock
@@ -46,11 +42,6 @@ public class OrgEnhetLederServiceTest {
 
     @InjectMocks
     private OrgEnhetLederService orgEnhetLederService;
-
-    @BeforeEach
-    void setUp() {
-        doReturn(true).when(unleash).isEnabled(any());
-    }
 
     @Test
     @DisplayName("Test at ingen leder er persistert i state for orgenhet og en Opprettet og OppdatertStartdato blir sendt")
@@ -212,6 +203,65 @@ public class OrgEnhetLederServiceTest {
         // Then
         verify(orgEnhetLederCommandService, times(0)).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
         verify(orgEnhetLederCommandService, times(0)).oppdaterOrgEnhetLederStartdato(anyString(), any(OppdaterOrgEnhetLederStartdato.class));
+        verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("Test at løsningen klarer å avslutte en OrgEnhetLederState når orgenheten faller ut av hierarkiet")
+    void test_007() {
+        // Given
+        var orgEnhetIdEn = "ab123c";
+        var orgEnhetIdTo = "cd456e";
+        var orgEnhetIdTre = "fg789h";
+        var dvhLeder = List.of(
+            DvhLeder.builder().navIdent("A000001").orgEnhetNr("1000000").orgNiv("ORGNIV4").orgenhetNavn("Utvikling 1A").build(),
+            DvhLeder.builder().navIdent("A000002").orgEnhetNr("1000001").orgNiv("ORGNIV4").orgenhetNavn("Utvikling 1B").build()
+        );
+
+        var nomLeder = List.of(
+            OrgEnhetLederState.builder().fid("FID-001").navident("A000001").orgEnhetId(orgEnhetIdEn).startdato(LocalDate.now().minusMonths(1)).build(),
+            OrgEnhetLederState.builder().fid("FID-002").navident("A000001").orgEnhetId(orgEnhetIdTo).startdato(LocalDate.now()).build()
+        );
+
+        var nomLederMap = Map.of(
+            nomLeder.getFirst().navident(), Map.of(nomLeder.getFirst().orgEnhetId(), nomLeder.getFirst(), nomLeder.getLast().orgEnhetId(), nomLeder.getLast())
+        );
+
+        // And
+        doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetIdTo).build())))
+            .when(orgenhetService)
+            .getEnhetByAgressoIdNivaAndName(
+                dvhLeder.getFirst().getOrgEnhetNr(),
+                dvhLeder.getFirst().getOrgNiv(),
+                dvhLeder.getFirst().getOrgenhetNavn()
+            );
+
+        doReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().id(orgEnhetIdTre).build())))
+            .when(orgenhetService)
+            .getEnhetByAgressoIdNivaAndName(
+                dvhLeder.getLast().getOrgEnhetNr(),
+                dvhLeder.getLast().getOrgNiv(),
+                dvhLeder.getLast().getOrgenhetNavn()
+            );
+
+        doReturn(List.of(nomLeder.getFirst()))
+            .when(orgEnhetLederStateRepository)
+            .findAllByOrgEnhetId(orgEnhetIdTo);
+
+        doReturn("FID-003")
+            .when(orgEnhetLederCommandService)
+            .opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
+
+        doReturn(nomLederMap)
+            .when(orgEnhetLederStateRepository)
+            .getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
+
+        // When
+        orgEnhetLederService.persisterLedereForOrgenheter(dvhLeder);
+
+        // Then
+        verify(orgEnhetLederCommandService, times(1)).opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class));
+        verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederStartdato(anyString(), any(OppdaterOrgEnhetLederStartdato.class));
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(anyString(), any());
     }
 }
