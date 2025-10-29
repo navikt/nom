@@ -19,12 +19,6 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: team-nof
-      application: fullmaktsregister-api
-      access: read
-    - team: nom
-      application: skjermede-personer   # migrert til v4
-      access: read
 
 ---
 
@@ -49,9 +43,6 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: read
-    - team: team-nof
-      application: fullmaktsregister-api
       access: read
 
 ---
