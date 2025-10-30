@@ -31,7 +31,7 @@ spec:
     - name: high-kafka-lag
       rules:
         - alert: NOM-API høy Kafka lag
-          expr: kafka_consumergroup_group_topic_sum_lag{topic=~"org.nom.+-eventsource", group=~"org.nom.+|nom.remedy.+"} > 10
+          expr: kafka_consumergroup_group_topic_sum_lag{topic=~"org.nom.+-eventsource", group=~"org.nom.+|nom.remedy.+", group!~"org.nom-kafka-api-ressurs-state-v3_stream_-3||org.nom-kafka-api-ressurs-state_stream_-2"}} > 10
           for: 5m
           annotations:
             action: "Sjekk Kafka lag dashboard: https://grafana.nav.cloud.nais.io/d/edvoasmrt7ri8a/nom-kafka-lag?orgId=1"
