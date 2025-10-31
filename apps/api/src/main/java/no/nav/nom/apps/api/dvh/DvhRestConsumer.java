@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
@@ -79,7 +78,6 @@ public class DvhRestConsumer {
 
     private final OTUtenforHierarki otUtenforHierarki;
     private final TelefonService telefonService;
-    private final OrgEnhetLederService orgEnhetLederService;
     private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
@@ -112,7 +110,7 @@ public class DvhRestConsumer {
 
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
 
-        if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
+        if (!dvhStartupLoadMonitor.hasCompleted() && dvhTelefoner != null && !dvhTelefoner.isEmpty()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
@@ -135,7 +133,9 @@ public class DvhRestConsumer {
             updateOrgtilknytningerStateFromDvh();
 
             updateOrgtilknytningerForEksterneFromDvh();
-            oppdaterTelefonerFraDvh(dvhTelefoner);
+            if (dvhTelefoner != null && !dvhTelefoner.isEmpty()) {
+                oppdaterTelefonerFraDvh(dvhTelefoner);
+            }
         }
 
         manuelleRessurserOgLedereTilState.oppdater();

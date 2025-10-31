@@ -22,35 +22,16 @@ import java.util.function.Supplier;
 @Component
 @RequiredArgsConstructor
 public class DvhRepository {
-//    private List<DvhLeder> ledere = Collections.emptyList();
     private Collection<String> annenStatNavIdenter = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrList = Collections.emptyList();
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 
-//    public List<DvhLeder> getLederByAgressoIdAndNivAndNavn(String agressoId, String orgNiv, String navn) {
-//        return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv) && l.getOrgenhetNavn().equals(navn)).toList();
-//    }
-//
-//    public void saveLedere(List<DvhLeder> ledere) {
-//        this.ledere = ledere;
-//        this.updateListeners();
-//    }
-//
-//    public void updateLeder(DvhLeder nyLeder) {
-//        var orginalLederForEnhet = getLederByAgressoIdAndNivAndNavn(nyLeder.getOrgEnhetNr(), nyLeder.getOrgNiv(), nyLeder.getOrgenhetNavn()).stream().findFirst();
-//        List<DvhLeder> nyLedereList = new ArrayList<>(ledere);
-//        if (orginalLederForEnhet.isPresent()) {
-//            nyLedereList.remove(orginalLederForEnhet.get());
-//            log.info("bytter ut leder [{}] med [{}]", orginalLederForEnhet.get(), nyLeder);
-//            nyLedereList.add(nyLeder);
-//            saveLedere(nyLedereList);
-//        } else {
-//            log.error("Fant ikke original leder objekt for orgenhet til ny leder [{}]", nyLeder);
-//        }
-//    }
-
     public void saveTlf(List<DvhTelefon> tlfList) {
+        if (tlfList == null || tlfList.isEmpty()) {
+            log.warn("Mottok tom eller null liste for telefonnummer fra DVH");
+            return;
+        }
         this.navidentTelefonNrList = tlfList;
         this.updateListeners();
     }
