@@ -26,12 +26,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
 public class OrgenhetRenamedListener {
     public static final String ORGENHET_NAVN_ENDRET_VARSEL_FTLH = "orgenhet-navn-endret-varsel.ftlh";
+
+    private TimeUnit delayUnit = TimeUnit.SECONDS;
+    private int delayAmount = 10;
+
+    private static final ScheduledExecutorService ex = Executors.newSingleThreadScheduledExecutor();
 
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final OrgenhetService orgenhetService;
@@ -66,9 +74,15 @@ public class OrgenhetRenamedListener {
         StreamSupport.stream(records.spliterator(), false).forEach(consumerRecord -> {
             var organiseringEvent = consumerRecord.value();
             if (organiseringEvent instanceof OrganiseringAvsluttetEventV1 avsluttet) {
-                handleOrganiseringAvsluttet(avsluttet);
+                // Legg inn en delay for å sikre at eventuell ny organisering har blitt prosessert før vi sjekker opp mot alternativ orgenhet
+                ex.schedule(() -> handleOrganiseringAvsluttet(avsluttet), delayAmount, delayUnit);
             }
         });
+    }
+
+    void setDelay(TimeUnit unit, int amount) {
+        this.delayUnit = unit;
+        this.delayAmount = amount;
     }
 
     private void handleOrganiseringAvsluttet(OrganiseringAvsluttetEventV1 avsluttetEvt) {
