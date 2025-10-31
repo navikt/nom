@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,8 +21,8 @@ public class ManuelleRessurserOgLedereTilState {
     final ManuelleRessurserOgLedereProperties cfg;
     final RessursStateRepository nomStateRessursRepository;
     final OrgtilknytningStateRepository nomStateOrgtilknytningRepository;
+    final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     final OrgenhetService orgenhetService;
-    final OrgEnhetLederService orgEnhetLederService;
     final DvhRepository dvhRepository;
     final LuceneService luceneService;
 
@@ -29,14 +30,15 @@ public class ManuelleRessurserOgLedereTilState {
         ManuelleRessurserOgLedereProperties cfg,
         @Qualifier("nomStateRessursRepository") RessursStateRepository nomStateRessursRepository,
         @Qualifier("nomStateOrgtilknytningRepository") OrgtilknytningStateRepository nomStateOrgtilknytningRepository,
-        OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService, DvhRepository dvhRepository,
+        @Qualifier("nomStateOrgEnhetLederRepository") OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        OrgenhetService orgenhetService, DvhRepository dvhRepository,
         LuceneService luceneService
     ) {
         this.cfg = cfg;
         this.nomStateRessursRepository = nomStateRessursRepository;
         this.nomStateOrgtilknytningRepository = nomStateOrgtilknytningRepository;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.orgenhetService = orgenhetService;
-        this.orgEnhetLederService = orgEnhetLederService;
         this.dvhRepository = dvhRepository;
         this.luceneService = luceneService;
     }
@@ -55,7 +57,8 @@ public class ManuelleRessurserOgLedereTilState {
             });
             cfg.ledere().forEach(l -> {
                 if (l.navident() != null && l.orgenhet() != null) {
-                    orgEnhetLederService.persisterLedereForOrgenheter(List.of(l.asDvhLeder(orgenhetService)));
+                    var lederState = l.asState();
+                    orgEnhetLederStateRepository.update(lederState.fid(), lederState);
                 } else {
                     log.warn("Manuell leder mangler navident eller orgenhet: {}", l);
                 }

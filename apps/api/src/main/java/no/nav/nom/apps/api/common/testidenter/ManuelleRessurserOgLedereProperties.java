@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -67,13 +68,14 @@ public record ManuelleRessurserOgLedereProperties(
         String navident,
         String orgenhet
     ) {
-        public DvhLeder asDvhLeder(OrgenhetService orgenhetService) {
-            return DvhLeder.builder()
-                .navIdent(navident)
-                .orgEnhetNr(orgenhetService.getById(orgenhet).orElseThrow().getAgressoId())
-                .orgNiv(orgenhetService.getById(orgenhet).orElseThrow().getOrgNiv())
-                .orgenhetNavn(orgenhetService.getById(orgenhet).orElseThrow().getNavn())
+        public OrgEnhetLederState asState() {
+            return OrgEnhetLederState.builder()
+                .fid("FID_MANUELL_OT_" + navident + " " + orgenhet)
+                .orgEnhetId(orgenhet)
+                .navident(navident)
+                .startdato(LocalDate.now().minusMonths(1))
                 .build();
         }
+
     }
 }
