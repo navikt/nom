@@ -35,10 +35,10 @@ public class OrgTilknytningResolver {
         this.orgenhetService = orgenhetService;
     }
 
-    public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytninger(Collection<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalgArg) {
-        return ressurser.stream()
-            .collect(toMap(Function.identity(), r -> getOrgTilknytningerForRessurs(r, periodiskUtvalgArg)));
-    }
+//    public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytninger(Collection<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalgArg) {
+//        return ressurser.stream()
+//            .collect(toMap(Function.identity(), r -> getOrgTilknytningerForRessurs(r, periodiskUtvalgArg)));
+//    }
 
     public List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalgArg) {
         return orgtilknytningService
@@ -79,7 +79,6 @@ public class OrgTilknytningResolver {
         final var orgEnhetGqlResponse = MappingUtils.toOrgEnhet(orgenhet);
 
         return RessursOrgTilknytning.builder()
-            .organisasjonsenhet(orgEnhetGqlResponse)
             .orgEnhet(orgEnhetGqlResponse)
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())

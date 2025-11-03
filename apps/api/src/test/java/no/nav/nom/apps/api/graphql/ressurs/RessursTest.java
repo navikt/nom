@@ -161,12 +161,10 @@ class RessursTest {
                 .orgEnhetId("ID_1").build()
         );
 
-        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
         final var response = gqlUtil.postForResource("ressurs/scenario42.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        final var outputOrganisasjonsEnhetId = outputRessurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
+        final var outputOrganisasjonsEnhetId = outputRessurs.get("orgTilknytninger").get(0).get("orgEnhet").get("agressoId").asText();
 
         assertEquals(orgenhet.agressoId(), outputOrganisasjonsEnhetId);
     }
@@ -180,7 +178,7 @@ class RessursTest {
         final var response = gqlUtil.postForResource("ressurs/scenario22.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertTrue(outputRessurs.get("koblinger").isEmpty());
+        assertTrue(outputRessurs.get("orgTilknytninger").isEmpty());
     }
 
     @Test
@@ -307,7 +305,7 @@ class RessursTest {
 
         final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
         assertEquals(1, lederFor.size());
-        assertEquals(orgenhet.agressoId(), lederFor.get(0).get("organisasjonsenhet").get("agressoId").textValue());
+        assertEquals(orgenhet.agressoId(), lederFor.get(0).get("orgEnhet").get("agressoId").textValue());
     }
 
     @Test

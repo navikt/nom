@@ -17,11 +17,7 @@ public class OrgEnhet {
     String navn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
-    @Deprecated
-    Kode type;
 
-    @Deprecated
-    NomNivaa orgEnhetsKategori;
     NomNivaa nomNivaa;
 
     OrgEnhetsType orgEnhetsType;

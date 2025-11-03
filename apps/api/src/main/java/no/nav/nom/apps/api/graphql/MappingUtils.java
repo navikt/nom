@@ -24,7 +24,6 @@ public class MappingUtils {
                 .navIdent(ressursState.navident())
                 .personident(sladdetPersonIdent)
                 .personIdent(sladdetPersonIdent)
-                .ressurstype(sektor)
                 .sektor(sektor)
                 .gjeldendeSektor(ressursState.sektor() != null ? ressursState.sektor() : Sektor.NAV_STATLIG)
                 .startdato(startdato)
@@ -46,7 +45,6 @@ public class MappingUtils {
                 .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())
                 .gyldigFom(orgEnhet.getGyldigFom())
                 .gyldigTom(orgEnhet.getGyldigTom())
-                .orgEnhetsKategori(orgEnhet.getNomNivaa())
                 .nomNivaa(orgEnhet.getNomNivaa())
                 .orgEnhetsType(getType(orgEnhet.getOrgEnhetsType()))
                 .build();

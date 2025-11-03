@@ -44,7 +44,6 @@ public class OrgEnhetResolver {
     }
 
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch search) {
-
         final var ider = search.resolveIder();
         if(ider.isEmpty()){
             return orgenheterByAgressoData(search);
@@ -60,7 +59,6 @@ public class OrgEnhetResolver {
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
-        logger.debug("Ny implementasjon henter orgEnhet for {}", organisering);
         return orgenhetService.getById(organisering.getId())
             .map(MappingUtils::toOrgEnhet)
             .orElseThrow();

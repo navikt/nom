@@ -15,7 +15,6 @@ public class Ressurs {
     @Deprecated    String personIdent;
     @Deprecated    String visningsNavn;
     @Deprecated    List<Sektor> sektor;
-    @Deprecated    List<Sektor> ressurstype;
 
     String navident;
     String personident;

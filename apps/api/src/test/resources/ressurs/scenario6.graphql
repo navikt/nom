@@ -2,7 +2,7 @@ query {
     ressurs(where: {navIdent: "testNavIdent"}) {
         navIdent
         lederFor {
-            organisasjonsenhet {
+            orgEnhet {
                 agressoId
             }
         }

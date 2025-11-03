@@ -12,10 +12,6 @@ query {
             navn
             gyldigFom
             gyldigTom
-            type {
-                kode
-                navn
-            }
         }
     }
 }

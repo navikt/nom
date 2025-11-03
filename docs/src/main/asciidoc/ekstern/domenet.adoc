@@ -79,12 +79,17 @@ Liste over alle ressurser knyttet til orgEnheten.|Se OrgEnhetsKobling | Unit4 vi
 
 I spørring på OrgEnhet.orgTilknytninger kan man benytte filter for periodisk utvalg [ALLE\|AKTIVE\|HISTORISKE\|FREMTIDIGE] for å hente orgtilknytninger som var aktive i gitt periode. Angis ikke utvalg filter så hentes kun AKTIVE orgtilknytninger
 |Se OrgTilknytning-objektet | NOM
-|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
-|agressoOrgenhetType | Ja   |Enhetstype slik det er definert i Unit4. Alle enheter i direktoratet er f.eks. DIR, et NAV-kontor er LOKAL. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra agressoOrgenhetType på sikt. | LOKAL/DIR... | Unit4 via DVH
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId.
+
+Konsumenter av NOM oppfordres sterkt til å ikke bruke agressoId, men heller bruke NOMs id for enheten som er unik. +
+NOM kommer til å gå vekk fra agressoid på sikt.| 1001360         | Unit4 via DVH
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso.
+
+Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
+|agressoOrgenhetType | Ja   |Enhetstype slik det er definert i Unit4. Alle enheter i direktoratet er f.eks. DIR, et NAV-kontor er LOKAL.
+
+Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra agressoOrgenhetType på sikt. | LOKAL/DIR... | Unit4 via DVH
 |===
-
-
 
 
 == OrgEnhetsKobling (Deprekert)

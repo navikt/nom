@@ -11,8 +11,6 @@ type OrgEnhet {
     orgEnhetsType: OrgEnhetsType
     koblinger: [OrgEnhetsKobling!]! @deprecated(reason: "koblinger er erstattet med orgTilknytninger")  # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [OrgTilknytning!]!
-    orgEnhetsKategori: NomNivaa  @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
-    type: Kode   @deprecated(reason: "Ubrukt felt")
     agressoId: ID!
     orgNiv: String!
     agressoOrgenhetType: String
@@ -20,7 +18,6 @@ type OrgEnhet {
 
 type Organisering {
     retning: Retning!
-    organisasjonsenhet : OrgEnhet! @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet : OrgEnhet!
     gyldigFom: Date!
     gyldigTom: Date
@@ -38,14 +35,12 @@ type Ressurs {
     epost: String
     primaryTelefon: String
     telefon: [Telefon!]!
-    ressurstype: [Sektor!]! @deprecated(reason: "ressurstype er erstattet med gjeldendeSektor") # Deprekert Nov.2025
     sektor: [Sektor!]! @deprecated(reason: "sektor er erstattet med gjeldendeSektor") # Deprekert Nov.2025
     gjeldendeSektor: Sektor!
     startdato: Date
     sluttdato: Date
     ledere (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursLeder!]!
     lederFor (utvalg: PeriodiskUtvalgArg = AKTIVE): [LederOrgEnhet!]!
-    koblinger: [RessursOrgTilknytning!]! @deprecated(reason: "koblinger er erstattet med orgTilknytninger")
     orgTilknytning: [RessursOrgTilknytning!]! @deprecated(reason: "orgTilknytning er erstattet med orgTilknytninger") # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursOrgTilknytning!]!
 }
@@ -64,7 +59,6 @@ type OrgEnhetsLeder {
 }
 
 type LederOrgEnhet {
-    organisasjonsenhet: OrgEnhet! @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet!
     gyldigFom: Date!
     gyldigTom: Date
@@ -86,7 +80,6 @@ type OrgTilknytning {
 }
 
 type RessursOrgTilknytning {
-    organisasjonsenhet: OrgEnhet! @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet!
     gyldigFom: Date!
     gyldigTom: Date
@@ -105,13 +98,6 @@ enum PeriodiskUtvalgArg {
     AKTIVE,
     HISTORISKE,
     FREMTIDIGE
-}
-
-type Kode { # Deprekeres
-    kode: String!
-    navn: String!
-    gyldigFom: Date
-    gyldigTom: Date
 }
 
 type Telefon {

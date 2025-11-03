@@ -204,7 +204,7 @@ class OrganisasjonsenhetTest {
             .collect(
                 toMap(
                     o -> o.get("retning").asText(),
-                    o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                    o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
                 )
             );
 
@@ -233,7 +233,7 @@ class OrganisasjonsenhetTest {
             .collect(
                 toMap(
                     o -> o.get("retning").asText(),
-                    o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                    o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
                 )
             );
 
@@ -263,7 +263,7 @@ class OrganisasjonsenhetTest {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
@@ -290,7 +290,7 @@ class OrganisasjonsenhetTest {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);

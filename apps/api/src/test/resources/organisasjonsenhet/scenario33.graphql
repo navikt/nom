@@ -4,7 +4,7 @@ query {
         navn
         organiseringer(retning: over){
             retning
-            organisasjonsenhet{
+            orgEnhet {
                 id
                 agressoId
             }

@@ -67,8 +67,6 @@ public class OrganiseringResolver {
             .id(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())
             .retning(retning)
             .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())
-            .orgNiv("")
-            .orgEnhetNavn(retning == OrganiseringRetning.over ? organisering.navnOver() : organisering.navn())
             .gyldigFom(organisering.gyldigFom())
             .gyldigTom(organisering.gyldigTom())
             .build();

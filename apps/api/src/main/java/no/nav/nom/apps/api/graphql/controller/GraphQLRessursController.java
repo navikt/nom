@@ -80,12 +80,6 @@ public class GraphQLRessursController {
     }
 
     @Deprecated
-    @BatchMapping(typeName = "Ressurs", field = "koblinger")
-    public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> koblinger(List<Ressurs> ressurser) {
-        return orgTilknytning(ressurser);
-    }
-
-    @Deprecated
     @BatchMapping(typeName = "Ressurs", field = "orgTilknytning")
     public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytning(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytning(ressurser));
