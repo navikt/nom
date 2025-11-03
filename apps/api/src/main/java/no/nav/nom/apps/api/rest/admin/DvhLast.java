@@ -71,7 +71,7 @@ public class DvhLast {
     })
     @GetMapping(value = "/loadOrganiseringKoblingerOgLedere")
     public void loadOrganiseringKoblingerOgLedere() {
-        triggerKoblingerOgLederLast();
+        triggerOrganiseringerOgLederLast();
     }
 
     @Operation(
@@ -119,7 +119,7 @@ public class DvhLast {
     })
     @GetMapping(value = "/resolveOrgEnhetsTyper")
     public void resolveOrgEnhetsTyper() {
-        triggerKoblingerOgLederLast();
+        triggerOrganiseringerOgLederLast();
         triggerOrgEnhetsTypeLast();
     }
 
@@ -134,8 +134,9 @@ public class DvhLast {
     }
 
     @Async
-    public void triggerKoblingerOgLederLast() {
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+    public void triggerOrganiseringerOgLederLast() {
+        dvhRestConsumer.loadLedereFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
     }
 
     @Async

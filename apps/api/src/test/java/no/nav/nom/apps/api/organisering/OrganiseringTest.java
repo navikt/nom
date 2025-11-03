@@ -147,7 +147,8 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // Get organiseringer from DVH
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
+        
 
         ConsumerRecord<String, OrganiseringEvent> singleRecord = recordsQueue.poll(250, MILLISECONDS);
 
@@ -188,7 +189,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // First import from DVH, creates the organisering
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // The organisering is now present in the state
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
@@ -198,7 +199,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         when(dvhOrdsService.getOrganiseringer()).thenReturn(emptyList());
 
         // Second import from DVH, this should not create avslutt organisering event
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Expect one messages
         await()
@@ -245,7 +246,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // First import from DVH, creates the organisering
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // The organisering is now present in the state
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
@@ -255,7 +256,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dummyDvhOrganisering));
 
         // Second import from DVH, this should not create avslutt organisering event
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // 3. The gyldigTom date of organisering present in the state is NOT anymore in the future
         var newGyldigTom = LocalDate.now().minusDays(5);
@@ -268,7 +269,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));
 
         // Third import from DVH, creates avslutt organisering event
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Expect three messages
         await()
@@ -316,7 +317,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // Import organiseringer from DVH
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Organisering is now available from OrganiseringStateRepository
         OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgEnhetState, orgEnhetStateOver, LocalDate.now(), null);
@@ -336,7 +337,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering_modified));
 
         // Import organiseringer from DVH again
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Expect one create message and then one terminate + one create message for the change in organisering
         await()
@@ -391,7 +392,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // Get organiseringer from DVH, should generate two opprettet messages (organisering 2 + 3)
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // oppdatere organiseringByFid map i OrganiseringStateRepository
         OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3, overEnhetTilOrgEnhet3, LocalDate.now().minusDays(1), null);
@@ -425,7 +426,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // Get organiseringer from DVH again
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Wait until 5 messages have arrived
         // 2 messages initially + 3 from second part (organisering 4 created, old organisering 2 is terminated and new organisering 2 is created)
@@ -485,7 +486,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // opprette organisering (1 - 3)
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // oppdatere state
         OrganiseringState organiseringState3 = getOrganiseringState("organisering_3", orgEnhet3.id(), organisering3.getNavnUnder(),
@@ -512,7 +513,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // hente organiseringer from DVH igjen
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // vente til meldinger
         await()
@@ -566,7 +567,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // First import from DVH, creates the organisering
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // The organisering is now present in the state
         String fid_organisering1 = "organisering_1";
@@ -595,7 +596,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         );
 
         // Second import from DVH, creates the organisering and terminates the old one
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
 
         // Expect two create messages and then one terminate message
         await()
