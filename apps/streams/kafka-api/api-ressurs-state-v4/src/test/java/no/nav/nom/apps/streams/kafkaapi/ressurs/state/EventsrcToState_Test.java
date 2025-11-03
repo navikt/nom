@@ -631,6 +631,7 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             identType != null ? identType : data.identType(),
             data.primaryTelefonnummer(),
             data.primaryFysiskBrukersted(),
+            null,
             null
         );
     }
@@ -647,7 +648,8 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             ressursState.identType(),
             ressursState.primaryTelefonnummer(),
             ressursState.primaryFysiskBrukersted(),
-            ressursState.orgtilknytninger()
+            ressursState.orgtilknytninger(),
+            null
         );
     }
 
@@ -663,7 +665,8 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             ressursState.identType(),
             ressursState.primaryTelefonnummer(),
             ressursState.primaryFysiskBrukersted(),
-            ressursState.orgtilknytninger()
+            ressursState.orgtilknytninger(),
+            null
         );
     }
 
@@ -778,7 +781,8 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
             ressursState.identType(),
             ressursState.primaryTelefonnummer(),
             ressursState.primaryFysiskBrukersted(),
-            copy.isEmpty() ? null : copy
+            copy.isEmpty() ? null : copy,
+            null
         );
     }
 

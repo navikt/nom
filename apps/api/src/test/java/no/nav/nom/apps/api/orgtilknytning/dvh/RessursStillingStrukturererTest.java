@@ -72,6 +72,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
+                null,
                 null
             )));
         when(ressursStateRepository.findByNavident(navident_B002002))
@@ -88,6 +89,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
+                null,
                 null
             )));
     }
@@ -329,6 +331,7 @@ class RessursStillingStrukturererTest extends TestBase {
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
+                null,
                 null
             )));
 

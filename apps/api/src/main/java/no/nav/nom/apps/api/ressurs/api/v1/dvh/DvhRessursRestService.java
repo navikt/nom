@@ -79,7 +79,7 @@ public class DvhRessursRestService {
             ressursState.startdato(),
             ressursState.sluttdato(),
             orgtilknytninger,
-            getTilknyttingsType(ressursState.navident())
+            ressursState.tilknytningtype().name()
         );
     }
 
@@ -120,13 +120,4 @@ public class DvhRessursRestService {
             .orElse(null);
     }
 
-    public String getTilknyttingsType(String navident) {
-        OrgtilknytningState aktivDolOT = orgtilknytningService.getAktivDolOTForRessurs(navident);
-        return aktivDolOT != null
-            ? (aktivDolOT.orgtilknytningType() != null
-            ? aktivDolOT.orgtilknytningType().name()
-            : null)
-            : null;
-
-    }
 }

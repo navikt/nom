@@ -61,7 +61,8 @@ class MigreringVedLanseringMastringKommunaleOgEksterneTest {
             null,
             Collections.EMPTY_LIST,
             IdentType.STANDARD,
-            "S123456"
+            "S123456",
+            null
         );
     }
 

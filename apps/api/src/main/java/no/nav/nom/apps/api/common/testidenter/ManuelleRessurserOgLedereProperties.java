@@ -39,7 +39,8 @@ public record ManuelleRessurserOgLedereProperties(
                 "2700",
                 List.of("2700"),
                 IdentType.STANDARD,
-                "nom-api"
+                "nom-api",
+                null
             );
         }
 

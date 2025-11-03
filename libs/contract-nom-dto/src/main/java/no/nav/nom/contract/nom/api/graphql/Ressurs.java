@@ -3,6 +3,7 @@ package no.nav.nom.contract.nom.api.graphql;
 import lombok.Builder;
 import lombok.Value;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,5 +26,5 @@ public class Ressurs {
     String visningsNavn;
     String visningsnavn;
     String primaryTelefon;
-    String tilknytningstype;
+    Tilknytningtype tilknytningstype;
 }

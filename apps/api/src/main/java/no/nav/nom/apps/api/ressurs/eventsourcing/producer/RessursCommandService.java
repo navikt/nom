@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrima
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
@@ -25,6 +26,7 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTilknytningtypeOppdatertV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import org.slf4j.Logger;
@@ -133,6 +135,16 @@ public class RessursCommandService {
         ));
     }
 
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterTilknytningtypeEvent(OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand,
+        InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursTilknytningtypeOppdatertV1(
+            oppdaterTilknytningtypeCommand.fid(),
+            new RessursTilknytningtypeOppdatertV1.TilknytningtypeOppdatertEventData(
+                oppdaterTilknytningtypeCommand.tilknytningtype()
+            ),
+            inputMetadata
+        ));
+    }
 
     private CompletableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
         var pdlPerson = opprettRessursCommand.pdlPerson();

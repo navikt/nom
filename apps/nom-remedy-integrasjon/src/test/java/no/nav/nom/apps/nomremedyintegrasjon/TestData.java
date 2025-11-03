@@ -308,6 +308,7 @@ public class TestData {
             v1.getRessursOpprettetEventData().primaryFysiskBrukersted(),
             v1.getRessursOpprettetEventData().fysiskeBrukersteder(),
             IdentType.STANDARD,
+            null,
             null
         );
     }
@@ -326,6 +327,7 @@ public class TestData {
             "2700",
             new ArrayList<>(),
             IdentType.STANDARD,
+            null,
             null
         );
     }

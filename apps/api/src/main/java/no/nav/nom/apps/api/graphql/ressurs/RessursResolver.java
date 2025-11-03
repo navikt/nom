@@ -60,12 +60,8 @@ public class RessursResolver {
             ident = search.resolveIdent().flatMap(ressursStateRepository::findByPersonident);
 
         }
-
-        String navident = ident.map(RessursState::navident).orElse(null);
-        String tilknytningstype = dvhRessursRestService.getTilknyttingsType(navident);
-        return ident
-            .map(MappingUtils::toRessurs)
-            .map(r -> r.toBuilder().tilknytningstype(tilknytningstype).build());
+        
+        return ident.map(MappingUtils::toRessurs);
     }
 
     public List<RessursResult> ressurser(RessurserSearch search) {
@@ -78,22 +74,10 @@ public class RessursResolver {
                 search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByPersonident(ident).orElse(null)))
             );
         }
-        /*
+
         return results
             .map(res -> new RessursResult(res.isEmpty() ? null : MappingUtils.toRessurs(res.ressurs), res.id))
-            .toList();*/
-
-        return results
-            .map(res -> {
-                Ressurs ressurs = res.isEmpty() ? null : MappingUtils.toRessurs(res.ressurs);
-                if (ressurs != null) {
-                    String tilknytningstype = dvhRessursRestService.getTilknyttingsType(res.ressurs.navident());
-                    ressurs = ressurs.toBuilder().tilknytningstype(tilknytningstype).build();
-                }
-                return new RessursResult(ressurs, res.id);
-            })
             .toList();
-
     }
 
     public List<RessursWithMetadataResult> ressurserWithMetadata() {

@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.common.speiling;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -45,6 +46,7 @@ public class SpeilingService {
     public void speilOrgtilknytningSektorTilRessursScheduler() {
         if (leaderElection.isLeader()) {
             speilSektorOrgtilknytning();
+            speilTilknitningtyoeOrgtilknytning();
         }
     }
 
@@ -67,6 +69,29 @@ public class SpeilingService {
             if (isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), orgtilknytningState.sektor())) {
                 OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), orgtilknytningState.sektor());
                 ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
+            }
+        }));
+    }
+
+    private void speilTilknitningtyoeOrgtilknytning() {
+        var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
+            .stream()
+            .filter(OrgtilknytningState::erDagligOppfolging)
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> nonNull(orgtilknytningState.orgtilknytningType()))
+            .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
+            .toList();
+
+        InputMetadata inputMetadata = InputMetadata.builder()
+            .inputInterfaceName("nom-api BatchJob")
+            .inputInterfaceMethodName("speilOrgtilknytningTilknytningtypeTilRessursScheduler")
+            .origination(new Origination("nom-api", "nom-api"))
+            .build();
+
+        dolOrgtilknytninger.forEach(orgtilknytningState -> ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
+            if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), orgtilknytningState.orgtilknytningType())) {
+                OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), orgtilknytningState.orgtilknytningType());
+                ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
             }
         }));
     }

@@ -26,6 +26,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -534,15 +535,29 @@ public class OrgtilknytningRestService {
         }
 
         ressursStateRepository.findByNavident(orgtilknytningStateBeforeChanges.navident()).ifPresent(ressursState -> {
+            // commented code to be deleted
+            /*
             if (endreOrgtilknytningRequest.erDagligOppfolging()
                 && isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())
                 && (isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), endreOrgtilknytningRequest.sektor()))) {
                 OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), endreOrgtilknytningRequest.sektor());
                 ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
             }
+            */
+
+            if (endreOrgtilknytningRequest.erDagligOppfolging()
+                && isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
+                if(isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), endreOrgtilknytningRequest.sektor())){
+                    OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), endreOrgtilknytningRequest.sektor());
+                    ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
+                }
+                if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), endreOrgtilknytningRequest.tilknytningtype())) {
+                    OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), endreOrgtilknytningRequest.tilknytningtype());
+                    ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+                }
+            }
         });
     }
-
 
     // TODO: Det burde det muligens lages et nytt event 'OrgtilknytningOpprettetEventV2' som inneholder felter for erDagligOppfolging og orgtilknytningType
     //  slik at man kun trenger å sende ett i event i sammenheng med opprettelse av en ny orgtilknytning

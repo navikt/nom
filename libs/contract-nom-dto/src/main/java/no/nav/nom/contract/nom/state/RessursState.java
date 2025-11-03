@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
@@ -27,7 +28,8 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String primaryFysiskBrukersted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, defaultValue = "STANDARD") IdentType identType,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String sistEndretAv
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String sistEndretAv,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Tilknytningtype tilknytningtype
 ) {
     @JsonIgnore
     public boolean isEkstern() { return Sektor.EKSTERN.equals(this.sektor()); }
@@ -42,6 +44,7 @@ public record RessursState(
         return "RessursState{" +
             "navident='" + navident + '\'' +
             ", sektor=" + sektor +
+            ", tilknytningtype=" + tilknytningtype +
             ", visningsnavn=" + visningsnavn +
             ", jobbtelefon=" + jobbtelefon +
             ", primaryTelefonnummer=" + primaryTelefonnummer +

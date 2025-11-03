@@ -183,7 +183,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
-            "S123456"
+            "S123456",
+            null
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);
@@ -216,7 +217,8 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
-            "S123456"
+            "S123456",
+            null
         );
 
         kafkaUtils.createRessursHendelseEventSource(ressursState);

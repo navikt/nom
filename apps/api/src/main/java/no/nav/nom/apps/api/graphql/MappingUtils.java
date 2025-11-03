@@ -17,6 +17,7 @@ public class MappingUtils {
         var startdato = isNull(ressursState.startdato()) ? null : ressursState.startdato();
         var sluttdato = isNull(ressursState.sluttdato()) ? null : ressursState.sluttdato();
         var primaryTelefonnummer = isNull(ressursState.primaryTelefonnummer()) ? null : ressursState.primaryTelefonnummer();
+        var tilknytningstype = isNull(ressursState.tilknytningtype()) ? null : ressursState.tilknytningtype();
         return Ressurs.builder()
                 .navident(ressursState.navident())
                 .navIdent(ressursState.navident())
@@ -31,6 +32,7 @@ public class MappingUtils {
                 .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .primaryTelefon(primaryTelefonnummer)
+                .tilknytningstype(tilknytningstype)
                 .build();
     }
 

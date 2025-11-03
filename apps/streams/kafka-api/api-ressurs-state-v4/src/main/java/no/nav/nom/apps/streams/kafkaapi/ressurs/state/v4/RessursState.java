@@ -2,6 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4;
 
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
@@ -17,5 +18,6 @@ public record RessursState(
         IdentType identType,
         String primaryTelefonnummer,
         String primaryFysiskBrukersted,
-        List<Orgtilknytning> orgtilknytninger
+        List<Orgtilknytning> orgtilknytninger,
+        Tilknytningtype tilknytningtype
 ) { }
