@@ -138,6 +138,12 @@ public class DvhRestConsumer {
             }
         }
 
+        // TODO - denne kan i sekundær Pod (ikke leader) bli kjørt rett før leader pod har oppdatert ny info
+        //  - som gjør at sekundær pod er out of synch egentlig inntil denne trigges på nytt
+        // Men dette er best effort akkurat nå
+        authorizedNavident.oppdaterLedereForOrgenheter();
+
+
         manuelleRessurserOgLedereTilState.oppdater();
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
@@ -315,8 +321,6 @@ public class DvhRestConsumer {
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
             organiseringService.saveOrganiseringer(organiseringer);
-
-            authorizedNavident.oppdaterLedereForOrgenheter();
             return true;
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);

@@ -77,7 +77,6 @@ public class AuthorizedNavident {
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederService orgEnhetLederService;
-    private final DvhRepository dvhRepository;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
     private final MicrosoftGraphClient microsoftGraphClient;
     private final String nomWriteDelegertAdGroup;
@@ -100,7 +99,6 @@ public class AuthorizedNavident {
         OrganiseringStateRepository organiseringStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService,
-        DvhRepository dvhRepository,
         TilgangDelegertEmailService tilgangDelegertEmailService,
         MicrosoftGraphClient microsoftGraphClient,
         @Value("${app.clients.microsoft-graph.groups.nom-delegert}") String nomWriteDelegertAdGroup,
@@ -114,7 +112,6 @@ public class AuthorizedNavident {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgEnhetLederService = orgEnhetLederService;
-        this.dvhRepository = dvhRepository;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
         this.microsoftGraphClient = microsoftGraphClient;
         this.nomWriteDelegertAdGroup = nomWriteDelegertAdGroup;
@@ -409,22 +406,11 @@ public class AuthorizedNavident {
         enheterIHierarkiFraDriftsenhet.forEach(
             enhetId -> orgenhetService.getById(enhetId)
                 .flatMap(orgenhet -> orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident))
-//                dvhRepository.getLedere()
-//                    .stream()
-//                    .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-//                        .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-//                    .findAny()
-//                    .map(DvhLeder::getNavIdent))
                 .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
         );
 
         List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
             orgenhetId -> orgenhetService.getById(orgenhetId).flatMap(orgenhet -> orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident))
-//                dvhRepository.getLedere().stream()
-//                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-//                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-//                .findAny()
-//                .map(DvhLeder::getNavIdent))
                 .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
         );
         synchronized (this) {
