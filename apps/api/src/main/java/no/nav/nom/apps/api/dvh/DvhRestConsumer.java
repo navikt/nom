@@ -109,6 +109,7 @@ public class DvhRestConsumer {
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
+        loadOrganiseringerFromDvh();
 
         if (!dvhStartupLoadMonitor.hasCompleted() && dvhTelefoner != null && !dvhTelefoner.isEmpty()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
@@ -121,7 +122,7 @@ public class DvhRestConsumer {
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
 
             // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
-            loadLedereAndOrganiseringerFromDvh();
+            loadLedereFromDvh();
 
             // Finn OTer utenfor hierarki - og autoflytt om mulig
             findOTUtenforHierarki();
@@ -310,19 +311,31 @@ public class DvhRestConsumer {
         return new Jobbtelefon(telefon.nummer(), telefon.type());
     }
 
-    public boolean loadLedereAndOrganiseringerFromDvh() {
-        log.info("Laster ledere og Organisering fra dvh");
+    public boolean loadLedereFromDvh() {
+        log.info("Laster ledere fra dvh");
         try {
             var ledere = dvhOrdsService.getLedere();
-            var organiseringer = dvhOrdsService.getOrganiseringer();
 
             dvhService.saveLedere(ledere);
-            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-
-            organiseringService.saveOrganiseringer(organiseringer);
             return true;
         } catch (Exception e) {
-            log.error("Failure loading ledere og Organisering data from DVH", e);
+            log.error("Failure loading ledere data from DVH", e);
+        }
+        return false;
+    }
+
+    public boolean loadOrganiseringerFromDvh() {
+        log.info("Laster Organisering fra dvh");
+        try {
+            var organiseringer = dvhOrdsService.getOrganiseringer();
+
+            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
+            if (leaderElection.isLeader()) {
+                organiseringService.saveOrganiseringer(organiseringer);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("Failure loading Organisering data from DVH", e);
         }
         return false;
     }
