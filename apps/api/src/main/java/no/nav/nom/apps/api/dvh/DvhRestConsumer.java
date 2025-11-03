@@ -138,13 +138,12 @@ public class DvhRestConsumer {
             }
         }
 
+        manuelleRessurserOgLedereTilState.oppdater();
+
         // TODO - denne kan i sekundær Pod (ikke leader) bli kjørt rett før leader pod har oppdatert ny info
         //  - som gjør at sekundær pod er out of synch egentlig inntil denne trigges på nytt
         // Men dette er best effort akkurat nå
         authorizedNavident.oppdaterLedereForOrgenheter();
-
-
-        manuelleRessurserOgLedereTilState.oppdater();
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
