@@ -11,9 +11,10 @@ type OrgEnhet {
     orgEnhetsType: OrgEnhetsType
     koblinger: [OrgEnhetsKobling!]! @deprecated(reason: "koblinger er erstattet med orgTilknytninger")  # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [OrgTilknytning!]!
-    agressoId: ID!
-    orgNiv: String!
-    agressoOrgenhetType: String
+    agressoId: ID! @deprecated(reason: "agressoId er erstattet med agressoInfo.agressoId")  # Deprekert Nov.2025
+    orgNiv: String! @deprecated(reason: "orgNiv er erstattet med agressoInfo.agressoOrgNiv")  # Deprekert Nov.2025
+    agressoOrgenhetType: String @deprecated(reason: "agressoOrgenhetType er erstattet med agressoInfo.agressoOrgenhetType")  # Deprekert Nov.2025
+    agressoInfo: AgressoInfo
 }
 
 type Organisering {
@@ -86,6 +87,12 @@ type RessursOrgTilknytning {
     erDagligOppfolging: Boolean
     sektor: Sektor
     tilknytningType: TilknytningType
+}
+
+type AgressoInfo {
+    agressoId: ID
+    agressoOrgenhetType: String
+    agressoOrgNiv: String
 }
 
 enum Retning {

@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.api.graphql.AgressoInfo;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -47,6 +48,12 @@ public class MappingUtils {
                 .gyldigTom(orgEnhet.getGyldigTom())
                 .nomNivaa(orgEnhet.getNomNivaa())
                 .orgEnhetsType(getType(orgEnhet.getOrgEnhetsType()))
+                .agressoInfo(AgressoInfo.builder()
+                    .agressoId(orgEnhet.getAgressoId())
+                    .agressoOrgNiv(orgEnhet.getOrgNiv())
+                    .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())
+                    .build()
+                )
                 .build();
     }
 

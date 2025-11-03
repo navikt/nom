@@ -10,10 +10,11 @@ import java.time.LocalDate;
 @Value
 @Builder
 public class OrgEnhet {
+    @Deprecated        String agressoId;
+    @Deprecated        String orgNiv;
+    @Deprecated        String agressoOrgenhetType;
+
     String id;
-    String agressoId;
-    String orgNiv;
-    String agressoOrgenhetType;
     String navn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
@@ -22,6 +23,8 @@ public class OrgEnhet {
 
     OrgEnhetsType orgEnhetsType;
     String remedyEnhetId;
+
+    AgressoInfo agressoInfo;
 
     // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
     public boolean endedOnStartDate() {
