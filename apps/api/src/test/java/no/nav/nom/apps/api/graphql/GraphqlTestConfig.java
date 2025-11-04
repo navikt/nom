@@ -48,7 +48,6 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.ValidationService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
-import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
@@ -181,10 +180,6 @@ public class GraphqlTestConfig {
     @Bean
     OrganiseringService organiseringService() {
         return Mockito.mock(OrganiseringService.class, MockReset.after());
-    }
-    @Bean
-    KommunaleRessurserLoader kommunaleRessurserLoader() {
-        return Mockito.mock(KommunaleRessurserLoader.class, MockReset.after());
     }
     @Bean
     AuthorizedNavident authorizedNavident() {

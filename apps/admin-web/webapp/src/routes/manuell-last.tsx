@@ -9,7 +9,6 @@ import {
   lastOrgtilknytninger,
   lastOrgtilknytningerForEksterne,
   lastRessurser,
-  lastSkyggeOrgtilknytningerForKommunale,
   lastTyperForOrgenheter,
   persisterLedere,
   reberegnNomnivaa,
@@ -27,10 +26,6 @@ const LASTER = [
   {
     text: "Last eksterne orgtilknytninger",
     fn: lastOrgtilknytningerForEksterne,
-  },
-  {
-    text: "Last skyggeorgtilknytninger for kommunale",
-    fn: lastSkyggeOrgtilknytningerForKommunale,
   },
   { text: "Last typer for orgenheter", fn: lastTyperForOrgenheter },
   { text: "Beregn NOM-nivå på nytt", fn: reberegnNomnivaa },

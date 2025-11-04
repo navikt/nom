@@ -19,7 +19,6 @@ import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
-import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -118,8 +117,6 @@ public abstract class DvhTestBase {
     EksterneRessurserLoader eksterneRessurserLoader;
     @MockitoBean
     OrganiseringService organiseringService;
-    @MockitoBean
-    KommunaleRessurserLoader kommunaleRessurserLoader;
     @MockitoBean
     AuthorizedNavident authorizedNavident;
     @MockitoBean

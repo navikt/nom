@@ -60,7 +60,6 @@ public record AppProperties(
         String enhetPath,
         String ressursStillingerPath,
         String eksterneRessurserPath,
-        String kommunaleRessurserPath,
         String ansatteBucketsPath,
         String tlfPath,
         String orgHierarkiPath,

@@ -49,7 +49,6 @@ app:
       enhet-path: /dvh_nom/nom_ords_hrorg_orgenhet.json
       ressurs-stillinger-path: /dvh_nom/nom_ords_ressurs_stillinger.json
       eksterne-ressurser-path: /dvh_nom/nom_ords_eksterne.json
-      kommunale-ressurser-path: /dvh_nom/nom_ords_kommunale.json
       ansatte-buckets-path: /dvh_nom/nom_ords_ansatte_buckets.json
       tlf-path: /dvh_nom/nom_ords_tlf.json
       org-hierarki-path: /dvh_nom/nom_ords_hrorg_hierarki.json
