@@ -2,11 +2,13 @@ package no.nav.nom.libs.utils.common.util;
 
 import lombok.experimental.UtilityClass;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -31,5 +33,15 @@ public class StreamUtils {
         return safeStream(from).collect(Collectors.toMap(keyExtractor, Function.identity()));
     }
 
-
+    public <T, K, V> Collector<T, ?, LinkedHashMap<K, V>> collectToOrderedMap(
+        Function<? super T, ? extends K> keyMapper,
+        Function<? super T, ? extends V> valueMapper
+    ) {
+        return Collectors.toMap(
+            keyMapper,
+            valueMapper,
+            (exsisting, replacement) -> exsisting,
+            LinkedHashMap::new
+        );
+    }
 }

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -81,9 +82,16 @@ public class DvhRestConsumer {
     private final TelefonService telefonService;
     private final OrgEnhetLederService orgEnhetLederService;
     private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+    private final Unleash unleash;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
+
+        if (!unleash.isEnabled("nom-api.dvh-last")) {
+            log.info("DVH lasten er skrudd av i Unleash");
+            return;
+        }
+
         log.info("Starter schedulert oppdatering fra DVH");
         if (skipScheduledRunIfDuringDvhUpdate()) {
             return;

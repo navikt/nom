@@ -4,14 +4,24 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type"
+    use = JsonTypeInfo.Id.NAME,
+    property = "type"
 )
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = RessursSluttdatoOppdatertEventV1.class),
-    @JsonSubTypes.Type(value = RessursSluttetEventV1.class),
-    @JsonSubTypes.Type(value = RessursJobbtelefonOppdatertEventV1.class)
-})
+@JsonSubTypes(
+    {
+        @JsonSubTypes.Type(value = RessursFysiskeBrukerstederOppdatertEventV1.class),
+        @JsonSubTypes.Type(value = RessursJobbtelefonOppdatertEventV1.class),
+        @JsonSubTypes.Type(value = RessursOpprettetEventV1.class),
+        @JsonSubTypes.Type(value = RessursPersonaliaOppdatertV1.class),
+        @JsonSubTypes.Type(value = RessursPersonidentOppdatertV1.class),
+        @JsonSubTypes.Type(value = RessursPrimaryTelefonnummerOppdatertEventV1.class),
+        @JsonSubTypes.Type(value = RessursSektorOppdatertV1.class),
+        @JsonSubTypes.Type(value = RessursSluttdatoOppdatertEventV1.class),
+        @JsonSubTypes.Type(value = RessursSluttetEventV1.class),
+        @JsonSubTypes.Type(value = RessursStartDatoOppdatertV1.class),
+        @JsonSubTypes.Type(value = RessursTekniskSlettetEventV1.class)
+    }
+)
 public abstract class RessursEvent extends Event {
 
     public RessursEvent(String fid, Data data, Metadata metadata, Data additionalData) {
@@ -19,8 +29,8 @@ public abstract class RessursEvent extends Event {
     }
 
     @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type"
+        use = JsonTypeInfo.Id.NAME,
+        property = "type"
     )
-    public interface Data extends Event.Data { }
+    public interface Data extends Event.Data {}
 }

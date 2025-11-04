@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
+import static no.nav.nom.libs.utils.common.util.DateTimeUtil.epochMillisNorwegianTimeEndOfDay;
+
 @Service
 public class OrgtilknytningEventProducer {
 
@@ -39,6 +41,10 @@ public class OrgtilknytningEventProducer {
             saveToDB(event, eventKey);
         }
         return orgtilknytningEventProducerTemplate.sendDefault(eventKey, event);
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> replayMessage(String eventKey, OrgtilknytningEvent event) {
+        return orgtilknytningEventProducerTemplate.sendDefault(0, epochMillisNorwegianTimeEndOfDay(event.getMetadata().createdTimestamp()), eventKey, event);
     }
 
     private void saveToDB(OrgtilknytningEvent event, String eventKey) {

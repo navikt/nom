@@ -2,6 +2,7 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.IdentType;
@@ -12,11 +13,17 @@ import java.util.List;
 
 public class RessursOpprettetEventV1 extends RessursEvent {
 
-    @JsonCreator
-    public RessursOpprettetEventV1(String fid, RessursOpprettetEventData data, Metadata metadata, RessursOpprettetAdditionalData additionalData) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RessursOpprettetEventV1(
+        @JsonProperty("fid") String fid,
+        @JsonProperty("data") RessursOpprettetEventData data,
+        @JsonProperty("metadata") Metadata metadata,
+        @JsonProperty("additionalData") RessursOpprettetAdditionalData additionalData
+    ) {
         super(fid, data, metadata, additionalData);
     }
 
+    @JsonIgnore
     public RessursOpprettetEventV1(String fid, RessursOpprettetEventData data, InputMetadata inputMetadata, RessursOpprettetAdditionalData additionalData) {
         this(fid, data, Metadata.from(inputMetadata), additionalData);
     }

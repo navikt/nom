@@ -2,17 +2,23 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 
 import java.time.LocalDateTime;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type"
+    use = JsonTypeInfo.Id.NAME,
+    property = "type"
 )
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = OrgtilknytningEvent.class),
-    @JsonSubTypes.Type(value = RessursEvent.class)
-})
+@JsonSubTypes(
+    {
+        @JsonSubTypes.Type(value = OrgtilknytningEvent.class),
+        @JsonSubTypes.Type(value = RessursEvent.class),
+        @JsonSubTypes.Type(value = OrganiseringEvent.class),
+        @JsonSubTypes.Type(value = OrgEnhetEvent.class),
+        @JsonSubTypes.Type(value = OrgEnhetLederEvent.class)
+    }
+)
 public abstract class Event {
     private final String fid;
     private final Data data;
@@ -46,25 +52,25 @@ public abstract class Event {
     public record Metadata(
         InputMetadata inputMetadata,
         LocalDateTime createdTimestamp
-    ){
-        public static Metadata from(InputMetadata metadata){
+    ) {
+        public static Metadata from(InputMetadata metadata) {
             return new Metadata(metadata, LocalDateTime.now());
         }
     }
 
     @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type"
+        use = JsonTypeInfo.Id.NAME,
+        property = "type"
     )
-    public interface Data{ }
+    public interface Data {}
 
     @Override
     public String toString() {
         return "Event{" +
-                "fid='" + fid + '\'' +
-                ", data=" + data +
-                ", metadata=" + metadata +
-                ", additionalData=" + additionalData +
-                '}';
+            "fid='" + fid + '\'' +
+            ", data=" + data +
+            ", metadata=" + metadata +
+            ", additionalData=" + additionalData +
+            '}';
     }
 }

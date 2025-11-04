@@ -1,21 +1,26 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.nom.contract.nom.Sektor;
 
-import java.time.LocalDateTime;
-
 public class RessursSektorOppdatertV1 extends RessursEvent {
-    @JsonCreator
-    public RessursSektorOppdatertV1(String fid, SektorOppdatertEventData data, Metadata metadata) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RessursSektorOppdatertV1(
+        @JsonProperty("fid") String fid,
+        @JsonProperty("data") SektorOppdatertEventData data,
+        @JsonProperty("metadata") Metadata metadata
+    ) {
         super(fid, data, metadata, null);
     }
 
+    @JsonIgnore
     public RessursSektorOppdatertV1(String fid, SektorOppdatertEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
+        this(fid, data, Metadata.from(inputMetadata));
     }
 
     public record SektorOppdatertEventData(
         Sektor sektor
-    ) implements Data{ }
+    ) implements Data {}
 }
