@@ -69,6 +69,7 @@ public class AuthorizedNavident {
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
 
     private final Unleash unleash;
+    @Value("${app.orgenhet.nav}") String navOrgenhetId;
     @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
     @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
     @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
@@ -163,11 +164,12 @@ public class AuthorizedNavident {
         Set<String> outOrgenhetIder = new HashSet<>();
         if (kunToppNoder) {
             outOrgenhetIder.addAll(beholdKunOrgenheterOverstIHierarkiet(orgenhetIder,HashSet::new));
-
         } else {
             orgenhetIder.forEach(o -> outOrgenhetIder.addAll(alleEnheterIHierarkiFra(o)));
         }
-        return orgenhetService.getByIdBulk(outOrgenhetIder.stream().toList()).values().stream().toList();
+        return orgenhetService.getByIdBulk(outOrgenhetIder.stream()
+            .filter(this::enhetInnenforHierarki)
+            .toList()).values().stream().toList();
     }
 
     public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
@@ -533,6 +535,11 @@ public class AuthorizedNavident {
             targetOrgEnhetId = idOver;
         }
         return out;
+    }
+
+    private boolean enhetInnenforHierarki(String orgId) {
+        var sti = stiTilRotForEnhet(orgId, true);
+        return Stream.of(navOrgenhetId, helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).anyMatch(sti::contains);
     }
 
     private <C extends Collection<String>> C beholdKunOrgenheterOverstIHierarkiet(C orgenhetIdList, Supplier<C> outputCollectionSupplier){

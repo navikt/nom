@@ -37,7 +37,8 @@ import static org.mockito.Mockito.when;
         "app.clients.microsoft-graph.groups.nom-leder=e9cd9267-9baf-4078-abb8-7251c4313d32",
         "app.orgenhet.helfo=dummyHelfoId",
         "app.orgenhet.skatt=dummySkattId",
-        "app.orgenhet.riksrev=dummyRiksrevisjonenId"
+        "app.orgenhet.riksrev=dummyRiksrevisjonenId",
+        "app.orgenhet.nav=X"
     }
 )
 class AuthorizedNavidentTest extends MockBasisTestOrganisering {
