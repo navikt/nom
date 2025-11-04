@@ -337,7 +337,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <release>25</release>
-                    <parameters>true</parameters>
                     <compilerArgs>
                         <arg>-proc:full</arg>
                     </compilerArgs>
