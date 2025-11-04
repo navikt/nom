@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -28,20 +29,9 @@ public class OrgtilknytningResolver {
 
     public List<OrgTilknytning> orgtilknytninger(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg) {
         return orgtilknytningService.getByEnhet(orgEnhet.getId()).stream()
-            .filter(o -> filterByPeriodiskUtvalg(o, periodiskUtvalg))
+            .filter(o -> Util.filterByPeriodiskUtvalg(o, periodiskUtvalg))
             .map(this::tilOrgTilknytning)
             .toList();
-    }
-
-    private boolean filterByPeriodiskUtvalg(OrgtilknytningState orgtilknytningState, PeriodiskUtvalgArg periodiskUtvalg) {
-        if (periodiskUtvalg == null) periodiskUtvalg = AKTIVE; // Default
-
-        return switch (periodiskUtvalg) {
-            case ALLE -> true;
-            case AKTIVE -> PeriodeUtil.isCurrentPeriod(orgtilknytningState);
-            case FREMTIDIGE -> PeriodeUtil.isFuturePeriod(orgtilknytningState);
-            case HISTORISKE -> PeriodeUtil.isHistoricPeriod(orgtilknytningState);
-        };
     }
 
     private OrgTilknytning tilOrgTilknytning(OrgtilknytningState orgtilknytning) {

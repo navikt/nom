@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
@@ -51,7 +52,7 @@ public class LederResolver {
         return orgEnhetLederService
             .getOrgEnheterNavidentErLederFor(ressurs.getNavIdent())
             .stream()
-            .filter(orgEnhetLederState -> filterByPeriodiskUtvalg(orgEnhetLederState, periodiskUtvalg))
+            .filter(orgEnhetLederState -> Util.filterByPeriodiskUtvalg(orgEnhetLederState, periodiskUtvalg))
             .map(orgEnhetLederState ->
                 new LederOrgEnhet(
                     MappingUtils.toOrgEnhet(
@@ -70,7 +71,7 @@ public class LederResolver {
 
     public List<RessursLeder> ledere(String navIdent, PeriodiskUtvalgArg periodiskUtvalg) {
         return orgEnhetLederService.getLedereForRessurs(navIdent, false).stream()
-            .filter(lederForRessurs -> filterByPeriodiskUtvalg(lederForRessurs, periodiskUtvalg))
+            .filter(lederForRessurs -> Util.filterByPeriodiskUtvalg(lederForRessurs, periodiskUtvalg))
             .map(lederForRessurs ->
                 new RessursLeder(
                     MappingUtils.toRessurs(
@@ -81,27 +82,5 @@ public class LederResolver {
                     lederForRessurs.sluttdato()
                 )
             ).toList();
-    }
-
-    private boolean filterByPeriodiskUtvalg(LederForRessurs lederForRessurs, PeriodiskUtvalgArg periodiskUtvalg) {
-        if (periodiskUtvalg == null) periodiskUtvalg = AKTIVE; // Default
-
-        return switch (periodiskUtvalg) {
-            case ALLE -> true;
-            case AKTIVE -> PeriodeUtil.isCurrentPeriod(lederForRessurs);
-            case FREMTIDIGE -> PeriodeUtil.isFuturePeriod(lederForRessurs);
-            case HISTORISKE -> PeriodeUtil.isHistoricPeriod(lederForRessurs);
-        };
-    }
-
-    private boolean filterByPeriodiskUtvalg(OrgEnhetLederState orgEnhetLederState, PeriodiskUtvalgArg periodiskUtvalg) {
-        if (periodiskUtvalg == null) periodiskUtvalg = AKTIVE; // Default
-
-        return switch (periodiskUtvalg) {
-            case ALLE -> true;
-            case AKTIVE -> PeriodeUtil.isCurrentPeriod(orgEnhetLederState);
-            case FREMTIDIGE -> PeriodeUtil.isFuturePeriod(orgEnhetLederState);
-            case HISTORISKE -> PeriodeUtil.isHistoricPeriod(orgEnhetLederState);
-        };
     }
 }

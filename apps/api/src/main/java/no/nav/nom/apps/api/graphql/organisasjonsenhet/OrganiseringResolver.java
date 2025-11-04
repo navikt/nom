@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
@@ -39,21 +40,10 @@ public class OrganiseringResolver {
 
         log.debug("Henter organiseringer for {} retning '{}' og periodiskUtvalg '{}'", orgEnhet.getId(), retning, periodiskUtvalg);
         return organiseringStateRepository.getOrganiseringerContainingId(orgEnhet.getId(), false).stream()
-            .filter(o -> filterByPeriodiskUtvalg(o, periodiskUtvalg))
+            .filter(o -> Util.filterByPeriodiskUtvalg(o, periodiskUtvalg))
             .map(organiseringState -> convert(organiseringState, orgEnhet))
             .filter(organisering -> retning == null || organisering.getRetning() == retning)
             .toList();
-    }
-
-    private boolean filterByPeriodiskUtvalg(OrganiseringState organiseringState, PeriodiskUtvalgArg periodiskUtvalg) {
-        if (periodiskUtvalg == null) periodiskUtvalg = AKTIVE; // Default
-
-        return switch (periodiskUtvalg) {
-            case ALLE -> true;
-            case AKTIVE -> PeriodeUtil.isCurrentPeriod(organiseringState);
-            case FREMTIDIGE -> PeriodeUtil.isFuturePeriod(organiseringState);
-            case HISTORISKE -> PeriodeUtil.isHistoricPeriod(organiseringState);
-        };
     }
 
     private Organisering convert(OrganiseringState organisering, OrgEnhet orgEnhet) {

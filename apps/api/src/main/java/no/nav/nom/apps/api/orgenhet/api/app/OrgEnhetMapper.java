@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetUnderordnetResolver;
@@ -12,12 +10,11 @@ import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +27,8 @@ import java.util.Objects;
 @Component
 public class OrgEnhetMapper {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
-    private final RessursStateRepository ressursStateRepository;
+    private final RessursService ressursService;
     private final OrgEnhetLederService orgEnhetLederService;
-//    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final OrgtilknytningService orgtilknytningService;
 
     private final OrgEnhetOverordnetResolver overordnetResolver;
@@ -40,17 +36,15 @@ public class OrgEnhetMapper {
     private final OrgEnhetUnderordnetResolver underordnetResolver;
 
     public OrgEnhetMapper(
-        RemedyEnhetMapperService remedyEnhetMapperService,
-        RessursStateRepository ressursStateRepository, OrgEnhetLederService orgEnhetLederService,
-//        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        RemedyEnhetMapperService remedyEnhetMapperService, RessursService ressursService,
+        OrgEnhetLederService orgEnhetLederService,
         OrgtilknytningService orgtilknytningService,
         OrgEnhetOverordnetResolver overordnetResolver,
         OrgEnhetUnderordnetResolver underordnetResolver
     ) {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
-        this.ressursStateRepository = ressursStateRepository;
+        this.ressursService = ressursService;
         this.orgEnhetLederService = orgEnhetLederService;
-//        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.overordnetResolver = overordnetResolver;
         this.underordnetResolver = underordnetResolver;
@@ -67,7 +61,7 @@ public class OrgEnhetMapper {
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
         var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id).orElse(null);
         var orgEnhetLeder = orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId())
-            .flatMap(orgEnhetLederState -> ressursStateRepository.findByNavident(orgEnhetLederState.navident()))
+            .flatMap(orgEnhetLederState -> ressursService.findByNavident(orgEnhetLederState.navident()))
             .map(ressursState -> new MinimalRessurs(ressursState.navident(), ressursState.visningsnavn()
                 .getFormattedVisningsnavn())).orElse(null);
 
@@ -117,36 +111,8 @@ public class OrgEnhetMapper {
             .toList();
     }
 
-//    public List<RessursState> hentOrgEnhetLedere(String agressoId, String orgNiv, String navn) {
-//        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
-//            .stream()
-//
-//            .filter(Objects::nonNull)
-//            .toList();
-//    }
-
-//    public List<String> hentOrgEnhetLedereNavident(String agressoId, String orgNiv, String navn) {
-//        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, navn)
-//            .stream()
-//            .map(DvhLeder::getNavIdent)
-//            .toList();
-//    }
-//
-//    private RessursState ressursWithObscuredPersonident(DvhLeder leder) {
-//        var ressursState = ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null);
-//        var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-//
-//        if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
-//            ressursState = ressursState.toBuilder()
-//                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
-//                .build();
-//        }
-//
-//        return ressursState;
-//    }
-
     private RessursState ressursWithObscuredPersonident(OrgEnhetLederState leder) {
-        var ressursState = ressursStateRepository.findByNavident(leder.navident()).orElse(null);
+        var ressursState = ressursService.findByNavident(leder.navident()).orElse(null);
         var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 
         if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
@@ -168,7 +134,7 @@ public class OrgEnhetMapper {
     }
 
     private String getNavnForNavident(String navident) {
-        return ressursStateRepository.findByNavident(navident)
+        return ressursService.findByNavident(navident)
                 .map(r -> r.visningsnavn().getFormattedVisningsnavn())
                 .orElse(null);
     }

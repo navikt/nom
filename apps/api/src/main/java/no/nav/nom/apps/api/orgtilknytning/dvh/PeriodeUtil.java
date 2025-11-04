@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
 
+// TODO -  PeriodeUtil burde implementere metodene basert på f.eks. Periodisert interface
 public class PeriodeUtil {
     public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
 

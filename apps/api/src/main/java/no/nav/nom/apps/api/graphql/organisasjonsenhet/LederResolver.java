@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
@@ -34,23 +35,12 @@ public class LederResolver {
 
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg) {
         return orgEnhetLederService.getLedereForOrgEnhet(orgEnhet.getId()).stream()
-            .filter(leder -> filterByPeriodiskUtvalg(leder, periodiskUtvalg))
+            .filter(leder -> Util.filterByPeriodiskUtvalg(leder, periodiskUtvalg))
             .map(leder -> new OrgEnhetsLeder(
                 getRessurs(leder),
                 leder.startdato(), leder.sluttdato())
             )
             .toList();
-    }
-
-    private boolean filterByPeriodiskUtvalg(OrgEnhetLederState leder, PeriodiskUtvalgArg periodiskUtvalg) {
-        if (periodiskUtvalg == null) periodiskUtvalg = AKTIVE; // Default
-
-        return switch (periodiskUtvalg) {
-            case ALLE -> true;
-            case AKTIVE -> PeriodeUtil.isCurrentPeriod(leder);
-            case FREMTIDIGE -> PeriodeUtil.isFuturePeriod(leder);
-            case HISTORISKE -> PeriodeUtil.isHistoricPeriod(leder);
-        };
     }
 
     private Ressurs getRessurs(OrgEnhetLederState leder) {

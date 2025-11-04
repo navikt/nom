@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.clients.msgraph.EmailSendingUnforeseenException;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.ad.AdRessurs;
