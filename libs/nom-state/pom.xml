@@ -47,11 +47,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>contract-nom-dto</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
