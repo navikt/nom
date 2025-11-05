@@ -109,23 +109,6 @@ public class DvhOrds {
     }
 
     @Operation(
-            description = "Hent kommunale ressurser",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
-    )
-    @GetMapping(value = "/kommunaleRessurser", produces="application/json")
-    public String kommunaleRessurser(@RequestParam(defaultValue ="1") int numRows, @RequestParam(required = false) String ordsFilter) {
-        if (ordsFilter != null) {
-            return dvhOrdsService.getKommunaleRessurserJson(ordsFilter).toString();
-        }
-        return dvhOrdsService.getKommunaleRessurserJson(numRows).toString();
-    }
-
-    @Operation(
             description = "Hent eksterne ressurser tilknytninger",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )

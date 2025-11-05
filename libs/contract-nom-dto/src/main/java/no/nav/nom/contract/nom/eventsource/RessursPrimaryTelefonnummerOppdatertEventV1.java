@@ -2,27 +2,26 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RessursPrimaryTelefonnummerOppdatertEventV1 extends RessursEvent {
 
 
-    @JsonCreator
-    public RessursPrimaryTelefonnummerOppdatertEventV1(String fid, PrimaryTelefonnummerOppdatertEventData data, Metadata metadata) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RessursPrimaryTelefonnummerOppdatertEventV1(
+        @JsonProperty("fid") String fid,
+        @JsonProperty("data") PrimaryTelefonnummerOppdatertEventData data,
+        @JsonProperty("metadata") Metadata metadata
+    ) {
         super(fid, data, metadata, null);
     }
 
-    public RessursPrimaryTelefonnummerOppdatertEventV1(String fid, PrimaryTelefonnummerOppdatertEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
-    }
-
     @JsonIgnore
-    public PrimaryTelefonnummerOppdatertEventData getMobilnummerOppdatertEventData() {
-        return (PrimaryTelefonnummerOppdatertEventData) getData();
+    public RessursPrimaryTelefonnummerOppdatertEventV1(String fid, PrimaryTelefonnummerOppdatertEventData data, InputMetadata inputMetadata) {
+        this(fid, data, Metadata.from(inputMetadata));
     }
 
     public record PrimaryTelefonnummerOppdatertEventData(
         String primaryTelefonnummer
-    ) implements Data{ }
+    ) implements Data {}
 }

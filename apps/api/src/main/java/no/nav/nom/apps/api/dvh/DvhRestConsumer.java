@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,6 @@ import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
-import no.nav.nom.apps.api.orgtilknytning.dvh.KommunaleRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
@@ -67,7 +67,6 @@ public class DvhRestConsumer {
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
     private final OrganiseringService organiseringService;
-    private final KommunaleRessurserLoader kommunaleRessurserLoader;
     private final AuthorizedNavident authorizedNavident;
 
     private final ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
@@ -79,9 +78,16 @@ public class DvhRestConsumer {
     private final OTUtenforHierarki otUtenforHierarki;
     private final TelefonService telefonService;
     private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+    private final Unleash unleash;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
+
+        if (!unleash.isEnabled("nom-api.dvh-last")) {
+            log.info("DVH lasten er skrudd av i Unleash");
+            return;
+        }
+
         log.info("Starter schedulert oppdatering fra DVH");
         if (skipScheduledRunIfDuringDvhUpdate()) {
             return;
@@ -115,8 +121,6 @@ public class DvhRestConsumer {
             dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
-
-        updateShadowOrgtilknytningerForKommunaleFromDvh();
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
@@ -238,15 +242,6 @@ public class DvhRestConsumer {
     public void updateOrgtilknytningerForEksterneFromDvh() {
         log.info("Oppdater Orgtilknytninger for eksterne fra dvh");
         eksterneRessurserLoader.loadAndProcess();
-    }
-
-    public void updateShadowOrgtilknytningerForKommunaleFromDvh() {
-        try {
-            log.info("Oppdater skygge Orgtilknytninger for kommunale fra dvh");
-            kommunaleRessurserLoader.loadAndProcess();
-        }  catch (Exception e) {
-            log.error("Failure loading skygge-orgtilknytninger data from DVH", e);
-        }
     }
 
     public List<DvhTelefon> loadTlfFromDvh() {

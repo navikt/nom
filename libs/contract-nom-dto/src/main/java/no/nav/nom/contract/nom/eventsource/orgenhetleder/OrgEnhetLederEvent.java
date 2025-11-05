@@ -12,7 +12,8 @@ import no.nav.nom.contract.nom.eventsource.Event;
 @JsonSubTypes({
     @Type(value = OrgEnhetLederOpprettetEventV1.class),
     @Type(value = OrgEnhetLederStartdatoOppdatertEventV1.class),
-    @Type(value = OrgEnhetLederSluttdatoOppdatertEventV1.class)
+    @Type(value = OrgEnhetLederSluttdatoOppdatertEventV1.class),
+    @Type(value = OrgEnhetLederSlettetEventV1.class)
 })
 public abstract class OrgEnhetLederEvent extends Event {
 

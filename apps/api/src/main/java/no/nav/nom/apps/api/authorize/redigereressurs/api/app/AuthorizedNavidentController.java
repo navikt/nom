@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.authorize.redigereressurs.DelegationAdService;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
@@ -30,12 +31,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
@@ -46,11 +45,16 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 public class AuthorizedNavidentController {
     private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
+    private final DelegationAdService delegationAdService;
 
-    public AuthorizedNavidentController(AuthorizedNavident authorizedNavident,
-                                        AuthResolver authResolver) {
+    public AuthorizedNavidentController(
+        AuthorizedNavident authorizedNavident,
+        AuthResolver authResolver,
+        DelegationAdService delegationAdService
+    ) {
         this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
+        this.delegationAdService = delegationAdService;
     }
 
     @Operation(
@@ -200,7 +204,7 @@ public class AuthorizedNavidentController {
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
     public List<MinimalRessurs> getRessurserWhichCanBeDelegatedTo() {
-        return authorizedNavident.getRessurserWhichCanBeDelegatedTo();
+        return delegationAdService.getRessurserWhichCanBeDelegatedTo();
     }
 
     @GetMapping("getOrgEnheterLederCanEdit")

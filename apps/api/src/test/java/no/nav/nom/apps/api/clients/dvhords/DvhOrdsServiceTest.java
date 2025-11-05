@@ -16,7 +16,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,40 +58,6 @@ class DvhOrdsServiceTest {
         assertEquals("0400", ressurser.get(2).getFysiskBrukersted());
         assertEquals("N", ressurser.get(2).getAnsattRessursKode());
         assertFalse(ressurser.get(2).getRemedyAktiv());
-    }
-
-    @Test
-    void getKommunaleRessurser() {
-        var ressurser = dvhOrdsService.getKommunaleRessurser(List.of("A321001", "A321002", "A321004", "A321005"));
-        assertNotNull(ressurser);
-        assertEquals(4, ressurser.size());
-
-        assertEquals("A321001", ressurser.getFirst().getNavIdent());
-        assertEquals(LocalDate.of(2013, 1, 9), ressurser.getFirst().getRemedyStartDato());
-        assertEquals(LocalDate.of(2020, 1, 2), ressurser.getFirst().getRemedySluttdato());
-        assertFalse(ressurser.getFirst().getRemedyAktiv());
-        assertEquals("080600", ressurser.getFirst().getOrgenhetPaaRessurs());
-        assertEquals("Skien", ressurser.getFirst().getOrgenhetPaaRessursBeskrivelse());
-        assertEquals("ORGNIV3", ressurser.getFirst().getOrgenhetPaaRessursNiva());
-
-        assertEquals("A321002", ressurser.get(1).getNavIdent());
-        assertEquals(LocalDate.of(2024, 5, 8), ressurser.get(1).getRemedyStartDato());
-        assertNull(ressurser.get(1).getSluttdato());
-        assertEquals("0906", ressurser.get(1).getFysiskBrukersted());
-        assertTrue(ressurser.get(1).getRemedyAktiv());
-        assertEquals("0906003", ressurser.get(1).getOrgenhetPaaRessurs());
-        assertEquals("Arendal Ungdom", ressurser.get(1).getOrgenhetPaaRessursBeskrivelse());
-        assertEquals("ORGENHET", ressurser.get(1).getOrgenhetPaaRessursNiva());
-
-        assertEquals("A321005", ressurser.get(3).getNavIdent());
-        assertEquals(LocalDate.of(2009, 8, 4), ressurser.get(3).getRemedyStartDato());
-        assertNotNull(ressurser.get(3).getRemedySluttdato());
-        assertEquals("0326", ressurser.get(3).getFysiskBrukersted());
-        assertEquals("N", ressurser.get(3).getAnsattRessursKode());
-        assertTrue(ressurser.get(3).getRemedyAktiv());
-        assertEquals("0326006", ressurser.get(3).getOrgenhetPaaRessurs());
-        assertEquals("Alna Inngang", ressurser.get(3).getOrgenhetPaaRessursBeskrivelse());
-        assertEquals("ORGENHET", ressurser.get(3).getOrgenhetPaaRessursNiva());
     }
 
     @Test

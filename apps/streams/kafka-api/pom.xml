@@ -14,8 +14,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>api-ressurs-state</module>
-        <module>api-ressurs-state-v3</module>
         <module>api-ressurs-state-v4</module>
         <module>api-orgenhet-state</module>
         <module>api-hendelser</module>
