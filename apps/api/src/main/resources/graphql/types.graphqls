@@ -44,7 +44,7 @@ type Ressurs {
     sektor: [Sektor!]!
     sluttdato: Date
     startdato: Date
-    tilknytningstype: String
+    tilknytningstype: TilknytningType!
 }
 
 type Navn {
