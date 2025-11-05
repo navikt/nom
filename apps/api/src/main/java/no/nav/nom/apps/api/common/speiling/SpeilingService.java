@@ -46,7 +46,7 @@ public class SpeilingService {
     public void speilOrgtilknytningSektorTilRessursScheduler() {
         if (leaderElection.isLeader()) {
             speilSektorOrgtilknytning();
-            speilTilknitningtypeOrgtilknytning();
+            speilTilknytningtypeOrgtilknytning();
         }
     }
 
@@ -73,7 +73,7 @@ public class SpeilingService {
         }));
     }
 
-    private void speilTilknitningtypeOrgtilknytning() {
+    private void speilTilknytningtypeOrgtilknytning() {
         var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)

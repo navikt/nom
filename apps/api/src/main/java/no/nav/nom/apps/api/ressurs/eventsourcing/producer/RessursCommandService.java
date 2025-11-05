@@ -162,7 +162,8 @@ public class RessursCommandService {
                 opprettRessursCommand.primaryTelefonnummer(),
                 opprettRessursCommand.fysiskbrukerStedNr() == null ? Collections.emptyList() : List.of(opprettRessursCommand.fysiskbrukerStedNr()),
                 opprettRessursCommand.fysiskbrukerStedNr(),
-                opprettRessursCommand.identType()
+                opprettRessursCommand.identType(),
+                opprettRessursCommand.tilknytningtype()
             ),
             opprettRessursCommand.inputMetadata(),
             new RessursOpprettetEventV1.RessursOpprettetAdditionalData(

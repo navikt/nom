@@ -12,5 +12,5 @@ public record DvhRessursDTO(
     LocalDate startdato,
     LocalDate sluttdato,
     List<DvhOrgtilknytningDTO> orgtilknytninger,
-    String tilknyttingsType
+    String tilknytningsType
 ){}

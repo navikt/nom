@@ -105,7 +105,8 @@ public class RessursCommandServiceTest {
             "OrgEnhetId-1",
             AnsettelsesType.FAST,
             "2700",
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
     }
 

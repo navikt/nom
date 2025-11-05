@@ -7,6 +7,7 @@ import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,7 +47,8 @@ public class RessursOpprettetEventV1 extends RessursEvent {
         String primaryTelefonnummer,
         List<String> fysiskeBrukersteder,
         String primaryFysiskBrukersted,
-        IdentType identType
+        IdentType identType,
+        Tilknytningtype tilknytningtype
     ) implements Data {}
 
     @Builder(toBuilder = true)
