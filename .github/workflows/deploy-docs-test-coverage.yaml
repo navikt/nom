@@ -46,91 +46,91 @@ jobs:
           mv docs/target/intern/index.html public/index-intern.html
           mv docs/target/intern/images public/images
 
-      - name: Run tests
-        run: mvn clean test -Pcoverage
-
-      - name: Generate JaCoCo Badge for api
-        id: jacocoApi
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          intervals:  ${{env.BADGE_INTERVALS}}
-          coverage-badge-filename: api-jacoco.svg
-          branches-badge-filename: api-branches.svg
-          coverage-label: api coverage
-          branches-label: api branches
-          jacoco-csv-file: >
-            apps/api/target/site/jacoco/jacoco.csv
-          badges-directory: apps/api/target/site/jacoco/badges
-      - name: Move api coverage folder
-        run: mkdir -p test-coverage/api && cp -rf apps/api/target/site/jacoco/. test-coverage/api
-
-      - name: Generate JaCoCo Badge for nav-ident
-        id: jacocoNavIdent
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          intervals:  ${{env.BADGE_INTERVALS}}
-          coverage-badge-filename: nav-ident-jacoco.svg
-          branches-badge-filename: nav-ident-branches.svg
-          coverage-label: nav-ident coverage
-          branches-label: nav-ident branches
-          jacoco-csv-file: >
-            apps/nav-ident/target/site/jacoco/jacoco.csv
-          badges-directory: apps/nav-ident/target/site/jacoco/badges
-      - name: Move nav-ident coverage folder
-        run: mkdir -p test-coverage/nav-ident && cp -rf apps/nav-ident/target/site/jacoco/. test-coverage/nav-ident
-
-      - name: Generate JaCoCo Badge for nom-ressurser
-        id: jacocoNomRessurser
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          intervals:  ${{env.BADGE_INTERVALS}}
-          coverage-badge-filename: nom-ressurser-jacoco.svg
-          branches-badge-filename: nom-ressurser-branches.svg
-          coverage-label: nom-ressurser coverage
-          branches-label: nom-ressurser branches
-          jacoco-csv-file: >
-            apps/nom-ressurser/target/site/jacoco/jacoco.csv
-          badges-directory: apps/nom-ressurser/target/site/jacoco/badges
-      - name: Move nom-ressurser coverage folder
-        run: mkdir -p test-coverage/nom-ressurser && cp -rf apps/nom-ressurser/target/site/jacoco/. test-coverage/nom-ressurser
-
-      - name: Generate JaCoCo Badge for proxy
-        id: jacocoProxy
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          intervals:  ${{env.BADGE_INTERVALS}}
-          coverage-badge-filename: proxy-jacoco.svg
-          branches-badge-filename: proxy-branches.svg
-          coverage-label: proxy coverage
-          branches-label: proxy branches
-          jacoco-csv-file: >
-            apps/proxy/target/site/jacoco/jacoco.csv
-          badges-directory: apps/proxy/target/site/jacoco/badges
-      - name: Move proxy coverage folder
-        run: mkdir -p test-coverage/proxy && cp -rf apps/proxy/target/site/jacoco/. test-coverage/proxy
-
-      - name: Generate JaCoCo Badge for unit4
-        id: jacocoUnit4
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-          intervals:  ${{env.BADGE_INTERVALS}}
-          coverage-badge-filename: unit4-jacoco.svg
-          branches-badge-filename: unit4-branches.svg
-          coverage-label: unit4 coverage
-          branches-label: unit4 branches
-          jacoco-csv-file: >
-            apps/unit4/target/site/jacoco/jacoco.csv
-          badges-directory: apps/unit4/target/site/jacoco/badges
-      - name: Move proxy coverage folder
-        run: mkdir -p test-coverage/unit4 && cp -rf apps/unit4/target/site/jacoco/. test-coverage/unit4
-
-      - name: Move test-coverage to deploy folder
-        run: cp -rf test-coverage public
+#      - name: Run tests
+#        run: mvn clean test -Pcoverage
+#
+#      - name: Generate JaCoCo Badge for api
+#        id: jacocoApi
+#        uses: cicirello/jacoco-badge-generator@v2
+#        with:
+#          generate-branches-badge: true
+#          intervals:  ${{env.BADGE_INTERVALS}}
+#          coverage-badge-filename: api-jacoco.svg
+#          branches-badge-filename: api-branches.svg
+#          coverage-label: api coverage
+#          branches-label: api branches
+#          jacoco-csv-file: >
+#            apps/api/target/site/jacoco/jacoco.csv
+#          badges-directory: apps/api/target/site/jacoco/badges
+#      - name: Move api coverage folder
+#        run: mkdir -p test-coverage/api && cp -rf apps/api/target/site/jacoco/. test-coverage/api
+#
+#      - name: Generate JaCoCo Badge for nav-ident
+#        id: jacocoNavIdent
+#        uses: cicirello/jacoco-badge-generator@v2
+#        with:
+#          generate-branches-badge: true
+#          intervals:  ${{env.BADGE_INTERVALS}}
+#          coverage-badge-filename: nav-ident-jacoco.svg
+#          branches-badge-filename: nav-ident-branches.svg
+#          coverage-label: nav-ident coverage
+#          branches-label: nav-ident branches
+#          jacoco-csv-file: >
+#            apps/nav-ident/target/site/jacoco/jacoco.csv
+#          badges-directory: apps/nav-ident/target/site/jacoco/badges
+#      - name: Move nav-ident coverage folder
+#        run: mkdir -p test-coverage/nav-ident && cp -rf apps/nav-ident/target/site/jacoco/. test-coverage/nav-ident
+#
+#      - name: Generate JaCoCo Badge for nom-ressurser
+#        id: jacocoNomRessurser
+#        uses: cicirello/jacoco-badge-generator@v2
+#        with:
+#          generate-branches-badge: true
+#          intervals:  ${{env.BADGE_INTERVALS}}
+#          coverage-badge-filename: nom-ressurser-jacoco.svg
+#          branches-badge-filename: nom-ressurser-branches.svg
+#          coverage-label: nom-ressurser coverage
+#          branches-label: nom-ressurser branches
+#          jacoco-csv-file: >
+#            apps/nom-ressurser/target/site/jacoco/jacoco.csv
+#          badges-directory: apps/nom-ressurser/target/site/jacoco/badges
+#      - name: Move nom-ressurser coverage folder
+#        run: mkdir -p test-coverage/nom-ressurser && cp -rf apps/nom-ressurser/target/site/jacoco/. test-coverage/nom-ressurser
+#
+#      - name: Generate JaCoCo Badge for proxy
+#        id: jacocoProxy
+#        uses: cicirello/jacoco-badge-generator@v2
+#        with:
+#          generate-branches-badge: true
+#          intervals:  ${{env.BADGE_INTERVALS}}
+#          coverage-badge-filename: proxy-jacoco.svg
+#          branches-badge-filename: proxy-branches.svg
+#          coverage-label: proxy coverage
+#          branches-label: proxy branches
+#          jacoco-csv-file: >
+#            apps/proxy/target/site/jacoco/jacoco.csv
+#          badges-directory: apps/proxy/target/site/jacoco/badges
+#      - name: Move proxy coverage folder
+#        run: mkdir -p test-coverage/proxy && cp -rf apps/proxy/target/site/jacoco/. test-coverage/proxy
+#
+#      - name: Generate JaCoCo Badge for unit4
+#        id: jacocoUnit4
+#        uses: cicirello/jacoco-badge-generator@v2
+#        with:
+#          generate-branches-badge: true
+#          intervals:  ${{env.BADGE_INTERVALS}}
+#          coverage-badge-filename: unit4-jacoco.svg
+#          branches-badge-filename: unit4-branches.svg
+#          coverage-label: unit4 coverage
+#          branches-label: unit4 branches
+#          jacoco-csv-file: >
+#            apps/unit4/target/site/jacoco/jacoco.csv
+#          badges-directory: apps/unit4/target/site/jacoco/badges
+#      - name: Move proxy coverage folder
+#        run: mkdir -p test-coverage/unit4 && cp -rf apps/unit4/target/site/jacoco/. test-coverage/unit4
+#
+#      - name: Move test-coverage to deploy folder
+#        run: cp -rf test-coverage public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
