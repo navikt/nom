@@ -29,7 +29,7 @@ public class TestUtil {
         return ressursState;
     }
 
-    static RessursState createRessursState(String suffix) {
+    public static RessursState createRessursState(String suffix) {
         return new RessursState(
             PrefixedUlidCreator.createRessursUlid(),
             "testPersonIdent" + suffix,

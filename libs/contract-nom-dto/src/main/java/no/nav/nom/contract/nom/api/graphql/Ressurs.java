@@ -12,18 +12,18 @@ import java.util.UUID;
 @Value
 @Builder(toBuilder = true)
 public class Ressurs {
-    UUID nomId;
-    String navIdent;
+    @Deprecated    String navIdent;
+    @Deprecated    String personIdent;
+    @Deprecated    String visningsNavn;
+    @Deprecated    List<Sektor> sektor;
+
     String navident;
-    String personIdent;
     String personident;
-    List<Sektor> ressurstype;
-    List<Sektor> sektor;
     LocalDate sluttdato;
     LocalDate startdato;
+    Sektor gjeldendeSektor;
     String fornavn;
     String etternavn;
-    String visningsNavn;
     String visningsnavn;
     String primaryTelefon;
     Tilknytningtype tilknytningstype;

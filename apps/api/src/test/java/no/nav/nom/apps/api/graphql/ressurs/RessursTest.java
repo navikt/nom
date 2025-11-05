@@ -1,107 +1,130 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
-import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
-import no.nav.nom.contract.nom.IdentType;
-import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
+import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
-import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.TestUtil.createRessursState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
 
-@DisplayName("GraphQL.HentRessursEventsource")
-class RessursTest extends GraphQLExtendedIntegrationTestBase {
-
+@ActiveProfiles({"GraphQLTest", "test"})
+@GraphQlTest
+@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@AutoConfigureWireMock(port = 0) // For AD wiremock resultat (epost oppslag)
+@DisplayName("GraphQL - Ressurs spørringer")
+class RessursTest {
     @Autowired
-    private DvhRestConsumer dvhRestConsumer;
+    protected GraphQLTestUtil gqlUtil;
 
     @Autowired
     private DvhRepository dvhRepository;
 
     @Autowired
-    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+    protected OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    private RessursStateRepository ressursStateRepository;
 
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
 
+    @MockitoBean
+    protected OrgEnhetLederService orgEnhetLederService;
+
+    @BeforeEach
+    protected void setup() {
+        orgEnhetStateRepository.clear();
+//        organiseringStateRepository.clear();
+        ressursStateRepository.clear();
+        orgtilknytningStateRepository.clear();
+    }
+
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("");
+        var ressurs = createRessursState("1").toBuilder().navident("testNavIdent").build();
+        ressursStateRepository.update(ressurs);
 
-        final var response = postForResource("ressurs/scenario1.graphql");
-
+        final var response = gqlUtil.postForResource("ressurs/scenario1.graphql");
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
+
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
     }
 
     @Test
     @DisplayName("Leser inn med graphql navIdent og personIdent parameter bulk")
     void scenario112() {
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
+        var ressurs1 = createRessursState("1").toBuilder().navident("testNavIdent1").personident("testPersonIdent1").build();
+        var ressurs2 = createRessursState("2").toBuilder().navident("testNavIdent2").personident("testPersonIdent2").build();
+        ressursStateRepository.update(ressurs1);
+        ressursStateRepository.update(ressurs2);
 
-        final var response = postForResource("ressurs/scenario12.graphql")
+        final var response = gqlUtil.postForResource("ressurs/scenario12.graphql")
             .path("ressurser")
             .entityList(RessursResult.class)
             .get();
 
-        assertThat(response).hasSize(4);
+        assertEquals(4, response.size());
         RessursResult navIdent = get(response, "testNavIdent1");
-        assertEquals(navIdent.getId(), "testNavIdent1");
-        assertEquals(navIdent.getCode(), ResultCode.OK);
+        assertEquals("testNavIdent1", navIdent.getId());
+        assertEquals(ResultCode.OK, navIdent.getCode());
+
         RessursResult navIdentNotFound = get(response, "notFoundNavIdent");
-        assertEquals(navIdentNotFound.getId(), "notFoundNavIdent");
-        assertEquals(navIdentNotFound.getCode(), ResultCode.NOT_FOUND);
+        assertEquals("notFoundNavIdent", navIdentNotFound.getId());
+        assertEquals(ResultCode.NOT_FOUND, navIdentNotFound.getCode());
 
         RessursResult personIdent = get(response, "testPersonIdent2");
-        assertEquals(personIdent.getId(), "testPersonIdent2");
-        assertEquals(personIdent.getCode(), ResultCode.OK);
-        RessursResult personIdentNotFound = get(response, "notFoundPersonIdent");
-        assertEquals(personIdentNotFound.getId(), "notFoundPersonIdent");
-        assertEquals(personIdentNotFound.getCode(), ResultCode.NOT_FOUND);
-    }
+        assertEquals("testPersonIdent2", personIdent.getId());
+        assertEquals(ResultCode.OK, personIdent.getCode());
 
-    private RessursResult get(List<RessursResult> list, String ident) {
-        return list.stream().filter(o -> ident.equals(o.getId())).findFirst().orElseThrow();
+        RessursResult personIdentNotFound = get(response, "notFoundPersonIdent");
+        assertEquals("notFoundPersonIdent", personIdentNotFound.getId());
+        assertEquals(ResultCode.NOT_FOUND, personIdentNotFound.getCode());
     }
 
     @Test
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        RessursState ressurs = kafkaUtils.createRessursHendelseEventSource("");
+        var ressurs = createRessursState("1").toBuilder().personident("testPersonIdent").build();
+        ressursStateRepository.update(ressurs);
 
-        final var response = postForResource("ressurs/scenario2.graphql");
+        final var outputRessurs = gqlUtil.postForResource("ressurs/scenario2.graphql").path("ressurs").entity(Ressurs.class).get();
 
-        final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
         assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
     }
@@ -109,179 +132,137 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Leser inn med graphql uten parameter bulk")
     void scenario13() {
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
-        kafkaUtils.createRessursHendelseEventSource("3");
+        var ressurs1 = createRessursState("1");
+        var ressurs2 = createRessursState("2");
+        var ressurs3 = createRessursState("3");
+        ressursStateRepository.update(ressurs1);
+        ressursStateRepository.update(ressurs2);
+        ressursStateRepository.update(ressurs3);
 
-        final var response = postForResource("ressurs/scenario3.graphql");
+        final var outputRessurs = gqlUtil.postForResource("ressurs/scenario3.graphql").path("ressurser").entityList(Ressurs.class).get();
 
-        final var outputRessurs = response.path("ressurser").entityList(Ressurs.class).get();
         assertEquals(3, outputRessurs.size());
     }
 
     @Test
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        final var ressursState = kafkaUtils.createRessursHendelseEventSource("2");
-        final var enhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
-        dvhOrgenhetMockUtils.addToResponse(enhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var ressurs = createRessursState("2").toBuilder().navident("testNavIdent2").build();
+        ressursStateRepository.update(ressurs);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test get methods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
-            enhet,
-            1,
-            String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
-            String.valueOf(enhet.getORGENHET_TIL_PERIODE())
-        ));
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        orgEnhetStateRepository.update(orgenhet);
+
         orgtilknytningStateRepository.update(
             "FID_1",
             orgtilknytningState().toBuilder()
                 .fid("FID_1")
-                .navident(ressursState.navident())
+                .navident(ressurs.navident())
                 .orgEnhetId("ID_1").build()
         );
 
-        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        final var response = gqlUtil.postForResource("ressurs/scenario42.graphql");
 
-        final var response = postForResource("ressurs/scenario42.graphql");
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        final var outputOrganisasjonsEnhetId = outputRessurs.get("orgTilknytninger").get(0).get("orgEnhet").get("agressoId").asText();
 
-        final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
-        final var actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
-        assertEquals("testId2", actualOrganisasjonsEnhetId);
+        assertEquals(orgenhet.agressoId(), outputOrganisasjonsEnhetId);
     }
 
     @Test
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        kafkaUtils.createRessursHendelseEventSource("3");
+        var ressurs = createRessursState("3").toBuilder().navident("testNavIdent3").build();
+        ressursStateRepository.update(ressurs);
 
-        final var response = postForResource("ressurs/scenario22.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario22.graphql");
 
-        final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertTrue(ressurs.get("koblinger").isEmpty());
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertTrue(outputRessurs.get("orgTilknytninger").isEmpty());
     }
 
     @Test
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
-        RessursState ressursState = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "testPersonIdent",
-            "testNavIdent",
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "fornavn",
-                Optional.of("mellomnavn"),
-                "etternavn"
-            ),
-            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            null,
-            LocalDate.now().plusDays(10),
-            null,
-            null,
-            Collections.emptyList(),
-            IdentType.STANDARD,
-            "S123456",
-            null
-        );
+        var ressurs = createRessursState("1").toBuilder().navident("testNavIdent").sluttdato(LocalDate.now().plusDays(10)).build();
+        ressursStateRepository.update(ressurs);
 
-        kafkaUtils.createRessursHendelseEventSource(ressursState);
-
-        final var response = postForResource("ressurs/scenario1.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
-        assertEquals(ressursState.sluttdato(), outputRessurs.getSluttdato());
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.sluttdato(), outputRessurs.getSluttdato());
     }
 
     @Test
     @DisplayName("Kan hente startdato når satt")
     void scenario32() {
-        RessursState ressursState = new RessursState(
-            PrefixedUlidCreator.createRessursUlid(),
-            "testPersonIdent",
-            "testNavIdent",
-            Sektor.NAV_STATLIG,
-            new Visningsnavn(
-                "fornavn",
-                Optional.of("mellomnavn"),
-                "etternavn"
-            ),
-            new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON),
-            null,
-            LocalDate.now().plusDays(10),
-            LocalDate.now().minusDays(10),
-            null,
-            Collections.emptyList(),
-            IdentType.STANDARD,
-            "S123456",
-            null
-        );
+        var ressurs = createRessursState("1").toBuilder().navident("testNavIdent").personident("01011000001").build();
+        ressursStateRepository.update(ressurs);
 
-        kafkaUtils.createRessursHendelseEventSource(ressursState);
-
-        final var response = postForResource("ressurs/scenario1.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(sladdetPersonident(ressursState.personident()), outputRessurs.getPersonIdent());
-        assertEquals(ressursState.startdato(), outputRessurs.getStartdato());
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.startdato(), outputRessurs.getStartdato());
     }
 
 
     @Test
     @DisplayName("Kan hente fulle navn fra NOM")
     void scenarioNavn1() {
-        var r1 = kafkaUtils.createRessursHendelseEventSource("3");
-        var r2 = kafkaUtils.createRessursHendelseEventSource("4");
+        var ressurs1 = createRessursState("1");
+        var ressurs2 = createRessursState("2");
+        ressursStateRepository.update(ressurs1);
+        ressursStateRepository.update(ressurs2);
 
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
-
-        final var response = postForResource("ressurs/scenario5.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario5.graphql");
 
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(r1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
-        assertEquals(r1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
 
-        assertEquals(r2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
-        assertEquals(r2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
     }
 
     @Test
     @DisplayName("Kan hente navn uten mellomnavn fra NOM")
     void scenarioNavn2() {
-        var r3 = kafkaUtils.createRessursHendelseEventSource("3");
-        var r4 = kafkaUtils.createRessursHendelseEventSource("4");
+        var ressurs1 = createRessursState("1").toBuilder().visningsnavn(new Visningsnavn("F", Optional.empty(), "E")).build();
+        var ressurs2 = createRessursState("2").toBuilder().visningsnavn(new Visningsnavn("F", Optional.empty(), "E")).build();
+        ressursStateRepository.update(ressurs1);
+        ressursStateRepository.update(ressurs2);
 
-        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-
-        final var response = postForResource("ressurs/scenario5.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario5.graphql");
 
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(r3.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
-        assertEquals(r3.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
 
-        assertEquals(r4.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
-        assertEquals(r4.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
     }
 
     @Test
     @DisplayName("Kan hente email fra AD og visningsnavn")
     void scenario745() {
-        final var ressurs1 = kafkaUtils.createRessursHendelseEventSource("1");
-        final var ressurs2 = kafkaUtils.createRessursHendelseEventSource("2");
-        final var ressurs3 = kafkaUtils.createRessursHendelseEventSource("3");
+        var ressurs1 = createRessursState("1");
+        var ressurs2 = createRessursState("2");
+        var ressurs3 = createRessursState("3");
+        ressursStateRepository.update(ressurs1);
+        ressursStateRepository.update(ressurs2);
+        ressursStateRepository.update(ressurs3);
 
-        final var response = postForResource("ressurs/scenario8.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario8.graphql");
         MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
 
         final var ressurser = response.path("ressurser")
@@ -291,11 +272,11 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
 
         ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
-        assertThat(ressurser.get(0).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent1@domain.no");
-        assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs1.visningsnavn().getFormattedVisningsnavn());
-        assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
-        assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs2.visningsnavn().getFormattedVisningsnavn());
-        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().getFormattedVisningsnavn());
+        assertEquals("testNavIdent1@domain.no", ressurser.get(0).get("ressurs").get("epost").asText());
+        assertEquals(ressurser.get(0).get("ressurs").get("visningsNavn").asText(), ressurs1.visningsnavn().getFormattedVisningsnavn());
+        assertEquals("testNavIdent2@domain.no", ressurser.get(1).get("ressurs").get("epost").asText());
+        assertEquals(ressurser.get(1).get("ressurs").get("visningsNavn").asText(), ressurs2.visningsnavn().getFormattedVisningsnavn());
+        assertEquals(ressurser.get(2).get("ressurs").get("visningsNavn").asText(), ressurs3.visningsnavn().getFormattedVisningsnavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         response.errors().satisfy(errors -> assertEquals(1, errors.size()));
@@ -304,159 +285,136 @@ class RessursTest extends GraphQLExtendedIntegrationTestBase {
     @Test
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
-        kafkaUtils.createRessursHendelseEventSource("");
-        var enhet = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId1")
-            .ORGNODE_NIV("ORGENHET")
-            .ORGENHET_NAVN("testNavn")
-            .build();
-        dvhOrgenhetMockUtils.addToResponse(enhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var ressurs = createRessursState("1").toBuilder().navident("testNavIdent").build();
+        ressursStateRepository.update(ressurs);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
-            enhet,
-            1,
-            String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
-            String.valueOf(enhet.getORGENHET_TIL_PERIODE())
-        ));
+        var orgenhet = OrgenhetTestUtils.createDefault();
+        orgEnhetStateRepository.update(orgenhet);
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        doReturn(
+            List.of(OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident(ressurs.navident())
+                .orgEnhetId(orgenhet.id())
+                .startdato(LocalDate.now().minusYears(1))
+                .build()
+            )
+        ).when(orgEnhetLederService).getOrgEnheterNavidentErLederFor(ressurs.navident());
 
-        final var response = postForResource("ressurs/scenario6.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario6.graphql");
 
         final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
-        assertThat(lederFor.size()).isEqualTo(1);
-        assertThat(lederFor.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
+        assertEquals(1, lederFor.size());
+        assertEquals(orgenhet.agressoId(), lederFor.get(0).get("orgEnhet").get("agressoId").textValue());
     }
 
     @Test
     @DisplayName("Hente leder for ressurs")
     void scenario36() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2")
-            .ORGENHET_NAVN("testNavn")
-            .ORGNODE_NIV("ORGENHET")
-            .build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        final var ressursState1 = kafkaUtils.createRessursHendelseEventSource("1");
-        final var ressursState2 = kafkaUtils.createRessursHendelseEventSource("2");
+        var leder = createRessursState("1").toBuilder().navident("testNavIdent").build();
+        var ansatt = createRessursState("2").toBuilder().navident("testNavIdent2").build();
+        ressursStateRepository.update(leder);
+        ressursStateRepository.update(ansatt);
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        var orgenhet = OrgenhetTestUtils.createDefault();
+        orgEnhetStateRepository.update(orgenhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
-            mockedEnhet,
-            1,
-            String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()),
-            String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())
-        ));
-        orgtilknytningStateRepository.update(
-            "FID_1",
-            orgtilknytningState().toBuilder()
-                .fid("FID_1")
-                .navident(ressursState2.navident())
-                .orgEnhetId("ID_1").build()
-        );
+        var ot = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .navident(ansatt.navident())
+            .orgEnhetId("ID_1").build();
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        orgtilknytningStateRepository.update("FID_1", ot);
 
-        final var response = postForResource("ressurs/scenario7.graphql");
+        doReturn(
+            List.of(new LederForRessurs(leder.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
+        ).when(orgEnhetLederService).getLedereForRessurs(ansatt.navident(), false);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario7.graphql");
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledere.size()).isEqualTo(1);
-        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+        assertEquals(1, ledere.size());
+        assertEquals(leder.navident(), ledere.get(0).get("ressurs").get("navIdent").textValue());
     }
 
     @Test
-    @DisplayName("Hente leder for ressurs som er leder av sin enhet")
+    @DisplayName("Hente leder for ressurs som er leder av sin enhet - Note tester ikke orgEnhetLederService.getLedereForRessurs sin logikk")
     void scenario37() {
-        kafkaUtils.createRessursHendelseEventSource("1");   // Oppretter ressursen "testNavIdent1"
-        kafkaUtils.createRessursHendelseEventSource("2");
-        final var ressursState4 = kafkaUtils.createRessursHendelseEventSource("4");   // Oppretter ressursen "testNavIdent4"
-        final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build(); // Oppretter orgEnhet 5
-        final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();  // Oppretter orgEnhet 4
+        var overLederRessurs = createRessursState("1");
+        var ansattRessurs = createRessursState("4").toBuilder().navident("testNavIdent4").build();
+        ressursStateRepository.update(overLederRessurs);
+        ressursStateRepository.update(ansattRessurs);
 
-        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);   //  Returnere orgEnheter fra kall til DVH
+        var orgenhet = OrgenhetTestUtils.createDefault();
+        var overEnhet = OrgenhetTestUtils.createDefault();
+        orgEnhetStateRepository.update(orgenhet);
+        orgEnhetStateRepository.update(overEnhet);
 
-        // Since stream infrastructure is not up, the streams pipeline has not created state.
-        // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
-            ressursLederForDenneEnheten,
-            1,
-            String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()),
-            String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE())
-        ));   // orgEnhet 5 får ID 1
-        orgEnhetStateRepository.update(dvhOrgenhetMockUtils.dvhMockToState(
-            lederenErPaDenneEnheten,
-            2,// orgEnhet 4 får ID 2
-            String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()),
-            String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE())
-        ));
-
-        // Lagrer orgTilknytning for testNavIdent4 til orgEnhet ID_2 (testId4)
+        OrgtilknytningState ot = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .navident(ansattRessurs.navident())
+            .orgEnhetId(orgenhet.id()).build();
         orgtilknytningStateRepository.update(
             "FID_1",
-            orgtilknytningState().toBuilder()
-                .fid("FID_1")
-                .navident(ressursState4.navident())
-                .orgEnhetId("ID_2").build()
+            ot
         );
 
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+        doReturn(
+            List.of(new LederForRessurs(overLederRessurs.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
+        ).when(orgEnhetLederService).getLedereForRessurs(ansattRessurs.navident(), false);
 
-        final var response = postForResource("ressurs/scenario71.graphql");
-
+        final var response = gqlUtil.postForResource("ressurs/scenario71.graphql");
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledere.size()).isEqualTo(1);
-
-        // Sjekke at ledere for testNavIdent4 er testNavIdent1
-        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+        assertEquals(1, ledere.size());
+        assertEquals(overLederRessurs.navident(), ledere.get(0).get("ressurs").get("navIdent").textValue());
     }
 
     @Test
     @DisplayName("Kan slå opp ressurs ved eksakt telefonnummer")
     void scenario52() {
-        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
         String telefonNummer = "4712345678";
         DvhTelefon mockDvhTelefon = DvhTelefon.builder()
             .nummer(telefonNummer)
-            .navIdent(ressursState.navident())
+            .navIdent(ressurs.navident())
             .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
             .build();
 
         dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
-        final var response = postForResource("ressurs/scenario52.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario52.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
+        assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
+        assertEquals(telefonNummer, outputRessurs.get("telefon").get(0).get("nummer").textValue());
     }
 
     @Test
     @DisplayName("Kan slå opp ressurs ved telefonnummer uten landskode")
     void scenario53() {
-        RessursState ressursState = kafkaUtils.createRessursHendelseEventSource("1");
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
 
         String telefonNummer = "4712345678";
         DvhTelefon mockDvhTelefon = DvhTelefon.builder()
             .nummer(telefonNummer)
-            .navIdent(ressursState.navident())
+            .navIdent(ressurs.navident())
             .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
             .build();
 
         dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
-        final var response = postForResource("ressurs/scenario53.graphql");
+        final var response = gqlUtil.postForResource("ressurs/scenario53.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
+        assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
+        assertEquals(telefonNummer, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+    }
+
+    private RessursResult get(List<RessursResult> list, String ident) {
+        return list.stream().filter(o -> ident.equals(o.getId())).findFirst().orElseThrow();
     }
 
     private String sladdetPersonident(String personident){

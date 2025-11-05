@@ -11,8 +11,10 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -36,18 +38,22 @@ public class OmadaController {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final DvhRepository dvhRepository;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final OrgenhetService orgenhetService;
     private final RessursStateRepository ressursStateRepository;
 
     public OmadaController(
         OrganiseringStateRepository organiseringStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
-        DvhRepository dvhRepository, OrgenhetService orgenhetService,
+        DvhRepository dvhRepository,
+        OrgEnhetLederService orgEnhetLederService,
+        OrgenhetService orgenhetService,
         RessursStateRepository ressursStateRepository
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.dvhRepository = dvhRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.orgenhetService = orgenhetService;
         this.ressursStateRepository = ressursStateRepository;
     }
@@ -115,10 +121,7 @@ public class OmadaController {
     }
 
     private String getLeder(IOrgenhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
-            .stream().findAny()
-            .map(DvhLeder::getNavIdent)
-            .orElse(null);
+        return orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId()).map(OrgEnhetLederState::navident).orElse(null);
     }
 
     private OmadaRessursTelefonDTO toOmadaRessursInfoDTO(DvhTelefon dvhTelefon) {

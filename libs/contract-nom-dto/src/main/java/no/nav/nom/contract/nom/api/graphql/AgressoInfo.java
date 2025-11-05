@@ -5,8 +5,8 @@ import lombok.Value;
 
 @Value
 @Builder
-public class RessursNavn {
-    String fornavn;
-    String mellomnavn;
-    String etternavn;
+public class AgressoInfo {
+    String agressoId;
+    String agressoOrgNiv;
+    String agressoOrgenhetType;
 }

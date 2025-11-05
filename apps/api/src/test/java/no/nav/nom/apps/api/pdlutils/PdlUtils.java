@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.pdlutils;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -12,21 +11,15 @@ import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Component
 @RequiredArgsConstructor
 public class PdlUtils {
-    private final Map<String, HentPersonBulkEntry> pdlEntryByIdent = new HashMap<>();
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
 
@@ -34,21 +27,6 @@ public class PdlUtils {
         stubFor(post("/graphql")
             .withHeader("Tema", equalTo(appProperties.clients().pdl().tema()))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
-    }
-
-    public void addPersonToPdlResponse(boolean mellomnavn, String... personIdenter) {
-        List.of(personIdenter).forEach(p -> {
-            val navn = NavnDTO.builder()
-                    .fornavn("fornavn" + pdlEntryByIdent.size())
-                    .mellomnavn(mellomnavn ? "mellomnavn" + pdlEntryByIdent.size() : null)
-                    .etternavn("etternavn" + pdlEntryByIdent.size())
-                    .build();
-            val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
-            val entry = HentPersonBulkEntry.builder().ident(p).person(new PersonDto(List.of(navn), List.of(kjoenn))).code("ok").build();
-            pdlEntryByIdent.put(p, entry);
-        });
-
-        mockPdlResponse(buildResponse());
     }
 
     @SneakyThrows
@@ -73,26 +51,5 @@ public class PdlUtils {
         mockPdlResponse(objectMapper.writeValueAsString(result));
 
         return navn;
-    }
-
-    public void addErrorToPdlResponse(String personIdent, String code) {
-        val entry = HentPersonBulkEntry.builder().ident(personIdent).person(null).code(code).build();
-        pdlEntryByIdent.put(personIdent, entry);
-
-        mockPdlResponse(buildResponse());
-    }
-
-    @SneakyThrows
-    private String buildResponse() {
-        return objectMapper.writeValueAsString(
-            objectMapper.createObjectNode()
-                .putPOJO("data", objectMapper.createObjectNode()
-                    .putPOJO("hentPersonBolk", pdlEntryByIdent.values())
-                )
-        );
-    }
-
-    public void reset() {
-        pdlEntryByIdent.clear();
     }
 }

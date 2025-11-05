@@ -6,9 +6,11 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,16 +40,19 @@ class OmadaControllerTest extends RestTestBase {
 
 
     @MockitoBean
-    private OrganiseringStateRepository organiseringStateRepositoryMock;
+    OrganiseringStateRepository organiseringStateRepositoryMock;
 
     @MockitoBean
-    private RemedyEnhetMapperService remedyEnhetMapperServiceMock;
+    RemedyEnhetMapperService remedyEnhetMapperServiceMock;
 
     @MockitoBean
-    private OrgenhetService orgenhetServiceMock;
+    OrgenhetService orgenhetServiceMock;
 
     @MockitoBean
-    private DvhRepository dvhRepositoryMock;
+    DvhRepository dvhRepositoryMock;
+
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
 
     @Autowired
     TestTokensGenerator testToken;
@@ -63,9 +69,7 @@ class OmadaControllerTest extends RestTestBase {
         when(orgenhetServiceMock.getById(NOM_ID))
             .thenReturn(Optional.of(getOrgEnhet()));
 
-        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(AGRESSO_ID, AGRESSO_ORG_NIVAA, ORG_ENHET_NAVN))
-            .thenReturn(getLedere());
-
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(NOM_ID)).thenReturn(getLeder());
 
         webTestClient.get()
             .uri("/api/v1/omada/orgEnhet/{id}", NOM_ID)
@@ -114,9 +118,7 @@ class OmadaControllerTest extends RestTestBase {
         when(orgenhetServiceMock.getById(NOM_ID))
             .thenReturn(Optional.of(getOrgEnhet()));
 
-        when(dvhRepositoryMock.getLederByAgressoIdAndNivAndNavn(AGRESSO_ID, AGRESSO_ORG_NIVAA, ORG_ENHET_NAVN))
-            .thenReturn(Collections.emptyList());
-
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(NOM_ID)).thenReturn(Optional.empty());
 
         webTestClient.get()
             .uri("/api/v1/omada/orgEnhet/{id}", NOM_ID)
@@ -202,6 +204,17 @@ class OmadaControllerTest extends RestTestBase {
             .navIdent(NAVIDENT)
             .orgEnhetNr(NOM_ID)
             .build()
+        );
+    }
+
+    private Optional<OrgEnhetLederState> getLeder() {
+        return Optional.of(
+            OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident(NAVIDENT)
+                .orgEnhetId(NOM_ID)
+                .startdato(LocalDate.now().minusYears(1))
+                .build()
         );
     }
 

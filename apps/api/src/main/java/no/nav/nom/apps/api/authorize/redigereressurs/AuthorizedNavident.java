@@ -14,12 +14,15 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.LederTilgangState;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -65,7 +68,7 @@ public class AuthorizedNavident {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
-    private final DvhRepository dvhRepository;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
 
     private final Unleash unleash;
@@ -87,6 +90,7 @@ public class AuthorizedNavident {
             OrganiseringStateRepository organiseringStateRepository,
             RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
+            OrgEnhetLederService orgEnhetLederService,
             DvhRepository dvhRepository,
             TilgangDelegertEmailService tilgangDelegertEmailService,
             Unleash unleash
@@ -97,7 +101,7 @@ public class AuthorizedNavident {
         this.organiseringStateRepository = organiseringStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
-        this.dvhRepository = dvhRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
         this.unleash = unleash;
     }
@@ -388,19 +392,14 @@ public class AuthorizedNavident {
         Map<String, HashSet<String>> nyMapLederToRedigerbarOrgenhet = new HashMap<>();
 
         enheterIHierarkiFraDriftsenhet.forEach(
-            enhetId -> orgenhetService.getById(enhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
-                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
+            enhetId -> orgenhetService.getById(enhetId)
+                .flatMap(orgenhet -> orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident))
+                .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
         );
 
         List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
-            orgenhetId -> orgenhetService.getById(orgenhetId).flatMap(orgenhet -> dvhRepository.getLedere().stream()
-                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                .findAny()
-                .map(DvhLeder::getNavIdent)).ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
+            orgenhetId -> orgenhetService.getById(orgenhetId).flatMap(orgenhet -> orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident))
+                .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
         );
         synchronized (this) {
             lederForOrgenhetSomKanRedigere.clear();
@@ -414,17 +413,14 @@ public class AuthorizedNavident {
     }
 
     public List<IOrgenhet> isAuthorizedToDelegate(String lederNavident) {
-        var orgenheterTilLeder = orgenhetService.getEnheterByLeder(lederNavident);
+        var orgenheterTilLeder = orgEnhetLederService.getOrgEnheterNavidentErAktivLederFor(lederNavident);
         var enheterMellomDriftOgArbomr = alleOrgenheterMellomDriftsenhetOgArbeidsomraade();
 
         return orgenheterTilLeder.stream()
-            .filter(orgenhet -> enheterMellomDriftOgArbomr.contains(orgenhet.getId()))
+            .filter(orgenhet -> enheterMellomDriftOgArbomr.contains(orgenhet.orgEnhetId()))
+            .map(orgEnhetLederState -> orgenhetService.getById(orgEnhetLederState.orgEnhetId()).orElseThrow())
             .toList();
     }
-    
-
-    
-
 
     private int orgenheterMedAuthedLederCount() {
         return lederForOrgenhetSomKanRedigere.values().stream().mapToInt(Collection::size).sum();

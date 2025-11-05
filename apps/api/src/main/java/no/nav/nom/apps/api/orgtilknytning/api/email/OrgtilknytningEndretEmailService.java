@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
@@ -56,7 +57,7 @@ public class OrgtilknytningEndretEmailService {
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
-    private final LederResolver lederResolver;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final CacheQueueService cacheQueueService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
@@ -73,9 +74,8 @@ public class OrgtilknytningEndretEmailService {
         Configuration freemarkerConfig,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository, OrgEnhetLederService orgEnhetLederService,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        LederResolver lederResolver,
         CacheQueueService cacheQueueService,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
@@ -87,8 +87,8 @@ public class OrgtilknytningEndretEmailService {
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
-        this.lederResolver = lederResolver;
         this.cacheQueueService = cacheQueueService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
@@ -353,21 +353,12 @@ public class OrgtilknytningEndretEmailService {
             if (orgtilknytningState.isPresent()) {
                 var orgenhetState = orgEnhetStateRepository.findById(orgtilknytningState.get().orgEnhetId());
                 if (orgenhetState.isPresent()) {
-                    log.info("Orgenhet ved OT endriner: {}", orgenhetState.get());
-                    var leader = lederResolver.leder(
-                        // populate at least agressoId, orgNiv, and navn
-                        OrgEnhet.builder()
-                            .id(orgenhetState.get().id())
-                            .navn(orgenhetState.get().navn())
-                            .agressoId(orgenhetState.get().agressoId())
-                            .orgNiv(orgenhetState.get().agressoOrgNivaa())
-                            .build()
-                    );
-                    log.info("Orgenhet og leder ved OT endriner: {}, {}", orgenhetState.get(), leader);
-                    if (!leader.isEmpty()) {
-                        // add the leader of the orgenhet
-                        recipientNavidents.add(leader.getFirst().getRessurs().getNavIdent());
-                    }
+                    log.info("Orgenhet ved OT endringer: {}", orgenhetState.get());
+                    var leder = orgEnhetLederService.getAktivLederForOrgEnhet(orgenhetState.get().id());
+                    leder.ifPresent(l -> {
+                        log.info("Orgenhet og leder ved OT endringer: {}, {}", orgenhetState.get(), l.navident());
+                        recipientNavidents.add(l.navident());
+                    });
                 }
             }
         }

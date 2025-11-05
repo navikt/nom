@@ -9,9 +9,9 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
-import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.IdentType;
@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.Assert.isTrue;
@@ -47,22 +48,22 @@ import static org.springframework.util.Assert.isTrue;
 public class TeamcatControllerTest extends RestTestBase {
 
     @MockitoBean
-    protected RessursStateRepository ressursStateRepository;
+    RessursStateRepository ressursStateRepository;
 
     @MockitoBean
-    protected OrgenhetService orgenhetService;
+    OrgenhetService orgenhetService;
 
     @MockitoBean
-    protected OrgtilknytningService orgtilknytningService;
+    OrgtilknytningService orgtilknytningService;
 
     @MockitoBean
-    protected AdClient adClient;
+    AdClient adClient;
 
     @MockitoBean
-    protected RessursLedereResolver ressursLedereResolver;
+    OrgEnhetLederService orgEnhetLederService;
 
     @MockitoBean
-    protected OrgEnhetMapper orgEnhetMapper;
+    OrgEnhetMapper orgEnhetMapper;
 
     @Autowired
     TestTokensGenerator testTokensGenerator;
@@ -171,7 +172,9 @@ public class TeamcatControllerTest extends RestTestBase {
         when(adClient.fetchInAdRessursInBatches(anyList())).thenReturn(Map.of(resId, createAdRessurs(resId)));
         when(orgtilknytningService.getByNavIdent(resId)).thenReturn(List.of(createOtks(resId, oeId)));
         when(orgenhetService.getById(oeId)).thenReturn(Optional.of(createOes(oeId, oeNavn,null)));
-        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
+
+        when(orgEnhetLederService.getAktiveLedereForRessurs(any(), anyBoolean()))
+            .thenReturn(List.of(new LederForRessurs("B321321", oeId, LocalDate.now().minusYears(1), null, true)));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
@@ -186,7 +189,6 @@ public class TeamcatControllerTest extends RestTestBase {
         var z = y.returnResult().getResponseBody();
         Assertions.assertEquals(resId, z.navident());
         Assertions.assertEquals(TeamcatRessursDTO.ResourceType.INTERN, z.ressurstype());
-//        Assertions.assertEquals(oeNavn, z.avdelingnavn());
     }
 
 
@@ -209,9 +211,8 @@ public class TeamcatControllerTest extends RestTestBase {
 
         mockEnheterAsHierarchy(List.of(oe1,oe2,oe3,oe4));
 
-
-        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
-
+        when(orgEnhetLederService.getAktiveLedereForRessurs(any(), anyBoolean()))
+            .thenReturn(List.of(new LederForRessurs("B321321", oeId, LocalDate.now().minusYears(1), null, true)));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
@@ -307,7 +308,6 @@ public class TeamcatControllerTest extends RestTestBase {
         assert w != null;
         Assertions.assertEquals(4,w.size());
         Assertions.assertTrue(w.has("oe1"));
-//        Assertions.assertTrue(w.values().stream().anyMatch(it -> it.id().equals(oe2.getId())));
     }
 
     private void mockEnheterAsHierarchy(List<OrgEnhet> toMock) {

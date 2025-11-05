@@ -14,6 +14,8 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import org.springframework.http.ResponseEntity;
@@ -38,17 +40,19 @@ import java.util.stream.Collectors;
 @RequestMapping(value = {"/app/orgenheter"})
 public class OrgEnhetController {
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
     private final AuthResolver authResolver;
 
     public OrgEnhetController(
-        OrgenhetService orgenhetService,
+        OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService,
         OrgEnhetMapper orgEnhetMapper,
         KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
         AuthResolver authResolver
     ) {
         this.orgenhetService = orgenhetService;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
         this.authResolver = authResolver;
@@ -169,7 +173,13 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public List<OrgEnhet> hentOrgEnheterByLeder(@PathVariable String navident) {
-        return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
+        return orgEnhetLederService.getOrgEnheterNavidentErLederFor(navident)
+            .stream()
+            .map(orgEnhetLederState ->
+                orgenhetService.getById(orgEnhetLederState.orgEnhetId())
+                    .orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetLederState.orgEnhetId())))
+            .map(orgEnhetMapper::mapToOrgEnhet)
+            .toList();
     }
 
     @GetMapping("/underliggende/{parentId}")

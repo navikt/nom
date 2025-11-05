@@ -51,9 +51,6 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
     @MockitoBean
     DelegertLederStateRepository delegertLederStateRepository;
 
-    @Mock
-    Unleash unleash;
-
     @Test
     @DisplayName("Verifiser at Leder B har auth til å redigere ressurser B110001 og B110002")
     void test_0001() {
@@ -322,7 +319,6 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
 
         Function<String,RessursState> createRessurs = (navident) -> RessursState.builder().navident(navident).visningsnavn(new Visningsnavn(navident,Optional.of(navident),navident)).build();
 
-        when(unleash.isEnabled(anyString(),anyBoolean())).thenReturn(true);
         when(ressursStateRepository.findByNavident("C")).thenReturn(Optional.of(createRessurs.apply("C")));
         when(ressursStateRepository.findByNavident("C2")).thenReturn(Optional.of(createRessurs.apply("C2")));
         when(ressursStateRepository.findByNavident("C3")).thenReturn(Optional.of(createRessurs.apply("C3")));

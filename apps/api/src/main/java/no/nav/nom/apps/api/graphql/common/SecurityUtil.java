@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+// TODO: splitt denne klassen i hva som er spesifkt for GQL, og hva som er generelt for ellers i APIet
+
 @Component
 public class SecurityUtil {
 

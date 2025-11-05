@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -47,7 +48,6 @@ public class OrgenhetService {
 
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
-    private final DvhRepository dvhRepository;
     private final KafkaTopicReader kafkaTopicReader;
     private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
@@ -55,15 +55,13 @@ public class OrgenhetService {
     private String vikafossenOrgEnhetId;
 
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, 
-                           OrgEnhetCommandService orgEnhetCommandService, 
-                           DvhRepository dvhRepository, 
-                           KafkaTopicReader kafkaTopicReader, 
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository,
+                           OrgEnhetCommandService orgEnhetCommandService,
+                           KafkaTopicReader kafkaTopicReader,
                            OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
-        this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
         this.organiseringStateRepository = organiseringStateRepository;
     }
@@ -171,14 +169,6 @@ public class OrgenhetService {
     public Collection<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId) {
         return getAllEnheterMedOrganisering().stream()
             .filter(orgenhet -> Objects.equals(orgenhet.getAgressoId(), agressoId))
-            .toList();
-    }
-
-    public List<IOrgenhet> getEnheterByLeder(String lederNavIdent) {
-        return dvhRepository.getLedere().stream()
-            .filter(l -> l.getNavIdent().equals(lederNavIdent))
-            .map(l -> getEnhetByAgressoIdNivaAndName(l.getOrgEnhetNr(), l.getOrgNiv(), l.getOrgenhetNavn()).orElse(null))
-            .filter(Objects::nonNull)
             .toList();
     }
 

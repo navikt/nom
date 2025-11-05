@@ -2,43 +2,49 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg.AKTIVE;
 
 @Component("OrgEnhetsLeder")
 public class LederResolver {
-
-    private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
+    private final OrgEnhetLederService orgEnhetLederService;
 
-    public LederResolver(
-        DvhRepository dvhRepository,
-        RessursStateRepository ressursStateRepository
+    public LederResolver(RessursStateRepository ressursStateRepository,
+                         OrgEnhetLederService orgEnhetLederService
     ) {
-        this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
     }
 
-    public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
-            .stream()
-            .map(leder -> tilOrgEnhetsLeder(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
-                .orElseThrow(LederNotFoundException::new)))
+    public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg) {
+        return orgEnhetLederService.getLedereForOrgEnhet(orgEnhet.getId()).stream()
+            .filter(leder -> Util.filterByPeriodiskUtvalg(leder, periodiskUtvalg))
+            .map(leder -> new OrgEnhetsLeder(
+                getRessurs(leder),
+                leder.startdato(), leder.sluttdato())
+            )
             .toList();
     }
 
-    private OrgEnhetsLeder tilOrgEnhetsLeder(Ressurs leder) {
-        return OrgEnhetsLeder.builder().ressurs(leder).build();
+    private Ressurs getRessurs(OrgEnhetLederState leder) {
+        return ressursStateRepository.findByNavident(leder.navident(), MappingUtils::toRessurs).orElseThrow(LederNotFoundException::new);
     }
 
     public static GraphQLError handleLederNotFoundException(Throwable throwable, DataFetchingEnvironment environment) {

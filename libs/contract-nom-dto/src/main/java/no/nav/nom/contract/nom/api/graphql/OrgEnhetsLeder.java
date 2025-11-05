@@ -1,10 +1,10 @@
 package no.nav.nom.contract.nom.api.graphql;
 
-import lombok.Builder;
-import lombok.Value;
+import java.time.LocalDate;
 
-@Builder
-@Value
-public class OrgEnhetsLeder {
-    Ressurs ressurs;
-}
+public record OrgEnhetsLeder(
+    Ressurs ressurs,
+    LocalDate gyldigFom,
+    LocalDate gyldigTom
+){}
+

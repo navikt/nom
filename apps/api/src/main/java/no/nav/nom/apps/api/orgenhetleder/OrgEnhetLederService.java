@@ -6,20 +6,24 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
-import no.nav.nom.apps.api.orgenhetleder.api.app.OrgEnhetLederResponse;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCommandService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederSluttdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OpprettOrgEnhetLeder;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +31,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 
 @Slf4j
@@ -35,10 +41,10 @@ import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 public class OrgEnhetLederService {
 
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
-    private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
     private final OrgenhetService orgenhetService;
-
+    private final OrgtilknytningService orgtilknytningService;
+    private final OrganiseringStateRepository organiseringStateRepository;
 
     public void persisterLedereForOrgenheter(List<DvhLeder> filteredDvhLedere) {
         Origination origination = new Origination("nom-api", "nom-api");
@@ -152,30 +158,122 @@ public class OrgEnhetLederService {
         }
     }
 
-    public List<OrgEnhetLederResponse> getLederByNavident(String navident) {
-        return orgEnhetLederStateRepository.findAllByNavident(navident).stream().map(this::enrichWithData).toList();
+    public List<LederForRessurs> getLedereForRessurs(String navident, boolean kunDOL) {
+        var oter = orgtilknytningService.getByNavIdent(navident);
+        if (kunDOL) {
+            oter = oter.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
+        }
+        List<LederForRessurs> lederForRessurs = new ArrayList<>();
+        oter.forEach(ot -> {
+            var lederStates = getLedereForOrgEnhetIPeriode(ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom());
+            lederStates.forEach(lederState -> {
+                if (lederState.navident().equals(navident)) {
+                    getLedereForOverOrgenheterSomIkkeErAngittNavident(ot.orgEnhetId(), lederState.startdato(), lederState.sluttdato(), navident).forEach(
+                        overEnhetLederState -> lederForRessurs.add(new LederForRessurs(
+                            overEnhetLederState.navident(),
+                            overEnhetLederState.orgEnhetId(),
+                            foer(overEnhetLederState.startdato(), lederState.startdato()) ?lederState.startdato() : overEnhetLederState.startdato(),
+                            etter(overEnhetLederState.sluttdato(), lederState.sluttdato()) ? lederState.sluttdato() : overEnhetLederState.sluttdato(),
+                            ot.erDagligOppfolging()
+                        )
+                    ));
+                } else {
+                    lederForRessurs.add(new LederForRessurs(
+                        lederState.navident(),
+                        ot.orgEnhetId(),
+                        foer(lederState.startdato(), ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
+                        etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
+                        ot.erDagligOppfolging()
+                    ));
+                }
+            });
+        });
+        return lederForRessurs.stream().sorted(lederForRessursComparator).toList();
     }
 
-    public List<OrgEnhetLederResponse> getLederByOrgEnhetId(String orgEnhetId) {
-        return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream().map(this::enrichWithData).toList();
+    private List<OrgEnhetLederState> getLedereForOverOrgenheterSomIkkeErAngittNavident(String orgEnhetId, LocalDate startdato, LocalDate sluttdato, String navident) {
+        List<OrgEnhetLederState> lederStates = new ArrayList<>();
+        getLedereForOrgEnhetIPeriode(orgEnhetId, startdato, sluttdato).forEach(lederState -> {
+            if (!lederState.navident().equals(navident)) {
+                lederStates.add(
+                    lederState.toBuilder()
+                        .startdato(foer(lederState.startdato(), startdato) ? startdato : lederState.startdato())
+                        .sluttdato(etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato())
+                        .build()
+                );
+            } else {
+                // Har enheten flere overordnede enheter i perioden (e.g. organiseringen har endret seg)?
+                organiseringStateRepository.findById(orgEnhetId).stream()
+                    .filter(organiseringState -> organiseringState.id().equals(orgEnhetId))
+                    .filter(organiseringState -> PeriodeUtil.overlapsInterval(startdato, sluttdato, organiseringState))
+                    .forEach(organiseringState ->
+                        lederStates.addAll(
+                            getLedereForOverOrgenheterSomIkkeErAngittNavident(
+                                organiseringState.idOver(),
+                                foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
+                                etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
+                                navident
+                            )
+                        )
+                    );
+            }
+        });
+        return lederStates.stream().sorted(orgEnhetLederStateComparator).toList();
     }
 
-    public Optional<OrgEnhetLederResponse> getActivLederForOrgEnhet(String orgEnhetId) {
-        return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhetId).map(this::enrichWithData);
+    public List<LederForRessurs> getAktiveLedereForRessurs(String navident, boolean kunDOL) {
+        return getLedereForRessurs(navident, kunDOL).stream()
+            .filter(LederForRessurs::isActive)
+            .sorted(lederForRessursComparator)
+            .toList();
     }
 
-    public OrgEnhetLederResponse enrichWithData(OrgEnhetLederState orgEnhetLederState) {
-        var ressursVisningsnavn = ressursStateRepository.findByNavident(orgEnhetLederState.navident()).map(RessursState::visningsnavn).orElse(null);
-        var orgEnhetNavn = orgenhetService.getById(orgEnhetLederState.orgEnhetId()).map(IOrgenhet::getNavn).orElse(null);
-
-        return OrgEnhetLederResponse.builder()
-            .fid(orgEnhetLederState.fid())
-            .navident(orgEnhetLederState.navident())
-            .visningsnavn(ressursVisningsnavn)
-            .orgEnhetId(orgEnhetLederState.orgEnhetId())
-            .orgEnhetNavn(orgEnhetNavn)
-            .startdato(orgEnhetLederState.startdato())
-            .sluttdato(orgEnhetLederState.sluttdato())
-            .build();
+    public List<IOrgenhet> getEnheterByLeder(String lederNavIdent) {
+        return orgEnhetLederStateRepository.findAllByNavident(lederNavIdent).stream()
+            .map(leder -> orgenhetService.getById(leder.orgEnhetId()))
+            .flatMap(Optional::stream)
+            .toList();
     }
+
+
+    public List<OrgEnhetLederState> getLedereForOrgEnhetIPeriode(String orgEnhetId, LocalDate startdato, LocalDate sluttdato) {
+        return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream()
+            .filter(lederState -> PeriodeUtil.overlapsInterval(startdato, sluttdato, lederState.startdato(), lederState.sluttdato()))
+            .sorted(orgEnhetLederStateComparator)
+            .toList();
+    }
+
+    public List<OrgEnhetLederState> getOrgEnheterNavidentErLederFor(String navident) {
+        return orgEnhetLederStateRepository.findAllByNavident(navident).stream()
+            .sorted(orgEnhetLederStateComparator)
+            .toList();
+    }
+
+    public List<OrgEnhetLederState> getOrgEnheterNavidentErAktivLederFor(String navident) {
+        return getOrgEnheterNavidentErLederFor(navident).stream()
+            .filter(OrgEnhetLederState::isActive)
+            .toList();
+    }
+
+    public List<OrgEnhetLederState> getLedereForOrgEnhet(String orgEnhetId) {
+        return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream()
+            .sorted(orgEnhetLederStateComparator)
+            .toList();
+    }
+
+    public Optional<OrgEnhetLederState> getAktivLederForOrgEnhet(String orgEnhetId) {
+        return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhetId);
+    }
+
+    // Comparator to sort leaders first by start date, then by end date (nulls last), then by org unit ID
+    private final Comparator<LederForRessurs> lederForRessursComparator =
+        Comparator.comparing(LederForRessurs::startdato)
+            .thenComparing(LederForRessurs::sluttdato, Comparator.nullsLast(LocalDate::compareTo))
+            .thenComparing(LederForRessurs::orgEnhetId);
+
+    // Comparator to sort leaders first by start date, then by end date (nulls last), then by org unit ID
+    private final Comparator<OrgEnhetLederState> orgEnhetLederStateComparator =
+        Comparator.comparing(OrgEnhetLederState::startdato)
+            .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo))
+            .thenComparing(OrgEnhetLederState::orgEnhetId);
 }

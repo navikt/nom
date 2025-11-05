@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -40,43 +41,34 @@ public class RessursOpprettetEmailService {
     private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
     private final RessursStateRepository ressursStateRepository;
-    private final DvhRepository dvhRepository;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final Configuration freemarkerConfig;
-    private final Unleash unleash;
 
     public RessursOpprettetEmailService(
         MicrosoftGraphClient microsoftGraphClient,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
-        DvhRepository dvhRepository,
         Configuration freemarkerConfig,
-        Unleash unleash
+        OrgEnhetLederService orgEnhetLederService
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
-        this.dvhRepository = dvhRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.freemarkerConfig = freemarkerConfig;
-        this.unleash = unleash;
     }
 
     public void notifyByEmail(RessursState opprettetRessurs, OrgEnhetState orgEnhet) {
         log.info("Sender epost om opprettelse av ressurs {} til leder av orgenhet {}", opprettetRessurs.navident(), orgEnhet.id());
 
-        // get leaders using lederResolver
-        List<String> leaders = dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.agressoId(), orgEnhet.agressoOrgNivaa(), orgEnhet.navn())
-            .stream()
-            .map(leder -> tilOrgEnhetsLederNavIdents(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
-                .orElseThrow(LederNotFoundException::new)))
-            .toList();
+        var leder = orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.id());
 
-        // throw exception if no leaders are found
-        if(leaders.isEmpty()) {
+        if(leder.isEmpty()) {
             throw new RessursOpprettetEmailException("Fant ikke leder for orgenhet " + orgEnhet.id());
         }
 
         // compose and send email to all recipients
-        Set <String> recipientNavidents = Set.copyOf(leaders);
+        Set <String> recipientNavidents = Set.of(leder.get().navident());
         recipientNavidents = appendAuthenticatedUserToRecipientNavIdents(Set.copyOf(recipientNavidents));
         composeAndSendEmail(opprettetRessurs, recipientNavidents, orgEnhet.navn());
     }

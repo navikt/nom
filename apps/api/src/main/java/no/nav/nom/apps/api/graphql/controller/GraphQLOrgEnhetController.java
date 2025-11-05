@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgtilknytningResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
@@ -13,8 +13,10 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -30,22 +32,22 @@ import java.util.Optional;
 public class GraphQLOrgEnhetController {
 
     private final OrgEnhetResolver orgEnhetResolver;
-    private final OrgEnhetKoblingResolver koblingResolver;
+    private final OrgtilknytningResolver orgtilknytningResolver;
     private final OrganiseringResolver organiseringResolver;
     private final LederResolver lederResolver;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final GraphQLFieldConsumptionCounter counter;
 
     public GraphQLOrgEnhetController(
-            OrgEnhetResolver orgEnhetResolver,
-            OrgEnhetKoblingResolver koblingResolver,
-            OrganiseringResolver organiseringResolver,
-            @Qualifier("OrgEnhetsLeder") LederResolver lederResolver,
-            RemedyEnhetIdResolver remedyEnhetIdResolver,
-            GraphQLFieldConsumptionCounter counter
+        OrgEnhetResolver orgEnhetResolver,
+        OrgtilknytningResolver orgtilknytningResolver,
+        OrganiseringResolver organiseringResolver,
+        @Qualifier("OrgEnhetsLeder") LederResolver lederResolver,
+        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        GraphQLFieldConsumptionCounter counter
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
-        this.koblingResolver = koblingResolver;
+        this.orgtilknytningResolver = orgtilknytningResolver;
         this.organiseringResolver = organiseringResolver;
         this.lederResolver = lederResolver;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
@@ -79,13 +81,19 @@ public class GraphQLOrgEnhetController {
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
-    public List<Organisering> organisering(OrgEnhet orgEnhet, @Argument("retning") OrganiseringRetning retning) {
-        return organiseringResolver.organiseringer(orgEnhet, retning);
+    public List<Organisering> organisering(OrgEnhet orgEnhet, @Argument("retning") OrganiseringRetning retning, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return organiseringResolver.organiseringer(orgEnhet, retning, periodiskUtvalg);
     }
 
+    @Deprecated
     @SchemaMapping(typeName = "OrgEnhet", field = "leder")
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
-        return lederResolver.leder(orgEnhet);
+        return lederResolver.leder(orgEnhet, PeriodiskUtvalgArg.AKTIVE);
+    }
+
+    @SchemaMapping(typeName = "OrgEnhet", field = "ledere")
+    public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return lederResolver.leder(orgEnhet, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "remedyEnhetId")
@@ -93,11 +101,18 @@ public class GraphQLOrgEnhetController {
         return remedyEnhetIdResolver.remedyEnhetId(orgEnhet);
     }
 
+    @Deprecated
     @SchemaMapping(typeName = "OrgEnhet", field = "koblinger")
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
-        return koblingResolver.koblinger(orgEnhet);
+        return orgtilknytningResolver.koblinger(orgEnhet);
     }
 
+    @SchemaMapping(typeName = "OrgEnhet", field = "orgTilknytninger")
+    public List<OrgTilknytning> orgTilknytninger(OrgEnhet orgEnhet, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
+        return orgtilknytningResolver.orgtilknytninger(orgEnhet, periodiskUtvalg);
+    }
+
+    @Deprecated
     @SchemaMapping(typeName = "Organisering", field = "organisasjonsenhet")
     public OrgEnhet organisasjonsenhet(Organisering organisering) {
         return orgEnhet(organisering);

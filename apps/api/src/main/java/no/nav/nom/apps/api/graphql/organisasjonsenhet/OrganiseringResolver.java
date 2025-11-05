@@ -1,15 +1,20 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.graphql.Util;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+
+import static no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg.*;
 
 @Slf4j
 @Component
@@ -30,6 +35,17 @@ public class OrganiseringResolver {
             .toList();
     }
 
+    public List<Organisering> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning, PeriodiskUtvalgArg periodiskUtvalg) {
+        if (orgEnhet.endedOnStartDate()) return Collections.emptyList();
+
+        log.debug("Henter organiseringer for {} retning '{}' og periodiskUtvalg '{}'", orgEnhet.getId(), retning, periodiskUtvalg);
+        return organiseringStateRepository.getOrganiseringerContainingId(orgEnhet.getId(), false).stream()
+            .filter(o -> Util.filterByPeriodiskUtvalg(o, periodiskUtvalg))
+            .map(organiseringState -> convert(organiseringState, orgEnhet))
+            .filter(organisering -> retning == null || organisering.getRetning() == retning)
+            .toList();
+    }
+
     private Organisering convert(OrganiseringState organisering, OrgEnhet orgEnhet) {
         var retning = OrganiseringRetning.over;
 
@@ -41,8 +57,6 @@ public class OrganiseringResolver {
             .id(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())
             .retning(retning)
             .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.idOver() : organisering.id())
-            .orgNiv("")
-            .orgEnhetNavn(retning == OrganiseringRetning.over ? organisering.navnOver() : organisering.navn())
             .gyldigFom(organisering.gyldigFom())
             .gyldigTom(organisering.gyldigTom())
             .build();

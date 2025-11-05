@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.clients.msgraph.EmailSendingUnforeseenException;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -51,7 +51,7 @@ public class RessursUtloperSnartEmailService {
     private final NomMastered nomMastered;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
-    private final OrgEnhetMapper orgEnhetMapper;
+    private final OrgEnhetLederService orgEnhetLederService;
     private final Unleash unleash;
 
     public RessursUtloperSnartEmailService(
@@ -64,7 +64,7 @@ public class RessursUtloperSnartEmailService {
         NomMastered nomMastered,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
-        OrgEnhetMapper orgEnhetMapper,
+        OrgEnhetLederService orgEnhetLederService,
         Unleash unleash
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
@@ -76,7 +76,7 @@ public class RessursUtloperSnartEmailService {
         this.nomMastered = nomMastered;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
-        this.orgEnhetMapper = orgEnhetMapper;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.unleash = unleash;
     }
 
@@ -259,20 +259,16 @@ public class RessursUtloperSnartEmailService {
                 return utloperRessursData;
             }
 
-            var ledere = orgEnhetMapper.hentOrgEnhetLedereNavident(
-                orgEnhetState.agressoId(),
-                orgEnhetState.agressoOrgNivaa(),
-                orgEnhetState.navn()
-            );
+            var leder = orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhetState.id());
 
-            if (isNull(ledere) || ledere.isEmpty()) {
+            if (leder.isEmpty()) {
                 log.warn("ALERT: Fant ikke leder for orgenhet: {}, ressurs: {}", orgEnhetState.navn(), ressurs.navident());
                 return utloperRessursData.toBuilder().orgenhetNavn(orgEnhetState.navn()).build();
             }
 
             return utloperRessursData.toBuilder()
                 .orgenhetNavn(orgEnhetState.navn())
-                .orgenhetLederNavident(ledere.getFirst())
+                .orgenhetLederNavident(leder.get().navident())
                 .build();
 
         } catch (Exception e) {

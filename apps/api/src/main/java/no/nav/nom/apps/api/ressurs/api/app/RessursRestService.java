@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
@@ -102,7 +103,6 @@ public class RessursRestService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
-    private final RessursLedereResolver ressursLedereResolver;
     private final KafkaTopicReader kafkaTopicReader;
     private final NomMastered nomMastered;
     private final AuthResolver authResolver;
@@ -110,6 +110,7 @@ public class RessursRestService {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final MicrosoftGraphClient microsoftGraphClient;
+    private final OrgEnhetLederService orgEnhetLederService;
 
     @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
@@ -125,11 +126,10 @@ public class RessursRestService {
         NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient, OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
-        RessursLedereResolver ressursLedereResolver,
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
         AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService, RemedyEnhetMapperService remedyEnhetMapperService,
-        OrgtilknytningService orgtilknytningService, MicrosoftGraphClient microsoftGraphClient
+        OrgtilknytningService orgtilknytningService, MicrosoftGraphClient microsoftGraphClient, OrgEnhetLederService orgEnhetLederService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -143,13 +143,13 @@ public class RessursRestService {
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
         this.kafkaTopicReader = kafkaTopicReader;
         this.ressursContactDetailsResolver = ressursContactDetailsResolver;
-        this.ressursLedereResolver = ressursLedereResolver;
         this.nomMastered = nomMastered;
         this.authResolver = authResolver;
         this.fysiskBrukerstedService = fysiskBrukerstedService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.microsoftGraphClient = microsoftGraphClient;
+        this.orgEnhetLederService = orgEnhetLederService;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -363,7 +363,21 @@ public class RessursRestService {
     }
 
     public List<RessursLeder> getLedereForRessurs(String navident) {
-        return ressursLedereResolver.ledere(navident);
+        return orgEnhetLederService.getAktiveLedereForRessurs(navident, false)
+            .stream()
+            .map(leder -> new RessursLeder(
+                ressursStateRepository.findByNavident(leder.lederNavident())
+                    .map(this::maskPersonNr)
+                    .orElseThrow(() -> RessursNotFoundException.navident(leder.lederNavident())),
+                navident,
+                leder.erDagligOppfolging()
+            ))
+            .toList();
+    }
+
+    private RessursState maskPersonNr(RessursState ressurs) {
+        var maskedPersonIdent = ressurs.personident().replaceFirst(".{5}$", "*****");
+        return ressurs.toBuilder().personident(maskedPersonIdent).build();
     }
 
     public RessursState createRessursAndNotify(OpprettRessursRequest request) {

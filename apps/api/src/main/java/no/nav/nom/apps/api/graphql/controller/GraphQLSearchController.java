@@ -19,7 +19,6 @@ import static java.util.Objects.isNull;
 @Controller
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLSearchController {
-
     private final SearchResolver searchResolver;
     private final GraphQLFieldConsumptionCounter counter;
 

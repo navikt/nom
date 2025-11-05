@@ -1,19 +1,25 @@
 package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.graphql.GraphQLExtendedIntegrationTestBase;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,29 +29,36 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("GraphQL.Search")
-public class SearchTest extends GraphQLExtendedIntegrationTestBase {
+@ActiveProfiles({"GraphQLTest", "test"})
+@GraphQlTest
+@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@DisplayName("GraphQL - Search endepunkter")
+public class SearchTest {
+    @Autowired
+    protected GraphQLTestUtil gqlUtil;
 
     @Autowired
-    private DvhRestConsumer dvhRestConsumer;
+    private RessursStateRepository ressursStateRepository;
+
+    @Autowired
+    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
     private LuceneService luceneService;
 
     @Autowired
-    DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+    DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
     @BeforeEach
-    void clearLucene() {
+    void setup() {
+        ressursStateRepository.clear();
         luceneService.clear();
+        dvhStartupLoadMonitor.setCompleted();
     }
 
     @Test
@@ -54,16 +67,12 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         var r1 = new RessursStateBuilder(1).navident("testNavIdent").personident("testPersonIdent1").build();
         var r2 = new RessursStateBuilder(2).navident("testAnnenNav").personident("testPersonIdent2").build();
 
-        List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
 
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
-        luceneService.addInvalidatedEntitiesToIndex();
-
-        final var response = postForResource("search/scenario1.graphql");
+        final var response = gqlUtil.postForResource("search/scenario1.graphql");
         final var searchResults = response.path("search").entityList(Ressurs.class).get();
 
-        assertThat(searchResults, hasSize(1));
+        assertEquals(1, searchResults.size());
 
         final var navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
         assertThat(navidenter, hasItems(r1.navident()));
@@ -74,34 +83,32 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
     public void scenario2() {
         var e1 = new OrgEnhetStateBuilder(1).navn("testid").uniqueAgressoId("unique-1").build();
         var e2 = new OrgEnhetStateBuilder(2).navn("testid2").uniqueAgressoId("unique-2").build();
-        List.of(e1, e2).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
 
-        luceneService.addInvalidatedEntitiesToIndex();
+        addToOrgenhetStateAndSearchIndex(List.of(e1, e2));
 
-        final var response = postForResource("search/scenario2.graphql");
+        final var response = gqlUtil.postForResource("search/scenario2.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
-        assertThat(searchResults.size(), greaterThan(1));
-        assertThat(agressoIds, hasItem(e1.agressoId()));
-        assertThat(agressoIds, hasItem(e2.agressoId()));
-
+        assertEquals(2, agressoIds.size());
+        assertTrue(agressoIds.contains(e1.agressoId()));
+        assertTrue(agressoIds.contains(e2.agressoId()));
     }
 
     @Test
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
-
         var mocknavn = "testenhet";
         var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).uniqueAgressoId("unique-1").build();
-        kafkaUtils.createOrgenhetHendelseEventSource(e1);
-        luceneService.addInvalidatedEntitiesToIndex();
 
-        final var response = postForResource("search/scenario3.graphql");
+        addToOrgenhetStateAndSearchIndex(List.of(e1));
+
+
+        final var response = gqlUtil.postForResource("search/scenario3.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
-        assertThat(enhetsnavn, hasItem(mocknavn));
+        assertTrue(enhetsnavn.contains(mocknavn));
     }
 
     @Test
@@ -112,14 +119,10 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
         var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").uniqueAgressoId("unique-1").build();
 
-        List.of(r1,r2).forEach(kafkaUtils::createRessursHendelseEventSource);
-        List.of(e1).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
+        addToOrgenhetStateAndSearchIndex(List.of(e1));
 
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
-        luceneService.addInvalidatedEntitiesToIndex();
-
-        final var response = postForResource("search/scenario4.graphql");
+        final var response = gqlUtil.postForResource("search/scenario4.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
         final var resultTypes = StreamSupport
@@ -127,82 +130,75 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
             .map(result -> result.get("__typename").asText())
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
-        assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
+        assertEquals(2, searchResults.size());
+        assertEquals(1, resultTypes.getOrDefault("Ressurs", 0L));
+        assertEquals(1, resultTypes.getOrDefault("OrgEnhet", 0L));
     }
 
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario51() {
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
+        var r1 = new RessursStateBuilder(1).build();
+        var r2 = new RessursStateBuilder(2).build();
 
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-        luceneService.addInvalidatedEntitiesToIndex();
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
 
-        final var response = postForResource("search/scenario5.graphql");
+        final var response = gqlUtil.postForResource("search/scenario5.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
-        assertThat(searchResults.toString(), containsString("fornavn"));
+        assertTrue(searchResults.toString().contains("fornavn"));
     }
 
     @Test
     @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
     public void scenario61() {
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
+        var r1 = new RessursStateBuilder(1).build();
+        var r2 = new RessursStateBuilder(2).build();
 
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").uniqueAgressoId("unique-1").build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").uniqueAgressoId("unique-2").build());
+        var e1 = new OrgEnhetStateBuilder(1).navn("NAV City").uniqueAgressoId("unique-1").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("Not-to-find").uniqueAgressoId("unique-2").build();
 
-        luceneService.addInvalidatedEntitiesToIndex();
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
+        addToOrgenhetStateAndSearchIndex(List.of(e1, e2));
 
-        final var response = postForResource("search/scenario6.graphql");
+        final var response = gqlUtil.postForResource("search/scenario6.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
-        assertThat(searchResults.toString(), containsString("NAV"));
+        assertTrue(searchResults.toString().contains("NAV"));
     }
 
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario52() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
+        var r1 = new RessursStateBuilder(1).navident("test").build();
+        var r2 = new RessursStateBuilder(2).build();
 
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
+        var e1 = new OrgEnhetStateBuilder(1).navn("fornavn").build();
 
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-        luceneService.addInvalidatedEntitiesToIndex();
-        luceneService.refreshOrgenhet();
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
+        addToOrgenhetStateAndSearchIndex(List.of(e1));
 
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
-        final var response = postForResource("search/scenario5_1.graphql");
+        final var response = gqlUtil.postForResource("search/scenario5_1.graphql");
         final var searchResults = response.path("searchRessurs").entity(JsonNode.class).get();
 
-        assertThat(searchResults.toString(), containsString("test"));
-        assertThat(searchResults.size(), equalTo(2));
+        assertTrue(searchResults.toString().contains("test"));
+        assertEquals(2, searchResults.size());
     }
 
     @Test
     @DisplayName("Søk etter orgenhet")
     public void scenario71() {
+        var r1 = new RessursStateBuilder(1).build();
+        var r2 = new RessursStateBuilder(2).build();
+
         var passedDate = LocalDate.now().minusMonths(1L);
+        var e1 = new OrgEnhetStateBuilder(1).navn("test 3").gyldigTom(passedDate).uniqueAgressoId("unique-1").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("test 4").uniqueAgressoId("unique-2").build();
 
-        kafkaUtils.createRessursHendelseEventSource("1");
-        kafkaUtils.createRessursHendelseEventSource("2");
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(passedDate).uniqueAgressoId("unique-1").build());
-        kafkaUtils.createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").uniqueAgressoId("unique-2").build());
+        addToRessursStateAndSearchIndex(List.of(r1, r2));
+        addToOrgenhetStateAndSearchIndex(List.of(e1, e2));
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-        luceneService.addInvalidatedEntitiesToIndex();
-
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
-        final var allResponse = postForResource(
+        final var allResponse = gqlUtil.postForResource(
             "search/scenario7.graphql",
             Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "ALLE"),
                 "term", "test"
@@ -210,17 +206,18 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         );
         final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
 
-        assertThat(all.size(), equalTo(2));
-        assertThat(all.toString(), containsString("test"));
+        assertEquals(2, all.size());
+        assertTrue(all.toString().contains("test"));
 
-        final var onlyActiveResponse = postForResource(
+        final var onlyActiveResponse = gqlUtil.postForResource(
             "search/scenario7.graphql",
             Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "IKKE_PASSERT"),
                 "term", "test"
             )
         );
         final var onlyActive = onlyActiveResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
-        assertThat(onlyActive.size(), equalTo(1));
+
+        assertEquals(1, onlyActive.size());
     }
 
     @Test
@@ -232,12 +229,9 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").uniqueAgressoId("unique-2").build();
         var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").uniqueAgressoId("unique-3").build();
 
-        List.of(e1, e2, e3).forEach(kafkaUtils::createOrgenhetHendelseEventSource);
-        List.of(r1).forEach(kafkaUtils::createRessursHendelseEventSource);
-
-        luceneService.addInvalidatedEntitiesToIndex();
-
-        final var allResponse = postForResource(
+        addToRessursStateAndSearchIndex(List.of(r1));
+        addToOrgenhetStateAndSearchIndex(List.of(e1, e2, e3));
+        final var allResponse = gqlUtil.postForResource(
             "search/scenario7.graphql",
             Map.of("filter", Map.of("orgnivSelection", "ORGNIV_ORGENHET", "gyldigTomSelection", "ALLE"),
                 "term", "forn"
@@ -245,9 +239,25 @@ public class SearchTest extends GraphQLExtendedIntegrationTestBase {
         );
         final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
 
-        assertThat(all.toString(), containsString("fornavnet"));
-        assertThat(all.toString(), not(containsString("fornavnene")));
-        assertThat(all.size(), equalTo(2));
+        assertTrue(all.toString().contains("fornavnet"));
+        assertFalse(all.toString().contains("fornavnene"));
+        assertEquals(2, all.size());
+    }
+
+    private void addToRessursStateAndSearchIndex(List<RessursState> states) {
+        states.forEach(state -> {
+            ressursStateRepository.update(state);
+            luceneService.invalidateRessurs(state.navident());
+        });
+        luceneService.addInvalidatedEntitiesToIndex();
+    }
+
+    private void addToOrgenhetStateAndSearchIndex(List<OrgEnhetState> states) {
+        states.forEach(state -> {
+            orgEnhetStateRepository.update(state);
+            luceneService.invalidateOrgenhet(state.id());
+        });
+        luceneService.addInvalidatedEntitiesToIndex();
     }
 
 }

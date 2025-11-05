@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql;
+package no.nav.nom.apps.api.graphql.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -14,12 +14,13 @@ import org.springframework.http.HttpHeaders;
 
 import java.time.Duration;
 import java.util.Map;
+
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
 @AutoConfigureGraphQlTester
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public abstract class OldGraphQLTestBase extends TestBase {
+public abstract class GraphQLTestBase extends TestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
 

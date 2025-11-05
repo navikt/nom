@@ -11,7 +11,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
@@ -78,7 +77,6 @@ public class DvhRestConsumer {
 
     private final OTUtenforHierarki otUtenforHierarki;
     private final TelefonService telefonService;
-    private final OrgEnhetLederService orgEnhetLederService;
     private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
     private final Unleash unleash;
 
@@ -116,12 +114,10 @@ public class DvhRestConsumer {
 
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
-        var ledereLastOk = loadLedereAndOrganiseringerFromDvh();
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
+        loadOrganiseringerFromDvh();
 
-        authorizedNavident.oppdaterLedereForOrgenheter();
-
-        if (!dvhStartupLoadMonitor.hasCompleted() && ledereLastOk) { // Pod kan markeres som klar etter oppstart
+        if (!dvhStartupLoadMonitor.hasCompleted() && dvhTelefoner != null && !dvhTelefoner.isEmpty()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
@@ -130,7 +126,7 @@ public class DvhRestConsumer {
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
 
             // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
-            loadLedereAndOrganiseringerFromDvh();
+            loadLedereFromDvh();
 
             // Finn OTer utenfor hierarki - og autoflytt om mulig
             findOTUtenforHierarki();
@@ -142,11 +138,17 @@ public class DvhRestConsumer {
             updateOrgtilknytningerStateFromDvh();
 
             updateOrgtilknytningerForEksterneFromDvh();
-            oppdaterTelefonerFraDvh(dvhTelefoner);
-            orgEnhetLederService.persisterLedereForOrgenheter(dvhRepository.getLedere());
+            if (dvhTelefoner != null && !dvhTelefoner.isEmpty()) {
+                oppdaterTelefonerFraDvh(dvhTelefoner);
+            }
         }
 
         manuelleRessurserOgLedereTilState.oppdater();
+
+        // TODO - denne kan i sekundær Pod (ikke leader) bli kjørt rett før leader pod har oppdatert ny info
+        //  - som gjør at sekundær pod er out of synch egentlig inntil denne trigges på nytt
+        // Men dette er best effort akkurat nå
+        authorizedNavident.oppdaterLedereForOrgenheter();
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
@@ -304,20 +306,31 @@ public class DvhRestConsumer {
         return new Jobbtelefon(telefon.nummer(), telefon.type());
     }
 
-    public boolean loadLedereAndOrganiseringerFromDvh() {
-        log.info("Laster ledere og Organisering fra dvh");
+    public boolean loadLedereFromDvh() {
+        log.info("Laster ledere fra dvh");
         try {
             var ledere = dvhOrdsService.getLedere();
-            var organiseringer = dvhOrdsService.getOrganiseringer();
 
             dvhService.saveLedere(ledere);
-            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-
-            organiseringService.saveOrganiseringer(organiseringer);
-
             return true;
         } catch (Exception e) {
-            log.error("Failure loading ledere og Organisering data from DVH", e);
+            log.error("Failure loading ledere data from DVH", e);
+        }
+        return false;
+    }
+
+    public boolean loadOrganiseringerFromDvh() {
+        log.info("Laster Organisering fra dvh");
+        try {
+            var organiseringer = dvhOrdsService.getOrganiseringer();
+
+            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
+            if (leaderElection.isLeader()) {
+                organiseringService.saveOrganiseringer(organiseringer);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("Failure loading Organisering data from DVH", e);
         }
         return false;
     }
@@ -330,16 +343,6 @@ public class DvhRestConsumer {
             log.error("Feilet i 'Finn OTer utenfor hierarki'", e);
         }
     }
-
-    public void persisterLedereFraDvh() {
-        log.info("Persister ledere fra dvh");
-        try {
-            orgEnhetLederService.persisterLedereForOrgenheter(dvhRepository.getLedere());
-        } catch (Exception e) {
-            log.error("Feilet i 'Persister ledere fra dvh'", e);
-        }
-    }
-
 
     private boolean isInitialStateReady() {
         return  nomStateRessursListener.hasReadToEndOnStartup()

@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,16 +25,15 @@ import static java.util.stream.Collectors.toMap;
 @Service
 public class DvhService {
 
-    private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetLederService orgEnhetLederService;
 
     public DvhService(
-        DvhRepository dvhRepository,
         RessursStateRepository ressursStateRepository,
-        OrgenhetService orgenhetService
+        OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService
     ) {
-        this.dvhRepository = dvhRepository;
+        this.orgEnhetLederService = orgEnhetLederService;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
     }
@@ -54,7 +54,7 @@ public class DvhService {
         final var enhetMissing = new LinkedList<DvhLeder>();
         final var ressursMissing = new LinkedList<DvhLeder>();
 
-        dvhRepository.saveLedere(
+        orgEnhetLederService.persisterLedereForOrgenheter(
             ledere.stream()
                 .filter(l -> {
                     val enhet = cachedEnheter.get(l.getOrgEnhetNr() + "-" + l.getOrgenhetNavn() + "-" + l.getOrgNiv());
@@ -78,7 +78,6 @@ public class DvhService {
         log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
         log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
-
     }
 
     // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState

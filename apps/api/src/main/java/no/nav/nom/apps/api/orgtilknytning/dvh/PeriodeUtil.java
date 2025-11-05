@@ -1,5 +1,8 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.time.LocalDate;
@@ -7,6 +10,7 @@ import java.time.LocalDate;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
 
+// TODO -  PeriodeUtil burde implementere metodene basert på f.eks. Periodisert interface
 public class PeriodeUtil {
     public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
 
@@ -18,12 +22,40 @@ public class PeriodeUtil {
         return stillingPeriode.gyldigFom().isAfter(LocalDate.now());
     }
 
+    public static boolean isFuturePeriod(OrganiseringState organisering) {
+        return organisering.gyldigFom().isAfter(LocalDate.now());
+    }
+
+    public static boolean isFuturePeriod(OrgEnhetLederState leder) {
+        return leder.startdato().isAfter(LocalDate.now());
+    }
+
+    public static boolean isFuturePeriod(LederForRessurs leder) {
+        return leder.startdato().isAfter(LocalDate.now());
+    }
+
+    public static boolean isCurrentPeriod(OrganiseringState organisering) {
+        return isCurrentOrFuturePeriod(organisering) && organisering.gyldigFom().isBefore(tomorrow());
+    }
+
     public static boolean isCurrentPeriod(StillingPeriode stillingPeriode) {
         return isCurrentOrFuturePeriod(stillingPeriode) && stillingPeriode.gyldigFom().isBefore(tomorrow());
     }
 
     public static boolean isCurrentPeriod(OrgtilknytningState orgtilknytning) {
         return isCurrentOrFuturePeriod(orgtilknytning) && orgtilknytning.gyldigFom().isBefore(tomorrow());
+    }
+
+    public static boolean isCurrentPeriod(OrgEnhetLederState leder) {
+        return isCurrentOrFuturePeriod(leder) && leder.startdato().isBefore(tomorrow());
+    }
+
+    public static boolean isCurrentPeriod(LederForRessurs leder) {
+        return isCurrentOrFuturePeriod(leder) && leder.startdato().isBefore(tomorrow());
+    }
+
+    public static boolean isHistoricPeriod(OrganiseringState organisering) {
+        return requireNonNullElse(organisering.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
     }
 
     public static boolean isHistoricPeriod(OrgtilknytningState orgtilknytning) {
@@ -34,12 +66,32 @@ public class PeriodeUtil {
         return stillingPeriode.gyldigTom().isBefore(tomorrow());
     }
 
+    public static boolean isHistoricPeriod(OrgEnhetLederState leder){
+        return requireNonNullElse(leder.sluttdato(), NO_END_DATE).isBefore(tomorrow());
+    }
+
+    public static boolean isHistoricPeriod(LederForRessurs leder){
+        return requireNonNullElse(leder.sluttdato(), NO_END_DATE).isBefore(tomorrow());
+    }
+
+    public static boolean isCurrentOrFuturePeriod(OrganiseringState organisering) {
+        return isNull(organisering.gyldigTom()) || organisering.gyldigTom().isAfter(yesterday());
+    }
+
     public static boolean isCurrentOrFuturePeriod(StillingPeriode stillingPeriode) {
         return stillingPeriode.gyldigTom().isAfter(yesterday());
     }
 
     public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
         return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
+    }
+
+    public static boolean isCurrentOrFuturePeriod(OrgEnhetLederState leder) {
+        return isNull(leder.sluttdato()) || leder.sluttdato().isAfter(yesterday());
+    }
+
+    public static boolean isCurrentOrFuturePeriod(LederForRessurs leder) {
+        return isNull(leder.sluttdato()) || leder.sluttdato().isAfter(yesterday());
     }
 
     public static boolean isCurrentOrFuture(LocalDate date) {
@@ -70,8 +122,24 @@ public class PeriodeUtil {
             (stillingPeriode.gyldigTom() == null || stillingPeriode.gyldigTom().isAfter(dayBefore(start)));
     }
 
+    public static boolean overlapsInterval(LocalDate start, LocalDate end, OrganiseringState organiseringState) {
+        end = end == null ? NO_END_DATE : end;
+        start = start == null ? LocalDate.MIN : start;
+        return organiseringState.gyldigFom().isBefore(dayAfter(end)) &&
+            (organiseringState.gyldigTom() == null || organiseringState.gyldigTom().isAfter(dayBefore(start)));
+    }
+
     public static boolean overlapsInterval(LocalDate start, LocalDate end, OrgtilknytningState orgtilknytning) {
         return orgtilknytning.gyldigFom().isBefore(dayAfter(end)) && requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE).isAfter(dayBefore(start));
+    }
+
+    public static boolean overlapsInterval(LocalDate startDateA, LocalDate endDateA, LocalDate startDateB, LocalDate endDateB) {
+        endDateA = endDateA == null ? NO_END_DATE : endDateA;
+        endDateB = endDateB == null ? NO_END_DATE : endDateB;
+        startDateA = startDateA == null ? LocalDate.MIN : startDateA;
+        startDateB = startDateB == null ? LocalDate.MIN : startDateB;
+
+        return startDateA.isBefore(dayAfter(endDateB)) && endDateA.isAfter(dayBefore(startDateB));
     }
 
     public static boolean intervalCoversDate(LocalDate intervalStart, LocalDate intervalEnd, LocalDate date) {

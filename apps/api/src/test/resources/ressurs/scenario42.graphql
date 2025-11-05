@@ -2,8 +2,8 @@ query {
     ressurs(where: {navIdent: "testNavIdent2"}) {
         navIdent
         personIdent
-        koblinger{
-            organisasjonsenhet{
+        orgTilknytninger{
+            orgEnhet{
                 agressoId
                 navn
             }

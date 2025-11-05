@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
@@ -76,6 +77,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockitoBean
     OrgenhetService orgenhetService;
+
+    @MockitoBean
+    OrgEnhetLederService orgEnhetLederService;
 
     @Autowired
     AuthResolver authResolver;
@@ -536,7 +540,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_update_orgtilknytninger_for_ressurs_handle_null_dato_ny() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -583,7 +587,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -632,7 +636,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.NAV_STATLIG).build();
 
@@ -675,7 +679,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -724,7 +728,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -773,7 +777,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(ROBOT)
@@ -824,7 +828,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("Annen enhet")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(ROBOT)
@@ -874,7 +878,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("Annen enhet")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(ROBOT)
@@ -924,7 +928,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("Annen enhet")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -976,7 +980,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1025,7 +1029,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1074,7 +1078,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .build();
@@ -1124,7 +1128,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(UTENLANDSK_KONSULENT)
@@ -1175,7 +1179,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1226,7 +1230,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1277,7 +1281,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
         when(authorizedNavident.orgenheterLederKanRedigere(any())).thenReturn(List.of(orgEnhet("orgEnhet321")));
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1329,7 +1333,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1377,7 +1381,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
 
@@ -1425,7 +1429,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(ROBOT)
@@ -1475,7 +1479,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(ROBOT)
@@ -1525,7 +1529,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1575,7 +1579,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1625,7 +1629,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1675,7 +1679,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1725,7 +1729,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN)
             .identType(VIKAFOSSEN)
@@ -1830,7 +1834,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_update_orgtilknytninger_for_ressurs_start_and_sluttdato_ny() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
         when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
@@ -2347,7 +2351,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void test_update_orgtilknytninger_for_ressurs_ny() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
         when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
@@ -2618,7 +2622,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MethodSource("test_no_overlapping_daglig_oppfolginger_input")
     void test_no_overlapping_daglig_oppfolginger_ny(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         when(ressursStateRepository.findByNavident("whatever")).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
 
         saveOrgtilknytninger(
@@ -3047,7 +3051,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     ) {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         var tilknyttetRessurs = ressursState().toBuilder()
             .sektor(Sektor.EKSTERN).build();
         when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
@@ -3165,7 +3169,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
 
-        when(orgenhetService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
+        when(orgEnhetLederService.getEnheterByLeder("A321321")).thenReturn(List.of(orgEnhet()));
         when(ressursStateRepository.findByNavident("A321321")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("John", Optional.empty(), "Doe")).build()));
 
         when(ressursStateRepository.findByNavident("navident1")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("Jane", Optional.empty(), "Doe")).build()));

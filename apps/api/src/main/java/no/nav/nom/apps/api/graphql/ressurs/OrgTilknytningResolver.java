@@ -2,8 +2,10 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.Util;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -31,11 +33,21 @@ public class OrgTilknytningResolver {
         this.orgenhetService = orgenhetService;
     }
 
-    public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
-        return ressurser.stream()
-                .collect(toMap(Function.identity(), this::getOrgTilknytningerForRessurs));
+    public List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalgArg) {
+        return orgtilknytningService
+            .getByNavIdent(ressurs.getNavIdent()).stream()
+            .filter(ot -> Util.filterByPeriodiskUtvalg(ot, periodiskUtvalgArg))
+            .map(this::fromOrgtilknytningState)
+            .toList();
     }
 
+    @Deprecated
+    public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
+        return ressurser.stream()
+            .collect(toMap(Function.identity(), this::getOrgTilknytningerForRessurs));
+    }
+
+    @Deprecated
     private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
         return orgtilknytningService
             .getByNavIdent(ressurs.getNavIdent()).stream()
@@ -48,11 +60,11 @@ public class OrgTilknytningResolver {
         final var orgEnhetGqlResponse = MappingUtils.toOrgEnhet(orgenhet);
 
         return RessursOrgTilknytning.builder()
-            .organisasjonsenhet(orgEnhetGqlResponse)
             .orgEnhet(orgEnhetGqlResponse)
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
             .gyldigTom(orgtilknytning.gyldigTom())
+            .sektor(orgtilknytning.sektor())
             .tilknytningType(orgtilknytning.orgtilknytningType())
             .build();
     }

@@ -68,7 +68,7 @@ public class DvhLast {
     })
     @GetMapping(value = "/loadOrganiseringKoblingerOgLedere")
     public void loadOrganiseringKoblingerOgLedere() {
-        triggerKoblingerOgLederLast();
+        triggerOrganiseringerOgLederLast();
     }
 
     @Operation(
@@ -104,7 +104,7 @@ public class DvhLast {
     })
     @GetMapping(value = "/resolveOrgEnhetsTyper")
     public void resolveOrgEnhetsTyper() {
-        triggerKoblingerOgLederLast();
+        triggerOrganiseringerOgLederLast();
         triggerOrgEnhetsTypeLast();
     }
 
@@ -120,19 +120,6 @@ public class DvhLast {
         triggerFindOTUtenforHierarki();
     }
 
-
-    @Operation(
-        description = "Start last av ledere og persister",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
-    @GetMapping(value = "/persisterLedere")
-    public void persisterLedere() {
-        triggerPersisterLeder();
-    }
-
     @Async
     public void triggerRessursLast() {
         dvhRestConsumer.loadRessurserFromDvh();
@@ -144,8 +131,9 @@ public class DvhLast {
     }
 
     @Async
-    public void triggerKoblingerOgLederLast() {
-        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+    public void triggerOrganiseringerOgLederLast() {
+        dvhRestConsumer.loadLedereFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh();
     }
 
     @Async
@@ -166,10 +154,5 @@ public class DvhLast {
     @Async
     public void triggerFindOTUtenforHierarki() {
         dvhRestConsumer.findOTUtenforHierarki();
-    }
-
-    @Async
-    public void triggerPersisterLeder() {
-        dvhRestConsumer.persisterLedereFraDvh();
     }
 }

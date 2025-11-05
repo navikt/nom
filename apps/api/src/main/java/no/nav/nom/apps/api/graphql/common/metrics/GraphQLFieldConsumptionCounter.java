@@ -31,12 +31,25 @@ public class GraphQLFieldConsumptionCounter {
         this.securityUtil = securityUtil;
     }
 
+    @SuppressWarnings("unchecked")
     public void count(DataFetchingEnvironment env) {
         final var consumer = securityUtil.getAzpName().orElse("unknown");
         final var operationName = env.getOperationDefinition().getName(); // operation name is the query alias, which may be null
         final var queryRoot = env.getField().getName();
 
+        // Søke argumenter parameter navn
+        env.getArguments().forEach((argument, value) -> {
+            if (!(value instanceof Map<?, ?>)) {
+                return;
+            }
+            var path = String.format("%s.argument.%s", queryRoot, argument);
+            try {
+                ((Map<String, Object>) value).forEach((paramName, paramValue) -> registerValues(paramName, path, consumer, operationName));
+            } catch (ClassCastException ignored) {}
+        });
+
         registerValues(queryRoot, queryRoot, consumer, operationName); // register query root
+
         env.getSelectionSet().getFields().forEach(field -> {
             final var currentPath = String.format("%s.%s", queryRoot, field.getQualifiedName().replace("/", "."));
             registerValues(field.getName(), currentPath, consumer, operationName); // register fields beneath query root
