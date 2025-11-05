@@ -2,23 +2,22 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RessursJobbtelefonOppdatertEventV1 extends RessursEvent {
 
-    @JsonCreator
-    public RessursJobbtelefonOppdatertEventV1(String fid, JobbtelefonOppdatertEventData data, Metadata metadata) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RessursJobbtelefonOppdatertEventV1(
+        @JsonProperty("fid") String fid,
+        @JsonProperty("data") JobbtelefonOppdatertEventData data,
+        @JsonProperty("metadata") Metadata metadata
+    ) {
         super(fid, data, metadata, null);
     }
 
-    public RessursJobbtelefonOppdatertEventV1(String fid, JobbtelefonOppdatertEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
-    }
-
     @JsonIgnore
-    public RessursJobbtelefonOppdatertEventV1.JobbtelefonOppdatertEventData getJobbtelefonOppdatertEventData() {
-        return (JobbtelefonOppdatertEventData) getData();
+    public RessursJobbtelefonOppdatertEventV1(String fid, JobbtelefonOppdatertEventData data, InputMetadata inputMetadata) {
+        this(fid, data, Metadata.from(inputMetadata));
     }
 
     public record JobbtelefonOppdatertEventData(

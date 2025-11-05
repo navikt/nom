@@ -26,7 +26,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 public class DvhOrdsService {
     private final DvhOrdsClient dvhOrdsClient;
-    private AppProperties.DvhOrds dvhOrdsProperties;
+    private final AppProperties.DvhOrds dvhOrdsProperties;
 
     private final boolean isLocal;
 
@@ -182,31 +182,6 @@ public class DvhOrdsService {
 
     public JsonNode getStatligeTilknytningerJson(String ordsFilter) {
         return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.ressursStillingerPath(), ordsFilter);
-    }
-
-    // Kommunale ressurser tilknytninger
-    public List<DvhRessurs> getKommunaleRessurser(List<String> aktiveKommunaleNavidenter) {
-        return StreamSupport.stream(getKommunaleRessurserJson().get("items").spliterator(), true)
-            .map(DvhRessurs::fromOrdsKommunalRessurs)
-            .distinct()
-            .filter(r -> aktiveKommunaleNavidenter.contains(r.getNavIdent()))
-            .toList();
-    }
-
-
-    public JsonNode getKommunaleRessurserJson() {
-        return dvhOrdsClient.dvhGetJsonData(dvhOrdsProperties.kommunaleRessurserPath());
-    }
-
-    public JsonNode getKommunaleRessurserJson(int numRowsToFetch) {
-        if (numRowsToFetch < 1) {
-            return getKommunaleRessurserJson();
-        }
-        return dvhOrdsClient.dvhGetJsonDataLimitRows(dvhOrdsProperties.kommunaleRessurserPath(), numRowsToFetch);
-    }
-
-    public JsonNode getKommunaleRessurserJson(String ordsFilter) {
-        return dvhOrdsClient.dvhGetJsonDataOrdsFilter(dvhOrdsProperties.kommunaleRessurserPath(), ordsFilter);
     }
 
     // Eksterne ressurser tilknytninger

@@ -46,18 +46,16 @@ export async function lastOrgtilknytningerForEksterne() {
   );
 }
 
-export async function lastSkyggeOrgtilknytningerForKommunale() {
-  return ky.get(
-    `${API_BASE_URL}/api/admin/dvhLast/loadSkyggeOrgtilknytningerForKommunale`,
-  );
-}
-
 export async function lastTyperForOrgenheter() {
   return ky.get(`${API_BASE_URL}/api/admin/dvhLast/resolveOrgEnhetsTyper`);
 }
 
 export async function reberegnNomnivaa() {
   return ky.get(`${API_BASE_URL}/api/admin/utlednomnivaaer`);
+}
+
+export async function persisterLedere() {
+  return ky.get(`${API_BASE_URL}/api/admin/dvhLast/persisterLedere`);
 }
 
 export async function oppdaterOrgEnhetType(data: {

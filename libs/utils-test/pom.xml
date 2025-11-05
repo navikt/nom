@@ -16,7 +16,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional> <!-- Ikke være med i jars -->
+            <scope>provided</scope> <!-- Ikke være med i jars -->
         </dependency>
 
         <dependency>

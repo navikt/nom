@@ -4,9 +4,14 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface OrgEnhetLederStateRepository {
+
+    List<OrgEnhetLederState> getAll();
+
+    Map<String, Map<String, OrgEnhetLederState>> getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
 
     Optional<OrgEnhetLederState> findByFid(String fid);
 

@@ -9,8 +9,8 @@ import {
   lastOrgtilknytninger,
   lastOrgtilknytningerForEksterne,
   lastRessurser,
-  lastSkyggeOrgtilknytningerForKommunale,
   lastTyperForOrgenheter,
+  persisterLedere,
   reberegnNomnivaa,
 } from "~/api/apiQueries.ts";
 
@@ -27,24 +27,21 @@ const LASTER = [
     text: "Last eksterne orgtilknytninger",
     fn: lastOrgtilknytningerForEksterne,
   },
-  {
-    text: "Last skyggeorgtilknytninger for kommunale",
-    fn: lastSkyggeOrgtilknytningerForKommunale,
-  },
   { text: "Last typer for orgenheter", fn: lastTyperForOrgenheter },
   { text: "Beregn NOM-nivå på nytt", fn: reberegnNomnivaa },
+  { text: "Persister ledere", fn: persisterLedere },
 ];
 function ManuellLastPage() {
   return (
     <div className="grid grid-cols-2 gap-4">
       {LASTER.map(({ fn, text }) => (
-        <KjørLast fn={fn} key={text} text={text} />
+        <KjorLast fn={fn} key={text} text={text} />
       ))}
     </div>
   );
 }
 
-function KjørLast({
+function KjorLast({
   fn,
   text,
 }: {

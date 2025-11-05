@@ -9,8 +9,6 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/dvhLast")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class DvhLast {
-    private final Logger log = LoggerFactory.getLogger(DvhLast.class);
 
     private final DvhRestConsumer dvhRestConsumer;
     private final DvhOrgenhetsLast dvhOrgenhetsLast;
@@ -99,18 +96,6 @@ public class DvhLast {
     }
 
     @Operation(
-        description = "Last av skygge orgtilknytninger for kommunale (OMADA)",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
-    @GetMapping(value = "/loadSkyggeOrgtilknytningerForKommunale")
-    public void loadSkyggeOrgtilknytningerForKommunale() {
-        triggerlastSkyggeOrgtilknytningerForKommunale();
-    }
-
-    @Operation(
         description = "Start last av typer for orgenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -121,6 +106,31 @@ public class DvhLast {
     public void resolveOrgEnhetsTyper() {
         triggerKoblingerOgLederLast();
         triggerOrgEnhetsTypeLast();
+    }
+
+    @Operation(
+        description = "Trigger sjekk av OT'er utenfor hierarki",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/findOTUtenforHierarki")
+    public void findOTUtenforHierarki() {
+        triggerFindOTUtenforHierarki();
+    }
+
+
+    @Operation(
+        description = "Start last av ledere og persister",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/persisterLedere")
+    public void persisterLedere() {
+        triggerPersisterLeder();
     }
 
     @Async
@@ -149,11 +159,6 @@ public class DvhLast {
     }
 
     @Async
-    public void triggerlastSkyggeOrgtilknytningerForKommunale() {
-        dvhRestConsumer.updateShadowOrgtilknytningerForKommunaleFromDvh();
-    }
-
-    @Async
     public void triggerOrgEnhetsTypeLast(){
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
     }
@@ -161,5 +166,10 @@ public class DvhLast {
     @Async
     public void triggerFindOTUtenforHierarki() {
         dvhRestConsumer.findOTUtenforHierarki();
+    }
+
+    @Async
+    public void triggerPersisterLeder() {
+        dvhRestConsumer.persisterLedereFraDvh();
     }
 }

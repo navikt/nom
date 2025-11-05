@@ -1,64 +1,6 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: nom.api-ressurs-state-v2
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    cleanupPolicy: compact
-  acl:
-    - team: org
-      application: nom-kafka-api-ressurs-state
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
-      access: read
-    - team: team-nof
-      application: fullmaktsregister-api
-      access: read
-    - team: nom
-      application: skjermede-personer   # migrert til v4
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  name: nom.api-ressurs-state-v3
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 10
-    replication: 3
-    cleanupPolicy: compact
-    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
-  acl:
-    - team: org
-      application: nom-kafka-api-ressurs-state-v3
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
-      access: read
-    - team: team-nof
-      application: fullmaktsregister-api
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
   name: nom.api-ressurs-state-v4
   namespace: org
   labels:

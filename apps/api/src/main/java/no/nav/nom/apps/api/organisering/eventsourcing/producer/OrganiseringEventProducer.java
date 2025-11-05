@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 
+import static no.nav.nom.libs.utils.common.util.DateTimeUtil.epochMillisNorwegianTimeEndOfDay;
+
 @Service
 public class OrganiseringEventProducer {
     private final KafkaTemplate<String, OrganiseringEvent> organiseringEventProducerTemplate;
@@ -39,6 +41,10 @@ public class OrganiseringEventProducer {
             saveToDB(event, eventKey);
         }
         return organiseringEventProducerTemplate.sendDefault(eventKey, event);
+    }
+
+    public CompletableFuture<SendResult<String, OrganiseringEvent>> replayMessage(String eventKey, OrganiseringEvent event) {
+        return organiseringEventProducerTemplate.sendDefault(0, epochMillisNorwegianTimeEndOfDay(event.getMetadata().createdTimestamp()), eventKey, event);
     }
 
     private void saveToDB(OrganiseringEvent event, String eventKey) {

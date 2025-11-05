@@ -1,11 +1,12 @@
 package no.nav.nom.contract.nom.eventsource.orgenhetleder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 
 public class OrgEnhetLederOpprettetEventV1 extends OrgEnhetLederEvent {
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public OrgEnhetLederOpprettetEventV1(
         @JsonProperty("fid") String fid,
         @JsonProperty("data") OrgEnhetLederOpprettetEventData data,
@@ -14,6 +15,7 @@ public class OrgEnhetLederOpprettetEventV1 extends OrgEnhetLederEvent {
         super(fid, data, metadata);
     }
 
+    @JsonIgnore
     public OrgEnhetLederOpprettetEventV1(String fid, OrgEnhetLederOpprettetEventData data, InputMetadata inputMetadata) {
         this(fid, data, Metadata.from(inputMetadata));
     }
