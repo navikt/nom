@@ -79,7 +79,7 @@ public class DvhRessursRestService {
             ressursState.startdato(),
             ressursState.sluttdato(),
             orgtilknytninger,
-            ressursState.tilknytningtype().name()
+            ressursState.tilknytningtype() !=null? ressursState.tilknytningtype().name(): null
         );
     }
 

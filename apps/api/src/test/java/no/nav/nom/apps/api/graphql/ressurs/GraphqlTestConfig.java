@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
@@ -68,5 +69,7 @@ public class GraphqlTestConfig {
     @Bean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter() { return Mockito.mock(GraphQLFieldConsumptionCounter.class, MockReset.after()); }
     @Bean
-    OrgEnhetLederService orgEnhetLederService() { return Mockito.mock(OrgEnhetLederService.class, MockReset.after()); }
+    OrgEnhetLederService orgEnhetLederService() { return Mockito.mock(OrgEnhetLederService.class, MockReset.after());}
+    @Bean
+    DvhRessursRestService dvhRessursRestService() { return Mockito.mock(DvhRessursRestService.class, MockReset.after()); }
 }
