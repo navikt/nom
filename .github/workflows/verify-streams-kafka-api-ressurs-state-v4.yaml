@@ -1,13 +1,13 @@
-name: 'verify: nom-kafka-api-ressurs-state'
+name: 'verify: nom-kafka-api-ressurs-state-v4'
 
 on:
   pull_request:
     branches:
       - 'main'
     paths:
-      - 'apps/streams/kafka-api/api-ressurs-state/**'
+      - 'apps/streams/kafka-api/api-ressurs-state-v4/**'
       - 'libs/contract-nom-dto/**'
-      - '.github/*/verify-streams-kafka-api-ressurs-state.yaml'
+      - '.github/*/verify-streams-kafka-api-ressurs-state-v4.yaml'
       - 'apps/streams/kafka-api/pom.xml'
       - 'apps/streams/pom.xml'
       - 'apps/pom.xml'
@@ -20,4 +20,4 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/verify-spring-app.yml
     with:
-      maven-project: api-ressurs-state
+      maven-project: api-ressurs-state-v4
