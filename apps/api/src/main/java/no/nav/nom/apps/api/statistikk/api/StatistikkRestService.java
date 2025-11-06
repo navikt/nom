@@ -153,7 +153,7 @@ public class StatistikkRestService {
             .map(orgEnhetMapper::mapToOrgEnhet)
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(this::erRelevantOt)
             .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
         var sektorCounts = new HashMap<>(Map.of(
@@ -193,7 +193,7 @@ public class StatistikkRestService {
         }
 
         var ressursStatistikk = RessursStatistikk.builder()
-            .antallAktiveRessurser(alleRelevanteOrgtilknytningerByNavident.keySet().size())
+            .antallAktiveRessurser(alleRelevanteOrgtilknytningerByNavident.size())
             .antallStatligeRessurser(sektorCounts.get(Sektor.NAV_STATLIG))
             .antallKommunaleRessurser(sektorCounts.get(Sektor.NAV_KOMMUNAL))
             .antallEksterneRessurser(sektorCounts.get(Sektor.EKSTERN))
@@ -342,6 +342,14 @@ public class StatistikkRestService {
             }
             return !ressursState.identType().equals(IdentType.ROBOT);
         }
+    }
+
+    private boolean erRelevantOt(OrgtilknytningState orgtilknytningState){
+        var okPeriod = isPeriodActive(orgtilknytningState.gyldigFom(),orgtilknytningState.gyldigTom());
+        var okNavIdent = this.ressursStateRepository.findByNavident(orgtilknytningState.navident())
+            .map(this::filterGyldigeRessurs)
+            .orElse(false);;
+        return okPeriod && okNavIdent;
     }
 
     @Cacheable(cacheNames = STATISTIKK_REST_SERVICE_CACHE_NAME, cacheManager = "cacheManager")

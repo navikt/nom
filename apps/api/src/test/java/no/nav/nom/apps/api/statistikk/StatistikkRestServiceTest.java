@@ -105,8 +105,20 @@ public class StatistikkRestServiceTest {
         when(orgEnhetMapper.mapToOrgEnhet(Mockito.argThat(oe -> oe != null && oe.getId()
             .equals("orgEnhet789")))).thenReturn(no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet.builder()
             .id("orgEnhet789")
-            .ressursKoblinger(List.of(OrgtilknytningState.builder().navident("b").sektor(Sektor.NAV_STATLIG).build(), OrgtilknytningState.builder().navident("c").sektor(Sektor.NAV_STATLIG).build()))
+            .ressursKoblinger(List.of(
+                OrgtilknytningState.builder().navident("b").sektor(Sektor.NAV_STATLIG).build(),
+                OrgtilknytningState.builder().navident("c").sektor(Sektor.NAV_STATLIG).build(),
+                OrgtilknytningState.builder().navident("r").sektor(Sektor.NAV_STATLIG).build()
+            ))
             .build());
+
+        when(ressursStateRepository.findByNavident(Mockito.argThat(x -> List.of("a", "b", "c").contains(x)))).thenReturn(Optional.of(RessursState.builder().identType(IdentType.STANDARD).build())
+        );
+
+
+        when(ressursStateRepository.findByNavident("r")).thenReturn(
+            Optional.of(RessursState.builder().identType(IdentType.ROBOT).build())
+        );
 
         var exectedStatistikk = new RessursStatistikk(3, 2, 1, 0);
 
