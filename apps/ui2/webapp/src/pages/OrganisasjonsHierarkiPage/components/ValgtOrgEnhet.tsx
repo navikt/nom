@@ -40,7 +40,6 @@ import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { IdentType, NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
-  formatVisningsnavn,
   isEksternSamarbeidspartnerOrgEnhet,
   isInDevelopment,
 } from "~/utils";
@@ -206,8 +205,8 @@ export const ValgtOrgEnhet = ({
             `}
           >
             <UserImage
-              navident={orgEnhet.ledere[0]?.navident}
-              navn={formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
+              navident={orgEnhet.leder?.navident}
+              navn={orgEnhet.leder?.visningsnavn}
               size="90px"
             />
             <OrgenhetLederLink orgEnhet={orgEnhet} />
@@ -624,7 +623,7 @@ function TopBorder() {
 }
 
 function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const firstLeder = orgEnhet.ledere[0];
+  const firstLeder = orgEnhet.leder;
   const { navident, visningsnavn } = firstLeder ?? {};
 
   if (!navident) {
@@ -635,7 +634,7 @@ function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     <span>
       Leder:{" "}
       <ReactRouterLink params={{ id: navident }} search={{}} to="/ressurs/$id">
-        <Link as="span">{formatVisningsnavn(visningsnavn)}</Link>
+        <Link as="span">{visningsnavn}</Link>
       </ReactRouterLink>
     </span>
   );

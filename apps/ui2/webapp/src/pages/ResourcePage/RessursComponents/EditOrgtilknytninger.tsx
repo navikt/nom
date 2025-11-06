@@ -95,9 +95,12 @@ import type {
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
-import { Sektor, Tilknytningtype } from "~/types/api-models";
+import {
+  IdentType,
+  OrgEnhetsType,
+  Sektor,
+  Tilknytningtype,
+} from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
   formatDisplayDate,
@@ -1124,7 +1127,7 @@ function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
     enabled: !!field.orgEnhetId,
   });
 
-  const orgEnhetLeder = orgEnhetQuery.data?.ledere[0];
+  const orgEnhetLeder = orgEnhetQuery.data?.leder;
 
   if (ressurs.navident === orgEnhetLeder?.navident) {
     return;
@@ -1132,7 +1135,7 @@ function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
 
   return (
     <BodyLong>
-      Leder: <b>{formatVisningsnavn(orgEnhetLeder?.visningsnavn)}</b>
+      Leder: <b>{orgEnhetLeder?.visningsnavn}</b>
     </BodyLong>
   );
 }

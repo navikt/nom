@@ -60,12 +60,10 @@ import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/Edi
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { Tilknytningtype } from "~/types/api-models";
+import { IdentType, Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   formatDisplayDate,
-  formatVisningsnavn,
   isAfterToday,
   isBeforeToday,
   isGyldighetsPeriodeActive,
@@ -496,7 +494,7 @@ function OrganisationHierarchyTree({
     return <></>;
   }
 
-  const orgEnhetLeder = orgEnhet.ledere[0];
+  const orgEnhetLeder = orgEnhet.leder;
 
   const {
     gyldigTom,
@@ -580,7 +578,7 @@ function OrganisationHierarchyTree({
             >
               Leder:{" "}
             </span>
-            {formatVisningsnavn(orgEnhetLeder?.visningsnavn)}
+            {orgEnhetLeder?.visningsnavn}
           </Label>
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag

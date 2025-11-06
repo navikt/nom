@@ -30,7 +30,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
   const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   const orgEnhet = orgEnhetQuery.data;
-  const leder = orgEnhet?.ledere[0];
+  const leder = orgEnhet?.leder;
 
   return (
     <div
@@ -75,7 +75,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
                 search={{}}
                 to="/ressurs/$id"
               >
-                <Link as="span">{formatVisningsnavn(leder.visningsnavn)}</Link>
+                <Link as="span">{leder.visningsnavn}</Link>
               </ReactRouterLink>
             </span>
           )}
