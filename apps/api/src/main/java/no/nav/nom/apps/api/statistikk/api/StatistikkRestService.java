@@ -12,11 +12,13 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,9 +29,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -50,6 +55,7 @@ public class StatistikkRestService {
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     public StatistikkRestService(
         RessursStateRepository ressursStateRepository,
@@ -59,7 +65,8 @@ public class StatistikkRestService {
         NomStateRessursListener nomStateRessursListener,
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrganiseringListener nomStateOrganiseringListener,
-        NomStateOrgEnhetListener nomStateOrgEnhetListener
+        NomStateOrgEnhetListener nomStateOrgEnhetListener,
+        OrgtilknytningStateRepository orgtilknytningStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -69,6 +76,7 @@ public class StatistikkRestService {
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateOrganiseringListener = nomStateOrganiseringListener;
         this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
@@ -132,7 +140,7 @@ public class StatistikkRestService {
         alleOrgEnheterSomErLinjeEllerDriftId.forEach(this::getStatistikkForOrgEnhetCache);
     }
 
-    public OrgEnhetStatistikkResponse hentStatistikkForOrgEnhet(String orgEnhetId) {
+    private OrgEnhetStatistikkResponse hentStatistikkForOrgEnhet(String orgEnhetId) {
         var optionalOrgEnhet = orgenhetService.getById(orgEnhetId);
         if (optionalOrgEnhet.isEmpty()) {
             throw new OrgEnhetNotFoundException("Fant ikke orgenhet med id " + orgEnhetId);
@@ -141,25 +149,54 @@ public class StatistikkRestService {
         var orgEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()));
         orgEnheter.add(optionalOrgEnhet.get());
 
-        var alleRessursNavidenter = orgEnheter.stream()
+        var alleRelevanteOrgtilknytningerByNavident = orgEnheter.stream()
             .map(orgEnhetMapper::mapToOrgEnhet)
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .map(OrgtilknytningState::navident)
-            .distinct()
-            .toList();
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
-        var alleRessurser = ressursStateRepository.findByNavidentBulk(alleRessursNavidenter).values().stream()
-            .distinct()
-            .filter(this::filterGyldigeRessurs)
-            .toList();
+        var sektorCounts = new HashMap<>(Map.of(
+                Sektor.NAV_STATLIG,0,
+                Sektor.NAV_KOMMUNAL, 0,
+                Sektor.EKSTERN, 0
+        ));
+
+        for(var navident : alleRelevanteOrgtilknytningerByNavident.keySet()) {
+            var otList = alleRelevanteOrgtilknytningerByNavident.get(navident);
+            if (otList.isEmpty()) {
+                continue;
+            }
+
+            var mbyDolOt = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).findFirst();
+            if(mbyDolOt.isPresent()) {
+                var ot =  mbyDolOt.get();
+                sektorCounts.compute(ot.sektor(),(sektor,count) -> count == null ? 1 : (count + 1));
+                continue;
+            }
+
+            var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).distinct().toList();
+            if(distinctSectorList.size() == 1) {
+                sektorCounts.compute(distinctSectorList.getFirst(), (k, currCount) -> currCount == null ? 1 : (currCount + 1));
+                continue;
+            }
+
+            // fallback, bruk DOL OT for denne ressursen, selv om gitt OT ligger utenfor relevant hierarki
+            var maybDolOtGlobally = orgtilknytningStateRepository.findByNavident(navident)
+                .stream()
+                .filter(it -> isPeriodActive(it.gyldigFom(), it.gyldigFom()))
+                .filter(OrgtilknytningState::erDagligOppfolging)
+                .findFirst();
+            maybDolOtGlobally.ifPresent(ot -> {
+                sektorCounts.compute(ot.sektor(), (k, currCount) -> currCount == null ? 1 : (currCount + 1));
+            });
+        }
 
         var ressursStatistikk = RessursStatistikk.builder()
-            .antallAktiveRessurser(alleRessurser.size())
-            .antallStatligeRessurser(alleRessurser.stream().filter(RessursState::isStatlig).count())
-            .antallKommunaleRessurser(alleRessurser.stream().filter(RessursState::isKommunal).count())
-            .antallEksterneRessurser(alleRessurser.stream().filter(RessursState::isEkstern).count())
+            .antallAktiveRessurser(alleRelevanteOrgtilknytningerByNavident.keySet().size())
+            .antallStatligeRessurser(sektorCounts.get(Sektor.NAV_STATLIG))
+            .antallKommunaleRessurser(sektorCounts.get(Sektor.NAV_KOMMUNAL))
+            .antallEksterneRessurser(sektorCounts.get(Sektor.EKSTERN))
             .build();
 
         var lovnoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser(optionalOrgEnhet.get().getId());
