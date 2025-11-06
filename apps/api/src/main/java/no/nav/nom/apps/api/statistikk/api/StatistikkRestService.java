@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -165,17 +167,22 @@ public class StatistikkRestService {
         for(var navident : alleRelevanteOrgtilknytningerByNavident.keySet()) {
             var otList = alleRelevanteOrgtilknytningerByNavident.get(navident);
 
-            var mbyDolOt = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
-            if(mbyDolOt.size() == 1) {
-                var ot =  mbyDolOt.getFirst();
-                sektorCounts.get(ot.sektor()).add(navident);
+            var relevantDolOtList = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
+            if(relevantDolOtList.size() == 1) {
+                var otSektor = Optional.ofNullable(relevantDolOtList.getFirst().sektor())
+                    .orElseGet(() -> ressursStateRepository.findByNavident(navident).map(RessursState::sektor).orElse(null));
+                if(otSektor != null){
+                    sektorCounts.getOrDefault(otSektor, new ArrayList<>()).add(navident);
+                }else{
+                    log.warn("Klarte ikke bestemme sektor for navident " + navident);
+                }
                 continue;
-            }else if (mbyDolOt.size() > 1){
-                log.warn("Navident " + navident + " har flere enn 1 orgtilknytning med DOL == true");
+            }else if (relevantDolOtList.size() > 1){
+                log.warn("Navident " + navident + " har flere enn 1 aktiv orgtilknytning med DOL == true");
                 continue;
             }
 
-            var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).distinct().toList();
+            var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).filter(Objects::nonNull).distinct().toList();
             if(distinctSectorList.size() == 1) {
                 sektorCounts.get(distinctSectorList.getFirst()).add(navident);;
                 continue;
@@ -187,11 +194,19 @@ public class StatistikkRestService {
                 .filter(it -> isPeriodActive(it.gyldigFom(), it.gyldigFom()))
                 .filter(OrgtilknytningState::erDagligOppfolging)
                 .findFirst();
-            if(maybDolOtGlobally.isPresent()) {
+            if (maybDolOtGlobally.isPresent()) {
                 var ot = maybDolOtGlobally.get();
-                sektorCounts.get(ot.sektor()).add(navident);
-            }else{
-                log.warn("Kunne ikke bestemme sektor for ressurs " + navident + " i kontekst av enhet " + orgEnhetId);
+                if (ot.sektor() != null) {
+                    sektorCounts.get(ot.sektor()).add(navident);
+                }
+            } else {
+                var maybeSektor = ressursStateRepository.findByNavident(navident)
+                    .map(RessursState::sektor);
+
+                maybeSektor.ifPresentOrElse(
+                    sektor -> sektorCounts.get(sektor).add(navident),
+                    () -> log.warn("Kunne ikke bestemme sektor for ressurs " + navident + " i kontekst av enhet " + orgEnhetId)
+                );
             }
         }
 
