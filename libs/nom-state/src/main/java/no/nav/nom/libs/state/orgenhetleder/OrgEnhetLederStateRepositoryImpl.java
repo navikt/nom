@@ -24,13 +24,8 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     @Override
-    public Map<String, Map<String, OrgEnhetLederState>> getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId() {
-        Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = new HashMap<>();
-        orgEnhetLederByNavidentMap.forEach((navident, orgEnhetLederStateMap) -> {
-            var navidentMap = orgEnhetLederStates.computeIfAbsent(navident, k -> new HashMap<>());
-            orgEnhetLederStateMap.forEach((fid, orgEnhetLederState) -> navidentMap.put(orgEnhetLederState.orgEnhetId(), orgEnhetLederState));
-        });
-        return orgEnhetLederStates;
+    public Map<String, Map<String, OrgEnhetLederState>> getOrgEnhetLederByNavidentMap() {
+        return orgEnhetLederByNavidentMap;
     }
 
     @Override
