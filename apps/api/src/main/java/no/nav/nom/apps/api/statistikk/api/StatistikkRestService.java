@@ -157,27 +157,27 @@ public class StatistikkRestService {
             .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
         var sektorCounts = new HashMap<>(Map.of(
-                Sektor.NAV_STATLIG,0,
-                Sektor.NAV_KOMMUNAL, 0,
-                Sektor.EKSTERN, 0
+                Sektor.NAV_STATLIG, new ArrayList<String>(),
+                Sektor.NAV_KOMMUNAL, new ArrayList<String>(),
+                Sektor.EKSTERN, new ArrayList<String>()
         ));
 
         for(var navident : alleRelevanteOrgtilknytningerByNavident.keySet()) {
             var otList = alleRelevanteOrgtilknytningerByNavident.get(navident);
-            if (otList.isEmpty()) {
-                continue;
-            }
 
-            var mbyDolOt = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).findFirst();
-            if(mbyDolOt.isPresent()) {
-                var ot =  mbyDolOt.get();
-                sektorCounts.compute(ot.sektor(),(sektor,count) -> count == null ? 1 : (count + 1));
+            var mbyDolOt = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
+            if(mbyDolOt.size() == 1) {
+                var ot =  mbyDolOt.getFirst();
+                sektorCounts.get(ot.sektor()).add(navident);
+                continue;
+            }else if (mbyDolOt.size() > 1){
+                log.warn("Navident " + navident + " har flere enn 1 orgtilknytning med DOL == true");
                 continue;
             }
 
             var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).distinct().toList();
             if(distinctSectorList.size() == 1) {
-                sektorCounts.compute(distinctSectorList.getFirst(), (k, currCount) -> currCount == null ? 1 : (currCount + 1));
+                sektorCounts.get(distinctSectorList.getFirst()).add(navident);;
                 continue;
             }
 
@@ -187,17 +187,31 @@ public class StatistikkRestService {
                 .filter(it -> isPeriodActive(it.gyldigFom(), it.gyldigFom()))
                 .filter(OrgtilknytningState::erDagligOppfolging)
                 .findFirst();
-            maybDolOtGlobally.ifPresent(ot -> {
-                sektorCounts.compute(ot.sektor(), (k, currCount) -> currCount == null ? 1 : (currCount + 1));
-            });
+            if(maybDolOtGlobally.isPresent()) {
+                var ot = maybDolOtGlobally.get();
+                sektorCounts.get(ot.sektor()).add(navident);
+            }else{
+                log.warn("Kunne ikke bestemme sektor for ressurs " + navident + " i kontekst av enhet " + orgEnhetId);
+            }
         }
 
         var ressursStatistikk = RessursStatistikk.builder()
             .antallAktiveRessurser(alleRelevanteOrgtilknytningerByNavident.size())
-            .antallStatligeRessurser(sektorCounts.get(Sektor.NAV_STATLIG))
-            .antallKommunaleRessurser(sektorCounts.get(Sektor.NAV_KOMMUNAL))
-            .antallEksterneRessurser(sektorCounts.get(Sektor.EKSTERN))
+            .antallStatligeRessurser(sektorCounts.get(Sektor.NAV_STATLIG).size())
+            .antallKommunaleRessurser(sektorCounts.get(Sektor.NAV_KOMMUNAL).size())
+            .antallEksterneRessurser(sektorCounts.get(Sektor.EKSTERN).size())
             .build();
+
+        { // verification
+            var testSet = new HashSet<String>(alleRelevanteOrgtilknytningerByNavident.keySet());
+            sektorCounts.get(Sektor.NAV_STATLIG).forEach(testSet::remove);
+            sektorCounts.get(Sektor.NAV_KOMMUNAL).forEach(testSet::remove);
+            sektorCounts.get(Sektor.EKSTERN).forEach(testSet::remove);
+            if(!testSet.isEmpty()){
+                var problamticNavIdentJoinedString = String.join(", ", testSet);
+                log.warn("For orgenhet " + orgEnhetId +": Følgende navidenter mangler i sum av alle ressurser på enheten: " + problamticNavIdentJoinedString);
+            }
+        }
 
         var lovnoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser(optionalOrgEnhet.get().getId());
         var erNestNedersteNode = orgenhetService.isOrgEnhetBeforeLeafNode(optionalOrgEnhet.get().getId(), lovnoder);
