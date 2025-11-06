@@ -27,10 +27,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -89,17 +91,18 @@ public class RessursUtloperSnartEmailServiceTest {
     @Test
     public void testGetUtlopendeRessurser_OT_has_same_gyldigTom_then_ressurs_sluttdato() {
         // setup data
-        String ressusNavIdent = "ressurNavnOgNavIdent";
+        String ressusNavIdent = "ressusNavIdent";
         String ressursForNavn = "ressursForNavn";
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
         LocalDate ressursSluttdato = LocalDate.now().plusWeeks(2);
 
-        String ressursNavIdent2 = "ressurNavnOgNavIdent2";
+        String ressursNavIdent2 = "ressusNavIdent2";
         String ressursForNavn2 = "ressursForNavn2";
         String ressursEtterNavn2 = "ressursEtterNavn2";
         Visningsnavn vis2 = new Visningsnavn(ressursForNavn2, Optional.empty(), ressursEtterNavn2);
         LocalDate ressursSluttdato2 = LocalDate.now().plusWeeks(5);
+        String ressurs2otEndretAv = "X123456";
 
         String orgEnhet = "orgenhet123456";
         String orgEnhetNavn = "orgenhetNavn";
@@ -141,24 +144,35 @@ public class RessursUtloperSnartEmailServiceTest {
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato2.minusYears(5))
                     .gyldigTom(ressursSluttdato2)
+                    .sistEndretAv(ressurs2otEndretAv)
                     .build()
             )
         );
 
+        var ressurs1 = RessursState.builder()
+            .navident(ressusNavIdent)
+            .visningsnavn(vis1)
+            .sluttdato(ressursSluttdato)
+            .build();
+        var ressurs2 = RessursState.builder()
+            .navident(ressursNavIdent2)
+            .visningsnavn(vis2)
+            .sluttdato(ressursSluttdato2)
+            .sistEndretAv(ressursNavIdent2)
+            .build();
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(
-            Map.of(
-                "ressurs1", RessursState.builder()
-                    .navident(ressusNavIdent)
-                    .visningsnavn(vis1)
-                    .sluttdato(ressursSluttdato)
-                    .build(),
-                "ressurs2", RessursState.builder()
-                    .navident(ressursNavIdent2)
-                    .visningsnavn(vis2)
-                    .sluttdato(ressursSluttdato2)
+            Map.of(ressurs1.navident(), ressurs1, ressurs2.navident(), ressurs2)
+        );
+
+        when(ressursStateRepository.findByNavident(ressurs2otEndretAv)).thenReturn(
+            Optional.of(
+                RessursState.builder()
+                    .navident(ressurs2otEndretAv)
+                    .startdato(LocalDate.now().minusDays(10))
                     .build()
             )
         );
+        when(ressursStateRepository.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
 
         // test
         var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
@@ -170,6 +184,7 @@ public class RessursUtloperSnartEmailServiceTest {
             .ressursSluttdato(ressursSluttdato)
             .orgenhetNavn(orgEnhetNavn)
             .orgenhetLederNavident(orgenhetLederNavIdent)
+            .sistEndretAvNavidenter(Collections.emptySet())
             .build();
         var ressursTwo = RessursUtloperData.builder()
             .ressurNavn(vis2.getFormattedVisningsnavn())
@@ -177,6 +192,7 @@ public class RessursUtloperSnartEmailServiceTest {
             .ressursSluttdato(ressursSluttdato2)
             .orgenhetNavn(orgEnhetNavn)
             .orgenhetLederNavident(orgenhetLederNavIdent)
+            .sistEndretAvNavidenter(Set.of(ressurs2otEndretAv))
             .build();
         var expected = List.of(ressursEn, ressursTwo);
 
@@ -276,11 +292,13 @@ public class RessursUtloperSnartEmailServiceTest {
                 .ressurNavn(vis1.getFormattedVisningsnavn())
                 .ressursNavident(ressusNavIdent)
                 .ressursSluttdato(ressursSluttdato)
+                .sistEndretAvNavidenter(Collections.emptySet())
                 .build(),
             RessursUtloperData.builder()
                 .ressurNavn(vis2.getFormattedVisningsnavn())
                 .ressursNavident(ressursNavIdent2)
                 .ressursSluttdato(ressursSluttdato2)
+                .sistEndretAvNavidenter(Collections.emptySet())
                 .build()
         );
 

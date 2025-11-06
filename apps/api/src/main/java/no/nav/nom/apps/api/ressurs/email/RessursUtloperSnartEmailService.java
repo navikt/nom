@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Component
 public class RessursUtloperSnartEmailService {
@@ -124,10 +126,13 @@ public class RessursUtloperSnartEmailService {
             return;
         }
         try {
-            Set<String> recipientNavidents = Set.of(utlopendeRessurs.orgenhetLederNavident());
-            if (utlopendeRessurs.sistEndretAvNavident() != null) {
-                recipientNavidents.add(utlopendeRessurs.sistEndretAvNavident());
+            Set<String> recipientNavidents = new HashSet<>();
+            recipientNavidents.add(utlopendeRessurs.orgenhetLederNavident());
+
+            if (isNotEmpty(utlopendeRessurs.sistEndretAvNavidenter())) {
+                recipientNavidents.addAll(utlopendeRessurs.sistEndretAvNavidenter());
             }
+
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
             log.info(
@@ -245,16 +250,18 @@ public class RessursUtloperSnartEmailService {
                 .findFirst()
                 .orElse(null);
 
-            var sistEndretAv = ressursStateRepository.findByNavident(ressurs.sistEndretAv())
-                .filter(r -> isActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
-                .map(RessursState::navident)
-                .orElse(null);
+            Set<String> sistEndretAvNavidenter = new HashSet<>();
+
+            leggTilSetHvisNavidentOgIkkeRessursenSelv(ressurs.sistEndretAv(), ressurs.sistEndretAv(), sistEndretAvNavidenter);
+            if (dolOrgtilknytning != null) {
+                leggTilSetHvisNavidentOgIkkeRessursenSelv(dolOrgtilknytning.sistEndretAv(), ressurs.sistEndretAv(), sistEndretAvNavidenter);
+            }
 
             var utloperRessursData = RessursUtloperData.builder()
                 .ressurNavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursNavident(ressurs.navident())
                 .ressursSluttdato(ressurs.sluttdato())
-                .sistEndretAvNavident(sistEndretAv)
+                .sistEndretAvNavidenter(sistEndretAvNavidenter)
                 .build();
 
             if (isNull(dolOrgtilknytning)) {
@@ -288,6 +295,14 @@ public class RessursUtloperSnartEmailService {
                 .ressursNavident(ressurs.navident())
                 .build();
         }
+    }
+
+    private void leggTilSetHvisNavidentOgIkkeRessursenSelv(String sistEndretAv, String ressursNavident, Set<String> mottakere) {
+        ressursStateRepository.findByNavident(sistEndretAv)
+            .filter(r -> !r.navident().equals(ressursNavident)) // Ikke ta med hvis det er ressursen selv som har gjort endring
+            .filter(r -> isActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
+            .map(RessursState::navident)
+            .ifPresent(mottakere::add);
     }
 
     private static boolean ressursMedUtlopsDatoOmFemEllerToUker(RessursState ressurs) {
