@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
+import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 
 @Component
 public class RessursUtloperSnartEmailService {
@@ -124,6 +125,9 @@ public class RessursUtloperSnartEmailService {
         }
         try {
             Set<String> recipientNavidents = Set.of(utlopendeRessurs.orgenhetLederNavident());
+            if (utlopendeRessurs.sistEndretAvNavident() != null) {
+                recipientNavidents.add(utlopendeRessurs.sistEndretAvNavident());
+            }
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
             log.info(
@@ -241,10 +245,16 @@ public class RessursUtloperSnartEmailService {
                 .findFirst()
                 .orElse(null);
 
+            var sistEndretAv = ressursStateRepository.findByNavident(ressurs.sistEndretAv())
+                .filter(r -> isActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
+                .map(RessursState::navident)
+                .orElse(null);
+
             var utloperRessursData = RessursUtloperData.builder()
                 .ressurNavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursNavident(ressurs.navident())
                 .ressursSluttdato(ressurs.sluttdato())
+                .sistEndretAvNavident(sistEndretAv)
                 .build();
 
             if (isNull(dolOrgtilknytning)) {

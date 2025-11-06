@@ -1,6 +1,6 @@
 Hei!
 
-Du mottar denne e-posten fordi du er leder for ${orgenhetNavn}.
+Du mottar denne e-posten fordi du er leder for ${orgenhetNavn}, eller var den siste som gjorde endring i NOM for ${ressurNavnOgNavIdent}.
 
 ${ressurNavnOgNavIdent} har sluttdato i ${orgenhetNavn} den ${ressursSluttdato}.
 

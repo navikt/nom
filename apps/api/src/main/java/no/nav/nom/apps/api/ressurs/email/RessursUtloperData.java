@@ -11,6 +11,7 @@ public record RessursUtloperData(
     String ressursNavident,
     LocalDate ressursSluttdato,
     String orgenhetNavn,
-    String orgenhetLederNavident
+    String orgenhetLederNavident,
+    String sistEndretAvNavident
 ) {
 }
