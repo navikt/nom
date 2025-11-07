@@ -7,7 +7,6 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Value
 @Builder(toBuilder = true)
@@ -26,5 +25,5 @@ public class Ressurs {
     String etternavn;
     String visningsnavn;
     String primaryTelefon;
-    Tilknytningtype tilknytningstype;
+    Tilknytningtype gjeldendeTilknytningstype;
 }
