@@ -4,6 +4,7 @@ import graphql.schema.DataFetchingEnvironment;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.graphql.querystats.GqlQueryStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,14 @@ public class GraphQLFieldConsumptionCounter {
 
     private final MeterRegistry meterRegistry;
     private final SecurityUtil securityUtil;
+    private final GqlQueryStatsService gqlQueryStatsService;
     private final Map<String, Counter> counterByNameAndTagValues = new HashMap<>();
 
     @Autowired
-    public GraphQLFieldConsumptionCounter(MeterRegistry meterRegistry, SecurityUtil securityUtil) {
+    public GraphQLFieldConsumptionCounter(MeterRegistry meterRegistry, SecurityUtil securityUtil, GqlQueryStatsService gqlQueryStatsService) {
         this.meterRegistry = meterRegistry;
         this.securityUtil = securityUtil;
+        this.gqlQueryStatsService = gqlQueryStatsService;
     }
 
     @SuppressWarnings("unchecked")
@@ -59,10 +62,13 @@ public class GraphQLFieldConsumptionCounter {
     private void registerValues(String field, String path, String consumer, String operationName) {
         Map<String, String> tagsAndValues = new LinkedHashMap<>();
 
+        var operation = isEmpty(operationName) ? "unknown" : operationName;
         tagsAndValues.put("field", field);
         tagsAndValues.put("path", path);
         tagsAndValues.put("consumer", consumer);
-        tagsAndValues.put("operationName", isEmpty(operationName) ? "unknown" : operationName);
+        tagsAndValues.put("operationName", operation);
+
+        gqlQueryStatsService.registerFieldUsage(field, path, operation, consumer);
 
         incrementCounter(METRICS_COUNTER_NAME, tagsAndValues);
     }

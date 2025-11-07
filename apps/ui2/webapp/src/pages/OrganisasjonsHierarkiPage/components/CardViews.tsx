@@ -63,8 +63,7 @@ export function OrgEnhetView({
             {orgEnhet?.navn}
           </Heading>
           <BodyShort size="small">
-            Leder:{" "}
-            <b>{formatVisningsnavn(orgEnhet?.ledere[0]?.visningsnavn)}</b>
+            Leder: <b>{orgEnhet?.leder?.visningsnavn}</b>
           </BodyShort>
         </div>
       </UnitContainerLink>

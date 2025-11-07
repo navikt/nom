@@ -924,7 +924,7 @@ public class OrgEnhetLederServiceTest {
 
         doReturn(nomLederMap)
             .when(orgEnhetLederStateRepository)
-            .getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
+            .getOrgEnhetLederByNavidentMap();
 
         // When
         orgEnhetLederService.persisterLedereForOrgenheter(dvhLeder);

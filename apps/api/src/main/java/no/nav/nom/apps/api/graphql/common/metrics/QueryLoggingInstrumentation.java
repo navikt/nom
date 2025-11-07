@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common.config;
+package no.nav.nom.apps.api.graphql.common.metrics;
 
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -9,11 +9,20 @@ import graphql.execution.instrumentation.parameters.InstrumentationExecutionPara
 import graphql.language.Document;
 import graphql.parser.Parser;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.graphql.querystats.GqlQueryStatsService;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class QueryLoggingInstrumentation extends SimplePerformantInstrumentation {
+    private final GqlQueryStatsService gqlQueryStatsService;
+    private final SecurityUtil securityUtil;
+
+    public QueryLoggingInstrumentation(GqlQueryStatsService gqlQueryStatsService, SecurityUtil securityUtil) {
+        this.gqlQueryStatsService = gqlQueryStatsService;
+        this.securityUtil = securityUtil;
+    }
 
     @Override
     public InstrumentationContext<ExecutionResult> beginExecution(InstrumentationExecutionParameters parameters, InstrumentationState state) {
@@ -25,7 +34,11 @@ public class QueryLoggingInstrumentation extends SimplePerformantInstrumentation
             Parser parser = new Parser();
             Document document = parser.parseDocument(query);
             String queryWithoutArgs = removeArguments(document);
-            log.info("GraphQL Query: {}", queryWithoutArgs);
+            final var consumer = securityUtil.getAzpName().orElse("unknown");
+
+            gqlQueryStatsService.registerQueryUsage(queryWithoutArgs, consumer);
+
+            log.debug("GraphQL Query: {}", queryWithoutArgs);
         } catch (Exception ignore) {}
 
         return super.beginExecution(parameters, state);

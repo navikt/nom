@@ -11,7 +11,7 @@ public interface OrgEnhetLederStateRepository {
 
     List<OrgEnhetLederState> getAll();
 
-    Map<String, Map<String, OrgEnhetLederState>> getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
+    Map<String, Map<String, OrgEnhetLederState>> getOrgEnhetLederByNavidentMap();
 
     Optional<OrgEnhetLederState> findByFid(String fid);
 

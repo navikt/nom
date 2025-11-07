@@ -12,11 +12,13 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,9 +29,14 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -50,6 +57,7 @@ public class StatistikkRestService {
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     public StatistikkRestService(
         RessursStateRepository ressursStateRepository,
@@ -59,7 +67,8 @@ public class StatistikkRestService {
         NomStateRessursListener nomStateRessursListener,
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrganiseringListener nomStateOrganiseringListener,
-        NomStateOrgEnhetListener nomStateOrgEnhetListener
+        NomStateOrgEnhetListener nomStateOrgEnhetListener,
+        OrgtilknytningStateRepository orgtilknytningStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -69,6 +78,7 @@ public class StatistikkRestService {
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateOrganiseringListener = nomStateOrganiseringListener;
         this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
@@ -132,7 +142,7 @@ public class StatistikkRestService {
         alleOrgEnheterSomErLinjeEllerDriftId.forEach(this::getStatistikkForOrgEnhetCache);
     }
 
-    public OrgEnhetStatistikkResponse hentStatistikkForOrgEnhet(String orgEnhetId) {
+    private OrgEnhetStatistikkResponse hentStatistikkForOrgEnhet(String orgEnhetId) {
         var optionalOrgEnhet = orgenhetService.getById(orgEnhetId);
         if (optionalOrgEnhet.isEmpty()) {
             throw new OrgEnhetNotFoundException("Fant ikke orgenhet med id " + orgEnhetId);
@@ -141,26 +151,82 @@ public class StatistikkRestService {
         var orgEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()));
         orgEnheter.add(optionalOrgEnhet.get());
 
-        var alleRessursNavidenter = orgEnheter.stream()
+        var alleRelevanteOrgtilknytningerByNavident = orgEnheter.stream()
             .map(orgEnhetMapper::mapToOrgEnhet)
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .map(OrgtilknytningState::navident)
-            .distinct()
-            .toList();
+            .filter(this::erRelevantOt)
+            .collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
-        var alleRessurser = ressursStateRepository.findByNavidentBulk(alleRessursNavidenter).values().stream()
-            .distinct()
-            .filter(this::filterGyldigeRessurs)
-            .toList();
+        var sektorCounts = new HashMap<>(Map.of(
+                Sektor.NAV_STATLIG, new ArrayList<String>(),
+                Sektor.NAV_KOMMUNAL, new ArrayList<String>(),
+                Sektor.EKSTERN, new ArrayList<String>()
+        ));
+
+        for(var navident : alleRelevanteOrgtilknytningerByNavident.keySet()) {
+            var otList = alleRelevanteOrgtilknytningerByNavident.get(navident);
+
+            var relevantDolOtList = otList.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
+            if(relevantDolOtList.size() == 1) {
+                var otSektor = Optional.ofNullable(relevantDolOtList.getFirst().sektor())
+                    .orElseGet(() -> ressursStateRepository.findByNavident(navident).map(RessursState::sektor).orElse(null));
+                if(otSektor != null){
+                    sektorCounts.getOrDefault(otSektor, new ArrayList<>()).add(navident);
+                }else{
+                    log.warn("Klarte ikke bestemme sektor for navident " + navident);
+                }
+                continue;
+            }else if (relevantDolOtList.size() > 1){
+                log.warn("Navident " + navident + " har flere enn 1 aktiv orgtilknytning med DOL == true");
+                continue;
+            }
+
+            var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).filter(Objects::nonNull).distinct().toList();
+            if(distinctSectorList.size() == 1) {
+                sektorCounts.get(distinctSectorList.getFirst()).add(navident);;
+                continue;
+            }
+
+            // fallback, bruk DOL OT for denne ressursen, selv om gitt OT ligger utenfor relevant hierarki
+            var maybDolOtGlobally = orgtilknytningStateRepository.findByNavident(navident)
+                .stream()
+                .filter(it -> isPeriodActive(it.gyldigFom(), it.gyldigFom()))
+                .filter(OrgtilknytningState::erDagligOppfolging)
+                .findFirst();
+            if (maybDolOtGlobally.isPresent()) {
+                var ot = maybDolOtGlobally.get();
+                if (ot.sektor() != null) {
+                    sektorCounts.get(ot.sektor()).add(navident);
+                }
+            } else {
+                var maybeSektor = ressursStateRepository.findByNavident(navident)
+                    .map(RessursState::sektor);
+
+                maybeSektor.ifPresentOrElse(
+                    sektor -> sektorCounts.get(sektor).add(navident),
+                    () -> log.warn("Kunne ikke bestemme sektor for ressurs " + navident + " i kontekst av enhet " + orgEnhetId)
+                );
+            }
+        }
 
         var ressursStatistikk = RessursStatistikk.builder()
-            .antallAktiveRessurser(alleRessurser.size())
-            .antallStatligeRessurser(alleRessurser.stream().filter(RessursState::isStatlig).count())
-            .antallKommunaleRessurser(alleRessurser.stream().filter(RessursState::isKommunal).count())
-            .antallEksterneRessurser(alleRessurser.stream().filter(RessursState::isEkstern).count())
+            .antallAktiveRessurser(alleRelevanteOrgtilknytningerByNavident.size())
+            .antallStatligeRessurser(sektorCounts.get(Sektor.NAV_STATLIG).size())
+            .antallKommunaleRessurser(sektorCounts.get(Sektor.NAV_KOMMUNAL).size())
+            .antallEksterneRessurser(sektorCounts.get(Sektor.EKSTERN).size())
             .build();
+
+        { // verification
+            var testSet = new HashSet<String>(alleRelevanteOrgtilknytningerByNavident.keySet());
+            sektorCounts.get(Sektor.NAV_STATLIG).forEach(testSet::remove);
+            sektorCounts.get(Sektor.NAV_KOMMUNAL).forEach(testSet::remove);
+            sektorCounts.get(Sektor.EKSTERN).forEach(testSet::remove);
+            if(!testSet.isEmpty()){
+                var problamticNavIdentJoinedString = String.join(", ", testSet);
+                log.warn("For orgenhet " + orgEnhetId +": Følgende navidenter mangler i sum av alle ressurser på enheten: " + problamticNavIdentJoinedString);
+            }
+        }
 
         var lovnoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser(optionalOrgEnhet.get().getId());
         var erNestNedersteNode = orgenhetService.isOrgEnhetBeforeLeafNode(optionalOrgEnhet.get().getId(), lovnoder);
@@ -305,6 +371,14 @@ public class StatistikkRestService {
             }
             return !ressursState.identType().equals(IdentType.ROBOT);
         }
+    }
+
+    private boolean erRelevantOt(OrgtilknytningState orgtilknytningState){
+        var okPeriod = isPeriodActive(orgtilknytningState.gyldigFom(),orgtilknytningState.gyldigTom());
+        var okNavIdent = this.ressursStateRepository.findByNavident(orgtilknytningState.navident())
+            .map(this::filterGyldigeRessurs)
+            .orElse(false);;
+        return okPeriod && okNavIdent;
     }
 
     @Cacheable(cacheNames = STATISTIKK_REST_SERVICE_CACHE_NAME, cacheManager = "cacheManager")

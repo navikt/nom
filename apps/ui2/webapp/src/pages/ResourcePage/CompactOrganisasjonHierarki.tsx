@@ -1,8 +1,7 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
-import { Heading, Link } from "@navikt/ds-react";
+import { Heading } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
@@ -117,8 +116,8 @@ function CompactOrgEnhet({
 
         <span>
           Leder:{" "}
-          <SmartLink href={`/ressurs/${orgEnhet.ledere[0]?.navident}`} inline>
-            {formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
+          <SmartLink href={`/ressurs/${orgEnhet.leder?.navident}`} inline>
+            {orgEnhet.leder?.visningsnavn}
           </SmartLink>
         </span>
       </div>

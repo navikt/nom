@@ -119,14 +119,14 @@ public class OrgEnhetLederService {
             });
 
             Map<String, List<DvhLeder>> dvhLedereForNavident = filteredDvhLedere.stream().collect(Collectors.groupingBy(DvhLeder::getNavIdent));
-            Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = orgEnhetLederStateRepository.getAllOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
+            Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = getAktiveOrgEnhetLederStateMappedByNavidentAndOrgEnhetId();
 
             log.info("Starter å rydde i orgEnhetLederState");
             orgEnhetLederStates.forEach((navident, orgEnhetLederStateByNavident) -> {
                 log.info("{} er leder i {} enheter", navident, orgEnhetLederStateByNavident.size());
                 var dvhLederByNavident = dvhLedereForNavident.get(navident);
                 if (isNull(dvhLederByNavident) || dvhLederByNavident.isEmpty()) {
-                    log.info("{} er ikke leder i Unit4, alle blir avsluttet hos oss", navident);
+                    log.info("{} er ikke leder i Unit4, alle aktive stater blir avsluttet hos oss", navident);
                     orgEnhetLederStateByNavident.values().forEach(orgEnhetLederState -> orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                         orgEnhetLederState.fid(),
                         new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
@@ -263,6 +263,22 @@ public class OrgEnhetLederService {
 
     public Optional<OrgEnhetLederState> getAktivLederForOrgEnhet(String orgEnhetId) {
         return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhetId);
+    }
+
+    public Map<String, Map<String, OrgEnhetLederState>> getAktiveOrgEnhetLederStateMappedByNavidentAndOrgEnhetId() {
+        Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = new HashMap<>();
+        orgEnhetLederStateRepository.getOrgEnhetLederByNavidentMap().forEach((navident, orgEnhetLederStateMap) -> {
+            var navidentMap = orgEnhetLederStates.computeIfAbsent(navident, k -> new HashMap<>());
+            orgEnhetLederStateMap
+                .forEach((fid, orgEnhetLederState) -> {
+                    if (orgEnhetLederState.isActive()) {
+                        navidentMap.put(orgEnhetLederState.orgEnhetId(), orgEnhetLederState);
+                    }
+                });
+        });
+        orgEnhetLederStates.entrySet().removeIf(entrySet -> entrySet.getValue().isEmpty());
+        log.info("Antall aktive ledere: {}", orgEnhetLederStates.size());
+        return orgEnhetLederStates;
     }
 
     // Comparator to sort leaders first by start date, then by end date (nulls last), then by org unit ID

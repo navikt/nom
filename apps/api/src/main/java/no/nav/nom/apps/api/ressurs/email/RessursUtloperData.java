@@ -4,6 +4,7 @@ package no.nav.nom.apps.api.ressurs.email;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Builder(toBuilder = true)
 public record RessursUtloperData(
@@ -11,6 +12,7 @@ public record RessursUtloperData(
     String ressursNavident,
     LocalDate ressursSluttdato,
     String orgenhetNavn,
-    String orgenhetLederNavident
+    String orgenhetLederNavident,
+    Set<String> sistEndretAvNavidenter
 ) {
 }
