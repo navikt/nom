@@ -35,7 +35,6 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , GraphQLRessursController.class
     , RessursResolver.class
     , RessursPropertyResolver.class
-    , TelefonResolver.class
     , OrgTilknytningResolver.class
     , LederResolver.class
 

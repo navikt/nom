@@ -8,9 +8,12 @@ import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.contract.nom.IdentType;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -37,6 +40,7 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.TestUtil.createRessursState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
@@ -388,7 +392,7 @@ class RessursTest {
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(telefonNummer, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").textValue());
     }
 
     @Test
@@ -410,7 +414,124 @@ class RessursTest {
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(telefonNummer, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").textValue());
+    }
+
+
+    @Test
+    @DisplayName("Hente telefonnummer på ressurs")
+    void scenario9_1() {
+        var nomTelefon = "12345678"; //nr registrert i NOM
+        var jobbtelefon = "87654321"; // nummmer fra Telenor/DVH
+        var ressurs = createRessursState("1").toBuilder()
+            .primaryTelefonnummer(nomTelefon)
+            .jobbtelefon(new Jobbtelefon(jobbtelefon, TelefonType.NAV_TJENESTE_TELEFON))
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(2, outputRessurs.get("telefon").size());
+        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente telefonnummer på ressurs noe registrert med landskode og mellomrom")
+    void scenario9_2() {
+        var nomTelefon = "12345678"; //nr registrert i NOM
+        var jobbtelefon = "87654321"; // nummmer fra Telenor/DVH
+        var ressurs = createRessursState("1").toBuilder()
+            .primaryTelefonnummer("+47 123 45 678")
+            .jobbtelefon(new Jobbtelefon("87 65 43 21", TelefonType.NAV_TJENESTE_TELEFON))
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(2, outputRessurs.get("telefon").size());
+        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente telefonnummer på ressurs uten jobbtelefon")
+    void scenario9_3() {
+        var nomTelefon = "1234567890"; //nr registrert i NOM
+        var ressurs = createRessursState("1").toBuilder()
+            .primaryTelefonnummer(nomTelefon)
+            .jobbtelefon(null)
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(nomTelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(1, outputRessurs.get("telefon").size());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente telefonnummer på ressurs uten primaryTelefonnummer")
+    void scenario9_4() {
+        var ressurs = createRessursState("1").toBuilder()
+            .jobbtelefon(null)
+            .primaryTelefonnummer(null)
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertNull(outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(0, outputRessurs.get("telefon").size());
+    }
+
+    @Test
+    @DisplayName("Hente identtype på ressurs - STANDARD")
+    void scenario10_1() {
+        var ressurs = createRessursState("1").toBuilder()
+            .identType(IdentType.STANDARD)
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(IdentType.STANDARD.name(), outputRessurs.get("identType").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente identtype på ressurs - ROBOT")
+    void scenario10_2() {
+        var ressurs = createRessursState("1").toBuilder()
+            .identType(IdentType.ROBOT)
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(IdentType.ROBOT.name(), outputRessurs.get("identType").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente identtype på ressurs - null/UKJENT")
+    void scenario10_3() {
+        var ressurs = createRessursState("1").toBuilder()
+            .identType(null)
+            .build();
+        ressursStateRepository.update(ressurs);
+
+        final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(IdentType.UKJENT.name(), outputRessurs.get("identType").textValue());
     }
 
     private RessursResult get(List<RessursResult> list, String ident) {

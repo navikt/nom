@@ -35,9 +35,10 @@ type Ressurs {
     visningsnavn: String
     epost: String
     primaryTelefon: String
-    telefon: [Telefon!]!
+    telefon: [Telefon]!
     sektor: [Sektor!]! @deprecated(reason: "sektor er erstattet med gjeldendeSektor") # Deprekert Nov.2025
     gjeldendeSektor: Sektor!
+    identType: IdentType!
     startdato: Date
     sluttdato: Date
     ledere (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursLeder!]!
@@ -169,4 +170,12 @@ enum TilknytningType {
     UFORUTSETT_BEHOV,
     UTDANNINGSSTILLINGER,
     VIKAR
+}
+
+enum IdentType {
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT
 }

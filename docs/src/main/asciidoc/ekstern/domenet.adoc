@@ -276,11 +276,15 @@ Merk at dette feltet alltid maskerer de siste 5 tegn |010110\*\***** |NOM
 Dette feltet er erstattet av _visningsnavn_ feltet | |NOM
 |visningsnavn   |Nei        | Det fulle navnet ressursen bruker i NAV. Formatert <Fornavn Etternavn> (inkludert evt mellomnavn). Kan avvike noe fra folkeregistrert navn | |NOM
 |epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via AD
-|telefon        |Ja         |Liste av telefonnumre eid av direktoratet. Dette er statlige ansatte sine tjeneste eller kontortelefonnumre.|Se Telefon-objekt |Telenor via DVH
-|primaryTelefon        |Ja         |Telefonnummer angitt i NOM. Dette kan f.eks. være kommunalt ansatt sin kontor-/tjeneste-telefon   | |NOM
+|telefon        |Ja         |Liste av telefonnumre for ressursen. +
+Er det statlig eid telefonnummer har den type NAV_TJENESTE_TELEFON eller NAV_KONTOR_TELEFON. +
+Telefonnummer manuelt registrert i NOM får typen PRIVAT_TELEFON selv om dette kanskje er en kommunalt ied tjenestetelefon |Se Telefon-objekt |Telenor via DVH
+|primaryTelefon        |Ja         |Det primære telefonnummeret for ressursen. Prioritert rekkefølge er statelig tjenestetelefon, statlig kontortelefon og til sist telefonnummer manuelt angitt i NOM. Dette kan f.eks. være kommunalt ansatt sin kontor-/tjeneste-telefon   | |NOM
 |ressurstype    |Ja         |!DEPREKERT november 2025: Dette feltet er erstattet av _gjeldendeSektor_ feltet |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
 |sektor    |Ja         |!DEPREKERT november 2025: Dette feltet er erstattet av _gjeldendeSektor_ feltet |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
 |gjeldendeSektor    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
+|identType    |Ja         |Kodeverk som angir typen navident knyttet til ressursen.  |STANDARD, ROBOT eller VIAKAFOSSEN etc. +
+Se eget objekt IdentType|NOM
 |startdato      |Nei         |Ressursens startdato. +
 Første arbeidsdag medarbeideren jobbet for Nav. Datoen kan være fra tidligere arbeidsforhold i Nav. (Historiske startdatoer fra noen år tilbake kan avvike noe fra den faktiske første arbeidsdagen. Datoen vil da vanligvis representere dagen Nav-identen ble opprettet.)
 | |NOM
@@ -356,12 +360,28 @@ Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service. I dag støtt
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel   |Kilde
-|nummer        |Ja         |Telefonnr med retningsnummer                               |4712345678  |Telenor via DVH
+|nummer        |Ja         |Telefonnr med retningsnummer                               |12345678  |Telenor via DVH
 |type        |Ja         |Angir typen telefon, både private og NAV-utdelt nr støttes.        |NAV_TJENESTE_TELEFON, NAV_KONTOR_TELEFON, PRIVAT_TELEFON | DVH
 |beskrivelse   |Nei       |Per juni 2023 er feltet tomt for alle.                             |          |DVH
 
 |===
 
+== IdentType
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+En kategorisering av hvilken type navident dette er, satt i NOM.
+
+Kan ha en av følgende verdier: +
+----
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT
+----
 
 
 

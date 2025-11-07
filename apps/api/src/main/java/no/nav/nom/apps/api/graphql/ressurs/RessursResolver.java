@@ -16,8 +16,6 @@ import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,8 +25,6 @@ import java.util.stream.Stream;
 
 @Component
 public class RessursResolver {
-
-    private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
     private final RessursStateRepository ressursStateRepository;
     private final RessursMetadataRepository ressursMetadataRepository;
     private final DvhRepository dvhRepository;
