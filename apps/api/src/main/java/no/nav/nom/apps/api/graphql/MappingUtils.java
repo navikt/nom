@@ -28,6 +28,7 @@ public class MappingUtils {
         var sluttdato = ressursState.sluttdato();
         var primaryTelefonnummer = getPrimaryTelefonnummer(ressursState);
         var telefon = getTelefonliste(ressursState);
+        var tilknytningstype = isNull(ressursState.tilknytningtype()) ? null : ressursState.tilknytningtype();
         return Ressurs.builder()
             .navident(ressursState.navident())
             .navIdent(ressursState.navident())
@@ -44,6 +45,7 @@ public class MappingUtils {
             .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
             .primaryTelefon(primaryTelefonnummer)
             .telefon(telefon)
+            .gjeldendeTilknytningstype(tilknytningstype)
             .build();
     }
 

@@ -78,7 +78,8 @@ public class DvhRessursRestService {
             ressursState.visningsnavn().etternavn(),
             ressursState.startdato(),
             ressursState.sluttdato(),
-            orgtilknytninger
+            orgtilknytninger,
+            ressursState.tilknytningtype() !=null? ressursState.tilknytningtype().name(): null
         );
     }
 
@@ -118,4 +119,5 @@ public class DvhRessursRestService {
             .map(OrganiseringState::idOver)
             .orElse(null);
     }
+
 }

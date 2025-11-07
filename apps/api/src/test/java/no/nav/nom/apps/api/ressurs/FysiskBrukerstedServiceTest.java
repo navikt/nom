@@ -379,7 +379,8 @@ class FysiskBrukerstedServiceTest {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
-            "S123456"
+            "S123456",
+            null
         );
     }
 }

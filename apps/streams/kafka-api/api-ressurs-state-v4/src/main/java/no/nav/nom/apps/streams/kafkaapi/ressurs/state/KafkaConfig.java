@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTilknytningtypeOppdatertV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,8 @@ class KafkaConfig {
             RessursSektorOppdatertV1.class,
             RessursSluttdatoOppdatertEventV1.class,
             RessursStartDatoOppdatertV1.class,
-            RessursTekniskSlettetEventV1.class
+            RessursTekniskSlettetEventV1.class,
+            RessursTilknytningtypeOppdatertV1.class
         );
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
@@ -209,7 +210,8 @@ class EventsrcToState {
                 fysiskBrukerstedList,
 
                 identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null,
-                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null
+                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null,
+                eventStateAggregate.hasNonNull("tilknytningtype") ? Tilknytningtype.valueOf(eventStateAggregate.get("tilknytningtype").asText()) : Tilknytningtype.ANNET
             );
         } catch (Exception e) {
             log.error("Error mapping to RessursState", e);

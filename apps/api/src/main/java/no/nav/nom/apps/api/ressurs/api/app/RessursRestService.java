@@ -37,6 +37,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPerso
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPrimaryTelefonnummerCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -449,7 +450,8 @@ public class RessursRestService {
                 .orElse(null), // TODO: Validate not null in RessursCommandService
             request.ansettelsesType(),
             request.fysiskBrukerstedNr(),
-            request.identType()
+            request.identType(),
+            request.tilknytningtype()
         );
 
 
@@ -533,6 +535,7 @@ public class RessursRestService {
             .sektor(request.sektor())
             .sluttdato(request.sluttDato())
             .primaryFysiskBrukersted(request.fysiskBrukerstedNr())
+            .tilknytningtype(request.tilknytningtype())
             .build();
 
         nomMastered.markRessursAsMasteredInNom(existingRessurs.navident());
@@ -600,6 +603,12 @@ public class RessursRestService {
         if (!reaktivertRessurs.sektor().name().equals(existingRessurs.sektor().name()))
             ressursCommandService.oppdaterSektorEvent(
                 new OppdaterSektorCommand(existingRessurs.fid(),request.sektor()),
+                metadata
+            );
+
+        if (reaktivertRessurs.tilknytningtype() != null && existingRessurs.tilknytningtype() != null && !reaktivertRessurs.tilknytningtype().name().equals(existingRessurs.tilknytningtype().name()))
+            ressursCommandService.oppdaterTilknytningtypeEvent(
+                new OppdaterTilknytningtypeCommand(existingRessurs.fid(),request.tilknytningtype()),
                 metadata
             );
 

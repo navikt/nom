@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -180,7 +181,8 @@ public class EventsrcToStateTest {
             null,
             Collections.emptyList(),
             null,
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -217,7 +219,8 @@ public class EventsrcToStateTest {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
-            null
+            null,
+            Tilknytningtype.ANNET
         );
 
         identTopic.pipeInput(navidentToIdentTypeObject("navident", IdentType.STANDARD));
@@ -373,7 +376,8 @@ public class EventsrcToStateTest {
             null,
             List.of("2011"),
             "2011",
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -410,7 +414,8 @@ public class EventsrcToStateTest {
             ressursOpprettetEventData.primaryFysiskBrukersted(),
             ressursOpprettetEventData.fysiskeBrukersteder(),
             IdentType.STANDARD,
-            null
+            null,
+            Tilknytningtype.ANNET
         );
     }
 
@@ -427,7 +432,8 @@ public class EventsrcToStateTest {
             null,
             List.of("2011"),
             "2011",
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -478,7 +484,8 @@ public class EventsrcToStateTest {
             ressursOpprettetEventData.primaryFysiskBrukersted(),
             ressursOpprettetEventData.fysiskeBrukersteder(),
             IdentType.STANDARD,
-            null
+            null,
+            Tilknytningtype.ANNET
         );
     }
 

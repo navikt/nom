@@ -140,7 +140,8 @@ public class HendelserTestUtils {
             null,
             List.of("fysiskBrukersted1", "fysiskBrukersted2"),
             "fysiskBrukersted1",
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(

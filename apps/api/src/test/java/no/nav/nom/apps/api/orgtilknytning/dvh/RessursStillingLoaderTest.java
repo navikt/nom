@@ -109,6 +109,7 @@ class RessursStillingLoaderTest extends TestBase {
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
+                null,
                 null
             )));
         when(ressursStateRepository.findByNavident("H554433"))
@@ -125,6 +126,7 @@ class RessursStillingLoaderTest extends TestBase {
                 null,
                 Collections.emptyList(),
                 IdentType.STANDARD,
+                null,
                 null
             )));
     }

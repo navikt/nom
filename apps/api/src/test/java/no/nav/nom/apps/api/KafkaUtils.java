@@ -150,6 +150,7 @@ public class KafkaUtils {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 

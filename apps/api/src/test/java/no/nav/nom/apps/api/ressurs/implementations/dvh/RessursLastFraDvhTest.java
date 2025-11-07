@@ -181,6 +181,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 
@@ -231,6 +232,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 
@@ -277,6 +279,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 
@@ -323,6 +326,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 
@@ -372,6 +376,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
              null,
              Collections.emptyList(),
              IdentType.STANDARD,
+             null,
              null
          );
 
@@ -417,6 +422,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
 
@@ -463,6 +469,7 @@ public class RessursLastFraDvhTest extends DvhTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
+            null,
             null
         );
         return ressursState;

@@ -66,7 +66,8 @@ public class ComparerTest {
                 "2700",
                 List.of(),
                 IdentType.STANDARD,
-                "X123456"
+                "X123456",
+                null
             ),
             new RessursState(
                 "fid-002",
@@ -81,7 +82,8 @@ public class ComparerTest {
                 "2700",
                 List.of(),
                 IdentType.STANDARD,
-                "X123456"
+                "X123456",
+                null
             ),
             new RessursState(
                 "fid-003",
@@ -96,7 +98,8 @@ public class ComparerTest {
                 "2700",
                 List.of(),
                 IdentType.STANDARD,
-                "X123456"
+                "X123456",
+                null
             )
         );
 

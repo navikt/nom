@@ -65,7 +65,8 @@ public class TestData {
             "12345678",
             List.of("2021"),
             "2021",
-            IdentType.STANDARD
+            IdentType.STANDARD,
+            null
         );
     }
 
@@ -308,6 +309,7 @@ public class TestData {
             v1.getRessursOpprettetEventData().primaryFysiskBrukersted(),
             v1.getRessursOpprettetEventData().fysiskeBrukersteder(),
             IdentType.STANDARD,
+            null,
             null
         );
     }
@@ -326,6 +328,7 @@ public class TestData {
             "2700",
             new ArrayList<>(),
             IdentType.STANDARD,
+            null,
             null
         );
     }

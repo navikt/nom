@@ -86,7 +86,8 @@ public class TeamcatControllerTest extends RestTestBase {
             null,
             Collections.emptyList(),
             IdentType.STANDARD,
-            "S123456"
+            "S123456",
+            null
         );
         return  Optional.of(ressursState);
     }

@@ -4,10 +4,10 @@ import lombok.Builder;
 import lombok.Value;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Value
 @Builder(toBuilder = true)
@@ -28,4 +28,5 @@ public class Ressurs {
     String visningsnavn;
     String primaryTelefon;
     List<Telefon> telefon;
+    Tilknytningtype gjeldendeTilknytningstype;
 }

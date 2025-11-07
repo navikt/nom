@@ -271,7 +271,8 @@ class EventsrcToState {
                         eventStateAggregate.hasNonNull("identType") ? IdentType.valueOf(eventStateAggregate.get("identType").asText()) : null,
                         getPrimaryTelefonnummer(eventStateAggregate),
                         eventStateAggregate.hasNonNull("primaryFysiskBrukersted") ? eventStateAggregate.get("primaryFysiskBrukersted").asText() : null,
-                        orgtilknytninger
+                        orgtilknytninger,
+                        eventStateAggregate.hasNonNull("tilknytningtype") ? Tilknytningtype.valueOf(eventStateAggregate.get("tilknytningtype").asText()) : null
                 );
 
                 return new AbstractMap.SimpleEntry<>(
