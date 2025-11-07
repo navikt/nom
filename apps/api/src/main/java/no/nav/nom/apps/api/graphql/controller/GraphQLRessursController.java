@@ -9,7 +9,6 @@ import no.nav.nom.apps.api.graphql.ressurs.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
-import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -17,7 +16,6 @@ import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
-import no.nav.nom.contract.nom.api.graphql.Telefon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
@@ -38,7 +36,6 @@ public class GraphQLRessursController {
 
     private final RessursResolver ressursResolver;
     private final RessursPropertyResolver propertyResolver;
-    private final TelefonResolver telefonResolver;
     private final LederResolver lederResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final GraphQLFieldConsumptionCounter counter;
@@ -47,14 +44,12 @@ public class GraphQLRessursController {
     public GraphQLRessursController(
             RessursResolver ressursResolver,
             RessursPropertyResolver propertyResolver,
-            TelefonResolver telefonResolver,
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
             OrgTilknytningResolver orgTilknytningResolver
     ) {
         this.ressursResolver = ressursResolver;
         this.propertyResolver = propertyResolver;
-        this.telefonResolver = telefonResolver;
         this.lederResolver = lederResolver;
         this.counter = graphQLFieldConsumptionCounter;
         this.orgTilknytningResolver = orgTilknytningResolver;
@@ -85,35 +80,15 @@ public class GraphQLRessursController {
         return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytning(ressurser));
     }
 
-    // NB! @BatchMapping støtter ikke filter argumenter - implementerer enn sålenge med plain @SchemaMapping enn sålenge.
-    // Alternativt se på senere å implementere med DataLoader manuelt i en @SchemaMapping metode.
-    // https://stackoverflow.com/questions/79503570/how-to-deal-with-input-arguments-as-part-of-a-batchmapping-in-spring-boot-graph
-    // Men usikker på om det faktisk vil gi noen ytelsesfordel her, siden alle batch kall ender opp med single kall og alt uansett går mot in-mem data
-
-//    @BatchMapping(typeName = "Ressurs", field = "orgTilknytninger")
-//    public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytninger(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
-//        return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytninger(ressurser, periodiskUtvalg));
-//    }
-
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
         return orgTilknytningResolver.getOrgTilknytningerForRessurs(ressurs, periodiskUtvalg);
     }
 
-//    @BatchMapping(typeName = "Ressurs", field = "lederFor")
-//    public Mono<Map<Ressurs, List<LederOrgEnhet>>> lederFor(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
-//        return Mono.fromSupplier(() -> lederResolver.load(ressurser, (r) -> lederResolver.lederFor(r, periodiskUtvalg)));
-//    }
-
     @SchemaMapping(typeName = "Ressurs", field = "lederFor")
     public List<LederOrgEnhet> lederFor(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
         return lederResolver.lederFor(ressurs, periodiskUtvalg);
     }
-
-//    @BatchMapping(typeName = "Ressurs", field = "ledere")
-//    public Mono<Map<Ressurs, List<RessursLeder>>> ledere(List<Ressurs> ressurser, PeriodiskUtvalgArg periodiskUtvalg) {
-//        return Mono.fromSupplier(() -> lederResolver.load(ressurser, (r) -> lederResolver.ledere(r.getNavIdent(), periodiskUtvalg)));
-//    }
 
     @SchemaMapping(typeName = "Ressurs", field = "ledere")
     public List<RessursLeder> ledere(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg) {
@@ -123,10 +98,5 @@ public class GraphQLRessursController {
     @BatchMapping(typeName = "Ressurs", field = "epost")
     public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> propertyResolver.epost(ressurser));
-    }
-
-    @BatchMapping(typeName = "Ressurs", field = "telefon")
-    public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
     }
 }

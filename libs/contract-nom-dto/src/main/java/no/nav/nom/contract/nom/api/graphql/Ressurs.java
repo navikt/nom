@@ -2,6 +2,7 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.Value;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -21,8 +22,10 @@ public class Ressurs {
     LocalDate sluttdato;
     LocalDate startdato;
     Sektor gjeldendeSektor;
+    IdentType identType;
     String fornavn;
     String etternavn;
     String visningsnavn;
     String primaryTelefon;
+    List<Telefon> telefon;
 }
