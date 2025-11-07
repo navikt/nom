@@ -171,20 +171,24 @@ public class StatistikkRestService {
             if(relevantDolOtList.size() == 1) {
                 var otSektor = Optional.ofNullable(relevantDolOtList.getFirst().sektor())
                     .orElseGet(() -> ressursStateRepository.findByNavident(navident).map(RessursState::sektor).orElse(null));
-                if(otSektor != null){
+                if (otSektor != null) {
                     sektorCounts.getOrDefault(otSektor, new ArrayList<>()).add(navident);
-                }else{
+                } else {
                     log.warn("Klarte ikke bestemme sektor for navident " + navident);
                 }
                 continue;
-            }else if (relevantDolOtList.size() > 1){
-                log.warn("Navident " + navident + " har flere enn 1 aktiv orgtilknytning med DOL == true");
+            }
+            if (relevantDolOtList.size() > 1) {
+                log.info("Navident " + navident + " har flere enn 1 aktiv orgtilknytning med DOL == true");
+                var maybeSektor = ressursStateRepository.findByNavident(navident)
+                    .map(RessursState::sektor);
+                maybeSektor.ifPresent(sektor -> sektorCounts.getOrDefault(sektor, new ArrayList<>()).add(navident));
                 continue;
             }
 
             var distinctSectorList = otList.stream().map(OrgtilknytningState::sektor).filter(Objects::nonNull).distinct().toList();
-            if(distinctSectorList.size() == 1) {
-                sektorCounts.get(distinctSectorList.getFirst()).add(navident);;
+            if (distinctSectorList.size() == 1) {
+                sektorCounts.get(distinctSectorList.getFirst()).add(navident);
                 continue;
             }
 
@@ -200,8 +204,7 @@ public class StatistikkRestService {
                     sektorCounts.get(ot.sektor()).add(navident);
                 }
             } else {
-                var maybeSektor = ressursStateRepository.findByNavident(navident)
-                    .map(RessursState::sektor);
+                var maybeSektor = ressursStateRepository.findByNavident(navident).map(RessursState::sektor);
 
                 maybeSektor.ifPresentOrElse(
                     sektor -> sektorCounts.get(sektor).add(navident),
