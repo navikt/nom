@@ -341,7 +341,7 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
       split
       value={
         fysiskBrukersted
-          ? capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)
+          ? `${fysiskBrukersted.brukerstedNr}: ${fysiskBrukersted.brukerstedNavn}`
           : "-"
       }
     />
