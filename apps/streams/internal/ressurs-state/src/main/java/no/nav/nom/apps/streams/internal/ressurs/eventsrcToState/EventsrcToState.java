@@ -185,6 +185,14 @@ class EventsrcToState {
                 log.info("SlettRessursEvent for fid {} received - create TOMBSTONE in StateTopic", fid);
                 return null;
             }
+            if (eventStateAggregate.hasNonNull("sektor")) {
+                try {
+                    Sektor.valueOf(eventStateAggregate.get("sektor").asText());
+                } catch (IllegalArgumentException e) {
+                    log.warn("Forkaster unparsable sektor '{}' fra eventState aggregate", eventStateAggregate.get("sektor").asText());
+                    ((ObjectNode)eventStateAggregate).remove("sektor");
+                }
+            }
 
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
             final var jobbtelefon = eventStateAggregate.hasNonNull("jobbtelefon") ? eventStateAggregate.get("jobbtelefon") : null;

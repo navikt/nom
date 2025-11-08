@@ -50,7 +50,7 @@ public class SpeilingService {
         }
     }
 
-    private void speilSektorOrgtilknytning() {
+    public void speilSektorOrgtilknytning() {
         var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
@@ -88,12 +88,26 @@ public class SpeilingService {
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
-        dolOrgtilknytninger.forEach(orgtilknytningState -> ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
+        for (OrgtilknytningState orgtilknytningState: dolOrgtilknytninger) {
+            var ressursState = ressursStateRepository.findByNavident(orgtilknytningState.navident()).orElse(null);
+            if (ressursState == null) continue;
+
             if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), orgtilknytningState.orgtilknytningType())) {
-                OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), orgtilknytningState.orgtilknytningType());
+                OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(
+                    ressursState.fid(),
+                    orgtilknytningState.orgtilknytningType()
+                );
                 ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+                break; // Shortcut enn sålenge - kjør kun for en
             }
-        }));
+        }
+
+//        dolOrgtilknytninger.forEach(orgtilknytningState -> ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
+//            if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), orgtilknytningState.orgtilknytningType())) {
+//                OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), orgtilknytningState.orgtilknytningType());
+//                ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+//            }
+//        }));
     }
 
 }
