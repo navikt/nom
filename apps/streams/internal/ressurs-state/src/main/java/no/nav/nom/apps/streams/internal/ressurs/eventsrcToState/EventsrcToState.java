@@ -74,7 +74,7 @@ class EventsrcToState {
                                 event.getMetadata().inputMetadata()
                             );
                             state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
-                        } else if (event.getData() == null && event instanceof RessursTilknytningtypeOppdatertV1) {
+                        } else if (event instanceof RessursTilknytningtypeOppdatertV1) {
                             var evtSrcFeltVerdier = objectMapper.convertValue(event.getData(), ObjectNode.class);
                             evtSrcFeltVerdier.remove("sektor");// Denne eventtypen skulle aldri hatt sektor i dataene sine. Dette var en typo feil.
                             state.setAll(evtSrcFeltVerdier);

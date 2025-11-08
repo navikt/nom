@@ -73,7 +73,7 @@ public class SpeilingService {
         }));
     }
 
-    private void speilTilknytningtypeOrgtilknytning() {
+    public void speilTilknytningtypeOrgtilknytning() {
         var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
