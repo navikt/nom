@@ -14,6 +14,7 @@ import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEv
 import no.nav.nom.contract.nom.eventsource.RessursJobbtelefonOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTilknytningtypeOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
@@ -73,6 +74,10 @@ class EventsrcToState {
                                 event.getMetadata().inputMetadata()
                             );
                             state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                        } else if (event.getData() == null && event instanceof RessursTilknytningtypeOppdatertV1) {
+                            var evtSrcFeltVerdier = objectMapper.convertValue(event.getData(), ObjectNode.class);
+                            evtSrcFeltVerdier.remove("sektor");// Denne eventtypen skulle aldri hatt sektor i dataene sine. Dette var en typo feil.
+                            state.setAll(evtSrcFeltVerdier);
                         } else {
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                         }

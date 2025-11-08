@@ -16,6 +16,11 @@ public class RessursTilknytningtypeOppdatertV1 extends RessursEvent {
     }
 
     public record TilknytningtypeOppdatertEventData(
-        Tilknytningtype sektor
+        Tilknytningtype tilknytningtype,
+
+        // Må beholde denne fordi det finnes event med feltnavn 'sektor', etter at typo på feltet over.
+        // Den het en liten periode 'Tilknytningtype sektor', Så for å fortsatt kunne parse alle RessursEvent, må denne ligge her.
+        // Data for felt sektor fjernes i state streams, før de brukes som del av state
+        String sektor
     ) implements Data{ }
 }
