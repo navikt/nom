@@ -262,6 +262,15 @@ class EventsrcToState {
                         fid, new RessursStateExt(null, ressursMetaData, orgtilknytningerMetaData)
                 );
             } else {
+                if (eventStateAggregate.hasNonNull("sektor")) {
+                    try {
+                        Sektor.valueOf(eventStateAggregate.get("sektor").asText());
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Forkaster unparsable sektor '{}' fra eventState aggregate", eventStateAggregate.get("sektor").asText());
+                        ((ObjectNode)eventStateAggregate).remove("sektor");
+                    }
+                }
+
                 var ressursState = new RessursState(
                         eventStateAggregate.get("personident").asText(),
                         eventStateAggregate.get("navident").asText(),
