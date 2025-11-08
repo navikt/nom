@@ -1,6 +1,7 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class RessursTilknytningtypeOppdatertV1 extends RessursEvent {
         super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public record TilknytningtypeOppdatertEventData(
         Tilknytningtype tilknytningtype,
 
@@ -22,5 +24,9 @@ public class RessursTilknytningtypeOppdatertV1 extends RessursEvent {
         // Den het en liten periode 'Tilknytningtype sektor', Så for å fortsatt kunne parse alle RessursEvent, må denne ligge her.
         // Data for felt sektor fjernes i state streams, før de brukes som del av state
         String sektor
-    ) implements Data{ }
+    ) implements Data{
+        public TilknytningtypeOppdatertEventData(Tilknytningtype tilknytningtype) {
+            this(tilknytningtype, null);
+        }
+    }
 }
