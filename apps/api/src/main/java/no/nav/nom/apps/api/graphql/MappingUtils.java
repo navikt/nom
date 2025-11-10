@@ -45,7 +45,7 @@ public class MappingUtils {
             .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
             .primaryTelefon(primaryTelefonnummer)
             .telefon(telefon)
-            .gjeldendeTilknytningstype(tilknytningstype)
+            .gjeldendeTilknytningtype(tilknytningstype)
             .build();
     }
 

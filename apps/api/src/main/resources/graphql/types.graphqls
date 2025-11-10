@@ -45,7 +45,7 @@ type Ressurs {
     lederFor (utvalg: PeriodiskUtvalgArg = AKTIVE): [LederOrgEnhet!]!
     orgTilknytning: [RessursOrgTilknytning!]! @deprecated(reason: "orgTilknytning er erstattet med orgTilknytninger") # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursOrgTilknytning!]!
-    gjeldendeTilknytningstype: TilknytningType
+    gjeldendeTilknytningtype: TilknytningType
 }
 
 type RessursLeder {

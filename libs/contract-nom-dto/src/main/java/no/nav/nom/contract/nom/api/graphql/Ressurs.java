@@ -28,5 +28,5 @@ public class Ressurs {
     String visningsnavn;
     String primaryTelefon;
     List<Telefon> telefon;
-    Tilknytningtype gjeldendeTilknytningstype;
+    Tilknytningtype gjeldendeTilknytningtype;
 }
