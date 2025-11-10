@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import no.nav.nom.generated.model.Visningsnavn;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +26,7 @@ public class UtilsTest {
     void testCapitalizeNavn(){
 
         assertThat(capitalizeNavn("fornavn")).isEqualTo("Fornavn");
+        assertThat(capitalizeNavn("flere fornavn")).isEqualTo("Flere Fornavn");
     }
 
     @Test
@@ -40,20 +40,16 @@ public class UtilsTest {
     @Test
     @DisplayName("Ensure that Utils.formatWithMellomNavn works as expected")
     void testFormatWithMellomNavn(){
-        var navn = new Visningsnavn();
-        navn.setFornavn("Fornavn");
+        var navn = new no.nav.nom.contract.nom.eventsource.Visningsnavn("fornavn", Optional.empty(), "etternavn");
         assertThat(formatFornavnWithMellomnavn(navn)).isEqualTo("Fornavn");
 
-        navn.setMellomnavn("mellom-Navn");
-        assertThat(formatFornavnWithMellomnavn(navn)).isEqualTo("Fornavn mellom-Navn");
+        navn = new no.nav.nom.contract.nom.eventsource.Visningsnavn("fornavn", Optional.of("van der"), "etternavn");
+        assertThat(formatFornavnWithMellomnavn(navn)).isEqualTo("Fornavn van der");
 
-        navn.setMellomnavn("");
+        navn = new no.nav.nom.contract.nom.eventsource.Visningsnavn("fornavn", Optional.of(""), "etternavn");
         assertThat(capitalizeNavn(formatFornavnWithMellomnavn(navn))).isEqualTo("Fornavn");
 
-        navn.setMellomnavn("  ");
-        assertThat(capitalizeNavn(formatFornavnWithMellomnavn(navn))).isEqualTo("Fornavn");
-
-        navn.setMellomnavn(null);
+        navn = new no.nav.nom.contract.nom.eventsource.Visningsnavn("fornavn", Optional.of("    "), "etternavn");
         assertThat(capitalizeNavn(formatFornavnWithMellomnavn(navn))).isEqualTo("Fornavn");
     }
 }
