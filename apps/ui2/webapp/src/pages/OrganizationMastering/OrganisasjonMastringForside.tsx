@@ -456,6 +456,7 @@ function UtvidOrgEnhetKort({
             <Divider noMargins />
 
             <EnhetKontekstInfo
+              displayKostnadssted={true}
               displayLeder={false}
               displayUni4Niv
               nomIdLink

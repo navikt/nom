@@ -40,6 +40,9 @@ spec:
         - application: nom-azure
           namespace: org
           cluster: dev-gcp
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
+          cluster: dev-gcp
       external:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
@@ -112,6 +115,10 @@ spec:
       value: http://nom-paarorende.org.svc.cluster.local
     - name: PAARORENDE_API_SCOPE
       value: api://dev-gcp.org.nom-paarorende/.default
+    - name: ORGENHET_KOSTNADSSTED_MAPPING_API_URL
+      value: http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local
+    - name: ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE
+      value: api://dev-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
     - name: ENABLE_CDN_BUNDLES
       value: "true"
   envFrom:

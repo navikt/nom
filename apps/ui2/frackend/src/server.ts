@@ -5,6 +5,7 @@ import {
   setupNomApiProxy,
   setupNomAzureProxy,
   setupNomRemedyIntegrasjonProxy,
+  setupOgEnhetKostnadsstedMappingProxy,
   setupPaarorendeProxy,
   setupTeamcatApiProxy,
 } from "./apiProxy.js";
@@ -31,6 +32,7 @@ setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
 setupUnleashProxy(app);
 setupPlayground(app);
+setupOgEnhetKostnadsstedMappingProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

@@ -39,6 +39,8 @@ const NOM_API_BASE_PATH = "/frackend/nom-api";
 const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
 const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
 const NOM_UNLEASH_BASE_PATH = "/frackend/unleash";
+const ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH =
+  "/frackend/org-koststed-mapping";
 
 /**
  * Intercept errors that are 401.
@@ -130,6 +132,12 @@ export const eventSourceForRessursKeys = {
 
 export const eventSourceForOrgEnhetKeys = {
   all: ["ORGENHET_EVENTS"] as const,
+};
+
+export const kostnadsstedKeys = {
+  all: ["KOSTNADSSTED_BY_ORGENHET"] as const,
+  orgEnhetId: (orgEnhetId: string) =>
+    [...kostnadsstedKeys.all, orgEnhetId] as const,
 };
 
 export const getAlleRessurserGraphql = {
@@ -322,6 +330,16 @@ export const getOrgEnhet = {
     (
       await axios.get<OrgEnhet>(
         `${NOM_API_BASE_PATH}/app/orgenheter/${orgEnhetId}`,
+      )
+    ).data,
+};
+
+export const getKostnadssted = {
+  queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
+  queryFn: async (orgEnhetId: string) =>
+    (
+      await axios.get<OrgKoststedMapping>(
+        `${ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH}/api/v1/mapping?orgenhetid=${orgEnhetId}`,
       )
     ).data,
 };
@@ -874,4 +892,9 @@ export type Kontaktinfo = {
   postnr?: string;
   poststed?: string;
   land?: string;
+};
+
+export type OrgKoststedMapping = {
+  orgenhetId: string;
+  kostnadsstedId: string;
 };

@@ -22,6 +22,7 @@ import type { AxiosError, AxiosResponse } from "axios";
 import React, { useState } from "react";
 
 import {
+  getKostnadssted,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
@@ -595,12 +596,14 @@ export function EnhetKontekstInfo({
   displayLeder = true,
   displayUni4Niv = false,
   nomIdLink = false,
+  displayKostnadssted = false,
 }: {
   orgEnhet: OrgEnhet | undefined;
   fallbackMessage?: string;
   displayLeder?: boolean;
   displayUni4Niv?: boolean;
   nomIdLink?: boolean;
+  displayKostnadssted?: boolean;
 }) {
   const ledere =
     Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
@@ -608,6 +611,10 @@ export function EnhetKontekstInfo({
       : [];
 
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
+
+  const kostnadssted = displayKostnadssted
+    ? useKostnadsstedInfo(orgEnhet?.id)
+    : undefined;
 
   if (!orgEnhet) {
     return <>{fallbackMessage}</>;
@@ -631,6 +638,10 @@ export function EnhetKontekstInfo({
       {displayUni4Niv && (
         <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />
       )}
+      <LabelWithValue
+        label="Kostnadssted"
+        value={kostnadssted?.kostnadsstedId}
+      />
     </HStack>
   );
 }
@@ -648,6 +659,23 @@ function useExtraAgressoInfo(orgEnhetId: string | undefined) {
   return {
     agressoId: query.data.agressoId,
     agressoOrgenhetType: query.data.agressoOrgenhetType,
+  };
+}
+
+function useKostnadsstedInfo(orgEnhetId: string | undefined) {
+  const query = useQuery({
+    queryKey: getKostnadssted.queryKey(orgEnhetId ?? ""),
+    queryFn: () => getKostnadssted.queryFn(orgEnhetId ?? ""),
+    enabled: /[a-zA-Z]{2}\d{3}[a-zA-Z]/.test(orgEnhetId ?? ""),
+    retry: 1,
+  });
+
+  if (!query.data) {
+    return undefined;
+  }
+  return {
+    orgenhetId: query.data.orgenhetId,
+    kostnadsstedId: query.data.kostnadsstedId,
   };
 }
 
