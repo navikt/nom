@@ -401,6 +401,13 @@ app:
       - navident: Z990141         # Team ISA / Øystein Brox
         orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
+        
+      - navident: Z994864         # Team Klage / Kristin Jacobsen
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994651         # Team Klage / Kristin Jacobsen
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
 
     ledere:
       - navident: N852930
