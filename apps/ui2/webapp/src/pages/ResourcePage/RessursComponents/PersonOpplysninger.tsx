@@ -35,9 +35,7 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { nomDateIsBefore } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { Ressurs } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
-import { TelefonType } from "~/types/api-models";
+import { IdentType, Sektor, TelefonType } from "~/types/api-models";
 import {
   capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
@@ -341,7 +339,7 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
       split
       value={
         fysiskBrukersted
-          ? `${fysiskBrukersted.brukerstedNr}: ${fysiskBrukersted.brukerstedNavn}`
+          ? `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`
           : "-"
       }
     />
