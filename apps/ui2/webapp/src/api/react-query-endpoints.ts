@@ -23,6 +23,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
+  OrgenhetLederByNavidentResponse,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
@@ -367,6 +368,16 @@ export function getOrgEnheterLedetAvOptions(navident: string) {
       ).data,
   });
 }
+
+export const getOrgenhetLederByNavIdent = {
+  queryKey: (navident: string) => ["getOrgenhetLederByNavIdent", navident],
+  queryFn: async (navident: string) =>
+    (
+      await axios.get<OrgenhetLederByNavidentResponse[]>(
+        `${NOM_API_BASE_PATH}/app/orgenhetleder/by-navident/${navident}`,
+      )
+    ).data as OrgenhetLederByNavidentResponse[],
+};
 
 export const getOrgEnheterSomKanHaRessurser = {
   gcTime: CACHE_FOR.anHour,

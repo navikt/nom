@@ -488,3 +488,17 @@ export interface Visningsnavn {
   fornavn: string;
   mellomnavn?: string;
 }
+
+export interface OrgenhetLederByNavidentResponse {
+  fid: string;
+  navident: string;
+  visningsnavn: {
+    fornavn: string;
+    mellomnavn?: string;
+    etternavn: string;
+  };
+  orgEnhetId: string;
+  orgEnhetNavn: string;
+  startdato: string;
+  sluttdato?: string | null;
+}

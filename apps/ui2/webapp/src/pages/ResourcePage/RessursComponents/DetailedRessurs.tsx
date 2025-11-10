@@ -27,8 +27,8 @@ import React, { useState } from "react";
 
 import {
   getOrgEnhet,
-  getOrgEnheterLedetAvOptions,
   getOrgEnheterRessursKanRedigere,
+  getOrgenhetLederByNavIdent,
   getOrgTilknytninger,
   getTeamcatMemberships,
   harLederTilgangForNavidentOptions,
@@ -664,12 +664,25 @@ const vikafossenOrgEnhetIder = new Set(["ru664y", "fe178t"]);
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminAccess = useHasAdminAccess();
   const lederForOrgenheter =
-    useQuery(getOrgEnheterLedetAvOptions(ressurs.navident)).data ?? [];
+    useQuery({
+      queryKey: getOrgenhetLederByNavIdent.queryKey(ressurs.navident),
+      queryFn: () => getOrgenhetLederByNavIdent.queryFn(ressurs.navident),
+      select: (orgenhetLederList) =>
+        orgenhetLederList.filter((it) => {
+          if (!it.sluttdato) {
+            return true;
+          }
+          const isoFormatRoughlyOk = /^\d{4}-\d{2}-\d{2}$/.test(it.sluttdato);
+          return isoFormatRoughlyOk && it.sluttdato >= new Date().toISOString();
+        }),
+    }).data ?? [];
 
   const lederForOrgenheterFiltrert =
     hasAdminAccess || isInDevelopment()
       ? lederForOrgenheter
-      : lederForOrgenheter.filter((enh) => !vikafossenOrgEnhetIder.has(enh.id));
+      : lederForOrgenheter.filter(
+          (enh) => !vikafossenOrgEnhetIder.has(enh.orgEnhetId),
+        );
 
   if (lederForOrgenheterFiltrert.length === 0) {
     return <></>;
@@ -682,7 +695,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     */
   const uniqLederFor = uniqBy(
     lederForOrgenheterFiltrert,
-    (orgEnhet) => orgEnhet.navn,
+    (orgEnhet) => orgEnhet.orgEnhetNavn,
   );
 
   return (
@@ -702,12 +715,12 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
       >
         {uniqLederFor.map((orgEnhet) => (
           <ReactRouterLink
-            key={orgEnhet.id}
-            params={{ id: orgEnhet.id }}
+            key={orgEnhet.orgEnhetId}
+            params={{ id: orgEnhet.orgEnhetId }}
             search={{}}
             to="/org/$id"
           >
-            <Link as="span">{orgEnhet.navn}</Link>
+            <Link as="span">{orgEnhet.orgEnhetNavn}</Link>
           </ReactRouterLink>
         ))}
       </div>
