@@ -3,7 +3,6 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.generated.model.Visningsnavn;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,16 +45,9 @@ public class Utils {
         return localDateTime.toEpochSecond(norwegianTimeZone.getRules().getOffset(localDateTime));
     }
 
-    public static String formatFornavnWithMellomnavn(Visningsnavn visningsnavn) {
-        // Visningsnavn fra nomApi over rest kommer med mellomnavn som tom streng "", og ikke som null
-        var m = visningsnavn.getMellomnavn();
-        return visningsnavn.getFornavn() + (m != null && !m.isBlank() ? " " + m : "");
-    }
-
     public static String formatFornavnWithMellomnavn(no.nav.nom.contract.nom.eventsource.Visningsnavn visningsnavn) {
         // Visningsnavn fra nomApi over rest kommer med mellomnavn som tom streng "", og ikke som null
-        var m = visningsnavn.mellomnavn().orElse(null);
-        return visningsnavn.fornavn() + (m != null && !m.isBlank() ? " " + m : "");
+        return capitalizeNavn(visningsnavn.fornavn()) + visningsnavn.mellomnavn().map(it -> it.isBlank() ? "" : " " + it).orElse("");
     }
 
     public static boolean isActive(LocalDate gyldigFom, LocalDate gyldigTom) {

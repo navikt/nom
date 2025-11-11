@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSektorToRemedyCode;
@@ -638,7 +637,7 @@ public class NomRemedyIntegrasjonServiceTest {
         var utlopsdato = getUtlopsdato(sektor, dolOrgtilknytning);
 
         return NomIntegrasjonEntity.builder()
-                .fornavn(capitalizeNavn(formatFornavnWithMellomnavn(ressursState.visningsnavn()).trim()))
+                .fornavn(formatFornavnWithMellomnavn(ressursState.visningsnavn()).trim())
                 .etternavn(ressursState.visningsnavn().etternavn().trim())
                 .navId(ressursState.navident())
                 .fodselsnummer(ressursState.personident())
