@@ -1,15 +1,10 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import graphql.GraphQLError;
-import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.graphql.common.exception.NIKException;
-import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -28,18 +23,15 @@ public class RessursResolver {
     private final RessursStateRepository ressursStateRepository;
     private final RessursMetadataRepository ressursMetadataRepository;
     private final DvhRepository dvhRepository;
-    private final DvhRessursRestService dvhRessursRestService;
 
     RessursResolver(
         RessursStateRepository ressursStateRepository,
         RessursMetadataRepository ressursMetadataRepository,
-        DvhRepository dvhRepository,
-        DvhRessursRestService dvhRessursRestService
+        DvhRepository dvhRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursMetadataRepository = ressursMetadataRepository;
         this.dvhRepository = dvhRepository;
-        this.dvhRessursRestService = dvhRessursRestService;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
@@ -90,21 +82,6 @@ public class RessursResolver {
                 ressursMetadataRepository.findEndringEventByNavident(res.id)
             )
         ).collect(Collectors.toList());
-    }
-
-
-    public static GraphQLError handleNIKException(Throwable throwable, DataFetchingEnvironment env) {
-        if (throwable instanceof NIKException exc) {
-            return exc.getErrorCode().construct(env, throwable.getMessage());
-        }
-        return null;
-    }
-
-    public static GraphQLError handleOpprettRessursException(Throwable throwable, DataFetchingEnvironment env) {
-        if (throwable instanceof OpprettRessursException exc) {
-            return exc.getErrorCode().construct(env, throwable.getMessage());
-        }
-        return null;
     }
 
     private record Result(

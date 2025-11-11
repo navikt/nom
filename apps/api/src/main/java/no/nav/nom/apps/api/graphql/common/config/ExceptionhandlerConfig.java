@@ -17,16 +17,6 @@ import java.util.function.BiFunction;
 public class ExceptionhandlerConfig {
 
     @Bean
-    public DataFetcherExceptionResolver NIKResponseExceptionResolver() {
-        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleNIKException);
-    }
-
-    @Bean
-    public DataFetcherExceptionResolver OpprettRessursExceptionResolver() {
-        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleOpprettRessursException);
-    }
-
-    @Bean
     public DataFetcherExceptionResolver ADResponseExceptionResolver() {
         return DataFetcherExceptionResolver.forSingleError(ActiveDirectoryRessursBatchLoader::handleADResponseException);
     }
