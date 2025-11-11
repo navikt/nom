@@ -283,6 +283,12 @@ Telefonnummer manuelt registrert i NOM får typen PRIVAT_TELEFON selv om dette k
 |ressurstype    |Ja         |!DEPREKERT november 2025: Dette feltet er erstattet av _gjeldendeSektor_ feltet |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
 |sektor    |Ja         |!DEPREKERT november 2025: Dette feltet er erstattet av _gjeldendeSektor_ feltet |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
 |gjeldendeSektor    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |NOM
+|gjeldendeTilknytningtype    |Ja         |Kodeverk som angir ressursens primære tilknytningstype. |FAST +
+KONSULENT +
+EKSTERN_SAMARBEIDSPARTNER +
+Etc
+
+Se TilknytningType-objektet for komplett liste |NOM
 |identType    |Ja         |Kodeverk som angir typen navident knyttet til ressursen.  |STANDARD, ROBOT eller VIAKAFOSSEN etc. +
 Se eget objekt IdentType|NOM
 |startdato      |Nei         |Ressursens startdato. +
