@@ -22,26 +22,26 @@ public class GqlQueryStatsService {
     }
 
     public void registerQueryUsage(String query, String consumer) {
-        String hash = getHashAndInsertIfMissing(query);
-        gqlQueryUsageRepository.save(
-            GqlQueryUsage.builder()
-                .hash(hash)
-                .consumer(consumer)
-                .timestamp(LocalDateTime.now())
-                .build()
-        );
+//        String hash = getHashAndInsertIfMissing(query);
+//        gqlQueryUsageRepository.save(
+//            GqlQueryUsage.builder()
+//                .hash(hash)
+//                .consumer(consumer)
+//                .timestamp(LocalDateTime.now())
+//                .build()
+//        );
     }
 
     public void registerFieldUsage(String field, String path, String operationName, String consumer) {
-        gqlFieldUsageRepository.save(
-            GqlFieldUsage.builder()
-                .field(field)
-                .path(path)
-                .operationName(operationName)
-                .consumer(consumer)
-                .timestamp(LocalDateTime.now())
-                .build()
-        );
+//        gqlFieldUsageRepository.save(
+//            GqlFieldUsage.builder()
+//                .field(field)
+//                .path(path)
+//                .operationName(operationName)
+//                .consumer(consumer)
+//                .timestamp(LocalDateTime.now())
+//                .build()
+//        );
     }
 
     private String getHashAndInsertIfMissing(String query) {
