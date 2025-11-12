@@ -188,7 +188,9 @@ public class AuthorizedNavident {
                 .toList();
 
             var delegerteLedereNavidenter = hierarkiOppoverFiltrertList.stream()
-                .flatMap(hierarkiOeId -> delegertLederStateRepository.getDelegertLederByEnhet(hierarkiOeId).stream().map(LederTilgangState::til));
+                .flatMap(hierarkiOeId -> delegertLederStateRepository.getDelegertLederByEnhet(hierarkiOeId).stream()
+                    .filter(LederTilgangState::isActive)
+                    .map(LederTilgangState::til));
 
             var vanligLedereNavidenter = hierarkiOppoverFiltrertList.stream().map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
                 .filter(Objects::nonNull)
