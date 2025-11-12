@@ -137,6 +137,12 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
+        - application: opprett-oppgave-frontend-q2
+          namespace: isa
+          cluster: dev-gcp
+        - application: opprett-oppgave-frontend-q1
+          namespace: isa
+          cluster: dev-gcp
         - application: amt-person-service
           namespace: amt
           cluster: dev-gcp
@@ -286,9 +292,6 @@ spec:
           cluster: dev-gcp
         - application: behandlingskatalog-backend
           namespace: teamdatajegerne
-          cluster: dev-gcp
-        - application: slack-sommeroppgave
-          namespace: isa
           cluster: dev-gcp
         - application: ung-deltakelse-opplyser
           namespace: k9saksbehandling
