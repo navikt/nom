@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
+import com.google.common.base.Strings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -298,19 +299,25 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
     @PostMapping(value = "/endreSluttdatoOrgtilknytning")
     public ResponseEntity<String> endreSluttdatoOrgtilknytning(
         @Parameter(description = "FID for orgtilknytningen som skal endre sluttdato") @RequestParam String fid,
-        @Parameter(description = "Ny sluttdato for ressursen") @RequestParam LocalDate nySluttDato,
+        @Parameter(description = "Ny sluttdato for ressursen") @RequestParam String nySluttDato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ) {
         if (!validFid(fid)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
         }
-
         var orgtilknytning = orgtilknytningService.findByFid(fid);
         if (orgtilknytning.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgtilknytning med FID: " +  HtmlUtils.htmlEscape(fid));
         }
 
-        if (orgtilknytning.get().gyldigFom().isAfter(nySluttDato)) {
+        LocalDate nySluttDatoParsed = null;
+        try {
+            nySluttDatoParsed = Strings.isNullOrEmpty(nySluttDato) ? null : LocalDate.parse(nySluttDato);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Feil format på sluttdato");
+        }
+
+        if (nySluttDatoParsed != null && orgtilknytning.get().gyldigFom().isAfter(nySluttDatoParsed)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ny sluttdato kan ikke være før startdato");
         }
 
@@ -330,7 +337,7 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
             new EndreOrgtilknytningDatoCommand(
                 fid,
                 orgtilknytning.get().gyldigFom(),
-                nySluttDato,
+                nySluttDatoParsed,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",
                     "endreSektorOrgtilknytning",
