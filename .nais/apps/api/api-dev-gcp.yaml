@@ -293,6 +293,9 @@ spec:
         - application: behandlingskatalog-backend
           namespace: teamdatajegerne
           cluster: dev-gcp
+        - application: slack-sommeroppgave
+          namespace: isa
+          cluster: dev-gcp
         - application: ung-deltakelse-opplyser
           namespace: k9saksbehandling
           cluster: dev-gcp
