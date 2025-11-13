@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -37,8 +39,10 @@ public class GraphQLFieldConsumptionCounter {
     @SuppressWarnings("unchecked")
     public void count(DataFetchingEnvironment env) {
         final var consumer = securityUtil.getAzpName().orElse("unknown");
-        final var operationName = env.getOperationDefinition().getName(); // operation name is the query alias, which may be null
+        final var operation = getOperationName(env);
         final var queryRoot = env.getField().getName();
+
+        List<FieldPathEntry> fieldPathList = new ArrayList<>();
 
         // Søke argumenter parameter navn
         env.getArguments().forEach((argument, value) -> {
@@ -47,28 +51,35 @@ public class GraphQLFieldConsumptionCounter {
             }
             var path = String.format("%s.argument.%s", queryRoot, argument);
             try {
-                ((Map<String, Object>) value).forEach((paramName, paramValue) -> registerValues(paramName, path, consumer, operationName));
+                ((Map<String, Object>) value).forEach((paramName, _) -> {
+                    fieldPathList.add(new FieldPathEntry(paramName, path));
+                    registerValuesToMetrics(paramName, path, consumer, operation);
+                });
             } catch (ClassCastException ignored) {}
         });
 
-        registerValues(queryRoot, queryRoot, consumer, operationName); // register query root
+        registerValuesToMetrics(queryRoot, queryRoot, consumer, operation); // register query root
 
         env.getSelectionSet().getFields().forEach(field -> {
             final var currentPath = String.format("%s.%s", queryRoot, field.getQualifiedName().replace("/", "."));
-            registerValues(field.getName(), currentPath, consumer, operationName); // register fields beneath query root
+            fieldPathList.add(new FieldPathEntry(field.getName(), currentPath));
+            registerValuesToMetrics(field.getName(), currentPath, consumer, operation); // register fields beneath query root
         });
+        gqlQueryStatsService.registerFieldUsage(fieldPathList, operation, consumer);
     }
 
-    private void registerValues(String field, String path, String consumer, String operationName) {
+    private static String getOperationName(DataFetchingEnvironment env) {
+        var operationName =  env.getOperationDefinition().getName(); // operation name is the query alias, which may be null
+        return isEmpty(operationName) ? "unknown" : operationName;
+    }
+
+    private void registerValuesToMetrics(String field, String path, String consumer, String operation) {
         Map<String, String> tagsAndValues = new LinkedHashMap<>();
 
-        var operation = isEmpty(operationName) ? "unknown" : operationName;
         tagsAndValues.put("field", field);
         tagsAndValues.put("path", path);
         tagsAndValues.put("consumer", consumer);
         tagsAndValues.put("operationName", operation);
-
-        gqlQueryStatsService.registerFieldUsage(field, path, operation, consumer);
 
         incrementCounter(METRICS_COUNTER_NAME, tagsAndValues);
     }
@@ -89,4 +100,5 @@ public class GraphQLFieldConsumptionCounter {
         tagsAndValues.forEach(counterBuilder::tag);
         return counterBuilder.register(meterRegistry);
     }
+
 }

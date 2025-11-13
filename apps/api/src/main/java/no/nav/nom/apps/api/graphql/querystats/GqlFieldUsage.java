@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.graphql.querystats;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Type;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -25,11 +30,9 @@ public class GqlFieldUsage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Type(JsonBinaryType.class)
     @NotNull
-    private String field;
-
-    @NotNull
-    private String path;
+    private JsonNode fieldPathArray;
 
     @NotNull
     private String operationName;

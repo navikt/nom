@@ -99,7 +99,7 @@ spring:
     url: ${DATABASE_JDBC_URL}
     hikari:
       minimum-idle: 1
-      maximum-pool-size: 5
+      maximum-pool-size: 10
   security:
     oauth2:
       resourceserver:
@@ -226,18 +226,10 @@ spring:
 
 server.tomcat.mbeanregistry.enabled: true
 
+# Her kan log level settes spesifikt for DEV. Log level setting for både prod/dev kan settes i logback-nais.xml
 logging:
   level:
     no.nav.nom: INFO
-    no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient: DEBUG
-#    no.nav.nom.apps.api.orgtilknytning.u4diff: DEBUG
-#    no.nav.nom.apps.api.orgtilknytning: DEBUG
-#    no.nav.nom.apps.api.organisering: DEBUG
-#    no.nav.nom.apps.api.graphql.organisasjonsenhet: DEBUG
-    no.nav.nom.apps.api.orgenhet: DEBUG
-#    no.nav.nom.apps.api.ressurs.api: DEBUG
-#    no.nav.nom.apps.api.rest.uttrekk: DEBUG
-#    no.nav.nom.apps.api.common.security: DEBUG
 
 management:
   endpoints:

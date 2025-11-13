@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Tag(name = "Admin for å teste unleash toggles/strategier.")
 @RestController
 @RequestMapping("/api/admin/unleash")
@@ -35,6 +37,7 @@ public class UnleashManuellTest {
     )
     @GetMapping(value = "/sjekkToggle")
     public boolean sendEmailTest(@RequestParam String unelashToggle) {
+        log.error("DUMMY ALERT TEST! Connection is not available -- Laget kun for å teste trigging av alert - Hvis du tror denne kan slettes fra koden, så kan den sikkert det. Da har jeg nok glemt å fjerne den selv. /Roy");
         return unleash.isEnabled(unelashToggle);
     }
 }
