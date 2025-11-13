@@ -12,6 +12,8 @@ public class QueryStatsThreadPoolTaskExecutor {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(1);
         taskExecutor.setMaxPoolSize(4);
+        taskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        taskExecutor.setThreadNamePrefix("GQL_Metric_Saver-");
         return taskExecutor;
     }
 }

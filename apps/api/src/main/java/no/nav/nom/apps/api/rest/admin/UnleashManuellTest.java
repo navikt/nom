@@ -36,8 +36,7 @@ public class UnleashManuellTest {
         }
     )
     @GetMapping(value = "/sjekkToggle")
-    public boolean sendEmailTest(@RequestParam String unelashToggle) {
-        log.error("DUMMY ALERT TEST! Connection is not available -- Laget kun for å teste trigging av alert - Hvis du tror denne kan slettes fra koden, så kan den sikkert det. Da har jeg nok glemt å fjerne den selv. /Roy");
-        return unleash.isEnabled(unelashToggle);
+    public boolean sendEmailTest(@RequestParam String unleashToggle) {
+        return unleash.isEnabled(unleashToggle);
     }
 }

@@ -12,15 +12,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
 public class GqlQueryStatsService {
     private static final int QUEUE_MONITOR_WARNING_SIZE = 50;
-    private final Set<String> knownHashes = new HashSet<>(); // simple caching
+    private final Set<String> knownHashes = ConcurrentHashMap.newKeySet(); // simple caching
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final GqlQueryRepository gqlQueryRepository;
@@ -30,7 +30,7 @@ public class GqlQueryStatsService {
 
     public GqlQueryStatsService(
         GqlQueryRepository gqlQueryRepository,
-       GqlQueryUsageRepository gqlQueryUsageRepository,
+        GqlQueryUsageRepository gqlQueryUsageRepository,
         GqlFieldUsageRepository gqlFieldUsageRepository,
         @Qualifier("gqlStatsTaskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
@@ -92,8 +92,8 @@ public class GqlQueryStatsService {
                     .query(query)
                     .build())
             );
+            knownHashes.add(hash);
         }
-        knownHashes.add(hash);
         return hash;
     }
 
