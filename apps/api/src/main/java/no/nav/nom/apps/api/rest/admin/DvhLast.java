@@ -133,7 +133,7 @@ public class DvhLast {
     @Async
     public void triggerOrganiseringerOgLederLast() {
         dvhRestConsumer.loadLedereFromDvh();
-        dvhRestConsumer.loadOrganiseringerFromDvh();
+        dvhRestConsumer.loadOrganiseringerFromDvh(true);
     }
 
     @Async

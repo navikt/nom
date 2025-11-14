@@ -159,17 +159,19 @@ public class DvhRestConsumer {
             log.info("Oppstartsinnlesning - kan ikke skippe schedulert oppdatering");
             return false;
         }
+
+        return !erKlokkeslettISafeTidsromForKonsistentLastFraDVH();
+    }
+
+    private boolean erKlokkeslettISafeTidsromForKonsistentLastFraDVH() {
         // Dvh oppdateres ifølge Henrik ca. 02.00. 14.00 og 18.00.
         // Har observert inkonsistens i periodene 01:30-03:00, 12:30-15:00, og 17:00-18:30
         // Velger å kun kjøre i timene 22, 05, 10 og 16
         // Kan kjøres manuelt fra Swagger/admin
         List<Integer> runHours = Arrays.asList(5, 10, 16, 22);
-        if (runHours.contains(LocalDateTime.now().getHour())) {
-            log.info("Kjører schedulert oppdatering fra DVH da timen {} er i runHours {}", LocalDateTime.now().getHour(), runHours);
-            return false;
-        }
-        log.info("Skipper schedulert oppdatering fra DVH da timen {} er ikke er i runHours {}", LocalDateTime.now().getHour(), runHours);
-        return true;
+        var safe = runHours.contains(LocalDateTime.now().getHour());
+        log.info("Vi er {} safe tidsrom for oppdatering fra DVH da timen {} er i runHours {}", safe ? "i" : "ikke i", LocalDateTime.now().getHour(), runHours);
+        return safe;
     }
 
     public void loadRessurserOgOrgEnheter() {
@@ -319,20 +321,23 @@ public class DvhRestConsumer {
         return false;
     }
 
-    public boolean loadOrganiseringerFromDvh() {
+    public void loadOrganiseringerFromDvh() {
+        loadOrganiseringerFromDvh(false);
+    }
+
+    public void loadOrganiseringerFromDvh(boolean forceEvtSrcUpdate) {
         log.info("Laster Organisering fra dvh");
         try {
             var organiseringer = dvhOrdsService.getOrganiseringer();
 
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-            if (leaderElection.isLeader()) {
+
+            if (forceEvtSrcUpdate || (leaderElection.isLeader() && erKlokkeslettISafeTidsromForKonsistentLastFraDVH())) {
                 organiseringService.saveOrganiseringer(organiseringer);
             }
-            return true;
         } catch (Exception e) {
             log.error("Failure loading Organisering data from DVH", e);
         }
-        return false;
     }
 
     public void findOTUtenforHierarki() {

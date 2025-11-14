@@ -49,7 +49,7 @@ public class OrganiseringService {
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
-        logger.info("Starter innlesning av organiseringer");
+        logger.info("Starter oppdatering av organiseringer evtSrc");
 
         if(dvhOrganiseringer.isEmpty()) {
             logger.warn("Ingen organiseringer mottatt fra DVH, så ingen organiseringer vil bli endret.");
