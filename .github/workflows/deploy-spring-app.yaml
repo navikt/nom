@@ -55,7 +55,7 @@ on:
       dockerfile:
         type: string
         required: false
-        default: Dockerfile
+        default: Dockerfile_chainguard
         description: Dockerfile to use for building the docker image
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER:
