@@ -624,6 +624,7 @@ export function EnhetKontekstInfo({
     <HStack
       css={css`
         font-size: var(--a-font-size-large);
+        row-gap: var(--a-spacing-1);
       `}
       gap="4"
     >

@@ -20,6 +20,7 @@ import React, { useState } from "react";
 
 import {
   getLedereForOrgEnhet,
+  getOrgEnhet,
   getOrgEnheterLedetAvOptions,
   getOrgEnheterRessursKanRedigere,
   getOrgEnhetList,
@@ -42,7 +43,11 @@ import { PageBanner } from "~/components/PageBanner";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import {
+  formatDisplayDate,
+  formatVisningsnavn,
+  isInDevelopment,
+} from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -456,7 +461,7 @@ function UtvidOrgEnhetKort({
             <Divider noMargins />
 
             <EnhetKontekstInfo
-              displayKostnadssted={true}
+              displayKostnadssted
               displayLeder={false}
               displayUni4Niv
               nomIdLink
@@ -504,7 +509,18 @@ function HvemKanRedigereSection({
 }: {
   kanAdministrere: MinimalRessurs[];
 }) {
-  const direktorNavident = "H158936";
+  const inDevelopment = isInDevelopment();
+
+  const toppnodeOrgEnhetId = inDevelopment ? "sa312u" : "py437s";
+
+  const toppnodeOrgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(toppnodeOrgEnhetId),
+  });
+
+  const toppnodeOrgEnhet = toppnodeOrgEnhetQuery.data;
+
+  const direktorNavident = toppnodeOrgEnhet?.leder.navident;
 
   const unikeFiltrerteRessurser = Array.from(
     new Map(kanAdministrere.map((r) => [r.navident, r]))
@@ -522,6 +538,9 @@ function HvemKanRedigereSection({
         <VStack>
           {unikeFiltrerteRessurser.map((ressurs, index) => (
             <SmartLink
+              css={css`
+                width: fit-content;
+              `}
               href={`/ressurs/${ressurs.navident}`}
               key={`${ressurs.navident}${index}`}
             >
