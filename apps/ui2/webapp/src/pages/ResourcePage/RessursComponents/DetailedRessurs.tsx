@@ -44,6 +44,7 @@ import {
 import { Divider } from "~/components/Divider";
 import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
@@ -818,23 +819,25 @@ function SummarySection({
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
-  const memberships = useQuery({
+  const membershipsQuery = useQuery({
     queryKey: getTeamcatMemberships.queryKey(navident),
     queryFn: () => getTeamcatMemberships.queryFn(navident),
-  }).data;
+  });
+
+  const memberships = membershipsQuery.data;
 
   if (!memberships) {
-    return <></>;
+    return;
   }
 
-  const flattenedMemberships = [
+  const activeMemberships = [
     ...memberships.teams,
     ...memberships.clusters,
     ...memberships.productAreas,
-  ];
+  ].filter((membership) => membership.status === "ACTIVE");
 
-  if (flattenedMemberships.length === 0) {
-    return <></>;
+  if (activeMemberships.length === 0) {
+    return;
   }
 
   const teamcatBaseUrl = isInDevelopment()
@@ -844,15 +847,16 @@ function TeamCatSection({ navident }: { navident: string }) {
   return (
     <>
       <Divider noMargins />
+
       <Heading level="2" size="small">
         <ReceptionIcon />
         Tilhørighet til team, område og klynge
       </Heading>
 
       <div>
-        <Link href={`${teamcatBaseUrl}/resource/${navident}`}>
+        <SmartLink externalIcon href={`${teamcatBaseUrl}/resource/${navident}`}>
           Se mer i Teamkatalogen
-        </Link>
+        </SmartLink>
       </div>
     </>
   );
