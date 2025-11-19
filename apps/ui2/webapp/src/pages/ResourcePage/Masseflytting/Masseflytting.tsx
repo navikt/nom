@@ -7,7 +7,6 @@ import {
   Checkbox,
   DatePicker,
   Heading,
-  HStack,
   Label,
   Link,
   Loader,
@@ -22,14 +21,13 @@ import type { AxiosError, AxiosResponse } from "axios";
 import React, { useState } from "react";
 
 import {
-  getKostnadssted,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   masseflytting,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
-import { LabelWithValue } from "~/components/LabelWithValue";
+import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
   ModalProvider,
@@ -73,7 +71,7 @@ export function Masseflytting() {
 
   return (
     <>
-      <PageBanner text={"Flytt medarbeidere"} />
+      <PageBanner text="Flytt medarbeidere" />
 
       <ContentWrapper>
         <Link
@@ -588,96 +586,6 @@ export function OrgEnhetVisning({
       </VStack>
     </VStack>
   );
-}
-
-export function EnhetKontekstInfo({
-  orgEnhet,
-  fallbackMessage,
-  displayLeder = true,
-  displayUni4Niv = false,
-  nomIdLink = false,
-  displayKostnadssted = false,
-}: {
-  orgEnhet: OrgEnhet | undefined;
-  fallbackMessage?: string;
-  displayLeder?: boolean;
-  displayUni4Niv?: boolean;
-  nomIdLink?: boolean;
-  displayKostnadssted?: boolean;
-}) {
-  const ledere =
-    Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
-      ? orgEnhet.ledere.map((leder) => formatVisningsnavn(leder.visningsnavn))
-      : [];
-
-  const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
-
-  const kostnadssted = displayKostnadssted
-    ? useKostnadsstedInfo(orgEnhet?.id)
-    : undefined;
-
-  if (!orgEnhet) {
-    return <>{fallbackMessage}</>;
-  }
-
-  return (
-    <HStack
-      css={css`
-        font-size: var(--a-font-size-large);
-        row-gap: var(--a-spacing-1);
-      `}
-      gap="4"
-    >
-      <LabelWithValue
-        label="NOM-ID"
-        value={orgEnhet.id}
-        valueHref={nomIdLink ? `/org/${orgEnhet.id}` : undefined}
-      />
-      {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
-      <LabelWithValue label="Enhet i Remedy" value={orgEnhet.remedyEnhetId} />
-      <LabelWithValue label="Unit4-ID" value={extraAgressoInfo?.agressoId} />
-      {displayUni4Niv && (
-        <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />
-      )}
-      <LabelWithValue
-        label="Kostnadssted"
-        value={kostnadssted?.kostnadsstedId}
-      />
-    </HStack>
-  );
-}
-
-function useExtraAgressoInfo(orgEnhetId: string | undefined) {
-  const query = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
-  });
-
-  if (!query.data) {
-    return undefined;
-  }
-  return {
-    agressoId: query.data.agressoId,
-    agressoOrgenhetType: query.data.agressoOrgenhetType,
-  };
-}
-
-function useKostnadsstedInfo(orgEnhetId: string | undefined) {
-  const query = useQuery({
-    queryKey: getKostnadssted.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getKostnadssted.queryFn(orgEnhetId ?? ""),
-    enabled: /[a-zA-Z]{2}\d{3}[a-zA-Z]/.test(orgEnhetId ?? ""),
-    retry: 1,
-  });
-
-  if (!query.data) {
-    return undefined;
-  }
-  return {
-    orgenhetId: query.data.orgenhetId,
-    kostnadsstedId: query.data.kostnadsstedId,
-  };
 }
 
 function lagMasseFlyttingRequest(

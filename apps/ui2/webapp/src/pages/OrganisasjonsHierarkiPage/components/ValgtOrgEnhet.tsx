@@ -26,6 +26,7 @@ import {
   isOrgEnhetDriftsenhet,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import { useKostnadsstedInfo } from "~/components/EnhetKontekstInfo";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
@@ -52,6 +53,8 @@ export const ValgtOrgEnhet = ({
   hideRessurser?: boolean;
 }) => {
   const inDevelopment = isInDevelopment();
+
+  const hasAdminAccess = useHasAdminAccess();
 
   const ressurserNavidents = orgEnhet.ressursKoblinger
     .filter((orgtilknytning) =>
@@ -115,6 +118,10 @@ export const ValgtOrgEnhet = ({
   const tkatLenke = inDevelopment
     ? `https://teamkatalog.ekstern.dev.nav.no/area/${teamkatalogSeksjon?.id}`
     : `https://teamkatalog.nav.no/area/${teamkatalogSeksjon?.id}`;
+
+  const kostnadssted = hasAdminAccess
+    ? useKostnadsstedInfo(orgEnhet?.id)
+    : undefined;
 
   return (
     <div
@@ -193,6 +200,10 @@ export const ValgtOrgEnhet = ({
                 orgEnhet.orgNiv !== "ORGENHET" && (
                   <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />
                 )}
+              <LabelWithValue
+                label="Kostnadssted"
+                value={kostnadssted?.kostnadsstedId}
+              />
             </HGrid>
           </div>
 

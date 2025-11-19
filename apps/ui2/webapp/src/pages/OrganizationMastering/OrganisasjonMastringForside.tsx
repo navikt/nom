@@ -36,12 +36,12 @@ import {
 } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { Divider } from "~/components/Divider";
+import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
-import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
 import {
   formatDisplayDate,

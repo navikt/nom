@@ -42,6 +42,7 @@ import {
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
+import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import {
   SektorNameMapping,
@@ -49,7 +50,6 @@ import {
 } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
-import { EnhetKontekstInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import {
   nomDateIsBefore,
   nomDateIsBeforeToday,
@@ -595,7 +595,11 @@ function OrganisationHierarchyTree({
       </ExpansionCard.Header>
 
       <ExpansionCard.Content>
-        <EnhetKontekstInfo displayLeder={false} orgEnhet={orgEnhet} />
+        <EnhetKontekstInfo
+          displayKostnadssted
+          displayLeder={false}
+          orgEnhet={orgEnhet}
+        />
 
         <Divider size="small" />
 
