@@ -61,7 +61,7 @@ public class Utils {
     }
 
     public static boolean isFuture(OrgtilknytningState orgtilknytningState) {
-        return orgtilknytningState.gyldigTom() == null || orgtilknytningState.gyldigTom().isAfter(LocalDate.now());
+        return orgtilknytningState.gyldigFom().isAfter(LocalDate.now());
     }
 
     public static Integer nomSektorToRemedyCode(Sektor sektor) {
