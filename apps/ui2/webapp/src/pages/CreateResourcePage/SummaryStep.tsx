@@ -324,7 +324,13 @@ function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
   const identrutinenLenke = "https://it-hjelpa.adeo.no/arsys/home";
 
   return (
-    <>
+    <VStack
+      css={css`
+        width: 70%;
+        margin: auto;
+      `}
+      gap="4"
+    >
       <PanelLink
         href={identrutinenLenke}
         label="Gi tilganger i Identrutina (må vente opptil 1 minutt)"
@@ -336,7 +342,7 @@ function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
       />
 
       <PanelLink href="/" label="Gå tilbake til forsiden" />
-    </>
+    </VStack>
   );
 }
 
@@ -345,7 +351,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
     <SmartLink
       css={css`
         display: flex;
-        width: 70%;
+        width: 100%;
         margin: auto;
         padding: var(--a-spacing-4);
         border: 1px solid var(--a-border-default);
@@ -359,6 +365,7 @@ function PanelLink({ label, href }: { label: string; href: string }) {
         :active {
           color: var(--a-text-action-hover);
           border: 1px solid var(--a-border-action-hover);
+          width: 100%;
           text-decoration: underline;
           box-shadow: var(--a-shadow-small);
           background: unset;
