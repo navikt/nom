@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Cache local Maven build-cache
         uses: actions/cache@v4
         with:
@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Cache local Maven build-cache
         uses: actions/cache@v4
         with:
@@ -166,7 +166,7 @@ jobs:
       - build-test-app
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
@@ -195,7 +195,7 @@ jobs:
       - build-test-app
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
