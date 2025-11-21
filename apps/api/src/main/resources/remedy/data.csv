@@ -33,7 +33,6 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV4;ky791b;12.07.2023: Mappet til ky791b (ORGNIV4), men mulig den skal til ba443d (ORGNIV3). Tester med dette, og ser hvilke avvik vi da får. 26.02.2025: korrekt at det er mappet til ky791b
 029611;0296;ORGNIV4;Øst-Viken SFJ;;;;JA;029611;ORGNIV4;ru584t;04.06.2025: Oppdatert til ny Øst-Viken SFJ-enhet da gml. falt ut av hierarkiet.
 039000;0300;ORGNIV3;Oslo;Opp til ORGNIV2;03;;JA;03;ORGNIV2;leggInn;Testet på leder av NAV Oslo, som er på orgNiv2, men de har også en orgEnhet på orgNiv3, som er denne. Og lederen for den, og leder for en underliggende har alle XXX0300 som trygdeident, så riktig
-0390201;0300;ORGENHET;Oslo tjenesteutvikling arbeidsinkludering;Beholdt;;;JA;0390201;ORGENHET;sy327k;21.11.2025 testmapping på en løvnode ifm. overgang fra 0396 til 0300
 031200;0312;ORGNIV3;Frogner;Beholdt;;;JA;031200;ORGNIV3;leggInn;
 031300;0313;ORGNIV3;St. Hanshaugen;Beholdt;;;JA;031300;ORGNIV3;leggInn;
 031400;0314;ORGNIV3;Sagene;Beholdt;;;JA;031400;ORGNIV3;leggInn;
@@ -52,7 +51,6 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 038700;0387;ORGNIV3;Oslo Tiltak;Beholdt;;;JA;038700;ORGNIV3;leggInn;
 039900;0391;ORGNIV3;Oslo Arbeidslivssenter;Beholdt;;;JA;039900;ORGNIV3;leggInn;
 039300;0393;ORGNIV3;Oslo Oppfølging Utland;Beholdt;;;JA;039300;ORGNIV3;leggInn;
-039020;0396;ORGNIV3;Oslo tjenesteutvikling;Beholdt;;;JA;039020;ORGNIV3;ne175a;06.06.2025 Oppdatert til ny enhet sammen med enheten. 
 048010;0400;ORGNIV3;Innlandet Region;Opp til ORGNIV2;R04;;JA;R04;ORGNIV2;leggInn;
 040200;0402;ORGNIV3;Kongsvinger;Beholdt;;;JA;040200;ORGNIV3;leggInn;
 040300;0403;ORGNIV3;Hamar;Beholdt;;;JA;040300;ORGNIV3;leggInn;
