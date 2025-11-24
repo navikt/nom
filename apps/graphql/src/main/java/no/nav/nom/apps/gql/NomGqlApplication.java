@@ -99,13 +99,8 @@ public class NomGqlApplication {
         }
 
         @Bean
-        public NomStateRessursListener  nomStateRessursListener(){
-            return (NomStateRessursListener) null;
-        }
-
-        @Bean
-        public NomStateOrgEnhetListener nomStateOrgEnhetListener(){
-            return (NomStateOrgEnhetListener) null;
+        public FieldUsageCounterInterface fieldUsageCounter(){
+            return (dataFetchingEnvironment) -> {};
         }
 
         public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
