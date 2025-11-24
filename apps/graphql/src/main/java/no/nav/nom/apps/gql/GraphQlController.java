@@ -15,7 +15,7 @@ import no.nav.nom.apps.gql.resolvers.OrgTilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.RemedyEnhetIdResolver;
-import no.nav.nom.apps.gql.resolvers.RessursPropertyResolver;
+import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
 import no.nav.nom.apps.gql.resolvers.RessursResolver;
 import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -56,7 +56,7 @@ public class GraphQlController {
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
 
     private final RessursResolver ressursResolver;
-    private final RessursPropertyResolver propertyResolver;
+    private final RessursPropertyResolverInterface propertyResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final SearchResolver searchResolver;
 
@@ -70,7 +70,7 @@ public class GraphQlController {
         LederResolver lederResolver,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
         RessursResolver ressursResolver,
-        RessursPropertyResolver propertyResolver,
+        RessursPropertyResolverInterface propertyResolver,
         OrgTilknytningResolver orgTilknytningResolver,
         SearchResolver searchResolver, FieldUsageCounterInterface fieldUsageCounter
     ) {
@@ -170,11 +170,9 @@ public class GraphQlController {
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")
-    public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser, DataFetchingEnvironment environment) {
-        counter.count(environment);
-        return Mono.fromSupplier(() -> propertyResolver.epost(ressurser, environment));
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser) {
+        return Mono.fromSupplier(() -> propertyResolver.epost(ressurser));
     }
-
     @QueryMapping("search")
     public List<Object> search(@Argument("term") String term, @Argument("ressursFilter") RessursSearchFilter ressursFilter, @Argument("orgEnhetFilter") OrgEnhetSearchFilter orgEnhetFilter, DataFetchingEnvironment environment) {
         counter.count(environment);
@@ -199,7 +197,7 @@ public class GraphQlController {
 
     /*
 
-    deprecations below
+        deprecations below
 
      */
 
