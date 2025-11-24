@@ -13,6 +13,7 @@ import no.nav.nom.libs.lucenewrapper.search.QueryFilter;
 import no.nav.nom.libs.lucenewrapper.search.QueryFilterContext;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,7 +38,7 @@ public class LuceneService {
     private List<String> invalidatedNavidentList = new ArrayList<>();
     private List<String> invalidatedOrgEnhetList = new ArrayList<>();
 
-    private final OrgenhetService orgenhetService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
 
     private final String orgenhetEntityType;
     private final String ressursEntityType;
@@ -49,9 +50,10 @@ public class LuceneService {
 
     public LuceneService(
         RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment,
+        OrgEnhetStateRepository orgEnhetStateRepository,
         DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
-        this.orgenhetService = orgenhetService;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -110,15 +112,15 @@ public class LuceneService {
 
         {
             final var luceneOrgEnhetStream = grabAndResetOrgenhetInvalidationList().stream()
-                .map(orgenhetService::getById)
+                .map(orgEnhetStateRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(orgenhet -> new LuceneOrgEnhet(
-                    orgenhet.getId(),
-                    orgenhet.getNavn(),
-                    nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : null,
-                    orgenhet.getOrgNiv(),
-                    orgenhet.getGyldigTom()
+                    orgenhet.id(),
+                    orgenhet.navn(),
+                    nonNull(orgenhet.nomNivaa()) ? orgenhet.nomNivaa().name() : null,
+                    orgenhet.agressoOrgNivaa(),
+                    orgenhet.gyldigTom()
                 ));
 
 
@@ -133,13 +135,13 @@ public class LuceneService {
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
         wrappedLucene.upsertEntities(
-            orgenhetService.getAllEnheter().stream()
+            orgEnhetStateRepository.getAll().stream()
                 .map(orgenhet -> new LuceneOrgEnhet(
-                        orgenhet.getFid(),
-                        orgenhet.getNavn(),
-                        orgenhet.getNomNivaa().toString(),
-                        orgenhet.getOrgNiv(),
-                        orgenhet.getGyldigTom()
+                        orgenhet.fid(),
+                        orgenhet.navn(),
+                        orgenhet.nomNivaa().toString(),
+                        orgenhet.agressoOrgNivaa(),
+                        orgenhet.gyldigTom()
                     )
                 ), LuceneOrgEnhet.class);
         log.info("Lucene indexing for orgenhet completed.");
