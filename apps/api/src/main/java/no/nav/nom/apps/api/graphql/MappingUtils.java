@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql;
 
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.OrgEnhetsType;

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.gql.resolvers;
 
-import graphql.ErrorClassification;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;

@@ -111,7 +111,7 @@ public class RessursOpprettetEmailService {
     }
 
     private String tilOrgEnhetsLederNavIdents(Ressurs leder) {
-        return leder.getNavident();
+        return leder.getNavIdent();
     }
 
     public Set<String> appendAuthenticatedUserToRecipientNavIdents(Set<String> recipientNavIdents) {

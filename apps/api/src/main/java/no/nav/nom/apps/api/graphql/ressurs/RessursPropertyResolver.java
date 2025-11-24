@@ -36,7 +36,7 @@ public class RessursPropertyResolver {
     }
 
     private Map<Ressurs, DataFetcherResult<String>> createDummyResponse(String fieldSpec, List<Ressurs> source) {
-        return source.stream().collect(toMap(Function.identity(), ressurs -> respondWithDummydata(fieldSpec + ressurs.getNavident())));
+        return source.stream().collect(toMap(Function.identity(), ressurs -> respondWithDummydata(fieldSpec + ressurs.getNavIdent())));
     }
 
     private DataFetcherResult<String> respondWithDummydata(String data) {
