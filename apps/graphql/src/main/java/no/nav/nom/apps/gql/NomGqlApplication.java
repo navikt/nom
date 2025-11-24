@@ -4,6 +4,7 @@ package no.nav.nom.apps.gql
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -11,12 +12,14 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
+import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import org.springframework.boot.SpringApplication;
@@ -57,7 +60,6 @@ public class NomGqlApplication {
         app.run();
 	}
 
-    @Component
     private static class FileSourcedRepositories {
         private final RessursStateRepositoryImpl ressursStateRepository;
         private final OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
@@ -91,6 +93,20 @@ public class NomGqlApplication {
             return this.orgEnhetStateRepository;
         }
 
+        @Bean
+        public ReadyForIndexingInterface readyForIndexing(){
+            return () -> true;
+        }
+
+        @Bean
+        public NomStateRessursListener  nomStateRessursListener(){
+            return (NomStateRessursListener) null;
+        }
+
+        @Bean
+        public NomStateOrgEnhetListener nomStateOrgEnhetListener(){
+            return (NomStateOrgEnhetListener) null;
+        }
 
         public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
             this.ressursStateRepository = new RessursStateRepositoryImpl();
