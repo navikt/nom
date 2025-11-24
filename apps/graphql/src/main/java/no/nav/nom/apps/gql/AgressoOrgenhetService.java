@@ -6,11 +6,8 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -49,30 +46,22 @@ public class AgressoOrgenhetService {
 
 
     public List<OrgEnhetResult> orgenheterByAgressoData(Set<String> agressoIder, String orgNiv, Set<NomNivaa> nomNivaaSet){
-        Collection<OrgEnhet> result;
-        if (agressoIder.isEmpty()) {
+        if(agressoIder.isEmpty()){
             return List.of();
-        } else {
-            result = this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIder).stream().map(MappingUtils::toOrgEnhet).toList();
         }
+        var unfilteredOrgenhetList = this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIder).stream().map(MappingUtils::toOrgEnhet).toList();
 
-        final var orgEnhetResults = result.stream()
+        final var orgEnhetResults = unfilteredOrgenhetList.stream()
             .filter(e -> orgNiv == null || orgNiv.equals(e.getAgressoInfo().getAgressoOrgNiv()))
             .filter(e -> nomNivaaSet.isEmpty() || nomNivaaSet.contains(e.getNomNivaa()))
             .peek(orgEnhet -> agressoIder.remove(orgEnhet.getAgressoInfo().getAgressoId()))
             .map(OrgEnhetResult::new)
             .collect(Collectors.toList());
 
-        orgEnhetResults.addAll(agressoIder.stream().map(id -> OrgEnhetResult.notFound(id, orgNiv)).toList());
+        var notFoundElements = agressoIder.stream().map(id -> OrgEnhetResult.notFound(id, orgNiv)).toList();
+        orgEnhetResults.addAll(notFoundElements);
         return orgEnhetResults;
     }
-
-
-
-
-
-
-
 
 
 }
