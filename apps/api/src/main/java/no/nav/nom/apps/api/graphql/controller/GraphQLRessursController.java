@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.graphql.ressurs.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
+import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -35,7 +36,7 @@ import java.util.Optional;
 public class GraphQLRessursController {
 
     private final RessursResolver ressursResolver;
-    private final RessursPropertyResolver propertyResolver;
+    private final RessursPropertyResolverInterface propertyResolver;
     private final LederResolver lederResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final GraphQLFieldConsumptionCounter counter;
