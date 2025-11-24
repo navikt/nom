@@ -30,18 +30,22 @@ public class Ressurs {
     String primaryTelefon;
     List<Telefon> telefon;
 
+    @Deprecated
     public String getNavIdent() {
         return navIdent;
     }
 
+    @Deprecated
     public String getPersonIdent() {
         return personIdent;
     }
 
+    @Deprecated
     public String getVisningsNavn() {
         return visningsNavn;
     }
 
+    @Deprecated
     public List<Sektor> getSektor() {
         return sektor;
     }
