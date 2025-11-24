@@ -35,7 +35,7 @@ public class OrgTilknytningResolver {
 
     public List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalgArg) {
         return orgtilknytningService
-            .getByNavIdent(ressurs.getNavIdent()).stream()
+            .getByNavIdent(ressurs.getNavident()).stream()
             .filter(ot -> Util.filterByPeriodiskUtvalg(ot, periodiskUtvalgArg))
             .map(this::fromOrgtilknytningState)
             .toList();
@@ -50,7 +50,7 @@ public class OrgTilknytningResolver {
     @Deprecated
     private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
         return orgtilknytningService
-            .getByNavIdent(ressurs.getNavIdent()).stream()
+            .getByNavIdent(ressurs.getNavident()).stream()
             .map(this::fromOrgtilknytningState)
             .toList();
     }

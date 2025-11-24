@@ -31,7 +31,7 @@ public class MappingUtils {
         var tilknytningstype = isNull(ressursState.tilknytningtype()) ? null : ressursState.tilknytningtype();
         return Ressurs.builder()
             .navident(ressursState.navident())
-            .navIdent(ressursState.navident())
+            .navident(ressursState.navident())
             .personident(sladdetPersonIdent)
             .personIdent(sladdetPersonIdent)
             .sektor(sektor)

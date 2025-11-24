@@ -35,12 +35,12 @@ public class ActiveDirectoryRessursBatchLoader {
 
     public <T> Map<Ressurs, DataFetcherResult<T>> load(List<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
         final var adRessurser = listToBatches(ressurser, AD_MAX_BATCH_SIZE).stream() // Split into MAX_BATCH_SIZE lists
-            .map(batch -> getAdRessurser(batch.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy
+            .map(batch -> getAdRessurser(batch.stream().map(Ressurs::getNavident).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy
             .flatMap(batchResult -> batchResult.entrySet().stream()) // Convert all Maps to a big stream of EntrySet
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)); // Collect all entries to a Map
 
         return ressurser.stream()
-                .collect(toMap(Function.identity(), ressurs -> adRessurser.getOrDefault(ressurs.getNavIdent(), DataFetcherResult.<T>newResult().build())));
+                .collect(toMap(Function.identity(), ressurs -> adRessurser.getOrDefault(ressurs.getNavident(), DataFetcherResult.<T>newResult().build())));
     }
 
     @SneakyThrows

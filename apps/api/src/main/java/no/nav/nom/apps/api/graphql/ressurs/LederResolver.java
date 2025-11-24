@@ -50,7 +50,7 @@ public class LederResolver {
 
     public List<LederOrgEnhet> lederFor(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg) {
         return orgEnhetLederService
-            .getOrgEnheterNavidentErLederFor(ressurs.getNavIdent())
+            .getOrgEnheterNavidentErLederFor(ressurs.getNavident())
             .stream()
             .filter(orgEnhetLederState -> Util.filterByPeriodiskUtvalg(orgEnhetLederState, periodiskUtvalg))
             .map(orgEnhetLederState ->
@@ -66,7 +66,7 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(Ressurs ressurs) {
-        return ledere(ressurs.getNavIdent(), null);
+        return ledere(ressurs.getNavident(), null);
     }
 
     public List<RessursLeder> ledere(String navIdent, PeriodiskUtvalgArg periodiskUtvalg) {
