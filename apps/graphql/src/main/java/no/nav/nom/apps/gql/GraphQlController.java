@@ -31,7 +31,6 @@ import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
-import org.springframework.context.ApplicationContext;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -58,7 +57,6 @@ public class GraphQlController {
     private final RessursPropertyResolver propertyResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
     private final SearchResolver searchResolver;
-    private final ApplicationContext applicationContext;
 
     public GraphQlController(
         OrgEnhetResolver orgEnhetResolver,
@@ -69,8 +67,7 @@ public class GraphQlController {
         RessursResolver ressursResolver,
         RessursPropertyResolver propertyResolver,
         OrgTilknytningResolver orgTilknytningResolver,
-        SearchResolver searchResolver,
-        ApplicationContext appContext
+        SearchResolver searchResolver
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
         this.orgtilknytningResolver = orgtilknytningResolver;
@@ -81,8 +78,6 @@ public class GraphQlController {
         this.propertyResolver = propertyResolver;
         this.orgTilknytningResolver = orgTilknytningResolver;
         this.searchResolver = searchResolver;
-
-        this.applicationContext = appContext;
     }
 
     @QueryMapping("orgEnhet")
