@@ -1,9 +1,9 @@
 package no.nav.nom.apps.gql.resolvers;
 
+import no.nav.nom.apps.gql.AgressoOrgenhetService;
 import no.nav.nom.apps.gql.MappingUtils;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearch;
 import no.nav.nom.apps.gql.projections.OrgEnheterSearch;
-import no.nav.nom.contract.nom.api.graphql.AgressoInfo;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
@@ -17,9 +17,11 @@ import java.util.Optional;
 public class OrgEnhetResolver {
 
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final AgressoOrgenhetService  agressoOrgenhetService;
 
-    public OrgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository) {
+    public OrgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository, AgressoOrgenhetService agressoOrgenhetService) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.agressoOrgenhetService = agressoOrgenhetService;
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch orgEnhetSearch) {
@@ -27,7 +29,7 @@ public class OrgEnhetResolver {
             return orgEnhetStateRepository.findById(orgEnhetSearch.getId()).map(MappingUtils::toOrgEnhet);
         }
         if (orgEnhetSearch.getAgressoId() != null && orgEnhetSearch.getOrgNiv() != null) {
-            return orgEnhetStateRepository.findAllByAgressoIdAndNiv(orgEnhetSearch.getAgressoIdDashOrgnivId()).stream().map(MappingUtils::toOrgEnhet).findFirst();
+            return agressoOrgenhetService.getEnhetByAgressoIdNivaAndName(orgEnhetSearch.getAgressoId(), orgEnhetSearch.getOrgNiv(), orgEnhetSearch.getNavn());
         }
         return Optional.empty();
     }
@@ -39,8 +41,7 @@ public class OrgEnhetResolver {
         if(ider.isEmpty()){
             var agressoRequsted = !search.getAgressoIder().isEmpty();
             if(agressoRequsted){
-                // todo handle agresso IDs
-                throw new RuntimeException("Not implemented");
+                return agressoOrgenhetService.orgenheterByAgressoData(search.getAgressoIder(), search.getOrgNiv(), search.resolveNomNivaaEnum());
             }
 
             return orgEnhetStateRepository.getAll().stream()

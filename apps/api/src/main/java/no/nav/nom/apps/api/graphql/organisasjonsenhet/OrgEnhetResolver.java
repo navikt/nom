@@ -83,7 +83,7 @@ public class OrgEnhetResolver {
             .map(OrgEnhetResult::new)
             .collect(toList());
 
-        orgEnhetResults.addAll(agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv)).toList());
+        orgEnhetResults.addAll(agressoIder.stream().map(id -> OrgEnhetResult.notFound(id, orgNiv)).toList());
         return orgEnhetResults;
     }
 
