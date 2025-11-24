@@ -1,0 +1,16 @@
+spring.application.name: ${NAIS_APP_NAME:nom-gql}
+
+app:
+  name: ${NAIS_APP_NAME:nom-gql}
+
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  graphql:
+    graphiql:
+      enabled: on
+server:
+  port: 9038
+

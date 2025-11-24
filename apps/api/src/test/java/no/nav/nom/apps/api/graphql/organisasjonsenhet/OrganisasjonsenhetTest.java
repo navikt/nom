@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -14,19 +14,12 @@ import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,33 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
-@ActiveProfiles("GraphQLTest")
+@ActiveProfiles({"GraphQLTest","localgql"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
-@DisplayName("GraphQL - Organisasjonsenhet spørringer")
-class OrganisasjonsenhetTest {
-    @Autowired
-    protected GraphQLTestUtil gqlUtil;
+public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
-    @Autowired
-    protected OrgEnhetStateRepository orgEnhetStateRepository;
-
-    @Autowired
-    protected OrganiseringStateRepository organiseringStateRepository;
-
-    @Autowired
-    protected OrgtilknytningStateRepository orgtilknytningStateRepository;
-
-    @Autowired
-    private RessursStateRepository ressursStateRepository;
 
     @Autowired
     public ObjectMapper objectMapper;
-
-    @MockitoBean
-    protected OrgEnhetLederService orgEnhetLederService;
 
     @BeforeEach
     protected void setup() {
@@ -80,7 +54,7 @@ class OrganisasjonsenhetTest {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().fid("FID_1").id("ID_1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
         orgEnhetStateRepository.update(orgenhet);
 
         var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario1.graphql")
@@ -315,8 +289,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -356,8 +329,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -432,8 +404,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -468,4 +439,5 @@ class OrganisasjonsenhetTest {
             .gyldigTom(gyldigTom)
             .build();
     }
+
 }

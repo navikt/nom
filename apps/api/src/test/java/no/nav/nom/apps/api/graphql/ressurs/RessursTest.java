@@ -1,13 +1,12 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.ad.AdRessurser;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -16,63 +15,45 @@ import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.TestUtil.createRessursState;
+import static no.nav.nom.apps.api.TestUtil.createRessursStateBuilder;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
-
-@ActiveProfiles({"GraphQLTest", "test"})
+@ActiveProfiles({"GraphQLTest","localgql"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
-@AutoConfigureWireMock(port = 0) // For AD wiremock resultat (epost oppslag)
-@DisplayName("GraphQL - Ressurs spørringer")
-class RessursTest {
-    @Autowired
-    protected GraphQLTestUtil gqlUtil;
+public class RessursTest extends GraphQlTestBase {
 
-    @Autowired
-    private DvhRepository dvhRepository;
-
-    @Autowired
-    protected OrgEnhetStateRepository orgEnhetStateRepository;
-
-    @Autowired
-    private RessursStateRepository ressursStateRepository;
-
-    @Autowired
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
-
-    @MockitoBean
-    protected OrgEnhetLederService orgEnhetLederService;
 
     @BeforeEach
     protected void setup() {
         orgEnhetStateRepository.clear();
-//        organiseringStateRepository.clear();
         ressursStateRepository.clear();
         orgtilknytningStateRepository.clear();
     }
@@ -266,6 +247,16 @@ class RessursTest {
         ressursStateRepository.update(ressurs2);
         ressursStateRepository.update(ressurs3);
 
+        var fakeRespons = Stream.of(ressurs1, ressurs2, ressurs3).map(ressursState -> {
+            if (ressursState.equals(ressurs3)) {
+                return AdRessurs.ikkeFunnet(ressursState.navident());
+            }
+            return AdRessurs.builder().navIdent(ressursState.navident()).email(ressursState.navident() + "@dummy.mail").build();
+        }).toList();
+
+        Mockito.when(this.adClient.getAdRessurser(Mockito.anySet()))
+            .thenReturn(new AdRessurser(fakeRespons));
+
         final var response = gqlUtil.postForResource("ressurs/scenario8.graphql");
         MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
 
@@ -274,11 +265,12 @@ class RessursTest {
             .hasSize(3)
             .get();
 
+
         ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
-        assertEquals("testNavIdent1@domain.no", ressurser.get(0).get("ressurs").get("epost").asText());
+        assertEquals("testNavIdent1@dummy.mail", ressurser.get(0).get("ressurs").get("epost").asText());
         assertEquals(ressurser.get(0).get("ressurs").get("visningsNavn").asText(), ressurs1.visningsnavn().getFormattedVisningsnavn());
-        assertEquals("testNavIdent2@domain.no", ressurser.get(1).get("ressurs").get("epost").asText());
+        assertEquals("testNavIdent2@dummy.mail", ressurser.get(1).get("ressurs").get("epost").asText());
         assertEquals(ressurser.get(1).get("ressurs").get("visningsNavn").asText(), ressurs2.visningsnavn().getFormattedVisningsnavn());
         assertEquals(ressurser.get(2).get("ressurs").get("visningsNavn").asText(), ressurs3.visningsnavn().getFormattedVisningsnavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
@@ -295,15 +287,14 @@ class RessursTest {
         var orgenhet = OrgenhetTestUtils.createDefault();
         orgEnhetStateRepository.update(orgenhet);
 
-        doReturn(
-            List.of(OrgEnhetLederState.builder()
-                .fid("FID_1")
-                .navident(ressurs.navident())
-                .orgEnhetId(orgenhet.id())
-                .startdato(LocalDate.now().minusYears(1))
-                .build()
-            )
-        ).when(orgEnhetLederService).getOrgEnheterNavidentErLederFor(ressurs.navident());
+
+        var lederState = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+        orgEnhetLederStateRepository.update(lederState.fid(),lederState);
 
         final var response = gqlUtil.postForResource("ressurs/scenario6.graphql");
 
@@ -326,13 +317,12 @@ class RessursTest {
         var ot = orgtilknytningState().toBuilder()
             .fid("FID_1")
             .navident(ansatt.navident())
-            .orgEnhetId("ID_1").build();
+            .orgEnhetId(orgenhet.id()).build();
 
         orgtilknytningStateRepository.update("FID_1", ot);
 
-        doReturn(
-            List.of(new LederForRessurs(leder.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
-        ).when(orgEnhetLederService).getLedereForRessurs(ansatt.navident(), false);
+        var lederState = OrgEnhetLederState.builder().orgEnhetId(orgenhet.id()).navident(leder.navident()).startdato(LocalDate.now().minusYears(1)).fid("?").build();
+        orgEnhetLederStateRepository.update(lederState.fid(),lederState);
 
         final var response = gqlUtil.postForResource("ressurs/scenario7.graphql");
 
@@ -345,27 +335,49 @@ class RessursTest {
     @DisplayName("Hente leder for ressurs som er leder av sin enhet - Note tester ikke orgEnhetLederService.getLedereForRessurs sin logikk")
     void scenario37() {
         var overLederRessurs = createRessursState("1");
-        var ansattRessurs = createRessursState("4").toBuilder().navident("testNavIdent4").build();
+        var underLederRessurs = createRessursState("4").toBuilder().navident("testNavIdent4").build();
         ressursStateRepository.update(overLederRessurs);
-        ressursStateRepository.update(ansattRessurs);
+        ressursStateRepository.update(underLederRessurs);
 
         var orgenhet = OrgenhetTestUtils.createDefault();
         var overEnhet = OrgenhetTestUtils.createDefault();
+        var organisering = OrganiseringState.builder().fid("FIDO").idOver(overEnhet.id()).id(orgenhet.id()).gyldigFom(LocalDate.now().minusYears(1)).build();
         orgEnhetStateRepository.update(orgenhet);
         orgEnhetStateRepository.update(overEnhet);
+        organiseringStateRepository.update(organisering);
 
         OrgtilknytningState ot = orgtilknytningState().toBuilder()
             .fid("FID_1")
-            .navident(ansattRessurs.navident())
-            .orgEnhetId(orgenhet.id()).build();
-        orgtilknytningStateRepository.update(
-            "FID_1",
-            ot
-        );
+            .navident(underLederRessurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .build();
 
-        doReturn(
-            List.of(new LederForRessurs(overLederRessurs.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
-        ).when(orgEnhetLederService).getLedereForRessurs(ansattRessurs.navident(), false);
+        orgtilknytningStateRepository.update("FID_1",ot);
+
+        var underLederState = OrgEnhetLederState.builder()
+            .fid("FID_2")
+            .navident(underLederRessurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+
+        var overLederState = OrgEnhetLederState.builder()
+            .fid("FID_3")
+            .navident(overLederRessurs.navident())
+            .orgEnhetId(overEnhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+
+
+        orgEnhetLederStateRepository.update(underLederState.fid(), underLederState);
+        orgEnhetLederStateRepository.update(overLederState.fid(), overLederState);
+
+        //
+        //        doReturn(
+        //            List.of(new LederForRessurs(overLederRessurs.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
+        //        ).when(orgEnhetLederStateRepository).getLedereForRessurs(ansattRessurs.navident(), false);
 
         final var response = gqlUtil.postForResource("ressurs/scenario71.graphql");
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
@@ -376,19 +388,21 @@ class RessursTest {
     @Test
     @DisplayName("Kan slå opp ressurs ved eksakt telefonnummer")
     void scenario52() {
-        var ressurs = createRessursState("1");
+        var telefonNummer = "4712345678";
+        var ressurs = createRessursStateBuilder("1").jobbtelefon(new Jobbtelefon(telefonNummer, TelefonType.NAV_TJENESTE_TELEFON)).build();
         ressursStateRepository.update(ressurs);
 
-        String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
-            .nummer(telefonNummer)
-            .navIdent(ressurs.navident())
-            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
-            .build();
-
-        dvhRepository.saveTlf(List.of(mockDvhTelefon));
+        //        String telefonNummer = "4712345678";
+        //        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
+        //            .nummer(telefonNummer)
+        //            .navIdent(ressurs.navident())
+        //            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
+        //            .build();
+        //
+        //        dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
         final var response = gqlUtil.postForResource("ressurs/scenario52.graphql");
+        response.errors();
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
@@ -402,13 +416,6 @@ class RessursTest {
         ressursStateRepository.update(ressurs);
 
         String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
-            .nummer(telefonNummer)
-            .navIdent(ressurs.navident())
-            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
-            .build();
-
-        dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
         final var response = gqlUtil.postForResource("ressurs/scenario53.graphql");
 
@@ -534,6 +541,42 @@ class RessursTest {
         assertEquals(IdentType.UKJENT.name(), outputRessurs.get("identType").textValue());
     }
 
+    @Test
+    @DisplayName("check deprecated ressurs.orgTilknytning")
+    void scenario14(){
+        var r = createRessursState("1");
+        ressursStateRepository.update(r);
+
+        var commonOrgtilknytningBuilder = OrgtilknytningState.builder().navident("testNavIdent1").gyldigFom(LocalDate.now().minusDays(1));
+
+        orgtilknytningStateRepository.update("abc1", commonOrgtilknytningBuilder.fid("1-fid1").orgEnhetId("abc1").build());
+        orgtilknytningStateRepository.update("abc2", commonOrgtilknytningBuilder.fid("1-fid2").orgEnhetId("abc2").build());
+        orgEnhetStateRepository.update(OrgEnhetState.builder().fid("fid-abc1").id("abc1").build());
+        orgEnhetStateRepository.update(OrgEnhetState.builder().fid("fid-abc2").id("abc2").build());
+
+        // language=graphql
+        var gqlQry = """
+              query A{
+                ressurs(where: {navident: "testNavIdent1"}){
+                    navident
+                    orgTilknytning{
+                      orgEnhet{
+                        id
+                      }
+                    }
+                }
+              }
+              """;
+
+        final var resp = gqlUtil.postForQuery(gqlQry);
+        resp.errors().verify();
+        resp.path("ressurs.navident").hasValue();
+        resp.path("ressurs.orgTilknytning[0].orgEnhet.id").hasValue();
+        resp.path("ressurs.orgTilknytning[1].orgEnhet.id").hasValue();
+
+
+    }
+
     private RessursResult get(List<RessursResult> list, String ident) {
         return list.stream().filter(o -> ident.equals(o.getId())).findFirst().orElseThrow();
     }
@@ -541,4 +584,5 @@ class RessursTest {
     private String sladdetPersonident(String personident){
         return personident.replaceFirst(".{5}$","*****");
     }
+
 }

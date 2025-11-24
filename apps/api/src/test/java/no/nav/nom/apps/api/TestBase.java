@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
+import no.nav.nom.libs.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -45,7 +46,8 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = { TestConfig.class, MasteredRessursStateAutoconfiguration.class },
+
+    classes = { TestConfig.class, MasteredRessursStateAutoconfiguration.class, NomGraphQlAutoConfiguration.class, TestBase.ConfigureRemedy.class },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         "nom.libs.state.idle-event-interval-seconds: 1",
@@ -177,5 +179,11 @@ public abstract class TestBase {
         ressursStateList.forEach(r -> ressursStateRepository.update(r));
     }
 
+    static class ConfigureRemedy{
+//        @Bean
+//        RemedyIdResolverInterface remedyIdResolver() {
+//            return (x) -> "remedy-"+x;
+//        }
+    }
 
 }

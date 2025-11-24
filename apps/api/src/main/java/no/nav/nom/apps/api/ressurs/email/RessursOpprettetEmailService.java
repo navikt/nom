@@ -1,14 +1,11 @@
 package no.nav.nom.apps.api.ressurs.email;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
+import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -21,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import freemarker.template.Configuration;
 
 import java.io.IOException;
 import java.io.StringWriter;

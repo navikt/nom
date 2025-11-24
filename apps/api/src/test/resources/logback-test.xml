@@ -14,6 +14,7 @@
     <logger name="org.apache.zookeeper" level="warn" />
     <logger name="kafka" level="warn" />
     <logger name="state.change.logger" level="error" />
+    <logger name="org.springframework.graphql" level="info" />
 
 
     <root level="INFO">
