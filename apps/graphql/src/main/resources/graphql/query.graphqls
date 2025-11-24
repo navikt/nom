@@ -6,7 +6,9 @@ type Query {
     search(term: String!, ressursFilter: RessursSearchFilter, orgEnhetFilter: OrgEnhetSearchFilter): [SearchResult!]!
     searchRessurs(term: String!, filter: RessursSearchFilter): [Ressurs!]!
     searchOrgEnhet(term: String!, filter: OrgEnhetSearchFilter): [OrgEnhet!]!
+    organisasjonsenhet(where: OrgEnhetSearch!): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")
     orgEnhet(where: OrgEnhetSearch!): OrgEnhet
+    organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
     orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
     ressurs(where: RessursSearch!): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
@@ -36,19 +38,24 @@ input OrgEnhetSearch {
 
 input OrgEnheterSearch {
     agressoIder: [String!]
+    orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
     nomNivaa: [NomNivaa!]
     orgNiv: String
     ider: [String!]
 }
 
 input RessursSearch {
+    navIdent: String    @deprecated(reason: "navIdent er erstattet med navident")
     navident: String
     telefonNummer: String
+    personIdent: String     @deprecated(reason: "personIdent er erstattet med personident")
     personident: String
 }
 
 input RessurserSearch {
+    navIdenter: [String!] @deprecated(reason: "navIdenter er erstattet med navidenter")
     navidenter: [String!]
+    personIdenter: [String!] @deprecated(reason: "personIdenter er erstattet med personidenter")
     personidenter: [String!]
 }
 
@@ -57,6 +64,7 @@ type OrgEnhetResult {
     id: String!
     nomId: String!
     orgNiv: String
+    organisasjonsenhet: OrgEnhet    @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet
 }
 

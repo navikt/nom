@@ -11,10 +11,40 @@ import java.util.Optional;
 @ProjectedPayload
 public interface RessursSearch {
 
+    @Deprecated(forRemoval = true)
+    String getNavIdent();
+
     String getNavident();
 
     String getTelefonNummer();
 
+    @Deprecated(forRemoval = true)
+    String getPersonIdent();
+
     String getPersonident();
 
+    default boolean isPersonidentPresent() {
+        return getPersonident() != null || getPersonIdent() != null;
+    }
+
+    default String resolvePersonident() {
+        return getPersonident() != null ? getPersonident() : getPersonIdent();
+    }
+
+    default boolean isNavidentPresent() {
+        return getNavIdent() != null || getNavident() != null;
+    }
+
+    default String resolveNavident() {
+        return getNavident() != null ? getNavident() : getNavIdent();
+    }
+
+    default Optional<String> resolveIdent() {
+        if (isNavidentPresent()) {
+            return Optional.of(resolveNavident());
+        } else if (isPersonidentPresent()) {
+            return Optional.of(resolvePersonident());
+        }
+        return Optional.empty();
+    }
 }
