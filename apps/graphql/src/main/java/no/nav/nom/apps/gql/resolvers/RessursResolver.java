@@ -21,13 +21,14 @@ public class RessursResolver {
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
-        if(search.getNavident() != null) {
-            var navident = search.getNavident();
+
+        var navident = search.resolveNavident();
+        if(navident != null) {
             return ressursStateRepository.findByNavident(navident).map(MappingUtils::toRessurs);
         }
 
-        if(search.getPersonident() != null) {
-            var personident = search.getPersonident();
+        var personident = search.resolvePersonident();
+        if(personident != null) {
             return ressursStateRepository.findByPersonident(personident).map(MappingUtils::toRessurs);
         }
 
@@ -37,7 +38,8 @@ public class RessursResolver {
 
     public List<RessursResult> ressurser(RessurserSearch search) {
 
-        if (search.getNavidenter() != null && !search.getNavidenter().isEmpty()) {
+        var navIdenter = search.resolveNavidenter();
+        if (navIdenter != null && !navIdenter.isEmpty()) {
             return this.ressursStateRepository.findByNavidentBulk(search.getNavidenter().stream().toList())
                 .values()
                 .stream()
@@ -45,7 +47,8 @@ public class RessursResolver {
                 .toList();
         }
 
-        if (search.getPersonidenter() != null && !search.getPersonidenter().isEmpty()) {
+        var personIdenter = search.resolvePersonidenter();
+        if (personIdenter != null && !personIdenter.isEmpty()) {
             return this.ressursStateRepository.findByPersonidentBulk(search.getPersonidenter().stream().toList())
                 .values()
                 .stream()
