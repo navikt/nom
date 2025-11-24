@@ -1,0 +1,120 @@
+scalar Date
+scalar DateTime
+scalar JSON
+
+type Query {
+    search(term: String!, ressursFilter: RessursSearchFilter, orgEnhetFilter: OrgEnhetSearchFilter): [SearchResult!]!
+    searchRessurs(term: String!, filter: RessursSearchFilter): [Ressurs!]!
+    searchOrgEnhet(term: String!, filter: OrgEnhetSearchFilter): [OrgEnhet!]!
+    orgEnhet(where: OrgEnhetSearch!): OrgEnhet
+    orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
+    ressurs(where: RessursSearch!): Ressurs
+    ressurser(where: RessurserSearch): [RessursResult!]!
+    ressurserWithMetadata: [RessursWithMetadataResult!]!
+}
+
+union SearchResult = Ressurs | OrgEnhet
+
+input RessursSearchFilter {
+    sektorSelection: SektorSelection! = ALLE
+    statusSelection: StatusSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+
+input OrgEnhetSearchFilter {
+    orgnivSelection: OrgnivSelection! = ALLE
+    gyldigTomSelection: GyldigTomSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+
+input OrgEnhetSearch {
+    agressoId: String
+    orgNiv: String
+    navn: String
+    id: String
+}
+
+input OrgEnheterSearch {
+    agressoIder: [String!]
+    nomNivaa: [NomNivaa!]
+    orgNiv: String
+    ider: [String!]
+}
+
+input RessursSearch {
+    navident: String
+    telefonNummer: String
+    personident: String
+}
+
+input RessurserSearch {
+    navidenter: [String!]
+    personidenter: [String!]
+}
+
+type OrgEnhetResult {
+    code: ResultCode!
+    id: String!
+    nomId: String!
+    orgNiv: String
+    orgEnhet: OrgEnhet
+}
+
+type RessursResult {
+    code: ResultCode!
+    id: String!
+    ressurs: Ressurs
+}
+
+type RessursWithMetadataResult {
+    code: ResultCode!
+    id: String!
+    ressurs: Ressurs
+    opprettetAv: String
+    opprettetDato: Date
+    endretAv: String
+    endretDato: Date
+    endringEvent: String
+}
+
+enum ResultCode {
+    OK,
+    NOT_FOUND,
+    ERROR
+}
+
+enum SektorSelection{
+    EKSTERN,
+    STATLIG,
+    KOMMUNAL,
+    IKKE_EKSTERN,
+    ALLE,
+}
+
+enum StatusSelection{
+    AKTIV,
+    INAKTIV,
+    ALLE
+}
+
+enum GyldigTomSelection {
+    IKKE_PASSERT,
+    PASSERT,
+    ALLE
+}
+
+enum OrgnivSelection {
+    ORGNIV_ORGENHET,
+    IKKE_ORGNIV_ORGENHET,
+    ALLE
+}
+
+enum ResultLimit {
+    LIMIT_10,
+    LIMIT_20,
+    LIMIT_30,
+    LIMIT_50,
+    LIMIT_100,
+    LIMIT_200,
+    UNLIMITED,
+}

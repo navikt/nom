@@ -1,0 +1,171 @@
+type OrgEnhet {
+    id: ID!
+    navn: String!
+    gyldigFom: Date!
+    gyldigTom: Date
+    remedyEnhetId: String
+    nomNivaa: NomNivaa
+    organiseringer (retning: Retning, utvalg: PeriodiskUtvalgArg = AKTIVE) : [Organisering!]!
+    ledere (utvalg: PeriodiskUtvalgArg = AKTIVE): [OrgEnhetsLeder!]!
+    orgEnhetsType: OrgEnhetsType
+    orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [OrgTilknytning!]!
+    agressoInfo: AgressoInfo
+}
+
+type Organisering {
+    retning: Retning!
+    orgEnhet : OrgEnhet!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type Ressurs {
+    navident: String!
+    personident: String!
+    fornavn: String
+    etternavn: String
+    visningsnavn: String
+    epost: String
+    primaryTelefon: String
+    telefon: [Telefon]!
+    gjeldendeSektor: Sektor!
+    identType: IdentType!
+    startdato: Date
+    sluttdato: Date
+    ledere (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursLeder!]!
+    lederFor (utvalg: PeriodiskUtvalgArg = AKTIVE): [LederOrgEnhet!]!
+    orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursOrgTilknytning!]!
+    gjeldendeTilknytningtype: TilknytningType
+}
+
+type RessursLeder {
+    erDagligOppfolging: Boolean
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type OrgEnhetsLeder {
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type LederOrgEnhet {
+    orgEnhet: OrgEnhet!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type OrgEnhetsKobling { # Deprekeres
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type OrgTilknytning {
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+    erDagligOppfolging: Boolean
+    sektor: Sektor
+    tilknytningType: TilknytningType
+}
+
+type RessursOrgTilknytning {
+    orgEnhet: OrgEnhet!
+    gyldigFom: Date!
+    gyldigTom: Date
+    erDagligOppfolging: Boolean
+    sektor: Sektor
+    tilknytningType: TilknytningType
+}
+
+type AgressoInfo {
+    agressoId: ID
+    agressoOrgenhetType: String
+    agressoOrgNiv: String
+}
+
+enum Retning {
+    over,
+    under,
+}
+
+enum PeriodiskUtvalgArg {
+    ALLE,
+    AKTIVE,
+    HISTORISKE,
+    FREMTIDIGE
+}
+
+type Telefon {
+    nummer: String!
+    type: TelefonType!
+    beskrivelse: String
+}
+
+enum TelefonType {
+    NAV_TJENESTE_TELEFON,
+    NAV_KONTOR_TELEFON,
+    PRIVAT_TELEFON
+}
+
+enum Sektor {
+    NAV_STATLIG,
+    NAV_KOMMUNAL,
+    EKSTERN
+}
+
+enum NomNivaa {
+    LINJEENHET
+    DRIFTSENHET
+    ARBEIDSOMRAADE
+}
+
+enum OrgEnhetsType {
+    ARBEIDSLIVSSENTER
+    NAV_ARBEID_OG_YTELSER
+    ARBEIDSRAADGIVNING
+    DIREKTORAT
+#    DIR - Hvis det skulle finnes DIR type på Enhet i NOM, konverteres denne til DIREKTORAT i GQL
+    FYLKE
+    NAV_FAMILIE_OG_PENSJONSYTELSER
+    HJELPEMIDLER_OG_TILRETTELEGGING
+    KLAGEINSTANS
+    NAV_KONTAKTSENTER
+    KONTROLL_KONTROLLENHET
+    NAV_KONTOR
+    TILTAK
+    NAV_OKONOMITJENESTE
+}
+
+enum TilknytningType {
+    ANNET,
+    ARBEIDSTRENING,
+    EKSTERN_SAMARBEIDSPARTNER,
+    FAST,
+    HELFO,
+    INGEN,
+    JOBBSPESIALIST,
+    KONSULENT,
+    LAERLING,
+    MIDLERTIDIG,
+    PENSJONIST,
+    PRAKSISARBEID,
+    RIKSREVISJONEN,
+    SKATTEETATEN,
+    STATSFORVALTEREN,
+    STUDENT,
+    UFORUTSETT_BEHOV,
+    UTDANNINGSSTILLINGER,
+    VIKAR
+}
+
+enum IdentType {
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT
+}

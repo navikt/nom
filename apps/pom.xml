@@ -26,5 +26,6 @@
         <module>nom-rdbms-data</module>
         <module>paarorende</module>
         <module>nom-azure</module>
+        <module>graphql</module>
     </modules>
 </project>
