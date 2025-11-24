@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 public class RessursWithMetadataResult {
 
-    public final String id;
-    public final Ressurs ressurs;
-    public final  String opprettetAv;
-    public final LocalDateTime opprettetDato;
-    public final String endretAv;
-    public final LocalDateTime endretDato;
-    public final String endringEvent;
-    public final ResultCode code;
+    private String id;
+    private Ressurs ressurs;
+    private  String opprettetAv;
+    private LocalDateTime opprettetDato;
+    private String endretAv;
+    private LocalDateTime endretDato;
+    private String endringEvent;
+    private ResultCode code;
 
 
     public RessursWithMetadataResult(String id, Ressurs ressurs, String opprettetAv, LocalDateTime opprettetDato, String endretAv, LocalDateTime endretDato, String endringEvent) {

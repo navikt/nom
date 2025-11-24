@@ -12,6 +12,11 @@ import java.util.List;
 @Value
 @Builder(toBuilder = true)
 public class Ressurs {
+    @Deprecated    String navIdent;
+    @Deprecated    String personIdent;
+    @Deprecated    String visningsNavn;
+    @Deprecated    List<Sektor> sektor;
+
     String navident;
     String personident;
     LocalDate sluttdato;
