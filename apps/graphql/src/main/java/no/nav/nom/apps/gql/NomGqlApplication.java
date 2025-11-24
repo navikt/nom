@@ -4,7 +4,9 @@ package no.nav.nom.apps.gql
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
+import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -12,21 +14,18 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
-import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
-import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
 
 import javax.swing.JOptionPane;
 import java.io.IOException;
@@ -34,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class NomGqlApplication {
@@ -101,6 +101,15 @@ public class NomGqlApplication {
         @Bean
         public FieldUsageCounterInterface fieldUsageCounter(){
             return (dataFetchingEnvironment) -> {};
+        }
+
+        @Bean
+        public RessursPropertyResolverInterface propertyResolver() {
+            return ressurser -> ressurser.stream().collect(
+                Collectors.toMap(
+                    (ressurs) -> ressurs,
+                    (ressurs) -> DataFetcherResult.<String>newResult().data(ressurs.getNavident()+"@dummy.mail").build())
+            );
         }
 
         public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
