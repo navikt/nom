@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.execution.DataFetcherResult;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
-import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
+import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;

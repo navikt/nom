@@ -15,7 +15,6 @@ import no.nav.nom.apps.gql.resolvers.OrgTilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.RemedyEnhetIdResolver;
-import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
 import no.nav.nom.apps.gql.resolvers.RessursResolver;
 import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;

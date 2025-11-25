@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
-import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;

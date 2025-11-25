@@ -7,9 +7,8 @@ import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.graphql.ressurs.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
-import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
-import no.nav.nom.apps.gql.resolvers.RessursPropertyResolverInterface;
+import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -44,7 +43,7 @@ public class GraphQLRessursController {
     @Autowired
     public GraphQLRessursController(
             RessursResolver ressursResolver,
-            RessursPropertyResolver propertyResolver,
+            RessursPropertyResolverInterface propertyResolver,
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
             OrgTilknytningResolver orgTilknytningResolver
