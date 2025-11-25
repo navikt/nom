@@ -11,7 +11,6 @@ import no.nav.nom.apps.gql.projections.RessursSearchFilter;
 import no.nav.nom.apps.gql.projections.RessurserSearch;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
-import no.nav.nom.apps.gql.resolvers.OrgTilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.RemedyEnhetIdResolver;
@@ -56,7 +55,6 @@ public class GraphQlController {
 
     private final RessursResolver ressursResolver;
     private final RessursPropertyResolverInterface propertyResolver;
-    private final OrgTilknytningResolver orgTilknytningResolver;
     private final SearchResolver searchResolver;
 
     private final FieldUsageCounterInterface counter;
@@ -70,7 +68,6 @@ public class GraphQlController {
         RemedyEnhetIdResolver remedyEnhetIdResolver,
         RessursResolver ressursResolver,
         RessursPropertyResolverInterface propertyResolver,
-        OrgTilknytningResolver orgTilknytningResolver,
         SearchResolver searchResolver, FieldUsageCounterInterface fieldUsageCounter
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
@@ -80,7 +77,6 @@ public class GraphQlController {
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.ressursResolver = ressursResolver;
         this.propertyResolver = propertyResolver;
-        this.orgTilknytningResolver = orgTilknytningResolver;
         this.searchResolver = searchResolver;
         this.counter = fieldUsageCounter;
     }
@@ -153,7 +149,7 @@ public class GraphQlController {
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return orgTilknytningResolver.getOrgTilknytningerForRessurs(ressurs, periodiskUtvalg);
+        return orgtilknytningResolver.getOrgTilknytningerForRessurs(ressurs, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "lederFor")
@@ -236,7 +232,7 @@ public class GraphQlController {
 
         return Mono.fromSupplier(
             () -> ressurser.stream()
-                .map(it -> new Pair(it, orgTilknytningResolver.getOrgTilknytningerForRessurs(it, PeriodiskUtvalgArg.AKTIVE)))
+                .map(it -> new Pair(it, orgtilknytningResolver.getOrgTilknytningerForRessurs(it, PeriodiskUtvalgArg.AKTIVE)))
                 .collect(Collectors.toMap(r -> r.ressurs, r -> r.ressursOrgTilknytningList))
         );
     }

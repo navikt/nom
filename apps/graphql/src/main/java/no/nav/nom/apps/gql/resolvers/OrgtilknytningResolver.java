@@ -85,16 +85,16 @@ public class OrgtilknytningResolver {
     @Deprecated
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
         return ressurser.stream()
-            .collect(toMap(Function.identity(), this::getOrgTilknytningerForRessurs));
+            .collect(toMap(Function.identity(), ressurs -> this.getOrgTilknytningerForRessurs(ressurs,PeriodiskUtvalgArg.AKTIVE)));
     }
 
 
 
     @Deprecated
-    private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
-
+    public List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg) {
         return orgtilknytningStateRepository
             .findByNavident(ressurs.getNavident()).stream()
+            .filter(ot -> Util.filterByPeriodiskUtvalg(ot, periodiskUtvalg))
             .map(this::fromOrgtilknytningState)
             .toList();
     }
