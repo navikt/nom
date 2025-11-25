@@ -111,6 +111,11 @@ public class NomGqlApplication {
             );
         }
 
+        @Bean
+        public RemedyIdResolverInterface remedyIdResolver() {
+            return (s) -> "remedy-"+s;
+        }
+
         public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
             this.ressursStateRepository = new RessursStateRepositoryImpl();
             this.orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();

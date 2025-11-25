@@ -13,7 +13,6 @@ import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
-import no.nav.nom.apps.gql.resolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.gql.resolvers.RessursResolver;
 import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -51,7 +50,7 @@ public class GraphQlController {
     private final OrgtilknytningResolver orgtilknytningResolver;
     private final OrganiseringResolver organiseringResolver;
     private final LederResolver lederResolver;
-    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final RemedyIdResolverInterface remedyEnhetIdResolver;
 
     private final RessursResolver ressursResolver;
     private final RessursPropertyResolverInterface propertyResolver;
@@ -65,7 +64,7 @@ public class GraphQlController {
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,
         LederResolver lederResolver,
-        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        RemedyIdResolverInterface remedyEnhetIdResolver,
         RessursResolver ressursResolver,
         RessursPropertyResolverInterface propertyResolver,
         SearchResolver searchResolver, FieldUsageCounterInterface fieldUsageCounter
@@ -108,7 +107,7 @@ public class GraphQlController {
     @SchemaMapping(typeName = "OrgEnhet", field = "remedyEnhetId")
     public String remedyEnhetId(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return remedyEnhetIdResolver.remedyEnhetId(orgEnhet);
+        return remedyEnhetIdResolver.remedyEnhetId(orgEnhet.getId());
     }
 
 

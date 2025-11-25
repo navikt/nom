@@ -1,42 +1,62 @@
-package no.nav.nom.apps.api.graphql.ressurs;
+package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.config.GraphQLConfig;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataRepositoryImpl;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.apps.gql.AgressoOrgenhetService;
+import no.nav.nom.apps.gql.FieldUsageCounterInterface;
+import no.nav.nom.apps.gql.GraphQlController;
+import no.nav.nom.apps.gql.RemedyIdResolverInterface;
+import no.nav.nom.apps.gql.lucenesearch.LuceneService;
+import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
+import no.nav.nom.apps.gql.resolvers.LederResolver;
+import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
+import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
+import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
+import no.nav.nom.apps.gql.resolvers.RessursResolver;
+import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
+import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.bean.override.mockito.MockReset;
 
 @Import({
      TestTokensGenerator.class
 
-    , GraphQLRessursController.class
+    , GraphQlController.class
     , RessursResolver.class
     , RessursPropertyResolver.class
-    , OrgTilknytningResolver.class
+    , OrgtilknytningResolver.class
     , LederResolver.class
+    , OrgEnhetResolver.class
+    , OrganiseringResolver.class
+    , SearchResolver.class
+//    , RemedyEnhetIdResolver.class
 
     , GraphQLConfig.class
     , GraphQLTestUtil.class
@@ -48,12 +68,13 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
 
     , DvhRepository.class
     , RessursStateRepositoryImpl.class
-    , RessursMetadataRepositoryImpl.class
-    , OrgenhetService.class
+//    , RessursMetadataRepositoryImpl.class
+//    , OrgenhetService.class
     , OrgEnhetStateRepositoryImpl.class
     , OrganiseringStateRepositoryImpl.class
     , OrgtilknytningStateRepositoryImpl.class
-    , OrgtilknytningService.class
+    , OrgEnhetLederStateRepositoryImpl.class
+    , AgressoOrgenhetService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class GraphqlTestConfig {
@@ -71,4 +92,33 @@ public class GraphqlTestConfig {
     OrgEnhetLederService orgEnhetLederService() { return Mockito.mock(OrgEnhetLederService.class, MockReset.after());}
     @Bean
     DvhRessursRestService dvhRessursRestService() { return Mockito.mock(DvhRessursRestService.class, MockReset.after()); }
+
+    @Bean
+    RemedyIdResolverInterface remedyIdResolverInterface(){
+        return (s) -> "remedy"+"s";
+    }
+
+//    @Bean
+//    LuceneService luceneService(RessursStateRepository rsr, Environment env, OrgEnhetStateRepository orgEnhetStateRepository) {
+//        return new LuceneService(rsr,env,orgEnhetStateRepository,null);
+//    }
+
+    @Bean
+    LuceneService luceneService(ApplicationContext applicationContext) {
+    var rsr = applicationContext.getBean(RessursStateRepositoryImpl.class);
+    var env = applicationContext.getBean(Environment.class);
+    var orgEnhetStateRepository = applicationContext.getBean(OrgEnhetStateRepositoryImpl.class);
+        return new LuceneService(rsr,env,orgEnhetStateRepository,() -> true);
+    }
+
+    @Bean
+    FieldUsageCounterInterface fieldUsageCounter() {
+        return x -> {};
+    }
+
+    @Bean
+    DvhStartupLoadMonitor dvhStartupLoadMonitor() {
+        return new DvhStartupLoadMonitor();
+    }
+
 }

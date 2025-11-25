@@ -30,14 +30,18 @@ public class MappingUtils {
         var tilknytningstype = isNull(ressursState.tilknytningtype()) ? null : ressursState.tilknytningtype();
         return Ressurs.builder()
             .navident(ressursState.navident())
+            .navIdent(ressursState.navident())
             .personident(sladdetPersonIdent)
+            .personIdent(sladdetPersonIdent)
             .gjeldendeSektor(ressursState.sektor() != null ? ressursState.sektor() : Sektor.NAV_STATLIG)
+            .sektor(List.of(ressursState.sektor()))
             .identType(ressursState.identType() != null ? ressursState.identType() : IdentType.UKJENT)
             .startdato(startdato)
             .sluttdato(sluttdato)
             .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
             .etternavn(ressursState.visningsnavn().etternavn())
             .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
+            .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
             .primaryTelefon(primaryTelefonnummer)
             .telefon(telefon)
             .gjeldendeTilknytningtype(tilknytningstype)
@@ -57,6 +61,9 @@ public class MappingUtils {
                 .agressoOrgenhetType(orgEnhetState.agressoOrgenhetType())
                 .agressoOrgNiv(orgEnhetState.agressoOrgNivaa())
                 .build())
+            .agressoId(orgEnhetState.agressoId())
+            .agressoOrgenhetType(orgEnhetState.agressoOrgenhetType())
+            .orgNiv(orgEnhetState.agressoOrgNivaa())
             .build();
     }
 

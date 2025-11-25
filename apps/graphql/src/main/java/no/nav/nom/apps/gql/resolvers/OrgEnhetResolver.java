@@ -39,7 +39,8 @@ public class OrgEnhetResolver {
         final var nomNivaa = search.resolveNomNivaaEnum();
 
         if(ider.isEmpty()){
-            var agressoRequsted = !search.getAgressoIder().isEmpty();
+            var agressoIder = search.getAgressoIder() != null ?  search.getAgressoIder() : List.of();
+            var agressoRequsted = !agressoIder.isEmpty();
             if(agressoRequsted){
                 return agressoOrgenhetService.orgenheterByAgressoData(search.getAgressoIder(), search.getOrgNiv(), search.resolveNomNivaaEnum());
             }

@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
@@ -41,7 +44,7 @@ public class LederForRessursTest {
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;
     @MockitoBean
-    OrgEnhetLederService orgEnhetLederService;
+    OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
@@ -70,8 +73,9 @@ public class LederForRessursTest {
                 .orgEnhetId(orgenhet.id()).build()
         );
 
-        var lederForRessurs = new LederForRessurs(leder.navident(), ledersEnhet.id(), LocalDate.now().minusYears(1), null, true);
-        doReturn(List.of(lederForRessurs)).when(orgEnhetLederService).getLedereForRessurs(ressurs.navident(), false);
+        var lederState = OrgEnhetLederState.builder().orgEnhetId(orgenhet.id()).navident(leder.navident()).startdato(LocalDate.now().minusYears(1)).build();
+        doReturn(List.of(lederState)).when(orgEnhetLederStateRepository).findAllByNavident(ressurs.navident());
+        doReturn(List.of(lederState)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(orgenhet.id());
 
         final var response = gqlUtil.postForResource("ressurs/leder_over_rekursivt.graphql");
 

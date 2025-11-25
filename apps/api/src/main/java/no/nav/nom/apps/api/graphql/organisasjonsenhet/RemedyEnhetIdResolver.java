@@ -3,11 +3,12 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.gql.RemedyIdResolverInterface;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RemedyEnhetIdResolver {
+public class RemedyEnhetIdResolver implements RemedyIdResolverInterface {
 
     private final RemedyEnhetMapperService remedyEnhetMapperService;
 
@@ -21,5 +22,10 @@ public class RemedyEnhetIdResolver {
 
     public String remedyEnhetId(IOrgenhet orgenhet) {
         return remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
+    }
+
+    @Override
+    public String remedyEnhetId(String nomId) {
+        return remedyEnhetMapperService.findByNomId(nomId).map(RemedyEnhet::remedyEnhetId).orElse(null);
     }
 }
