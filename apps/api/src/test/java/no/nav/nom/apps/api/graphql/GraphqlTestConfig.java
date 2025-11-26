@@ -88,8 +88,7 @@ public class GraphqlTestConfig {
     KafkaTopicReader kafkaTopicReader() { return Mockito.mock(KafkaTopicReader.class, MockReset.after()); }
     @Bean
     GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter() { return Mockito.mock(GraphQLFieldConsumptionCounter.class, MockReset.after()); }
-    @Bean
-    OrgEnhetLederService orgEnhetLederService() { return Mockito.mock(OrgEnhetLederService.class, MockReset.after());}
+
     @Bean
     DvhRessursRestService dvhRessursRestService() { return Mockito.mock(DvhRessursRestService.class, MockReset.after()); }
 

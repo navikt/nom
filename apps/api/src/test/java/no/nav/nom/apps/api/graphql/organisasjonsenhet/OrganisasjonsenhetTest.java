@@ -16,9 +16,14 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,22 +58,22 @@ class OrganisasjonsenhetTest {
     protected GraphQLTestUtil gqlUtil;
 
     @Autowired
-    protected OrgEnhetStateRepository orgEnhetStateRepository;
+    protected OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
-    protected OrganiseringStateRepository organiseringStateRepository;
+    protected OrganiseringStateRepositoryImpl organiseringStateRepository;
 
     @Autowired
-    protected OrgtilknytningStateRepository orgtilknytningStateRepository;
+    protected OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
 
     @Autowired
-    private RessursStateRepository ressursStateRepository;
+    private RessursStateRepositoryImpl ressursStateRepository;
 
     @Autowired
     public ObjectMapper objectMapper;
 
-    @MockitoBean
-    protected OrgEnhetLederService orgEnhetLederService;
+    @Autowired
+    private OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     @BeforeEach
     protected void setup() {
@@ -316,8 +321,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -357,8 +361,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -433,8 +436,7 @@ class OrganisasjonsenhetTest {
             .orgEnhetId(orgenhet.id())
             .startdato(LocalDate.now().minusYears(1))
             .build();
-
-        doReturn(List.of(leder)).when(orgEnhetLederService).getLedereForOrgEnhet(orgenhet.id());
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();

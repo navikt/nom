@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -17,10 +16,13 @@ import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
+import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static no.nav.nom.apps.api.TestUtil.createRessursState;
+import static no.nav.nom.apps.api.TestUtil.createRessursStateBuilder;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -59,16 +62,19 @@ class RessursTest {
     private DvhRepository dvhRepository;
 
     @Autowired
-    protected OrgEnhetStateRepository orgEnhetStateRepository;
+    protected OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
-    private RessursStateRepository ressursStateRepository;
+    private RessursStateRepositoryImpl ressursStateRepository;
 
     @Autowired
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
+    OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
 
-    @MockitoBean
-    protected OrgEnhetLederService orgEnhetLederService;
+    @Autowired
+    protected OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+
+    @Autowired
+    OrganiseringStateRepository organiseringStateRepository;
 
     @BeforeEach
     protected void setup() {
@@ -296,15 +302,14 @@ class RessursTest {
         var orgenhet = OrgenhetTestUtils.createDefault();
         orgEnhetStateRepository.update(orgenhet);
 
-        doReturn(
-            List.of(OrgEnhetLederState.builder()
-                .fid("FID_1")
-                .navident(ressurs.navident())
-                .orgEnhetId(orgenhet.id())
-                .startdato(LocalDate.now().minusYears(1))
-                .build()
-            )
-        ).when(orgEnhetLederService).getOrgEnheterNavidentErLederFor(ressurs.navident());
+
+        var lederState = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+        orgEnhetLederStateRepository.update(lederState.fid(),lederState);
 
         final var response = gqlUtil.postForResource("ressurs/scenario6.graphql");
 
@@ -327,13 +332,16 @@ class RessursTest {
         var ot = orgtilknytningState().toBuilder()
             .fid("FID_1")
             .navident(ansatt.navident())
-            .orgEnhetId("ID_1").build();
+            .orgEnhetId(orgenhet.id()).build();
 
         orgtilknytningStateRepository.update("FID_1", ot);
 
-        doReturn(
-            List.of(new LederForRessurs(leder.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
-        ).when(orgEnhetLederService).getLedereForRessurs(ansatt.navident(), false);
+        var lederState = OrgEnhetLederState.builder().orgEnhetId(orgenhet.id()).navident(leder.navident()).startdato(LocalDate.now().minusYears(1)).fid("?").build();
+        orgEnhetLederStateRepository.update(lederState.fid(),lederState);
+//
+//        doReturn(
+//            List.of(new LederForRessurs(leder.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
+//        ).when(orgEnhetLederStateRepository).getLedereForRessurs(ansatt.navident(), false);
 
         final var response = gqlUtil.postForResource("ressurs/scenario7.graphql");
 
@@ -346,27 +354,49 @@ class RessursTest {
     @DisplayName("Hente leder for ressurs som er leder av sin enhet - Note tester ikke orgEnhetLederService.getLedereForRessurs sin logikk")
     void scenario37() {
         var overLederRessurs = createRessursState("1");
-        var ansattRessurs = createRessursState("4").toBuilder().navident("testNavIdent4").build();
+        var underLederRessurs = createRessursState("4").toBuilder().navident("testNavIdent4").build();
         ressursStateRepository.update(overLederRessurs);
-        ressursStateRepository.update(ansattRessurs);
+        ressursStateRepository.update(underLederRessurs);
 
         var orgenhet = OrgenhetTestUtils.createDefault();
         var overEnhet = OrgenhetTestUtils.createDefault();
+        var organisering = OrganiseringState.builder().fid("FIDO").idOver(overEnhet.id()).id(orgenhet.id()).gyldigFom(LocalDate.now().minusYears(1)).build();
         orgEnhetStateRepository.update(orgenhet);
         orgEnhetStateRepository.update(overEnhet);
+        organiseringStateRepository.update(organisering);
 
         OrgtilknytningState ot = orgtilknytningState().toBuilder()
             .fid("FID_1")
-            .navident(ansattRessurs.navident())
-            .orgEnhetId(orgenhet.id()).build();
-        orgtilknytningStateRepository.update(
-            "FID_1",
-            ot
-        );
+            .navident(underLederRessurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .build();
 
-        doReturn(
-            List.of(new LederForRessurs(overLederRessurs.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
-        ).when(orgEnhetLederService).getLedereForRessurs(ansattRessurs.navident(), false);
+        orgtilknytningStateRepository.update("FID_1",ot);
+
+        var underLederState = OrgEnhetLederState.builder()
+            .fid("FID_2")
+            .navident(underLederRessurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+
+        var overLederState = OrgEnhetLederState.builder()
+            .fid("FID_3")
+            .navident(overLederRessurs.navident())
+            .orgEnhetId(overEnhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+
+
+        orgEnhetLederStateRepository.update(underLederState.fid(), underLederState);
+        orgEnhetLederStateRepository.update(overLederState.fid(), overLederState);
+
+//
+//        doReturn(
+//            List.of(new LederForRessurs(overLederRessurs.navident(), orgenhet.id(), ot.gyldigFom(), ot.gyldigTom(), ot.erDagligOppfolging()))
+//        ).when(orgEnhetLederStateRepository).getLedereForRessurs(ansattRessurs.navident(), false);
 
         final var response = gqlUtil.postForResource("ressurs/scenario71.graphql");
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
@@ -377,19 +407,21 @@ class RessursTest {
     @Test
     @DisplayName("Kan slå opp ressurs ved eksakt telefonnummer")
     void scenario52() {
-        var ressurs = createRessursState("1");
+        var telefonNummer = "4712345678";
+        var ressurs = createRessursStateBuilder("1").jobbtelefon(new Jobbtelefon(telefonNummer,TelefonType.NAV_TJENESTE_TELEFON)).build();
         ressursStateRepository.update(ressurs);
 
-        String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
-            .nummer(telefonNummer)
-            .navIdent(ressurs.navident())
-            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
-            .build();
-
-        dvhRepository.saveTlf(List.of(mockDvhTelefon));
+//        String telefonNummer = "4712345678";
+//        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
+//            .nummer(telefonNummer)
+//            .navIdent(ressurs.navident())
+//            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
+//            .build();
+//
+//        dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
         final var response = gqlUtil.postForResource("ressurs/scenario52.graphql");
+        response.errors();
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
         assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());

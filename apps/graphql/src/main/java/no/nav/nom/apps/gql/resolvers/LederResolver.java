@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class LederResolver {
@@ -52,15 +53,14 @@ public class LederResolver {
     }
 
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg) {
-        return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhet.getId()).stream()
-                .sorted(orgEnhetLederStateComparator)
-                .filter(leder -> Util.filterByPeriodiskUtvalg(leder, periodiskUtvalg))
-                .map(leder -> new OrgEnhetsLeder(
-                                getRessurs(leder),
-                                leder.startdato(), leder.sluttdato()
-                        )
-                )
-                .toList();
+        var relevantLederStates = orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhet.getId()).stream()
+            .sorted(orgEnhetLederStateComparator)
+            .filter(leder -> Util.filterByPeriodiskUtvalg(leder, periodiskUtvalg));
+
+        return relevantLederStates.map(lederState -> getLederRessurs(lederState).map(r -> new OrgEnhetsLeder(r, lederState.startdato(), lederState.sluttdato())))
+            .flatMap(Optional::stream)
+            .toList();
+
     }
 
     public List<LederOrgEnhet> lederFor(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg) {
@@ -190,8 +190,8 @@ public class LederResolver {
     // ****
 
 
-    private Ressurs getRessurs(OrgEnhetLederState leder) {
-        return ressursStateRepository.findByNavident(leder.navident(), MappingUtils::toRessurs).orElseThrow(LederNotFoundException::new);
+    private Optional<Ressurs> getLederRessurs(OrgEnhetLederState lederState) {
+        return ressursStateRepository.findByNavident(lederState.navident(), MappingUtils::toRessurs);
     }
 
     public static GraphQLError handleLederNotFoundException(Throwable throwable, DataFetchingEnvironment environment) {
