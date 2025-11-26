@@ -1,13 +1,10 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -18,9 +15,9 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
-import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
@@ -33,7 +30,6 @@ import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -46,7 +42,6 @@ import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
 
 @ActiveProfiles({"GraphQLTest", "test"})
@@ -59,9 +54,6 @@ class RessursTest {
     protected GraphQLTestUtil gqlUtil;
 
     @Autowired
-    private DvhRepository dvhRepository;
-
-    @Autowired
     protected OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
     @Autowired
@@ -71,10 +63,10 @@ class RessursTest {
     OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
 
     @Autowired
-    protected OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+    protected OrgEnhetLederStateRepositoryImpl orgEnhetLederStateRepository;
 
     @Autowired
-    OrganiseringStateRepository organiseringStateRepository;
+    OrganiseringStateRepositoryImpl organiseringStateRepository;
 
     @BeforeEach
     protected void setup() {
@@ -435,13 +427,6 @@ class RessursTest {
         ressursStateRepository.update(ressurs);
 
         String telefonNummer = "4712345678";
-        DvhTelefon mockDvhTelefon = DvhTelefon.builder()
-            .nummer(telefonNummer)
-            .navIdent(ressurs.navident())
-            .type(DvhTelefon.DvhTelefonType.TJENESTETELEFON)
-            .build();
-
-        dvhRepository.saveTlf(List.of(mockDvhTelefon));
 
         final var response = gqlUtil.postForResource("ressurs/scenario53.graphql");
 
