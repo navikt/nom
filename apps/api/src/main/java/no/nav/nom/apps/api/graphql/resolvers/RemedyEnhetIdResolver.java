@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.organisasjonsenhet;
+package no.nav.nom.apps.api.graphql.resolvers;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;

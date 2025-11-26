@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common.metrics;
+package no.nav.nom.apps.api.graphql.metrics;
 
 import graphql.schema.DataFetchingEnvironment;
 import io.micrometer.core.instrument.Counter;

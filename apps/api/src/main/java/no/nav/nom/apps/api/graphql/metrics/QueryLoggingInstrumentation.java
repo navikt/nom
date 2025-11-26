@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common.metrics;
+package no.nav.nom.apps.api.graphql.metrics;
 
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
