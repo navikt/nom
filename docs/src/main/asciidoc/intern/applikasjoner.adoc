@@ -65,7 +65,7 @@ Man må være tilkoblet naisdevice for å kunne kjøre lokalutvikling mot miljø
 ** Hvis UI f.eks kjører på port 8080, gå til https://localhost:8080/login og logg inn med trygdeetaten bruker, enten din egen eller bruker generert i https://ida.intern.nav.no
 ** UI Frackend vil nå gjøre API kall direkte mot miljø via naisdevice.
 * Deretter kan react-dev server kjøres opp
-** kjør `npm install` i apps/ui/src/main/webapp/
+** kjør `npm ci` i apps/ui/src/main/webapp/
 ** kjør `npm run start` i samme mappe
 ** api kall gjort mot react dev server proxies videre til frackend
 

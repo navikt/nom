@@ -27,7 +27,7 @@ jobs:
 
       - name: Install webapp dependencies
         working-directory: apps/admin-web/webapp
-        run: npm install
+        run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 

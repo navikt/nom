@@ -7,6 +7,6 @@ Vi anbefaler at du bruker [asdf](https://asdf-vm.com/) slik at du automatisk kj�
 Etter at Node er installert kjører du følgende kommandoer for å starte:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```

@@ -1,6 +1,6 @@
 # Generating typescript types from GQL-schema
 
-- Make sure you have previously run `npm install`
+- Make sure you have previously run `npm ci`
 
 - Set your terminal working directory to the folder containing this markdown file (`$apps/frontend/src/api/nom/generated`)
 

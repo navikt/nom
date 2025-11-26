@@ -34,7 +34,7 @@ docker-compose up -d --build frontend
 Fra `apps/ui2/webapp` folderen kjører du følgende for å starte vite dev-server med hot-reloading:
 
 ```bash
-npm install
+npm ci
 npm run dev # Starter vite devserver på port 5173 som standard
 ```
 

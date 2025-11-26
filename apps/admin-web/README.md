@@ -7,11 +7,11 @@ Vi anbefaler at du bruker [asdf](https://asdf-vm.com/) slik at du automatisk kj�
 
 ## Utvikling
 
-Gå inn i mappene `frackend` og `webapp` og kjør `npm install` for å installere avhengigheter.
+Gå inn i mappene `frackend` og `webapp` og kjør `npm ci` for å installere avhengigheter.
 
 ```bash
-cd frackend && npm install
-cd ../webapp && npm install
+cd frackend && npm ci
+cd ../webapp && npm ci
 ```
 
 Start frontenden ved å gå til `webapp`-mappen og kjøre `npm run dev`.
