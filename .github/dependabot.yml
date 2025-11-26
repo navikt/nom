@@ -7,24 +7,31 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
+
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: daily
       time: "04:00"
     open-pull-requests-limit: 10
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
       time: "04:00"
     open-pull-requests-limit: 10
+
   - package-ecosystem: npm
     directory: "/apps/ui2/webapp"
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
     groups:
       ui2-patches:
@@ -33,11 +40,14 @@ updates:
       ui2-minors:
         update-types:
           - minor
+
   - package-ecosystem: npm
     directory: "/apps/ui2/frackend"
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
     groups:
       frackend-patches:
@@ -46,6 +56,7 @@ updates:
       frackend-minors:
         update-types:
           - minor
+
   - package-ecosystem: docker
     directory: "/apps/ui2/frackend"
     schedule:
