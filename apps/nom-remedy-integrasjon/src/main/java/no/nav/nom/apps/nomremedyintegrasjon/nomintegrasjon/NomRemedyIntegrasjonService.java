@@ -57,6 +57,7 @@ public class NomRemedyIntegrasjonService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final DelayedEventRepository delayedEventRepository;
     private final DelayedEventReactiveRepository delayedEventReactiveRepository;
+    private final ThreadLocal<Boolean> isAdmin = ThreadLocal.withInitial(() -> false);
 
     public NomRemedyIntegrasjonService(
         LeaderElection leaderElection,
@@ -306,7 +307,7 @@ public class NomRemedyIntegrasjonService {
             && (ressursState.startdato().isAfter(LocalDate.now()) || dolOrgtilknytning.gyldigFom().isAfter(LocalDate.now()))) {
 
             remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(
-                nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv());
+                nomIntegrasjonEntityFromNomData(ressursState, dolOrgtilknytning, false), ressursState.sistEndretAv(), isAdmin.get());
             logger.info(
                 "Opprettet ressurs i IR med navident {}, startdato {}",
                 ressursState.navident(),
@@ -319,7 +320,7 @@ public class NomRemedyIntegrasjonService {
     }
 
     private void saveStateToRemedy(NomIntegrasjonEntity nomIntegrasjonEntity, String initatedBy) {
-        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, initatedBy);
+        remedyIntegrasjonRepositoryService.saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, initatedBy, isAdmin.get());
     }
 
     private NomIntegrasjonEntity nomIntegrasjonEntityFromNomData(RessursState ressursState, OrgtilknytningState dolOrgtilknytning, boolean isMasseflytting) {
@@ -418,18 +419,24 @@ public class NomRemedyIntegrasjonService {
     }
 
     @Transactional
-    public void lesStatePaaNytt(String navident) {
-        var ressursState = ressursStateRepository.findByNavident(navident)
-            .orElseThrow(() -> RessursNotFoundException.notFound(navident));
-        executeStateUpdates(
-            List.of(
-                AggregateState.builder()
-                    .navident(navident)
-                    .createdAt(LocalDateTime.now())
-                    .stateFid(ressursState.fid())
-                    .stateType(ressursState.getClass().getSimpleName())
-                    .build()
-            ));
+    public void lesStatePaaNytt(String navident, boolean isAdmin) {
+        try {
+            this.isAdmin.set(isAdmin);
+            var ressursState = ressursStateRepository.findByNavident(navident)
+                .orElseThrow(() -> RessursNotFoundException.notFound(navident));
+            executeStateUpdates(
+                List.of(
+                    AggregateState.builder()
+                        .navident(navident)
+                        .createdAt(LocalDateTime.now())
+                        .stateFid(ressursState.fid())
+                        .stateType(ressursState.getClass().getSimpleName())
+                        .build()
+                ));
+        } finally {
+            this.isAdmin.remove();
+        }
+
     }
 
     public Flux<Event> getAllDelayedEvents() {

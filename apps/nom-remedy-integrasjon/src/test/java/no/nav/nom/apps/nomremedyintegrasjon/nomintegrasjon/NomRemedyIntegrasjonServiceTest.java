@@ -38,6 +38,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.nomSekto
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -107,7 +108,7 @@ public class NomRemedyIntegrasjonServiceTest {
 
         doReturn(List.of(orgtilknytningState)).when(orgtilknytningStateRepository).findByNavident(navident);
 
-        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, ressursState.sistEndretAv());
+        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -115,7 +116,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -145,7 +146,7 @@ public class NomRemedyIntegrasjonServiceTest {
                 .when(orgtilknytningStateRepository)
                 .findByFid(orgtilknytningFid);
 
-        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
+        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -153,7 +154,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -188,7 +189,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(0)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(0)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -231,7 +232,7 @@ public class NomRemedyIntegrasjonServiceTest {
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).save(aggregateState.toBuilder().delayedUntil(orgtilknytningState.gyldigFom()).build());
         verify(aggregateStateRepository, times(0)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(0)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(0)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -268,7 +269,7 @@ public class NomRemedyIntegrasjonServiceTest {
         verify(aggregateStateRepository, times(1)).findAggregateStatesByMasseflyttingIsFalseOrMasseflyttingIsNullAndDelayedUntilIsLessThanEqual(any());
         verify(aggregateStateRepository, times(0)).save(aggregateState.toBuilder().delayedUntil(orgtilknytningState.gyldigFom()).build());
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -298,7 +299,7 @@ public class NomRemedyIntegrasjonServiceTest {
                 .when(orgtilknytningStateRepository)
                 .findByFid(orgtilknytningFid);
 
-        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
+        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv(), false);
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -306,7 +307,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -336,7 +337,7 @@ public class NomRemedyIntegrasjonServiceTest {
                 .when(orgtilknytningStateRepository)
                 .findByFid(orgtilknytningFid);
 
-        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv());
+        doReturn(nomIntegrasjonEntity).when(remedyIntegrasjonRepositoryService).saveNewNomIntegrasjonEntityNew(nomIntegrasjonEntity, orgtilknytningState.sistEndretAv(), false);
 
         // When
         nomRemedyIntegrasjonService.executeImmediateStateUpdate();
@@ -344,7 +345,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
     @Test
@@ -426,7 +427,7 @@ public class NomRemedyIntegrasjonServiceTest {
 
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
 
     }
@@ -505,7 +506,7 @@ public class NomRemedyIntegrasjonServiceTest {
 
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
-        verify(remedyIntegrasjonRepositoryService, times(2)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(2)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
         verify(aggregateStateRepository, times(1)).deleteAllById(anyList());
         verify(aggregateStateRepository, times(1)).save(any(AggregateState.class));
     }
@@ -540,7 +541,6 @@ public class NomRemedyIntegrasjonServiceTest {
                 .build();
 
         var aggregateState = aggregate(futureOrgtilknytningFid, futureOrgtilknytningState.getClass().getSimpleName(), navident);
-        var nomIntegrasjonEntity = nomIntegrasjonEntityFromNomData(ressursState, futureOrgtilknytningState, false).toBuilder().entryOperasjon("Ny").build();
 
         // And
         doReturn(List.of(aggregateState))
@@ -565,7 +565,7 @@ public class NomRemedyIntegrasjonServiceTest {
         // Then
         verify(aggregateStateRepository, times(1)).findAllOlderThanFiveSecondsWhereDelayedUntilIsNull();
         verify(aggregateStateRepository, times(1)).deleteAllById(List.of(aggregateState.getAggregateStateId()));
-        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString());
+        verify(remedyIntegrasjonRepositoryService, times(1)).saveNewNomIntegrasjonEntityNew(any(NomIntegrasjonEntity.class), anyString(), eq(false));
     }
 
 

@@ -24,9 +24,9 @@ public class RemedyIntegrasjonRepositoryService {
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
     }
 
-    protected NomIntegrasjonEntity saveNewNomIntegrasjonEntityNew(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
+    protected NomIntegrasjonEntity saveNewNomIntegrasjonEntityNew(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident, boolean isAdmin) {
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
-        if (nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
+        if (isAdmin || nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
             try {
                 NomIntegrasjonEntity nomIntegrasjonEntity = nomIntegrasjonRepository.save(
                     newNomIntegrasjonEntity.toBuilder()
