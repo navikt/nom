@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, Detail, Modal } from "@navikt/ds-react";
+import { Alert, Checkbox, Detail, Modal } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
 import type { HTTPError } from "ky";
 import ky from "ky";
 import { useRef } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { NOM_REMEDY_INTEGRASJON_BASE_URL } from "~/api/queries.ts";
@@ -17,6 +17,7 @@ import { Trigger } from "~/manuelle-meldinger/felles/Trigger.tsx";
 
 const schema = z.object({
   navident: navidentValidator(),
+  isAdmin: z.boolean(),
 });
 
 type SchemaType = z.infer<typeof schema>;
@@ -27,6 +28,7 @@ export function SjekkRessursStateRemedy() {
   const methods = useForm<SchemaType>({
     defaultValues: {
       navident: "",
+      isAdmin: false,
     },
     resolver: zodResolver(schema),
   });
@@ -40,6 +42,7 @@ export function SjekkRessursStateRemedy() {
             headers: {
               "Content-Type": "application/json",
             },
+            searchParams: { isAdmin: v.isAdmin.toString() },
           },
         )
       ).text(),
@@ -62,6 +65,18 @@ export function SjekkRessursStateRemedy() {
           >
             <Modal.Body className="flex gap-4 flex-col">
               <NavidentTextField />
+              <Controller
+                control={methods.control}
+                name="isAdmin"
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  >
+                    Bekrefter at jeg sender duplikat state
+                  </Checkbox>
+                )}
+              />
               {(() => {
                 switch (mutation.status) {
                   case "pending":
