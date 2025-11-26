@@ -51,7 +51,7 @@
         <poi-ooxml.version>5.4.1</poi-ooxml.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <postgresql.version>42.7.8</postgresql.version>
-        <microsoft-graph.version>6.51.0</microsoft-graph.version>
+        <microsoft-graph.version>6.57.0</microsoft-graph.version>
         <azure-identity.version>1.18.0</azure-identity.version>
         <caffeine.version>3.2.2</caffeine.version>
         <apache.poi.version>5.4.1</apache.poi.version>
