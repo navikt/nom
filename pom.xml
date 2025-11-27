@@ -58,7 +58,7 @@
         <commons-lang3.version>3.18.0</commons-lang3.version>
 
 
-        <commons-io.version>2.20.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+        <commons-io.version>2.21.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
     </properties>
 
     <dependencyManagement>
