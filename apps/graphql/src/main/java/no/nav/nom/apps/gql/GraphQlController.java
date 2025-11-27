@@ -33,7 +33,6 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
-import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -43,8 +42,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
-@Controller
-public class GraphQlController {
+public abstract class GraphQlController {
 
     private final OrgEnhetResolver orgEnhetResolver;
     private final OrgtilknytningResolver orgtilknytningResolver;

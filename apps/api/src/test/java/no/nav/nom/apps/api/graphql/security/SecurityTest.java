@@ -141,7 +141,6 @@ class SecurityTest extends GraphQLTestBase {
         postAndAssertResponse(ressurserResource, token, null);
     }
 
-    @SneakyThrows
     private void postAndAssertResponse(String resource, String token, String path) {
         var response = postForResource(resource, token);
 

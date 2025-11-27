@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
+import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
+import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("GraphQLTest")
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL.HentLederForRessursFlereNivaer")
 public class LederForRessursTest {
     @Autowired

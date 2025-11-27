@@ -17,6 +17,7 @@ import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -24,69 +25,75 @@ import org.springframework.core.env.Environment;
 @AutoConfiguration
 public class GraphQlAutoConfiguration {
 
-    private final LuceneService luceneService;
-    private final GraphQlController graphQlController;
-    private final OrgEnhetStateVisitor orgEnhetStateVisitor;
-    private final RessursStateVisitor ressursStateVisitor;
-    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    private final NomStateRessursListener nomStateRessursListener;
+    @Bean
+    OrgEnhetResolver orgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository) {
+        return new OrgEnhetResolver(orgEnhetStateRepository, new AgressoOrgenhetService(orgEnhetStateRepository));
+    }
 
-
-    public  GraphQlAutoConfiguration(
-                                     OrganiseringStateRepository organiseringStateRepository,
-                                     OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                     RessursStateRepository ressursStateRepository,
-                                     OrgEnhetLederStateRepository orgEnhetLederStateRepository,
-                                     OrgEnhetStateRepository orgEnhetStateRepository,
-                                     ReadyForIndexingInterface readyForIndexing,
-                                     FieldUsageCounterInterface fieldUsageCounter,
-                                     RessursPropertyResolverInterface propertyResolver,
-                                     RemedyIdResolverInterface remedyIdResolver,
-                                     Environment environment,
-                                     FieldUsageCounterInterface fieldUsageCounterInterface,
-                                     NomStateOrgEnhetListener nomStateOrgEnhetListener,
-                                     NomStateRessursListener nomStateRessursListener
+    @Bean
+    OrgtilknytningResolver orgtilknytningResolver(
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgEnhetStateRepository orgEnhetStateRepository
     ) {
-        this.luceneService = new LuceneService(ressursStateRepository, environment, orgEnhetStateRepository, readyForIndexing);
-        this.graphQlController = new GraphQlController(
-            new OrgEnhetResolver(orgEnhetStateRepository, new AgressoOrgenhetService(orgEnhetStateRepository)),
-            new OrgtilknytningResolver(orgtilknytningStateRepository,ressursStateRepository,orgEnhetStateRepository),
-            new OrganiseringResolver(organiseringStateRepository),
-            new LederResolver(orgEnhetLederStateRepository,ressursStateRepository,orgEnhetStateRepository, orgtilknytningStateRepository, organiseringStateRepository),
-            remedyIdResolver,
-            new RessursResolver(ressursStateRepository),
-            propertyResolver,
-            new SearchResolver(luceneService,ressursStateRepository,orgEnhetStateRepository),
-            fieldUsageCounter
+        return new OrgtilknytningResolver(orgtilknytningStateRepository, ressursStateRepository, orgEnhetStateRepository);
+    }
+
+    @Bean
+    OrganiseringResolver organiseringResolver(OrganiseringStateRepository organiseringStateRepository) {
+        return new OrganiseringResolver(organiseringStateRepository);
+    }
+
+    @Bean
+    LederResolver lederResolver(
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        RessursStateRepository ressursStateRepository,
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrganiseringStateRepository organiseringStateRepository
+    ) {
+        return new LederResolver(
+            orgEnhetLederStateRepository,
+            ressursStateRepository,
+            orgEnhetStateRepository,
+            orgtilknytningStateRepository,
+            organiseringStateRepository
         );
-        this.orgEnhetStateVisitor = new OrgEnhetStateVisitor(luceneService,nomStateOrgEnhetListener);
-        this.ressursStateVisitor = new RessursStateVisitor(luceneService, nomStateRessursListener);
-        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
-        this.nomStateRessursListener = nomStateRessursListener;
     }
 
     @Bean
-    public LuceneService getLuceneService() {
-        return luceneService;
+    RessursResolver ressursResolver(RessursStateRepository ressursStateRepository) {
+        return new RessursResolver(ressursStateRepository);
     }
 
     @Bean
-    public GraphQlController getGraphQlController() {
-        return graphQlController;
+    SearchResolver searchResolver(LuceneService luceneService, RessursStateRepository ressursStateRepository, OrgEnhetStateRepository orgEnhetStateRepository) {
+        return new SearchResolver(luceneService, ressursStateRepository, orgEnhetStateRepository);
+    }
+
+
+
+    @Bean
+    public static LuceneService getLuceneService(RessursStateRepository ressursStateRepository, Environment environment,
+                                          OrgEnhetStateRepository orgEnhetStateRepository,
+                                          ReadyForIndexingInterface readyForIndexing,
+                                          @Autowired(required = false) NomStateOrgEnhetListener nomStateOrgEnhetListener,
+                                          @Autowired(required = false) NomStateRessursListener nomStateRessursListener
+    ) {
+        var out = new LuceneService(ressursStateRepository, environment, orgEnhetStateRepository, readyForIndexing);
+        // todo, only allow non-init if the appropriate profile is set
+        if(nomStateOrgEnhetListener != null) {
+            var ignored1 = new OrgEnhetStateVisitor(out, nomStateOrgEnhetListener);
+        }
+        // todo, only allow non-init if the appropriate profile is set
+        if(nomStateRessursListener != null) {
+            var ignored2 = new RessursStateVisitor(out, nomStateRessursListener);
+        }
+        return out;
     }
 
     @Bean
-    public OrgEnhetStateVisitor getOrgEnhetStateVisitor() {
-        return orgEnhetStateVisitor;
-    }
-
-    @Bean
-    public RessursStateVisitor getRessursStateVisitor() {
-        return ressursStateVisitor;
-    }
-
-    @Bean
-    public GraphQLConfig getGraphQLConfig() {
+    public static GraphQLConfig getGraphQLConfig() {
         return new GraphQLConfig();
     }
 }

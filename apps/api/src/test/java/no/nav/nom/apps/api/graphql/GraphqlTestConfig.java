@@ -51,7 +51,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , SearchResolver.class
 //    , RemedyEnhetIdResolver.class
 
-    , GraphQLConfig.class
+//    , GraphQLConfig.class
     , GraphQLTestUtil.class
 
     , ActiveDirectoryRessursBatchLoader.class
@@ -89,13 +89,13 @@ public class GraphqlTestConfig {
         return (s) -> "remedy"+"s";
     }
 
-    @Bean
-    LuceneService luceneService(ApplicationContext applicationContext) {
-        var rsr = applicationContext.getBean(RessursStateRepositoryImpl.class);
-        var env = applicationContext.getBean(Environment.class);
-        var orgEnhetStateRepository = applicationContext.getBean(OrgEnhetStateRepositoryImpl.class);
-            return new LuceneService(rsr,env,orgEnhetStateRepository,() -> true);
-    }
+//    @Bean
+//    LuceneService luceneService(ApplicationContext applicationContext) {
+//        var rsr = applicationContext.getBean(RessursStateRepositoryImpl.class);
+//        var env = applicationContext.getBean(Environment.class);
+//        var orgEnhetStateRepository = applicationContext.getBean(OrgEnhetStateRepositoryImpl.class);
+//            return new LuceneService(rsr,env,orgEnhetStateRepository,() -> true);
+//    }
 
     @Bean
     FieldUsageCounterInterface fieldUsageCounter() {
@@ -105,6 +105,11 @@ public class GraphqlTestConfig {
     @Bean
     DvhStartupLoadMonitor dvhStartupLoadMonitor() {
         return new DvhStartupLoadMonitor();
+    }
+
+    @Bean
+    GraphQLConfig graphQLConfig() {
+        return new GraphQLConfig();
     }
 
 }

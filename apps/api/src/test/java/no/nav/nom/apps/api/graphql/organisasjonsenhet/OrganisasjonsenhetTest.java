@@ -4,9 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
+import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -15,14 +16,10 @@ import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,27 +43,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
 @ActiveProfiles("GraphQLTest")
+@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class )
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL - Organisasjonsenhet spørringer")
 class OrganisasjonsenhetTest {
-    @Autowired
-    protected GraphQLTestUtil gqlUtil;
 
-    @Autowired
-    protected OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
+    @Autowired protected GraphQLTestUtil gqlUtil;
 
-    @Autowired
-    protected OrganiseringStateRepositoryImpl organiseringStateRepository;
+    @Autowired protected OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
 
-    @Autowired
-    protected OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
+    @Autowired protected OrganiseringStateRepositoryImpl organiseringStateRepository;
 
-    @Autowired
-    private RessursStateRepositoryImpl ressursStateRepository;
+    @Autowired protected OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
+
+    @Autowired protected RessursStateRepositoryImpl ressursStateRepository;
 
     @Autowired
     public ObjectMapper objectMapper;

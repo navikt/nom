@@ -3,8 +3,10 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
+import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
+import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -46,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles({"GraphQLTest", "test"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class)
 @AutoConfigureWireMock(port = 0) // For AD wiremock resultat (epost oppslag)
 @DisplayName("GraphQL - Ressurs spørringer")
 class RessursTest {

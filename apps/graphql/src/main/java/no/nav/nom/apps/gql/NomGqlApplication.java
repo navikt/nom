@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
+import no.nav.nom.apps.gql.resolvers.LederResolver;
+import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
+import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
+import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
+import no.nav.nom.apps.gql.resolvers.RessursResolver;
+import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -25,6 +31,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Controller;
 
 import javax.swing.JOptionPane;
 import java.io.IOException;
@@ -50,7 +57,7 @@ public class NomGqlApplication {
     }
 
 	static void main(String[] args) {
-        var app = new SpringApplication(NomGqlApplication.class, FileSourcedRepositories.class);
+        var app = new SpringApplication(NomGqlApplication.class, FileSourcedRepositories.class, ConcreteGraphqlController.class);
 
         var pathProvided = args.length > 0 && args[0] != null;
 
@@ -65,6 +72,39 @@ public class NomGqlApplication {
         private final OrgEnhetLederStateRepositoryImpl orgEnhetLederStateRepository;
         private final OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
         private final OrganiseringStateRepositoryImpl organiseringStateRepository;
+
+        public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
+            this.ressursStateRepository = new RessursStateRepositoryImpl();
+            this.orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();
+            this.orgEnhetLederStateRepository = new OrgEnhetLederStateRepositoryImpl();
+            this.orgtilknytningStateRepository = new OrgtilknytningStateRepositoryImpl();
+            this.organiseringStateRepository = new OrganiseringStateRepositoryImpl();
+
+            var stateObjects = this.readStateObjectsFromFile(env.getProperty(STATE_OBJECTS_PATH), objectMapper );
+
+            for(var so : stateObjects){
+                switch(so){
+                    case RessursState rs -> {
+                        ressursStateRepository.update(rs);
+                    }
+                    case OrgEnhetLederState oels -> {
+                        orgEnhetLederStateRepository.update(oels.fid(), oels);
+                    }
+                    case OrgEnhetState oes -> {
+                        orgEnhetStateRepository.update(oes);
+                    }
+                    case OrganiseringState os -> {
+                        organiseringStateRepository.update(os);
+                    }
+                    case OrgtilknytningState oets -> {
+                        orgtilknytningStateRepository.update(oets.fid(), oets);
+                    }
+                    default -> {
+                        throw new  RuntimeException("Bad state object");
+                    }
+                }
+            }
+        }
 
         @Bean
         public OrganiseringStateRepository organiseringStateRepository() {
@@ -116,39 +156,6 @@ public class NomGqlApplication {
             return (s) -> "remedy-"+s;
         }
 
-        public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
-            this.ressursStateRepository = new RessursStateRepositoryImpl();
-            this.orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();
-            this.orgEnhetLederStateRepository = new OrgEnhetLederStateRepositoryImpl();
-            this.orgtilknytningStateRepository = new OrgtilknytningStateRepositoryImpl();
-            this.organiseringStateRepository = new OrganiseringStateRepositoryImpl();
-
-            var stateObjects = this.readStateObjectsFromFile(env.getProperty(STATE_OBJECTS_PATH), objectMapper );
-
-            for(var so : stateObjects){
-                switch(so){
-                    case RessursState rs -> {
-                        ressursStateRepository.update(rs);
-                    }
-                    case OrgEnhetLederState oels -> {
-                        orgEnhetLederStateRepository.update(oels.fid(), oels);
-                    }
-                    case OrgEnhetState oes -> {
-                        orgEnhetStateRepository.update(oes);
-                    }
-                    case OrganiseringState os -> {
-                        organiseringStateRepository.update(os);
-                    }
-                    case OrgtilknytningState oets -> {
-                        orgtilknytningStateRepository.update(oets.fid(), oets);
-                    }
-                    default -> {
-                        throw new  RuntimeException("Bad state object");
-                    }
-                }
-            }
-        }
-
         private List<Object> readStateObjectsFromFile(String pathProperty, ObjectMapper objectMapper){
             try {
                 var s = Files.readString(Path.of(pathProperty));
@@ -175,6 +182,34 @@ public class NomGqlApplication {
                 }
             }
             throw new RuntimeException("Bad state object");
+        }
+    }
+
+    @Controller
+    private static class ConcreteGraphqlController extends GraphQlController{
+
+        public ConcreteGraphqlController(
+            OrgEnhetResolver orgEnhetResolver,
+            OrgtilknytningResolver orgtilknytningResolver,
+            OrganiseringResolver organiseringResolver,
+            LederResolver lederResolver,
+            RemedyIdResolverInterface remedyEnhetIdResolver4,
+            RessursResolver ressursResolver,
+            RessursPropertyResolverInterface propertyResolver,
+            SearchResolver searchResolver,
+            FieldUsageCounterInterface fieldUsageCounter
+        ) {
+            super(
+                orgEnhetResolver,
+                orgtilknytningResolver,
+                organiseringResolver,
+                lederResolver,
+                remedyEnhetIdResolver4,
+                ressursResolver,
+                propertyResolver,
+                searchResolver,
+                fieldUsageCounter
+            );
         }
     }
 
