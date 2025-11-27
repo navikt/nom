@@ -1,13 +1,14 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 @Slf4j
-public class DvhStartupLoadMonitor {
+public class DvhStartupLoadMonitor implements ReadyForIndexingInterface {
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
@@ -27,5 +28,10 @@ public class DvhStartupLoadMonitor {
                 log.error("Waiting for initial DVH last feilet", ignored);
             }
         }
+    }
+
+    @Override
+    public boolean isReadyForIndexing() {
+        return hasCompleted();
     }
 }

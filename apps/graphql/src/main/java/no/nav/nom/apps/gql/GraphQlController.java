@@ -64,7 +64,7 @@ public class GraphQlController {
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,
         LederResolver lederResolver,
-        RemedyIdResolverInterface remedyEnhetIdResolver,
+        RemedyIdResolverInterface remedyEnhetIdResolver4,
         RessursResolver ressursResolver,
         RessursPropertyResolverInterface propertyResolver,
         SearchResolver searchResolver, FieldUsageCounterInterface fieldUsageCounter
@@ -73,7 +73,7 @@ public class GraphQlController {
         this.orgtilknytningResolver = orgtilknytningResolver;
         this.organiseringResolver = organiseringResolver;
         this.lederResolver = lederResolver;
-        this.remedyEnhetIdResolver = remedyEnhetIdResolver;
+        this.remedyEnhetIdResolver = remedyEnhetIdResolver4;
         this.ressursResolver = ressursResolver;
         this.propertyResolver = propertyResolver;
         this.searchResolver = searchResolver;
