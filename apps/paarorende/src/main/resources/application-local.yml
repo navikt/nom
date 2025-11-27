@@ -1,9 +1,0 @@
-DATABASE_JDBC_URL: jdbc:postgresql://localhost:5436/postgres-paarorende?password=${DATABASE_PASSWORD}&user=${DATABASE_USERNAME}
-DATABASE_USERNAME: postgres
-DATABASE_PASSWORD: password
-
-AZURE_APP_TENANT_ID: 966ac572-f5b7-4bbe-aa88-c76419c0f851
-AZURE_APP_CLIENT_ID: none
-
-NOM_ADMIN_GROUP: 9e0e2958-df7a-4376-83f3-9bcbec1f2650
-NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default
