@@ -139,8 +139,9 @@ public abstract class GraphQlController {
     @QueryMapping("ressurserWithMetadata")
     public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment) {
         counter.count(environment);
+        return List.of();
 
-        throw new GraphQLException("Ikke implementert, pga ikke relevant for integrasjonstesting", null);
+//        throw new GraphQLException("Ikke implementert, pga ikke relevant for integrasjonstesting", null);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")

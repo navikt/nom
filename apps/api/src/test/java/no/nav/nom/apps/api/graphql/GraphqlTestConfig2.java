@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql;
 import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.gql.FieldUsageCounterInterface;
 import no.nav.nom.apps.gql.RemedyIdResolverInterface;
 import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
@@ -22,10 +23,11 @@ import org.springframework.boot.autoconfigure.web.reactive.function.client.WebCl
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 
 import java.util.stream.Collectors;
 
-@Import({WebClientAutoConfiguration.class, SecurityAutoConfiguration.class})
+@Import({WebClientAutoConfiguration.class, SecurityAutoConfiguration.class })
 public class GraphqlTestConfig2 {
 
     @Bean
@@ -95,6 +97,11 @@ public class GraphqlTestConfig2 {
     @Bean
     public ReadyForIndexingInterface readyForIndexingInterface(){
         return () -> true;
+    }
+
+    @Bean
+    public SecurityUtil securityUtil(Environment environment) {
+        return new SecurityUtil(environment);
     }
 
 }

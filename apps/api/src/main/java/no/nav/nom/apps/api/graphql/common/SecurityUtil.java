@@ -1,9 +1,14 @@
 package no.nav.nom.apps.api.graphql.common;
 
+import graphql.GraphQLError;
+import graphql.GraphqlErrorBuilder;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -171,5 +176,12 @@ public class SecurityUtil {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getAzpName(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", AZP_NAME)));
+    }
+
+    public static GraphQLError handleUnauthenticatedException(Throwable throwable, DataFetchingEnvironment environment) {
+        if(throwable instanceof InvalidBearerTokenException) {
+            return ErrorCode.UNAUTHORIZED.construct(environment, "Unauthorized");
+        }
+        return null;
     }
 }

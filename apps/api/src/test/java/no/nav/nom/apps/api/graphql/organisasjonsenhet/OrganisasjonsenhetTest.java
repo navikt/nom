@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
+import no.nav.nom.apps.api.graphql.GraphQlControllerForTest;
 import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
@@ -45,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("GraphQLTest")
-@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class )
+@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class )
 @GraphQlTest
 @DisplayName("GraphQL - Organisasjonsenhet spørringer")
 class OrganisasjonsenhetTest {
@@ -77,7 +78,7 @@ class OrganisasjonsenhetTest {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().fid("FID_1").id("ID_1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
         orgEnhetStateRepository.update(orgenhet);
 
         var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario1.graphql")

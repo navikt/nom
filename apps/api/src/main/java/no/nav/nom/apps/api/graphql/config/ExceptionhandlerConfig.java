@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.graphql.config;
 
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.resolvers.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,11 @@ public class ExceptionhandlerConfig {
     @Bean
     public DataFetcherExceptionResolver LederNotFoundExceptionResolver() {
         return DataFetcherExceptionResolver.forSingleError(LederResolver::handleLederNotFoundException);
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver x() {
+        return DataFetcherExceptionResolver.forSingleError(SecurityUtil::handleUnauthenticatedException);
     }
 
     /**

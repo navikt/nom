@@ -2,6 +2,7 @@ package no.nav.nom.apps.api;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
