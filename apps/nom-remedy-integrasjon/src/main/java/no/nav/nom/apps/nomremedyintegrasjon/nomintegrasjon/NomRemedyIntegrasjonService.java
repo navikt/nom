@@ -258,7 +258,7 @@ public class NomRemedyIntegrasjonService {
                 logger.info("RessursState med navident {} har en sluttdato før dagens dato, sletter ressurs i IR", navident);
                 remedyIntegrasjonRepositoryService.findTopByNavIdEqualsOrderByEntryIdDesc(navident).ifPresentOrElse(
                     nomIntegrasjonEntity -> {
-                        if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette")) {
+                        if (nomIntegrasjonEntity.getEntryOperasjon().equals("Slette") && !isAdmin.get()) {
                             logger.info("Ressurs {} er allerede slettet i IR", navident);
                         } else {
                             remedyIntegrasjonRepositoryService.markRessursForDeletion(navident, ressursState.sistEndretAv());
