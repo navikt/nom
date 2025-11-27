@@ -5,33 +5,25 @@ import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
-import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
-import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
 @ActiveProfiles("GraphQLTest")
 @GraphQlTest
@@ -50,9 +42,22 @@ public class LederForRessursTest {
     @Autowired
     OrgEnhetLederStateRepositoryImpl orgEnhetLederStateRepository;
 
+    public LederForRessursTest() {
+
+    }
+
+    public void resetState(
+    ) {
+        orgEnhetLederStateRepository.clear();
+        orgEnhetStateRepository.clear();
+        orgtilknytningStateRepository.clear();
+        ressursStateRepository.clear();
+    }
+
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
     void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet() {
+        resetState(); // workaround da testene per nå kan påvirke hverandre
         final String lederEnhetId = "idLederEnhet";
         final String lederEnhetNavn = "Leder sin enhet";
         final String lederEnhetNiva = "ORGNIV2";
