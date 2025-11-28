@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.gql.ErrorCode;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.ad.AdRessurs.AdStatus;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;

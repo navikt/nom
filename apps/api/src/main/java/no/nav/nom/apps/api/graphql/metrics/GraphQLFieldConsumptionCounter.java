@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.querystats.GqlQueryStatsService;
-import no.nav.nom.apps.gql.FieldUsageCounterInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Component
-public class GraphQLFieldConsumptionCounter implements FieldUsageCounterInterface {
+public class GraphQLFieldConsumptionCounter {
 
     private final static String METRICS_COUNTER_NAME = "graphql_query_field_counter";
     private final static Logger logger = LoggerFactory.getLogger(GraphQLFieldConsumptionCounter.class);
@@ -37,7 +36,6 @@ public class GraphQLFieldConsumptionCounter implements FieldUsageCounterInterfac
         this.gqlQueryStatsService = gqlQueryStatsService;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public void count(DataFetchingEnvironment env) {
         final var consumer = securityUtil.getAzpName().orElse("unknown");

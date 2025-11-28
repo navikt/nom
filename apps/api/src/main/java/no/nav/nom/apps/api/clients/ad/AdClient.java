@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.clients.ad;
 
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.gql.ErrorCode;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.ad.AdRessurser;
 import org.springframework.stereotype.Component;

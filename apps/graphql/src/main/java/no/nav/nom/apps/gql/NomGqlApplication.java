@@ -4,8 +4,6 @@ package no.nav.nom.apps.gql
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import graphql.execution.DataFetcherResult;
-import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
@@ -39,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class NomGqlApplication {
@@ -57,7 +54,7 @@ public class NomGqlApplication {
     }
 
 	static void main(String[] args) {
-        var app = new SpringApplication(NomGqlApplication.class, FileSourcedRepositories.class, ConcreteGraphqlController.class);
+        var app = new SpringApplication(NomGqlApplication.class, FileSourcedRepositories.class, ConcreteGraphqlController.class, GraphQlExceptionHandler.class);
 
         var pathProvided = args.length > 0 && args[0] != null;
 
@@ -132,28 +129,10 @@ public class NomGqlApplication {
             return this.orgEnhetStateRepository;
         }
 
-        @Bean
-        public ReadyForIndexingInterface readyForIndexing(){
-            return () -> true;
-        }
 
         @Bean
-        public FieldUsageCounterInterface fieldUsageCounter(){
-            return (dataFetchingEnvironment) -> {};
-        }
-
-        @Bean
-        public RessursPropertyResolverInterface propertyResolver() {
-            return ressurser -> ressurser.stream().collect(
-                Collectors.toMap(
-                    (ressurs) -> ressurs,
-                    (ressurs) -> DataFetcherResult.<String>newResult().data(ressurs.getNavident()+"@dummy.mail").build())
-            );
-        }
-
-        @Bean
-        public RemedyIdResolverInterface remedyIdResolver() {
-            return (s) -> "remedy-"+s;
+        public GraphqlSupportInterface graphqlSupport() {
+            return GraphqlSupportInterface.dummyImplementation();
         }
 
         private List<Object> readStateObjectsFromFile(String pathProperty, ObjectMapper objectMapper){
@@ -186,29 +165,25 @@ public class NomGqlApplication {
     }
 
     @Controller
-    private static class ConcreteGraphqlController extends GraphQlController{
+    private static class ConcreteGraphqlController extends AbstractGraphQlController {
 
         public ConcreteGraphqlController(
             OrgEnhetResolver orgEnhetResolver,
             OrgtilknytningResolver orgtilknytningResolver,
             OrganiseringResolver organiseringResolver,
             LederResolver lederResolver,
-            RemedyIdResolverInterface remedyEnhetIdResolver4,
             RessursResolver ressursResolver,
-            RessursPropertyResolverInterface propertyResolver,
             SearchResolver searchResolver,
-            FieldUsageCounterInterface fieldUsageCounter
+            GraphqlSupportInterface graphqlSupportInterface
         ) {
             super(
                 orgEnhetResolver,
                 orgtilknytningResolver,
                 organiseringResolver,
                 lederResolver,
-                remedyEnhetIdResolver4,
                 ressursResolver,
-                propertyResolver,
                 searchResolver,
-                fieldUsageCounter
+                graphqlSupportInterface
             );
         }
     }

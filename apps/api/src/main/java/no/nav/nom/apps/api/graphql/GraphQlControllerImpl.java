@@ -2,10 +2,8 @@ package no.nav.nom.apps.api.graphql;
 
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.gql.FieldUsageCounterInterface;
 import no.nav.nom.apps.gql.AbstractGraphQlController;
-import no.nav.nom.apps.gql.RemedyIdResolverInterface;
-import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
+import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearch;
 import no.nav.nom.apps.gql.projections.OrgEnheterSearch;
 import no.nav.nom.apps.gql.projections.RessursSearch;
@@ -42,23 +40,19 @@ public class GraphQlControllerImpl extends AbstractGraphQlController {
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,
         LederResolver lederResolver,
-        RemedyIdResolverInterface remedyEnhetIdResolver4,
         RessursResolver ressursResolver,
         SearchResolver searchResolver,
-        FieldUsageCounterInterface graphQLFieldConsumptionCounter,
-        RessursPropertyResolverInterface ressursPropertyResolver,
-        SecurityUtil securityUtil
+        SecurityUtil securityUtil,
+        GraphqlSupportInterface graphqlSupportInterface
     ) {
         super(
             orgEnhetResolver,
             orgtilknytningResolver,
             organiseringResolver,
             lederResolver,
-            remedyEnhetIdResolver4,
             ressursResolver,
-            ressursPropertyResolver,
             searchResolver,
-            graphQLFieldConsumptionCounter
+            graphqlSupportInterface
         );
         this.securityUtil = securityUtil;
     }

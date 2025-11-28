@@ -2,7 +2,6 @@ package no.nav.nom.apps.gql;
 
 import no.nav.nom.apps.gql.lucenesearch.LuceneService;
 import no.nav.nom.apps.gql.lucenesearch.OrgEnhetStateVisitor;
-import no.nav.nom.apps.gql.lucenesearch.ReadyForIndexingInterface;
 import no.nav.nom.apps.gql.lucenesearch.RessursStateVisitor;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
@@ -76,11 +75,11 @@ public class GraphQlAutoConfiguration {
     @Bean
     public static LuceneService getLuceneService(RessursStateRepository ressursStateRepository, Environment environment,
                                           OrgEnhetStateRepository orgEnhetStateRepository,
-                                          ReadyForIndexingInterface readyForIndexing,
+                                          GraphqlSupportInterface graphqlSupportInterface,
                                           @Autowired(required = false) NomStateOrgEnhetListener nomStateOrgEnhetListener,
                                           @Autowired(required = false) NomStateRessursListener nomStateRessursListener
     ) {
-        var out = new LuceneService(ressursStateRepository, environment, orgEnhetStateRepository, readyForIndexing);
+        var out = new LuceneService(ressursStateRepository, environment, orgEnhetStateRepository, graphqlSupportInterface);
         // todo, only allow non-init if the appropriate profile is set
         if(nomStateOrgEnhetListener != null) {
             var ignored1 = new OrgEnhetStateVisitor(out, nomStateOrgEnhetListener);

@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.graphql.propertyresolvers;
 
 import graphql.execution.DataFetcherResult;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -17,7 +16,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Component
-public class RessursPropertyResolver implements RessursPropertyResolverInterface {
+public class RessursPropertyResolver {
 
     private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
 
@@ -43,7 +42,6 @@ public class RessursPropertyResolver implements RessursPropertyResolverInterface
         return DataFetcherResult.<String>newResult().data(data).build();
     }
 
-    @Override
     public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser) {
         if (sendDummydata) {
             return createDummyResponse("dummy-epost@i-dev.", ressurser);

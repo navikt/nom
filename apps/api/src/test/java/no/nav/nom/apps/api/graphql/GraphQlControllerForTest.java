@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.graphql;
 
 import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.gql.AbstractGraphQlController;
+import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
@@ -29,18 +30,9 @@ public class GraphQlControllerForTest extends AbstractGraphQlController {
             orgtilknytningResolver,
             organiseringResolver,
             lederResolver,
-            // dummy remedy id resolver
-            s -> "remedy-"+s,
             ressursResolver,
-            // dummy email property batch resolver
-            ressurser -> ressurser.stream().collect(
-                Collectors.toMap(
-                    (ressurs) -> ressurs,
-                    (ressurs) -> DataFetcherResult.<String>newResult().data(ressurs.getNavident()+"@dummy.mail").build())
-            ),
             searchResolver,
-            // dummy field usage counter
-            (dataFetchingEnvironment) -> {}
+            GraphqlSupportInterface.dummyImplementation()
         );
     }
 }

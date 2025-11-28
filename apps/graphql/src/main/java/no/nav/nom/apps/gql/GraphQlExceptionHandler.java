@@ -1,10 +1,9 @@
 package no.nav.nom.apps.gql;
 
-import graphql.ErrorType;
-import graphql.GraphQLError;
-import graphql.GraphqlErrorBuilder;
-import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.gql.resolvers.LederResolver;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.graphql.execution.DataFetcherExceptionResolver;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 
 @Configuration(proxyBeanMethods = false)
@@ -19,6 +18,15 @@ public class GraphQlExceptionHandler extends DataFetcherExceptionResolverAdapter
 //            .build();
 //    }
 
+    @Bean
+    public DataFetcherExceptionResolver LederNotFoundExceptionResolver() {
+        return DataFetcherExceptionResolver.forSingleError(LederResolver::handleLederNotFoundException);
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver notRelevantQueryHandler() {
+        return DataFetcherExceptionResolver.forSingleError(AbstractGraphQlController::handleNotRelevantQueryException);
+    }
 
 
 }

@@ -22,14 +22,12 @@ public class ExceptionhandlerConfig {
     }
 
     @Bean
-    public DataFetcherExceptionResolver LederNotFoundExceptionResolver() {
-        return DataFetcherExceptionResolver.forSingleError(LederResolver::handleLederNotFoundException);
-    }
-
-    @Bean
     public DataFetcherExceptionResolver unauthenticatedException() {
         return DataFetcherExceptionResolver.forSingleError(SecurityUtil::handleUnauthenticatedException);
     }
+
+    @Bean
+
 
     /**
      * Factory method to create a {@link DataFetcherExceptionResolver} to resolve

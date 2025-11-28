@@ -11,10 +11,9 @@ import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
-import no.nav.nom.apps.gql.FieldUsageCounterInterface;
 import no.nav.nom.apps.gql.GraphQLConfig;
 import no.nav.nom.apps.gql.AbstractGraphQlController;
-import no.nav.nom.apps.gql.RemedyIdResolverInterface;
+import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
@@ -80,18 +79,8 @@ public class GraphqlTestConfig {
     DvhRessursRestService dvhRessursRestService() { return Mockito.mock(DvhRessursRestService.class, MockReset.after()); }
 
     @Bean
-    RemedyIdResolverInterface remedyIdResolverInterface(){
-        return (s) -> "remedy"+"s";
-    }
-
-    @Bean
-    FieldUsageCounterInterface fieldUsageCounter() {
-        return x -> {};
-    }
-
-    @Bean
-    DvhStartupLoadMonitor dvhStartupLoadMonitor() {
-        return new DvhStartupLoadMonitor();
+    GraphqlSupportInterface graphqlSupportInterface(){
+        return GraphqlSupportInterface.dummyImplementation();
     }
 
     @Bean

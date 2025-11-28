@@ -1,5 +1,6 @@
 package no.nav.nom.apps.gql.lucenesearch;
 
+import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
@@ -45,17 +46,17 @@ public class LuceneService {
     private final String ressursEntityType;
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final ReadyForIndexingInterface readyForIndexing;
+    private final GraphqlSupportInterface graphqlSupportInterface;
 
     private final boolean isLocal;
 
     public LuceneService(
         RessursStateRepository ressursStateRepository, Environment environment,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        ReadyForIndexingInterface readyForIndexing
+        GraphqlSupportInterface graphqlSupportInterface
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
-        this.readyForIndexing = readyForIndexing;
+        this.graphqlSupportInterface = graphqlSupportInterface;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
         this.wrappedLucene = new WrappedLucene(List.of(indexOrgEnhet, indexRessurs));
@@ -70,10 +71,10 @@ public class LuceneService {
 
     @Scheduled(initialDelayString = "PT30S", fixedDelayString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
-        if (!readyForIndexing.isReadyForIndexing()) {
+        if (graphqlSupportInterface.isWaitingToIndexLucene()) {
             log.info("Lucene indexing waiting for initial DVH load to complete.");
         }
-        while (!readyForIndexing.isReadyForIndexing()) { // Wait on initial DVH load to complete
+        while (graphqlSupportInterface.isWaitingToIndexLucene()) { // Wait on initial DVH load to complete
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
