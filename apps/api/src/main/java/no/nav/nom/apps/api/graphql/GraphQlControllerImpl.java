@@ -1,14 +1,9 @@
 package no.nav.nom.apps.api.graphql;
 
-import graphql.GraphQLException;
-import graphql.GraphqlErrorException;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.resolvers.RemedyEnhetIdResolver;
-import no.nav.nom.apps.api.graphql.resolvers.RessursPropertyResolver;
 import no.nav.nom.apps.gql.FieldUsageCounterInterface;
-import no.nav.nom.apps.gql.GraphQlController;
+import no.nav.nom.apps.gql.AbstractGraphQlController;
 import no.nav.nom.apps.gql.RemedyIdResolverInterface;
 import no.nav.nom.apps.gql.RessursPropertyResolverInterface;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearch;
@@ -38,7 +33,7 @@ import java.util.Optional;
 
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
 @Controller
-public class GraphQlControllerImpl extends GraphQlController {
+public class GraphQlControllerImpl extends AbstractGraphQlController {
 
     private final SecurityUtil securityUtil;
 

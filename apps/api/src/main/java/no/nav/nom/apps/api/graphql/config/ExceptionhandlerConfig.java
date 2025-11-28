@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.graphql.config;
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.graphql.resolvers.ActiveDirectoryRessursBatchLoader;
+import no.nav.nom.apps.api.graphql.propertyresolvers.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +27,7 @@ public class ExceptionhandlerConfig {
     }
 
     @Bean
-    public DataFetcherExceptionResolver x() {
+    public DataFetcherExceptionResolver unauthenticatedException() {
         return DataFetcherExceptionResolver.forSingleError(SecurityUtil::handleUnauthenticatedException);
     }
 

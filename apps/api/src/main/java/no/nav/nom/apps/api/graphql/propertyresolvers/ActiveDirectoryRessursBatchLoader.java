@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.resolvers;
+package no.nav.nom.apps.api.graphql.propertyresolvers;
 
 import graphql.GraphQLError;
 import graphql.GraphQLException;

@@ -27,7 +27,7 @@ public class GraphQlAutoConfiguration {
 
     @Bean
     OrgEnhetResolver orgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository) {
-        return new OrgEnhetResolver(orgEnhetStateRepository, new AgressoOrgenhetService(orgEnhetStateRepository));
+        return new OrgEnhetResolver(orgEnhetStateRepository);
     }
 
     @Bean

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.resolvers;
+package no.nav.nom.apps.api.graphql.propertyresolvers;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;

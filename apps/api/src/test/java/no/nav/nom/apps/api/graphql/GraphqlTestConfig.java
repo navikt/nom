@@ -5,18 +5,16 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.graphql.resolvers.ActiveDirectoryRessursBatchLoader;
+import no.nav.nom.apps.api.graphql.propertyresolvers.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.resolvers.RessursPropertyResolver;
+import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.ressurs.api.v1.dvh.DvhRessursRestService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
-import no.nav.nom.apps.gql.AgressoOrgenhetService;
 import no.nav.nom.apps.gql.FieldUsageCounterInterface;
 import no.nav.nom.apps.gql.GraphQLConfig;
-import no.nav.nom.apps.gql.GraphQlController;
+import no.nav.nom.apps.gql.AbstractGraphQlController;
 import no.nav.nom.apps.gql.RemedyIdResolverInterface;
-import no.nav.nom.apps.gql.lucenesearch.LuceneService;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
@@ -31,17 +29,15 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.bean.override.mockito.MockReset;
 
 @Import({
      TestTokensGenerator.class
 
-    , GraphQlController.class
+    , AbstractGraphQlController.class
     , RessursResolver.class
     , RessursPropertyResolver.class
     , OrgtilknytningResolver.class
@@ -66,7 +62,6 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OrganiseringStateRepositoryImpl.class
     , OrgtilknytningStateRepositoryImpl.class
     , OrgEnhetLederStateRepositoryImpl.class
-    , AgressoOrgenhetService.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class GraphqlTestConfig {
@@ -88,14 +83,6 @@ public class GraphqlTestConfig {
     RemedyIdResolverInterface remedyIdResolverInterface(){
         return (s) -> "remedy"+"s";
     }
-
-//    @Bean
-//    LuceneService luceneService(ApplicationContext applicationContext) {
-//        var rsr = applicationContext.getBean(RessursStateRepositoryImpl.class);
-//        var env = applicationContext.getBean(Environment.class);
-//        var orgEnhetStateRepository = applicationContext.getBean(OrgEnhetStateRepositoryImpl.class);
-//            return new LuceneService(rsr,env,orgEnhetStateRepository,() -> true);
-//    }
 
     @Bean
     FieldUsageCounterInterface fieldUsageCounter() {
