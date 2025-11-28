@@ -126,6 +126,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 100110;1001;ORGNIV3;Kristiansand;Beholdt;;;JA;100110;ORGNIV3;leggInn;
 100200;1002;ORGNIV3;Lindesnes;Beholdt;;;JA;100200;ORGNIV3;leggInn;
 101400;1014;ORGNIV3;Midt-Agder;Beholdt;;;JA;101400;ORGNIV3;leggInn;
+103400;1034;ORGNIV3;Hægebostad;Beholdt;;;JA;103400;ORGNIV3;ka920a;28.11.2025 - lagt inn nytt ifm. gjennopprettelse el rydding av Nav Hægebostad 
 103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
 1080143;1087;AGRESSOORGENHET;Agder Penger;Beholdt;;gu485r;JA;1080143;ORGENHET;gu485r;26.05.2025 Lagt inn midl mapping til 1087 på Agder Penger.
 1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;;JA;109900;ORGNIV3;;28.02.2025 fjernet nomId-mappingen. Mapper riktig via agressoID
@@ -406,7 +407,6 @@ ER00001;9504;ORGENHET;;TODO, se kommentar;;;;ER00001;ORGENHET;ke602d;04.03.2025:
 ;0293;;NAV Dokumentsenter Øst-Viken;Hentet fra Norg-uttrekk;029300;re831r;JA;029300;ORGNIV4;re831r;Bør nok inn i mappingen. Det finnes folk på 0293 i DVH. Skal antagelig mappes til 029300, men må også ryddes litt under da 0293010 også burde ligge under 029300, men har fått feil parent. Sendt til ØT for opprydding, avventer.
 ;0293;;NAV Dokumentsenter Øst-Viken;;0293010;he276e;JA;0293010;;he276e;24.02.2025 Oppdaterte så det nå er 2 enheter som mapper til 0293. Antagelig burde denne vært flyttet inn under re831r. Må tas med ØT.
 ;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
-;1034;;NAV Hægebostad;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive navIdenter i HRRES_RESSURS. Disse to personene har orgEnhet 103700 som er NAV Lister, som har sin egen remedyEnhet 1037. Mulig 1034 da kan avvikles? Sjekk med RemedyOversikt. Antagelig kan 1034 fjernes siden orgEnheten for Hægebosstad er nedlagt i Unit4, og fysiske arbeidsstedet er 1037.
 ;1193;;NAV Marked Nord-Rogaland;Hentet fra Norg-uttrekk;1194310;;JA;119431;ORGNIV3;my329y;04.03.2025 - flyttet mapping opp et hakk til my329y.
 ;1194;;NAV Marked Sør-Rogaland;Hentet fra Norg-uttrekk;119433;ga491t;JA;119433;ORGNIV3;ga491t;04.03.2025 - flyttet mapping opp et hakk til ga491t.
 ;1195;;NAV IPS Rogaland;Hentet fra Norg-uttrekk;119510;ny183y;JA;119510;ORGNIV3;ny183y;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her er på 1195100, og siden den ikke har søsken, så plasseres mapping på parent 119510 (ny183y)
