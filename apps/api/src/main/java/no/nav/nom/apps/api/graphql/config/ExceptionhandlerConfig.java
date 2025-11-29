@@ -26,9 +26,6 @@ public class ExceptionhandlerConfig {
         return DataFetcherExceptionResolver.forSingleError(SecurityUtil::handleUnauthenticatedException);
     }
 
-    @Bean
-
-
     /**
      * Factory method to create a {@link DataFetcherExceptionResolver} to resolve
      * an exception to a list of GraphQL errors. Effectively, a shortcut

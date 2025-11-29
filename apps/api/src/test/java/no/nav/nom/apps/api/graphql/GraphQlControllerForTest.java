@@ -12,7 +12,6 @@ import no.nav.nom.apps.gql.resolvers.SearchResolver;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 
-import java.util.stream.Collectors;
 
 @Profile("GraphQLTest")
 @Controller
@@ -23,7 +22,8 @@ public class GraphQlControllerForTest extends AbstractGraphQlController {
         OrganiseringResolver organiseringResolver,
         LederResolver lederResolver,
         RessursResolver ressursResolver,
-        SearchResolver searchResolver
+        SearchResolver searchResolver,
+        GraphqlSupportInterface graphqlSupportInterface
     ) {
         super(
             orgEnhetResolver,
@@ -32,7 +32,7 @@ public class GraphQlControllerForTest extends AbstractGraphQlController {
             lederResolver,
             ressursResolver,
             searchResolver,
-            GraphqlSupportInterface.dummyImplementation()
+            graphqlSupportInterface
         );
     }
 }

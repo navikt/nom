@@ -20,20 +20,24 @@ import java.util.Map;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
 
-@Component
-@Profile("GraphQLTest")
 public class GraphQLTestUtil {
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
     private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> TIMEOUT_DURATION);
 
-    @Autowired
-    ExecutionGraphQlServiceTester executionGraphQlServiceTester;
 
-    @Autowired
-    protected ResourceLoader resourceLoader;
+    private final ExecutionGraphQlServiceTester executionGraphQlServiceTester;
 
-    @Autowired
-    protected TestTokensGenerator testToken;
+
+    private final ResourceLoader resourceLoader;
+
+
+    private final TestTokensGenerator testToken;
+
+    public GraphQLTestUtil(ExecutionGraphQlServiceTester executionGraphQlServiceTester, ResourceLoader resourceLoader, TestTokensGenerator testToken) {
+        this.executionGraphQlServiceTester = executionGraphQlServiceTester;
+        this.resourceLoader = resourceLoader;
+        this.testToken = testToken;
+    }
 
     @SneakyThrows
     public GraphQlTester.Response postForResource(String resource) {

@@ -46,8 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("GraphQLTest")
-@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class )
 @GraphQlTest
+@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class )
 @DisplayName("GraphQL - Organisasjonsenhet spørringer")
 class OrganisasjonsenhetTest {
 
