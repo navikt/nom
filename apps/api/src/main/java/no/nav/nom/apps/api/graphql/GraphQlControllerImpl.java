@@ -106,45 +106,4 @@ public class GraphQlControllerImpl extends AbstractGraphQlController {
         securityUtil.checkAuth(SecurityContextHolder.getContext().getAuthentication());
 
     }
-    @Component
-    @Profile("!GraphQLTest")
-    private static class Support implements GraphqlSupportInterface{
-
-        private final RemedyEnhetIdResolver remedyEnhetIdResolver;
-        private final RessursPropertyResolver ressursPropertyResolver;
-        private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
-        private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
-
-        Support(
-            RemedyEnhetIdResolver remedyEnhetIdResolver,
-            RessursPropertyResolver ressursPropertyResolver,
-            GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
-            DvhStartupLoadMonitor dvhStartupLoadMonitor
-        ) {
-            this.remedyEnhetIdResolver = remedyEnhetIdResolver;
-            this.ressursPropertyResolver = ressursPropertyResolver;
-            this.graphQLFieldConsumptionCounter = graphQLFieldConsumptionCounter;
-            this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
-        }
-
-        @Override
-        public String remedyEnhetId(String nomId) {
-            return remedyEnhetIdResolver.remedyEnhetId(nomId);
-        }
-
-        @Override
-        public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser) {
-            return ressursPropertyResolver.epost(ressurser);
-        }
-
-        @Override
-        public void count(DataFetchingEnvironment dataFetchingEnvironment) {
-            graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
-        }
-
-        @Override
-        public boolean isWaitingToIndexLucene() {
-            return dvhStartupLoadMonitor.hasCompleted();
-        }
-    }
 }
