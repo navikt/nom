@@ -1,9 +1,11 @@
 package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.propertyresolvers.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
 import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
@@ -57,7 +59,7 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
     protected GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
     protected DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
-    @Autowired
+    protected AdClient adClient;
     protected GraphQLTestUtil gqlUtil;
 
 
@@ -73,6 +75,8 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
         this.graphQLFieldConsumptionCounter = applicationContext.getBean(GraphQLFieldConsumptionCounter.class);
         this.dvhStartupLoadMonitor = applicationContext.getBean(DvhStartupLoadMonitor.class);
         this.gqlUtil = applicationContext.getBean(GraphQLTestUtil.class);
+        this.adClient = applicationContext.getBean(AdClient.class);
+
     }
 
     @Import({WebClientAutoConfiguration.class, SecurityAutoConfiguration.class, TestTokensGenerator.class })
@@ -108,9 +112,16 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
         public RemedyEnhetIdResolver remedyEnhetIdResolver(){
             return Mockito.mock(RemedyEnhetIdResolver.class);
         }
+
         @Bean
-        protected final RessursPropertyResolver ressursPropertyResolver(){
-            return Mockito.mock(RessursPropertyResolver.class);
+        public AdClient adClient(){
+            return Mockito.mock(AdClient.class);
+        }
+
+        @Bean
+        protected final RessursPropertyResolver ressursPropertyResolver(Environment env, AdClient adClient, RessursStateRepository ressursStateRepository){
+            return Mockito.spy(new RessursPropertyResolver(new ActiveDirectoryRessursBatchLoader(adClient),env,ressursStateRepository));
+//            return Mockito.mock(RessursPropertyResolver.class);
         };
         @Bean public GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter(){
             return Mockito.mock(GraphQLFieldConsumptionCounter.class);
