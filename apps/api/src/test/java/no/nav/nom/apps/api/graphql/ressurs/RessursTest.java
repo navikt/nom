@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlControllerForTest;
-import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.gql.ErrorCode;
 import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.contract.nom.IdentType;
@@ -28,11 +26,9 @@ import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -55,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles({"GraphQLTest"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes = {GraphqlTestConfig.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL - Ressurs spørringer")
 class RessursTest {
     @Autowired

@@ -30,7 +30,7 @@ import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 
 
 @Import({WebClientAutoConfiguration.class, SecurityAutoConfiguration.class, TestTokensGenerator.class })
-public class GraphqlTestConfig2 {
+public class GraphqlTestConfig {
 
     private final OrganiseringStateRepositoryImpl organiseringStateRepository;
     private final OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
@@ -39,7 +39,7 @@ public class GraphqlTestConfig2 {
     private final OrgEnhetStateRepositoryImpl orgEnhetStateRepository;
     private final GraphqlSupportInterface supportInterface;
 
-    public GraphqlTestConfig2() {
+    public GraphqlTestConfig() {
         organiseringStateRepository = new OrganiseringStateRepositoryImpl();
         orgtilknytningStateRepository = new OrgtilknytningStateRepositoryImpl();
         orgEnhetLederStateRepository = new OrgEnhetLederStateRepositoryImpl();

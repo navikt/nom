@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
-import no.nav.nom.apps.api.graphql.GraphqlTestConfig2;
+import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
 import no.nav.nom.apps.gql.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles({"GraphQLTest", "test"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig2.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes = {GraphqlTestConfig.class, GraphQlAutoConfiguration.class, GraphQlControllerImpl.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL - Search endepunkter")
 public class SearchTest {
     @Autowired
