@@ -27,7 +27,7 @@ jobs:
 
       - name: Install webapp dependencies
         working-directory: apps/admin-web/webapp
-        run: npm ci
+        run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Install frackend dependencies
         working-directory: apps/admin-web/frackend
-        run: npm ci
+        run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
