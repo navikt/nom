@@ -28,6 +28,7 @@ import type {
   RessursMedFlereDOL,
   RessursOrgtilknytningKoblingInfo,
   RessursOrgtilknytningUlikSluttdato,
+  RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse,
   RessursStateKafkaDTO,
   RobotRessurs,
   SessionInfoResponse,
@@ -355,6 +356,18 @@ export function getEnheterUtenforHierarkietMenHarAktiveDelegeringer() {
   });
 }
 
+export function getOrgEnheterUtenleder() {
+  return queryOptions({
+    queryKey: ["API", "ORG_ENHETER_UTEN_LEDER"],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/SanityCheck/orgenhet/listOrgenheterUtenLeder`,
+        )
+      ).json<OrgEnhetOrganisering[]>(),
+  });
+}
+
 export async function getRessurserSanityCheck(): Promise<RessursOrgtilknytningKoblingInfo> {
   return await ky
     .get(`${API_BASE_URL}/SanityCheck/ressurs/ressurser`, {
@@ -388,6 +401,19 @@ export async function getRessursMedAktivOrgTilknytningHvorEnhetErInaktivMedUnder
       },
     )
     .json<RessursMedEnhet[]>();
+}
+
+export async function getRessurserSomHarSluttetMedLederRolleForOrgEnhet(): Promise<
+  RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurs/sluttetRessursMedLederRollePaaOrgEnhet`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse[]>();
 }
 
 export async function getListAvDuplikateEnheter(): Promise<OrgEnhetState[]> {

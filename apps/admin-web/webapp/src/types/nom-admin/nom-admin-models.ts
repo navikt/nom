@@ -92,6 +92,42 @@ export enum IdentType {
   UKJENT = "UKJENT",
 }
 
+export interface OrgEnhetEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
+export interface OrgtilknytningEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
+export interface RessursEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
+export interface Data {
+  type: string;
+}
+
+export interface AuthorizationEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
 export interface RessursSearchParams {
   /**
    * @format int32
@@ -123,6 +159,7 @@ export interface RessursState {
   /** @default "STANDARD" */
   identType: IdentType;
   sistEndretAv?: string;
+  tilknytningtype?: Tilknytningtype;
 }
 
 export interface Visningsnavn {
@@ -218,18 +255,6 @@ export interface EventSearchParams {
   filterText?: string;
 }
 
-export interface AuthorizationEvent {
-  fid?: string;
-  data?: Data;
-  metadata?: Metadata;
-  additionalData?: Data;
-  type: string;
-}
-
-export interface Data {
-  type: string;
-}
-
 export type DelegertAuthorizationAvsluttetEventV1 = AuthorizationEvent;
 
 export type DelegertAuthorizationFornyetEventV1 = AuthorizationEvent;
@@ -254,19 +279,27 @@ export interface Origination {
   initiatedFrom?: string;
 }
 
-export interface RessursEvent {
-  fid?: string;
-  data?: Data;
-  metadata?: Metadata;
-  additionalData?: Data;
-  type: string;
-}
+export type RessursFysiskeBrukerstederOppdatertEventV1 = RessursEvent;
 
 export type RessursJobbtelefonOppdatertEventV1 = RessursEvent;
+
+export type RessursOpprettetEventV1 = RessursEvent;
+
+export type RessursPersonaliaOppdatertV1 = RessursEvent;
+
+export type RessursPersonidentOppdatertV1 = RessursEvent;
+
+export type RessursPrimaryTelefonnummerOppdatertEventV1 = RessursEvent;
+
+export type RessursSektorOppdatertV1 = RessursEvent;
 
 export type RessursSluttdatoOppdatertEventV1 = RessursEvent;
 
 export type RessursSluttetEventV1 = RessursEvent;
+
+export type RessursStartDatoOppdatertV1 = RessursEvent;
+
+export type RessursTekniskSlettetEventV1 = RessursEvent;
 
 export interface DeadLetterDTO {
   fid?: string;
@@ -284,14 +317,6 @@ export type OrgtilknytningDatoEndretEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningDatoEndretEventV2 = OrgtilknytningEvent;
 
-export interface OrgtilknytningEvent {
-  fid?: string;
-  data?: Data;
-  metadata?: Metadata;
-  additionalData?: Data;
-  type: string;
-}
-
 export type OrgtilknytningFjernetEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningOpprettetEventV1 = OrgtilknytningEvent;
@@ -305,14 +330,6 @@ export type OrgtilknytningTypeEndretEventV1 = OrgtilknytningEvent;
 export type NomNivaaEndretEventV1 = OrgEnhetEvent;
 
 export type OrgEnhetAvvikletEventV1 = OrgEnhetEvent;
-
-export interface OrgEnhetEvent {
-  fid?: string;
-  data?: Data;
-  metadata?: Metadata;
-  additionalData?: Data;
-  type: string;
-}
 
 export type OrgEnhetKorrigertEventV1 = OrgEnhetEvent;
 
@@ -408,6 +425,20 @@ export interface SessionInfoResponse {
   navident: string;
   name: string;
   roles: UserRoles[];
+}
+
+export interface EnhetSanityCheckResponse {
+  navn: string;
+  id: string;
+  agressoId: string;
+}
+
+export interface RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse {
+  navident: string;
+  visningsnavn: string;
+  /** @format date */
+  sluttdato: string;
+  enheter: EnhetSanityCheckResponse[];
 }
 
 export interface RobotOrgtilknytning {

@@ -9,6 +9,7 @@ import {
   getEnheterUtenforHierarkietMenHarAktiveDelegeringer,
   getEnheterUtenOverenheter,
   getEnheterUtenOverenheterMedUnderEnheter,
+  getOrgEnheterUtenleder,
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { AntallOrgenheter } from "~/sanitychecks/OrgEnhet/AntallOrgenheter.tsx";
@@ -87,6 +88,15 @@ function ListSelector(props: { selected: string }) {
         />
       );
     }
+    case "OrgEnheterUtenleder": {
+      const orgEnhetOrganisering = useQuery(getOrgEnheterUtenleder());
+      return (
+        <OrgEnhetOrganiseringTabell
+          exportTypeNavn={undefined}
+          orgEnhetOrganisering={orgEnhetOrganisering}
+        />
+      );
+    }
     default: {
       return <></>;
     }
@@ -127,6 +137,7 @@ function OrgEnhetSanityChecks() {
         <option value={"EnheterUtenforHierarkietMenHarAktiveDelegeringer"}>
           Enheter utenfor hierarkiet men har aktive delegeringer
         </option>
+        <option value={"OrgEnheterUtenleder"}>Aktive enheter uten leder</option>
       </Select>
       <ListSelector selected={handleChange} />
     </div>

@@ -12,6 +12,7 @@ import { RessurserMedOverlappendeDOL } from "~/sanitychecks/Ressurs/RessurserMed
 import { RessursMedBlankMellomnavn } from "~/sanitychecks/Ressurs/RessursMedBlankMellomnavn.tsx";
 import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTUtenAktivEnhet.tsx";
 import { RessursRoboter } from "~/sanitychecks/Ressurs/RessursRoboter.tsx";
+import { RessursSluttetLederForOrgenhet } from "~/sanitychecks/Ressurs/RessursSluttetLederForOrgenhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
 import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
 import { RessursUtenOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUtenOrgtilknytning.tsx";
@@ -84,6 +85,9 @@ function ListSelector(props: { selected: string }) {
     case "RessursDelayedEventComparison": {
       return <RessursDelayedEventComparison />;
     }
+    case "RessursSluttetLederForOrgenhet": {
+      return <RessursSluttetLederForOrgenhet />;
+    }
     case "DuplikateRessurshendelser": {
       return <DuplikateRessursHendelser />;
     }
@@ -128,6 +132,9 @@ function RessursSanityChecks() {
         <option value="RessursRoboter">Robot-ressurser</option>
         <option value="RessursDelayedEventComparison">
           Ressurser med fremtidig endring som ikke er i DelayedEvent
+        </option>
+        <option value="RessursSluttetLederForOrgenhet">
+          Ressurser som har sluttet, men fortsatt står som leder for orgEnhet
         </option>
         <option value="DuplikateRessurshendelser">
           Duplikate ressurs-hendelser

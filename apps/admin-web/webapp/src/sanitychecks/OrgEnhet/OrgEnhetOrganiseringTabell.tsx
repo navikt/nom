@@ -2,6 +2,7 @@ import { Heading, Loader, Pagination, Table } from "@navikt/ds-react";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { NomLink } from "~/components/NomLink.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import { AntallOgExcelEksportKnapp } from "~/sanitychecks/components/AntallOgExcelEksportKnapp.tsx";
 import type { OrgEnhetOrganisering } from "~/types/nom-admin/nom-admin-models.ts";
@@ -84,7 +85,11 @@ export function OrgEnhetOrganiseringTabell({
         <Table.Body>
           {sortedData.map((orgEnhet, index) => (
             <Table.Row key={index} shadeOnHover={false}>
-              <Table.DataCell>{orgEnhet.orgEnhetId}</Table.DataCell>
+              <Table.DataCell>
+                <NomLink path={`org/${orgEnhet.orgEnhetId}`}>
+                  {orgEnhet.orgEnhetId}
+                </NomLink>
+              </Table.DataCell>
               <Table.DataCell>{orgEnhet.uniqueAgressoId}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigFom}</Table.DataCell>
               <Table.DataCell>{orgEnhet.gyldigTom}</Table.DataCell>
