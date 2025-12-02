@@ -5,10 +5,13 @@ import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +41,11 @@ class RessursSanityCheckServiceTest {
 
     private static final String ID_ORGENHET_1 = "ab123c";
     private static final String ID_ORGENHET_2 = "de456f";
+    private static final String ID_ORGENHET_3 = "gh789i";
     private static final String FID_ORGTILKNYTNING_1 = "orgtilknytning-1";
     private static final String FID_ORGTILKNYTNING_2 = "orgtilknytning-2";
+    private static final String SLUTTET_RESSURS_NAVIDENT = "A123456";
+    private static final String AKTIV_RESSURS_NAVIDENT = "B789012";
 
     @Mock
     private RessursStateRepository ressursStateRepositoryMock;
@@ -52,6 +58,9 @@ class RessursSanityCheckServiceTest {
 
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepositoryMock;
+
+    @Mock
+    OrgEnhetLederStateRepository orgEnhetLederStateRepositoryMock;
 
     @Mock
     private NomRemedyApiClient nomRemedyApiClientMock;
@@ -70,6 +79,7 @@ class RessursSanityCheckServiceTest {
                 orgEnhetStateRepositoryMock,
                 organiseringStateRepositoryMock,
                 orgtilknytningStateRepositoryMock,
+                orgEnhetLederStateRepositoryMock,
                 nomRemedyApiClientMock,
                 nomApiClientMock
         );
@@ -357,6 +367,78 @@ class RessursSanityCheckServiceTest {
             .stream()
             .findFirst().get().gyldigTom());
     }
+
+    @Test
+    void should_return_orgenheter_with_manager_which_is_no_longer_employed() {
+        var orgenhet1 = OrgEnhetState.builder()
+            .id(ID_ORGENHET_1)
+            .navn("Gausdal")
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusYears(2))
+            .uniqueAgressoId("052200-Gausdal-ORGNIV3")
+            .build();
+        var orgenhet2 = OrgEnhetState.builder()
+            .id(ID_ORGENHET_2)
+            .navn("Telemark Karrieresenter")
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(LocalDate.now().plusYears(2))
+            .uniqueAgressoId("089600-Telemark Karrieresenter-ORGNIV3")
+            .build();
+        when(orgEnhetStateRepositoryMock.getAll()).thenReturn(List.of(orgenhet1, orgenhet2));
+
+        // orgEnhetene er en del av hierarkiet og har parent
+        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_1)).thenReturn(true);
+        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_2)).thenReturn(true);
+
+
+        // En ressurs som har sluttet
+        var sluttetRessurs = RessursState.builder()
+            .navident(SLUTTET_RESSURS_NAVIDENT)
+            .visningsnavn(new Visningsnavn("Sluttet", Optional.empty(), "Leder"))
+            .sluttdato(LocalDate.now().minusYears(1))
+            .build();
+        when(ressursStateRepositoryMock.findAllWithSluttdatoBeforeToday()).thenReturn(Map.of(SLUTTET_RESSURS_NAVIDENT, sluttetRessurs));
+
+
+        // Begge orgEnhetene har ledere
+        var lederOrgEnhet1 = OrgEnhetLederState.builder()
+            .orgEnhetId(ID_ORGENHET_1)
+            .navident(SLUTTET_RESSURS_NAVIDENT)
+            .build();
+        var lederOrgEnhet2 = OrgEnhetLederState.builder()
+            .orgEnhetId(ID_ORGENHET_2)
+            .navident(AKTIV_RESSURS_NAVIDENT)
+            .build();
+        when(orgEnhetLederStateRepositoryMock.getActiveForOrgEnhet(ID_ORGENHET_1)).thenReturn(Optional.ofNullable(lederOrgEnhet1));
+        when(orgEnhetLederStateRepositoryMock.getActiveForOrgEnhet(ID_ORGENHET_2)).thenReturn(Optional.ofNullable(lederOrgEnhet2));
+
+
+        var sluttedeLedereMedAktiveEnheter = service.validerRessursMedLederRollePaaOrgEnhet();
+        assertThat(sluttedeLedereMedAktiveEnheter.size()).isEqualTo(1);
+        assertThat(sluttedeLedereMedAktiveEnheter.getFirst().navident()).isEqualTo(SLUTTET_RESSURS_NAVIDENT);
+        assertThat(sluttedeLedereMedAktiveEnheter.getFirst().enheter().getFirst().id()).isEqualTo(ID_ORGENHET_1);
+    }
+
+    @Test
+    void should_return_orgenheter_which_are_part_of_the_organization_and_thereby_active() {
+        var activeOrgenhet1 = OrgEnhetState.builder()
+            .id(ID_ORGENHET_1)
+            .build();
+        var activeOrgenhet2 = OrgEnhetState.builder()
+            .id(ID_ORGENHET_2)
+            .build();
+        var inactiveOrgenhet = OrgEnhetState.builder()
+            .id(ID_ORGENHET_3)
+            .build();
+
+        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_1)).thenReturn(true);
+        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_2)).thenReturn(true);
+        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_3)).thenReturn(false);
+
+        var aktiveOrgenheter = service.orgEnheterMedAktivOrganisering(List.of(activeOrgenhet1, activeOrgenhet2, inactiveOrgenhet));
+        assertThat(aktiveOrgenheter.size()).isEqualTo(2);
+    }
+
 
     private Map<String, RessursState> getRessursStateMap(RessursState ressurs) {
         Map<String, RessursState> ressursStateMap = new HashMap<>();

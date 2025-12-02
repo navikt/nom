@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.admin.SanityCheckMappingUtils;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.StandardResponse;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
@@ -204,6 +205,20 @@ public class RessursSanityCheckController {
             case "ressursUtenOrgtilknytning" -> exportRessursUtenOrgtilknytning(response);
             default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid export type");
         }
+    }
+
+    @Operation(
+        description = "Valider ressurs som har sluttet, men står som leder på orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/sluttetRessursMedLederRollePaaOrgEnhet")
+    public ResponseEntity<List<RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse>> validerRessursMedLederRollePaaOrgEnhet() {
+        return ok(ressursSanityCheckService.validerRessursMedLederRollePaaOrgEnhet());
     }
 
     private void exportRessurserTilIkkeAktivEnhet(HttpServletResponse response) throws IOException {

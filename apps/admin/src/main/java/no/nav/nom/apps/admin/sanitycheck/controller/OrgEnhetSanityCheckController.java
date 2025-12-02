@@ -178,6 +178,20 @@ public class OrgEnhetSanityCheckController {
         }
     }
 
+    @Operation(
+        description = "List orgenher i NAV orghierarkiet som ikke har leder",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listOrgenheterUtenLeder")
+    public ResponseEntity<List<OrgEnhetOrganisering>> listOrgenheterUtenLeder() {
+        return ResponseEntity.ok(orgEnhetSanityCheckService.listOrgenheterUtenLeder());
+    }
+
     private void exportEnheterUtenOverEnheter(HttpServletResponse response) throws IOException {
         try {
             var orgEnheterUtenOverEnhet = orgEnhetSanityCheckService.enhetUtenOverEnhet();

@@ -2,8 +2,8 @@ package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.EnheterOgOrganisering;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetArbeidsomraadeInfo;
-import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetOrganisering;
+import no.nav.nom.apps.admin.sanitycheck.dto.orgenhet.OrgEnhetStartOgSluttdato;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,13 +37,17 @@ public class OrgEnhetSanityCheckService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final DelegertLederStateRepository delegertLederStateRepository;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     public OrgEnhetSanityCheckService(OrgEnhetStateRepository orgEnhetStateRepository,
                                       OrganiseringStateRepository organiseringStateRepository,
-                                      DelegertLederStateRepository delegertLederStateRepository) {
+                                      DelegertLederStateRepository delegertLederStateRepository,
+                                      OrgEnhetLederStateRepository orgEnhetLederStateRepository
+    ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.delegertLederStateRepository = delegertLederStateRepository;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
     }
 
     public OrgEnhetStartOgSluttdato sjekkOrgEnhetStartSluttDato() {
@@ -254,7 +259,7 @@ public class OrgEnhetSanityCheckService {
                     oe.gyldigTom()))
             .toList();
     }
-    
+
     public OrgEnhetArbeidsomraadeInfo validerArbeidsomraade() {
         var alleEnheter =  orgEnhetStateRepository.getAll().stream().toList(); // Aktive enheter i organisasjonstreet
         var alleAktiveEnheter  = aktiveEnheter(alleEnheter);
@@ -278,11 +283,34 @@ public class OrgEnhetSanityCheckService {
                 );
             }
         });
-        
+
         return OrgEnhetArbeidsomraadeInfo.builder()
                 .antallLoevnoder(loevnoderMedFeilAntallArbOmr.size())
                 .loevnoderMedFeil(loevnoderMedFeilAntallArbOmr)
                 .build();
+    }
+
+    public List<OrgEnhetOrganisering> listOrgenheterUtenLeder() {
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(orgEnhetStateRepository.getAll().stream().toList());
+
+        List<OrgEnhetState> alleOrgEnheterUtenLeder = new ArrayList<>();
+
+        aktiveEnheter.forEach(orgenhet ->
+            orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.id())
+                .ifPresentOrElse(
+                    _ -> {},                // Har leder, gjør ingenting
+                    () -> alleOrgEnheterUtenLeder.add(orgenhet) // Har ikke leder
+                )
+        );
+
+        return alleOrgEnheterUtenLeder.stream()
+            .map(oe ->
+                new OrgEnhetOrganisering(
+                    oe.id(),
+                    Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
+                    oe.gyldigFom(),
+                    oe.gyldigTom()))
+            .toList();
     }
 
     private boolean manglerOvernode(OrgEnhetState orgenhet, List<String> alleIdUnder) {
