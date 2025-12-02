@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.dto.ressurs;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -8,15 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 public record RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse(
-    String navident,
-    String visningsnavn,
-    LocalDate sluttdato,
-    List<EnhetSanityCheckResponse> enheter
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String visningsnavn,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate sluttdato,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<EnhetSanityCheckResponse> enheter
 ) {
     public record EnhetSanityCheckResponse(
-        String navn,
-        String id,
-        String agressoId
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navn,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String id,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String agressoId
     ) {}
 
     public static List<RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse> from(Map<RessursState, List<OrgEnhetState>> ressursEnhetMap) {
