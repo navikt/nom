@@ -18,7 +18,6 @@ import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
-import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -76,13 +75,8 @@ public class GraphqlTestConfig {
 
 
     @Bean
-    public TestTokensGenerator testTokensGenerator(MockOAuth2Server mockOAuth2Server){
-        return  new TestTokensGenerator(mockOAuth2Server);
-    }
-
-    @Bean
-    public GraphQLTestUtil graphQLTestUtil(ExecutionGraphQlServiceTester tester, ResourceLoader resourceLoader, TestTokensGenerator testTokensGenerator) {
-        return new GraphQLTestUtil(tester,resourceLoader,testTokensGenerator);
+    public GraphQLTestUtil graphQLTestUtil(ExecutionGraphQlServiceTester tester, ResourceLoader resourceLoader) {
+        return new GraphQLTestUtil(tester,resourceLoader);
     }
 
     @Bean

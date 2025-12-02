@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlControllerForTest;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
-import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
+import no.nav.nom.apps.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.TelefonType;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles({"GraphQLTest"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class, GraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes = {GraphqlTestConfig.class, NomGraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL - Ressurs spørringer")
 class RessursTest {
     @Autowired

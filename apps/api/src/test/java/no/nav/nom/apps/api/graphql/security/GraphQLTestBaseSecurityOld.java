@@ -20,7 +20,7 @@ import static java.util.Collections.emptyMap;
 
 @AutoConfigureGraphQlTester
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public abstract class GraphQLTestBase extends TestBase {
+public abstract class GraphQLTestBaseSecurityOld extends TestBase {
 
     private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
 

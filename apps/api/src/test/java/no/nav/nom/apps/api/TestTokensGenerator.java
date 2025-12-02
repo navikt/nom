@@ -28,15 +28,12 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.READONLY;
 public class TestTokensGenerator {
 
 
-    protected final MockOAuth2Server mockOAuth2Server;
+    @Autowired
+    protected MockOAuth2Server mockOAuth2Server;
 
     public static String LOGGED_IN_USER_NAVIDENT = "A321321";
     public static String OAUTH_VALID_AUDIENCE = "test";
     public static String OAUTH_VALID_ISSUER = "aad";
-
-    public TestTokensGenerator(MockOAuth2Server mockOAuth2Server) {
-        this.mockOAuth2Server = mockOAuth2Server;
-    }
 
     public String generateToken(String issuer, Map<String, Object> claims, String audience) {
         return mockOAuth2Server.issueToken(

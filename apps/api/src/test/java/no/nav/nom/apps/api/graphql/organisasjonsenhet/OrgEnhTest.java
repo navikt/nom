@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("GraphQLTest")
 @GraphQlTest
 public class OrgEnhTest extends GraphQlTestBase {
+
 
     @Autowired
     public ObjectMapper objectMapper;

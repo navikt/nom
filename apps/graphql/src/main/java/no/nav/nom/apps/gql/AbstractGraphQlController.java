@@ -35,6 +35,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -78,6 +79,10 @@ public abstract class AbstractGraphQlController {
 
     @QueryMapping("orgEnhet")
     public Optional<OrgEnhet> orgEnhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+        var x = SecurityContextHolder.getContext().getAuthentication();
+        if(x == null){
+            throw new RuntimeException("Authentication is null!");
+        }
         graphqlSupport.count(environment);
         return orgEnhetResolver.orgEnhet(orgEnhetSearch);
     }

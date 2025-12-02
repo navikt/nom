@@ -1,50 +1,41 @@
 package no.nav.nom.apps.api.graphql;
 
-import no.nav.nom.apps.api.TestTokensGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.propertyresolvers.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
-import no.nav.nom.apps.gql.GraphQlAutoConfiguration;
+import no.nav.nom.apps.gql.NomGraphQlAutoConfiguration;
+import no.nav.nom.apps.gql.lucenesearch.LuceneService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepositoryImpl;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepositoryImpl;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepositoryImpl;
-import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
-import org.mockito.Mockito;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.graphql.tester.GraphQlTesterAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.graphql.ExecutionGraphQlService;
 import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.test.context.ContextConfiguration;
 
-@GraphQlTest
 @ContextConfiguration(
     classes = {
         GraphQlSupportImpl.class,
         GraphQlControllerForTest.class,
-        GraphQlAutoConfiguration.class,
-        GraphQlTestBase.TestBeans.class
-    },
-    initializers = MockOAuth2ServerInitializer.class
+        JacksonAutoConfiguration.class,
+        NomGraphQlAutoConfiguration.class,
+        GraphQlTestBase.TestBeans.class,
+        GraphQlStateReposConfig.class,
+        GraphQlTesterAutoConfiguration.class
+    }
 )
 abstract public class GraphQlTestBase implements ApplicationContextAware {
 
@@ -61,6 +52,9 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
 
     protected AdClient adClient;
     protected GraphQLTestUtil gqlUtil;
+    protected LuceneService luceneService;
+
+    protected ResourceLoader resourceLoader;
 
 
     @Override
@@ -74,71 +68,36 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
         this.ressursPropertyResolver = applicationContext.getBean(RessursPropertyResolver.class);
         this.graphQLFieldConsumptionCounter = applicationContext.getBean(GraphQLFieldConsumptionCounter.class);
         this.dvhStartupLoadMonitor = applicationContext.getBean(DvhStartupLoadMonitor.class);
-        this.gqlUtil = applicationContext.getBean(GraphQLTestUtil.class);
         this.adClient = applicationContext.getBean(AdClient.class);
+        this.luceneService = applicationContext.getBean(LuceneService.class);
+        this.resourceLoader = applicationContext.getBean(ResourceLoader.class);
+
+
+        {
+            var objectMapper = applicationContext.getBean(ObjectMapper.class);
+            var executionGraphQlService = applicationContext.getBean(ExecutionGraphQlService.class);
+
+            var executionGraphQLServiceTester = ExecutionGraphQlServiceTester.builder(executionGraphQlService)
+                .encoder(new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_GRAPHQL_RESPONSE,
+                    MediaType.APPLICATION_JSON, MediaType.APPLICATION_GRAPHQL))
+                .decoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON))
+                .build();
+
+            // todo, make this work
+            //   var executionGraphQLServiceTesterFromApplicationContext = applicationContext.getBean(ExecutionGraphQlServiceTester.class);
+
+
+           this.gqlUtil = new GraphQLTestUtil(executionGraphQLServiceTester,resourceLoader);
+        }
+
 
     }
 
-    @Import({WebClientAutoConfiguration.class, SecurityAutoConfiguration.class, TestTokensGenerator.class })
+
     static class TestBeans {
 
-        @Bean
-        public OrgEnhetStateRepositoryImpl orgEnhetStateRepository(){
-            return Mockito.spy(new OrgEnhetStateRepositoryImpl());
-        }
-
-        @Bean
-        public OrganiseringStateRepositoryImpl organiseringStateRepository() {
-            return Mockito.spy(new OrganiseringStateRepositoryImpl());
-        }
-
-        @Bean
-        public OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository() {
-            return Mockito.spy(new OrgtilknytningStateRepositoryImpl());
-        }
 
 
-        @Bean
-        public RessursStateRepositoryImpl ressursStateRepository(){
-            return Mockito.spy(new RessursStateRepositoryImpl());
-        }
-
-        @Bean
-        public OrgEnhetLederStateRepositoryImpl orgEnhetLederStateRepository(){
-            return Mockito.spy(new OrgEnhetLederStateRepositoryImpl());
-        }
-
-        @Bean
-        public RemedyEnhetIdResolver remedyEnhetIdResolver(){
-            return Mockito.mock(RemedyEnhetIdResolver.class);
-        }
-
-        @Bean
-        public AdClient adClient(){
-            return Mockito.mock(AdClient.class);
-        }
-
-        @Bean
-        protected final RessursPropertyResolver ressursPropertyResolver(Environment env, AdClient adClient, RessursStateRepository ressursStateRepository){
-            return Mockito.spy(new RessursPropertyResolver(new ActiveDirectoryRessursBatchLoader(adClient),env,ressursStateRepository));
-//            return Mockito.mock(RessursPropertyResolver.class);
-        };
-        @Bean public GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter(){
-            return Mockito.mock(GraphQLFieldConsumptionCounter.class);
-        }
-        @Bean public DvhStartupLoadMonitor dvhStartupLoadMonitor(){
-            return Mockito.mock(DvhStartupLoadMonitor.class);
-        }
-
-        @Bean
-        public GraphQLTestUtil graphQLTestUtil(ExecutionGraphQlServiceTester tester, ResourceLoader resourceLoader, TestTokensGenerator testTokensGenerator) {
-            return new GraphQLTestUtil(tester,resourceLoader,testTokensGenerator);
-        }
-
-        @Bean
-        public SecurityUtil securityUtil(Environment environment) {
-            return new SecurityUtil(environment);
-        }
 
 
     }

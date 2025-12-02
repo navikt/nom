@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@PreAuthorize("@securityUtil.checkAuth(authentication)")
 @Controller
+@PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQlControllerImpl extends AbstractGraphQlController {
 
     private final SecurityUtil securityUtil;

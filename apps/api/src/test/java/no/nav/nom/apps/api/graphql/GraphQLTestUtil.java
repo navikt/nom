@@ -1,14 +1,10 @@
 package no.nav.nom.apps.api.graphql;
 
 import lombok.SneakyThrows;
-import no.nav.nom.apps.api.TestTokensGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -31,12 +27,10 @@ public class GraphQLTestUtil {
     private final ResourceLoader resourceLoader;
 
 
-    private final TestTokensGenerator testToken;
 
-    public GraphQLTestUtil(ExecutionGraphQlServiceTester executionGraphQlServiceTester, ResourceLoader resourceLoader, TestTokensGenerator testToken) {
+    public GraphQLTestUtil(ExecutionGraphQlServiceTester executionGraphQlServiceTester, ResourceLoader resourceLoader) {
         this.executionGraphQlServiceTester = executionGraphQlServiceTester;
         this.resourceLoader = resourceLoader;
-        this.testToken = testToken;
     }
 
     @SneakyThrows
@@ -46,11 +40,6 @@ public class GraphQLTestUtil {
 
     @SneakyThrows
     public GraphQlTester.Response postForResource(String resource, Map<String, Object> vars) {
-        return postForResource(resource, testToken.nomAdminUser(), vars);
-    }
-
-    @SneakyThrows
-    public GraphQlTester.Response postForResource(String resource, String token, Map<String, Object> vars) {
         var query = executionGraphQlServiceTester
             .mutate().responseTimeout(responseTimeout.get())
             .build()

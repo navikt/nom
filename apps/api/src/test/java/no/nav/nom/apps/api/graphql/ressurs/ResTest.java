@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
+import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -21,7 +22,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
@@ -39,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("GraphQLTest")
 @GraphQlTest
-public class ResTest extends GraphQlTestBase {
+public class ResTest extends GraphQlTestBase implements ApplicationContextAware {
 
 
     @BeforeEach
@@ -47,6 +55,11 @@ public class ResTest extends GraphQlTestBase {
         orgEnhetStateRepository.clear();
         ressursStateRepository.clear();
         orgtilknytningStateRepository.clear();
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        super.setApplicationContext(applicationContext);
     }
 
     @Test
