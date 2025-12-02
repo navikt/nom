@@ -887,12 +887,12 @@ function DateFormSection() {
       <FullWidthDatePickerWrapper>
         <FormDateWrapper
           label="Startdato (første arbeidsdag)"
-          name={"startDato"}
+          name="startDato"
         />
       </FullWidthDatePickerWrapper>
 
       <FullWidthDatePickerWrapper>
-        <FormDateWrapper label="Sluttdato" name={"sluttDato"} />
+        <FormDateWrapper label="Sluttdato" name="sluttDato" />
       </FullWidthDatePickerWrapper>
     </div>
   );

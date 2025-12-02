@@ -664,33 +664,37 @@ function OrganisationHierarchyTree({
   );
 }
 
-const vikafossenOrgEnhetIder = new Set(["ru664y", "fe178t"]);
-
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
-  const hasAdminAccess = useHasAdminAccess();
+  const inDevelopment = isInDevelopment();
+
   const lederForOrgenheter =
     useQuery({
       queryKey: getOrgenhetLederByNavIdent.queryKey(ressurs.navident),
       queryFn: () => getOrgenhetLederByNavIdent.queryFn(ressurs.navident),
       select: (orgenhetLederList) =>
-        orgenhetLederList.filter((it) => {
-          if (!it.sluttdato) {
+        orgenhetLederList.filter((orgEnhet) => {
+          if (!orgEnhet.sluttdato) {
             return true;
           }
-          const isoFormatRoughlyOk = /^\d{4}-\d{2}-\d{2}$/.test(it.sluttdato);
-          return isoFormatRoughlyOk && it.sluttdato >= new Date().toISOString();
+          const isoFormatRoughlyOk = /^\d{4}-\d{2}-\d{2}$/.test(
+            orgEnhet.sluttdato,
+          );
+          return (
+            isoFormatRoughlyOk && orgEnhet.sluttdato >= new Date().toISOString()
+          );
         }),
     }).data ?? [];
 
-  const lederForOrgenheterFiltrert =
-    hasAdminAccess || isInDevelopment()
-      ? lederForOrgenheter
-      : lederForOrgenheter.filter(
-          (enh) => !vikafossenOrgEnhetIder.has(enh.orgEnhetId),
-        );
+  const skjulteEksterneOrgEnheter = inDevelopment
+    ? ["fa520s", "fe857w", "hy255y", "ja464g", "py733e", "ru151s"]
+    : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
+
+  const lederForOrgenheterFiltrert = lederForOrgenheter.filter(
+    (orgEnhet) => !skjulteEksterneOrgEnheter.includes(orgEnhet.orgEnhetId),
+  );
 
   if (lederForOrgenheterFiltrert.length === 0) {
-    return <></>;
+    return;
   }
 
   /*
@@ -698,7 +702,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
      Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
      Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
     */
-  const uniqLederFor = uniqBy(
+  const unikeOrgEnheter = uniqBy(
     lederForOrgenheterFiltrert,
     (orgEnhet) => orgEnhet.orgEnhetNavn,
   );
@@ -718,7 +722,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           gap: var(--a-spacing-2);
         `}
       >
-        {uniqLederFor.map((orgEnhet) => (
+        {unikeOrgEnheter.map((orgEnhet) => (
           <ReactRouterLink
             key={orgEnhet.orgEnhetId}
             params={{ id: orgEnhet.orgEnhetId }}
