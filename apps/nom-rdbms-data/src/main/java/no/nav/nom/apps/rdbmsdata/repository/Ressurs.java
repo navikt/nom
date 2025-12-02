@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.hibernate.annotations.Type;
 
@@ -75,6 +76,10 @@ public class Ressurs {
     @Column(name = "ident_type")
     private IdentType identType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tilknytning_type")
+    private Tilknytningtype tilknytningType;
+
     @Column(name = "sist_endret_av")
     private String sistEndretAv;
 
@@ -98,6 +103,7 @@ public class Ressurs {
             .primaryFysiskBrukersted(ressursState.primaryFysiskBrukersted())
             .fysiskeBrukersteder(ressursState.fysiskeBrukersteder().toArray(String[]::new))
             .identType(ressursState.identType())
+            .tilknytningType(ressursState.tilknytningtype())
             .sistEndretAv(ressursState.sistEndretAv())
             .build();
     }
