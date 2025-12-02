@@ -46,6 +46,7 @@ import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
+import static no.nav.nom.apps.admin.sanitycheck.service.OrgEnhetSanityCheckService.aktiveEnheter;
 import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
 
 @Service
@@ -58,6 +59,7 @@ public class RessursSanityCheckService {
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final NomRemedyApiClient nomRemedyApiClient;
     private final NomApiClient nomApiClient;
+    private final OrgEnhetSanityCheckService  orgEnhetSanityCheckService;
 
     public RessursSanityCheckService(RessursStateRepository ressursStateRepository,
                                      OrgEnhetStateRepository orgEnhetStateRepository,
@@ -65,7 +67,8 @@ public class RessursSanityCheckService {
                                      OrgtilknytningStateRepository orgtilknytningStateRepository,
                                      OrgEnhetLederStateRepository orgEnhetLederStateRepository,
                                      NomRemedyApiClient nomRemedyApiClient,
-                                     NomApiClient nomApiClient
+                                     NomApiClient nomApiClient,
+                                     OrgEnhetSanityCheckService orgEnhetSanityCheckService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -74,6 +77,7 @@ public class RessursSanityCheckService {
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.nomRemedyApiClient = nomRemedyApiClient;
         this.nomApiClient = nomApiClient;
+        this.orgEnhetSanityCheckService = orgEnhetSanityCheckService;
     }
 
     public RessursOrgtilknytningKoblingInfo aktiveRessurser() {
@@ -567,9 +571,9 @@ public class RessursSanityCheckService {
 
     public List<RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse> validerRessursMedLederRollePaaOrgEnhet() {
         var alleEnheter = orgEnhetStateRepository.getAll().stream().toList();
-        List<OrgEnhetState> aktiveEnheter = aktiveOrgEnheter(alleEnheter);
+        List<OrgEnhetState> aktiveEnheter = aktiveEnheter(alleEnheter);
 
-        List<OrgEnhetState> orgEnheterMedOrganisering = orgEnheterMedAktivOrganisering(aktiveEnheter);
+        List<OrgEnhetState> orgEnheterMedOrganisering = orgEnhetSanityCheckService.orgEnheterMedAktivOrganisering(aktiveEnheter);
 
         Map<String, RessursState> ressurserMedSluttdatoPassert = ressursStateRepository.findAllWithSluttdatoBeforeToday();
 
@@ -585,20 +589,6 @@ public class RessursSanityCheckService {
         }
 
         return RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse.from(alleOrgEnheterMedLederSomHarSluttet);
-    }
-
-    private List<OrgEnhetState> aktiveOrgEnheter(List<OrgEnhetState> enheter) {
-        // FOM er før eller lik dagens dato, samt at TOM er null eller fremtidig
-        return enheter.stream().filter(oe ->
-            oe.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (isNull(oe.gyldigTom()) || oe.gyldigTom().isAfter(LocalDate.now()))
-        ).toList();
-    }
-
-    public List<OrgEnhetState> orgEnheterMedAktivOrganisering(List<OrgEnhetState> orgEnheter) {
-        return orgEnheter.stream()
-            .filter(orgEnhet -> organiseringStateRepository.orgEnhetHasParent(orgEnhet.id()))
-            .toList();
     }
 
     private Optional<RessursState> validerEnhetsLedereSomHarSluttet(OrgEnhetState orgEnhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {

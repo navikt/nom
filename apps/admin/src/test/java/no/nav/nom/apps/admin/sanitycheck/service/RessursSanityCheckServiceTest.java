@@ -41,7 +41,6 @@ class RessursSanityCheckServiceTest {
 
     private static final String ID_ORGENHET_1 = "ab123c";
     private static final String ID_ORGENHET_2 = "de456f";
-    private static final String ID_ORGENHET_3 = "gh789i";
     private static final String FID_ORGTILKNYTNING_1 = "orgtilknytning-1";
     private static final String FID_ORGTILKNYTNING_2 = "orgtilknytning-2";
     private static final String SLUTTET_RESSURS_NAVIDENT = "A123456";
@@ -68,6 +67,9 @@ class RessursSanityCheckServiceTest {
     @Mock
     private NomApiClient nomApiClientMock;
 
+    @Mock
+    private OrgEnhetSanityCheckService  orgEnhetSanityCheckServiceMock;
+
 
     private RessursSanityCheckService service;
 
@@ -81,7 +83,8 @@ class RessursSanityCheckServiceTest {
                 orgtilknytningStateRepositoryMock,
                 orgEnhetLederStateRepositoryMock,
                 nomRemedyApiClientMock,
-                nomApiClientMock
+                nomApiClientMock,
+                orgEnhetSanityCheckServiceMock
         );
     }
 
@@ -384,11 +387,12 @@ class RessursSanityCheckServiceTest {
             .gyldigTom(LocalDate.now().plusYears(2))
             .uniqueAgressoId("089600-Telemark Karrieresenter-ORGNIV3")
             .build();
-        when(orgEnhetStateRepositoryMock.getAll()).thenReturn(List.of(orgenhet1, orgenhet2));
+        var orgEnheter = List.of(orgenhet1, orgenhet2);
+        when(orgEnhetStateRepositoryMock.getAll()).thenReturn(orgEnheter);
+
 
         // orgEnhetene er en del av hierarkiet og har parent
-        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_1)).thenReturn(true);
-        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_2)).thenReturn(true);
+        when(orgEnhetSanityCheckServiceMock.orgEnheterMedAktivOrganisering(orgEnheter)).thenReturn(orgEnheter);
 
 
         // En ressurs som har sluttet
@@ -418,27 +422,6 @@ class RessursSanityCheckServiceTest {
         assertThat(sluttedeLedereMedAktiveEnheter.getFirst().navident()).isEqualTo(SLUTTET_RESSURS_NAVIDENT);
         assertThat(sluttedeLedereMedAktiveEnheter.getFirst().enheter().getFirst().id()).isEqualTo(ID_ORGENHET_1);
     }
-
-    @Test
-    void should_return_orgenheter_which_are_part_of_the_organization_and_thereby_active() {
-        var activeOrgenhet1 = OrgEnhetState.builder()
-            .id(ID_ORGENHET_1)
-            .build();
-        var activeOrgenhet2 = OrgEnhetState.builder()
-            .id(ID_ORGENHET_2)
-            .build();
-        var inactiveOrgenhet = OrgEnhetState.builder()
-            .id(ID_ORGENHET_3)
-            .build();
-
-        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_1)).thenReturn(true);
-        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_2)).thenReturn(true);
-        when(organiseringStateRepositoryMock.orgEnhetHasParent(ID_ORGENHET_3)).thenReturn(false);
-
-        var aktiveOrgenheter = service.orgEnheterMedAktivOrganisering(List.of(activeOrgenhet1, activeOrgenhet2, inactiveOrgenhet));
-        assertThat(aktiveOrgenheter.size()).isEqualTo(2);
-    }
-
 
     private Map<String, RessursState> getRessursStateMap(RessursState ressurs) {
         Map<String, RessursState> ressursStateMap = new HashMap<>();

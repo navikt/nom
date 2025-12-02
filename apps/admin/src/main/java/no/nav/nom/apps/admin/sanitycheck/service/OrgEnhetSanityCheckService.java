@@ -204,7 +204,7 @@ public class OrgEnhetSanityCheckService {
         return enheter.stream().filter(oe -> nonNull(oe.gyldigTom())).filter(oe -> oe.gyldigTom().isBefore(oe.gyldigFom())).toList();
     }
 
-    private List<OrgEnhetState> aktiveEnheter(List<OrgEnhetState> enheter) {
+    public static List<OrgEnhetState> aktiveEnheter(List<OrgEnhetState> enheter) {
         // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
         return enheter.stream().filter(oe ->
                 oe.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
@@ -293,9 +293,11 @@ public class OrgEnhetSanityCheckService {
     public List<OrgEnhetOrganisering> listOrgenheterUtenLeder() {
         List<OrgEnhetState> aktiveEnheter = aktiveEnheter(orgEnhetStateRepository.getAll().stream().toList());
 
+        List<OrgEnhetState> orgEnheterMedOrganisering = orgEnheterMedAktivOrganisering(aktiveEnheter);
+
         List<OrgEnhetState> alleOrgEnheterUtenLeder = new ArrayList<>();
 
-        aktiveEnheter.forEach(orgenhet ->
+        orgEnheterMedOrganisering.forEach(orgenhet ->
             orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.id())
                 .ifPresentOrElse(
                     _ -> {},                // Har leder, gjør ingenting
@@ -310,6 +312,12 @@ public class OrgEnhetSanityCheckService {
                     Objects.requireNonNullElse(oe.uniqueAgressoId(), ""),
                     oe.gyldigFom(),
                     oe.gyldigTom()))
+            .toList();
+    }
+
+    public List<OrgEnhetState> orgEnheterMedAktivOrganisering(List<OrgEnhetState> orgEnheter) {
+        return orgEnheter.stream()
+            .filter(orgEnhet -> organiseringStateRepository.orgEnhetHasParent(orgEnhet.id()))
             .toList();
     }
 
