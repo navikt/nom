@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
-public abstract class AbstractGraphQlController {
+public abstract class AbstractGraphQlController implements GraphQlControllerInterface {
 
     private final OrgEnhetResolver orgEnhetResolver;
     private final OrgtilknytningResolver orgtilknytningResolver;
@@ -78,6 +78,7 @@ public abstract class AbstractGraphQlController {
     }
 
     @QueryMapping("orgEnhet")
+    @Override
     public Optional<OrgEnhet> orgEnhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
         var x = SecurityContextHolder.getContext().getAuthentication();
         if(x == null){
@@ -88,24 +89,33 @@ public abstract class AbstractGraphQlController {
     }
 
     @QueryMapping("orgEnheter")
+    @Override
     public List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgEnhetResolver.orgEnheter(orgEnheterSearch);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
-    public List<Organisering> organisering(OrgEnhet orgEnhet, @Argument("retning") OrganiseringRetning retning, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+    @Override
+    public List<Organisering> organisering(
+        OrgEnhet orgEnhet,
+        @Argument("retning") OrganiseringRetning retning,
+        @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg,
+        DataFetchingEnvironment environment
+    ) {
         graphqlSupport.count(environment);
         return organiseringResolver.organiseringer(orgEnhet, retning, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "ledere")
+    @Override
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return lederResolver.leder(orgEnhet, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "remedyEnhetId")
+    @Override
     public String remedyEnhetId(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return graphqlSupport.remedyEnhetId(orgEnhet.getId());
@@ -113,6 +123,7 @@ public abstract class AbstractGraphQlController {
 
 
     @SchemaMapping(typeName = "OrgEnhet", field = "orgTilknytninger")
+    @Override
     public List<OrgTilknytning> orgTilknytninger(OrgEnhet orgEnhet, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgtilknytningResolver.orgtilknytninger(orgEnhet, periodiskUtvalg);
@@ -120,6 +131,7 @@ public abstract class AbstractGraphQlController {
 
 
     @SchemaMapping(typeName = "Organisering", field = "orgEnhet")
+    @Override
     public OrgEnhet orgEnhet(Organisering organisering, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgEnhetResolver.orgEnhet(organisering);
@@ -127,6 +139,7 @@ public abstract class AbstractGraphQlController {
 
 
     @QueryMapping("ressurs")
+    @Override
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment environment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
         graphqlSupport.count(environment);
@@ -134,41 +147,57 @@ public abstract class AbstractGraphQlController {
     }
 
     @QueryMapping("ressurser")
+    @Override
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return ressursResolver.ressurser(search);
     }
 
     @QueryMapping("ressurserWithMetadata")
+    @Override
     public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         throw new NotRelevantForIntegrationTestingException("Ikke implementert, pga ikke relevant for integrasjonstesting");
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
-    public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+    @Override
+    public List<RessursOrgTilknytning> orgTilknytninger(
+        Ressurs ressurs,
+        @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg,
+        DataFetchingEnvironment environment
+    ) {
         graphqlSupport.count(environment);
         return orgtilknytningResolver.getOrgTilknytningerForRessurs(ressurs, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "lederFor")
+    @Override
     public List<LederOrgEnhet> lederFor(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return lederResolver.lederFor(ressurs, periodiskUtvalg);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "ledere")
+    @Override
     public List<RessursLeder> ledere(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return lederResolver.ledere(ressurs.getNavident(), periodiskUtvalg);
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")
+    @Override
     public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> graphqlSupport.epost(ressurser));
     }
     @QueryMapping("search")
-    public List<Object> search(@Argument("term") String term, @Argument("ressursFilter") RessursSearchFilter ressursFilter, @Argument("orgEnhetFilter") OrgEnhetSearchFilter orgEnhetFilter, DataFetchingEnvironment environment) {
+    @Override
+    public List<Object> search(
+        @Argument("term") String term,
+        @Argument("ressursFilter") RessursSearchFilter ressursFilter,
+        @Argument("orgEnhetFilter") OrgEnhetSearchFilter orgEnhetFilter,
+        DataFetchingEnvironment environment
+    ) {
         graphqlSupport.count(environment);
         var ressurs = isNull(ressursFilter) ? RessursSearchFilter.alle() : ressursFilter;
         var orgenhet = isNull(orgEnhetFilter) ? OrgEnhetSearchFilter.alle() : orgEnhetFilter;
@@ -176,6 +205,7 @@ public abstract class AbstractGraphQlController {
     }
 
     @QueryMapping("searchRessurs")
+    @Override
     public List<Ressurs> searchRessurs(@Argument("term") String term, @Argument("filter") RessursSearchFilter filter, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         var searchFilter = isNull(filter) ? RessursSearchFilter.alle() : filter;
@@ -183,6 +213,7 @@ public abstract class AbstractGraphQlController {
     }
 
     @QueryMapping("searchOrgEnhet")
+    @Override
     public List<OrgEnhet> searchOrgEnhet(@Argument("term") String term, @Argument("filter") OrgEnhetSearchFilter filter, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         var searchFilter = isNull(filter) ? OrgEnhetSearchFilter.alle() : filter;
@@ -195,15 +226,17 @@ public abstract class AbstractGraphQlController {
 
      */
 
-    @Deprecated(forRemoval = true) // NB! ikke fjern umiddelbart. Counter manglet - lagt inn 10.09
+    @Deprecated(forRemoval = true)
     @QueryMapping("organisasjonsenhet")
+    @Override
     public Optional<OrgEnhet> organisasjonsenhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgEnhet(orgEnhetSearch, environment);
     }
 
-    @Deprecated(forRemoval = true)  // NB! ikke fjern umiddelbart. Counter manglet - lagt inn 10.09
+    @Deprecated(forRemoval = true)
     @QueryMapping("organisasjonsenheter")
+    @Override
     public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgEnheter(orgEnheterSearch, environment);
@@ -211,6 +244,7 @@ public abstract class AbstractGraphQlController {
 
     @Deprecated
     @SchemaMapping(typeName = "OrgEnhet", field = "leder")
+    @Override
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return lederResolver.leder(orgEnhet, PeriodiskUtvalgArg.AKTIVE);
@@ -218,6 +252,7 @@ public abstract class AbstractGraphQlController {
 
     @Deprecated
     @SchemaMapping(typeName = "OrgEnhet", field = "koblinger")
+    @Override
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgtilknytningResolver.koblinger(orgEnhet);
@@ -225,6 +260,7 @@ public abstract class AbstractGraphQlController {
 
     @Deprecated
     @BatchMapping(typeName = "Ressurs", field = "orgTilknytning")
+    @Override
     public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytning(List<Ressurs> ressurser, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         record Pair(Ressurs ressurs, List<RessursOrgTilknytning> ressursOrgTilknytningList){}
@@ -234,13 +270,6 @@ public abstract class AbstractGraphQlController {
                 .map(it -> new Pair(it, orgtilknytningResolver.getOrgTilknytningerForRessurs(it, PeriodiskUtvalgArg.AKTIVE)))
                 .collect(Collectors.toMap(r -> r.ressurs, r -> r.ressursOrgTilknytningList))
         );
-    }
-
-    public static GraphQLError handleNotRelevantQueryException(Throwable throwable, DataFetchingEnvironment environment) {
-        if(throwable instanceof NotRelevantForIntegrationTestingException){
-            return ErrorCode.DISABLED_FEATURE.construct(environment,"Ikke relevant query for integrasjonstesting");
-        }
-        return null;
     }
 
 }

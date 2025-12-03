@@ -11,5 +11,6 @@ spring:
   graphql:
     graphiql:
       enabled: on
-
+server:
+  port: 9038
 

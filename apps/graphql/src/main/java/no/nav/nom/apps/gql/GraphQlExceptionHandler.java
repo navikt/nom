@@ -25,7 +25,7 @@ public class GraphQlExceptionHandler extends DataFetcherExceptionResolverAdapter
 
     @Bean
     public DataFetcherExceptionResolver notRelevantQueryHandler() {
-        return DataFetcherExceptionResolver.forSingleError(AbstractGraphQlController::handleNotRelevantQueryException);
+        return DataFetcherExceptionResolver.forSingleError(GraphQlControllerInterface::handleNotRelevantQueryException);
     }
 
 
