@@ -46,7 +46,7 @@ public class InitHierarkiIdGenerator {
     public NavIdent generateNavIdent() {
         var suffixTmp = this.getNextIdNumber() + "";
         var suffix = "0".repeat(6 - suffixTmp.length()) + suffixTmp;
-        var outStr = "A" + suffix;
+        var outStr = "X" + suffix;
         return NavIdent.create(outStr);
     }
 
@@ -61,6 +61,10 @@ public class InitHierarkiIdGenerator {
 
     public RessursState.RessursStateBuilder ressursStateBuilder(String navn) {
         var navIdentStr = generateNavIdent().navIdent();
+        return ressursStateBuilder(navn, navIdentStr);
+    }
+
+    public RessursState.RessursStateBuilder ressursStateBuilder(String navn, String navIdentStr) {
         return RessursState.builder()
             .visningsnavn(new Visningsnavn(navn, Optional.empty(), "(" + navIdentStr + ")"))
             .navident(navIdentStr)

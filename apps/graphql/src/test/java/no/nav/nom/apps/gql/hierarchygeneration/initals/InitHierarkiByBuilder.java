@@ -41,17 +41,14 @@ public class InitHierarkiByBuilder implements InitHierarkiInterface {
     public final RessursState LEDER_NORDLAND = idGen.ressursStateBuilder("Nordland-leder").build();
     public final RessursState LEDER_SORTLAND = idGen.ressursStateBuilder("Sortland-leder").build();
     public final RessursState LEDER_SORTLAND_7S = idGen.ressursStateBuilder("Sortland-7siffer-leder").build();
-    public final RessursState LEDER_NARVIK = idGen.ressursStateBuilder("Narvik-leder").build();
+    public final RessursState LEDER_NARVIK = idGen.ressursStateBuilder("Narvik-leder","A123456").build();
 
 
     public final List<RessursState> ANSATTE_SORTLAND = Stream.of(1, 2, 3, 4, 5, 6, 7)
         .map(it -> idGen.ressursStateBuilder("Sortland ressurs " + it).build())
         .toList();
-    public final List<RessursState> ANSATTE_NARVIK = Stream.concat(
-        Stream.of(idGen.ressursStateBuilder("Test Testesen").navident("A123456").build()),
-        Stream.of(1, 2, 3, 4).map(it -> idGen.ressursStateBuilder("Narvik ressurs " + it).build())
+    public final List<RessursState> ANSATTE_NARVIK = Stream.of(1, 2, 3, 4).map(it -> idGen.ressursStateBuilder("Narvik ressurs " + it).build()
     ).toList();
-
 
 
     public final TestOrgNode testHierarki = TestOrgNode.createRootNode(
