@@ -9,10 +9,13 @@ import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
 import no.nav.nom.apps.gql.AbstractGraphQlController;
+import no.nav.nom.apps.gql.GraphQlControllerInterface;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearch;
+import no.nav.nom.apps.gql.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.gql.projections.OrgEnheterSearch;
 import no.nav.nom.apps.gql.projections.RessursSearch;
+import no.nav.nom.apps.gql.projections.RessursSearchFilter;
 import no.nav.nom.apps.gql.projections.RessurserSearch;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
@@ -20,12 +23,18 @@ import no.nav.nom.apps.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.apps.gql.resolvers.OrgtilknytningResolver;
 import no.nav.nom.apps.gql.resolvers.RessursResolver;
 import no.nav.nom.apps.gql.resolvers.SearchResolver;
+import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
+import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.api.graphql.RessursLeder;
+import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import org.springframework.context.annotation.Profile;
@@ -33,6 +42,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -40,9 +50,10 @@ import java.util.Optional;
 
 @Controller
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
-public class GraphQlControllerImpl extends AbstractGraphQlController {
+public class GraphQlControllerImpl implements GraphQlControllerInterface {
 
     private final SecurityUtil securityUtil;
+    private final AbstractGraphQlController delegate;
 
     public GraphQlControllerImpl(
         OrgEnhetResolver orgEnhetResolver,
@@ -54,7 +65,7 @@ public class GraphQlControllerImpl extends AbstractGraphQlController {
         SecurityUtil securityUtil,
         GraphqlSupportInterface graphqlSupportInterface
     ) {
-        super(
+        this.delegate = new AbstractGraphQlController(
             orgEnhetResolver,
             orgtilknytningResolver,
             organiseringResolver,
@@ -62,48 +73,130 @@ public class GraphQlControllerImpl extends AbstractGraphQlController {
             ressursResolver,
             searchResolver,
             graphqlSupportInterface
-        );
+        ) {};
         this.securityUtil = securityUtil;
     }
 
     @Override
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
-        return super.orgEnhet(orgEnhetSearch, environment);
+        return delegate.orgEnhet(orgEnhetSearch, environment);
     }
 
     @Override
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
-        return super.orgEnheter(orgEnheterSearch, environment);
+        return delegate.orgEnheter(orgEnheterSearch, environment);
+    }
+
+    @Override
+    public List<Organisering> organisering(
+        OrgEnhet orgEnhet,
+        OrganiseringRetning retning,
+        PeriodiskUtvalgArg periodiskUtvalg,
+        DataFetchingEnvironment environment
+    ) {
+        return delegate.organisering(orgEnhet, retning, periodiskUtvalg, environment);
+    }
+
+    @Override
+    public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+        return delegate.leder(orgEnhet, periodiskUtvalg, environment);
+    }
+
+    @Override
+    public String remedyEnhetId(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
+        return delegate.remedyEnhetId(orgEnhet, environment);
     }
 
     @Override
     public List<OrgTilknytning> orgTilknytninger(OrgEnhet orgEnhet, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
-        return super.orgTilknytninger(orgEnhet, periodiskUtvalg, environment);
+        return delegate.orgTilknytninger(orgEnhet, periodiskUtvalg, environment);
     }
 
     @Override
     public OrgEnhet orgEnhet(Organisering organisering, DataFetchingEnvironment environment) {
-        return super.orgEnhet(organisering, environment);
+        return delegate.orgEnhet(organisering, environment);
     }
 
     @Override
     public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment) {
-        return super.ressurserWithMetadata(environment);
+        return delegate.ressurserWithMetadata(environment);
+    }
+
+    @Override
+    public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+        return delegate.orgTilknytninger(ressurs, periodiskUtvalg, environment);
+    }
+
+    @Override
+    public List<LederOrgEnhet> lederFor(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+        return delegate.lederFor(ressurs, periodiskUtvalg, environment);
+    }
+
+    @Override
+    public List<RessursLeder> ledere(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
+        return delegate.ledere(ressurs, periodiskUtvalg, environment);
+    }
+
+    @Override
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser) {
+        return delegate.epost(ressurser);
+    }
+
+    @Override
+    public List<Object> search(String term, RessursSearchFilter ressursFilter, OrgEnhetSearchFilter orgEnhetFilter, DataFetchingEnvironment environment) {
+        return delegate.search(term, ressursFilter, orgEnhetFilter, environment);
+    }
+
+    @Override
+    public List<Ressurs> searchRessurs(String term, RessursSearchFilter filter, DataFetchingEnvironment environment) {
+        return delegate.searchRessurs(term, filter, environment);
+    }
+
+    @Override
+    public List<OrgEnhet> searchOrgEnhet(String term, OrgEnhetSearchFilter filter, DataFetchingEnvironment environment) {
+        return delegate.searchOrgEnhet(term, filter, environment);
+    }
+
+    @Override
+    @Deprecated
+    public Optional<OrgEnhet> organisasjonsenhet(OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+        return delegate.organisasjonsenhet(orgEnhetSearch, environment);
+    }
+
+    @Override
+    @Deprecated
+    public List<OrgEnhetResult> organisasjonsenheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+        return delegate.organisasjonsenheter(orgEnheterSearch, environment);
+    }
+
+    @Override
+    @Deprecated
+    public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
+        return delegate.leder(orgEnhet, environment);
+    }
+
+    @Override
+    public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet, DataFetchingEnvironment environment) {
+        return delegate.koblinger(orgEnhet, environment);
+    }
+
+    @Override
+    public Mono<Map<Ressurs, List<RessursOrgTilknytning>>> orgTilknytning(List<Ressurs> ressurser, DataFetchingEnvironment environment) {
+        return orgTilknytning(ressurser, environment);
     }
 
     @Override
     public List<RessursResult> ressurser(RessurserSearch search, DataFetchingEnvironment environment) {
-        return super.ressurser(search, environment);
+        return delegate.ressurser(search, environment);
     }
 
     @Override
     public Optional<Ressurs> ressurs(RessursSearch search, DataFetchingEnvironment environment) {
         System.out.println(search.resolveNavident());
-        return super.ressurs(search, environment);
+        return delegate.ressurs(search, environment);
     }
 
     private void checkAuth() {
         securityUtil.checkAuth(SecurityContextHolder.getContext().getAuthentication());
-
     }
 }

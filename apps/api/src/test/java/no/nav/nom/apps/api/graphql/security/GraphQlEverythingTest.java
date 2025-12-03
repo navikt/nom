@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.common.security.SecurityConfig;
 import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
 import no.nav.nom.apps.api.graphql.GraphQlStateReposConfig;
 import no.nav.nom.apps.api.graphql.GraphQlSupportImpl;
+import no.nav.nom.apps.gql.GraphQlControllerInterface;
 import no.nav.nom.apps.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
@@ -77,6 +78,7 @@ import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
         , GraphQlSupportImpl.class
         , GraphQlAutoConfiguration.class
         , GraphQlControllerImpl.class
+//        , GraphQlControllerInterface.class
         , GraphQlWebMvcAutoConfiguration.class
         , TestTokensGenerator.class
         , AuthResolver.class
@@ -107,7 +109,7 @@ public class GraphQlEverythingTest  {
 
     @Autowired TestTokensGenerator testTokensGenerator;
 
-    @Autowired GraphQlControllerImpl graphQlController;
+    @Autowired GraphQlControllerInterface graphQlController;
 
 //    public GraphQlEverythingTest(WebApplicationContext applicationContext){
 //
