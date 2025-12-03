@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface GraphQlControllerInterface {
+public interface NomGraphQlControllerInterface {
     static GraphQLError handleNotRelevantQueryException(Throwable throwable, DataFetchingEnvironment environment) {
         if (throwable instanceof NotRelevantForIntegrationTestingException) {
             return ErrorCode.DISABLED_FEATURE.construct(environment, "Ikke relevant query for integrasjonstesting");

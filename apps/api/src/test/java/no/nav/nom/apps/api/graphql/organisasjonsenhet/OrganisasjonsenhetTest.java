@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.graphql.GraphQlControllerForTest;
+import no.nav.nom.apps.api.graphql.NomGraphQlControllerForTest;
 import no.nav.nom.apps.api.graphql.GraphqlTestConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.apps.gql.NomGraphQlAutoConfiguration;
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("GraphQLTest")
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class, NomGraphQlAutoConfiguration.class, GraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class )
+@ContextConfiguration(classes = {GraphqlTestConfig.class, NomGraphQlAutoConfiguration.class, NomGraphQlControllerForTest.class}, initializers = MockOAuth2ServerInitializer.class )
 @DisplayName("GraphQL - Organisasjonsenhet spørringer")
 class OrganisasjonsenhetTest {
 

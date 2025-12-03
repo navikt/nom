@@ -29,7 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(
     classes = {
         GraphQlSupportImpl.class,
-        GraphQlControllerForTest.class,
+        NomGraphQlControllerForTest.class,
         JacksonAutoConfiguration.class,
         NomGraphQlAutoConfiguration.class,
         GraphQlTestBase.TestBeans.class,

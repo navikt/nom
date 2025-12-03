@@ -1,8 +1,7 @@
 package no.nav.nom.apps.api.graphql;
 
-import graphql.execution.DataFetcherResult;
-import no.nav.nom.apps.gql.AbstractGraphQlController;
-import no.nav.nom.apps.gql.GraphQlControllerInterface;
+import no.nav.nom.apps.gql.AbstractNomGraphQlController;
+import no.nav.nom.apps.gql.NomGraphQlControllerInterface;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
 import no.nav.nom.apps.gql.resolvers.OrgEnhetResolver;
@@ -16,8 +15,8 @@ import org.springframework.stereotype.Controller;
 
 @Profile("GraphQLTest")
 @Controller
-public class GraphQlControllerForTest extends AbstractGraphQlController implements GraphQlControllerInterface {
-    public GraphQlControllerForTest(
+public class NomGraphQlControllerForTest extends AbstractNomGraphQlController implements NomGraphQlControllerInterface {
+    public NomGraphQlControllerForTest(
         OrgEnhetResolver orgEnhetResolver,
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,

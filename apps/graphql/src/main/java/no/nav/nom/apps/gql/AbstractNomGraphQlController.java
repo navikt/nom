@@ -1,7 +1,5 @@
 package no.nav.nom.apps.gql;
 
-import graphql.GraphQLError;
-import graphql.GraphqlErrorBuilder;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.gql.exception.NotRelevantForIntegrationTestingException;
@@ -45,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
-public abstract class AbstractGraphQlController implements GraphQlControllerInterface {
+public abstract class AbstractNomGraphQlController implements NomGraphQlControllerInterface {
 
     private final OrgEnhetResolver orgEnhetResolver;
     private final OrgtilknytningResolver orgtilknytningResolver;
@@ -59,7 +57,7 @@ public abstract class AbstractGraphQlController implements GraphQlControllerInte
 
 
 
-    public AbstractGraphQlController(
+    public AbstractNomGraphQlController(
         OrgEnhetResolver orgEnhetResolver,
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,

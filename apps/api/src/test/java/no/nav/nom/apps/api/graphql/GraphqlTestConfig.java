@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.gql.AbstractGraphQlController;
+import no.nav.nom.apps.gql.AbstractNomGraphQlController;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.lucenesearch.LuceneService;
 import no.nav.nom.apps.gql.resolvers.LederResolver;
@@ -97,15 +97,15 @@ public class GraphqlTestConfig {
 
     @Bean
     @Profile("GraphQLTest4")
-    public AbstractGraphQlController graphQlController(                                                       OrgEnhetResolver orgEnhetResolver,
-                                                       OrgtilknytningResolver orgtilknytningResolver,
-                                                       OrganiseringResolver organiseringResolver,
-                                                       LederResolver lederResolver,
-                                                       RessursResolver ressursResolver,
-                                                       SearchResolver searchResolver
+    public AbstractNomGraphQlController graphQlController(OrgEnhetResolver orgEnhetResolver,
+                                                          OrgtilknytningResolver orgtilknytningResolver,
+                                                          OrganiseringResolver organiseringResolver,
+                                                          LederResolver lederResolver,
+                                                          RessursResolver ressursResolver,
+                                                          SearchResolver searchResolver
 
                                                        ) {
-        return new AbstractGraphQlController(
+        return new AbstractNomGraphQlController(
             orgEnhetResolver,
             orgtilknytningResolver,
             organiseringResolver ,

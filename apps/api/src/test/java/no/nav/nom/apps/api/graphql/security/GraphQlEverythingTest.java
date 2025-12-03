@@ -17,10 +17,10 @@ import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties;
 import no.nav.nom.apps.api.common.security.JWTFilter;
 import no.nav.nom.apps.api.common.security.SecurityConfig;
-import no.nav.nom.apps.api.graphql.GraphQlControllerImpl;
+import no.nav.nom.apps.api.graphql.NomGraphQlControllerImpl;
 import no.nav.nom.apps.api.graphql.GraphQlStateReposConfig;
 import no.nav.nom.apps.api.graphql.GraphQlSupportImpl;
-import no.nav.nom.apps.gql.GraphQlControllerInterface;
+import no.nav.nom.apps.gql.NomGraphQlControllerInterface;
 import no.nav.nom.apps.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
@@ -77,7 +77,7 @@ import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
         , GraphQlStateReposConfig.class
         , GraphQlSupportImpl.class
         , GraphQlAutoConfiguration.class
-        , GraphQlControllerImpl.class
+        , NomGraphQlControllerImpl.class
 //        , GraphQlControllerInterface.class
         , GraphQlWebMvcAutoConfiguration.class
         , TestTokensGenerator.class
@@ -109,7 +109,8 @@ public class GraphQlEverythingTest  {
 
     @Autowired TestTokensGenerator testTokensGenerator;
 
-    @Autowired GraphQlControllerInterface graphQlController;
+    @Autowired
+    NomGraphQlControllerInterface graphQlController;
 
 //    public GraphQlEverythingTest(WebApplicationContext applicationContext){
 //

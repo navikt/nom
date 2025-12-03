@@ -1,15 +1,10 @@
 package no.nav.nom.apps.api.graphql;
 
 import graphql.execution.DataFetcherResult;
-import graphql.schema.DataFetcherFactories;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
-import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
-import no.nav.nom.apps.gql.AbstractGraphQlController;
-import no.nav.nom.apps.gql.GraphQlControllerInterface;
+import no.nav.nom.apps.gql.AbstractNomGraphQlController;
+import no.nav.nom.apps.gql.NomGraphQlControllerInterface;
 import no.nav.nom.apps.gql.GraphqlSupportInterface;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearch;
 import no.nav.nom.apps.gql.projections.OrgEnhetSearchFilter;
@@ -37,10 +32,8 @@ import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
@@ -50,12 +43,12 @@ import java.util.Optional;
 
 @Controller
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
-public class GraphQlControllerImpl implements GraphQlControllerInterface {
+public class NomGraphQlControllerImpl implements NomGraphQlControllerInterface {
 
     private final SecurityUtil securityUtil;
-    private final AbstractGraphQlController delegate;
+    private final AbstractNomGraphQlController delegate;
 
-    public GraphQlControllerImpl(
+    public NomGraphQlControllerImpl(
         OrgEnhetResolver orgEnhetResolver,
         OrgtilknytningResolver orgtilknytningResolver,
         OrganiseringResolver organiseringResolver,
@@ -65,7 +58,7 @@ public class GraphQlControllerImpl implements GraphQlControllerInterface {
         SecurityUtil securityUtil,
         GraphqlSupportInterface graphqlSupportInterface
     ) {
-        this.delegate = new AbstractGraphQlController(
+        this.delegate = new AbstractNomGraphQlController(
             orgEnhetResolver,
             orgtilknytningResolver,
             organiseringResolver,

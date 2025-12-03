@@ -165,7 +165,7 @@ public class NomGqlApplication {
     }
 
     @Controller
-    private static class ConcreteGraphqlController extends AbstractGraphQlController {
+    private static class ConcreteGraphqlController extends AbstractNomGraphQlController {
 
         public ConcreteGraphqlController(
             OrgEnhetResolver orgEnhetResolver,
