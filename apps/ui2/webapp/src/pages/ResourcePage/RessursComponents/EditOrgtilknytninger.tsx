@@ -1261,11 +1261,12 @@ function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
 function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
   return (
     <ul>
-      <li>
-        {ressursSektor === Sektor.EKSTERN
-          ? "Du må fylle inn sluttdato, men sluttdato må være mindre enn ett år frem i tid fra dagens dato."
-          : "Du trenger ikke fylle inn sluttdato på fast ansatte."}
-      </li>
+      {ressursSektor === Sektor.EKSTERN && (
+        <li>
+          Du må fylle inn sluttdato, og sluttdato må være mindre enn ett år frem
+          i tid fra dagens dato.
+        </li>
+      )}
       <li>
         Medarbeideren må ha en organisasjonstilknytning og en leder med daglig
         oppfølging for å være registrert som medarbeider i Nav. Perioder med

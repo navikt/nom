@@ -249,7 +249,7 @@ function SluttDatoPicker() {
               data-cy="sluttDato-picker"
               {...sluttDatoDatepicker.inputProps}
               error={fieldState.error?.message?.toString()}
-              label="Sluttdato (Siste arbeidsdag)"
+              label="Sluttdato (siste dag iht. kontrakt)"
               ref={field.ref}
             />
           </DatePicker>

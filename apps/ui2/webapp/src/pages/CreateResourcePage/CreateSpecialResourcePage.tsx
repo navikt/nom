@@ -727,7 +727,7 @@ function VikafossenFormSection() {
       <div>
         <Label>Organisasjonsenhet</Label>
         <BodyShort>
-          Medarbeideren blir plassert i organisasjonsenheten Vikafossen
+          Medarbeideren blir plassert i organisasjonsenheten Vikafossen.
         </BodyShort>
       </div>
 
