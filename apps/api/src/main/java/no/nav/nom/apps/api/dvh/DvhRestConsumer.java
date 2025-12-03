@@ -336,7 +336,7 @@ public class DvhRestConsumer {
                 organiseringService.saveOrganiseringer(organiseringer);
             }
         } catch (Exception e) {
-            log.error("Failure loading Organisering data from DVH", e);
+            log.error("ALERT! Failure loading Organisering data from DVH", e);
         }
     }
 

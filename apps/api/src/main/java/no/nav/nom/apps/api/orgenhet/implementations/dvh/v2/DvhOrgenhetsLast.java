@@ -197,7 +197,7 @@ public class DvhOrgenhetsLast {
             );
             log.info("Ferdig med orgenhet last");
         } catch (Exception e) {
-            log.error("Failure loading data from DVH", e);
+            log.error("ALERT: Failure loading data from DVH", e);
         }
     }
 
