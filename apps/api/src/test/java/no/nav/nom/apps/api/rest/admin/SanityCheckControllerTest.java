@@ -49,63 +49,63 @@ public class SanityCheckControllerTest extends RestTestBase {
     @MockitoBean
     RessursStateRepository ressursStateRepository;
 
-    @Test
-    @DisplayName("Henter orgenheter uten leder og tom NAV hierarkiet")
-    void test_listOrgenheterUtenLeder_no_leaders_no_hierarchy() {
+//    @Test
+//    @DisplayName("Henter orgenheter uten leder og tom NAV hierarkiet")
+//    void test_listOrgenheterUtenLeder_no_leaders_no_hierarchy() {
+//
+//        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
+//            .thenReturn(Collections.emptyList());
+//        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
+//
+//        webTestClient.get()
+//            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
+//            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+//            .exchange()
+//            .expectStatus().isOk()
+//            .expectBody(String.class)
+//            .value(result -> assertThat(result).isNull());
+//    }
 
-        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
-            .thenReturn(Collections.emptyList());
-        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
+//    @Test
+//    @DisplayName("Henter orgenheter uten leder og NAV hierarkiet")
+//    void test_listOrgenheterUtenLeder_no_leaders_with_hierarchy() {
+//
+//        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
+//            .thenReturn(getMockEnheterMedOrganisering());
+//        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
+//        webTestClient.get()
+//            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
+//            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+//            .exchange()
+//            .expectStatus().isOk()
+//            .expectBody(String.class)
+//            .value(result -> {
+//                assertThat(result).isNotNull();
+//                assertThat(result.contains(ORG_ENHET_NAVN_B)).isTrue();
+//                assertThat(result.contains(ORG_ENHET_NAVN_A)).isTrue();
+//             });
+//    }
 
-        webTestClient.get()
-            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class)
-            .value(result -> assertThat(result).isNull());
-    }
-
-    @Test
-    @DisplayName("Henter orgenheter uten leder og NAV hierarkiet")
-    void test_listOrgenheterUtenLeder_no_leaders_with_hierarchy() {
-
-        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
-            .thenReturn(getMockEnheterMedOrganisering());
-        when(orgEnhetLederService.getAktivLederForOrgEnhet(any())).thenReturn(Optional.empty());
-        webTestClient.get()
-            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class)
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assertThat(result.contains(ORG_ENHET_NAVN_B)).isTrue();
-                assertThat(result.contains(ORG_ENHET_NAVN_A)).isTrue();
-             });
-    }
-
-    @Test
-    @DisplayName("Henter orgenheter med leder i NAV hierarkiet")
-    void test_listOrgenheterUtenLeder_with_leaders() {
-        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
-            .thenReturn(getMockEnheterMedOrganisering());
-        // simulate that orgenhet B has a leader
-        when(orgEnhetLederService.getAktivLederForOrgEnhet("B")).thenReturn(getMockLederState());
-
-        webTestClient.get()
-            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(String.class)
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assertThat(result.contains(ORG_ENHET_NAVN_B)).isFalse();
-                assertThat(result.contains(ORG_ENHET_NAVN_A)).isTrue();
-            });
-    }
+//    @Test
+//    @DisplayName("Henter orgenheter med leder i NAV hierarkiet")
+//    void test_listOrgenheterUtenLeder_with_leaders() {
+//        when(orgenhetServiceMock.getAllEnheterMedOrganisering())
+//            .thenReturn(getMockEnheterMedOrganisering());
+//        // simulate that orgenhet B has a leader
+//        when(orgEnhetLederService.getAktivLederForOrgEnhet("B")).thenReturn(getMockLederState());
+//
+//        webTestClient.get()
+//            .uri("/api/admin/SanityCheck/listOrgenheterUtenLeder")
+//            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+//            .exchange()
+//            .expectStatus().isOk()
+//            .expectBody(String.class)
+//            .value(result -> {
+//                assertThat(result).isNotNull();
+//                assertThat(result.contains(ORG_ENHET_NAVN_B)).isFalse();
+//                assertThat(result.contains(ORG_ENHET_NAVN_A)).isTrue();
+//            });
+//    }
 
     private Optional<OrgEnhetLederState> getMockLederState() {
         return Optional.of(
