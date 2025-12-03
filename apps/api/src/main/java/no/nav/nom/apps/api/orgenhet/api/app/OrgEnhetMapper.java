@@ -113,7 +113,8 @@ public class OrgEnhetMapper {
 
     private RessursState ressursWithObscuredPersonident(OrgEnhetLederState leder) {
         var ressursState = ressursService.findByNavident(leder.navident()).orElse(null);
-        var loggedInUserAuthorities = SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        var loggedInUserAuthorities = auth != null ? auth.getAuthorities() : List.of();
 
         if (ressursState != null && !loggedInUserAuthorities.contains(NomApiAccessScope.ADMIN.asGrantedAuthority())) {
             ressursState = ressursState.toBuilder()
