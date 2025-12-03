@@ -279,7 +279,7 @@ public class DvhOrgenhetsLast {
     private void korrigerOrgEnhetHvisEndringer(DvhOrgenhetV2 dvhOrgenhetV2, OrgEnhetState orgEnhetState) {
         val navnEndret = !orgEnhetState.navn().equals(dvhOrgenhetV2.getNavn());
         val datoFOMEndret = !orgEnhetState.gyldigFom().equals(dvhOrgenhetV2.getGyldigFom());
-        val datoTOMEndret = nonNull(orgEnhetState.gyldigTom()) && !dvhOrgenhetV2.getGyldigTom().equals(orgEnhetState.gyldigTom());
+        val datoTOMEndret = !Objects.equals(orgEnhetState.gyldigTom(),dvhOrgenhetV2.getGyldigTom());
         val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType(), dvhOrgenhetV2.getAgressoOrgenhetType());
 
         if (navnEndret || datoFOMEndret || datoTOMEndret ||agressoOrgEnhetTypeEndret) {
