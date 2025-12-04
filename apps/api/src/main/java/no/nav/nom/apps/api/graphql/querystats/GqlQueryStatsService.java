@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class GqlQueryStatsService {
-    private static final int QUEUE_MONITOR_WARNING_SIZE = 50;
+    private static final int QUEUE_MONITOR_WARNING_SIZE = 200;
     private final Set<String> knownHashes = ConcurrentHashMap.newKeySet(); // simple caching
     private final ObjectMapper objectMapper = new ObjectMapper();
 
