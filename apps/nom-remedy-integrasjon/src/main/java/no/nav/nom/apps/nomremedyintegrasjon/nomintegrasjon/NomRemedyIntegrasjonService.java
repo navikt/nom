@@ -107,49 +107,54 @@ public class NomRemedyIntegrasjonService {
     @Scheduled(cron = "0 10 0 * * *")
     public void executeOldDelayedStateUpdate() {
         if (leaderElection.isLeader()) {
-            logger.info("Executing old delayed state update");
-            var oldDelayedStates = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
-            if (oldDelayedStates.isEmpty()) {
-                logger.info("No old delayed states to update");
-                return;
-            }
-            List<AggregateState> oldDelayedStatesToUpdate = new ArrayList<>();
-            List<UUID> oldDelayedEventsNotFoundToDelete = new ArrayList<>();
-            List<UUID> oldDelayedEventsConvertedToDelete = new ArrayList<>();
-            oldDelayedStates.forEach(state -> {
-                var fid = state.getEvent().getFid();
-                var fidType = fid.contains("ressurs") ? RessursState.class.getSimpleName() : OrgtilknytningState.class.getSimpleName();
-                var navident = fidType.equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(fid)
-                    .map(OrgtilknytningState::navident)
-                    .orElse(null) :
-                    ressursStateRepository.findByFid(fid).map(RessursState::navident)
-                        .orElse(null);
-
-                if (navident == null) {
-                    logger.error("Fant ikke state for {}", fid);
-                    oldDelayedEventsNotFoundToDelete.add(state.getDelayedEventId());
-                } else {
-                    oldDelayedStatesToUpdate.add(
-                        AggregateState.builder()
-                            .createdAt(LocalDateTime.now())
-                            .navident(navident)
-                            .stateFid(fid)
-                            .stateType(fidType)
-                            .delayedUntil(state.getDelayedUntil())
-                            .build()
-                    );
-                    oldDelayedEventsConvertedToDelete.add(state.getDelayedEventId());
+            try {
+                logger.info("Executing old delayed state update");
+                var oldDelayedStates = delayedEventRepository.findByDelayedUntilLessThanEqual(LocalDate.now());
+                if (oldDelayedStates.isEmpty()) {
+                    logger.info("No old delayed states to update");
+                    return;
                 }
-            });
+                List<AggregateState> oldDelayedStatesToUpdate = new ArrayList<>();
+                List<UUID> oldDelayedEventsNotFoundToDelete = new ArrayList<>();
+                List<UUID> oldDelayedEventsConvertedToDelete = new ArrayList<>();
+                oldDelayedStates.forEach(state -> {
+                    var fid = state.getEvent().getFid();
+                    var fidType = fid.contains("ressurs") ? RessursState.class.getSimpleName() : OrgtilknytningState.class.getSimpleName();
+                    var navident = fidType.equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(fid)
+                        .map(OrgtilknytningState::navident)
+                        .orElse(null) :
+                        ressursStateRepository.findByFid(fid).map(RessursState::navident)
+                            .orElse(null);
 
-            if (!oldDelayedEventsNotFoundToDelete.isEmpty()) {
-                delayedEventRepository.deleteAllById(oldDelayedEventsNotFoundToDelete);
-                logger.info("Sletter alle gamle events som ikke kunne bli prossesert {}",  oldDelayedEventsNotFoundToDelete);
+                    if (navident == null) {
+                        logger.error("Fant ikke state for {}", fid);
+                        oldDelayedEventsNotFoundToDelete.add(state.getDelayedEventId());
+                    } else {
+                        oldDelayedStatesToUpdate.add(
+                            AggregateState.builder()
+                                .createdAt(LocalDateTime.now())
+                                .navident(navident)
+                                .stateFid(fid)
+                                .stateType(fidType)
+                                .delayedUntil(state.getDelayedUntil())
+                                .build()
+                        );
+                        oldDelayedEventsConvertedToDelete.add(state.getDelayedEventId());
+                    }
+                });
+
+                if (!oldDelayedEventsNotFoundToDelete.isEmpty()) {
+                    delayedEventRepository.deleteAllById(oldDelayedEventsNotFoundToDelete);
+                    logger.info("Sletter alle gamle events som ikke kunne bli prossesert {}",  oldDelayedEventsNotFoundToDelete);
+                }
+                logger.info("Old delayed state update: {}", oldDelayedStates);
+                List<UUID> rowsToDelete = executeStateUpdates(oldDelayedStatesToUpdate);
+                aggregateStateRepository.deleteAllById(rowsToDelete);
+                delayedEventRepository.deleteAllById(oldDelayedEventsConvertedToDelete);
+            } catch (Exception e) {
+                logger.error("Uventet error skjedde {}", e.getMessage());
+                throw e;
             }
-            logger.info("Old delayed state update: {}", oldDelayedStates);
-            List<UUID> rowsToDelete = executeStateUpdates(oldDelayedStatesToUpdate);
-            aggregateStateRepository.deleteAllById(rowsToDelete);
-            delayedEventRepository.deleteAllById(oldDelayedEventsConvertedToDelete);
         }
     }
 
