@@ -252,9 +252,9 @@ public class RessursUtloperSnartEmailService {
 
             Set<String> sistEndretAvNavidenter = new HashSet<>();
 
-            leggTilSetHvisNavidentOgIkkeRessursenSelv(ressurs.sistEndretAv(), ressurs.sistEndretAv(), sistEndretAvNavidenter);
+            leggTilSetHvisNavidentOgIkkeRessursenSelv(ressurs.sistEndretAv(), ressurs.navident(), sistEndretAvNavidenter);
             if (dolOrgtilknytning != null) {
-                leggTilSetHvisNavidentOgIkkeRessursenSelv(dolOrgtilknytning.sistEndretAv(), ressurs.sistEndretAv(), sistEndretAvNavidenter);
+                leggTilSetHvisNavidentOgIkkeRessursenSelv(dolOrgtilknytning.sistEndretAv(), ressurs.navident(), sistEndretAvNavidenter);
             }
 
             var utloperRessursData = RessursUtloperData.builder()
@@ -289,7 +289,7 @@ public class RessursUtloperSnartEmailService {
                 .build();
 
         } catch (Exception e) {
-            log.error("ALERT: En feil skjedde under henting av ressurs med fem eller to uker til utløpsdato: {}\n {}", ressurs.navident(), e.getStackTrace(), e);
+            log.error("ALERT: En feil skjedde under henting av ressurs med fem eller to uker til utløpsdato: {}\n", ressurs.navident(), e);
             return RessursUtloperData.builder()
                 .ressurNavn(ressurs.visningsnavn().getFormattedVisningsnavn())
                 .ressursNavident(ressurs.navident())
@@ -298,6 +298,9 @@ public class RessursUtloperSnartEmailService {
     }
 
     private void leggTilSetHvisNavidentOgIkkeRessursenSelv(String sistEndretAv, String ressursNavident, Set<String> mottakere) {
+        if (sistEndretAv == null || sistEndretAv.isBlank()) {
+            return;
+        }
         ressursStateRepository.findByNavident(sistEndretAv)
             .filter(r -> !r.navident().equals(ressursNavident)) // Ikke ta med hvis det er ressursen selv som har gjort endring
             .filter(r -> isActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
