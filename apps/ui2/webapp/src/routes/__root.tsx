@@ -4,10 +4,12 @@ import {
   createRootRouteWithContext,
   Outlet,
   ScrollRestoration,
+  useRouterState,
 } from "@tanstack/react-router";
 import React from "react";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { ChristmasBanner } from "~/components/ChristmasBanner";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
@@ -32,6 +34,28 @@ export const Route = createRootRouteWithContext<{
   component: () => {
     const hasAdminAccess = useHasAdminAccess();
 
+    const routerState = useRouterState();
+    const currentRoute = routerState.location.pathname;
+
+    const routesWithPageBanner = [
+      "/ressurs/",
+      "/ressurs/create",
+      "/ressurs/createspecial",
+      "/org/",
+      "/opprett-organisasjonsenhet",
+      "/organisasjonsmastring",
+      "/kontaktpersoner/",
+      "/masseflytting/",
+      "/masseflytting-fysisk-brukersted",
+      "/org/table/",
+      "/ressurs-terminate/",
+      "/tilganger",
+    ];
+
+    const showChristmasBanner = !routesWithPageBanner.some((bannerRoute) =>
+      currentRoute.includes(bannerRoute),
+    );
+
     return (
       <>
         {hasAdminAccess && <PrefetchUsefulAdminQueries />}
@@ -42,6 +66,7 @@ export const Route = createRootRouteWithContext<{
         <TestBanner />
         <NavHeader />
         <PilotBanner />
+        {showChristmasBanner && <ChristmasBanner />}
         <div
           css={css`
             background-color: var(--nom-bg);

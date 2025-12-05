@@ -334,3 +334,7 @@ export function isEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
     isRiksrevisjonenOrgEnhet(orgEnhetId)
   );
 }
+
+export function isDecember() {
+  return new Date().getMonth() === 11;
+}

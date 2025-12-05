@@ -8,6 +8,7 @@ import React from "react";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { ChristmasBanner } from "~/components/ChristmasBanner";
 import { PageBanner } from "~/components/PageBanner";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
@@ -43,7 +44,11 @@ export const ResourcePage = () => {
 
   return (
     <>
-      {editOrgtilknytninger && <PageBanner text="Endre medarbeider" />}
+      {editOrgtilknytninger ? (
+        <PageBanner text="Endre medarbeider" />
+      ) : (
+        <ChristmasBanner />
+      )}
 
       <ContentWrapper>
         {editOrgtilknytninger && !!ressurs && (

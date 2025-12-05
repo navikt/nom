@@ -48,6 +48,7 @@ export function CreateRessursPage() {
   return (
     <>
       <PageBanner text="Opprett medarbeider" />
+
       <ContentWrapper>
         <Stepper
           activeStep={stepIdAsNumber}
