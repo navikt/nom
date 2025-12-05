@@ -113,7 +113,9 @@ public class TilgangDelegertUtloeperEmailService {
             }
 
             var recipientList = List.of(lederAdRessurs.getEmail());
-            List<String> ccRecipientList = delegertLederAdRessurs.map(adRessurs -> List.of(adRessurs.getEmail())).orElse(List.of());
+            List<String> ccRecipientList = delegertLederAdRessurs
+                .filter(adRessurs -> adRessurs.getEmail() != null)
+                .map(adRessurs -> List.of(adRessurs.getEmail())).orElse(List.of());
             if (ccRecipientList.isEmpty()) {
                 log.warn(
                     "Sending email-notification about future expiry of LederTilgangState {} mishap. CC email address not retrieved",
