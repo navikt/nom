@@ -168,12 +168,15 @@ public class OrgEnhetLederService {
             var lederStates = getLedereForOrgEnhetIPeriode(ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom());
             lederStates.forEach(lederState -> {
                 if (lederState.navident().equals(navident)) {
-                    getLedereForOverOrgenheterSomIkkeErAngittNavident(ot.orgEnhetId(), lederState.startdato(), lederState.sluttdato(), navident).forEach(
+                    var periodeStart = foer(lederState.startdato(), ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato();
+                    var periodeSlutt = etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato();
+
+                    getLedereForOverOrgenheterSomIkkeErAngittNavident(ot.orgEnhetId(), periodeStart, periodeSlutt, navident).forEach(
                         overEnhetLederState -> lederForRessurs.add(new LederForRessurs(
                             overEnhetLederState.navident(),
                             overEnhetLederState.orgEnhetId(),
-                            foer(overEnhetLederState.startdato(), lederState.startdato()) ?lederState.startdato() : overEnhetLederState.startdato(),
-                            etter(overEnhetLederState.sluttdato(), lederState.sluttdato()) ? lederState.sluttdato() : overEnhetLederState.sluttdato(),
+                            foer(overEnhetLederState.startdato(), periodeStart) ? periodeStart : overEnhetLederState.startdato(),
+                            etter(overEnhetLederState.sluttdato(), periodeSlutt) ? periodeSlutt : overEnhetLederState.sluttdato(),
                             ot.erDagligOppfolging()
                         )
                     ));
@@ -202,16 +205,18 @@ public class OrgEnhetLederService {
                         .build()
                 );
             } else {
+                var delperiodeStart = foer(lederState.startdato(), startdato) ? startdato : lederState.startdato();
+                var delperiodeSlutt = etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato();
                 // Har enheten flere overordnede enheter i perioden (e.g. organiseringen har endret seg)?
                 organiseringStateRepository.findById(orgEnhetId).stream()
                     .filter(organiseringState -> organiseringState.id().equals(orgEnhetId))
-                    .filter(organiseringState -> PeriodeUtil.overlapsInterval(startdato, sluttdato, organiseringState))
+                    .filter(organiseringState -> PeriodeUtil.overlapsInterval(delperiodeStart, delperiodeSlutt, organiseringState))
                     .forEach(organiseringState ->
                         lederStates.addAll(
                             getLedereForOverOrgenheterSomIkkeErAngittNavident(
                                 organiseringState.idOver(),
-                                foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
-                                etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
+                                foer(organiseringState.gyldigFom(), delperiodeStart) ? delperiodeStart : organiseringState.gyldigFom(),
+                                etter(organiseringState.gyldigTom(), delperiodeSlutt) ? delperiodeSlutt : organiseringState.gyldigTom(),
                                 navident
                             )
                         )

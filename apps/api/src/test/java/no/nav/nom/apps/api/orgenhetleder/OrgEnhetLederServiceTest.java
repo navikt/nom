@@ -277,7 +277,6 @@ public class OrgEnhetLederServiceTest {
         assertEquals(leder1001, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
-        assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
     }
 
@@ -312,7 +311,6 @@ public class OrgEnhetLederServiceTest {
         assertEquals("1001", result.getFirst().orgEnhetId());
         assertEquals(leder1001, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
-        assertEquals(otEndDate, result.getFirst().sluttdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
 
@@ -365,8 +363,63 @@ public class OrgEnhetLederServiceTest {
         assertEquals(leder10, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
-        assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("get ledere for Ressurs - Includes leaders from over-enheter when navident matches and leader itself was leader in unit above in period")
+    void getLedereForRessurs_includesLeadersFromOverEnheterWhenNavidentMatchesAndLeaderWasLeaderInUnitAboveInPeriod() {
+        // Given
+        String navident = "A000001";
+        String leder10 = "B000010";
+        String leder100 = "B000100";
+        String enhet1001    = "1001";
+        String overEnhet100 = "100";
+        String overEnhet10  = "10";
+
+        var otStartDate = LocalDate.now().minusDays(10);
+        var otEndDate = LocalDate.now().plusDays(10);
+        var switchDateLeder100 = LocalDate.now().minusDays(5);
+
+        var orgtilknytning = List.of(
+            OrgtilknytningState.builder().orgEnhetId(enhet1001).gyldigFom(otStartDate).gyldigTom(otEndDate).erDagligOppfolging(true).build()
+        );
+        var lederState1001  = OrgEnhetLederState.builder().navident(navident).orgEnhetId(enhet1001).startdato(otStartDate.minusYears(1)).sluttdato(null).build();
+        var lederState100_1 = OrgEnhetLederState.builder().navident(navident).orgEnhetId(overEnhet100).startdato(otStartDate).sluttdato(switchDateLeder100.minusDays(1)).build();
+        var lederState100_2 = OrgEnhetLederState.builder().navident(leder100).orgEnhetId(overEnhet100).startdato(switchDateLeder100).sluttdato(null).build();
+        var lederState10    = OrgEnhetLederState.builder().navident(leder10).orgEnhetId(overEnhet10).startdato(otStartDate.minusYears(1)).sluttdato(null).build();
+
+        doReturn(orgtilknytning).when(orgtilknytningService).getByNavIdent(navident);
+        doReturn(List.of(lederState1001)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(enhet1001);
+        doReturn(List.of(lederState100_1, lederState100_2)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(overEnhet100);
+        doReturn(List.of(lederState10)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(overEnhet10);
+
+        var organiseringStateForId1001 = List.of(
+            OrganiseringState.builder().id(enhet1001).navn("Enhet-"+enhet1001).idOver(overEnhet100).navnOver("Enhet-"+overEnhet100).gyldigFom(otStartDate.minusYears(1)).build()
+        );
+        var organiseringStateForId100 = List.of(
+            OrganiseringState.builder().id(overEnhet100).navn("Enhet-"+overEnhet100).idOver(overEnhet10).navnOver("Enhet-"+overEnhet10).gyldigFom(otStartDate.minusYears(1)).build(),
+            OrganiseringState.builder().id(enhet1001).navn("Enhet-"+enhet1001).idOver(overEnhet100).navnOver("Enhet-"+overEnhet100).gyldigFom(otStartDate.minusYears(1)).build()
+        );
+        doReturn(organiseringStateForId1001).when(organiseringStateRepository).findById(enhet1001);
+        doReturn(organiseringStateForId100).when(organiseringStateRepository).findById(overEnhet100);
+
+        // When
+        var result = orgEnhetLederService.getLedereForRessurs(navident, false);
+
+        // Then
+        assertEquals(2, result.size());
+        assertEquals("10", result.getFirst().orgEnhetId());
+        assertEquals(leder10, result.getFirst().lederNavident());
+        assertEquals(otStartDate, result.getFirst().startdato());
+        assertEquals(switchDateLeder100.minusDays(1), result.getFirst().sluttdato());
+        assertTrue(result.getFirst().erDagligOppfolging());
+
+        assertEquals("100", result.getLast().orgEnhetId());
+        assertEquals(leder100, result.getLast().lederNavident());
+        assertEquals(switchDateLeder100, result.getLast().startdato());
+        assertEquals(otEndDate, result.getLast().sluttdato());
+        assertTrue(result.getLast().erDagligOppfolging());
     }
 
     @Test
@@ -613,7 +666,6 @@ public class OrgEnhetLederServiceTest {
         assertEquals(leder1001, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
-        assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
     }
 
@@ -677,7 +729,6 @@ public class OrgEnhetLederServiceTest {
         assertEquals(leder1001, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
-        assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
 
         assertEquals("1002", result.getLast().orgEnhetId());
@@ -729,9 +780,59 @@ public class OrgEnhetLederServiceTest {
         assertEquals(leder10, result.getFirst().lederNavident());
         assertEquals(otStartDate, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
+        assertTrue(result.getFirst().erDagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("get active ledere for Ressurs - Includes leaders from over-enheter when navident matches and leader itself was leader in unit above in period")
+    void getAktiveLedereForRessurs_includesLeadersFromOverEnheterWhenNavidentMatchesAndLeaderWasLeaderInUnitAboveInPeriod() {
+        // Given
+        String navident = "A000001";
+        String leder10 = "B000010";
+        String leder100 = "B000100";
+        String enhet1001    = "1001";
+        String overEnhet100 = "100";
+        String overEnhet10  = "10";
+
+        var otStartDate = LocalDate.now().minusDays(10);
+        var otEndDate = LocalDate.now().plusDays(10);
+        var switchDateLeder100 = LocalDate.now().minusDays(5);
+
+        var orgtilknytning = List.of(
+            OrgtilknytningState.builder().orgEnhetId(enhet1001).gyldigFom(otStartDate).gyldigTom(otEndDate).erDagligOppfolging(true).build()
+        );
+        var lederState1001  = OrgEnhetLederState.builder().navident(navident).orgEnhetId(enhet1001).startdato(otStartDate).sluttdato(otEndDate).build();
+        var lederState100_1 = OrgEnhetLederState.builder().navident(navident).orgEnhetId(overEnhet100).startdato(otStartDate).sluttdato(switchDateLeder100.minusDays(1)).build();
+        var lederState100_2 = OrgEnhetLederState.builder().navident(leder100).orgEnhetId(overEnhet100).startdato(switchDateLeder100).sluttdato(otEndDate).build();
+        var lederState10    = OrgEnhetLederState.builder().navident(leder10).orgEnhetId(overEnhet10).startdato(otStartDate).sluttdato(otEndDate).build();
+
+        doReturn(orgtilknytning).when(orgtilknytningService).getByNavIdent(navident);
+        doReturn(List.of(lederState1001)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(enhet1001);
+        doReturn(List.of(lederState100_1, lederState100_2)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(overEnhet100);
+        doReturn(List.of(lederState10)).when(orgEnhetLederStateRepository).findAllByOrgEnhetId(overEnhet10);
+
+        var organiseringStateForId1001 = List.of(
+            OrganiseringState.builder().id(enhet1001).navn("Enhet-"+enhet1001).idOver(overEnhet100).navnOver("Enhet-"+overEnhet100).gyldigFom(otStartDate.minusYears(1)).build()
+        );
+        var organiseringStateForId100 = List.of(
+            OrganiseringState.builder().id(overEnhet100).navn("Enhet-"+overEnhet100).idOver(overEnhet10).navnOver("Enhet-"+overEnhet10).gyldigFom(otStartDate.minusYears(1)).build(),
+            OrganiseringState.builder().id(enhet1001).navn("Enhet-"+enhet1001).idOver(overEnhet100).navnOver("Enhet-"+overEnhet100).gyldigFom(otStartDate.minusYears(1)).build()
+        );
+        doReturn(organiseringStateForId1001).when(organiseringStateRepository).findById(enhet1001);
+        doReturn(organiseringStateForId100).when(organiseringStateRepository).findById(overEnhet100);
+
+        // When
+        var result = orgEnhetLederService.getAktiveLedereForRessurs(navident, false);
+
+        // Then
+        assertEquals(1, result.size());
+        assertEquals("100", result.getFirst().orgEnhetId());
+        assertEquals(leder100, result.getFirst().lederNavident());
+        assertEquals(switchDateLeder100, result.getFirst().startdato());
         assertEquals(otEndDate, result.getFirst().sluttdato());
         assertTrue(result.getFirst().erDagligOppfolging());
     }
+
 
     @Test
     @DisplayName("get active ledere for Ressurs - Handles different complex cases with different periods")
