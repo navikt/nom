@@ -33,8 +33,12 @@ const proxy = {
   nomAzureApiScope: requireEnvironment("NOM_AZURE_SCOPE"),
   nomAzureApiUrl: requireEnvironment("NOM_AZURE_URL"),
 
-  orgEnhetKostnadsstedMappingApiScope: requireEnvironment("ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE"),
-  orgEnhetKostnadsstedMappingApiUrl: requireEnvironment("ORGENHET_KOSTNADSSTED_MAPPING_API_URL"),
+  orgEnhetKostnadsstedMappingApiScope: requireEnvironment(
+    "ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE",
+  ),
+  orgEnhetKostnadsstedMappingApiUrl: requireEnvironment(
+    "ORGENHET_KOSTNADSSTED_MAPPING_API_URL",
+  ),
 };
 
 const unleash = {
