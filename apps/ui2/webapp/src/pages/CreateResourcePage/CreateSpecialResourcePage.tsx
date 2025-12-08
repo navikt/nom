@@ -5,6 +5,7 @@ import {
   BodyLong,
   BodyShort,
   Button,
+  Checkbox,
   DatePicker,
   HelpText,
   HGrid,
@@ -35,6 +36,7 @@ import {
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getPerson,
+  getRessurs,
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
@@ -51,6 +53,7 @@ import {
   ModalProvider,
   useModal,
 } from "~/components/modalProvider/ModalProvider";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
@@ -59,19 +62,24 @@ import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
-import { nomDateIsSameOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  nomDateIsBeforeToday,
+  nomDateIsSameOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { fullwidthRow } from "~/resources/NomStyles";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
   GetPersonRequest,
   OpprettRessursRequest,
   OpprettRessursResponse,
+  Ressurs,
 } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { IdentType, type Person } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
+  capitalizeNameFysiskBrukersted,
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatVisningsnavn,
@@ -86,10 +94,10 @@ export function CreateSpecialResourcePage() {
   const hasVikafossenAccess = useHasVikafossenAccess();
 
   if (
-    !hasAdminAccess &&
     !hasRobotAccess &&
     !hasUtenlandskKonsulentAccess &&
-    !hasVikafossenAccess
+    !hasVikafossenAccess &&
+    !hasAdminAccess
   ) {
     return;
   }
@@ -99,13 +107,15 @@ export function CreateSpecialResourcePage() {
       <PageBanner text="Opprett annen medarbeider" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop icon={opprettRessursIconRoundedBackground}>
-          <ModalProvider>
+        <ModalProvider>
+          <ContainerWithHighlightedTop
+            icon={opprettRessursIconRoundedBackground}
+          >
             <CreateSpecialResourceForm />
+          </ContainerWithHighlightedTop>
 
-            <ModalComponent />
-          </ModalProvider>
-        </ContainerWithHighlightedTop>
+          <ModalComponent />
+        </ModalProvider>
       </ContentWrapper>
     </>
   );
@@ -136,7 +146,8 @@ function CreateSpecialResourceForm() {
   const methods = useForm({
     defaultValues: {
       identType: tillatteIdentTyper[0],
-      identifikasjonsnummer: undefined,
+      identifikasjonsnummer: "",
+      navident: undefined,
       visningsfornavn: "",
       visningsmellomnavn: "",
       visningsetternavn: "",
@@ -147,7 +158,7 @@ function CreateSpecialResourceForm() {
     resolver: yupResolver(opprettSpesiellValidationSchema),
   });
 
-  const { handleSubmit, watch } = methods;
+  const { handleSubmit, watch, reset, getValues, setValue } = methods;
 
   const { showModal } = useModal();
 
@@ -176,16 +187,45 @@ function CreateSpecialResourceForm() {
   ) => {
     const request = lagRessursRequest(values);
 
-    await showModal(<CreateSpecialConfirmModal request={request} />).then(
-      () => {
-        opprettRessursMutation.mutate(request);
-      },
-    );
+    await showModal(
+      <CreateSpecialConfirmModal
+        navident={getValues("navident")}
+        request={request}
+      />,
+    ).then(() => {
+      opprettRessursMutation.mutate(request);
+    });
   };
 
   const identType = watch("identType");
 
   const [identifikasjonsnummer, setIdentifikasjonsnummer] = useState("");
+
+  const [gjenopprettUtenlandsk, setGjenopprettUtenlandsk] = useState(false);
+  const [navident, setNavident] = useState("");
+
+  const handleGjenopprettCheck = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setGjenopprettUtenlandsk(event.target.checked);
+    setIdentifikasjonsnummer("");
+    setNavident("");
+
+    reset({
+      identType,
+    });
+  };
+
+  const handleGjenopprettReset = () => {
+    setGjenopprettUtenlandsk(false);
+
+    setValue("visningsfornavn", "");
+    setValue("visningsmellomnavn", "");
+    setValue("visningsetternavn", "");
+    setValue("orgEnhetId", "");
+    setValue("startDato", "");
+    setValue("sluttDato", "");
+  };
 
   if (opprettRessursMutation.isPending) {
     return (
@@ -215,16 +255,33 @@ function CreateSpecialResourceForm() {
             >
               <IdentTypeFormPart
                 name="identType"
+                resetGjenopprett={handleGjenopprettReset}
                 tillatteIdentTyper={tillatteIdentTyper}
               />
 
-              <IdentifikasjonsnummerSearchFormPart
-                checkedIdentifikasjonsnummer={identifikasjonsnummer}
-                name={"identifikasjonsnummer"}
-                onChecked={(value) => {
-                  setIdentifikasjonsnummer(value);
-                }}
-              />
+              {identType === IdentType.UTENLANDSK_KONSULENT && (
+                <Checkbox onChange={handleGjenopprettCheck}>
+                  Gjenopprett utenlandsk konsulent
+                </Checkbox>
+              )}
+
+              {!gjenopprettUtenlandsk ? (
+                <IdentifikasjonsnummerSearchFormPart
+                  checkedIdentifikasjonsnummer={identifikasjonsnummer}
+                  name={"identifikasjonsnummer"}
+                  onCheckClick={(value) => {
+                    setIdentifikasjonsnummer(value);
+                  }}
+                />
+              ) : (
+                <NavidentSearchFormPart
+                  checkedNavident={navident}
+                  name={"navident"}
+                  onCheckClick={(value) => {
+                    setNavident(value.toUpperCase());
+                  }}
+                />
+              )}
             </div>
 
             <BodyLong
@@ -237,15 +294,20 @@ function CreateSpecialResourceForm() {
                 align-self: center;
               `}
             >
-              Velg identtype og skriv inn ønsket identifikator. NOM vil
-              verifisere at identifikatoren ikke er i bruk.
+              {gjenopprettUtenlandsk
+                ? "Skriv inn Nav-identen til brukeren som skal gjenopprettes"
+                : "Velg identtype og skriv inn ønsket identifikator. NOM vil verifisere at identifikatoren ikke er i bruk."}
             </BodyLong>
           </div>
 
-          <CreateSpecialResourceFormInner
-            identType={identType as IdentType}
-            identifikasjonsnummer={identifikasjonsnummer}
-          />
+          {!gjenopprettUtenlandsk ? (
+            <CreateSpecialResourceFormInner
+              identType={identType as IdentType}
+              identifikasjonsnummer={identifikasjonsnummer}
+            />
+          ) : (
+            <RestoreSpecialResourceFormInner navident={navident} />
+          )}
 
           <ApiResponseError error={opprettRessursMutation.error} />
         </VStack>
@@ -257,11 +319,13 @@ function CreateSpecialResourceForm() {
 function CreateSpecialResourceFormInner({
   identType,
   identifikasjonsnummer,
+  eksisterendeRessurs,
 }: {
   identType: IdentType;
   identifikasjonsnummer: string;
+  eksisterendeRessurs?: Ressurs;
 }) {
-  const navigate = useNavigate();
+  const { setValue } = useFormContext();
 
   const personRequest: GetPersonRequest = {
     identType: identType,
@@ -271,39 +335,19 @@ function CreateSpecialResourceFormInner({
   const personQuery = useQuery<Person, AxiosError<Error>>({
     queryKey: getPerson.queryKey(personRequest),
     queryFn: () => getPerson.queryFn(personRequest),
-    enabled: !!identifikasjonsnummer && identifikasjonsnummer !== "",
+    enabled: !!identifikasjonsnummer,
     retry: false,
   });
 
-  const ressurs = personQuery.data;
+  const person = personQuery.data;
 
-  const erBrukt = !!ressurs;
+  const erBrukt = !!person;
 
   if (!identifikasjonsnummer) {
-    return (
-      <div
-        css={css`
-          margin-top: var(--a-spacing-4);
-          display: flex;
-          justify-content: end;
-        `}
-      >
-        <Button
-          css={css`
-            width: 130px;
-          `}
-          onClick={() => navigate({ to: "/" })}
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Avbryt
-        </Button>
-      </div>
-    );
+    return <BottomButtonSection />;
   }
 
-  if (personQuery.isLoading) {
+  if (!eksisterendeRessurs && personQuery.isLoading) {
     return (
       <>
         <Loader
@@ -314,96 +358,62 @@ function CreateSpecialResourceFormInner({
           title={`Søker etter ${identifikasjonsnummer}`}
         />
 
-        <div
-          css={css`
-            margin-top: var(--a-spacing-4);
-            display: flex;
-            justify-content: end;
-          `}
-        >
-          <Button
-            css={css`
-              width: 130px;
-            `}
-            onClick={() => navigate({ to: "/" })}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </div>
+        <BottomButtonSection />
       </>
     );
   }
 
-  if (personQuery.error && personQuery.error.status !== 404) {
+  if (
+    !eksisterendeRessurs &&
+    personQuery.error &&
+    personQuery.error.status !== 404
+  ) {
     return (
       <>
         <Alert variant="error">En teknisk feil forhindret søket</Alert>
 
-        <div
-          css={css`
-            margin-top: var(--a-spacing-4);
-            display: flex;
-            justify-content: end;
-          `}
-        >
-          <Button
-            css={css`
-              width: 130px;
-            `}
-            onClick={() => navigate({ to: "/" })}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </div>
+        <BottomButtonSection />
       </>
     );
   }
 
-  if (erBrukt) {
+  if (!eksisterendeRessurs && erBrukt) {
     return (
       <>
         <Alert variant="error">
           Denne identifikatoren er allerede i bruk for ressurs med Nav-ident{" "}
-          <b>{ressurs?.navident}</b>. Rediger identifikatoren hvis du skal
+          <b>{person?.navident}</b>. Rediger identifikatoren hvis du skal
           opprette en ny ident. Du kan se mer informasjon på{" "}
-          <Link params={{ id: ressurs?.navident ?? "" }} to="/ressurs/$id">
+          <Link params={{ id: person?.navident ?? "" }} to="/ressurs/$id">
             ressursens profilside
           </Link>
           .
         </Alert>
 
-        <div
-          css={css`
-            margin-top: var(--a-spacing-4);
-            display: flex;
-            justify-content: end;
-          `}
-        >
-          <Button
-            css={css`
-              width: 130px;
-            `}
-            onClick={() => navigate({ to: "/" })}
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </div>
+        <BottomButtonSection />
       </>
     );
   }
 
+  if (!!eksisterendeRessurs) {
+    setValue("visningsfornavn", eksisterendeRessurs.visningsnavn.fornavn);
+    setValue("visningmellomnavn", eksisterendeRessurs.visningsnavn.mellomnavn);
+    setValue("visningsetternavn", eksisterendeRessurs.visningsnavn.etternavn);
+    setValue("identifikasjonsnummer", identifikasjonsnummer);
+  }
+
   return (
     <>
-      <Alert variant="success">Identifikatoren er ikke i bruk</Alert>
+      <Alert variant="success">
+        {!!eksisterendeRessurs ? (
+          <>
+            Utenlandsk konsulent med Nav-ident{" "}
+            <b>{eksisterendeRessurs.navident}</b> funnet
+          </>
+        ) : (
+          "Identifikatoren er ikke i bruk"
+        )}
+      </Alert>
 
       {identType === IdentType.ROBOT && <RobotFormSection />}
 
@@ -413,25 +423,104 @@ function CreateSpecialResourceFormInner({
 
       {identType === IdentType.VIKAFOSSEN && <VikafossenFormSection />}
 
-      <div
-        css={css`
-          margin-top: var(--a-spacing-4);
-          display: flex;
-          justify-content: end;
-        `}
-      >
-        <Button
-          css={css`
-            width: 130px;
-          `}
-          onClick={() => navigate({ to: "/" })}
-          size="small"
-          type="button"
-          variant="secondary"
-        >
-          Avbryt
-        </Button>
+      <BottomButtonSection nesteButton />
+    </>
+  );
+}
 
+function RestoreSpecialResourceFormInner({ navident }: { navident: string }) {
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(navident),
+    queryFn: () => getRessurs.queryFn(navident),
+    enabled: !!navident,
+    retry: false,
+  });
+
+  const ressurs = ressursQuery.data;
+
+  const gyldigForGjenoppretting =
+    ressurs?.identType === IdentType.UTENLANDSK_KONSULENT &&
+    nomDateIsBeforeToday(ressurs?.sluttdato);
+
+  if (!navident) {
+    return <BottomButtonSection />;
+  }
+
+  if (ressursQuery.isLoading) {
+    return (
+      <>
+        <Loader
+          css={css`
+            align-self: center;
+          `}
+          size="3xlarge"
+          title={`Søker etter ${navident}`}
+        />
+
+        <BottomButtonSection />
+      </>
+    );
+  }
+
+  if (!gyldigForGjenoppretting) {
+    return (
+      <>
+        <Alert variant="error">
+          Nav-ident <b>{navident}</b> tilhører ikke en utenlandsk konsulent som
+          kan gjenopprettes.{" "}
+          {!!ressurs && (
+            <>
+              Se mer på{" "}
+              <SmartLink href={`/ressurs/${ressurs.navident}`}>
+                medarbeiderens profilside
+              </SmartLink>
+              .
+            </>
+          )}
+        </Alert>
+
+        <BottomButtonSection />
+      </>
+    );
+  }
+
+  return (
+    <CreateSpecialResourceFormInner
+      eksisterendeRessurs={ressurs}
+      identType={IdentType.UTENLANDSK_KONSULENT}
+      identifikasjonsnummer={ressurs.personident}
+    />
+  );
+}
+
+function BottomButtonSection({
+  nesteButton = false,
+}: {
+  nesteButton?: boolean;
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <div
+      css={css`
+        margin-top: var(--a-spacing-4);
+        display: flex;
+        justify-content: end;
+      `}
+    >
+      <Button
+        css={css`
+          width: 130px;
+        `}
+        onClick={() => navigate({ to: "/" })}
+        size="small"
+        type="button"
+        variant="secondary"
+      >
+        Avbryt
+      </Button>
+
+      {nesteButton && (
         <Button
           css={css`
             margin-left: var(--a-spacing-6);
@@ -442,8 +531,8 @@ function CreateSpecialResourceFormInner({
         >
           Neste
         </Button>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 
@@ -451,10 +540,12 @@ function CreateSpecialConfirmModal({
   onCancel,
   onConfirm,
   request,
+  navident,
 }: {
   onCancel?: () => void;
   onConfirm?: () => void;
   request: OpprettRessursRequest;
+  navident?: string;
 }) {
   const {
     personident,
@@ -493,7 +584,10 @@ function CreateSpecialConfirmModal({
           width: 600px;
           padding: var(--a-spacing-4);
         `}
-        header={{ heading: "Bekreft registrering", closeButton: false }}
+        header={{
+          heading: `Bekreft ${!!navident ? "gjenoppretting" : "registrering"}`,
+          closeButton: false,
+        }}
         onClose={onCancel}
         open
       >
@@ -520,7 +614,10 @@ function CreateSpecialConfirmModal({
       css={css`
         padding: var(--a-spacing-4);
       `}
-      header={{ heading: "Bekreft registrering", closeButton: false }}
+      header={{
+        heading: `Bekreft ${!!navident ? "gjenoppretting" : "registrering"}`,
+        closeButton: false,
+      }}
       onClose={onCancel}
       open
     >
@@ -536,17 +633,20 @@ function CreateSpecialConfirmModal({
             max-width: 400px;
           `}
         >
-          Ved å bekrefte disse detaljene vil ressursen bli registrert som
-          medarbeider i NOM.
+          {!!navident ? (
+            <>
+              Ved å bekrefte disse detaljene vil personen bli gjenopprettet som
+              medarbeider i Nav. De beholder sin Nav-ident <b>{navident}</b>.
+            </>
+          ) : (
+            "Ved å bekrefte disse detaljene vil personen bli registrert som medarbeider i Nav."
+          )}
         </span>
 
         <HGrid columns="max-content max-content" gap="2 2">
           <LabelWithValue label="Navn" split value={formattedName} />
-          <LabelWithValue
-            label="Identifikasjonsnummer"
-            split
-            value={personident}
-          />
+          <LabelWithValue label="Identifikator" split value={personident} />
+          <LabelWithValue label="Nav-ident" split value={navident} />
           <LabelWithValue
             label="Sektor"
             split
@@ -573,7 +673,7 @@ function CreateSpecialConfirmModal({
             split
             value={
               selectedFysiskBrukersted &&
-              `${selectedFysiskBrukersted.brukerstedNavn} (${selectedFysiskBrukersted.brukerstedNr})`
+              `${capitalizeNameFysiskBrukersted(selectedFysiskBrukersted.brukerstedNavn)} (${selectedFysiskBrukersted.brukerstedNr})`
             }
           />
           <LabelWithValue
@@ -593,6 +693,7 @@ function CreateSpecialConfirmModal({
           />
         </HGrid>
       </Modal.Body>
+
       <Modal.Footer>
         <Button onClick={onConfirm} type="button">
           Opprett medarbeider
@@ -608,9 +709,11 @@ function CreateSpecialConfirmModal({
 function IdentTypeFormPart({
   name,
   tillatteIdentTyper,
+  resetGjenopprett,
 }: {
   name: string;
   tillatteIdentTyper: IdentType[];
+  resetGjenopprett: any;
 }) {
   const { field, fieldState } = useController({ name });
   const { clearErrors } = useFormContext();
@@ -622,6 +725,9 @@ function IdentTypeFormPart({
       onChange={(event) => {
         field.onChange(event.target.value);
         clearErrors();
+        if (event.target.value !== IdentType.UTENLANDSK_KONSULENT) {
+          resetGjenopprett();
+        }
       }}
       ref={field.ref}
       value={field.value}
@@ -637,21 +743,23 @@ function IdentTypeFormPart({
 
 function IdentifikasjonsnummerSearchFormPart({
   name,
-  onChecked,
+  onCheckClick,
   checkedIdentifikasjonsnummer,
 }: {
   name: string;
-  onChecked: (identifikasjonsnummer: string) => void;
+  onCheckClick: (identifikasjonsnummer: string) => void;
   checkedIdentifikasjonsnummer: string;
 }) {
   const { trigger, getValues, reset, clearErrors } = useFormContext();
   const { field, fieldState } = useController({ name });
 
+  const identType = getValues("identType");
+
   const handleCheckClick = async () => {
     const isValid = await trigger(name);
 
     if (isValid) {
-      onChecked(getValues(name));
+      onCheckClick(getValues(name));
     }
   };
 
@@ -659,7 +767,7 @@ function IdentifikasjonsnummerSearchFormPart({
     field.onChange(value);
 
     if (checkedIdentifikasjonsnummer) {
-      onChecked("");
+      onCheckClick("");
 
       clearErrors();
     }
@@ -678,9 +786,7 @@ function IdentifikasjonsnummerSearchFormPart({
         hideLabel={false}
         label="Identifikator"
         onChange={handleChange}
-        onClear={() => {
-          reset({ identifikasjonsnummer: "" });
-        }}
+        onClear={() => reset({ identType })}
         variant="secondary"
       >
         <Search.Button
@@ -689,6 +795,70 @@ function IdentifikasjonsnummerSearchFormPart({
           type="button"
         >
           Verifisér
+        </Search.Button>
+      </Search>
+    </div>
+  );
+}
+
+function NavidentSearchFormPart({
+  name,
+  onCheckClick,
+  checkedNavident,
+}: {
+  name: string;
+  onCheckClick: (identifikasjonsnummer: string) => void;
+  checkedNavident: string;
+}) {
+  const { trigger, getValues, reset, clearErrors } = useFormContext();
+  const { field, fieldState } = useController({ name });
+
+  const identType = getValues("identType");
+
+  const handleCheckClick = async () => {
+    const isValid = await trigger(name);
+
+    if (isValid) {
+      onCheckClick(getValues(name));
+    }
+  };
+
+  const handleChange = async (value: string) => {
+    field.onChange(value);
+
+    if (checkedNavident) {
+      onCheckClick("");
+
+      clearErrors();
+    }
+  };
+
+  return (
+    <div
+      css={css`
+        margin-top: var(--a-spacing-8);
+      `}
+    >
+      <Search
+        autoComplete="off"
+        css={css`
+          .navds-search__input {
+            text-transform: uppercase;
+          }
+        `}
+        error={fieldState.error?.message}
+        hideLabel={false}
+        label="Nav-ident"
+        onChange={handleChange}
+        onClear={() => reset({ identType })}
+        variant="secondary"
+      >
+        <Search.Button
+          iconPosition="right"
+          onClick={handleCheckClick}
+          type="button"
+        >
+          Søk
         </Search.Button>
       </Search>
     </div>
@@ -827,7 +997,7 @@ function VikafossenVisningsnavnFormSection() {
 }
 
 function OrgEnhetSelectFormSection() {
-  const { watch } = useFormContext();
+  const { getValues } = useFormContext();
 
   const orgEnheterSomKanHaRessurser =
     useQuery(getOrgEnheterSomKanHaRessurser).data?.filter(
@@ -835,11 +1005,11 @@ function OrgEnhetSelectFormSection() {
     ) || [];
 
   const selectedOrgEnhet = orgEnheterSomKanHaRessurser.find(
-    (orgEnhet) => orgEnhet.id === watch("orgEnhetId"),
+    (orgEnhet) => orgEnhet.id === getValues("orgEnhetId"),
   );
 
   return (
-    <>
+    <VStack gap="2">
       <OrgEnhetSelectFormPart
         name={"orgEnhetId"}
         orgEnheter={orgEnheterSomKanHaRessurser}
@@ -872,7 +1042,7 @@ function OrgEnhetSelectFormSection() {
           </div>
         </div>
       )}
-    </>
+    </VStack>
   );
 }
 
@@ -924,14 +1094,15 @@ function FormDateWrapper({ name, label }: { name: string; label: string }) {
 }
 
 function lagRessursRequest(values: {
-  orgEnhetId?: string | undefined;
+  identType: NonNullable<IdentType | undefined>;
   visningsfornavn?: string | undefined;
   visningsmellomnavn?: string | undefined;
   visningsetternavn?: string | undefined;
-  sluttDato?: string | null | undefined;
-  identType: NonNullable<IdentType | undefined>;
-  identifikasjonsnummer: string;
+  orgEnhetId?: string | undefined;
   startDato: string;
+  sluttDato?: string | null | undefined;
+  identifikasjonsnummer?: string;
+  navident?: string | undefined;
 }): OpprettRessursRequest {
   const getVisningsEtternavn = (identType: IdentType, etternavn?: string) => {
     if (identType === IdentType.ROBOT) return "RPARobot";
@@ -945,7 +1116,7 @@ function lagRessursRequest(values: {
 
   return {
     identType: values.identType,
-    personident: values.identifikasjonsnummer,
+    personident: values.identifikasjonsnummer ?? "",
     orgEnhetId:
       values.identType === IdentType.VIKAFOSSEN
         ? vikafossenOrgEnhetId
@@ -981,8 +1152,22 @@ const opprettSpesiellValidationSchema = yup.object().shape({
     ),
   identifikasjonsnummer: yup
     .string()
-    .required("Obligatorisk")
-    .length(11, "Identifikasjonsnummer må bestå av 11 tegn"),
+    .test(
+      "11-tegn-hvis-ikke-navident",
+      "Identifikator består av 11 tegn",
+      function (value) {
+        const { navident } = this.parent;
+
+        if (navident) return true;
+
+        return value?.length === 11;
+      },
+    ),
+  navident: yup
+    .string()
+    .transform((value) => (value === "" ? undefined : value))
+    .optional()
+    .length(7, "Nav-ident består av 7 tegn"),
   visningsfornavn: yup.string().test({
     name: "fornavn-obligatorisk-ikke-vikafossen",
     message: "Obligatorisk",
