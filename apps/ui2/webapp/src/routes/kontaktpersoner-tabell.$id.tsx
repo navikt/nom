@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { KontaktpersonerTabellPage } from "~/pages/Parorendeinfo/KontaktpersonerTabellPage";
 

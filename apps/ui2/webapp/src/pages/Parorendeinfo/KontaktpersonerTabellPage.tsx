@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { ChevronLeftIcon } from "@navikt/aksel-icons";
-import { Alert, Heading, Link, Loader, Table } from "@navikt/ds-react";
+import { Alert, Heading, Loader, Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import React from "react";
@@ -93,6 +93,7 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
         --ac-table-row-border: #071a3636;
       `}
+      zebraStripes
     >
       <Table.Header
         css={css`
@@ -103,7 +104,6 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         <Table.Row
           css={css`
             height: 48px;
-            border-width: 0 0 1px;
           `}
         >
           <Table.ColumnHeader scope="col">Nav-ident</Table.ColumnHeader>
@@ -124,9 +124,7 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         {mockKontaktpersoner.map((kontaktpersonRad, index) => (
           <Table.Row
             css={css`
-              --ac-table-row-border: none;
               height: 48px;
-              border-width: 0 0 1px;
             `}
             key={index}
             shadeOnHover={false}
