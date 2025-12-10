@@ -721,7 +721,7 @@ const formValuesSchema = yup.object().shape({
   kontaktinfo: yup.array().of(kontaktinfoSchema).required(),
 });
 
-enum Relasjon {
+export enum Relasjon {
   EKTEFELLE = "EKTEFELLE",
   SAMBOER = "SAMBOER",
   BARN = "BARN",
@@ -730,7 +730,7 @@ enum Relasjon {
   ANNET = "ANNET",
 }
 
-const RelasjonNameMapping = {
+export const RelasjonNameMapping = {
   [Relasjon.EKTEFELLE]: "Ektefelle/Partner",
   [Relasjon.SAMBOER]: "Samboer",
   [Relasjon.BARN]: "Barn",

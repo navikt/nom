@@ -101,7 +101,7 @@ export const OrgRessursTabellPageInner = ({
     return (
       <div
         css={css`
-          margin-top: 20px;
+          margin-top: var(--a-spacing-4);
         `}
       >
         <Table
@@ -226,10 +226,11 @@ export const OrgRessursTabellPageInner = ({
             ))}
           </Table.Body>
         </Table>
+
         <Pagination
           count={Math.ceil(data.length / rowsPerPage)}
           css={css`
-            margin-top: 24px;
+            margin-top: var(--a-spacing-6);
             display: flex;
             align-items: center;
             justify-content: center;

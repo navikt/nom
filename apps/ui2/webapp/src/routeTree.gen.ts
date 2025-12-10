@@ -21,6 +21,7 @@ import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-termina
 import { Route as OrgIdRouteImport } from './routes/org.$id'
 import { Route as MasseflyttingIdRouteImport } from './routes/masseflytting.$id'
 import { Route as KontaktpersonerIdRouteImport } from './routes/kontaktpersoner.$id'
+import { Route as KontaktpersonerTabellIdRouteImport } from './routes/kontaktpersoner-tabell.$id'
 import { Route as RessursCreateStepRouteImport } from './routes/ressurs.create.$step'
 import { Route as OrgTableIdRouteImport } from './routes/org.table.$id'
 
@@ -86,6 +87,11 @@ const KontaktpersonerIdRoute = KontaktpersonerIdRouteImport.update({
   path: '/kontaktpersoner/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KontaktpersonerTabellIdRoute = KontaktpersonerTabellIdRouteImport.update({
+  id: '/kontaktpersoner-tabell/$id',
+  path: '/kontaktpersoner-tabell/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
   id: '/ressurs/create/$step',
   path: '/ressurs/create/$step',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
+  '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
+  '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
+  '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
+    | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
+    | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
+    | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   OpprettOrganisasjonsenhetRoute: typeof OpprettOrganisasjonsenhetRoute
   OrganisasjonsmastringRoute: typeof OrganisasjonsmastringRoute
   TilgangerRoute: typeof TilgangerRoute
+  KontaktpersonerTabellIdRoute: typeof KontaktpersonerTabellIdRoute
   KontaktpersonerIdRoute: typeof KontaktpersonerIdRoute
   MasseflyttingIdRoute: typeof MasseflyttingIdRoute
   OrgIdRoute: typeof OrgIdRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KontaktpersonerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kontaktpersoner-tabell/$id': {
+      id: '/kontaktpersoner-tabell/$id'
+      path: '/kontaktpersoner-tabell/$id'
+      fullPath: '/kontaktpersoner-tabell/$id'
+      preLoaderRoute: typeof KontaktpersonerTabellIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ressurs/create/$step': {
       id: '/ressurs/create/$step'
       path: '/ressurs/create/$step'
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   OpprettOrganisasjonsenhetRoute: OpprettOrganisasjonsenhetRoute,
   OrganisasjonsmastringRoute: OrganisasjonsmastringRoute,
   TilgangerRoute: TilgangerRoute,
+  KontaktpersonerTabellIdRoute: KontaktpersonerTabellIdRoute,
   KontaktpersonerIdRoute: KontaktpersonerIdRoute,
   MasseflyttingIdRoute: MasseflyttingIdRoute,
   OrgIdRoute: OrgIdRoute,

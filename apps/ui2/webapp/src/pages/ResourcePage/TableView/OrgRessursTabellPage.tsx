@@ -95,7 +95,7 @@ export const OrgRessursTabellPage = () => {
           justify-content: center;
         `}
       >
-        <Loader size="3xlarge" variant="neutral" />
+        <Loader size="3xlarge" />
       </div>
     );
   }
@@ -131,13 +131,15 @@ export const OrgRessursTabellPage = () => {
   ) {
     return (
       <>
-        <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
+        <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || id} />
 
         <ContentWrapper limitWidth={false}>
           <SmartLink
             css={css`
-              color: #000;
+              display: flex;
+              width: fit-content;
               font-size: 1.2rem;
+              color: #000;
             `}
             href={`/org/${id}`}
           >
@@ -152,7 +154,12 @@ export const OrgRessursTabellPage = () => {
             </span>
           </SmartLink>
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div
+            css={css`
+              display: flex;
+              justify-content: space-between;
+            `}
+          >
             <Checkbox
               checked={includeUnderliggende}
               css={css`
