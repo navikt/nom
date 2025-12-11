@@ -174,6 +174,7 @@ export const OrgRessursTabellPage = () => {
             >
               Vis medarbeidere fra underliggende organisasjonsenheter
             </Checkbox>
+
             <div>
               <Button
                 icon={<FileExcelIcon />}
