@@ -122,6 +122,9 @@ spec:
         - application: saas-proxy
           namespace: teamcrm
           cluster: dev-gcp
+        - application: saas-proxy
+          namespace: platforce
+          cluster: dev-gcp
         - application: salesforce
           namespace: teamcrm
           cluster: dev-external
