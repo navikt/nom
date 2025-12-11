@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import { ChevronLeftIcon } from "@navikt/aksel-icons";
-import { Alert, Heading, Loader, Table } from "@navikt/ds-react";
+import { ChevronLeftIcon, FileExcelIcon } from "@navikt/aksel-icons";
+import { Alert, Button, Heading, Loader, Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import React from "react";
@@ -56,25 +56,36 @@ export function KontaktpersonerTabellPage() {
       />
 
       <ContentWrapper limitWidth={false}>
-        <SmartLink
+        <div
           css={css`
             display: flex;
-            width: fit-content;
-            font-size: 1.2rem;
-            color: #000;
+            justify-content: space-between;
           `}
-          href={`/org/${id}`}
         >
-          <span
+          <SmartLink
             css={css`
               display: flex;
-              align-items: center;
+              width: fit-content;
+              font-size: 1.2rem;
+              color: #000;
             `}
+            href={`/org/${id}`}
           >
-            <ChevronLeftIcon fontSize="1.8rem" />
-            <b>Tilbake til {orgEnhet?.navn ?? id}</b>
-          </span>
-        </SmartLink>
+            <span
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <ChevronLeftIcon fontSize="1.8rem" />
+              <b>Tilbake til {orgEnhet?.navn ?? id}</b>
+            </span>
+          </SmartLink>
+
+          <Button icon={<FileExcelIcon />} variant="secondary">
+            Eksportér til Excel
+          </Button>
+        </div>
 
         <KontaktpersonerTabellInner orgEnhet={orgEnhet} />
       </ContentWrapper>

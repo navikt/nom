@@ -180,7 +180,7 @@ export const OrgRessursTabellPage = () => {
                 onClick={handleDownloadExcel}
                 variant="secondary"
               >
-                Til Excel
+                Eksportér til Excel
               </Button>
             </div>
           </div>
