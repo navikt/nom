@@ -72,14 +72,19 @@ public class DvhRessursRestService {
             .toList();
         return new DvhRessursDTO(
             ressursState.navident(),
+            ressursState.personident(),
             ressursState.sektor().name(),
+            ressursState.identType().name(),
             ressursState.visningsnavn().fornavn(),
             ressursState.visningsnavn().mellomnavn().orElse(null),
             ressursState.visningsnavn().etternavn(),
             ressursState.startdato(),
             ressursState.sluttdato(),
             orgtilknytninger,
-            ressursState.tilknytningtype() !=null? ressursState.tilknytningtype().name(): null
+            ressursState.tilknytningtype() !=null? ressursState.tilknytningtype().name(): null,
+            ressursState.primaryFysiskBrukersted(),
+            ressursState.jobbtelefon(),
+            ressursState.primaryTelefonnummer()
         );
     }
 
