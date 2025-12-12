@@ -98,7 +98,7 @@ public class TilgangDelegertEmailService {
             "lederNavIdent", lederNavIdent,
             "delegertRessursDisplayname", delegertRessursDisplayname,
             "delegertRessursNavIdent", delegertRessursNavIdent,
-            "tomDato", gyldigTom,
+            "tomDato", gyldigTom != null ? gyldigTom.toString() : "<ubegrenset>",
             "orgenhetNavn", orgenhetNavn
         );
         try {
