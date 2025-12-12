@@ -1,10 +1,13 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
+import jakarta.persistence.metamodel.IdentifiableType;
+
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -74,7 +77,7 @@ public class DvhRessursRestService {
             ressursState.navident(),
             ressursState.personident(),
             ressursState.sektor().name(),
-            ressursState.identType().name(),
+            ressursState.identType() != null ? ressursState.identType().name() : IdentType.STANDARD.name(),
             ressursState.visningsnavn().fornavn(),
             ressursState.visningsnavn().mellomnavn().orElse(null),
             ressursState.visningsnavn().etternavn(),
