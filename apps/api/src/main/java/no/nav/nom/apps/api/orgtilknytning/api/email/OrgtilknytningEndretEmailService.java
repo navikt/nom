@@ -66,8 +66,6 @@ public class OrgtilknytningEndretEmailService {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgenhetService orgenhetService;
     private final Unleash unleash;
-    private final String UNLEASH_SKRU_AV_EPOST_ENDRING = "nom.ot_endring_epost.skru_av_utsendelse";
-
 
     public OrgtilknytningEndretEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -191,11 +189,7 @@ public class OrgtilknytningEndretEmailService {
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
             EmailMessage message = new EmailMessage(subject, body, recipientList, List.of(), getAdditionalBccRecipientsEmails());
-            if (!unleash.isEnabled(UNLEASH_SKRU_AV_EPOST_ENDRING)) {
-                microsoftGraphClient.sendEmail(message).subscribe();
-            } else {
-                log.info("Epost sending is disabled by Unleash");
-            }
+            microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
