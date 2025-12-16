@@ -168,7 +168,7 @@ public class TeamcatController {
             ressurs.sluttdato(),
             adResource.get(navident) != null ? adResource.get(navident).getEmail() : null,
             navident,
-            TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
+            TeamcatRessursDTO.ResourceType.from(ressurs.sektor()),
             ressurs.visningsnavn().getFormattedVisningsnavn(),
             oeId,
             lederNavident

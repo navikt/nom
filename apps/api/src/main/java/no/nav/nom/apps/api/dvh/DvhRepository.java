@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 @Component
 @RequiredArgsConstructor
 public class DvhRepository {
-    private Collection<String> annenStatNavIdenter = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrList = Collections.emptyList();
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
@@ -34,10 +33,6 @@ public class DvhRepository {
         }
         this.navidentTelefonNrList = tlfList;
         this.updateListeners();
-    }
-
-    public void saveAnnenStatNavIdenter(Collection<String> navidentCollection){
-        this.annenStatNavIdenter = new HashSet<>(navidentCollection);
     }
 
     public void clearRepository() {
@@ -53,10 +48,6 @@ public class DvhRepository {
         // Phone numbers in DVH includes country code. If the requested phone-number does not include a country code we assume 47.
         var formattedNumber = telefonNummer.length() == 8 ? "47".concat(telefonNummer) : telefonNummer;
         return navidentTelefonNrList.stream().filter(it -> it.getNummer().equals(formattedNumber)).findFirst();
-    }
-
-    public boolean getIsAnnenStat(String navident){
-        return this.annenStatNavIdenter.contains(navident);
     }
 
     public void addUpdateListener(Supplier<Boolean> callback) {

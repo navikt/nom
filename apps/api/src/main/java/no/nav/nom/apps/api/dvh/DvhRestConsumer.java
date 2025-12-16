@@ -213,7 +213,6 @@ public class DvhRestConsumer {
                 .toList();
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
-            dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
         } catch (Exception e) {
             log.error("Feilet i last av ressurser fra dvh", e);
         }
