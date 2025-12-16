@@ -46,13 +46,14 @@
     </appender>
 
     <!-- NOM loggers -->
-    <logger name="no.nav.nom.apps.api.graphql.querystats" level="DEBUG"/>
 
     <!-- Unleash logger -->
-    <logger name="io.getunleash.event.UnleashSubscriber" level="DEBUG"/>
 
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>
+
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
