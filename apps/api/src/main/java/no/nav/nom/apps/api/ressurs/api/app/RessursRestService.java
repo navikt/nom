@@ -806,30 +806,6 @@ public class RessursRestService {
         }
     }
 
-    public List<Ressurs.Telefon> getTelefonnummere(String navident) {
-        var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
-        var ressursState = findRessursStateByNavident(navident);
-        if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
-        return telefoner.isEmpty() ? Collections.emptyList() : telefoner;
-    }
-
-    public String getTelefonnummer(String navident) {
-        var telefoner = new ArrayList<>(ressursContactDetailsResolver.fetchTelefoner(navident));
-        var ressursState = findRessursStateByNavident(navident);
-        if (ressursState.primaryTelefonnummer() != null) telefoner.add(new Ressurs.Telefon(ressursState.primaryTelefonnummer(), TelefonType.PRIVAT_TELEFON));
-        telefoner.sort(
-            (o1, o2) -> {
-                if (o1.type().equals(o2.type())) return 0;
-                if (o1.type().equals(TelefonType.NAV_TJENESTE_TELEFON)) return -1;
-                if (o2.type().equals(TelefonType.NAV_TJENESTE_TELEFON)) return 1;
-                if (o1.type().equals(TelefonType.NAV_KONTOR_TELEFON)) return -1;
-                if (o2.type().equals(TelefonType.NAV_KONTOR_TELEFON)) return 1;
-                if (o1.type().equals(TelefonType.PRIVAT_TELEFON)) return -1;
-                if (o2.type().equals(TelefonType.PRIVAT_TELEFON)) return 1;
-                return 0;});
-        return telefoner.isEmpty() ? null : telefoner.getFirst().nummer();
-    }
-
     public List<RessursState> getRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
         var ressursStates = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukersted(fysiskBrukerstedNr);
 

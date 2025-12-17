@@ -14,7 +14,7 @@ export const footerHeight = "180px";
 
 export function Footer() {
   const brukerveiledningLenke =
-    "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
+    "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
 
   const slackLenke = "https://nav-it.slack.com/archives/C0362LA7ZLN";
 

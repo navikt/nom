@@ -13,7 +13,6 @@ import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
-import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.exceptions.NomMasteredException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
@@ -24,6 +23,8 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessur
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
+import no.nav.nom.apps.api.telefon.Telefon;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
@@ -108,6 +109,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockitoBean
     RessursContactDetailsResolver ressursContactDetailsResolver;
+
+    @MockitoBean
+    TelefonService telefonService;
 
     @MockitoBean
     FysiskBrukerstedService fysiskBrukerstedService;
@@ -1299,11 +1303,11 @@ public class RessursControllerTest extends RestTestBase {
         String expectedTelefonnummer = "12345678";
 
         var telefoner = List.of(
-            new Ressurs.Telefon(expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)
+            new Telefon(null, expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)
         );
         when(ressursStateRepository.findByNavident(navident))
             .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
-        when(ressursContactDetailsResolver.fetchTelefoner(navident))
+        when(telefonService.getAlleTelefonnummer(navident))
             .thenReturn(telefoner);
 
         webTestClient.get()
@@ -1314,7 +1318,7 @@ public class RessursControllerTest extends RestTestBase {
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
-            .expectBodyList(Ressurs.Telefon.class)
+            .expectBodyList(Telefon.class)
             .isEqualTo(telefoner);
     }
 
@@ -1415,13 +1419,13 @@ public class RessursControllerTest extends RestTestBase {
         String expectedTelefonnummer1 = "12345678";
         String expectedTelefonnummer2 = "87654321";
         var telefoner = List.of(
-            new Ressurs.Telefon(expectedTelefonnummer1, TelefonType.NAV_KONTOR_TELEFON),
-            new Ressurs.Telefon(expectedTelefonnummer2, TelefonType.PRIVAT_TELEFON)
+            new Telefon(null, expectedTelefonnummer1, TelefonType.NAV_KONTOR_TELEFON),
+            new Telefon(null, expectedTelefonnummer2, TelefonType.PRIVAT_TELEFON)
         );
         when(ressursStateRepository.findByNavident(navident))
             .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
 
-        when(ressursContactDetailsResolver.fetchTelefoner(navident))
+        when(telefonService.getAlleTelefonnummer(navident))
             .thenReturn(telefoner);
 
         webTestClient.get()
@@ -1432,23 +1436,21 @@ public class RessursControllerTest extends RestTestBase {
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
             .exchange()
             .expectStatus().isOk()
-            .expectBodyList(Ressurs.Telefon.class)
+            .expectBodyList(Telefon.class)
             .isEqualTo(telefoner);
     }
 
     @Test
-    @DisplayName("Should return list of telefonnummer for given navident")
+    @DisplayName("Should return prioritert telefonnummer for given navident")
     void test_getTelefonnummer_should_return_primary_phone() {
         String navident = "x123456";
         String expectedTelefonnummer = "12345678";
-        var telefoner = List.of(
-            new Ressurs.Telefon(expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)
-        );
+
         when(ressursStateRepository.findByNavident(navident))
             .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
 
-        when(ressursContactDetailsResolver.fetchTelefoner(navident))
-            .thenReturn(telefoner);
+        when(telefonService.getPrioritertTelefonnummer(navident))
+            .thenReturn(expectedTelefonnummer);
 
         webTestClient.get()
             .uri(uriBuilder -> uriBuilder

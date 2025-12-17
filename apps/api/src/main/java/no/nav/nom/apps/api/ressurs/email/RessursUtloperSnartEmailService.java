@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -55,7 +54,6 @@ public class RessursUtloperSnartEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     private final OrgEnhetLederService orgEnhetLederService;
-    private final Unleash unleash;
 
     public RessursUtloperSnartEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -67,8 +65,7 @@ public class RessursUtloperSnartEmailService {
         NomMastered nomMastered,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
-        OrgEnhetLederService orgEnhetLederService,
-        Unleash unleash
+        OrgEnhetLederService orgEnhetLederService
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
@@ -80,7 +77,6 @@ public class RessursUtloperSnartEmailService {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
         this.orgEnhetLederService = orgEnhetLederService;
-        this.unleash = unleash;
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
@@ -320,6 +316,6 @@ public class RessursUtloperSnartEmailService {
     }
 
     private List<String> bccRecipientsEmailAddresses() {
-        return unleash.isEnabled("nom.email.bcc-utlopersnart") ? List.of("hama.keli@nav.no") : List.of();
+        return List.of();
     }
 }

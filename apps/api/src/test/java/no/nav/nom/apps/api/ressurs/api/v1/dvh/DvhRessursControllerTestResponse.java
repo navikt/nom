@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -57,7 +58,7 @@ public class DvhRessursControllerTestResponse extends RestTestBase {
             .expectStatus().is2xxSuccessful()
             .expectBodyList(DvhRessursDTO.class);
 
-        var expected ="[{\"navident\":\"A000001\",\"sektor\":\"NAV_STATLIG\",\"fornavn\":\"Fornavn_1\",\"mellomnavn\":null,\"etternavn\":\"Etternavn_1\",\"startdato\":\"2007-12-01\",\"sluttdato\":\"2012-11-30\",\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2007-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_1\"}],\"tilknytningsType\":null},{\"navident\":\"A000002\",\"sektor\":\"NAV_KOMMUNAL\",\"fornavn\":\"Fornavn_2\",\"mellomnavn\":null,\"etternavn\":\"Etternavn_2\",\"startdato\":\"2008-12-01\",\"sluttdato\":null,\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_2\",\"startdato\":\"2012-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_3\"},{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2008-12-01\",\"sluttdato\":\"2012-11-30\",\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_2\"}],\"tilknytningsType\":null},{\"navident\":\"A000003\",\"sektor\":\"EKSTERN\",\"fornavn\":\"Fornavn_3\",\"mellomnavn\":\"Mellomnavn_3\",\"etternavn\":\"Etternavn_3\",\"startdato\":\"2009-12-01\",\"sluttdato\":null,\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_2\",\"startdato\":\"2012-12-01\",\"sluttdato\":\"2018-12-31\",\"sektor\":null,\"erDagligOppfolging\":false,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID5\"},{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2009-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_4\"}],\"tilknytningsType\":null}]";
+        var expected ="[{\"navident\":\"A000001\",\"personident\":\"01019000001\",\"sektor\":\"NAV_STATLIG\",\"identType\":\"STANDARD\",\"fornavn\":\"Fornavn_1\",\"mellomnavn\":null,\"etternavn\":\"Etternavn_1\",\"startdato\":\"2007-12-01\",\"sluttdato\":\"2012-11-30\",\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2007-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_1\"}],\"tilknytningsType\":null,\"primaryFysiskBrukersted\":null,\"jobbtelefon\":null,\"nomRegistrertTelefonnummer\":null},{\"navident\":\"A000002\",\"personident\":\"01019000002\",\"sektor\":\"NAV_KOMMUNAL\",\"identType\":\"STANDARD\",\"fornavn\":\"Fornavn_2\",\"mellomnavn\":null,\"etternavn\":\"Etternavn_2\",\"startdato\":\"2008-12-01\",\"sluttdato\":null,\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_2\",\"startdato\":\"2012-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_3\"},{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2008-12-01\",\"sluttdato\":\"2012-11-30\",\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_2\"}],\"tilknytningsType\":null,\"primaryFysiskBrukersted\":null,\"jobbtelefon\":null,\"nomRegistrertTelefonnummer\":null},{\"navident\":\"A000003\",\"personident\":\"01019000003\",\"sektor\":\"EKSTERN\",\"identType\":\"UTENLANDSK_KONSULENT\",\"fornavn\":\"Fornavn_3\",\"mellomnavn\":\"Mellomnavn_3\",\"etternavn\":\"Etternavn_3\",\"startdato\":\"2009-12-01\",\"sluttdato\":null,\"orgtilknytninger\":[{\"orgenhetId\":\"ENHET_2\",\"startdato\":\"2012-12-01\",\"sluttdato\":\"2018-12-31\",\"sektor\":null,\"erDagligOppfolging\":false,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID5\"},{\"orgenhetId\":\"ENHET_1\",\"startdato\":\"2009-12-01\",\"sluttdato\":null,\"sektor\":null,\"erDagligOppfolging\":true,\"orgtilknytningType\":null,\"orgtilknytningFid\":\"OT_FID_4\"}],\"tilknytningsType\":null,\"primaryFysiskBrukersted\":null,\"jobbtelefon\":null,\"nomRegistrertTelefonnummer\":null}]";
 
         var result = webTestClient.get()
             .uri("/api/v1/dvh/nom-mastered-ressurser")
@@ -155,6 +156,7 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .personident("01019000001")
             .navident("A000001")
             .sektor(Sektor.NAV_STATLIG)
+            .identType(IdentType.STANDARD)
             .visningsnavn(new Visningsnavn("Fornavn_1", Optional.empty(), "Etternavn_1"))
             .startdato(LocalDate.of(2007, 12, 1))
             .sluttdato(LocalDate.of(2012, 11, 30))
@@ -164,6 +166,7 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .personident("01019000002")
             .navident("A000002")
             .sektor(Sektor.NAV_KOMMUNAL)
+            .identType(IdentType.STANDARD)
             .visningsnavn(new Visningsnavn("Fornavn_2", Optional.empty(), "Etternavn_2"))
             .startdato(LocalDate.of(2008, 12, 1))
             .sluttdato(null)
@@ -173,6 +176,7 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .personident("01019000003")
             .navident("A000003")
             .sektor(Sektor.EKSTERN)
+            .identType(IdentType.UTENLANDSK_KONSULENT)
             .visningsnavn(new Visningsnavn("Fornavn_3", Optional.of("Mellomnavn_3"), "Etternavn_3"))
             .startdato(LocalDate.of(2009, 12, 1))
             .sluttdato(null)
@@ -182,6 +186,7 @@ class RessursStateRepositoryFake implements RessursStateRepository {
             .personident("01019000004")
             .navident("A000004")
             .sektor(Sektor.NAV_STATLIG)
+            .identType(IdentType.STANDARD)
             .visningsnavn(new Visningsnavn("Fornavn_4", Optional.empty(), "Etternavn_4"))
             .startdato(LocalDate.of(2010, 12, 1))
             .sluttdato(null)

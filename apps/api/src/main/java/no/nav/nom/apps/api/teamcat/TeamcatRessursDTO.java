@@ -15,22 +15,16 @@ public record TeamcatRessursDTO(
     String lederNavident
 ) {
     public enum ResourceType {
-        ANNEN_STAT("ANNEN_STAT"),
         EKSTERN("EKSTERN"),
         INTERN("INTERN");
 
-
         public final String textRepresentation;
-
 
         ResourceType(String textRepresentation) {
             this.textRepresentation = textRepresentation;
         }
 
-        public static ResourceType from(Sektor sektor, boolean isAnnenStat) {
-            if (isAnnenStat) {
-                return ResourceType.ANNEN_STAT;
-            }
+        public static ResourceType from(Sektor sektor) {
             if (sektor.equals(Sektor.EKSTERN)) {
                 return ResourceType.EKSTERN;
             }

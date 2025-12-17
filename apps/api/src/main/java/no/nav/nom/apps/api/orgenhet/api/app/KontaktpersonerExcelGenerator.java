@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -44,18 +45,20 @@ public class KontaktpersonerExcelGenerator {
     private final RessursRestService ressursRestService;
     private final KontaktinfoClient kontaktinfoClient;
     private final ExcelGenerator excelGenerator;
+    private final TelefonService telefonService;
 
     public KontaktpersonerExcelGenerator(KontaktinfoClient kontaktinfoClient,
                                          OrgenhetService orgenhetService,
                                          OrgEnhetMapper orgEnhetMapper,
                                          OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                         RessursRestService ressursRestService
+                                         RessursRestService ressursRestService, TelefonService telefonService
     ) {
         this.kontaktinfoClient = kontaktinfoClient;
         this.orgenhetService = orgenhetService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.ressursRestService = ressursRestService;
+        this.telefonService = telefonService;
         this.excelGenerator = new  ExcelGenerator();
     }
 
@@ -259,7 +262,7 @@ public class KontaktpersonerExcelGenerator {
             String ressursFornavn = visningsnavn.map(Visningsnavn::fornavn).orElse("");
             String ressursEtternavn = visningsnavn.map(Visningsnavn::etternavn).orElse("");
 
-            String ressursJobbtelefon = ressursRestService.getTelefonnummer(ressursKontaktinfo.ressursNavident());
+            String ressursJobbtelefon = telefonService.getPrioritertTelefonnummer(ressursKontaktinfo.ressursNavident());
             String ressursPrimarytelefon = getPrimaryTelefonForRessurs(ressurser.get(ressursKontaktinfo.ressursNavident()));
 
             if (ressursKontaktinfo.kontaktinfo().isEmpty()) {

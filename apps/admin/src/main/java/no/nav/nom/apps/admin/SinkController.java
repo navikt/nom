@@ -186,7 +186,10 @@ public class SinkController {
         Set<String> eventFids = new HashSet<>();
         List<OrgtilknytningEvent> events;
         if (matcher.find()) {
-            eventFids.addAll(orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+            var oter = orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group());
+            if (oter != null) {
+                eventFids.addAll(orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+            }
         }
 
         if (!eventFids.isEmpty()) {

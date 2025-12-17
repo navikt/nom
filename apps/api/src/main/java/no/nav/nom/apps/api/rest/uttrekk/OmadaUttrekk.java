@@ -44,19 +44,16 @@ import static java.util.Objects.nonNull;
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
-    public static final String BRUK_NY_TELEFON_AGGREGERING = "nom.telefon.bruk_ny_telefon_aggregering";
     private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
-    private final DvhRepository dvhRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private final TelefonService telefonService;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
-    private final Unleash unleash;
 
     private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
 
@@ -65,20 +62,16 @@ public class OmadaUttrekk {
         OrgenhetService orgenhetService,
         OrgtilknytningService orgtilknytningService,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
-        DvhRepository dvhRepository,
         OrganiseringStateRepository organiseringStateRepository,
-        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository,
-        Unleash unleash
+        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
-        this.dvhRepository = dvhRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.telefonService = telefonService;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -190,50 +183,28 @@ public class OmadaUttrekk {
 
         final var cSVFormat = getCSVFormat("navident", "nummer", "type", "beskrivelse");
 
-        if (unleash.isEnabled(BRUK_NY_TELEFON_AGGREGERING)) {
-            log.info("Eksporterer telefonnummer med ny aggregering");
-            try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-                telefonService.hentPrioriterteTelefonnummer().forEach(
-                        (navident, telefon) -> {
-                            var prioritertNummer = telefon.getFirst();
-                            try {
-                                printer.printRecord(
-                                        navident,
-                                        formaterTelefonnummer(prioritertNummer.nummer()),
-                                        prioritertNummer.type(),
-                                        ""
-                                );
+        log.info("Eksporterer telefonnummer med ny aggregering");
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+            telefonService.hentPrioriterteTelefonnummer().forEach(
+                    (navident, telefon) -> {
+                        var prioritertNummer = telefon.getFirst();
+                        try {
+                            printer.printRecord(
+                                    navident,
+                                    formaterTelefonnummer(prioritertNummer.nummer()),
+                                    prioritertNummer.type(),
+                                    ""
+                            );
 
-                                writer.close();
-                            } catch (IOException e) {
-                                log.error("Error writing to CSV", e);
-                                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                            }
+                            writer.close();
+                        } catch (IOException e) {
+                            log.error("Error writing to CSV", e);
+                            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
                         }
-                );
-
-                return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
-            }
-        } else {
-            log.info("Eksporterer telefonnummer på gammel måte");
-            try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-                dvhRepository.getNavidentTelefonNrList().forEach(telefon -> {
-                    try {
-                        printer.printRecord(
-                                telefon.getNavIdent(),
-                                telefon.getNummer(),
-                                telefon.getType(),
-                                telefon.getBeskrivelse()
-                        );
-
-                        writer.close();
-                    } catch (IOException e) {
-                        log.error("Error writing to CSV", e);
-                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
                     }
-                });
-                return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
-            }
+            );
+
+            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
     }
 

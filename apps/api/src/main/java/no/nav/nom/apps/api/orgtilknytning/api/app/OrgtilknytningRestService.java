@@ -1,12 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.AuthResolver;
-import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
@@ -65,7 +62,6 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
-import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 
 @Service
@@ -79,10 +75,8 @@ public class OrgtilknytningRestService {
     private final NomMastered nomMastered;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursCommandService ressursCommandService;
-    private final AuthorizedNavident authorizedNavident;
     private final AuthResolver authResolver;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
-    private final Unleash unleash;
 
     @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
@@ -93,18 +87,16 @@ public class OrgtilknytningRestService {
         RessursCommandService ressursCommandService,
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
-        AuthorizedNavident authorizedNavident, AuthResolver authResolver,
-        MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService, Unleash unleash
+        AuthResolver authResolver,
+        MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursCommandService = ressursCommandService;
         this.ressursStateRepository = ressursStateRepository;
         this.nomMastered = nomMastered;
-        this.authorizedNavident = authorizedNavident;
         this.authResolver = authResolver;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
-        this.unleash = unleash;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
@@ -256,9 +248,6 @@ public class OrgtilknytningRestService {
 
     private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
                                                                    boolean isLoggedInUserLederForNavident, String navident) {
-        if (!unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
-            validateLederKanOppdatereOrgtilknytninger(oppdaterOrgtilknytningerForRessursRequest, isLoggedInUserLederForNavident);
-        }
         validateEndreOrgtilknytningUnderSeksMaaneder(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
@@ -353,40 +342,6 @@ public class OrgtilknytningRestService {
             .append(orgtilknytningRequest.gyldigTom(), stateDate)
             .isEquals();
     }
-
-    private void validateLederKanOppdatereOrgtilknytninger(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                           boolean isLeder) {
-        var alleUnderliggendeEnheterTilLeder = authorizedNavident.orgenheterLederKanRedigere(getAuthenticatedNavIdent());
-        Set<String> orgenhetIds = alleUnderliggendeEnheterTilLeder.stream().map(IOrgenhet::getId).collect(Collectors.toSet());
-        var orgtilknytningFids = oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().stream()
-            .map(EndreOrgtilknytningRequest::fid)
-            .distinct()
-            .toList();
-
-        var eksisterendeOrgtilknytninger = orgtilknytningStateRepository.findByFidIn(orgtilknytningFids);
-        log.info("Leder har tilgang til orgenhetene: {}", orgenhetIds);
-
-        if (!isLeder) {
-            if (!oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().isEmpty()) {
-                boolean hasAccessToAddOrgtilknytning = oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger()
-                    .stream()
-                    .anyMatch(leggTilOrgtilknytningRequest -> orgenhetIds.contains(leggTilOrgtilknytningRequest.orgEnhetId()));
-
-                if (!hasAccessToAddOrgtilknytning) {
-                    eksisterendeOrgtilknytninger.stream()
-                        .filter(endreOrgtilknytningRequest -> orgenhetIds.contains(endreOrgtilknytningRequest.orgEnhetId()))
-                        .findAny()
-                        .orElseThrow(() -> new AccessDeniedException("Du har lagt til og/eller prøvd å endre en organisasjonstilknytning for en orgenhet som du ikke har tilgang til."));
-                }
-            } else {
-                eksisterendeOrgtilknytninger.stream()
-                    .filter(eksisterendeOrgtilknytning -> orgenhetIds.contains(eksisterendeOrgtilknytning.orgEnhetId()))
-                    .findAny()
-                    .orElseThrow(() -> new AccessDeniedException("Du er ikke leder for en eksisterende Orgtilknytning til denne medarbeideren og kan derfor ikke endre personens orgtilknytning."));
-            }
-        }
-    }
-
 
     private void validateChronologicalDates(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger()
@@ -850,25 +805,22 @@ public class OrgtilknytningRestService {
     }
 
     public boolean kanEndreOrgtilknytninger(IdentType identType, String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        if (unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)) {
-            var orgenhetIdsUnderEndring = orgEnhetIderForOterUnderEndring(oppdaterOrgtilknytningerForRessursRequest);
-            return switch (identType) {
-                case ROBOT ->
-                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT,ADMIN)
-                    || authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
-                case UTENLANDSK_KONSULENT ->
-                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT,ADMIN)
-                    || authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
-                case VIKAFOSSEN ->
-                    SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
-                default ->
-                    authResolver.kanRedigereRessurs(navident)
-                    || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
-            };
-        }
-        return true;
+        var orgenhetIdsUnderEndring = orgEnhetIderForOterUnderEndring(oppdaterOrgtilknytningerForRessursRequest);
+        return switch (identType) {
+            case ROBOT ->
+                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT,ADMIN)
+                || authResolver.kanRedigereRessurs(navident)
+                || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
+            case UTENLANDSK_KONSULENT ->
+                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT,ADMIN)
+                || authResolver.kanRedigereRessurs(navident)
+                || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
+            case VIKAFOSSEN ->
+                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            default ->
+                authResolver.kanRedigereRessurs(navident)
+                || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
+        };
     }
 
     private Set<String> orgEnhetIderForOterUnderEndring(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
