@@ -27,10 +27,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -48,7 +49,11 @@ import static org.mockito.Mockito.doReturn;
 @ActiveProfiles({"GraphQLTest", "test"})
 @GraphQlTest
 @ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
-@AutoConfigureWireMock(port = 0) // For AD wiremock resultat (epost oppslag)
+// For AD wiremock resultat (epost oppslag)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 @DisplayName("GraphQL - Ressurs spørringer")
 class RessursTest {
     @Autowired

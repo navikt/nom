@@ -20,12 +20,13 @@ import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -41,7 +42,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 )
 @ContextConfiguration(classes= {OrgEnhetTestConfig.class, OrgEnhetStateAutoconfiguration.class, OrganiseringStateAutoconfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.intern-orgenhet-state", "org.nom.intern-organisering-state"},  controlledShutdown = true)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 public class OrgEnhetTestBase {
     @Autowired
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;

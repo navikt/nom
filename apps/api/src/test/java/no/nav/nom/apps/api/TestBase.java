@@ -20,7 +20,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -32,6 +31,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,10 @@ import static org.mockito.Mockito.when;
         "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource", "org.nom.orgtilknytning-eventsource"}, 
         controlledShutdown = true)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 public abstract class TestBase {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
