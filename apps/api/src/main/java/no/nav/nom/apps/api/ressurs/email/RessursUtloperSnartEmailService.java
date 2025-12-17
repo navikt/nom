@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -54,6 +55,7 @@ public class RessursUtloperSnartEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     private final OrgEnhetLederService orgEnhetLederService;
+    private final Unleash unleash;
 
     public RessursUtloperSnartEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -65,7 +67,8 @@ public class RessursUtloperSnartEmailService {
         NomMastered nomMastered,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
-        OrgEnhetLederService orgEnhetLederService
+        OrgEnhetLederService orgEnhetLederService,
+        Unleash unleash
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
@@ -77,6 +80,7 @@ public class RessursUtloperSnartEmailService {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
         this.orgEnhetLederService = orgEnhetLederService;
+        this.unleash = unleash;
     }
 
     @Scheduled(cron = "0 0 18 * * ?") // every day at 18:00
@@ -96,6 +100,7 @@ public class RessursUtloperSnartEmailService {
             "Totalt antall ressurser som utløper snart: {} Ressurser: {}",
             ressurserUtloperSnart.size(),
             ressurserUtloperSnart.stream().map(RessursUtloperData::ressursNavident).toList());
+
         var ressursUtloperOmFemEllerToUker = ressurserUtloperSnart.stream()
             .filter(ressursUtloperData -> ressursUtloperData.orgenhetLederNavident() != null)
             .toList();
@@ -103,7 +108,6 @@ public class RessursUtloperSnartEmailService {
         var ressursUtloperOmToUker = ressurserUtloperSnart.stream()
             .filter(ressursUtloperData -> ressursUtloperData.ressursSluttdato() != null)
             .filter(ressursUtloperData -> ressursUtloperData.ressursSluttdato().isEqual(LocalDate.now().plusWeeks(2)))
-            .filter(ressursUtloperData -> isNull(ressursUtloperData.orgenhetLederNavident()))
             .toList();
 
         log.info(
@@ -113,6 +117,9 @@ public class RessursUtloperSnartEmailService {
         );
         if (!ressursUtloperOmFemEllerToUker.isEmpty()) {
             ressursUtloperOmFemEllerToUker.forEach(this::sendEmail);
+            if (unleash.isEnabled("nom.sluttdato-epost-ansatte")) {
+                ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
+            }
         }
     }
 
@@ -163,7 +170,7 @@ public class RessursUtloperSnartEmailService {
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
-            String subject = String.format("Varsel før utløpsdato for %s (%s)", utlopendeRessurs.ressurNavn(), utlopendeRessurs.ressursNavident());
+            String subject = "Din sluttdato nærmer seg";
             String emailBody = generateEmailBodyForAnsatt(utlopendeRessurs);
             if (emailBody.isBlank()) {
                 log.warn("Epost body er tom, Varsel før utløpsdato for ressurs vil ikke bli sendt");
