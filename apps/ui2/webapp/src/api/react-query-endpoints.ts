@@ -276,7 +276,7 @@ export const downloadExcelByListNavident = async (
   link.remove();
 };
 
-export const downloadExcelKontaktPersonserForOrgenhetByOrgenhetId = async (
+export const downloadExcelKontaktpersonerForOrgenhetByOrgenhetId = async (
   orgEnhetId: string,
   excelDocumentNavn: string,
 ) => {

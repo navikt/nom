@@ -67,6 +67,8 @@ export const OrgRessursTabellPage = () => {
 
   const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(id);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const excelFilNavn = () => {
     return includeUnderliggende &&
       underliggendeOrgEnhetQuery.isSuccess &&
@@ -80,10 +82,12 @@ export const OrgRessursTabellPage = () => {
       navidenter: ressurserNavidents,
       topOrgEnhetId: orgEnhetQuery.data?.id,
     };
+    setIsDownloading(true);
     await downloadExcelByListNavident(
       excelExportRequest as ExcelExportRequest,
       excelFilNavn(),
     );
+    setIsDownloading(false);
   };
 
   if (orgEnhetQuery.isLoading || underliggendeOrgEnhetQuery.isLoading) {
@@ -158,6 +162,7 @@ export const OrgRessursTabellPage = () => {
             css={css`
               display: flex;
               justify-content: space-between;
+              margin-top: var(--a-spacing-1);
             `}
           >
             <Checkbox
@@ -165,7 +170,6 @@ export const OrgRessursTabellPage = () => {
               css={css`
                 color: #000;
                 font-size: 1.2rem;
-                margin-bottom: 20px;
               `}
               onChange={(event) => {
                 setIncludeUnderliggende(event.target.checked);
@@ -178,6 +182,7 @@ export const OrgRessursTabellPage = () => {
             <div>
               <Button
                 icon={<FileExcelIcon />}
+                loading={isDownloading}
                 onClick={handleDownloadExcel}
                 variant="secondary"
               >

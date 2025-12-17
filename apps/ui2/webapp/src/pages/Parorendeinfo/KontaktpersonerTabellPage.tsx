@@ -3,19 +3,27 @@ import { ChevronLeftIcon, FileExcelIcon } from "@navikt/aksel-icons";
 import { Alert, Button, Heading, Loader, Table } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import React from "react";
+import React, { useState } from "react";
 
-import { getOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  downloadExcelKontaktpersonerForOrgenhetByOrgenhetId,
+  getOrgEnhet,
+  harLederTilgangForOrgenhetOptions,
+} from "~/api/react-query-endpoints";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import type { Relasjon } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import { RelasjonNameMapping } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import type { OrgEnhet } from "~/types/api-models";
-import { formatTlf } from "~/utils";
+import { formatTlf, isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
 
 export function KontaktpersonerTabellPage() {
   const { id } = useParams({ from: "/kontaktpersoner-tabell/$id" });
+
+  const hasAdminAccess = useHasAdminAccess();
+  const hasWriteAccess = useHasWriteAccess();
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id),
@@ -23,6 +31,39 @@ export function KontaktpersonerTabellPage() {
   });
 
   const orgEnhet = orgEnhetQuery.data;
+
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const excelFilNavn = () => {
+    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
+  };
+
+  const handleDownloadKontaktpersonerExcel = async () => {
+    try {
+      setIsDownloading(true);
+      await downloadExcelKontaktpersonerForOrgenhetByOrgenhetId(
+        orgEnhet?.id ?? "",
+        excelFilNavn(),
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const hasWriteAccessForOrgenhet =
+    useQuery(harLederTilgangForOrgenhetOptions(orgEnhet?.id ?? "")).data ??
+    false;
+
+  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+    orgEnhet?.id ?? "",
+  );
+
+  const adminOrWriteForOrgenhet =
+    (hasWriteAccess && hasWriteAccessForOrgenhet) || hasAdminAccess;
+
+  if (!adminOrWriteForOrgenhet || eksternSamarbeidspartner) {
+    return;
+  }
 
   if (orgEnhetQuery.isLoading) {
     return (
@@ -43,7 +84,7 @@ export function KontaktpersonerTabellPage() {
     return (
       <Alert variant="error">
         <Heading level="3" size="small">
-          Kunne ikke hente organisasjonsenhet med id <b>{id}</b>
+          Kunne ikke hente organisasjonsenhet med ID <b>{id}</b>
         </Heading>
       </Alert>
     );
@@ -82,7 +123,12 @@ export function KontaktpersonerTabellPage() {
             </span>
           </SmartLink>
 
-          <Button icon={<FileExcelIcon />} variant="secondary">
+          <Button
+            icon={<FileExcelIcon />}
+            loading={isDownloading}
+            onClick={handleDownloadKontaktpersonerExcel}
+            variant="secondary"
+          >
             Eksportér til Excel
           </Button>
         </div>
@@ -94,6 +140,18 @@ export function KontaktpersonerTabellPage() {
 }
 
 function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const sortedKontaktpersoner = mockKontaktpersoner.sort((a, b) => {
+    const navnCompare = a.navn.localeCompare(b.navn);
+    if (navnCompare !== 0) return navnCompare;
+
+    const prioritetCompare = a.kontaktpersonPrioritet.localeCompare(
+      b.kontaktpersonPrioritet,
+    );
+    if (prioritetCompare !== 0) return prioritetCompare;
+
+    return a.kontaktpersonNavn.localeCompare(b.kontaktpersonNavn);
+  });
+
   return (
     <Table
       css={css`
@@ -132,7 +190,7 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           height: 48px;
         `}
       >
-        {mockKontaktpersoner.map((kontaktpersonRad, index) => (
+        {sortedKontaktpersoner.map((kontaktpersonRad, index) => (
           <Table.Row
             css={css`
               height: 48px;
@@ -186,9 +244,9 @@ interface Kontaktperson {
 
 const mockKontaktpersoner: Kontaktperson[] = [
   {
-    navident: "E000001",
-    navn: "Test Testesen 1",
-    jobbtelefon: "4700000001",
+    navident: "T123456",
+    navn: "Testperson 4",
+    jobbtelefon: "12345678",
     privattelefon: "",
     kontaktpersonNavn: "",
     kontaktpersonRelasjon: "",
@@ -196,59 +254,59 @@ const mockKontaktpersoner: Kontaktperson[] = [
     kontaktpersonPrioritet: "",
   },
   {
-    navident: "M000001",
-    navn: "Test Testesen 2",
-    jobbtelefon: "4700000002",
+    navident: "T123457",
+    navn: "Testperson 3",
+    jobbtelefon: "4799887766",
     privattelefon: "",
-    kontaktpersonNavn: "",
-    kontaktpersonRelasjon: "",
-    kontaktpersonTelefonnummer: "",
-    kontaktpersonPrioritet: "",
-  },
-  {
-    navident: "H000001",
-    navn: "Test Testesen 3",
-    jobbtelefon: "4700000003",
-    privattelefon: "",
-    kontaktpersonNavn: "",
-    kontaktpersonRelasjon: "",
-    kontaktpersonTelefonnummer: "",
-    kontaktpersonPrioritet: "",
-  },
-  {
-    navident: "K000001",
-    navn: "Test Testesen 4",
-    jobbtelefon: "4700000004",
-    privattelefon: "",
-    kontaktpersonNavn: "Derp Derpeses",
+    kontaktpersonNavn: "BDerp Derpeses",
     kontaktpersonRelasjon: "BARN",
     kontaktpersonTelefonnummer: "12345678",
     kontaktpersonPrioritet: "1",
   },
   {
-    navident: "K000001",
-    navn: "Test Testesen 4",
+    navident: "T123458",
+    navn: "Testperson 1",
+    jobbtelefon: "4791234567",
+    privattelefon: "",
+    kontaktpersonNavn: "",
+    kontaktpersonRelasjon: "",
+    kontaktpersonTelefonnummer: "",
+    kontaktpersonPrioritet: "",
+  },
+  {
+    navident: "T123459",
+    navn: "Testperson 2",
+    jobbtelefon: "4712312312",
+    privattelefon: "",
+    kontaktpersonNavn: "",
+    kontaktpersonRelasjon: "",
+    kontaktpersonTelefonnummer: "",
+    kontaktpersonPrioritet: "",
+  },
+  {
+    navident: "K121212",
+    navn: "ATestperson 99",
     jobbtelefon: "4700000004",
     privattelefon: "",
-    kontaktpersonNavn: "Derpina Derpeses",
+    kontaktpersonNavn: "CDerp jr Derpeses",
+    kontaktpersonRelasjon: "BARN",
+    kontaktpersonTelefonnummer: "87654321",
+    kontaktpersonPrioritet: "2",
+  },
+  {
+    navident: "K122222",
+    navn: "Testperson 6",
+    jobbtelefon: "4714111111",
+    privattelefon: "",
+    kontaktpersonNavn: "ADerpina Derpeses",
     kontaktpersonRelasjon: "SOSKEN",
     kontaktpersonTelefonnummer: "56781234",
     kontaktpersonPrioritet: "1",
   },
   {
-    navident: "K000001",
-    navn: "Test Testesen 4",
-    jobbtelefon: "4700000004",
-    privattelefon: "",
-    kontaktpersonNavn: "Derp jr Derpeses",
-    kontaktpersonRelasjon: "BARN",
-    kontaktpersonTelefonnummer: "87654321",
-    kontaktpersonPrioritet: "1",
-  },
-  {
-    navident: "M000002",
-    navn: "Test Testesen 5",
-    jobbtelefon: "4700000005",
+    navident: "E111111",
+    navn: "BETestperson 123",
+    jobbtelefon: "4776576544",
     privattelefon: "",
     kontaktpersonNavn: "",
     kontaktpersonRelasjon: "",
@@ -256,9 +314,9 @@ const mockKontaktpersoner: Kontaktperson[] = [
     kontaktpersonPrioritet: "",
   },
   {
-    navident: "U000001",
-    navn: "Test Testesen 6",
-    jobbtelefon: "4700000006",
+    navident: "U555666",
+    navn: "Test McTest 2",
+    jobbtelefon: "4755555555",
     privattelefon: "",
     kontaktpersonNavn: "",
     kontaktpersonRelasjon: "",
@@ -266,19 +324,19 @@ const mockKontaktpersoner: Kontaktperson[] = [
     kontaktpersonPrioritet: "",
   },
   {
-    navident: "W000001",
-    navn: "Test Testesen 7",
-    jobbtelefon: "4700000007",
+    navident: "W654654",
+    navn: "Wtestperson 2",
+    jobbtelefon: "4712312312",
     privattelefon: "",
     kontaktpersonNavn: "Testperson 1",
     kontaktpersonRelasjon: "SOSKEN",
-    kontaktpersonTelefonnummer: "88776655",
+    kontaktpersonTelefonnummer: "+38288776655",
     kontaktpersonPrioritet: "1",
   },
   {
-    navident: "N000001",
-    navn: "Test Testesen 8",
-    jobbtelefon: "4700000008",
+    navident: "N161212",
+    navn: "Test NyTest",
+    jobbtelefon: "004712341234",
     privattelefon: "",
     kontaktpersonNavn: "",
     kontaktpersonRelasjon: "",
