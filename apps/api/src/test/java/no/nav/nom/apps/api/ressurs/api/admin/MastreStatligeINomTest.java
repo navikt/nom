@@ -256,9 +256,9 @@ class MastreStatligeINomTest {
 
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpC(dd5uker, LocalDate.parse("2024-12-31"), List.of("A000001", "A000018", "A000019"), false, true, "USERID");
 
-        assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe C utvalg: 2"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 2"));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall navidenter å ekskludere: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall i Gruppe C utvalg: 2")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall å oppdatere: 2")));
 
         verify(ressursCommandService, times(2)).oppdaterRessursSluttdatoEvent(any());
     }
@@ -271,9 +271,9 @@ class MastreStatligeINomTest {
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpC(dd5uker, LocalDate.parse("2024-12-31"), List.of("A000001", "A000018", "A000019"), false, false, "USERID");
 
         assertTrue(res.getBody().contains("DRY RUN"));
-        assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe C utvalg: 2"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 2"));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall navidenter å ekskludere: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall i Gruppe C utvalg: 2")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall å oppdatere: 2")));
 
         verifyNoInteractions(ressursCommandService);
     }
@@ -285,9 +285,9 @@ class MastreStatligeINomTest {
 
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpC(dd5uker, LocalDate.parse("2024-12-31"), List.of("A000006"), true, true, "USERID");
 
-        assertTrue(res.getBody().contains("Antall navidenter å begrense utvalget med: 1"));
-        assertTrue(res.getBody().contains("Antall i Gruppe C utvalg: 2"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 1"));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall navidenter å begrense utvalget med: 1")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall i Gruppe C utvalg: 2")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall å oppdatere: 1")));
 
         verify(ressursCommandService, times(1)).oppdaterRessursSluttdatoEvent(any());
     }
