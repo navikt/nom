@@ -259,7 +259,7 @@ public class MastreStatligeINom {
         skalOppdateres.forEach(getRessursRow(sb));
 
         log.info(sb.toString());
-        return ResponseEntity.ok(sb.toString());
+        return ResponseEntity.ok(HtmlUtils.htmlEscape(sb.toString()));
     }
 
     protected String markerStatligeSomMastret(boolean commit, List<String> ekskluderNavidenter) {
