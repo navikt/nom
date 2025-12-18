@@ -4,6 +4,8 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
@@ -12,6 +14,7 @@ import no.nav.nom.libs.gql.ErrorCode;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.ad.AdRessurs.AdStatus;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -29,13 +32,23 @@ public class ActiveDirectoryRessursBatchLoader {
 
     private final AdClient adClient;
 
-    public ActiveDirectoryRessursBatchLoader(AdClient adClient) {
+    private final Counter maybeDeprecatedNavIdentUsageCounter;
+
+    public ActiveDirectoryRessursBatchLoader(AdClient adClient, @Autowired(required = false) MeterRegistry maybeMeterRegistry) {
         this.adClient = adClient;
+        { // setup counters
+            if (maybeMeterRegistry != null) {
+                this.maybeDeprecatedNavIdentUsageCounter = Counter.builder("nom_activedirectoryressursbatchloader_used_deprecated_navident_field").register(maybeMeterRegistry);
+            } else {
+                this.maybeDeprecatedNavIdentUsageCounter = null;
+            }
+        }
+
     }
 
     public <T> Map<Ressurs, DataFetcherResult<T>> load(List<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
         final var adRessurser = listToBatches(ressurser, AD_MAX_BATCH_SIZE).stream() // Split into MAX_BATCH_SIZE lists
-            .map(batch -> getAdRessurser(batch.stream().map(Ressurs::getNavident).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy
+            .map(batch -> getAdRessurser(batch.stream().map(this::extractNavidentFromRessurs).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy
             .flatMap(batchResult -> batchResult.entrySet().stream()) // Convert all Maps to a big stream of EntrySet
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)); // Collect all entries to a Map
 
@@ -74,5 +87,19 @@ public class ActiveDirectoryRessursBatchLoader {
             return exc.getErrorCode().construct(environment, exc.getMessage());
         }
         return null;
+    }
+
+    private String extractNavidentFromRessurs(Ressurs ressurs){
+        var navident = ressurs.getNavident();
+        if(navident != null){
+            return navident;
+        }
+        var deprecatedNavIdentOrNull = ressurs.getNavIdent();
+        if(this.maybeDeprecatedNavIdentUsageCounter != null){
+            if(deprecatedNavIdentOrNull != null){
+                this.maybeDeprecatedNavIdentUsageCounter.increment();
+            }
+        }
+        return deprecatedNavIdentOrNull;
     }
 }

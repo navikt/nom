@@ -63,7 +63,7 @@ public class GraphQlStateReposConfig {
 
     @Bean
     protected final RessursPropertyResolver ressursPropertyResolver(Environment env, AdClient adClient, RessursStateRepository ressursStateRepository){
-        return Mockito.spy(new RessursPropertyResolver(new ActiveDirectoryRessursBatchLoader(adClient),env,ressursStateRepository));
+        return Mockito.spy(new RessursPropertyResolver(new ActiveDirectoryRessursBatchLoader(adClient,null),env,ressursStateRepository));
     };
 
     @Bean public GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter(){
