@@ -38,6 +38,8 @@ export function BurgerMenu() {
 
   const session = useGetSession();
 
+  const innloggetNavident = session.data?.navident;
+
   const navigate = useNavigate();
 
   const adminLenke: string = globalThis.location.href.includes("nom.nav.no")
@@ -99,22 +101,19 @@ export function BurgerMenu() {
         `}
       >
         <Dropdown.Menu.List>
-          <Dropdown.Menu.List.Item onClick={() => navigate({ to: "/" })}>
-            <img alt="hierarki" src={hierarchyFilled} />
-            <span>Organisasjonshierarki</span>
-          </Dropdown.Menu.List.Item>
+          <SmartLink href="/">
+            <Dropdown.Menu.List.Item>
+              <img alt="hierarki" src={hierarchyFilled} />
+              <span>Organisasjonshierarki</span>
+            </Dropdown.Menu.List.Item>
+          </SmartLink>
 
-          <Dropdown.Menu.List.Item
-            onClick={() =>
-              navigate({
-                to: "/ressurs/$id",
-                params: { id: session.data?.navident ?? "" },
-              })
-            }
-          >
-            <PersonFillIcon color="black" fontSize="24px" />
-            <span>Min profil</span>
-          </Dropdown.Menu.List.Item>
+          <SmartLink href={`/ressurs/${innloggetNavident}`}>
+            <Dropdown.Menu.List.Item>
+              <PersonFillIcon color="black" fontSize="24px" />
+              <span>Min profil</span>
+            </Dropdown.Menu.List.Item>
+          </SmartLink>
 
           {showOpprettLink && (
             <>
@@ -133,16 +132,12 @@ export function BurgerMenu() {
             <>
               {!showOpprettLink && <Dropdown.Menu.Divider />}
 
-              <Dropdown.Menu.List.Item
-                onClick={() =>
-                  navigate({
-                    to: "/ressurs/createspecial",
-                  })
-                }
-              >
-                <PersonPlusFillIcon color="black" fontSize="24px" />
-                <span>Opprett annen medarbeider</span>
-              </Dropdown.Menu.List.Item>
+              <SmartLink href="/ressurs/createspecial">
+                <Dropdown.Menu.List.Item>
+                  <PersonPlusFillIcon color="black" fontSize="24px" />
+                  <span>Opprett annen medarbeider</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
 
@@ -152,22 +147,20 @@ export function BurgerMenu() {
                 <Dropdown.Menu.Divider />
               )}
 
-              <Dropdown.Menu.List.Item
-                onClick={() =>
-                  navigate({ to: "/masseflytting-fysisk-brukersted" })
-                }
-              >
-                <img
-                  alt=""
-                  css={css`
-                    height: 24px;
-                    width: 24px;
-                    align-self: center;
-                  `}
-                  src={flyttFysiskBrukersted}
-                />
-                <span>Masseflytting fysisk brukersted</span>
-              </Dropdown.Menu.List.Item>
+              <SmartLink href="/masseflytting-fysisk-brukersted">
+                <Dropdown.Menu.List.Item>
+                  <img
+                    alt=""
+                    css={css`
+                      height: 24px;
+                      width: 24px;
+                      align-self: center;
+                    `}
+                    src={flyttFysiskBrukersted}
+                  />
+                  <span>Masseflytting fysisk brukersted</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
 
@@ -175,12 +168,14 @@ export function BurgerMenu() {
             <>
               <Dropdown.Menu.Divider />
 
-              <Dropdown.Menu.List.Item
-                onClick={() => navigate({ to: "/organisasjonsmastring" })}
-              >
-                <img alt="hierarki" src={hierarchyFilled} />
-                <span>Mine organisasjonsenheter</span>
-              </Dropdown.Menu.List.Item>
+              <SmartLink href="/organisasjonsmastring">
+                <Dropdown.Menu.List.Item
+                  onClick={() => navigate({ to: "/organisasjonsmastring" })}
+                >
+                  <img alt="hierarki" src={hierarchyFilled} />
+                  <span>Mine organisasjonsenheter</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
 
@@ -188,13 +183,12 @@ export function BurgerMenu() {
             <>
               <Dropdown.Menu.Divider />
 
-              <Dropdown.Menu.List.Item
-                data-cy="tilganger-button"
-                onClick={() => navigate({ to: "/tilganger" })}
-              >
-                <KeyVerticalFillIcon color="black" fontSize="24px" />
-                <span>Tilganger</span>
-              </Dropdown.Menu.List.Item>
+              <SmartLink href="/tilganger">
+                <Dropdown.Menu.List.Item data-cy="tilganger-button">
+                  <KeyVerticalFillIcon color="black" fontSize="24px" />
+                  <span>Tilganger</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
 
@@ -202,12 +196,25 @@ export function BurgerMenu() {
             <>
               {!showTilgangerLink && <Dropdown.Menu.Divider />}
 
-              <Dropdown.Menu.List.Item
-                onClick={() => globalThis.open(adminLenke, "_blank")}
+              <SmartLink
+                css={css`
+                  width: 100%;
+
+                  :hover {
+                    width: 100%;
+                  }
+
+                  .navds-dropdown__list-item {
+                    width: 100%;
+                  }
+                `}
+                href={adminLenke}
               >
-                <TokenFillIcon color="black" fontSize="24px" />
-                <span>Admin</span>
-              </Dropdown.Menu.List.Item>
+                <Dropdown.Menu.List.Item>
+                  <TokenFillIcon color="black" fontSize="24px" />
+                  <span>Admin</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             </>
           )}
         </Dropdown.Menu.List>
