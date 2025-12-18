@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -109,7 +110,11 @@ public class ManuelleOrgEnhetLederMeldinger {
             orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(fid, OppdaterOrgEnhetLederSluttdato.builder().sluttdato(sluttdato).inputMetadata(inputMetadata).build());
         }
 
-        return ResponseEntity.ok().body("Leder %s er opprettet med FID %s i orgenhet %s".formatted(navident, fid, orgEnhetId));
+        return ResponseEntity.ok()
+            .body("Leder %s er opprettet med FID %s i orgenhet %s".formatted(
+                HtmlUtils.htmlEscape(navident),
+                HtmlUtils.htmlEscape(fid),
+                HtmlUtils.htmlEscape(orgEnhetId)));
     }
 
     @Operation(
@@ -157,7 +162,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 return ResponseEntity.ok().body("Startdato til FID %s ble oppdatert til %s".formatted(fid, startdato));
             }).orElse(ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body("Fant ikke OrgEnhetLederState med FID %s".formatted(fid)));
+            .body("Fant ikke OrgEnhetLederState med FID %s".formatted(HtmlUtils.htmlEscape(fid))));
     }
 
     @Operation(
@@ -205,7 +210,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 return ResponseEntity.ok().body("Sluttdato til FID %s ble oppdatert til %s".formatted(fid, sluttdato));
             }).orElse(ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body("Fant ikke OrgEnhetLederState med FID %s".formatted(fid)));
+            .body("Fant ikke OrgEnhetLederState med FID %s".formatted(HtmlUtils.htmlEscape(fid))));
     }
 
     @DeleteMapping("/slettManuelleOrgEnhetLederState")
@@ -237,7 +242,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 return ResponseEntity.ok().body("OrgEnhetLederState for orgenhet %s og navident %s for perioden %s til %s er slettet"
                     .formatted(fid, orgEnhetLederState.navident(), orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()));
             }
-        ).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fant ikke OrgEnhetLederState med FID %s".formatted(fid)));
+        ).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fant ikke OrgEnhetLederState med FID %s".formatted(HtmlUtils.htmlEscape(fid))));
     }
 
     private boolean validFid(String fid) {

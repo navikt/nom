@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,7 @@ public class TilgangDelegertUtloeperEmailService {
             var delegertLederAdRessurs = Optional.ofNullable(adRessurser.get(expiringDelegering.til()));
             var delegertLederNavn = delegertLederAdRessurs.map(AdRessurs::getDisplayName).orElse("Ukjent Navn");
 
-            if (lederAdRessurs == null) {
+            if (lederAdRessurs == null || lederAdRessurs.getEmail() == null) {
                 log.error(
                     "Sending email-notification about future expiry of LederTilgangState {} failed. Email address of leder not retrieved. ",
                     expiringDelegering.fid()

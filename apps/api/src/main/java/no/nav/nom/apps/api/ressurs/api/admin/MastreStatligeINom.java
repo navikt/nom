@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -147,7 +148,7 @@ public class MastreStatligeINom {
         skalOppdateres.forEach(getRessursRow(sb));
 
         log.info(sb.toString());
-        return ResponseEntity.ok(sb.toString());
+        return ResponseEntity.ok(HtmlUtils.htmlEscape(sb.toString()));
     }
 
     @Operation(

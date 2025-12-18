@@ -17,6 +17,7 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -197,9 +198,9 @@ class MastreStatligeINomTest {
 
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpA(dd5uker, List.of("A000001", "A000002", "A000003"), true, "USERID");
 
-        assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 3"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 3"));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall navidenter å ekskludere: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall i Gruppe A utvalg: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall å oppdatere: 3")));
 
         verify(ressursCommandService, times(3)).oppdaterRessursSluttdatoEvent(any());
     }
@@ -212,9 +213,9 @@ class MastreStatligeINomTest {
         var res = mastreStatligeINom.oppdaterRessursSluttdatoGrpA(dd5uker, List.of("A000001", "A000002", "A000003"), false, "USERID");
 
         assertTrue(res.getBody().contains("DRY RUN"));
-        assertTrue(res.getBody().contains("Antall navidenter å ekskludere: 3"));
-        assertTrue(res.getBody().contains("Antall i Gruppe A utvalg: 3"));
-        assertTrue(res.getBody().contains("Antall å oppdatere: 3"));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall navidenter å ekskludere: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall i Gruppe A utvalg: 3")));
+        assertTrue(res.getBody().contains(HtmlUtils.htmlEscape("Antall å oppdatere: 3")));
 
         verifyNoInteractions(ressursCommandService);
     }
