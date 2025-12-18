@@ -52,7 +52,7 @@
         <postgresql.version>42.7.8</postgresql.version>
         <microsoft-graph.version>6.58.0</microsoft-graph.version>
         <azure-identity.version>1.18.1</azure-identity.version>
-        <caffeine.version>3.2.2</caffeine.version>
+        <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>5.5.1</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
