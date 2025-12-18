@@ -1,31 +1,39 @@
 package no.nav.nom.apps.api.common.security;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration(proxyBeanMethods = false)
-@EnableMethodSecurity
+@EnableMethodSecurity(proxyTargetClass = true)
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTFilter jwtFilter) throws Exception {
+    public SecurityFilterChain nomSecurityFilterChain(HttpSecurity http, JWTFilter jwtFilter, ApplicationContext applicationContext) throws Exception {
+
+        RequestMatcher anyRequestMatcher = AnyRequestMatcher.INSTANCE;
+
         return http
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-            .securityMatcher("/**")
+            .securityMatcher(anyRequestMatcher)
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers(
                     // Default/internal paths

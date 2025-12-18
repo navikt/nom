@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.clients.kontaktinfo;
 
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.libs.gql.ErrorCode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
