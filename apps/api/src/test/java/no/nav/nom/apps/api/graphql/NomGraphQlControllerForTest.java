@@ -108,11 +108,6 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     }
 
     @Override
-    public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment) {
-        return delegate.ressurserWithMetadata(environment);
-    }
-
-    @Override
     public List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment) {
         return delegate.orgTilknytninger(ressurs, periodiskUtvalg, environment);
     }

@@ -142,13 +142,6 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
         return ressursResolver.ressurser(search);
     }
 
-    @QueryMapping("ressurserWithMetadata")
-    @Override
-    public List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment) {
-        graphqlSupport.count(environment);
-        throw new NotRelevantForIntegrationTestingException("Ikke implementert, pga ikke relevant for integrasjonstesting");
-    }
-
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     @Override
     public List<RessursOrgTilknytning> orgTilknytninger(

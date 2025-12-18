@@ -56,9 +56,6 @@ public interface NomGraphQlControllerInterface {
     @QueryMapping("ressurser")
     List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment);
 
-    @QueryMapping("ressurserWithMetadata")
-    List<RessursWithMetadataResult> ressurserWithMetadata(DataFetchingEnvironment environment);
-
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment);
 
