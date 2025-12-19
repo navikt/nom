@@ -59,7 +59,7 @@
 
 
         <commons-io.version>2.21.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
-        <reactor-netty-http-codec.version>4.1.130.Final</reactor-netty-http-codec.version>  <!-- Overstyring av reactor-netty versjon for å fikse https://github.com/navikt/nom/security/dependabot/654 -->
+        <reactor-netty-http-codec.version>4.2.9.Final</reactor-netty-http-codec.version>  <!-- Overstyring av reactor-netty versjon for å fikse https://github.com/navikt/nom/security/dependabot/654 -->
     </properties>
 
     <dependencyManagement>
