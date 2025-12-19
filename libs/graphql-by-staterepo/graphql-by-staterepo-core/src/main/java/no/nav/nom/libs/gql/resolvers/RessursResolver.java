@@ -38,8 +38,12 @@ public class RessursResolver {
         }
 
         var tlf = search.getTelefonNummer();
-        if(tlf != null) {
-            return ressursStateRepository.getAll().stream().filter(it -> it.jobbtelefon().nummer().equals(tlf)).map(MappingUtils::toRessurs).findFirst();
+        if (tlf != null) {
+            return ressursStateRepository.getAll().stream()
+                .filter(ressursState -> {
+                    var jobbTelefon = ressursState.jobbtelefon();
+                    return jobbTelefon != null && jobbTelefon.nummer().equals(tlf);
+                }).map(MappingUtils::toRessurs).findFirst();
         }
         return Optional.empty();
 
