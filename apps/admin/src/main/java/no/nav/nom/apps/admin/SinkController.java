@@ -9,6 +9,7 @@ import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
 import no.nav.nom.apps.admin.events.hendelser.HendelserApiStateRepository;
 import no.nav.nom.apps.admin.events.orgenhet.api.OrgEnhetStateApiRepository;
 import no.nav.nom.apps.admin.events.orgenhet.eventsource.OrgenhetEvtsrcRepository;
+import no.nav.nom.apps.admin.events.orgenhetleder.eventsource.OrgenhetLederEvtsrcRepository;
 import no.nav.nom.apps.admin.events.orgtilknytning.deadletter.DeadLetterRepository;
 import no.nav.nom.apps.admin.events.orgtilknytning.eventsource.OrgtilknytningEvtsrcRepository;
 import no.nav.nom.apps.admin.events.ressurs.api.RessursApiStateRepository;
@@ -19,6 +20,7 @@ import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +52,7 @@ public class SinkController {
     private final OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository;
     private final RessursHendelseApiRepository ressursHendelseApiRepository;
     private final DeadLetterRepository deadLetterRepository;
+    private final OrgenhetLederEvtsrcRepository orgenhetLederEvtsrcRepository;
 
     public SinkController(
         RessursEvtsrcRepository ressursEvtsrcRepository,
@@ -60,7 +63,8 @@ public class SinkController {
         HendelserApiStateRepository hendelserApiStateRepository,
         OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository,
         RessursHendelseApiRepository ressursHendelseApiRepository,
-        DeadLetterRepository deadLetterRepository
+        DeadLetterRepository deadLetterRepository,
+        OrgenhetLederEvtsrcRepository orgenhetLederEvtsrcRepository
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
@@ -71,6 +75,7 @@ public class SinkController {
         this.orgtilknytningEvtsrcRepository = orgtilknytningEvtsrcRepository;
         this.ressursHendelseApiRepository = ressursHendelseApiRepository;
         this.deadLetterRepository = deadLetterRepository;
+        this.orgenhetLederEvtsrcRepository = orgenhetLederEvtsrcRepository;
     }
 
 
@@ -87,6 +92,15 @@ public class SinkController {
     public List<OrgEnhetEvent> getOrgEnhetEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetEvent> events = orgenhetEvtsrcRepository.getOrgenhetEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
+
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+    }
+
+    @GetMapping(value = "/orgenhetLederEvents")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
+    public List<OrgEnhetLederEvent> getOrgEnhetLederEvents(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<OrgEnhetLederEvent> events = orgenhetLederEvtsrcRepository.getOrgenhetLederEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
 
         return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
