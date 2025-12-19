@@ -65,6 +65,15 @@ export const Route = createFileRoute("/state")({
             }
             value="/state/orgtilknytning"
           />
+          <Tabs.Tab
+            label="Orgenhet leder"
+            onClick={() =>
+              navigate({
+                to: "/state/orgenhet-leder",
+              })
+            }
+            value="/state/orgenhet-leder"
+          />
         </Tabs.List>
         <Outlet />
       </Tabs>

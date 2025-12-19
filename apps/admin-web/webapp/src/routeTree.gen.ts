@@ -20,6 +20,7 @@ import { Route as SinksIndexRouteImport } from './routes/sinks.index'
 import { Route as StateRessursRouteImport } from './routes/state.ressurs'
 import { Route as StateOrgtilknytningRouteImport } from './routes/state.orgtilknytning'
 import { Route as StateOrgenhetRouteImport } from './routes/state.orgenhet'
+import { Route as StateOrgenhetLederRouteImport } from './routes/state.orgenhet-leder'
 import { Route as StateOrganiseringRouteImport } from './routes/state.organisering'
 import { Route as SinksTilgangRouteImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursRouteImport } from './routes/sinks.ressurs'
@@ -90,6 +91,11 @@ const StateOrgtilknytningRoute = StateOrgtilknytningRouteImport.update({
 const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
   id: '/orgenhet',
   path: '/orgenhet',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrgenhetLederRoute = StateOrgenhetLederRouteImport.update({
+  id: '/orgenhet-leder',
+  path: '/orgenhet-leder',
   getParentRoute: () => StateRoute,
 } as any)
 const StateOrganiseringRoute = StateOrganiseringRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks/': typeof SinksIndexRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks': typeof SinksIndexRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks/': typeof SinksIndexRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks/'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks/'
@@ -435,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/orgenhet'
       fullPath: '/state/orgenhet'
       preLoaderRoute: typeof StateOrgenhetRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/orgenhet-leder': {
+      id: '/state/orgenhet-leder'
+      path: '/orgenhet-leder'
+      fullPath: '/state/orgenhet-leder'
+      preLoaderRoute: typeof StateOrgenhetLederRouteImport
       parentRoute: typeof StateRoute
     }
     '/state/organisering': {

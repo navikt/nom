@@ -16,6 +16,7 @@ import type {
   ImportedRemedyUser,
   MasteredRessursDTO,
   OrgEnhetArbeidsomraadeInfo,
+  OrgEnhetLederState,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetState,
@@ -150,6 +151,18 @@ export function getRessursStatesOptions(search: searchType) {
           `${API_BASE_URL}/states/ressurs?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<RessursState[]>(),
+  });
+}
+
+export function getOrgenhetLederStatesOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "ORGENHET-LEDER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/states/orgenhet-leder?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrgEnhetLederState[]>(),
   });
 }
 
