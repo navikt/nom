@@ -4,7 +4,7 @@ import { createFileRoute, Link as TanStackLink } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import {getOrgenhetLederStatesOptions, searchSchema} from "~/api/queries.ts";
+import { getOrgenhetLederStatesOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { NomLink } from "~/components/NomLink.tsx";
@@ -69,7 +69,10 @@ function OrgenhetLederPagePage() {
         {data.map((orgenhetleder) => (
           <Table.Row key={orgenhetleder.fid}>
             <Table.DataCell>
-              <CopyButton copyText={orgenhetleder.fid} text={orgenhetleder.fid} />
+              <CopyButton
+                copyText={orgenhetleder.fid}
+                text={orgenhetleder.fid}
+              />
             </Table.DataCell>
             <Table.HeaderCell scope="row">
               <NomLink path={`ressurs/${orgenhetleder.navident}`}>
