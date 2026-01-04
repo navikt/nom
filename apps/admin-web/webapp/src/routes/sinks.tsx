@@ -86,6 +86,11 @@ export const Route = createFileRoute("/sinks")({
             onClick={() => navigate({ to: "/sinks/dead-letter", search })}
             value={"/sinks/dead-letter"}
           />
+          <Tabs.Tab
+            label="Orgenhet leder"
+            onClick={() => navigate({ to: "/sinks/orgenhet-leder", search })}
+            value="/sinks/orgenhet-leder"
+          />
         </Tabs.List>
         <Outlet />
       </Tabs>

@@ -102,6 +102,18 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
+export function getOrgenhetLederEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "ORGENHETLEDER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/orgenhetLederEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<KafkaEvent[]>(),
+  });
+}
+
 export function getOrgtilknytningEventsOptions(search: searchType) {
   return queryOptions({
     queryKey: ["EVENTS", "ORGTILKNYTNING", search],
