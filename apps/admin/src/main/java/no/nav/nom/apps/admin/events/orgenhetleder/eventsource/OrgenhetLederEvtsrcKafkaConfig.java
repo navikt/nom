@@ -21,7 +21,7 @@ import java.time.Duration;
 public class OrgenhetLederEvtsrcKafkaConfig {
 
     @Bean
-    ConsumerFactory<String, OrgEnhetLederEvent> orgenhetEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, OrgEnhetLederEvent> orgenhetLederEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
