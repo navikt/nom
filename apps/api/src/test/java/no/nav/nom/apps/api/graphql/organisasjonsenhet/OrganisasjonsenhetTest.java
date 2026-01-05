@@ -414,6 +414,32 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asText());
     }
 
+
+    @Test
+    @DisplayName("Hent flere orgenheter basert på liste av IDer")
+    void scenario44(){
+        var targetOrgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn1").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+        var ignoreOrgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavn2").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(targetOrgenhet);
+        orgEnhetStateRepository.update(ignoreOrgenhet);
+
+        // language=graphql
+        var graphqlQry = """
+                        query X{
+                            orgEnheter(where: {ider: ["ID_1"]}) {
+                                code
+                                id
+                            }
+                        }
+                        """;
+
+        final var response = gqlUtil.postForQuery(graphqlQry);
+        var x = response.path("orgEnheter").entityList(Object.class).hasSize(1);
+
+
+    }
+
     private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {
         return organisasjonsenhetResult.stream()
             .filter(e -> e.getId().equals(id))

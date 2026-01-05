@@ -12,13 +12,13 @@ public class OrgEnheterSearch {
     private final Set<String> agressoIder;
     private final Set<String> orgenhetskategori;
     private final String orgNiv;
-    private final Set<String> IDer;
+    private final Set<String> ider;
 
-    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, String orgNiv, Set<String> IDer) {
+    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, String orgNiv, Set<String> ider) {
         this.agressoIder = agressoIder;
         this.orgenhetskategori = orgenhetskategori;
         this.orgNiv = orgNiv;
-        this.IDer = IDer;
+        this.ider = ider;
     }
 
     public Set<String> getAgressoIder() {
@@ -34,7 +34,7 @@ public class OrgEnheterSearch {
     }
 
     public Set<String> getIder() {
-        return this.IDer;
+        return this.ider;
     }
 
     public Set<String> resolveAgressoIder() {
@@ -78,12 +78,12 @@ public class OrgEnheterSearch {
         return Objects.equals(this.agressoIder, that.agressoIder) &&
             Objects.equals(this.orgenhetskategori, that.orgenhetskategori) &&
             Objects.equals(this.orgNiv, that.orgNiv) &&
-            Objects.equals(this.IDer, that.IDer);
+            Objects.equals(this.ider, that.ider);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agressoIder, orgenhetskategori, orgNiv, IDer);
+        return Objects.hash(agressoIder, orgenhetskategori, orgNiv, ider);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class OrgEnheterSearch {
             "agressoIder=" + agressoIder + ", " +
             "orgenhetskategori=" + orgenhetskategori + ", " +
             "orgNiv=" + orgNiv + ", " +
-            "IDer=" + IDer + ']';
+            "IDer=" + ider + ']';
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
