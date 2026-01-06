@@ -61,7 +61,7 @@ export function RemedyErrorState() {
             <Table.Row key={errorState.errorId}>
               <Table.DataCell>{errorState.errorId}</Table.DataCell>
               <Table.DataCell>
-                <NomLink path={`/ressurs/${errorState.navident}`}>
+                <NomLink path={`ressurs/${errorState.navident}`}>
                   {errorState.navident}
                 </NomLink>
               </Table.DataCell>

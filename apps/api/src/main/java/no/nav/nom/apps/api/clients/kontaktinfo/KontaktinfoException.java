@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.clients.kontaktinfo;
 
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
+
+import no.nav.nom.libs.gql.ErrorCode;
 
 public class KontaktinfoException extends RuntimeException {
 

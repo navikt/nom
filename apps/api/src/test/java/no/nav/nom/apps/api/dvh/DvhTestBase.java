@@ -13,17 +13,21 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 @Slf4j
 @ActiveProfiles("test")
 @ConfigurationPropertiesScan
 @SpringBootTest
 @ContextConfiguration(classes= DvhTestConfig.class, initializers = MockOAuth2ServerInitializer.class)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 public class DvhTestBase {
     @Autowired
     protected DvhRestConsumer dvhRestConsumer;

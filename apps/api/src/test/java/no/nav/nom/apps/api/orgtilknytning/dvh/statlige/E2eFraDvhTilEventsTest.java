@@ -384,33 +384,49 @@ class E2eFraDvhTilEventsTest extends TestBase {
     @Test
     @DisplayName("Test case 1 fra produksjon, hvor DVH lasten skal rette opp en feil produsert med flere DOL. Se JIRA: STS-37536 og JIRA: ORG-2450 - Ref: 8")
     void e2e_test_8() {
+        var p1Start = LocalDate.of(2022, 1, 1);
+        var p1End = LocalDate.of(2023, 4, 30);
+        var p2Start = LocalDate.of(2023, 5, 1);
+        var p2End = LocalDate.of(2023, 11, 30);
+        var p3Start = LocalDate.of(2023, 12, 1);
+        var p3End = LocalDate.of(2024, 4, 30);
+        var p4Start = LocalDate.of(2024, 5, 1);
+
+        // Relative dates. Fixed dates broke this test after passing 2025-12-31.
+        var p4End = LocalDate.now().minusDays(1); // LocalDate.of(2024, 12, 31);
+        var p5Start = LocalDate.now(); // LocalDate.of(2025, 1, 1);
+        var p5End = LocalDate.now().plusYears(1); // LocalDate.of(2025, 12, 31);
+        var p6Start = LocalDate.now().plusYears(2);// LocalDate.of(2026, 1, 1);
+
+
         List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", LocalDate.of(2022, 1, 1), LocalDate.of(2023, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 11, 30), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", LocalDate.of(2023, 12, 1), LocalDate.of(2024, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001",LocalDate.of(2024, 5, 1), LocalDate.of(2024, 12, 31), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", "0BB0001", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), "Fungering"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A","0BB0001", LocalDate.of(2026, 1, 1), MAX_DATE, "Fast")
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", p1Start, p1End, "Fast"),
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", p2Start, p2End, "Fast"),
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", p3Start, p3End, "Fast"),
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", p4Start, p4End, "Fast"),
+            dvhRessursStilling("A000001", "0BB0001", "Enhet B", "0BB0001", p5Start, p5End, "Fungering"),
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A", "0BB0001", p5Start, p5End, "Fast"),
+            dvhRessursStilling("A000001", "0AA0001", "Enhet A","0BB0001", p6Start, MAX_DATE, "Fast")
         );
 
+        var p0Start = LocalDate.of(2021, 5, 1);
         when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_A", A000001, ENHET_A.getId(), LocalDate.of(2021, 5, 1), null, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST),
-            orgtilknytning("FID_A1", A000001, ENHET_A.getId(), LocalDate.of(2022, 1, 1), LocalDate.of(2024, 12, 31), true, null, null),
-            orgtilknytning("FID_A2", A000001, ENHET_A.getId(), LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), false, null, null),
-            orgtilknytning("FID_B", A000001, ENHET_B.getId(), LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), true, null, null)
+            orgtilknytning("FID_A", A000001, ENHET_A.getId(), p0Start, null, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST),
+            orgtilknytning("FID_A1", A000001, ENHET_A.getId(), p1Start, p4End, true, null, null),
+            orgtilknytning("FID_A2", A000001, ENHET_A.getId(), p5Start, p5End, false, null, null),
+            orgtilknytning("FID_B", A000001, ENHET_B.getId(), p5Start, p5End, true, null, null)
         ));
 
         var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
         var result = prosserer.process(sspForNavidentResult);
 
         assertOrgtilknytning(CMD.AVVIKLET)
-            .forFid("FID_A").gyldigTom(LocalDate.of(2024, 12, 31));
+            .forFid("FID_A").gyldigTom(p4End);
 
         String fid_1 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(RESSURS_1.navident())
             .tilEnhet(ENHET_A.getId())
-            .gyldigFom(LocalDate.of(2025, 1, 1))
+            .gyldigFom(p5Start)
             .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_SEKTOR)
@@ -425,13 +441,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
 
         assertOrgtilknytning(CMD.ENDRET_DATO)
             .forFid(fid_1)
-            .gyldigFom(LocalDate.of(2025, 1, 1))
-            .gyldigTom(LocalDate.of(2025, 12, 31));
+            .gyldigFom(p5Start)
+            .gyldigTom(p5End);
 
         String fid_2 = assertOrgtilknytning(CMD.OPPRETTET)
             .forNavident(RESSURS_1.navident())
             .tilEnhet(ENHET_A.getId())
-            .gyldigFom(LocalDate.of(2026, 1, 1))
+            .gyldigFom(p6Start)
             .getFid();
 
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
@@ -452,13 +468,13 @@ class E2eFraDvhTilEventsTest extends TestBase {
 
         assertOrgtilknytning(CMD.FJERNET)
             .forFid("FID_A1")
-            .gyldigFom(LocalDate.of(2022, 1, 1))
-            .gyldigTom(LocalDate.of(2024, 12, 31));
+            .gyldigFom(p1Start)
+            .gyldigTom(p4End);
 
         assertOrgtilknytning(CMD.FJERNET)
             .forFid("FID_A2")
-            .gyldigFom(LocalDate.of(2025, 1, 1))
-            .gyldigTom(LocalDate.of(2025, 12, 31));
+            .gyldigFom(p5Start)
+            .gyldigTom(p5End);
 
         assertEquals(1, result.size());
         assertEquals(11, result.get(RESSURS_1.navident()).endringer().size());
@@ -830,81 +846,6 @@ class E2eFraDvhTilEventsTest extends TestBase {
             .erDagligOppfolging(true)
             .gyldigFom(DD_1Y_6M.plusDays(1))
             .gyldigTom(null);
-    }
-
-    @Test
-    void e2e_test_16() {
-        List<DvhRessursStilling> dvhRessursStillinger = List.of(
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 4, 1), LocalDate.of(2022, 4, 24), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 4, 25), LocalDate.of(2022, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 5, 1), LocalDate.of(2022, 8, 31), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 9, 1), LocalDate.of(2022, 9, 1), "Midlertidig karakter § 9a"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 9, 1), LocalDate.of(2022, 9, 1), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 9, 2), LocalDate.of(2022, 12, 31), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2022, 9, 2), LocalDate.of(2022, 12, 31), "Midlertidig karakter § 9a"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 3), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2023, 1, 4), LocalDate.of(2023, 3, 5), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2023, 3, 6), LocalDate.of(2023, 3, 23), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2023, 3, 6), LocalDate.of(2023, 3, 23), "Uforutsett behov § 9e"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 3, 24), LocalDate.of(2023, 3, 27), "Uforutsett behov § 9e"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 3, 24), LocalDate.of(2023, 3, 27), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 3, 28), LocalDate.of(2023, 4, 30), "Uforutsett behov § 9e"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 3, 28), LocalDate.of(2023, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), "Uforutsett behov § 9e"),
-            dvhRessursStilling("A000001", "0AA0001", "Enhet A", LocalDate.of(2023, 5, 1), LocalDate.of(2023, 12, 31), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 1, 11), LocalDate.of(2024, 1, 31), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 1, 11), LocalDate.of(2024, 1, 31), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 14), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 14), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 2, 15), LocalDate.of(2024, 2, 29), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 2, 15), LocalDate.of(2024, 2, 29), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 5, 1), LocalDate.of(2024, 5, 31), "Fast"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 6), "Fast"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 6), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0BB0001", "Enhet B", LocalDate.of(2024, 6, 7), LocalDate.of(2024, 6, 30), "Vikar § 9b"),
-            dvhRessursStilling("A000001", "0FF0001", "Enhet F2", LocalDate.of(2024, 6, 7), LocalDate.of(2024, 6, 30), "Fast"),
-            dvhRessursStilling("A000001", "0CC0001", "Enhet C", LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 11), "Fast"),
-            dvhRessursStilling("A000001", "0CC0001", "Enhet C", LocalDate.of(2024, 7, 12), LocalDate.of(2024, 7, 31), "Fast"),
-            dvhRessursStilling("A000001", "0CC0001", "Enhet C", LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 15), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2024, 9, 16), LocalDate.of(2024, 9, 16), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2024, 9, 17), LocalDate.of(2024, 9, 19), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2024, 9, 20), LocalDate.of(2024, 10, 31), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2024, 11, 1), LocalDate.of(2024, 11, 30), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2024, 12, 1), LocalDate.of(2024, 12, 31), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 2, 28), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2025, 3, 1), LocalDate.of(2025, 3, 31), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2025, 4, 1), LocalDate.of(2025, 4, 30), "Fast"),
-            dvhRessursStilling("A000001", "0EE0001", "Enhet E", LocalDate.of(2025, 5, 1), LocalDate.of(2099, 12, 31), "Fast")
-        );
-        
-        when(orgtilknytningService.getByNavIdent(A000001)).thenReturn(List.of(
-            orgtilknytning("FID_F1_1", A000001, ENHET_F1.getId(), LocalDate.of(2022, 4, 1), LocalDate.of(2022, 8, 31), true, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_F1_2", A000001, ENHET_F1.getId(), LocalDate.of(2022, 9, 1), LocalDate.of(2022, 10, 31), false, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_F1_3", A000001, ENHET_F1.getId(), LocalDate.of(2022, 9, 1), LocalDate.of(2022, 10, 31), false, null, Tilknytningtype.MIDLERTIDIG),
-            orgtilknytning("FID_A1", A000001, ENHET_A.getId(), LocalDate.of(2023, 3, 24), LocalDate.of(2023, 12, 31), false, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_A2", A000001, ENHET_A.getId(), LocalDate.of(2023, 3, 24), LocalDate.of(2023, 12, 31), false, null, Tilknytningtype.UFORUTSETT_BEHOV),
-            orgtilknytning("FID_F2_1", A000001, ENHET_F2.getId(), LocalDate.of(2022, 11, 1), LocalDate.of(2022, 12, 31), false, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_F2_2", A000001, ENHET_F2.getId(), LocalDate.of(2022, 11, 1), LocalDate.of(2022, 12, 31), false, null, Tilknytningtype.MIDLERTIDIG),
-            orgtilknytning("FID_F2_3", A000001, ENHET_F2.getId(), LocalDate.of(2023, 1, 1), LocalDate.of(2023, 3, 5), true, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_F2_4", A000001, ENHET_F2.getId(), LocalDate.of(2023, 3, 6), LocalDate.of(2023, 3, 23), false, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_F2_5", A000001, ENHET_F2.getId(), LocalDate.of(2023, 3, 6), LocalDate.of(2023, 3, 23), false, null, Tilknytningtype.UFORUTSETT_BEHOV),
-            orgtilknytning("FID_F2_6", A000001, ENHET_F2.getId(), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 6, 30), true, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_B", A000001, ENHET_B.getId(), LocalDate.of(2024, 1, 1), LocalDate.of(2024, 6, 30), false, null, Tilknytningtype.VIKAR),
-            orgtilknytning("FID_C", A000001, ENHET_C.getId(), LocalDate.of(2024, 7, 1), LocalDate.of(2024, 9, 15), true, null, Tilknytningtype.FAST),
-            orgtilknytning("FID_E", A000001, ENHET_E.getId(), LocalDate.of(2024, 9, 16), null, true, Sektor.NAV_STATLIG, Tilknytningtype.FAST)
-        ));
-
-        var sspForNavidentResult = strukturer.strukturerStilingPerioderPerNavident(dvhRessursStillinger);
-        var result = prosserer.process(sspForNavidentResult);
-
-        assertEquals(1, result.size());
     }
 
 

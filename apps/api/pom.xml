@@ -35,6 +35,12 @@
             <groupId>no.nav.nom</groupId>
             <artifactId>nom-state</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>graphql-by-staterepo-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -219,12 +225,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-test</artifactId>
             <scope>test</scope>
@@ -238,6 +238,7 @@
         <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot</artifactId>
+            <version>${wiremock-spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

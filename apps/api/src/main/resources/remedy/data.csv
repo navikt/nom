@@ -128,7 +128,6 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 101400;1014;ORGNIV3;Midt-Agder;Beholdt;;;JA;101400;ORGNIV3;leggInn;
 103400;1034;ORGNIV3;Hægebostad;Beholdt;;;JA;103400;ORGNIV3;ka920a;28.11.2025 - lagt inn nytt ifm. gjennopprettelse el rydding av Nav Hægebostad 
 103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
-1080143;1087;AGRESSOORGENHET;Agder Penger;Beholdt;;gu485r;JA;1080143;ORGENHET;gu485r;26.05.2025 Lagt inn midl mapping til 1087 på Agder Penger.
 1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;;JA;109900;ORGNIV3;;28.02.2025 fjernet nomId-mappingen. Mapper riktig via agressoID
 109610;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;109610;ORGNIV3;leggInn;
 119100;1100;ORGNIV3;Rogaland Fylkeskontor;Opp til ORGNIV2;11;hy244v;JA;11;ORGNIV2;hy244v;

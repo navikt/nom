@@ -218,7 +218,25 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: dev-gcp
+        - application: kabal-innstillinger-neon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabal-innstillinger-argon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabal-innstillinger-e2e
+          namespace: klage
+          cluster: dev-gcp
         - application: kabal-api
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabal-api-neon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabal-api-argon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabal-api-e2e
           namespace: klage
           cluster: dev-gcp
         - application: etterlevelse-backend
@@ -270,6 +288,15 @@ spec:
           namespace: oppgavehandtering
           cluster: dev-gcp
         - application: kabin-api
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabin-api-neon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabin-api-argon
+          namespace: klage
+          cluster: dev-gcp
+        - application: kabin-api-e2e
           namespace: klage
           cluster: dev-gcp
         - application: modia-robot-api
@@ -335,4 +362,4 @@ spec:
     buckets:
       - name: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
         lifecycleCondition:
-          age: 14        
+          age: 14

@@ -5,12 +5,15 @@ import no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams;
 import no.nav.nom.apps.admin.dto.OrgtilknytningStateSearchParams;
 import no.nav.nom.apps.admin.dto.RessursSearchParams;
 import no.nav.nom.apps.admin.dto.ressurs.MasteredRessursDTO;
+import no.nav.nom.apps.admin.dto.ressurs.OrgenhetLederStateSearchParams;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
@@ -28,6 +31,7 @@ import static no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams.organiseri
 import static no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams.orgenhetSearchFilter;
 import static no.nav.nom.apps.admin.dto.OrgtilknytningStateSearchParams.orgtilknytningStateSearchFilter;
 import static no.nav.nom.apps.admin.dto.RessursSearchParams.ressursSearchFilter;
+import static no.nav.nom.apps.admin.dto.ressurs.OrgenhetLederStateSearchParams.orgenhetLederSearchFilter;
 import static no.nav.nom.apps.admin.utils.safeSubList;
 
 @RestController
@@ -41,6 +45,7 @@ public class StateController {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
 
     public StateController(
@@ -48,13 +53,15 @@ public class StateController {
         OrgEnhetStateRepository orgEnhetStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrganiseringStateRepository organiseringStateRepository,
-        MasteredRessursStateRepository masteredRessursStateRepository
+        MasteredRessursStateRepository masteredRessursStateRepository,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
     }
 
     @GetMapping(value = "/ressurs")
@@ -115,4 +122,14 @@ public class StateController {
 
         return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
+
+    @GetMapping(value = "/orgenhet-leder")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
+    public List<OrgEnhetLederState> getOrgenhetLederStates(@Valid OrgenhetLederStateSearchParams orgenhetLederStateSearchParams) {
+        int fromOffset = orgenhetLederStateSearchParams.getFromOffset();
+        var events = orgEnhetLederStateRepository.getAll().stream().filter(orgenhetLederSearchFilter(orgenhetLederStateSearchParams)).toList();
+
+        return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
+    }
+
 }

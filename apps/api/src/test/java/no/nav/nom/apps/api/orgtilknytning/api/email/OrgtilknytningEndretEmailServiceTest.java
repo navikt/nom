@@ -4,7 +4,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.common.DateUtils;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;

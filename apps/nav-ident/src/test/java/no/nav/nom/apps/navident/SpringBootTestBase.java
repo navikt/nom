@@ -10,13 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.MDC;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.util.UUID;
 
@@ -31,7 +32,10 @@ import static org.mockito.Mockito.when;
 @Import({TestRedisConfiguration.class, RestMdcAutoconfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 public abstract class SpringBootTestBase {
     @MockitoBean
     protected OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;

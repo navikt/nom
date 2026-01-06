@@ -140,64 +140,6 @@ export const kostnadsstedKeys = {
     [...kostnadsstedKeys.all, orgEnhetId] as const,
 };
 
-export const getAlleRessurserGraphql = {
-  gcTime: CACHE_FOR.anHour,
-  staleTime: CACHE_FOR.aMinute * 5,
-  queryKey: ressurserGraphqlKeys.all,
-  queryFn: async () =>
-    (
-      await axios.post<RessurserWithMetadataGraphqlResponseWrapper>(
-        `${NOM_API_BASE_PATH}/graphql`,
-        {
-          operationName: "HentAlleRessurser",
-          query: `
-            query HentAlleRessurser {
-                ressurserWithMetadata {
-                    ressurs {
-                        navident,
-                        orgTilknytning{
-                            orgEnhet {
-                                id
-                                navn
-                            }
-                            gyldigFom
-                            gyldigTom
-                        }
-                        ledere {
-                            ressurs {
-                                navident
-                                visningsnavn
-                                
-                            }
-                            gyldigFom
-                            gyldigTom
-                        }
-                        visningsnavn
-                        sektor
-                        sluttdato
-                        startdato
-                    }
-                    opprettetAv
-                    opprettetDato
-                    endretAv
-                    endretDato
-                    endringEvent
-                }
-            }
-            `,
-          variables: {},
-        },
-      )
-    ).data.data.ressurserWithMetadata.map((ressursWithMetadata) => ({
-      ...ressursWithMetadata.ressurs,
-      opprettetAv: ressursWithMetadata.opprettetAv,
-      opprettetDato: ressursWithMetadata.opprettetDato,
-      endretAv: ressursWithMetadata.endretAv,
-      endretDato: ressursWithMetadata.endretDato,
-      endringEvent: ressursWithMetadata.endringEvent,
-    })),
-};
-
 export const getRessurs = {
   queryKey: (navident: string) => ressurserKeys.id(navident),
   queryFn: async (navident: string) =>

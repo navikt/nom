@@ -3,23 +3,16 @@ package no.nav.nom.apps.api.graphql.search;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
-import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,31 +27,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles({"GraphQLTest", "test"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
+@ActiveProfiles({"GraphQLTest", "test","localgql"})
 @DisplayName("GraphQL - Search endepunkter")
-public class SearchTest {
-    @Autowired
-    protected GraphQLTestUtil gqlUtil;
+public class SearchTest extends GraphQlTestBase {
 
-    @Autowired
-    private RessursStateRepository ressursStateRepository;
-
-    @Autowired
-    private OrgEnhetStateRepository orgEnhetStateRepository;
-
-    @Autowired
-    private LuceneService luceneService;
-
-    @Autowired
-    DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
     @BeforeEach
     void setup() {
         ressursStateRepository.clear();
         luceneService.clear();
-        dvhStartupLoadMonitor.setCompleted();
     }
 
     @Test

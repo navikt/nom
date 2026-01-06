@@ -219,6 +219,17 @@ export interface OrgEnhetState {
   agressoOrgenhetType?: string;
 }
 
+export interface OrgEnhetLederState {
+  fid: string;
+  navident: string;
+  orgEnhetId?: string;
+  /** @format date */
+  startdato?: string;
+  /** @format date */
+  sluttdato?: string;
+  sistEndretAv?: string;
+}
+
 export interface OrganiseringStateSearchParams {
   /**
    * @format int32

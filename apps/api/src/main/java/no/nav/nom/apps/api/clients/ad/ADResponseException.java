@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.clients.ad;
 
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.libs.gql.ErrorCode;
 import no.nav.nom.contract.ad.AdRessurser;
 import org.springframework.http.ResponseEntity;
 

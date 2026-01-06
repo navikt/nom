@@ -33,7 +33,7 @@
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-63.version>3.13.3</hypersistence-utils-hibernate-63.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
-        <unleash.version>11.1.1</unleash.version>
+        <unleash.version>11.2.0</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
@@ -43,7 +43,6 @@
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
         <org.wiremock-spring-boot.version>4.0.8</org.wiremock-spring-boot.version>
-        <spring-cloud-contract-wiremock.version>4.3.0</spring-cloud-contract-wiremock.version>
         <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.3.Final</hibernate-validator.version>
@@ -53,12 +52,14 @@
         <postgresql.version>42.7.8</postgresql.version>
         <microsoft-graph.version>6.58.0</microsoft-graph.version>
         <azure-identity.version>1.18.1</azure-identity.version>
-        <caffeine.version>3.2.2</caffeine.version>
+        <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>5.5.1</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
+        <wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
 
 
         <commons-io.version>2.21.0</commons-io.version> <!-- versjonskonflikt og https://github.com/navikt/nom/security/dependabot/172 -->
+        <reactor-netty-http-codec.version>4.1.130.Final</reactor-netty-http-codec.version>  <!-- Overstyring av reactor-netty versjon for å fikse https://github.com/navikt/nom/security/dependabot/654 -->
     </properties>
 
     <dependencyManagement>
@@ -73,6 +74,12 @@
                         <artifactId>org.osgi.core</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>    <!-- Overstyring av reactor-netty versjon for å fikse https://github.com/navikt/nom/security/dependabot/654 -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>${reactor-netty-http-codec.version}</version>
             </dependency>
 
             <!-- Ordinære dependencies ikke definert i Spring starter -->
@@ -111,6 +118,12 @@
             <dependency>
                 <groupId>no.nav.nom</groupId>
                 <artifactId>lucene-wrapper-nomdomain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.nom</groupId>
+                <artifactId>graphql-by-staterepo-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -270,12 +283,6 @@
                 <groupId>no.nav.security</groupId>
                 <artifactId>mock-oauth2-server</artifactId>
                 <version>${mock-oauth2-server.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-contract-wiremock</artifactId>
-                <version>${spring-cloud-contract-wiremock.version}</version>
             </dependency>
 
             <dependency>

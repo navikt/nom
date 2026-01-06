@@ -9,11 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
 import java.time.LocalDate;
 import java.util.TimeZone;
@@ -29,7 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class, WebClientAutoConfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
 @EnableConfigurationProperties(value = AppProperties.class)
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock({
+    @ConfigureWireMock(
+        filesUnderDirectory = "src/test/resources")
+})
 class DvhOrdsServiceTest {
     @MockitoBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;

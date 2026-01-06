@@ -13,13 +13,13 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.wiremock.spring.EnableWireMock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
     classes = NomRemedyIntegrasjonStarter.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@AutoConfigureWireMock(port = 0)
+@EnableWireMock
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class}, classes = {TestConfiguration.class})
 @EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource", "org.nom.orgtilknytning-eventsource"}, controlledShutdown = true)
 public abstract class TestBase {
