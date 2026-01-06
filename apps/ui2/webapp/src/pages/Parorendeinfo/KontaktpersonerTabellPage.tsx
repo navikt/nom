@@ -254,8 +254,8 @@ const mockKontaktpersoner: Kontaktperson[] = [
     kontaktpersonPrioritet: "",
   },
   {
-    navident: "T123457",
-    navn: "Testperson 3",
+    navident: "K121212",
+    navn: "ATestperson 99",
     jobbtelefon: "4799887766",
     privattelefon: "",
     kontaktpersonNavn: "BDerp Derpeses",
@@ -274,14 +274,14 @@ const mockKontaktpersoner: Kontaktperson[] = [
     kontaktpersonPrioritet: "",
   },
   {
-    navident: "T123459",
-    navn: "Testperson 2",
+    navident: "K121212",
+    navn: "ATestperson 99",
     jobbtelefon: "4712312312",
     privattelefon: "",
     kontaktpersonNavn: "",
     kontaktpersonRelasjon: "",
     kontaktpersonTelefonnummer: "",
-    kontaktpersonPrioritet: "",
+    kontaktpersonPrioritet: "3",
   },
   {
     navident: "K121212",
