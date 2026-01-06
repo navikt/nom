@@ -1,0 +1,116 @@
+scalar Date
+scalar DateTime
+scalar JSON
+
+type Query {
+    search(term: String!, ressursFilter: RessursSearchFilter, orgEnhetFilter: OrgEnhetSearchFilter): [SearchResult!]!
+    searchRessurs(term: String!, filter: RessursSearchFilter): [Ressurs!]!
+    searchOrgEnhet(term: String!, filter: OrgEnhetSearchFilter): [OrgEnhet!]!
+    organisasjonsenhet(where: OrgEnhetSearch!): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")
+    orgEnhet(where: OrgEnhetSearch!): OrgEnhet
+    organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
+    orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
+    ressurs(where: RessursSearch!): Ressurs
+    ressurser(where: RessurserSearch): [RessursResult!]!
+}
+
+union SearchResult = Ressurs | OrgEnhet
+
+input RessursSearchFilter {
+    sektorSelection: SektorSelection! = ALLE
+    statusSelection: StatusSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+
+input OrgEnhetSearchFilter {
+    orgnivSelection: OrgnivSelection! = ALLE
+    gyldigTomSelection: GyldigTomSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+
+input OrgEnhetSearch {
+    agressoId: String
+    orgNiv: String
+    navn: String
+    id: String
+}
+
+input OrgEnheterSearch {
+    agressoIder: [String!]
+    orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
+    nomNivaa: [NomNivaa!]
+    orgNiv: String
+    ider: [String!]
+}
+
+input RessursSearch {
+    navIdent: String    @deprecated(reason: "navIdent er erstattet med navident")
+    navident: String
+    telefonNummer: String
+    personIdent: String     @deprecated(reason: "personIdent er erstattet med personident")
+    personident: String
+}
+
+input RessurserSearch {
+    navIdenter: [String!] @deprecated(reason: "navIdenter er erstattet med navidenter")
+    navidenter: [String!]
+    personIdenter: [String!] @deprecated(reason: "personIdenter er erstattet med personidenter")
+    personidenter: [String!]
+}
+
+type OrgEnhetResult {
+    code: ResultCode!
+    id: String!
+    nomId: String!
+    orgNiv: String
+    organisasjonsenhet: OrgEnhet    @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
+    orgEnhet: OrgEnhet
+}
+
+type RessursResult {
+    code: ResultCode!
+    id: String!
+    ressurs: Ressurs
+}
+
+enum ResultCode {
+    OK,
+    NOT_FOUND,
+    ERROR
+}
+
+enum SektorSelection{
+    EKSTERN,
+    STATLIG,
+    KOMMUNAL,
+    IKKE_EKSTERN,
+    ALLE,
+}
+
+enum StatusSelection{
+    AKTIV,
+    INAKTIV,
+    ALLE
+}
+
+enum GyldigTomSelection {
+    IKKE_PASSERT,
+    PASSERT,
+    ALLE
+}
+
+enum OrgnivSelection {
+    ORGNIV_ORGENHET,
+    IKKE_ORGNIV_ORGENHET,
+    ALLE
+}
+
+enum ResultLimit {
+    LIMIT_10,
+    LIMIT_20,
+    LIMIT_30,
+    LIMIT_50,
+    LIMIT_100,
+    LIMIT_200,
+    UNLIMITED,
+}

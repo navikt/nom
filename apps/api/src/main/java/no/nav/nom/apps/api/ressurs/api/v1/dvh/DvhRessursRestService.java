@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 import jakarta.persistence.metamodel.IdentifiableType;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;

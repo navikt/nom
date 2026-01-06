@@ -17,20 +17,22 @@ public class OrgEnhetResult {
 
     public OrgEnhetResult(OrgEnhet orgEnhet) {
         this.code = ResultCode.OK;
-        this.id = orgEnhet.getAgressoId();
+        this.id = orgEnhet.getAgressoInfo().getAgressoId();
         this.nomId = orgEnhet.getId();
-        this.orgNiv = orgEnhet.getOrgNiv();
+        this.orgNiv = orgEnhet.getAgressoInfo().getAgressoOrgNiv();
         this.organisasjonsenhet = orgEnhet;
         this.orgEnhet = orgEnhet;
     }
 
-    public OrgEnhetResult(String id, String orgNiv) {
-        this.code = ResultCode.NOT_FOUND;
-        this.id = id;
-        this.nomId = null;
-        this.orgNiv = orgNiv;
-        this.organisasjonsenhet = null;
-        this.orgEnhet = null;
+    public static OrgEnhetResult notFound(String id, String orgNiv) {
+        return new OrgEnhetResult(
+            ResultCode.NOT_FOUND,
+            id,
+            null,
+            orgNiv,
+            null,
+            null
+        );
     }
 
 }

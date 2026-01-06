@@ -2,9 +2,9 @@ package no.nav.nom.apps.api.common.testidenter;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.libs.gql.lucenesearch.LuceneService;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;

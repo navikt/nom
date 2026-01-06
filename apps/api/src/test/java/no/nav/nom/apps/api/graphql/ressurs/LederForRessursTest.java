@@ -3,49 +3,41 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
-import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
-import no.nav.nom.apps.api.orgenhetleder.LederForRessurs;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
-import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
-import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
+import no.nav.nom.apps.api.graphql.GraphQlTestBase;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
 
-@ActiveProfiles("GraphQLTest")
+@ActiveProfiles({"GraphQLTest","localgql"})
 @GraphQlTest
-@ContextConfiguration(classes = {GraphqlTestConfig.class}, initializers = MockOAuth2ServerInitializer.class)
 @DisplayName("GraphQL.HentLederForRessursFlereNivaer")
-public class LederForRessursTest {
-    @Autowired
-    protected GraphQLTestUtil gqlUtil;
+public class LederForRessursTest extends GraphQlTestBase {
 
-    @Autowired
-    RessursStateRepository ressursStateRepository;
-    @Autowired
-    OrgEnhetStateRepository orgEnhetStateRepository;
-    @Autowired
-    OrgtilknytningStateRepository orgtilknytningStateRepository;
-    @MockitoBean
-    OrgEnhetLederService orgEnhetLederService;
+
+    public LederForRessursTest() {
+
+    }
+
+    public void resetState(
+    ) {
+        orgEnhetLederStateRepository.clear();
+        orgEnhetStateRepository.clear();
+        orgtilknytningStateRepository.clear();
+        ressursStateRepository.clear();
+    }
 
     @Test
     @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet ")
     void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet() {
+        resetState(); // workaround da testene per nå kan påvirke hverandre (pga samme navident i bruk?)
         final String lederEnhetId = "idLederEnhet";
         final String lederEnhetNavn = "Leder sin enhet";
         final String lederEnhetNiva = "ORGNIV2";
@@ -70,8 +62,8 @@ public class LederForRessursTest {
                 .orgEnhetId(orgenhet.id()).build()
         );
 
-        var lederForRessurs = new LederForRessurs(leder.navident(), ledersEnhet.id(), LocalDate.now().minusYears(1), null, true);
-        doReturn(List.of(lederForRessurs)).when(orgEnhetLederService).getLedereForRessurs(ressurs.navident(), false);
+        var lederState = OrgEnhetLederState.builder().fid("??").orgEnhetId(orgenhet.id()).navident(leder.navident()).startdato(LocalDate.now().minusYears(1)).build();
+        orgEnhetLederStateRepository.update(lederState.fid(),lederState);
 
         final var response = gqlUtil.postForResource("ressurs/leder_over_rekursivt.graphql");
 

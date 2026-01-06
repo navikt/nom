@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.common;
 
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
-import no.nav.nom.apps.api.lucenesearch.LuceneService;
+import no.nav.nom.libs.gql.lucenesearch.LuceneService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;

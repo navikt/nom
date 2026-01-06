@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.TelefonType;
@@ -50,5 +51,29 @@ public class TestUtil {
             null,
             null
         );
+    }
+
+    public static RessursState.RessursStateBuilder createRessursStateBuilder(String suffix) {
+        return RessursState.builder()
+            .fid(PrefixedUlidCreator.createRessursUlid())
+            .personident("testPersonIdent" + suffix)
+            .navident("testNavIdent" + suffix)
+            .sektor(Sektor.NAV_STATLIG)
+            .visningsnavn(            new Visningsnavn(
+                "fornavn" + suffix,
+                Optional.of("mellomnavn" + suffix),
+                "etternavn" + suffix
+            ))
+            .jobbtelefon(new Jobbtelefon("12345678", TelefonType.NAV_TJENESTE_TELEFON))
+            .primaryTelefonnummer(null)
+            .sluttdato(null)
+            .startdato(LocalDate.now())
+            .primaryFysiskBrukersted(null)
+            .fysiskeBrukersteder(Collections.emptyList())
+            .identType(IdentType.STANDARD)
+            .sistEndretAv(null)
+            .tilknytningtype(null);
+
+
     }
 }

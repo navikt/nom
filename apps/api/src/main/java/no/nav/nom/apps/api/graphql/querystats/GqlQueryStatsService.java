@@ -2,8 +2,11 @@ package no.nav.nom.apps.api.graphql.querystats;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.graphql.common.metrics.FieldPathEntry;
+import no.nav.nom.apps.api.graphql.metrics.FieldPathEntry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class GqlQueryStatsService {
-    private static final int QUEUE_MONITOR_WARNING_SIZE = 200;
     private final Set<String> knownHashes = ConcurrentHashMap.newKeySet(); // simple caching
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -32,12 +34,18 @@ public class GqlQueryStatsService {
         GqlQueryRepository gqlQueryRepository,
         GqlQueryUsageRepository gqlQueryUsageRepository,
         GqlFieldUsageRepository gqlFieldUsageRepository,
+        @Autowired(required = false) MeterRegistry meterRegistry,
         @Qualifier("gqlStatsTaskExecutor") ThreadPoolTaskExecutor taskExecutor
     ) {
         this.gqlQueryRepository = gqlQueryRepository;
         this.gqlQueryUsageRepository = gqlQueryUsageRepository;
         this.gqlFieldUsageRepository = gqlFieldUsageRepository;
         this.taskExecutor = taskExecutor;
+
+        if(meterRegistry != null){
+            log.info("Registering gauge for " + GqlQueryStatsService.class.getName() + " field usage queue size");
+            Gauge.builder("nom_querystatsservice_queue_size", taskExecutor, it -> it.getQueueSize() + 0.0).register(meterRegistry);
+        }
     }
 
     public void registerQueryUsage(String query, String consumer) {
@@ -71,15 +79,7 @@ public class GqlQueryStatsService {
     }
 
     private void execute(Runnable task) {
-        monitorQueueSize();
         taskExecutor.execute(task);
-    }
-
-    private void monitorQueueSize() {
-        log.debug("GraphQL TaskExecutor queue current size: {}", taskExecutor.getQueueSize());
-        if (taskExecutor.getQueueSize() > QUEUE_MONITOR_WARNING_SIZE) {
-            log.error("GraphQL TaskExecutor queue size has passed {} items in queue. Current size {}", QUEUE_MONITOR_WARNING_SIZE, taskExecutor.getQueueSize());
-        }
     }
 
     private String getHashAndInsertIfMissing(String query) {

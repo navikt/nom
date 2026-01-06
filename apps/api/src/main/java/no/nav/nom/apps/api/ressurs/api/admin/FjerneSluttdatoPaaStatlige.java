@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -125,7 +126,7 @@ public class FjerneSluttdatoPaaStatlige {
                 fjernSluttDatoPaaSisteOTer(ressurs, inputMetadata);
             });
         }
-        return ResponseEntity.ok(result.toString());
+        return ResponseEntity.ok(HtmlUtils.htmlEscape(result.toString()));
     }
 
     List<Ressurs> getAlleStatligeMastrede() {

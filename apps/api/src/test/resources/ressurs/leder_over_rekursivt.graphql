@@ -1,5 +1,5 @@
 query {
-    ressurs(where: {navIdent: "testNavIdent1"}) {
+    ressurs(where: {navident: "testNavIdent1"}) {
         navident
         ledere {
             ressurs {

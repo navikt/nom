@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
@@ -10,11 +9,9 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDele
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
@@ -71,7 +68,6 @@ public class AuthorizedNavident {
     private final OrgEnhetLederService orgEnhetLederService;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
 
-    private final Unleash unleash;
     @Value("${app.orgenhet.nav}") String navOrgenhetId;
     @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
     @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
@@ -92,8 +88,7 @@ public class AuthorizedNavident {
             OrgenhetService orgenhetService,
             OrgEnhetLederService orgEnhetLederService,
             DvhRepository dvhRepository,
-            TilgangDelegertEmailService tilgangDelegertEmailService,
-            Unleash unleash
+            TilgangDelegertEmailService tilgangDelegertEmailService
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -103,7 +98,6 @@ public class AuthorizedNavident {
         this.orgenhetService = orgenhetService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
-        this.unleash = unleash;
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -178,13 +172,11 @@ public class AuthorizedNavident {
 
     public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
         var out = new HashMap<String, List<MinimalRessurs>>();
-        var toggleIncludeDriftsEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderdriftsenhet", true);
-        var toggleIncludeLinjeEnhet = unleash.isEnabled("nom-api.lederesomkanredigereorgenhet.inkluderlinjeenhet", true);
 
         for (var oeId : orgenhetIdSet) {
             var hierarkiOppover = stiTilRotForEnhet(oeId, true);
             var hierarkiOppoverFiltrertList = hierarkiOppover.stream()
-                .filter(hierarkiElementPredicate(toggleIncludeDriftsEnhet, toggleIncludeLinjeEnhet))
+                .filter(hierarkiElementPredicate())
                 .toList();
 
             var delegerteLedereNavidenter = hierarkiOppoverFiltrertList.stream()
@@ -208,7 +200,7 @@ public class AuthorizedNavident {
 
     }
 
-    private Predicate<String> hierarkiElementPredicate(boolean toggleIncludeDriftsEnhet, boolean toggleIncludeLinjeEnhet) {
+    private Predicate<String> hierarkiElementPredicate() {
         return orgenhetId -> {
             var orgenhet = this.orgenhetService.getById(orgenhetId).orElse(null);
             if (orgenhet == null) {
@@ -216,8 +208,8 @@ public class AuthorizedNavident {
             }
             var nomNivaa = orgenhet.getNomNivaa();
             return NomNivaa.ARBEIDSOMRAADE == nomNivaa
-                || NomNivaa.DRIFTSENHET == nomNivaa && toggleIncludeDriftsEnhet
-                || NomNivaa.LINJEENHET == nomNivaa && toggleIncludeLinjeEnhet
+                || NomNivaa.DRIFTSENHET == nomNivaa
+                || NomNivaa.LINJEENHET == nomNivaa
                 || null == nomNivaa; // nødvendig linje i testene. Nødvendig i miljø også?
 
         };

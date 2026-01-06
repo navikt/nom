@@ -11,6 +11,9 @@ app:
       apiEventTopic: org.nom.api-orgenhet-state-v3
       eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
       apiEventTopic-listener-id: nom-admin_apiOrgenhetListener_${HOSTNAME}
+    orgEnhetLeder:
+      eventsourceTopic: org.nom.orgenhet-leder-eventsource
+      eventsource-listener-id: nom-admin_orgenhetLederEvtsrcListener_${HOSTNAME}
     orgtilknytning:
       eventsourceTopic: org.nom.orgtilknytning-eventsource
       eventsource-listener-id: nom-admin_orgtilknytningEvtsrcListener_${HOSTNAME}

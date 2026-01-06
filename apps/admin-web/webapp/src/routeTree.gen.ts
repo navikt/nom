@@ -20,11 +20,13 @@ import { Route as SinksIndexRouteImport } from './routes/sinks.index'
 import { Route as StateRessursRouteImport } from './routes/state.ressurs'
 import { Route as StateOrgtilknytningRouteImport } from './routes/state.orgtilknytning'
 import { Route as StateOrgenhetRouteImport } from './routes/state.orgenhet'
+import { Route as StateOrgenhetLederRouteImport } from './routes/state.orgenhet-leder'
 import { Route as StateOrganiseringRouteImport } from './routes/state.organisering'
 import { Route as SinksTilgangRouteImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursRouteImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgtilknytningRouteImport } from './routes/sinks.orgtilknytning'
 import { Route as SinksOrgenhetRouteImport } from './routes/sinks.orgenhet'
+import { Route as SinksOrgenhetLederRouteImport } from './routes/sinks.orgenhet-leder'
 import { Route as SinksNomMasteredRouteImport } from './routes/sinks.nom-mastered'
 import { Route as SinksDeadLetterRouteImport } from './routes/sinks.dead-letter'
 import { Route as SinksApiRessursHendelserRouteImport } from './routes/sinks.api-ressurs-hendelser'
@@ -92,6 +94,11 @@ const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
   path: '/orgenhet',
   getParentRoute: () => StateRoute,
 } as any)
+const StateOrgenhetLederRoute = StateOrgenhetLederRouteImport.update({
+  id: '/orgenhet-leder',
+  path: '/orgenhet-leder',
+  getParentRoute: () => StateRoute,
+} as any)
 const StateOrganiseringRoute = StateOrganiseringRouteImport.update({
   id: '/organisering',
   path: '/organisering',
@@ -115,6 +122,11 @@ const SinksOrgtilknytningRoute = SinksOrgtilknytningRouteImport.update({
 const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
   id: '/orgenhet',
   path: '/orgenhet',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrgenhetLederRoute = SinksOrgenhetLederRouteImport.update({
+  id: '/orgenhet-leder',
+  path: '/orgenhet-leder',
   getParentRoute: () => SinksRoute,
 } as any)
 const SinksNomMasteredRoute = SinksNomMasteredRouteImport.update({
@@ -194,11 +206,13 @@ export interface FileRoutesByFullPath {
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
+  '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
   '/sinks/ressurs': typeof SinksRessursRoute
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks/': typeof SinksIndexRoute
@@ -221,11 +235,13 @@ export interface FileRoutesByTo {
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
+  '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
   '/sinks/ressurs': typeof SinksRessursRoute
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks': typeof SinksIndexRoute
@@ -251,11 +267,13 @@ export interface FileRoutesById {
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
+  '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
   '/sinks/ressurs': typeof SinksRessursRoute
   '/sinks/tilgang': typeof SinksTilgangRoute
   '/state/organisering': typeof StateOrganiseringRoute
   '/state/orgenhet': typeof StateOrgenhetRoute
+  '/state/orgenhet-leder': typeof StateOrgenhetLederRoute
   '/state/orgtilknytning': typeof StateOrgtilknytningRoute
   '/state/ressurs': typeof StateRessursRoute
   '/sinks/': typeof SinksIndexRoute
@@ -282,11 +300,13 @@ export interface FileRouteTypes {
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
     | '/sinks/orgenhet'
+    | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
     | '/sinks/ressurs'
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks/'
@@ -309,11 +329,13 @@ export interface FileRouteTypes {
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
     | '/sinks/orgenhet'
+    | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
     | '/sinks/ressurs'
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks'
@@ -338,11 +360,13 @@ export interface FileRouteTypes {
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
     | '/sinks/orgenhet'
+    | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
     | '/sinks/ressurs'
     | '/sinks/tilgang'
     | '/state/organisering'
     | '/state/orgenhet'
+    | '/state/orgenhet-leder'
     | '/state/orgtilknytning'
     | '/state/ressurs'
     | '/sinks/'
@@ -437,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StateOrgenhetRouteImport
       parentRoute: typeof StateRoute
     }
+    '/state/orgenhet-leder': {
+      id: '/state/orgenhet-leder'
+      path: '/orgenhet-leder'
+      fullPath: '/state/orgenhet-leder'
+      preLoaderRoute: typeof StateOrgenhetLederRouteImport
+      parentRoute: typeof StateRoute
+    }
     '/state/organisering': {
       id: '/state/organisering'
       path: '/organisering'
@@ -470,6 +501,13 @@ declare module '@tanstack/react-router' {
       path: '/orgenhet'
       fullPath: '/sinks/orgenhet'
       preLoaderRoute: typeof SinksOrgenhetRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/orgenhet-leder': {
+      id: '/sinks/orgenhet-leder'
+      path: '/orgenhet-leder'
+      fullPath: '/sinks/orgenhet-leder'
+      preLoaderRoute: typeof SinksOrgenhetLederRouteImport
       parentRoute: typeof SinksRoute
     }
     '/sinks/nom-mastered': {

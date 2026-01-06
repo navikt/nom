@@ -16,6 +16,7 @@ import type {
   ImportedRemedyUser,
   MasteredRessursDTO,
   OrgEnhetArbeidsomraadeInfo,
+  OrgEnhetLederState,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
   OrgEnhetState,
@@ -101,6 +102,18 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
+export function getOrgenhetLederEventsOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "ORGENHETLEDER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/orgenhetLederEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<KafkaEvent[]>(),
+  });
+}
+
 export function getOrgtilknytningEventsOptions(search: searchType) {
   return queryOptions({
     queryKey: ["EVENTS", "ORGTILKNYTNING", search],
@@ -150,6 +163,18 @@ export function getRessursStatesOptions(search: searchType) {
           `${API_BASE_URL}/states/ressurs?${queryString.stringify(search, { skipNull: true })}`,
         )
       ).json<RessursState[]>(),
+  });
+}
+
+export function getOrgenhetLederStatesOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["STATE", "ORGENHET-LEDER", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/states/orgenhet-leder?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<OrgEnhetLederState[]>(),
   });
 }
 

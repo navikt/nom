@@ -27,6 +27,7 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.READONLY;
 @Component
 public class TestTokensGenerator {
 
+
     @Autowired
     protected MockOAuth2Server mockOAuth2Server;
 

@@ -1,7 +1,11 @@
 package no.nav.nom.apps.api.graphql.common;
 
+import graphql.GraphQLError;
+import graphql.GraphqlErrorBuilder;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
+import no.nav.nom.libs.gql.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -10,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -171,5 +176,15 @@ public class SecurityUtil {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return getAzpName(authentication).orElseThrow(
             () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", AZP_NAME)));
+    }
+
+    public static GraphQLError handleUnauthenticatedException(Throwable throwable, DataFetchingEnvironment environment) {
+        if(throwable instanceof InvalidBearerTokenException) {
+            return ErrorCode.UNAUTHORIZED.construct(environment, "Unauthorized");
+        }
+        if(throwable instanceof AuthenticationException) {
+            return ErrorCode.UNAUTHORIZED.construct(environment, "Unauthorized");
+        }
+        return null;
     }
 }
