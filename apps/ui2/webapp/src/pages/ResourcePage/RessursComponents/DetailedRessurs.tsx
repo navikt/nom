@@ -71,6 +71,7 @@ import {
   isInDevelopment,
   isTodayOrAfter,
   isTodayOrBefore,
+  skjulteOrgtilknytninger,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -242,6 +243,18 @@ function OrgTilknytningSection({
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
+  const skjulOrgtilknytninger =
+    !hasSelfServiceAccess && !hasWriteAccessForRessurs && !hasAdminAccess;
+
+  const filteredExpiredOrgTilknytninger = skjulOrgtilknytninger
+    ? expiredOrgTilknytninger.filter(
+        (tilknytning) => !skjulteOrgtilknytninger.includes(tilknytning.fid),
+      )
+    : expiredOrgTilknytninger;
+
   const sluttetOverSeksMndSiden = nomDateIsBefore(
     ressurs.sluttdato,
     dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
@@ -331,7 +344,7 @@ function OrgTilknytningSection({
           ressurs={ressurs}
         />
         <ExpiredOrgTilknytninger
-          expiredOrgTilknytninger={expiredOrgTilknytninger}
+          expiredOrgTilknytninger={filteredExpiredOrgTilknytninger}
         />
       </div>
     </>

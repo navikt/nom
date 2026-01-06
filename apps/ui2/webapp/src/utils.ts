@@ -335,6 +335,10 @@ export function isEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
   );
 }
 
+export const skjulteOrgtilknytninger = [
+  "orgtilknytning-01JR805KB6RNN7TDFP1NC4J1XG",
+];
+
 export function isDecember() {
   return new Date().getMonth() === 11;
 }
