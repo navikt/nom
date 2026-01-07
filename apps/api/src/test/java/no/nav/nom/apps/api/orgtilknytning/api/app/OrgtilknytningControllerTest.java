@@ -1674,7 +1674,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin - ny tilgangsvalidering")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvise legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin - ny tilgangsvalidering")
     void test_legg_til_orgtilknytning_for_vikafossen_som_nom_admin_eksisterende_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1720,11 +1720,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             testToken.nomAdminUser(),
             oppdaterOrgtilknytningerForRessursRequest
         )
-            .expectStatus().isOk();
+            .expectStatus().isForbidden();
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvis legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin på feil enhet")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvis at admin får lov til å endre på vikafossen ansatte")
     void test_avvis_legg_til_orgtilknytning_for_vikafossen_som_nom_admin_eksisterende_paa_feil_enhet() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1770,7 +1770,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             testToken.nomAdminUser(),
             oppdaterOrgtilknytningerForRessursRequest
         )
-            .expectStatus().isBadRequest();
+            .expectStatus().isForbidden();
     }
 
     @Test
