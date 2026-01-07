@@ -8,8 +8,6 @@
     "dev-debug": "vite --debug",
     "build": "tsc && vite build",
     "check-types": "tsc --noemit",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run --spec './cypress/e2e/*'",
     "test": "vitest run",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
@@ -17,8 +15,7 @@
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
     "generate-types": "swagger-typescript-api generate --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types --no-client -r -n api-models",
-    "all-checks": "npm run check-types && npm run cy:run && npm run test && npm run lint && npm run stylelint",
-    "all-checks-no-cypress": "npm run check-types && npm run test && npm run lint && npm run stylelint"
+    "all-checks": "npm run check-types && npm run test && npm run lint && npm run stylelint"
   },
   "dependencies": {
     "@apollo/client": "4.0.11",
@@ -59,7 +56,6 @@
     "@typescript-eslint/eslint-plugin": "8.48.1",
     "@typescript-eslint/parser": "8.48.1",
     "@vitejs/plugin-react": "5.1.2",
-    "cypress": "15.8.1",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
