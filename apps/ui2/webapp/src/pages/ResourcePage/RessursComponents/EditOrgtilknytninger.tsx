@@ -56,9 +56,6 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminOrWriteAccess,
-  useHasRobotAccess,
-  useHasUtenlandskKonsulentAccess,
-  useHasVikafossenAccess,
 } from "~/api/useGetSession";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -110,24 +107,14 @@ import {
   todayWithoutTimezone,
 } from "~/utils";
 
-export function EditOrgtilknytninger({ ressurs }: { ressurs: Ressurs }) {
-  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
-  const hasAdminAccess = useHasAdminAccess();
-
-  const hasRobotAccess = useHasRobotAccess();
-  const hasVikafossenAccess = useHasVikafossenAccess();
-  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
-
-  if (
-    (ressurs.identType === IdentType.VIKAFOSSEN &&
-      !hasVikafossenAccess &&
-      !hasAdminAccess) ||
-    (ressurs.identType !== IdentType.VIKAFOSSEN &&
-      !hasAdminOrWriteAccess &&
-      !hasVikafossenAccess &&
-      !hasRobotAccess &&
-      !hasUtenlandskKonsulentAccess)
-  ) {
+export function EditOrgtilknytninger({
+  ressurs,
+  canEditOrgtilknytninger,
+}: {
+  ressurs: Ressurs;
+  canEditOrgtilknytninger: boolean;
+}) {
+  if (!canEditOrgtilknytninger) {
     return;
   }
 

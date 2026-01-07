@@ -2,13 +2,13 @@ import { css } from "@emotion/react";
 import { ChevronLeftIcon } from "@navikt/aksel-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
-import { Link as ReactRouterLink } from "@tanstack/react-router";
 import { subYears } from "date-fns";
 import React from "react";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { ChristmasBanner } from "~/components/ChristmasBanner";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
@@ -52,23 +52,26 @@ export const ResourcePage = () => {
 
       <ContentWrapper>
         {editOrgtilknytninger && !!ressurs && (
-          <ReactRouterLink
-            params={{ id: ressurs.navident }}
-            to={`/ressurs/$id`}
+          <SmartLink
+            css={css`
+              display: flex;
+              width: fit-content;
+              margin-bottom: var(--a-spacing-4);
+              color: #000;
+              font-size: 1.2rem;
+            `}
+            href={`/ressurs/$id`}
           >
-            <div
+            <span
               css={css`
-                color: #000;
-                font-size: 1.2rem;
-                margin-bottom: var(--a-spacing-4);
                 display: flex;
                 align-items: center;
               `}
             >
               <ChevronLeftIcon fontSize="1.8rem" />
               <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
-            </div>
-          </ReactRouterLink>
+            </span>
+          </SmartLink>
         )}
 
         {ressurs && (

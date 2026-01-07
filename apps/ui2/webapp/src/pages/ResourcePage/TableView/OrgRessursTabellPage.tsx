@@ -146,7 +146,6 @@ export const OrgRessursTabellPage = () => {
               display: flex;
               width: fit-content;
               color: #000;
-              font-size: 1.2rem;
             `}
             href={`/org/${id}`}
           >
@@ -154,6 +153,7 @@ export const OrgRessursTabellPage = () => {
               css={css`
                 display: flex;
                 align-items: center;
+                font-size: 1.2rem;
               `}
             >
               <ChevronLeftIcon fontSize="1.8rem" />

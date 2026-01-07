@@ -22,7 +22,6 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React, { type ReactNode } from "react";
 import {
@@ -50,6 +49,7 @@ import {
   ModalProvider,
   useModal,
 } from "~/components/modalProvider/ModalProvider";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { showToast } from "~/hooks/showToast";
@@ -166,21 +166,26 @@ function StaticContentWrapper({
 
       <ContentWrapper>
         {ressurs && (
-          <ReactRouterLink
+          <SmartLink
             css={css`
               display: flex;
-              align-items: center;
+              width: fit-content;
+              margin-bottom: var(--a-spacing-4);
               color: #000;
               font-size: 1.2rem;
-              margin-bottom: var(--a-spacing-4);
             `}
-            params={{ id: ressurs?.navident }}
-            to="/ressurs/$id"
+            href={`/ressurs/$id`}
           >
-            <ChevronLeftIcon fontSize="1.8rem" />
-
-            <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
-          </ReactRouterLink>
+            <span
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <ChevronLeftIcon fontSize="1.8rem" />
+              <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
+            </span>
+          </SmartLink>
         )}
 
         <BodyLong>
