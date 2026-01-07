@@ -1,17 +1,17 @@
 package no.nav.nom.libs.gql.resolvers;
 
-import no.nav.nom.libs.gql.MappingUtils;
-import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
-import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.gql.MappingUtils;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,10 +45,10 @@ public class OrgEnhetResolver {
         final var nomNivaa = search.resolveNomNivaaEnum();
 
         if(ider.isEmpty()){
-            var agressoIder = search.getAgressoIder() != null ?  search.getAgressoIder() : List.of();
-            var agressoRequsted = !agressoIder.isEmpty();
-            if(agressoRequsted){
-                return agressoOrgenhetService.orgenheterByAgressoData(search.getAgressoIder(), search.getOrgNiv(), search.resolveNomNivaaEnum());
+            var agressoIdHashSet = search.getAgressoIder() != null ? new HashSet<>(search.getAgressoIder()) : new HashSet<String>();
+            var agressoRequested = !agressoIdHashSet.isEmpty() || search.getOrgNiv() != null;
+            if(agressoRequested){
+                return agressoOrgenhetService.orgenheterByAgressoData(agressoIdHashSet, search.getOrgNiv(), search.resolveNomNivaaEnum());
             }
 
             return orgEnhetStateRepository.getAll().stream()
@@ -97,20 +97,21 @@ public class OrgEnhetResolver {
         }
 
 
-        public List<OrgEnhetResult> orgenheterByAgressoData(Set<String> agressoIder, String orgNiv, Set<NomNivaa> nomNivaaSet){
-            if(agressoIder.isEmpty()){
-                return List.of();
-            }
-            var unfilteredOrgenhetList = this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIder).stream().map(MappingUtils::toOrgEnhet).toList();
+        // agressoIdHashSet is HashSet, not Set, because we need the `HashSet::remove` method to work
+        public List<OrgEnhetResult> orgenheterByAgressoData(HashSet<String> agressoIdHashSet, String orgNiv, Set<NomNivaa> nomNivaaSet){
+            // if no agressoIdHashSet are specified, then we want to filter everything by the other agresso parameters
+            var orgenhetStateListByAgressoIdSet = agressoIdHashSet.isEmpty() ? this.orgEnhetStateRepository.getAll() : this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIdHashSet);
+
+            var unfilteredOrgenhetList = orgenhetStateListByAgressoIdSet.stream().map(MappingUtils::toOrgEnhet).toList();
 
             final var orgEnhetResults = unfilteredOrgenhetList.stream()
                 .filter(e -> orgNiv == null || orgNiv.equals(e.getAgressoInfo().getAgressoOrgNiv()))
                 .filter(e -> nomNivaaSet.isEmpty() || nomNivaaSet.contains(e.getNomNivaa()))
-                .peek(orgEnhet -> agressoIder.remove(orgEnhet.getAgressoInfo().getAgressoId()))
+                .peek(orgEnhet -> agressoIdHashSet.remove(orgEnhet.getAgressoInfo().getAgressoId()))
                 .map(OrgEnhetResult::new)
                 .collect(Collectors.toList());
 
-            var notFoundElements = agressoIder.stream().map(id -> OrgEnhetResult.notFound(id, orgNiv)).toList();
+            var notFoundElements = agressoIdHashSet.stream().map(id -> OrgEnhetResult.notFound(id, orgNiv)).toList();
             orgEnhetResults.addAll(notFoundElements);
             return orgEnhetResults;
         }
