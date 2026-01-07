@@ -60,7 +60,7 @@ public class EndpointMetricsConfiguration implements WebMvcConfigurer {
             var maybeAzpName = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
                 .filter(Authentication::isAuthenticated)
                 .map(authentication -> {
-                    if (authentication.getDetails() instanceof JwtAuthenticationToken jwtAuthenticationToken) {
+                    if (authentication instanceof JwtAuthenticationToken jwtAuthenticationToken) {
                         var maybeAzpNameClaim = jwtAuthenticationToken.getTokenAttributes().get("azp_name");
                         if (maybeAzpNameClaim instanceof String azpNameString) {
                             return azpNameString;
@@ -72,7 +72,7 @@ public class EndpointMetricsConfiguration implements WebMvcConfigurer {
                         return null;
                     }
                     if (maybeConsumerHeader.isEmpty()) {
-                        log.info("endpoint metrics prehandle: Authentication was not instanceof JwtAuthenticationToken. Got: " + authentication.getClass().getName());
+                        log.debug("endpoint metrics prehandle: Authentication was not instanceof JwtAuthenticationToken. Got: " + authentication.getClass().getName());
                     }
                     return null;
 
