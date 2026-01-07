@@ -72,7 +72,7 @@ public class EndpointMetricsConfiguration implements WebMvcConfigurer {
                         return null;
                     }
                     if (maybeConsumerHeader.isEmpty()) {
-                        log.info("endpoint metrics prehandle: Authentication was not instanceof JwtAuthenticationToken");
+                        log.info("endpoint metrics prehandle: Authentication was not instanceof JwtAuthenticationToken. Got: " + authentication.getClass().getName());
                     }
                     return null;
 
