@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.querystats;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,20 +19,26 @@ public class GqlStatConsolidator {
     final GqlConsolidatedQueryUsageRepository gqlConsolidatedQueryUsageRepository;
     final GqlFieldUsageRepository gqlFieldUsageRepository;
     final GqlQueryUsageRepository gqlQueryUsageRepository;
+    final LeaderElection leaderElection;
+
 
     public GqlStatConsolidator(GqlConsolidatedFieldUsageRepository gqlConsolidatedFieldUsageRepository,
                                GqlConsolidatedQueryUsageRepository gqlConsolidatedQueryUsageRepository, GqlFieldUsageRepository gqlFieldUsageRepository,
-                               GqlQueryUsageRepository gqlQueryUsageRepository
+                               GqlQueryUsageRepository gqlQueryUsageRepository, LeaderElection leaderElection
     ) {
         this.gqlConsolidatedFieldUsageRepository = gqlConsolidatedFieldUsageRepository;
         this.gqlConsolidatedQueryUsageRepository = gqlConsolidatedQueryUsageRepository;
         this.gqlFieldUsageRepository = gqlFieldUsageRepository;
         this.gqlQueryUsageRepository = gqlQueryUsageRepository;
+        this.leaderElection = leaderElection;
     }
 
     @Scheduled(cron = "0 10 1 * * *")
     @Transactional
     public void consolidateAllMinus30Days() {
+        if (!leaderElection.isLeader()) {
+            return;
+        }
         var minus30days = LocalDate.now().minusDays(30);
 
         var fieldTimestamps = gqlFieldUsageRepository.findTimestamps(minus30days.atStartOfDay());
