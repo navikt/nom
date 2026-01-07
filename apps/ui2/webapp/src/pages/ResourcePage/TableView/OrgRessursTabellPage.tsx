@@ -1,6 +1,13 @@
 import { css } from "@emotion/react";
 import { ChevronLeftIcon, FileExcelIcon } from "@navikt/aksel-icons";
-import { Alert, Button, Checkbox, Heading, Loader } from "@navikt/ds-react";
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Checkbox,
+  Heading,
+  Loader,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import React, { useState } from "react";
@@ -136,6 +143,8 @@ export const OrgRessursTabellPage = () => {
         <ContentWrapper limitWidth={false}>
           <SmartLink
             css={css`
+              display: flex;
+              width: fit-content;
               color: #000;
               font-size: 1.2rem;
             `}
@@ -152,31 +161,53 @@ export const OrgRessursTabellPage = () => {
             </span>
           </SmartLink>
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Checkbox
-              checked={includeUnderliggende}
+          <div
+            css={css`
+              display: flex;
+              justify-content: space-between;
+            `}
+          >
+            <div
               css={css`
-                color: #000;
-                font-size: 1.2rem;
-                margin-bottom: 20px;
+                margin-top: var(--a-spacing-2);
               `}
-              onChange={(event) => {
-                setIncludeUnderliggende(event.target.checked);
-              }}
-              value="underliggende-organisasjonsenheter"
             >
-              Vis medarbeidere fra underliggende organisasjonsenheter
-            </Checkbox>
-            <div>
-              <Button
-                icon={<FileExcelIcon />}
-                onClick={handleDownloadExcel}
-                variant="secondary"
+              <Checkbox
+                checked={includeUnderliggende}
+                css={css`
+                  color: #000;
+                  font-size: 1.2rem;
+                `}
+                onChange={(event) => {
+                  setIncludeUnderliggende(event.target.checked);
+                }}
+                value="underliggende-organisasjonsenheter"
               >
-                Til Excel
-              </Button>
+                Vis medarbeidere fra underliggende organisasjonsenheter
+              </Checkbox>
+
+              <BodyShort
+                css={css`
+                  margin-top: var(--a-spacing-2);
+                `}
+              >
+                Antall medarbeidere: <b>{ressurserNavidents.length}</b>
+              </BodyShort>
             </div>
+
+            <Button
+              css={css`
+                height: fit-content;
+                align-self: end;
+              `}
+              icon={<FileExcelIcon />}
+              onClick={handleDownloadExcel}
+              variant="secondary"
+            >
+              Til Excel
+            </Button>
           </div>
+
           <OrgRessursTabellPageInner
             orgEnheter={filteredOrgEnheter}
             ressurserNavidents={ressurserNavidents}
