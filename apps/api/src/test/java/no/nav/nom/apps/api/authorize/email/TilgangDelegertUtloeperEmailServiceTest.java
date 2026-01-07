@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,10 +39,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ActiveProfiles("test")
@@ -66,6 +66,8 @@ public class TilgangDelegertUtloeperEmailServiceTest {
     private AdClient adClient;
     @Mock
     private OrgEnhetStateRepository orgEnhetStateRepository;
+    @Mock
+    private OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
 
 
