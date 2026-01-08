@@ -643,6 +643,7 @@ function OrgtilknytningForm({
               })
             }
             size="small"
+            type="button"
             variant="tertiary"
           >
             Avbryt

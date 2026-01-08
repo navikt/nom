@@ -228,6 +228,7 @@ export function EditPersonOpplysninger({
                 vil genereres en ny e-postadresse for medarbeideren.
               </span>
             </VStack>
+
             <div
               css={css`
                 display: flex;
@@ -288,6 +289,7 @@ export function EditPersonOpplysninger({
             size="126px"
           />
         </HStack>
+
         <VStack
           css={css`
             margin: var(--a-spacing-6) 0;
@@ -332,6 +334,7 @@ export function EditPersonOpplysninger({
             />
           )}
         </VStack>
+
         {editPersonopplysninger && (
           <div
             css={css`
