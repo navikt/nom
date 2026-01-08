@@ -127,9 +127,12 @@ public class SinkController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<RessursStateKafkaDTO> getEksternRessursEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
-        List<RessursStateKafkaDTO> events = ressursApiStateRepository.getRessursStateTopic().stream().filter(eventFilter(eventSearchParams)).toList();
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+        // synchronized -> fordi stateTopic er en synchronizedList
+        synchronized (this){
+            List<RessursStateKafkaDTO> events = ressursApiStateRepository.getRessursStateTopic().stream().filter(eventFilter(eventSearchParams)).toList();
+            return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+        }
     }
 
     @GetMapping(value = "/apiOrgenhetEvents")
