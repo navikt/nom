@@ -486,7 +486,6 @@ function OrgEnhetCard({
           {edit ? (
             <>
               <Button
-                data-cy="avbryt-tilganger"
                 key="end-edit"
                 onClick={onCloseCard}
                 size="small"
@@ -496,7 +495,6 @@ function OrgEnhetCard({
                 Avbryt
               </Button>
               <Button
-                data-cy="submit-tilganger"
                 key="submit-button"
                 loading={isPending}
                 size="small"
@@ -508,7 +506,6 @@ function OrgEnhetCard({
             </>
           ) : (
             <Button
-              data-cy="rediger-tilganger"
               key="start-edit"
               onClick={() => setEdit(true)}
               size="small"
@@ -569,7 +566,6 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
               css={css`
                 max-width: 158px;
               `}
-              data-cy="gyldig-tom-datepicker"
               {...gyldigTomDatePicker.inputProps}
               error={fieldState.error?.message?.toString()}
               hideLabel
@@ -582,7 +578,6 @@ function TilgangRowEditable({ tilgang }: { tilgang: LederTilgangState }) {
       </Table.DataCell>
       <Table.DataCell align="right">
         <Button
-          data-cy="slett-tilgang-button"
           loading={slettTilgangMutation.isPending}
           onClick={() =>
             slettTilgangMutation.mutate({
@@ -634,7 +629,6 @@ function AddTilgangRow({
       <Table.Row>
         <Table.DataCell colSpan={3}>
           <Button
-            data-cy="legg-til-tilgang-button"
             icon={<PlusCircleIcon />}
             onClick={() => setIsOpen(true)}
             size="small"
@@ -722,7 +716,6 @@ function ActiveAddTilgangRow({
               css={css`
                 max-width: 258px;
               `}
-              data-cy="newTilgang-gyldigTom-datepicker"
               error={fieldState.error?.message?.toString()}
               label="Gyldig til og med (valgfritt)"
               ref={field.ref}
@@ -732,12 +725,7 @@ function ActiveAddTilgangRow({
         </div>
       </Table.DataCell>
       <Table.DataCell align="right">
-        <Button
-          data-cy="fjern-ny-tilgang-button"
-          onClick={onClose}
-          size="small"
-          variant="secondary"
-        >
+        <Button onClick={onClose} size="small" variant="secondary">
           Fjern
         </Button>
       </Table.DataCell>

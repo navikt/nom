@@ -217,7 +217,6 @@ function VisningsnavnForm({ person }: { person: Person }) {
         <div css={fullwidthRow}>
           <TextField
             autoComplete="off"
-            data-cy="fornavn-textfield"
             error={errors.visningsfornavn?.message}
             label="Fornavn"
             type="text"
@@ -225,7 +224,6 @@ function VisningsnavnForm({ person }: { person: Person }) {
           />
           <TextField
             autoComplete="off"
-            data-cy="mellomnavn-textfield"
             error={errors.visningsmellomnavn?.message}
             label="Mellomnavn"
             type="text"
@@ -233,7 +231,6 @@ function VisningsnavnForm({ person }: { person: Person }) {
           />
           <TextField
             autoComplete="off"
-            data-cy="etternavn-textfield"
             error={errors.visningsetternavn?.message}
             label="Etternavn"
             type="text"
@@ -248,7 +245,6 @@ function VisningsnavnForm({ person }: { person: Person }) {
             width: 33%;
             padding-right: var(--a-spacing-2);
           `}
-          data-cy="telefon-textfield"
           description="Telefonnummer er valgfritt"
           error={errors.primaryTelefonnummer?.message}
           label={

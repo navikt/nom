@@ -242,20 +242,17 @@ export function EditPersonOpplysninger({
               <TextField
                 autoComplete="off"
                 {...methods.register("fornavn")}
-                data-cy="fornavn-textfield"
                 error={methods.formState.errors.fornavn?.message}
                 label="Fornavn"
               />
               <TextField
                 autoComplete="off"
-                data-cy="mellomnavn-textfield"
                 {...methods.register("mellomnavn")}
                 error={methods.formState.errors.mellomnavn?.message}
                 label="Mellomnavn"
               />
               <TextField
                 autoComplete="off"
-                data-cy="etternavn-textfield"
                 {...methods.register("etternavn")}
                 error={methods.formState.errors.etternavn?.message}
                 label="Etternavn"
@@ -303,7 +300,6 @@ export function EditPersonOpplysninger({
             css={css`
               width: 270px;
             `}
-            data-cy="telefon-textfield"
             error={methods.formState.errors.primaryTelefonnummer?.message}
             label={
               <div
@@ -345,7 +341,6 @@ export function EditPersonOpplysninger({
             `}
           >
             <Button
-              data-cy="avbryt-button"
               onClick={() =>
                 navigate({
                   to: "/ressurs/$id",
@@ -363,7 +358,6 @@ export function EditPersonOpplysninger({
             </Button>
 
             <Button
-              data-cy="lagre-button"
               icon={<FloppydiskIcon aria-hidden />}
               loading={isPending}
               size="small"

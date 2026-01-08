@@ -236,7 +236,6 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
               css={css`
                 width: fit-content;
               `}
-              data-cy="nom-mastered-tag"
               size="small"
               variant="alt1"
             >
@@ -925,7 +924,6 @@ function EditOrgtilknytningerButton({
   if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
       <Button
-        data-cy="endre-orgtilknytninger-button"
         icon={<PencilIcon aria-hidden />}
         onClick={() =>
           navigate({
@@ -1033,7 +1031,6 @@ function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
         to="/ressurs-terminate/$id"
       >
         <Button
-          data-cy="avslutt-medarbeider-button"
           icon={<PencilIcon aria-hidden />}
           size="small"
           type="button"
