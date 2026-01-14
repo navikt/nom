@@ -277,9 +277,8 @@ public class DvhOrdsService {
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
-        var isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
         var userRef1 = jsonNode.get("userrefeerence1");
 
-        return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
+        return (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
     }
 }
