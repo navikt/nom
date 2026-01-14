@@ -88,4 +88,4 @@ spec:
           cluster: dev-gcp
     outbound:
       external:
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io

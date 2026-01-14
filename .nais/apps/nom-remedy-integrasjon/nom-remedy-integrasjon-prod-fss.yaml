@@ -96,5 +96,5 @@ spec:
           cluster: prod-gcp
     outbound:
       external:
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io
         - host: nom-api.intern.nav.no

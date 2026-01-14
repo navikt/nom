@@ -346,7 +346,7 @@ spec:
         - application: logging
           namespace: nais-system
       external:
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io

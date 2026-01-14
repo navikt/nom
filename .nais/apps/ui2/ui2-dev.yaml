@@ -47,7 +47,7 @@ spec:
         - host: unpkg.com
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
         - host: static.hotjar.com
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io
         - host: cdn.nav.no
     inbound:
       rules:
