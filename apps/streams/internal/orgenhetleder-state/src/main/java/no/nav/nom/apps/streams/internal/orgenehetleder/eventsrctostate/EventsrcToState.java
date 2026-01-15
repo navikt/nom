@@ -37,6 +37,7 @@ public class EventsrcToState {
         final var eventSerde = objectSerde.copyWithType(OrgEnhetLederEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
+            .filter((k, v) -> !v.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((key, value) -> value.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
                 objectMapper::createObjectNode,
