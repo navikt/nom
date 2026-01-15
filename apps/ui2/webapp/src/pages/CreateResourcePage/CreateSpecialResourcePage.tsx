@@ -134,7 +134,7 @@ function CreateSpecialResourceForm() {
     [IdentType.ROBOT]: hasRobotAccess || hasAdminAccess,
     [IdentType.UTENLANDSK_KONSULENT]:
       hasUtenlandskKonsulentAccess || hasAdminAccess,
-    [IdentType.VIKAFOSSEN]: hasVikafossenAccess || hasAdminAccess,
+    [IdentType.VIKAFOSSEN]: hasVikafossenAccess,
     [IdentType.STANDARD]: false,
     [IdentType.UKJENT]: false,
   };

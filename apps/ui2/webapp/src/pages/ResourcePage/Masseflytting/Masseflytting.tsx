@@ -33,6 +33,7 @@ import {
   ModalProvider,
   useModal,
 } from "~/components/modalProvider/ModalProvider";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { OrgEnhetSelect } from "~/components/select/OrgEnhetSelect";
@@ -74,17 +75,26 @@ export function Masseflytting() {
       <PageBanner text="Flytt medarbeidere" />
 
       <ContentWrapper>
-        <Link
+        <SmartLink
           css={css`
+            display: flex;
+            width: fit-content;
+            margin-bottom: var(--a-spacing-4);
             color: #000;
-            font-size: 1.2rem;
-            margin-bottom: var(--a-spacing-6);
           `}
           href={`/org/${id}`}
         >
-          <ChevronLeftIcon fontSize="1.8rem" />
-          <b>Tilbake til {orgEnhet?.navn ?? id}</b>
-        </Link>
+          <span
+            css={css`
+              display: flex;
+              align-items: center;
+              font-size: 1.2rem;
+            `}
+          >
+            <ChevronLeftIcon fontSize="1.8rem" />
+            <b>Tilbake til {orgEnhet?.navn ?? id}</b>
+          </span>
+        </SmartLink>
 
         <ModalProvider>
           <MasseflyttingTable orgEnhet={orgEnhet} />

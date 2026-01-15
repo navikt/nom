@@ -23,7 +23,7 @@
     "morgan": "1.10.1",
     "node-cache": "5.1.2",
     "node-jose": "2.2.0",
-    "unleash-client": "6.8.1",
+    "unleash-client": "6.9.0",
     "uuid": "13.0.0"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "@types/cookie-parser": "1.4.10",
     "@types/node-jose": "1.1.13",
     "@types/uuid": "11.0.0",
-    "eslint": "9.39.1",
+    "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-prettier": "5.5.4",

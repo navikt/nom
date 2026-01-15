@@ -111,7 +111,7 @@ spec:
           namespace: nais-system
       external:
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io
 ---
 
 apiVersion: "nais.io/v1alpha1"

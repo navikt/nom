@@ -59,7 +59,7 @@ function Orghierarki({
   lenker: string[];
 }) {
   if (!orgEnhet) {
-    return <></>;
+    return;
   }
 
   return (

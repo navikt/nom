@@ -37,8 +37,8 @@ export function GenericSearchBar({
 
   const tilbakestill = () => {
     methods.reset({
-      filterText: "",
-      fromOffset: null as unknown as undefined,
+      filterText: undefined,
+      fromOffset: undefined,
     });
 
     const newSearch = {
@@ -64,11 +64,11 @@ export function GenericSearchBar({
           {...methods.register("filterText")}
         />
         <TextField label="Fra offset" {...methods.register("fromOffset")} />
-        <Button className="h-fit mt-8" type="submit">
+        <Button className="h-fit mt-8 self-end" type="submit">
           Søk
         </Button>
         <Button
-          className="h-fit mt-8"
+          className="h-fit mt-8 self-end"
           onClick={tilbakestill}
           type="button"
           variant="tertiary"

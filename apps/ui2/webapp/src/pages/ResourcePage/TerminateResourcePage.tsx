@@ -200,7 +200,6 @@ export function TerminateResourcePage() {
                     Avbryt
                   </Button>
                   <Button
-                    data-cy="submit-sluttdato-button"
                     loading={avvikleRessursMutation.isPending}
                     size="small"
                     type="submit"
@@ -246,7 +245,6 @@ function SluttDatoPicker() {
         <FullWidthDatePickerWrapper>
           <DatePicker {...sluttDatoDatepicker.datepickerProps}>
             <DatePicker.Input
-              data-cy="sluttDato-picker"
               {...sluttDatoDatepicker.inputProps}
               error={fieldState.error?.message?.toString()}
               label="Sluttdato (siste dag iht. kontrakt)"
@@ -262,7 +260,6 @@ function SluttDatoPicker() {
           margin-top: var(--a-spacing-10);
           height: var(--a-spacing-8);
         `}
-        data-cy="velg-dagens-dato-button"
         onClick={() => {
           sluttDatoDatepicker.setSelected(todayWithoutTimezone());
         }}

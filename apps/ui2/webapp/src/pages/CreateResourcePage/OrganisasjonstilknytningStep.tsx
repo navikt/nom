@@ -363,7 +363,6 @@ function Orgtilknytningsvarighet({
         <DatePicker {...sluttDatePicker.datepickerProps}>
           <DatePicker.Input
             {...sluttDatePicker.inputProps}
-            data-cy="sluttDato-picker"
             error={gyldigTomController.fieldState.error?.message?.toString()}
             label={(() => {
               switch (sektor) {

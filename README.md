@@ -1,32 +1,40 @@
 # NAV Organization Master (NOM)
 
 Docs: https://navikt.github.io/nom/
-## oppsett for pre-commit trigger
+## Oppsett for pre-commit trigger
 Sett opp slik at pre-commit trigger kjøres lokalt på din maskin ved commit for å søke etter secrets, credentials og personinfo i endringer som sjekkes inn.
 
+### Installering
 Installer pre-commit på maskinen (trenger kun å kjøres én gang) (https://pre-commit.com/#install)
 ```shell
 pip install pre-commit
 ```
-Test installasjon med å kjøre:
-```shell
-pre-commit --version
-```
-
 Installer GitLeaks på maskinen (trenger kun å kjøres én gang) (https://github.com/gitleaks/gitleaks)
 Eksempel:
 ```shell
 brew install gitleaks
 ```
-Test installasjon med å kjøre:
+#### Installasjon med nix
 ```shell
+nix profile add nixpkgs#pre-commit
+nix profile add nixpkgs#gitleaks
+```
+### Verifiser installering
+```shell
+pre-commit --version
 gitleaks version
 ```
+
+### Aktivere pre-commit i prosjektet
 Installer pre-commit hooks i github-prosjektet (trenger kun å kjøres én gang per prosjekt)
 ```shell
 pre-commit install
 ```
 Nå skal GitLeaks kjøre på alle endringer som forsøkes å commit'es. Finner den noe mistenkelig vil den stoppe commit'en og vise hva som er funnet.
+
+Commit output skal vise noe slikt som dette:
+    
+    Detect hardcoded secrets using Gitleaks..................................Passed
 
 ## Hente AAD properties
 

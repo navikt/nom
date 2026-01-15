@@ -51,7 +51,7 @@ public class TlfFraDvhTest extends DvhTestBase {
         assertThat(tlfList1.getFirst().getNummer()).isEqualTo("4711220033");
 
         var tlfList2 = this.dvhRepository.getTelefonNrListByNavIdent("A503999");
-        Assertions.assertTrue(tlfList2.isEmpty());
+        assertThat(tlfList2.getFirst().getNummer()).isEqualTo("4733002999");
 
         var tlfList3 = this.dvhRepository.getTelefonNrListByNavIdent("J509999");
         assertThat(tlfList3.getFirst().getNummer()).isEqualTo("4733008888");
@@ -153,7 +153,6 @@ public class TlfFraDvhTest extends DvhTestBase {
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
               "status": "ACTIVE",
-              "issecretnumber": "false",
               "validfromdate": "2021-05-28T00:00:00.000Z",
               "lastetdato": "2022-01-18T15:58:23.000Z",
               "res_mobil_tlf_kontroll": "112 20 033"
@@ -166,7 +165,6 @@ public class TlfFraDvhTest extends DvhTestBase {
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
               "status": "ACTIVE",
-              "issecretnumber": "false",
               "validfromdate": "2020-10-20T00:00:00.000Z",
               "lastetdato": "2020-10-20T00:00:00.000Z",
               "res_mobil_tlf_kontroll": "99999999"
@@ -179,7 +177,6 @@ public class TlfFraDvhTest extends DvhTestBase {
               "typename": "Bedrift Total A (50 GB)",
               "typeaccesstype": "MOBILE",
               "status": "ACTIVE",
-              "issecretnumber": "false",
               "validfromdate": "2020-10-20T00:00:00.000Z",
               "lastetdato": "2020-10-20T00:00:00.000Z",
               "res_mobil_tlf_kontroll": "88 88 88 88"
@@ -192,7 +189,6 @@ public class TlfFraDvhTest extends DvhTestBase {
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
               "status": "ACTIVE",
-              "issecretnumber": "false",
               "validfromdate": "2020-10-21T00:00:00.000Z",
               "lastetdato": "2020-10-21T00:00:00.000Z",
               "res_mobil_tlf_kontroll": "123 45 678"
@@ -213,7 +209,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "false",
                   "validfromdate": "2021-05-28T00:00:00.000Z",
                   "lastetdato": "2022-01-18T15:58:23.000Z",
                   "res_mobil_tlf_kontroll": "112 20 033"
@@ -226,7 +221,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "11330022"
@@ -239,7 +233,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "21 00 21 02"
@@ -252,7 +245,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "false",
                   "validfromdate": "2020-10-21T00:00:00.000Z",
                   "lastetdato": "2020-10-21T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "223 30 011"
@@ -265,7 +257,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "false",
                   "validfromdate": "2020-10-26T00:00:00.000Z",
                   "lastetdato": "2020-10-26T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "3300 2200"
@@ -278,7 +269,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": "true",
                   "validfromdate": "2020-10-26T00:00:00.000Z",
                   "lastetdato": "2020-10-26T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "3300 2200"
@@ -291,7 +281,6 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
                   "validfromdate": "2020-10-26T00:00:00.000Z",
                   "lastetdato": "2020-10-26T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "3300 2200"

@@ -93,3 +93,5 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: prod-gcp
+      external:
+        - host: org-unleash-api.nav.cloud.nais.io

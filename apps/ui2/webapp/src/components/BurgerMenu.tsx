@@ -77,7 +77,6 @@ export function BurgerMenu() {
     <Dropdown>
       <Button
         as={Dropdown.Toggle}
-        data-cy="menu-button"
         icon={<MenuHamburgerIcon />}
         size="medium"
         variant="secondary"
@@ -120,7 +119,7 @@ export function BurgerMenu() {
               <Dropdown.Menu.Divider />
 
               <SmartLink href="/ressurs/create/1">
-                <Dropdown.Menu.List.Item data-cy="opprettRessurs-button">
+                <Dropdown.Menu.List.Item>
                   <PersonPlusFillIcon color="black" fontSize="24px" />
                   <span>Opprett medarbeider</span>
                 </Dropdown.Menu.List.Item>
@@ -184,7 +183,7 @@ export function BurgerMenu() {
               <Dropdown.Menu.Divider />
 
               <SmartLink href="/tilganger">
-                <Dropdown.Menu.List.Item data-cy="tilganger-button">
+                <Dropdown.Menu.List.Item>
                   <KeyVerticalFillIcon color="black" fontSize="24px" />
                   <span>Tilganger</span>
                 </Dropdown.Menu.List.Item>

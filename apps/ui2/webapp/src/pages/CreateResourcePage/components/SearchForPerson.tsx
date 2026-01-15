@@ -39,7 +39,6 @@ export function SearchForPerson() {
         render={({ field: { onChange, value }, fieldState: { error } }) => (
           <Search
             autoComplete="off"
-            data-cy="fnr-search"
             error={error?.message}
             hideLabel={false}
             label="Fyll inn fødselsnummer/D-nummer, så finner vi personen i Folkeregisteret"

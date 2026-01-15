@@ -42,7 +42,7 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 public class SinkController {
 
     private static final int NUMBER_OF_EVENTS = 500;
-    
+
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
@@ -173,22 +173,23 @@ public class SinkController {
         Pattern pattern = Pattern.compile(regexNavident);
         Matcher matcher = pattern.matcher(eventSearchParams.getFilterText());
         Set<String> eventFids = new HashSet<>();
-        List<RessursEvent> events;
         if (matcher.find()) {
-            eventFids.addAll(ressursEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+            var fids = ressursEvtsrcRepository.getNavidentToFidMap().get(matcher.group());
+            if (fids != null) {
+                eventFids.addAll(fids);
+            }
         }
 
         if (!eventFids.isEmpty()) {
-            events = new ArrayList<>();
-            eventFids.forEach(fid -> events.addAll(ressursEvtsrcRepository.getRessursEvtsrc().stream()
-                .filter(event -> event.getFid().equals(fid))
-                .toList()));
+            // Use stream to collect all matching events
+            return ressursEvtsrcRepository.getRessursEvtsrc().stream()
+                .filter(event -> eventFids.contains(event.getFid()))
+                .toList();
         } else {
-            events = ressursEvtsrcRepository.getRessursEvtsrc().stream()
+            return ressursEvtsrcRepository.getRessursEvtsrc().stream()
                 .filter(eventFilter(new EventSearchParams(fromOffset, eventSearchParams.getFilterText())))
                 .toList();
         }
-        return events;
     }
 
     private List<OrgtilknytningEvent> getAllMatchingOrgtilknytningEvents(EventSearchParams eventSearchParams) {
@@ -198,24 +199,22 @@ public class SinkController {
         Pattern pattern = Pattern.compile(regexNavident);
         Matcher matcher = pattern.matcher(eventSearchParams.getFilterText());
         Set<String> eventFids = new HashSet<>();
-        List<OrgtilknytningEvent> events;
         if (matcher.find()) {
             var oter = orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group());
             if (oter != null) {
-                eventFids.addAll(orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+                eventFids.addAll(oter);
             }
         }
 
         if (!eventFids.isEmpty()) {
-            events = new ArrayList<>();
-            eventFids.forEach(fid -> events.addAll(orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
-                .filter(event -> event.getFid().equals(fid))
-                .toList()));
+            // Build a new list using streams, do not modify while iterating
+            return orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
+                .filter(event -> eventFids.contains(event.getFid()))
+                .toList();
         } else {
-            events = orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
+            return orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
                 .filter(eventFilter(new EventSearchParams(fromOffset, eventSearchParams.getFilterText())))
                 .toList();
         }
-        return events;
     }
 }

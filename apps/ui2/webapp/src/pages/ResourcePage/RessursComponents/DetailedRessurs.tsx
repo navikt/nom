@@ -76,6 +76,13 @@ import {
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
+  const hasWriteAccess = useHasWriteAccess();
+  const hasAdminAccess = useHasAdminAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
   const hasWriteAccessForRessurs =
@@ -117,21 +124,56 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   );
 
   const redigerbareOrgEnhetIder = new Set(
-    new Set(
-      orgtilknytninger
-        .filter((tilknytning) =>
-          nomDateIsSameOrAfter(
-            tilknytning.gyldigTom,
-            dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
-          ),
-        )
-        .map((tilknytning) => tilknytning.orgEnhetId),
-    ),
+    orgtilknytninger
+      .filter((tilknytning) =>
+        nomDateIsSameOrAfter(
+          tilknytning.gyldigTom,
+          dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
+        ),
+      )
+      .map((tilknytning) => tilknytning.orgEnhetId),
   );
 
   const tidligereLeder = iderLederKanRedigere.some((id) =>
     redigerbareOrgEnhetIder.has(id),
   );
+
+  const sluttetOverSeksMndSiden = nomDateIsBefore(
+    ressurs.sluttdato,
+    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
+  );
+
+  const canEditOrgtilknytninger = (() => {
+    switch (ressurs.identType) {
+      case IdentType.ROBOT: {
+        return (
+          (!sluttetOverSeksMndSiden && hasRobotAccess) ||
+          (!harSluttet && hasWriteAccess) ||
+          tidligereLeder ||
+          hasAdminAccess
+        );
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return !sluttetOverSeksMndSiden && hasVikafossenAccess;
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return (
+          (!sluttetOverSeksMndSiden && hasUtenlandskKonsulentAccess) ||
+          (!harSluttet && hasWriteAccess) ||
+          tidligereLeder ||
+          hasAdminAccess
+        );
+      }
+
+      default: {
+        return (
+          (!harSluttet && hasWriteAccess) || tidligereLeder || hasAdminAccess
+        );
+      }
+    }
+  })();
 
   return (
     <div
@@ -158,7 +200,10 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
     >
       {editOrgtilknytninger ? (
         <ModalProvider>
-          <EditOrgtilknytninger ressurs={ressurs} />
+          <EditOrgtilknytninger
+            canEditOrgtilknytninger={canEditOrgtilknytninger}
+            ressurs={ressurs}
+          />
         </ModalProvider>
       ) : (
         <>
@@ -172,10 +217,10 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           <LeaderForSection ressurs={ressurs} />
 
           <OrgTilknytningSection
+            canEditOrgtilknytninger={canEditOrgtilknytninger}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             orgtilknytninger={orgtilknytninger}
             ressurs={ressurs}
-            tidligereLeder={tidligereLeder}
           />
 
           <TeamCatSection navident={ressurs.navident} />
@@ -191,7 +236,6 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
               css={css`
                 width: fit-content;
               `}
-              data-cy="nom-mastered-tag"
               size="small"
               variant="alt1"
             >
@@ -208,12 +252,12 @@ function OrgTilknytningSection({
   ressurs,
   hasWriteAccessForRessurs,
   orgtilknytninger,
-  tidligereLeder,
+  canEditOrgtilknytninger,
 }: {
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
   orgtilknytninger: OrgtilknytningState[];
-  tidligereLeder: boolean;
+  canEditOrgtilknytninger: boolean;
 }) {
   const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
     isGyldighetsPeriodeActive(
@@ -234,14 +278,9 @@ function OrgTilknytningSection({
       isAfterToday(new Date(orgTilknytning.gyldigFom)),
   );
 
-  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+  const harSluttet = nomDateIsBeforeToday(ressurs.sluttdato);
 
-  const hasWriteAccess = useHasWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
-
-  const hasRobotAccess = useHasRobotAccess();
-  const hasVikafossenAccess = useHasVikafossenAccess();
-  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
@@ -254,45 +293,6 @@ function OrgTilknytningSection({
         (tilknytning) => !skjulteOrgtilknytninger.includes(tilknytning.fid),
       )
     : expiredOrgTilknytninger;
-
-  const sluttetOverSeksMndSiden = nomDateIsBefore(
-    ressurs.sluttdato,
-    dateWithoutTimezone(subMonths(todayWithoutTimezone(), 6)),
-  );
-
-  const canEditOrgtilknytninger = (() => {
-    switch (ressurs.identType) {
-      case IdentType.ROBOT: {
-        return (
-          (!sluttetOverSeksMndSiden && hasRobotAccess) ||
-          (!harSluttet && hasWriteAccess) ||
-          tidligereLeder ||
-          hasAdminAccess
-        );
-      }
-
-      case IdentType.VIKAFOSSEN: {
-        return (
-          (!sluttetOverSeksMndSiden && hasVikafossenAccess) || hasAdminAccess
-        );
-      }
-
-      case IdentType.UTENLANDSK_KONSULENT: {
-        return (
-          (!sluttetOverSeksMndSiden && hasUtenlandskKonsulentAccess) ||
-          (!harSluttet && hasWriteAccess) ||
-          tidligereLeder ||
-          hasAdminAccess
-        );
-      }
-
-      default: {
-        return (
-          (!harSluttet && hasWriteAccess) || tidligereLeder || hasAdminAccess
-        );
-      }
-    }
-  })();
 
   return (
     <>
@@ -775,7 +775,7 @@ function SummarySection({
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
 
-  const harSluttet = !!ressurs.sluttdato && isBeforeToday(ressurs.sluttdato);
+  const harSluttet = nomDateIsBeforeToday(ressurs.sluttdato);
 
   const canEditPersonopplysninger = (() => {
     switch (ressurs.identType) {
@@ -790,7 +790,7 @@ function SummarySection({
       }
 
       case IdentType.VIKAFOSSEN: {
-        return (!harSluttet && hasVikafossenAccess) || hasAdminAccess;
+        return !harSluttet && hasVikafossenAccess;
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
@@ -908,7 +908,7 @@ function EditOrgtilknytningerButton({
       }
 
       case IdentType.VIKAFOSSEN: {
-        return hasVikafossenAccess || hasAdminAccess;
+        return hasVikafossenAccess;
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
@@ -924,7 +924,6 @@ function EditOrgtilknytningerButton({
   if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
       <Button
-        data-cy="endre-orgtilknytninger-button"
         icon={<PencilIcon aria-hidden />}
         onClick={() =>
           navigate({
@@ -986,7 +985,7 @@ function BottomSection({
       }
 
       case IdentType.VIKAFOSSEN: {
-        return hasVikafossenAccess || hasAdminAccess;
+        return hasVikafossenAccess;
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
@@ -1032,7 +1031,6 @@ function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
         to="/ressurs-terminate/$id"
       >
         <Button
-          data-cy="avslutt-medarbeider-button"
           icon={<PencilIcon aria-hidden />}
           size="small"
           type="button"

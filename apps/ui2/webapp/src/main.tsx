@@ -61,6 +61,7 @@ const router = createRouter({
   context: {
     queryClient,
   },
+  scrollRestoration: true,
   defaultNotFoundComponent: () => (
     <Box
       css={css`

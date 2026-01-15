@@ -435,7 +435,33 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
                         """;
 
         final var response = gqlUtil.postForQuery(graphqlQry);
-        var x = response.path("orgEnheter").entityList(Object.class).hasSize(1);
+        response.path("orgEnheter").entityList(Object.class).hasSize(1);
+
+    }
+
+    @Test
+    @DisplayName("Hent flere orgenheter basert på orgniv")
+    void scenario45(){
+        var target1Orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn1").agressoId("testId1").agressoOrgNivaa("ORGNIV2").build();
+        var target2Orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_3").navn("testNavn1").agressoId("testId1").agressoOrgNivaa("ORGNIV2").build();
+        var ignoreOrgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavn2").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(target1Orgenhet);
+        orgEnhetStateRepository.update(target2Orgenhet);
+        orgEnhetStateRepository.update(ignoreOrgenhet);
+
+        // language=graphql
+        var graphqlQry = """
+                        query X{
+                            orgEnheter(where: {orgNiv: "ORGNIV2"}) {
+                                code
+                                id
+                            }
+                        }
+                        """;
+
+        final var response = gqlUtil.postForQuery(graphqlQry);
+        response.path("orgEnheter").entityList(Object.class).hasSize(2);
 
 
     }

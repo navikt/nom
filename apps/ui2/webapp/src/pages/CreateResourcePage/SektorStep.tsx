@@ -161,7 +161,6 @@ export function SektorStep() {
           css={css`
             margin-bottom: var(--a-spacing-4);
           `}
-          data-cy="sektor-radio"
           legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
           onChange={(value) => {
