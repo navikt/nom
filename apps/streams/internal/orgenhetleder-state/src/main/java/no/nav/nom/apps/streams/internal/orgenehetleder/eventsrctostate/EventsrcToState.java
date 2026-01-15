@@ -66,6 +66,9 @@ public class EventsrcToState {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
+            if ( eventStateAggregate.get("navident") == null) {
+                log.error("Missing Navident for FID {}", fid);
+            }
             return new  OrgEnhetLederState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
