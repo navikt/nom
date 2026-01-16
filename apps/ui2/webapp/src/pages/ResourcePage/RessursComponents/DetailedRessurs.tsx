@@ -898,6 +898,7 @@ function EditOrgtilknytningerButton({
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasMissingFysiskBrukersted = !!ressurs?.primaryFysiskBrukersted;
 
   const navigate = useNavigate();
 
@@ -924,6 +925,7 @@ function EditOrgtilknytningerButton({
   if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
       <Button
+        disabled={!hasMissingFysiskBrukersted}
         icon={<PencilIcon aria-hidden />}
         onClick={() =>
           navigate({

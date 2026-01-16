@@ -1,12 +1,19 @@
 import { css } from "@emotion/react";
 import { ChevronLeftIcon } from "@navikt/aksel-icons";
+import { LocalAlert } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { subYears } from "date-fns";
 import React from "react";
 
 import { getRessurs } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import {
+  useHasAdminAccess,
+  useHasAdminOrWriteAccess,
+  useHasRobotAccess,
+  useHasUtenlandskKonsulentAccess,
+  useHasVikafossenAccess,
+} from "~/api/useGetSession";
 import { ChristmasBanner } from "~/components/ChristmasBanner";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
@@ -34,6 +41,11 @@ export const ResourcePage = () => {
   const ressurs = ressursQuery.data;
 
   const hasAdminAccess = useHasAdminAccess();
+  const canSeeErrorsUseAccess =
+    useHasAdminOrWriteAccess() ||
+    useHasVikafossenAccess() ||
+    useHasRobotAccess() ||
+    useHasUtenlandskKonsulentAccess();
 
   const sluttetOverEtArSiden =
     !!ressurs?.sluttdato &&
@@ -41,6 +53,8 @@ export const ResourcePage = () => {
       dateWithoutTimezone(ressurs.sluttdato),
       subYears(todayWithoutTimezone(), 1),
     );
+
+  const hasMissingFysiskBrukersted = !!ressurs?.primaryFysiskBrukersted;
 
   return (
     <>
@@ -72,6 +86,27 @@ export const ResourcePage = () => {
               <b>Tilbake til {formatVisningsnavn(ressurs.visningsnavn)}</b>
             </span>
           </SmartLink>
+        )}
+        {!hasMissingFysiskBrukersted && canSeeErrorsUseAccess && (
+          <>
+            <LocalAlert
+              css={css`
+                margin-bottom: var(--a-spacing-4);
+              `}
+              status="warning"
+            >
+              <LocalAlert.Header>
+                <LocalAlert.Title>
+                  {formatVisningsnavn(ressurs?.visningsnavn) +
+                    " mangler fysisk brukersted."}
+                </LocalAlert.Title>
+              </LocalAlert.Header>
+              <LocalAlert.Content>
+                {formatVisningsnavn(ressurs?.visningsnavn) +
+                  " mangler fysisk brukersted, det må rettes opp før det kan gjøres andre endringer. Trykk 'Endre personopplysninger' og velg riktig fysisk brukersted."}
+              </LocalAlert.Content>
+            </LocalAlert>
+          </>
         )}
 
         {ressurs && (
