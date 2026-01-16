@@ -517,7 +517,7 @@ spec:
       application: nom-intern-orgenhet-leder-state
       access: readwrite
     - team: org
-      application: nom-intern-orgenhet-leder-state_v2
+      application: nom-intern-orgenhet-leder-state-v2
       access: read
     - team: nom
       application: nom-api
@@ -551,11 +551,11 @@ spec:
       application: nom-intern-orgenhet-leder-state
       access: readwrite
     - team: org
-      application: nom-intern-orgenhet-leder-state_v2
+      application: nom-intern-orgenhet-leder-state-v2
       access: readwrite
     - team: nom
       application: nom-api
-      access: readwrite
+      access: read
     - team: org
       application: org-kafka-manager
       access: read
