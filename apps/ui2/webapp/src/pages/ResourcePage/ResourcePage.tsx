@@ -69,7 +69,8 @@ export const ResourcePage = () => {
       subYears(todayWithoutTimezone(), 1),
     );
 
-  const hasMissingFysiskBrukersted = !ressurs?.primaryFysiskBrukersted;
+  const hasMissingFysiskBrukersted =
+    ressurs && !ressurs.primaryFysiskBrukersted;
 
   return (
     <>
