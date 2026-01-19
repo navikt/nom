@@ -19,6 +19,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
 import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
+import { IdentType } from "~/types/api-models";
 import {
   dateWithoutTimezone,
   formatVisningsnavn,
@@ -41,11 +42,25 @@ export const ResourcePage = () => {
   const ressurs = ressursQuery.data;
 
   const hasAdminAccess = useHasAdminAccess();
-  const canSeeErrorsUseAccess =
-    useHasAdminOrWriteAccess() ||
-    useHasVikafossenAccess() ||
-    useHasRobotAccess() ||
-    useHasUtenlandskKonsulentAccess();
+  const canSeeError = (() => {
+    switch (ressurs?.identType) {
+      case IdentType.ROBOT: {
+        return useHasRobotAccess();
+      }
+
+      case IdentType.VIKAFOSSEN: {
+        return useHasVikafossenAccess();
+      }
+
+      case IdentType.UTENLANDSK_KONSULENT: {
+        return useHasUtenlandskKonsulentAccess();
+      }
+
+      default: {
+        return useHasAdminOrWriteAccess();
+      }
+    }
+  })();
 
   const sluttetOverEtArSiden =
     !!ressurs?.sluttdato &&
@@ -87,7 +102,7 @@ export const ResourcePage = () => {
             </span>
           </SmartLink>
         )}
-        {!hasMissingFysiskBrukersted && canSeeErrorsUseAccess && (
+        {!hasMissingFysiskBrukersted && canSeeError && (
           <>
             <LocalAlert
               css={css`
@@ -98,7 +113,7 @@ export const ResourcePage = () => {
               <LocalAlert.Header>
                 <LocalAlert.Title>
                   {formatVisningsnavn(ressurs?.visningsnavn) +
-                    " mangler fysisk brukersted."}
+                    " mangler fysisk brukersted"}
                 </LocalAlert.Title>
               </LocalAlert.Header>
               <LocalAlert.Content>
