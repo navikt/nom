@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
 public class ImportNavIdenterKafkaTest extends SpringBootTestBase {
 
     private static final String TOPIC = "embedded-test-topic";
-    
+
 
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;

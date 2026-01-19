@@ -11,6 +11,7 @@ import {
   ExpansionCard,
   Heading,
   HelpText,
+  HStack,
   Label,
   Link,
   Tag,
@@ -899,6 +900,8 @@ function EditOrgtilknytningerButton({
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
+  const hasMissingFysiskBrukersted = !ressurs?.primaryFysiskBrukersted;
+
   const navigate = useNavigate();
 
   const kanGjenopprette = (() => {
@@ -923,20 +926,29 @@ function EditOrgtilknytningerButton({
 
   if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
-      <Button
-        icon={<PencilIcon aria-hidden />}
-        onClick={() =>
-          navigate({
-            to: "/ressurs/$id",
-            search: { editOrgtilknytninger: true },
-            params: (previous) => ({ id: previous.id ?? "" }),
-          })
-        }
-        size="small"
-        variant="secondary"
-      >
-        Endre
-      </Button>
+      <HStack align="center" gap="space-8">
+        {hasMissingFysiskBrukersted && (
+          <HelpText title="Knappen er deaktivert">
+            Denne knappen er deaktivert fordi ressursen mangler fysisk
+            brukersted
+          </HelpText>
+        )}
+        <Button
+          disabled={hasMissingFysiskBrukersted}
+          icon={<PencilIcon aria-hidden />}
+          onClick={() =>
+            navigate({
+              to: "/ressurs/$id",
+              search: { editOrgtilknytninger: true },
+              params: (previous) => ({ id: previous.id ?? "" }),
+            })
+          }
+          size="small"
+          variant="secondary"
+        >
+          Endre
+        </Button>
+      </HStack>
     );
   }
 
