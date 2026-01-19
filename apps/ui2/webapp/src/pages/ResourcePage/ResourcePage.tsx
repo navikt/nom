@@ -45,7 +45,7 @@ export const ResourcePage = () => {
   const canSeeError = (() => {
     switch (ressurs?.identType) {
       case IdentType.ROBOT: {
-        return useHasRobotAccess();
+        return useHasRobotAccess() || hasAdminAccess;
       }
 
       case IdentType.VIKAFOSSEN: {
@@ -53,7 +53,7 @@ export const ResourcePage = () => {
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
-        return useHasUtenlandskKonsulentAccess();
+        return useHasUtenlandskKonsulentAccess() || hasAdminAccess;
       }
 
       default: {
