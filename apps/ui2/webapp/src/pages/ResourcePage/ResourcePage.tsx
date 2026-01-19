@@ -69,7 +69,7 @@ export const ResourcePage = () => {
       subYears(todayWithoutTimezone(), 1),
     );
 
-  const hasMissingFysiskBrukersted = !!ressurs?.primaryFysiskBrukersted;
+  const hasMissingFysiskBrukersted = !ressurs?.primaryFysiskBrukersted;
 
   return (
     <>
@@ -102,7 +102,7 @@ export const ResourcePage = () => {
             </span>
           </SmartLink>
         )}
-        {!hasMissingFysiskBrukersted && canSeeError && (
+        {hasMissingFysiskBrukersted && canSeeError && (
           <>
             <LocalAlert
               css={css`
