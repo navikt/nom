@@ -934,7 +934,7 @@ function EditOrgtilknytningerButton({
           </HelpText>
         )}
         <Button
-          disabled={hasMissingFysiskBrukersted}
+          /*disabled={hasMissingFysiskBrukersted}*/
           icon={<PencilIcon aria-hidden />}
           onClick={() =>
             navigate({
