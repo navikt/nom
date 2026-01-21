@@ -39,7 +39,7 @@ public class AzureAdService {
         countPictureFetch.increment();
         String userId = lookupUserByNavIdent(navIdent);
         var pictureBytes = userId == null ? null : lookupUserProfilePicture(userId);
-        log.info("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
+        log.debug("Fetch of profile picture for {}: {}", navIdent, pictureBytes == null ? "failed" : "success");
         return Optional.ofNullable(pictureBytes);
     }
 
@@ -54,12 +54,12 @@ public class AzureAdService {
                 })
                 .getValue();
             if (res != null && res.size() != 1) {
-                log.info("Did not find single user for navIdent {} ({})", navIdent, res.size());
+                log.debug("Did not find single user for navIdent {} ({})", navIdent, res.size());
                 return null;
             }
             return res.getFirst().getId();
         } catch (Exception e) {
-            log.error("Lookup of user-id by navident failed");
+            log.debug("Lookup of user-id by navident failed");
             return null;
         }
 
