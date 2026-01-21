@@ -298,6 +298,8 @@ Første arbeidsdag medarbeideren jobbet for Nav. Datoen kan være fra tidligere 
 Medarbeiderens siste arbeidsdag i Nav. Kan være tom. +
 Konsulenter registreres alltid med en sluttdato maks 1 år frem i tid, og må fornyes av leder
 | |NOM
+|primaryFysiskBrukersted  |Nei         |Ressursens primære fysiske arbeidsstedskode. +
+| |NOM
 |ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. +
 Merk at historikk for ledere ikke eksisterer for tiden før oktober 2025.
 
