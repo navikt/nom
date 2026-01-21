@@ -45,6 +45,7 @@ public class MappingUtils {
             .primaryTelefon(primaryTelefonnummer)
             .telefon(telefon)
             .gjeldendeTilknytningtype(tilknytningstype)
+            .primaryFysiskBrukersted(ressursState.primaryFysiskBrukersted())
             .build();
     }
 

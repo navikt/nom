@@ -29,6 +29,7 @@ public class Ressurs {
     String visningsnavn;
     String primaryTelefon;
     List<Telefon> telefon;
+    String primaryFysiskBrukersted;
 
     @Deprecated
     public String getNavIdent() {
@@ -99,4 +100,6 @@ public class Ressurs {
     }
 
     Tilknytningtype gjeldendeTilknytningtype;
+
+    public String getPrimaryFysiskBrukersted() { return primaryFysiskBrukersted; }
 }

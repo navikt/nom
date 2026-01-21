@@ -46,6 +46,7 @@ type Ressurs {
     orgTilknytning: [RessursOrgTilknytning!]! @deprecated(reason: "orgTilknytning er erstattet med orgTilknytninger") # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursOrgTilknytning!]!
     gjeldendeTilknytningtype: TilknytningType
+    primaryFysiskBrukersted: String
 }
 
 type RessursLeder {
