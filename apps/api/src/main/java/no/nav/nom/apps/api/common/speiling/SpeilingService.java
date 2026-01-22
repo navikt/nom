@@ -113,7 +113,7 @@ public class SpeilingService {
 
         InputMetadata inputMetadata = InputMetadata.builder()
             .inputInterfaceName("nom-api BatchJob")
-            .inputInterfaceMethodName("mergUforutsettbehovOgVikarOrgtilknytningTyperTilMidlertidig")
+            .inputInterfaceMethodName("replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig")
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
