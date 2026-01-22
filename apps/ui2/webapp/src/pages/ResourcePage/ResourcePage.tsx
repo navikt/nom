@@ -1,6 +1,5 @@
 import { css } from "@emotion/react";
 import { ChevronLeftIcon } from "@navikt/aksel-icons";
-import { LocalAlert } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { subYears } from "date-fns";
@@ -103,7 +102,7 @@ export const ResourcePage = () => {
             </span>
           </SmartLink>
         )}
-        {hasMissingFysiskBrukersted && canSeeError && (
+        {/*hasMissingFysiskBrukersted && canSeeError && (
           <>
             <LocalAlert
               css={css`
@@ -123,7 +122,7 @@ export const ResourcePage = () => {
               </LocalAlert.Content>
             </LocalAlert>
           </>
-        )}
+        )*/}
 
         {ressurs && (
           <>
