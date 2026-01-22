@@ -52,7 +52,6 @@ public class SpeilingService {
         if (leaderElection.isLeader()) {
             speilSektorOrgtilknytning();
             speilTilknytningtypeOrgtilknytning();
-            replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig();
         }
     }
 
