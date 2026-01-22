@@ -4,12 +4,15 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,8 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 
 @Service
 public class SpeilingService {
+
+    private final static Logger logger = LoggerFactory.getLogger(SpeilingService.class);
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
@@ -47,6 +52,7 @@ public class SpeilingService {
         if (leaderElection.isLeader()) {
             speilSektorOrgtilknytning();
             speilTilknytningtypeOrgtilknytning();
+            replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig();
         }
     }
 
@@ -92,6 +98,36 @@ public class SpeilingService {
             if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), orgtilknytningState.orgtilknytningType())) {
                 OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), orgtilknytningState.orgtilknytningType());
                 ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+            }
+        }));
+    }
+
+    // Tilknytningstypene "Uforutsett behov" og "Vikar" skal ikke lenger benyttes i NOM.
+    // Alle OTer som har disse tilknytningtypene skal heller få tilknytningstype "Midlertidig".
+    // Dette gjelder også OTer som ikke lenger er aktive.
+    public void replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig() {
+        var alleOrgtilknytninger = orgtilknytningStateRepository.getAll()
+            .stream()
+            .filter(orgtilknytningState -> nonNull(orgtilknytningState.orgtilknytningType()))
+            .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
+            .toList();
+
+        InputMetadata inputMetadata = InputMetadata.builder()
+            .inputInterfaceName("nom-api BatchJob")
+            .inputInterfaceMethodName("mergUforutsettbehovOgVikarOrgtilknytningTyperTilMidlertidig")
+            .origination(new Origination("nom-api", "nom-api"))
+            .build();
+
+        //TODO: dry run first and to me removed later
+        boolean dryRun = true;
+        alleOrgtilknytninger.forEach(orgtilknytningState ->  ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
+            if(orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.UFORUTSETT_BEHOV)  || orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.VIKAR)) {
+                OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), Tilknytningtype.MIDLERTIDIG);
+                if(dryRun) {
+                    logger.info("Found Tilknytningstypene Uforutsett behov or Vikar, and will be replaced to Midlertidig. " + orgtilknytningState);
+                } else {
+                    ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+                }
             }
         }));
     }
