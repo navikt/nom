@@ -10,6 +10,6 @@ public class FysiskBrukerstedNotFoundException extends RuntimeException {
     }
 
     public static void fysiskBrukerstedIsNull(String visningnavn, String navident) {
-        throw new FysiskBrukerstedNotFoundException(String.format("Ressursen %s (%s) mangler fysisk brukersted", visningnavn, navident));
+        throw new FysiskBrukerstedNotFoundException(String.format("Ansatt %s (%s) mangler fysisk brukersted, det må rettes opp før det kan gjøres andre endringer. Trykk 'Endre personopplysninger' og velg riktig fysisk brukersted.", visningnavn, navident));
     }
 }
