@@ -69,8 +69,8 @@ public class GrupperOgSlaaSammenDvhStillinger {
         LocalDate ressursSluttdato = ressurs.sluttdato();
 
 
-        // logging if dvh data contains  "Uforutsett behov" og "Vikar" tilknitningstype
-        // might need to replace these tilknitningstype types with Midlertidig
+        // logging if dvh data contains  "Uforutsett behov" or "Vikar" tilknitningstype
+        // if so, might need to replace these tilknitningstype types with Midlertidig
         long uforutsettOrVikarCount = grupperteDvhStillinger.keySet().stream()
             .filter(key -> key != null && key.tilknytningtype != null &&
                 (key.tilknytningtype.equals(Tilknytningtype.UFORUTSETT_BEHOV) || key.tilknytningtype.equals(Tilknytningtype.VIKAR)))
