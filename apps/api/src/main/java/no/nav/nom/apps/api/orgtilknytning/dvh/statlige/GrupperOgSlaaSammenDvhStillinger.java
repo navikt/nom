@@ -70,7 +70,7 @@ public class GrupperOgSlaaSammenDvhStillinger {
 
 
         // logging if dvh data contains  "Uforutsett behov" or "Vikar" tilknitningstype
-        // if so, might need to replace these tilknitningstype types with Midlertidig
+        // if so, might need to replace these tilknitningstype types with Midlertidig. DO IT in DvhRessursStilling.getTilknytningtype
         long uforutsettOrVikarCount = grupperteDvhStillinger.keySet().stream()
             .filter(key -> key != null && key.tilknytningtype != null &&
                 (key.tilknytningtype.equals(Tilknytningtype.UFORUTSETT_BEHOV) || key.tilknytningtype.equals(Tilknytningtype.VIKAR)))
