@@ -10,8 +10,6 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +21,6 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 
 @Service
 public class SpeilingService {
-
-    private final static Logger logger = LoggerFactory.getLogger(SpeilingService.class);
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
