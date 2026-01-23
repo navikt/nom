@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilknytningtypeCommand;
@@ -17,23 +18,28 @@ import static java.util.Objects.nonNull;
 @Service
 public class OrgtilknytningTypeService {
 
+    public static final String UUNLEASH_SLAASAMMEN_UFORUTSETTBEHOVOGVIKARORGTILKNYTNINGTYPETILMIDLERTIDIG = "nom-api.slaasammen-uforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig";
+
     private final static Logger logger = LoggerFactory.getLogger(OrgtilknytningTypeService.class);
 
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final RessursStateRepository ressursStateRepository;
     private final NomMastered nomMastered;
     private final RessursCommandService ressursCommandService;
+    private final Unleash unleash;
 
     public OrgtilknytningTypeService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         RessursStateRepository ressursStateRepository,
         NomMastered nomMastered,
-        RessursCommandService ressursCommandService
+        RessursCommandService ressursCommandService,
+        Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.nomMastered = nomMastered;
         this.ressursCommandService = ressursCommandService;
+        this.unleash = unleash;
     }
 
     // Tilknytningstypene "Uforutsett behov" og "Vikar" skal ikke lenger benyttes i NOM.
@@ -52,15 +58,14 @@ public class OrgtilknytningTypeService {
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
-        //TODO: dry run first and to be removed later
-        boolean dryRun = true;
         alleOrgtilknytninger.forEach(orgtilknytningState ->  ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
             if(orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.UFORUTSETT_BEHOV)  || orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.VIKAR)) {
                 OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), Tilknytningtype.MIDLERTIDIG);
-                if(dryRun) {
-                    logger.info("Found Tilknytningstypene Uforutsett behov or Vikar, and will be replaced to Midlertidig. " + orgtilknytningState);
-                } else {
+                //TODO: dry run first and remove toggle later
+                if (unleash.isEnabled(UUNLEASH_SLAASAMMEN_UFORUTSETTBEHOVOGVIKARORGTILKNYTNINGTYPETILMIDLERTIDIG)) {
                     ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
+                } else {
+                    logger.info("Dryrun: Found Tilknytningstypene Uforutsett behov or Vikar, and will be replaced to Midlertidig. " + orgtilknytningState);
                 }
             }
         }));
