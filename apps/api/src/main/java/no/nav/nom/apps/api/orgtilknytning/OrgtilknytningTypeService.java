@@ -52,7 +52,7 @@ public class OrgtilknytningTypeService {
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
-        //TODO: dry run first and to me removed later
+        //TODO: dry run first and to be removed later
         boolean dryRun = true;
         alleOrgtilknytninger.forEach(orgtilknytningState ->  ressursStateRepository.findByNavident(orgtilknytningState.navident()).ifPresent(ressursState -> {
             if(orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.UFORUTSETT_BEHOV)  || orgtilknytningState.orgtilknytningType().equals(Tilknytningtype.VIKAR)) {
