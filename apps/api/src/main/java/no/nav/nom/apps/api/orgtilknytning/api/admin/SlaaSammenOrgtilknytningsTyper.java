@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.common.speiling.SpeilingService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningTypeService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/SlaaSammenOrgtilknytningsTyperUforutsettBehovOgVikarTilMidlertidig")
 @PreAuthorize("hasAuthority('ADMIN')")
 public class SlaaSammenOrgtilknytningsTyper {
-    private final SpeilingService speilingService;
+    private final OrgtilknytningTypeService orgtilknytningTypeService;
 
-    public SlaaSammenOrgtilknytningsTyper(SpeilingService speilingService) {
-        this.speilingService = speilingService;
+    public SlaaSammenOrgtilknytningsTyper(OrgtilknytningTypeService orgtilknytningTypeService) {
+        this.orgtilknytningTypeService = orgtilknytningTypeService;
     }
 
     @Operation(
@@ -42,7 +42,7 @@ public class SlaaSammenOrgtilknytningsTyper {
 
     @Async
     public void replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig() {
-        speilingService.replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig();
+        orgtilknytningTypeService.replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig();
     }
 
 }
