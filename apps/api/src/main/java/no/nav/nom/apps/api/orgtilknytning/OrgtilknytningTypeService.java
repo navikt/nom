@@ -47,7 +47,7 @@ public class OrgtilknytningTypeService {
             .toList();
 
         InputMetadata inputMetadata = InputMetadata.builder()
-            .inputInterfaceName("nom-api BatchJob")
+            .inputInterfaceName("nom-api")
             .inputInterfaceMethodName("replaceUforutsettbehovOgVikarOrgtilknytningTypeTilMidlertidig")
             .origination(new Origination("nom-api", "nom-api"))
             .build();
