@@ -1,5 +1,6 @@
 package no.nav.nom.libs.state.orgenhetleder;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 
+@Slf4j
 public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepository {
     private final Map<String, OrgEnhetLederState> orgEnhetLederByFid = new ConcurrentHashMap<>();
     private final Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederByNavidentMap = new ConcurrentHashMap<>();
@@ -86,6 +88,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     private void removeFromState(String fid) {
+        log.debug("Fjerner OrgEnhetLederState med fid={} fra repository", fid);
         var eksisterende = orgEnhetLederByFid.get(fid);
         if (eksisterende != null) {
             removeFromOrgEnhetLederByNavident(eksisterende);
@@ -114,6 +117,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     private void removeFromOrgEnhetLederByNavident(OrgEnhetLederState oldState) {
         var navidentOrgEnhetLeder = orgEnhetLederByNavidentMap.get(oldState.navident());
         if (navidentOrgEnhetLeder != null) {
+            log.debug("Fjerner orgEnhetLederByNavidentMap fid={}", oldState.fid());
             navidentOrgEnhetLeder.remove(oldState.fid());
         }
     }
@@ -121,6 +125,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     private void removeFromOrgEnhetLederByOrgEnhetId(OrgEnhetLederState oldState) {
         var orgEnhetIdOrgEnhetLeder = orgEnhetLederByOrgEnhetIdMap.get(oldState.orgEnhetId());
         if (orgEnhetIdOrgEnhetLeder != null) {
+            log.debug("Fjerner orgEnhetLederByOrgEnhetIdMap fid={}", oldState.fid());
             orgEnhetIdOrgEnhetLeder.remove(oldState.fid());
         }
     }

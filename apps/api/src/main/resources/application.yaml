@@ -230,6 +230,7 @@ server.tomcat.mbeanregistry.enabled: true
 logging:
   level:
     no.nav.nom: INFO
+    no.nav.nom.libs.state.orgenhetleder: DEBUG
 
 management:
   endpoints:
