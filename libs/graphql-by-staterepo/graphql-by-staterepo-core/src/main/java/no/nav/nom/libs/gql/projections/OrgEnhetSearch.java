@@ -1,6 +1,5 @@
 package no.nav.nom.libs.gql.projections;
 
-
 import java.util.Objects;
 
 public class OrgEnhetSearch {

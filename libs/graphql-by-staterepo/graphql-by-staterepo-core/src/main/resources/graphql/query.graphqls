@@ -60,8 +60,8 @@ input RessurserSearch {
 
 type OrgEnhetResult {
     code: ResultCode!
-    id: String!
-    nomId: String!
+    id: String
+    nomId: String
     orgNiv: String
     organisasjonsenhet: OrgEnhet    @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet
