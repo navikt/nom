@@ -1,6 +1,7 @@
 package no.nav.nom.libs.state.orgenhetleder;
 
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -117,7 +119,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     private void removeFromOrgEnhetLederByOrgEnhetId(OrgEnhetLederState oldState) {
-        var orgEnhetIdOrgEnhetLeder = orgEnhetLederByOrgEnhetIdMap.get(oldState.fid());
+        var orgEnhetIdOrgEnhetLeder = orgEnhetLederByOrgEnhetIdMap.get(oldState.orgEnhetId());
         if (orgEnhetIdOrgEnhetLeder != null) {
             orgEnhetIdOrgEnhetLeder.remove(oldState.fid());
         }
