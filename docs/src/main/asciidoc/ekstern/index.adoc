@@ -15,8 +15,7 @@ Sist oppdatert 29.10.2025
 include::visjon.adoc[leveloffset=1]
 include::domenet.adoc[leveloffset=1]
 include::integrasjon.adoc[leveloffset=1]
-include::hendelser.adoc[leveloffset=1]
-
+// include::hendelser.adoc[leveloffset=1]
 
 ^Edit^ ^me:^ ^https://github.com/navikt/nom/tree/main/docs/src/main/asciidoc/ekstern^
 

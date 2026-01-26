@@ -9,7 +9,7 @@ import lombok.Value;
 @AllArgsConstructor
 public class OrgEnhetResult {
     ResultCode code;
-    String id;  // Av gammlt er dette agressoId - TODO: Må endres med beraking changes
+    String id;  // Av gammelt er dette agressoId - TODO: Må endres med breaking changes eller via dobbel deprekering
     String nomId;
     String orgNiv;
     OrgEnhet organisasjonsenhet;

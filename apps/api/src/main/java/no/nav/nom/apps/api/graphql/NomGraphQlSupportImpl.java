@@ -6,8 +6,8 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RessursPropertyResolver;
-import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
