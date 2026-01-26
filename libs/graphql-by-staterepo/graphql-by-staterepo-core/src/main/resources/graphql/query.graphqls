@@ -30,7 +30,8 @@ input OrgEnhetSearchFilter {
 
 input OrgEnhetSearch {
     agressoId: String
-    orgNiv: String
+    orgNiv: String  @deprecated(reason: "orgEnhetsKategori er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
     navn: String
     id: String
 }
@@ -39,7 +40,8 @@ input OrgEnheterSearch {
     agressoIder: [String!]
     orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
     nomNivaa: [NomNivaa!]
-    orgNiv: String
+    orgNiv: String  @deprecated(reason: "orgEnhetsKategori er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
     ider: [String!]
 }
 

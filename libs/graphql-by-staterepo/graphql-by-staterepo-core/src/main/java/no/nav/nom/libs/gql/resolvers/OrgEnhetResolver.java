@@ -35,8 +35,12 @@ public class OrgEnhetResolver {
         if(orgEnhetSearch.getId() != null) {
             return orgEnhetStateRepository.findById(orgEnhetSearch.getId()).map(MappingUtils::toOrgEnhet);
         }
-        if (orgEnhetSearch.getAgressoId() != null && orgEnhetSearch.getOrgNiv() != null) {
-            return agressoOrgenhetService.getEnhetByAgressoIdNivaAndName(orgEnhetSearch.getAgressoId(), orgEnhetSearch.getOrgNiv(), orgEnhetSearch.getNavn());
+        if (orgEnhetSearch.getAgressoId() != null && (orgEnhetSearch.getOrgNiv() != null || orgEnhetSearch.agressoOrgNiv() != null)) {
+            return agressoOrgenhetService.getEnhetByAgressoIdNivaAndName(
+                orgEnhetSearch.getAgressoId(),
+                orgEnhetSearch.agressoOrgNiv() != null ? orgEnhetSearch.agressoOrgNiv() : orgEnhetSearch.getOrgNiv(), // orgNiv is deprecated
+                orgEnhetSearch.getNavn()
+            );
         }
         return Optional.empty();
     }
@@ -47,9 +51,12 @@ public class OrgEnhetResolver {
 
         if(ider.isEmpty()){
             Set<String> agressoIds = search.getAgressoIder() != null ? search.getAgressoIder() : Collections.emptySet();
-            var agressoRequested = !agressoIds.isEmpty() || search.getOrgNiv() != null;
+            var agressoRequested = !agressoIds.isEmpty() || search.getOrgNiv() != null || search.agressoOrgNiv() != null;
             if(agressoRequested){
-                return agressoOrgenhetService.orgenheterByAgressoData(agressoIds, search.getOrgNiv(), search.resolveNomNivaaEnum());
+                return agressoOrgenhetService.orgenheterByAgressoData(
+                    agressoIds,
+                    search.agressoOrgNiv() != null ? search.agressoOrgNiv() : search.getOrgNiv(),   // orgNiv is deprecated
+                    search.resolveNomNivaaEnum());
             }
 
             return orgEnhetStateRepository.getAll().stream()
