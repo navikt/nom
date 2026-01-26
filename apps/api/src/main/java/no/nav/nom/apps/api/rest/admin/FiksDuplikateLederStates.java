@@ -74,8 +74,9 @@ public class FiksDuplikateLederStates {
         alleLederStatesPerNavidentEnhetOgPeriode.forEach((key, lederStates) -> {
             if (lederStates.size() > 1) {
                 output.append("Duplikate leder states (%s) for %s:\n".formatted(lederStates.size(), key));
-                fidsToDelete.addAll(lederStates.stream().skip(1).map(OrgEnhetLederState::fid).toList());
-                output.append("Vil slette %s leder states:\n".formatted(fidsToDelete.size(), key));
+                var slettes =  lederStates.stream().skip(1).map(OrgEnhetLederState::fid).toList();
+                fidsToDelete.addAll(slettes);
+                output.append("Vil slette %s leder states:\n".formatted(slettes.size()));
             }
         });
 
