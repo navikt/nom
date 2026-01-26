@@ -1,0 +1,11 @@
+query {
+    organisasjonsenhet(where: {agressoId: "testId1", agressoOrgNiv: "ORGENHET"}) {
+        agressoId
+        leder{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
+    }
+}
