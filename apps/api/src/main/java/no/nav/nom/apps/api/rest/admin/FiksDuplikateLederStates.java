@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCom
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederEventProducer;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.SlettOrgEnhetLeder;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -93,7 +95,51 @@ public class FiksDuplikateLederStates {
         } else {
             output.append("DRYRUN Lederstates å slette: %s".formatted(fidsToDelete.size()));
         }
+
+        // Sjekk eter overlappende leder states
+        var alleLederStatesPerNavidentEnhet =
+            orgEnhetLederStateRepository.getAll()
+                .stream()
+                .sorted(Comparator
+                    .comparing(OrgEnhetLederState::startdato, Comparator.nullsLast(LocalDate::compareTo))
+                    .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo)))
+                .collect(Collectors.groupingBy(lederState -> lederState.navident() + "_" + lederState.orgEnhetId()));
+
+        List<String> coveredFidsToDelete= new ArrayList<>();
+        alleLederStatesPerNavidentEnhet.forEach((key, lederStates) ->
+            lederStates.forEach(state -> {
+                List<String> fidsCovered = new ArrayList<>();
+                if (isCovered(state, lederStates)) {
+                    fidsCovered.add(state.fid());
+                };
+                output.append("Overlappende leder states å slette for %s (%s): %s\n".formatted(key, fidsCovered.size(), fidsCovered));
+                coveredFidsToDelete.addAll(fidsCovered);
+            })
+        );
+
+        if (performUpdate) {
+            fidsToDelete.forEach(fid ->
+                orgEnhetLederCommandService.slettOrgEnhetLederState(
+                    new SlettOrgEnhetLeder(
+                        fid, inputMetaData
+                    )
+                )
+            );
+            output.append("Utført sletting av %s duplikate overlappende  leder states".formatted(fidsToDelete.size()));
+        } else {
+            output.append("DRYRUN overlappende Leder states å slette: %s".formatted(fidsToDelete.size()));
+        }
+
         return output.toString();
+    }
+
+    private boolean isCovered(OrgEnhetLederState state, List<OrgEnhetLederState> lederStates) {
+        return lederStates.stream()
+            .anyMatch(otherState ->
+                    !Objects.equals(otherState.fid(), state.fid())
+                    && PeriodeUtil.intervalCoversDate(otherState.startdato(), otherState.sluttdato(), state.startdato())
+                    && PeriodeUtil.intervalCoversDate(otherState.startdato(), otherState.sluttdato(), state.sluttdato())
+                    );
     }
 
     private static @NonNull String getLederStateGroupingKey(OrgEnhetLederState lederState) {
