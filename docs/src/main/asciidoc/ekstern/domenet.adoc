@@ -318,6 +318,7 @@ Merk at historikk for ledere ikke eksisterer for tiden før oktober 2025.
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
 |ressurs        |Ja         |Personen som er leder for den aktuelle ressursen                      |Se Ressurs-objekt                       |Unit4 via DVH
 |erDagligOppfølging | Ja    |Angir om denne lederen er den som har det daglige oppfølgingsansvaret for ressursen. Det innebærer at lederen har det daglige ansvaret for bl.a. sykefraværsoppfølging, godkjenning i MinWinTid, og har tilgang til den ansatte i Læringsportalen.     |TRUE/FALSE | Unit4 via DVH
+|orgEnhet       |Ja         |Orgenheten denne lederen er leder for i angitt periode |              |Unit4 via DVH
 |gyldigFom      |Ja         |Datoen personen ble leder for ressursen. |                 |Unit4 via DVH
 |gyldigTom      |Nei        |Siste dag personen var leder for den aktuelle ressursen. |     |Unit4 via DVH
 
