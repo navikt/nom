@@ -75,9 +75,10 @@ public class FiksDuplikateLederStates {
 
         alleLederStatesPerNavidentEnhetOgPeriode.forEach((key, lederStates) -> {
             if (lederStates.size() > 1) {
+                var fids = lederStates.stream().skip(1).map(OrgEnhetLederState::fid).toList();
                 output.append("Duplikate leder states (%s) for %s:\n".formatted(lederStates.size(), key));
-                fidsToDelete.addAll(lederStates.stream().skip(1).map(OrgEnhetLederState::fid).toList());
-                output.append("Vil slette %s leder states:\n".formatted(fidsToDelete.size(), key));
+                output.append("Vil slette %s leder states:\n".formatted(fids.size(), key));
+                fidsToDelete.addAll(fids);
             }
         });
 
@@ -96,7 +97,7 @@ public class FiksDuplikateLederStates {
             output.append("DRYRUN Lederstates å slette: %s".formatted(fidsToDelete.size()));
         }
 
-        // Sjekk eter overlappende leder states
+        // Sjekk etter overlappende leder states
         var alleLederStatesPerNavidentEnhet =
             orgEnhetLederStateRepository.getAll()
                 .stream()
@@ -106,19 +107,22 @@ public class FiksDuplikateLederStates {
                 .collect(Collectors.groupingBy(lederState -> lederState.navident() + "_" + lederState.orgEnhetId()));
 
         List<String> coveredFidsToDelete= new ArrayList<>();
-        alleLederStatesPerNavidentEnhet.forEach((key, lederStates) ->
+        alleLederStatesPerNavidentEnhet.forEach((key, lederStates) -> {
+            List<String> fidsCovered = new ArrayList<>();
             lederStates.forEach(state -> {
-                List<String> fidsCovered = new ArrayList<>();
                 if (isCovered(state, lederStates)) {
                     fidsCovered.add(state.fid());
-                };
+                }
+                ;
+            });
+            if (!fidsCovered.isEmpty()) {
                 output.append("Overlappende leder states å slette for %s (%s): %s\n".formatted(key, fidsCovered.size(), fidsCovered));
                 coveredFidsToDelete.addAll(fidsCovered);
-            })
-        );
+            }
+        });
 
         if (performUpdate) {
-            fidsToDelete.forEach(fid ->
+            coveredFidsToDelete.forEach(fid ->
                 orgEnhetLederCommandService.slettOrgEnhetLederState(
                     new SlettOrgEnhetLeder(
                         fid, inputMetaData
