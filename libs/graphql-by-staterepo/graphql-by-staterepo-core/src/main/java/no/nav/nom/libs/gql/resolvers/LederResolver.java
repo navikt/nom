@@ -2,9 +2,6 @@ package no.nav.nom.libs.gql.resolvers;
 
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.libs.gql.ErrorCode;
-import no.nav.nom.libs.gql.MappingUtils;
-import no.nav.nom.libs.gql.exception.LederNotFoundException;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
@@ -14,6 +11,9 @@ import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.libs.gql.ErrorCode;
+import no.nav.nom.libs.gql.MappingUtils;
+import no.nav.nom.libs.gql.exception.LederNotFoundException;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
@@ -73,7 +73,7 @@ public class LederResolver {
                     // todo review behavior
                     log.error("Expected lederState with fid " + orgEnhetLederState.fid() + " to point to existing orgenhet ");
                     return null;
-                };
+                }
                 return new LederOrgEnhet(
                     MappingUtils.toOrgEnhet(maybeOrgEnhet.get()),
                     orgEnhetLederState.startdato(),
@@ -87,23 +87,23 @@ public class LederResolver {
     public List<RessursLeder> ledere(String navIdent, PeriodiskUtvalgArg periodiskUtvalg) {
         return getLedereForRessurs(navIdent, false).stream()
             .filter(lederForRessurs -> Util.filterByPeriodiskUtvalg(lederForRessurs, periodiskUtvalg))
-            .map(lederForRessurs ->
-                new RessursLeder(
+            .map(lederForRessurs -> {
+                var maybeOrgEnhet = this.orgEnhetStateRepository.findById(lederForRessurs.orgEnhetId());
+                if (maybeOrgEnhet.isEmpty()) {
+                    log.error("Expected LederForRessurs with {} to point to existing orgenhet", lederForRessurs.orgEnhetId());
+                    return null;
+                }
+                return new RessursLeder(
                     MappingUtils.toRessurs(
                         ressursStateRepository.findByNavident(lederForRessurs.lederNavident()).orElseThrow(LederNotFoundException::new)
                     ),
                     lederForRessurs.erDagligOppfolging(),
+                    MappingUtils.toOrgEnhet(maybeOrgEnhet.get()),
                     lederForRessurs.startdato(),
                     lederForRessurs.sluttdato()
-                )
-            ).toList();
+                );
+            }).toList();
     }
-
-
-
-
-    // ***
-
 
     private List<LederForRessurs> getLedereForRessurs(String navident, boolean kunDOL) {
         var oter = orgtilknytningStateRepository.findByNavident(navident);
@@ -119,8 +119,8 @@ public class LederResolver {
                         overEnhetLederState -> lederForRessurs.add(new LederForRessurs(
                                 overEnhetLederState.navident(),
                                 overEnhetLederState.orgEnhetId(),
-                                DateUtils.foer(overEnhetLederState.startdato(), lederState.startdato()) ?lederState.startdato() : overEnhetLederState.startdato(),
-                                DateUtils.etter(overEnhetLederState.sluttdato(), lederState.sluttdato()) ? lederState.sluttdato() : overEnhetLederState.sluttdato(),
+                                DateUtils.foer(overEnhetLederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : overEnhetLederState.startdato(),
+                                DateUtils.etter(overEnhetLederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : overEnhetLederState.sluttdato(),
                                 ot.erDagligOppfolging()
                             )
                         ));
@@ -128,7 +128,7 @@ public class LederResolver {
                     lederForRessurs.add(new LederForRessurs(
                         lederState.navident(),
                         ot.orgEnhetId(),
-                        DateUtils.foer(lederState.startdato(), ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
+                        DateUtils.foer(lederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
                         DateUtils.etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
                         ot.erDagligOppfolging()
                     ));
