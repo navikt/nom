@@ -94,7 +94,7 @@ public class FiksDuplikateLederStates {
             );
             output.append("Utført sletting av %s duplikate leder states".formatted(fidsToDelete.size()));
         } else {
-            output.append("DRYRUN Lederstates å slette: %s".formatted(fidsToDelete.size()));
+            output.append("DRYRUN Lederstates å slette: %s\n".formatted(fidsToDelete.size()));
         }
 
         // Sjekk etter overlappende leder states
@@ -113,7 +113,6 @@ public class FiksDuplikateLederStates {
                 if (isCovered(state, lederStates)) {
                     fidsCovered.add(state.fid());
                 }
-                ;
             });
             if (!fidsCovered.isEmpty()) {
                 output.append("Overlappende leder states å slette for %s (%s): %s\n".formatted(key, fidsCovered.size(), fidsCovered));
@@ -129,9 +128,9 @@ public class FiksDuplikateLederStates {
                     )
                 )
             );
-            output.append("Utført sletting av %s duplikate overlappende  leder states".formatted(fidsToDelete.size()));
+            output.append("Utført sletting av %s duplikate overlappende  leder states".formatted(coveredFidsToDelete.size()));
         } else {
-            output.append("DRYRUN overlappende Leder states å slette: %s".formatted(fidsToDelete.size()));
+            output.append("DRYRUN overlappende Leder states å slette: %s".formatted(coveredFidsToDelete.size()));
         }
 
         return output.toString();
