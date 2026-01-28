@@ -136,7 +136,7 @@ public class KontaktpersonerService {
             RessursKontaktperson.from(
                 ressurs.state(),
                 telefonService.getPrioritertTelefonnummer(ressurs.state().navident()),
-                StringUtils.trimToNull(getPrimaryTelefonForRessurs(ressurs)),
+                getPrimaryTelefonForRessurs(ressurs),
                 kontaktinfoPerRessurs.getOrDefault(ressurs.state().navident(), Collections.emptyList())
             )
         ).flatMap(List::stream).toList();
