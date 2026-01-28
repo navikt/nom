@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -33,6 +34,16 @@ public class RessursKontaktperson {
         return ressursKontaktinfo.kontaktinfo().stream().map(kontaktinfo -> from(
             ressursKontaktinfo.ressursNavident(), visningsnavn, jobbtelefon, privattelefon, kontaktinfo
         )).toList();
+    }
+
+    public static List<RessursKontaktperson> from(RessursState ressurs, String jobbtelefon, String privattelefon, List<Kontaktinfo> kontaktinfo) {
+        if (kontaktinfo.isEmpty()) {
+            return List.of(
+                new RessursKontaktperson(ressurs.navident(), ressurs.visningsnavn().fornavn(), ressurs.visningsnavn().etternavn(), jobbtelefon, privattelefon, null, null, null, null)
+            );
+        }
+
+        return kontaktinfo.stream().map(k -> from(ressurs.navident(), ressurs.visningsnavn(), jobbtelefon, privattelefon, k)).toList();
     }
 
     private static RessursKontaktperson from(String navident, Visningsnavn visningsnavn, String jobbtelefon, String privattelefon, Kontaktinfo kontaktinfo) {
