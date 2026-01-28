@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
+public class KontaktpersonerServiceTest extends RestTestBase {
 
     private static final String ANSATT_1_NAVIDENT = "A123456";
     private static final String ANSATT_1_FORNAVN = "AnsattFornavn";
@@ -52,7 +52,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
     private static final String KONTAKTPERSON_2_TELEFON = "87654321";
 
     @Autowired
-    KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
+    KontaktpersonerService kontaktpersonerService;
 
     @MockitoBean
     KontaktinfoClient kontaktinfoClient;
@@ -121,7 +121,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
         OrgEnhet orgEnhet = OrgEnhet.builder().id("1").fid("F123").navn("Test Enhet").build();
 
         // act
-        kontaktpersonerExcelGenerator.generate(response, orgEnhet, ressurser);
+        kontaktpersonerService.generate(response, orgEnhet, ressurser);
 
         // Verify the content of the generated Excel file
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(outputStream.toByteArray()))) {
@@ -169,7 +169,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
         OrgEnhet orgEnhet = OrgEnhet.builder().id("1").fid("F123").navn("Test Enhet").build();
         var ressurser = List.of(ressurs());
 
-        kontaktpersonerExcelGenerator.generateExcelFileToServletResponse(response, orgEnhet, ressurser);
+        kontaktpersonerService.generateExcelFileToServletResponse(response, orgEnhet, ressurser);
 
 
         // Verify the content of the generated Excel file
@@ -195,7 +195,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs());
 
-        List<Map<String, Object>> mappedLines = kontaktpersonerExcelGenerator.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
+        List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
 
         var firstLine = mappedLines.getFirst();
         assertThat(firstLine.get("Medarbeider-navident")).isEqualTo(ANSATT_1_NAVIDENT);
@@ -212,7 +212,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs());
 
-        List<Map<String, Object>> mappedLines = kontaktpersonerExcelGenerator.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
+        List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
 
         var firstLine = mappedLines.getFirst();
         assertThat(firstLine.get("Medarbeider-navident")).isEqualTo(ANSATT_1_NAVIDENT);
@@ -231,7 +231,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
         var ressurs = new Ressurs(ressursState, Collections.emptyList(), "", true);
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs);
 
-        List<Map<String, Object>> mappedLines = kontaktpersonerExcelGenerator.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
+        List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
 
         var firstLine = mappedLines.getFirst();
         assertThat(firstLine.get("Medarbeider-navident")).isEqualTo(ANSATT_1_NAVIDENT);
@@ -252,7 +252,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs());
 
-        List<Map<String, Object>> mappedLines = kontaktpersonerExcelGenerator.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
+        List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
 
         var firstLine = mappedLines.getFirst();
         assertThat((String) firstLine.get("Kontaktperson-navn")).contains(KONTAKTPERSON_1_FORNAVN);
@@ -264,7 +264,7 @@ public class KontaktpersonerExcelGeneratorTest extends RestTestBase {
 
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs());
 
-        List<Map<String, Object>> mappedLines = kontaktpersonerExcelGenerator.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
+        List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
 
         assertThat(mappedLines).hasSize(2);
     }

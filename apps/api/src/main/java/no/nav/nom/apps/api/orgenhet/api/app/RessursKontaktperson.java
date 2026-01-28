@@ -1,0 +1,51 @@
+package no.nav.nom.apps.api.orgenhet.api.app;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
+import no.nav.nom.apps.api.clients.kontaktinfo.RessursKontaktinfo;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RessursKontaktperson {
+
+    private String navident;
+    private String fornavn;
+    private String etternavn;
+    private String jobbtelefon;
+    private String privattelefon;
+    private String kontaktpersonNavn;
+    private String kontaktpersonRelasjon;
+    private String kontaktpersonTelefonnr;
+    private String kontaktpersonProritet;
+
+    public static List<RessursKontaktperson> from(RessursKontaktinfo ressursKontaktinfo, Visningsnavn visningsnavn, String jobbtelefon, String privattelefon) {
+        return ressursKontaktinfo.kontaktinfo().stream().map(kontaktinfo -> from(
+            ressursKontaktinfo.ressursNavident(), visningsnavn, jobbtelefon, privattelefon, kontaktinfo
+        )).toList();
+    }
+
+    private static RessursKontaktperson from(String navident, Visningsnavn visningsnavn, String jobbtelefon, String privattelefon, Kontaktinfo kontaktinfo) {
+        return new RessursKontaktperson(
+            navident,
+            visningsnavn.fornavn(),
+            visningsnavn.etternavn(),
+            jobbtelefon,
+            privattelefon,
+            StringUtils.trimToNull(Stream.of(kontaktinfo.fornavn(), kontaktinfo.etternavn()).filter(Objects::nonNull).collect(Collectors.joining(" "))),
+            kontaktinfo.relasjon(),
+            kontaktinfo.telefon(),
+            kontaktinfo.prioritet().toString()
+        );
+    }
+}
