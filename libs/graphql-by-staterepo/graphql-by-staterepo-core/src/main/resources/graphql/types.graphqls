@@ -52,6 +52,7 @@ type Ressurs {
 type RessursLeder {
     erDagligOppfolging: Boolean
     ressurs: Ressurs!
+    orgEnhet: OrgEnhet!
     gyldigFom: Date!
     gyldigTom: Date
 }
