@@ -11,11 +11,12 @@ import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { KafkaEvent } from "~/types.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
+import {OrgEnhetLederState} from "~/types/nom-admin/nom-admin-models.ts";
 
 export function KafkaEventTableForOrgenhetLeder(props: {
   kafkaEvents: KafkaEvent[];
   linkPrefix: string;
-  orgenhetsLeaderStates:KafkaEvent[]
+  orgenhetsLeaderStates:OrgEnhetLederState[]
 }) {
   const kafkaEvents = props.kafkaEvents;
   const { data, sort, handleSort } = useTableSort(kafkaEvents ?? [], "dato");
