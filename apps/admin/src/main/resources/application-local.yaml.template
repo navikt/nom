@@ -7,6 +7,9 @@ NOM_REMEDY_INTEGRASJON_BASE_URL: https://nom-remedy-integrasjon.dev-fss-pub.nais
 NOM_REMEDY_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
 
 NAIS_APP_NAME: nom-admin-local
+UNLEASH_SERVER_API_TOKEN: default:development.ce71045bffaf29feb0c622abf219aa1c9c11557f4f6664991f801871
+UNLEASH_SERVER_API_URL: https://org-unleash-api.nav.cloud.nais.io
+HOSTNAME: "localhost"
 
 KAFKA_BROKERS: localhost:39092
 spring.kafka.properties.security.protocol: PLAINTEXT
