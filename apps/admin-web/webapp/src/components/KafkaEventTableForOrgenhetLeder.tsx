@@ -37,6 +37,7 @@ export function KafkaEventTableForOrgenhetLeder(props: {
           <Table.Row>
             <Table.HeaderCell />
             <Table.ColumnHeader scope="col">Fid</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">NAV-ident</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Endring</Table.ColumnHeader>
             <Table.ColumnHeader scope="col" sortKey="dato" sortable>
               Dato
@@ -56,9 +57,12 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                     search={{ filterText: kafkaEvent.fid }}
                     to={props.linkPrefix}
                   >
-                    {kafkaEvent.fid}({getNavident(kafkaEvent.fid) ?? "—"})
+                    {kafkaEvent.fid}
                   </Link>
                 </Table.HeaderCell>
+                <Table.DataCell>
+                  {getNavident(kafkaEvent.fid) ?? "—"}
+                </Table.DataCell>
                 <Table.DataCell>
                   <JsonModal data={kafkaEvent} text={kafkaEvent.type} />
                 </Table.DataCell>
