@@ -20,6 +20,11 @@ export function KafkaEventTableForOrgenhetLeder(props: {
 }) {
   const kafkaEvents = props.kafkaEvents;
   const { data, sort, handleSort } = useTableSort(kafkaEvents ?? [], "dato");
+
+  function getNavident(fid: string): string | undefined {
+    return props.orgenhetsLeaderStates.find(l => l.fid === fid)?.navident;
+  }
+
   return (
     <div>
       <EventDateRange events={kafkaEvents} />
@@ -52,6 +57,9 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                     to={props.linkPrefix}
                   >
                     {kafkaEvent.fid}
+                    (
+                    {getNavident(kafkaEvent.fid) ?? "—"}
+                    )
                   </Link>
                 </Table.HeaderCell>
                 <Table.DataCell>
