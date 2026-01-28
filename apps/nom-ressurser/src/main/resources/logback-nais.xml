@@ -13,7 +13,6 @@
 <!-- Spring Security logger -->
 <!--    <logger name="org.springframework.security" level="trace"/>-->
 
-
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
     </root>
