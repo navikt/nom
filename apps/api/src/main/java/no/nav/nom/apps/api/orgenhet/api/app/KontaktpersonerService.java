@@ -27,11 +27,11 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
@@ -126,15 +126,16 @@ public class KontaktpersonerService {
         }
 
         var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
-        var ressursMap = sortedRessurser.stream().collect(Collectors.toMap(r -> r.state().navident(), Function.identity()));
-        var ressursKontaktinfo = getKontaktinfoForRessurser(sortedRessurser, orgEnhet.get().id());
+        var kontaktinfoPerRessurs = getKontaktinfoForRessurser(sortedRessurser, orgEnhet.get().id())
+            .stream().collect(Collectors.toMap(RessursKontaktinfo::ressursNavident, RessursKontaktinfo::kontaktinfo));
 
-        return ressursKontaktinfo.stream().map(kontaktinfo ->
+
+        return sortedRessurser.stream().map(ressurs ->
             RessursKontaktperson.from(
-                kontaktinfo,
-                ressursMap.get(kontaktinfo.ressursNavident()).state().visningsnavn(),
-                telefonService.getPrioritertTelefonnummer(kontaktinfo.ressursNavident()),
-                getPrimaryTelefonForRessurs(ressursMap.get(kontaktinfo.ressursNavident()))
+                ressurs.state(),
+                telefonService.getPrioritertTelefonnummer(ressurs.state().navident()),
+                getPrimaryTelefonForRessurs(ressurs),
+                kontaktinfoPerRessurs.getOrDefault(ressurs.state().navident(), Collections.emptyList())
             )
         ).flatMap(List::stream).toList();
     }
