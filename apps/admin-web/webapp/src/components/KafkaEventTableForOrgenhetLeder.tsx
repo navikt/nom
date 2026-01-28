@@ -10,19 +10,19 @@ import { JsonModal } from "~/components/JsonModal.tsx";
 import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
 import type { KafkaEvent } from "~/types.ts";
+import type { OrgEnhetLederState } from "~/types/nom-admin/nom-admin-models.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
-import {OrgEnhetLederState} from "~/types/nom-admin/nom-admin-models.ts";
 
 export function KafkaEventTableForOrgenhetLeder(props: {
   kafkaEvents: KafkaEvent[];
   linkPrefix: string;
-  orgenhetsLeaderStates:OrgEnhetLederState[]
+  orgenhetsLeaderStates: OrgEnhetLederState[];
 }) {
   const kafkaEvents = props.kafkaEvents;
   const { data, sort, handleSort } = useTableSort(kafkaEvents ?? [], "dato");
 
   function getNavident(fid: string): string | undefined {
-    return props.orgenhetsLeaderStates.find(l => l.fid === fid)?.navident;
+    return props.orgenhetsLeaderStates.find((l) => l.fid === fid)?.navident;
   }
 
   return (
@@ -56,10 +56,7 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                     search={{ filterText: kafkaEvent.fid }}
                     to={props.linkPrefix}
                   >
-                    {kafkaEvent.fid}
-                    (
-                    {getNavident(kafkaEvent.fid) ?? "—"}
-                    )
+                    {kafkaEvent.fid}({getNavident(kafkaEvent.fid) ?? "—"})
                   </Link>
                 </Table.HeaderCell>
                 <Table.DataCell>
