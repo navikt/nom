@@ -1,6 +1,5 @@
 package no.nav.nom.libs.state.authorize;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
@@ -11,7 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
@@ -19,7 +18,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 
@@ -61,13 +61,13 @@ public class DelegertLederStateAutoconfiguration extends DefaultStateAutoconfigu
     @Bean
     @ConditionalOnMissingBean(name = "nomStateDelegertLederConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.delegert-leder.enabled")
-    ConsumerFactory<String, AuthorizationEvent> nomStateDelegertLederConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return getDefaultDelegertLederConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    ConsumerFactory<String, AuthorizationEvent> nomStateDelegertLederConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        return getDefaultDelegertLederConsumerFactory(properties.buildConsumerProperties(), jsonMapper);
     }
 
-    static ConsumerFactory<String, AuthorizationEvent> getDefaultDelegertLederConsumerFactory(Map<String, Object> configs, ObjectMapper objectMapper) {
+    static ConsumerFactory<String, AuthorizationEvent> getDefaultDelegertLederConsumerFactory(Map<String, Object> configs, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(configs,
-            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(AuthorizationEvent.class, objectMapper))
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JacksonJsonDeserializer<>(AuthorizationEvent.class, jsonMapper))
         );
     }
 

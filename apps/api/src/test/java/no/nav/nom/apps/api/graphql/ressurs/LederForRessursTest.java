@@ -1,14 +1,14 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 

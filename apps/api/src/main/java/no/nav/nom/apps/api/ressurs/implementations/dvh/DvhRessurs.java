@@ -1,11 +1,10 @@
 package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.Sektor;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -44,23 +43,23 @@ public class DvhRessurs {
 
     public static DvhRessurs fromOrdsRessurs(JsonNode ordsRessurs) {
         return DvhRessurs.builder()
-            .navIdent(ordsRessurs.get("nav_ident").asText())
-            .personIdent(ordsRessurs.get("fnr").asText())
-            .fornavn(ordsRessurs.get("fornavn").asText())
-            .etternavn(ordsRessurs.get("etternavn").asText())
-            .remedyAktiv(ordsRessurs.hasNonNull("remedy_aktiv") && ordsRessurs.get("remedy_aktiv").asText().equals("JA"))
-            .remedyAnsattType(ordsRessurs.get("ansatt_type").asText())
+            .navIdent(ordsRessurs.get("nav_ident").asString())
+            .personIdent(ordsRessurs.get("fnr").asString())
+            .fornavn(ordsRessurs.get("fornavn").asString())
+            .etternavn(ordsRessurs.get("etternavn").asString())
+            .remedyAktiv(ordsRessurs.hasNonNull("remedy_aktiv") && ordsRessurs.get("remedy_aktiv").asString().equals("JA"))
+            .remedyAnsattType(ordsRessurs.get("ansatt_type").asString())
             .rawData(ordsRessurs)
-            .ansattRessursKode(ordsRessurs.get("ansatt_ressurs_kode").asText())
+            .ansattRessursKode(ordsRessurs.get("ansatt_ressurs_kode").asString())
             .ansettelsesTypeBesk(parseNullableFromJson(ordsRessurs, "ansettelsestype_besk"))
             .remedyStartDato(parseNullableDateFromJson(ordsRessurs, "remedy_start_dato"))
             .remedySluttdato(parseNullableDateFromJson(ordsRessurs, "remedy_slutt_dato"))
             .agressoStartDato(parseNullableDateFromJson(ordsRessurs, "agresso_start_dato"))
             .agressoSluttdato(parseNullableDateFromJson(ordsRessurs, "agresso_slutt_dato"))
-            .agressoAnsattIDag(ordsRessurs.hasNonNull("ansatt_per_idag") && ordsRessurs.get("ansatt_per_idag").asText().equals("JA"))
-            .remedyPermisjon(ordsRessurs.get("remedy_permisjon").asText("NEI").equals("JA"))
-            .identType(ordsRessurs.get("ident_type").asText())
-            .epost(ordsRessurs.get("epost").asText())
+            .agressoAnsattIDag(ordsRessurs.hasNonNull("ansatt_per_idag") && ordsRessurs.get("ansatt_per_idag").asString().equals("JA"))
+            .remedyPermisjon(ordsRessurs.get("remedy_permisjon").asString("NEI").equals("JA"))
+            .identType(ordsRessurs.get("ident_type").asString())
+            .epost(ordsRessurs.get("epost").asString())
             .fysiskBrukersted(parseNullableFromJson(ordsRessurs, "fysisk_brukersted"))
             .build();
 
@@ -71,23 +70,23 @@ public class DvhRessurs {
 
     public static DvhRessurs fromOrdsKommunalRessurs(JsonNode ordsKommunalRessurs) {
         return DvhRessurs.builder()
-            .navIdent(ordsKommunalRessurs.get("navid").asText())
-            .personIdent(ordsKommunalRessurs.get("fnr ").asText())
-            .fornavn(ordsKommunalRessurs.get("navn ").asText())
-            .etternavn(ordsKommunalRessurs.get("etternavn ").asText())
-            .remedyAktiv(ordsKommunalRessurs.hasNonNull("aktiv") && ordsKommunalRessurs.get("aktiv").asText().equals("JA"))
-            .remedyAnsattType(ordsKommunalRessurs.get("ansatt_type").asText())
+            .navIdent(ordsKommunalRessurs.get("navid").asString())
+            .personIdent(ordsKommunalRessurs.get("fnr ").asString())
+            .fornavn(ordsKommunalRessurs.get("navn ").asString())
+            .etternavn(ordsKommunalRessurs.get("etternavn ").asString())
+            .remedyAktiv(ordsKommunalRessurs.hasNonNull("aktiv") && ordsKommunalRessurs.get("aktiv").asString().equals("JA"))
+            .remedyAnsattType(ordsKommunalRessurs.get("ansatt_type").asString())
             .rawData(ordsKommunalRessurs)
-            .ansattRessursKode(ordsKommunalRessurs.get("type").asText())
+            .ansattRessursKode(ordsKommunalRessurs.get("type").asString())
             .ansettelsesTypeBesk(parseNullableFromJson(ordsKommunalRessurs, "ansettelsestype_besk"))
             .remedyStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "start_dato"))
             .remedySluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "slutt_dato"))
             .agressoStartDato(parseNullableDateFromJson(ordsKommunalRessurs, "date_from"))
             .agressoSluttdato(parseNullableDateFromJson(ordsKommunalRessurs, "date_to"))
-            .agressoAnsattIDag(ordsKommunalRessurs.hasNonNull("ansatt_idag") && ordsKommunalRessurs.get("ansatt_idag").asText().equals("JA"))
-            .remedyPermisjon(ordsKommunalRessurs.get("permisjon").asText("NEI").equals("JA"))
-            .identType(ordsKommunalRessurs.get("identtype").asText())
-            .epost(ordsKommunalRessurs.get("epost ").asText())
+            .agressoAnsattIDag(ordsKommunalRessurs.hasNonNull("ansatt_idag") && ordsKommunalRessurs.get("ansatt_idag").asString().equals("JA"))
+            .remedyPermisjon(ordsKommunalRessurs.get("permisjon").asString("NEI").equals("JA"))
+            .identType(ordsKommunalRessurs.get("identtype").asString())
+            .epost(ordsKommunalRessurs.get("epost ").asString())
             .fysiskBrukersted(parseNullableFromJson(ordsKommunalRessurs, "fysisk_brukersted"))
             .orgenhetPaaRessurs(parseNullableFromJson(ordsKommunalRessurs, "orgenhet_paa_ressurs"))
             .orgenhetPaaRessursBeskrivelse(parseNullableFromJson(ordsKommunalRessurs, "orgenhet_paa_ressurs_beskrivelse"))
@@ -210,10 +209,10 @@ public class DvhRessurs {
     }
 
     private static LocalDate parseNullableDateFromJson(JsonNode jsonNode, String s) {
-        return jsonNode.hasNonNull(s) ? LocalDate.parse(jsonNode.get(s).asText()) : null;
+        return jsonNode.hasNonNull(s) ? LocalDate.parse(jsonNode.get(s).asString()) : null;
     }
 
     private static String parseNullableFromJson(JsonNode jsonNode, String s) {
-        return jsonNode.hasNonNull(s) ? jsonNode.get(s).asText() : null;
+        return jsonNode.hasNonNull(s) ? jsonNode.get(s).asString() : null;
     }
 }

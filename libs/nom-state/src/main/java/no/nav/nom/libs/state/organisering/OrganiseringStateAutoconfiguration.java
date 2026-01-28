@@ -1,6 +1,5 @@
 package no.nav.nom.libs.state.organisering;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
@@ -11,7 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
@@ -19,7 +18,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @AutoConfiguration
@@ -57,13 +57,13 @@ public class OrganiseringStateAutoconfiguration extends DefaultStateAutoconfigur
     @Bean
     @ConditionalOnMissingBean(name = "nomStateOrganiseringConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.organisering.enabled")
-    ConsumerFactory<String, OrganiseringState> nomStateOrganiseringConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return getDefaultOrganiseringConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    ConsumerFactory<String, OrganiseringState> nomStateOrganiseringConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        return getDefaultOrganiseringConsumerFactory(properties.buildConsumerProperties(), jsonMapper);
     }
 
-    static ConsumerFactory<String, OrganiseringState> getDefaultOrganiseringConsumerFactory(java. util. Map<String, Object> configs, ObjectMapper objectMapper) {
+    static ConsumerFactory<String, OrganiseringState> getDefaultOrganiseringConsumerFactory(java. util. Map<String, Object> configs, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(configs,
-            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(OrganiseringState.class, objectMapper))
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JacksonJsonDeserializer<>(OrganiseringState.class, jsonMapper))
         );
     }
 

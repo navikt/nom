@@ -1,10 +1,9 @@
 package no.nav.nom.apps.api.dvh.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
+import tools.jackson.databind.JsonNode;
 
 @Getter
 @Builder
@@ -17,10 +16,10 @@ public class DvhLeder {
 
     public static DvhLeder fromOrds(JsonNode node) {
         return DvhLeder.builder()
-            .navIdent(node.get("leder_navident").asText())
-            .orgEnhetNr(node.get("orgnode_kode").asText())
-            .orgNiv(node.get("orgnode_niva").asText())
-            .orgenhetNavn(node.get("orgnode_navn").asText())
+            .navIdent(node.get("leder_navident").asString())
+            .orgEnhetNr(node.get("orgnode_kode").asString())
+            .orgNiv(node.get("orgnode_niva").asString())
+            .orgenhetNavn(node.get("orgnode_navn").asString())
             .build();
     }
 }

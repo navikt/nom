@@ -66,6 +66,11 @@ spring:
     listener:
       missing-topics-fatal: true
     client-id: ${app.name}
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 unleash:
   endpoint:

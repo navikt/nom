@@ -1,9 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup.OrgtilknytningEventSource;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup.OrgtilknytningEventSourceRecoveryService;
@@ -15,6 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class OrgtilknytningEventSourceRecoveryServiceTest {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    JsonMapper jsonMapper = new JsonMapper();
 
     public OrgtilknytningEventSourceRecoveryServiceTest() {
-        objectMapper.registerModule(new JavaTimeModule());
+        jsonMapper.rebuild().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
     }
 
     @Mock
-    private ObjectMapper objectMapperMock;
+    private JsonMapper objectMapperMock;
 
     @Mock
     private LeaderElection leaderElection;
@@ -164,8 +164,8 @@ public class OrgtilknytningEventSourceRecoveryServiceTest {
         jsonNodeStrings.forEach(jsonNodeString -> {
             JsonNode jsonNode;
             try {
-                jsonNode = objectMapper.readTree(jsonNodeString);
-            } catch (JsonProcessingException e) {
+                jsonNode = jsonMapper.readTree(jsonNodeString);
+            } catch (JacksonException e) {
                 throw new RuntimeException(e);
             }
             jsonNodes.add(new OrgtilknytningEventSource("event-" + count.incrementAndGet(), jsonNode));

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.dvh;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsClientImpl;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
@@ -32,12 +31,13 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.mockito.Mockito;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.bean.override.mockito.MockReset;
+import tools.jackson.databind.json.JsonMapper;
 
 @Import({
     DvhRestConsumer.class
@@ -50,7 +50,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , ValidationService.class
     , NomProxyClient.class
     , LeaderElection.class
-    , ObjectMapper.class
+    , JsonMapper.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
 })

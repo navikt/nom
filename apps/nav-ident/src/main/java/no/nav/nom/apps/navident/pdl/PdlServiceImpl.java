@@ -1,10 +1,5 @@
 package no.nav.nom.apps.navident.pdl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.LogConfig;
@@ -12,12 +7,25 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_X_REQUEST_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +36,7 @@ public class PdlServiceImpl implements PdlService {
     private final WebClient pdlWebClient;
     private final PdlConfig pdlConfig;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JsonMapper mapper = new JsonMapper();
 
     // If anything fails in PDL communication/query, we return Empty list.
     // rnr Flow will then genereate new id as if nothing bad has happened
@@ -57,7 +65,7 @@ public class PdlServiceImpl implements PdlService {
         JsonNode response;
         try {
             response = mapper.readTree(pdlResponse);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error(LogConfig.TEAM_LOGS, "PDL GraphQL returned unparsable json response for qry:\n{}\nwith ident = {}", pdlHentIdentQry, id);
             log.error(String.format("PDL GraphQL returned unparsable json response for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
             return Collections.emptyList();
@@ -70,7 +78,7 @@ public class PdlServiceImpl implements PdlService {
                         .filter( PdlIdent::erFolkeregisterId )
                         .sorted( Comparator.comparing(PdlIdent::erGjeldende, Comparator.reverseOrder()) )   // Sorter slik at gjeldende folkeregistrert id for personen ligger først
                         .map( i -> i.ident ).collect(Collectors.toList());
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 log.error(LogConfig.TEAM_LOGS, "Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n{}\nwith ident = {}", pdlHentIdentQry, id);
                 log.error(String.format("Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
                 return Collections.emptyList();

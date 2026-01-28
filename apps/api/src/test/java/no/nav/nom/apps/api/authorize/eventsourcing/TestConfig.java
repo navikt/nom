@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.libs.state.authorize.DelegertLederStateAutoconfiguration;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import org.mockito.Mockito;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;

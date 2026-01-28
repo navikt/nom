@@ -1,8 +1,5 @@
 package no.nav.nom.apps.streams.internal.orgtilknytning.eventsrctostate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -17,8 +14,11 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 
@@ -30,8 +30,8 @@ class KafkaStreamProcessor {
     public KafkaStreamProcessor(
         @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
         @Value("${app.kafka.stateTopic}") String stateTopic,
-        ObjectMapper objectMapper,
-        JsonSerde<Object> objectSerde,
+        JsonMapper jsonMapper,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
@@ -41,9 +41,9 @@ class KafkaStreamProcessor {
             .filter((k, v) -> !v.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (key, event, state) -> {
-                    var convertedEvent = objectMapper.convertValue(event.getData(), ObjectNode.class);
+                    var convertedEvent = jsonMapper.convertValue(event.getData(), ObjectNode.class);
                     if (event instanceof OrgtilknytningFjernetEventV1) {
                         state.put("TOMBSTONE", true);
                         // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
@@ -92,15 +92,15 @@ class KafkaStreamProcessor {
 
             return new OrgtilknytningState(
                 fid,
-                eventStateAggregate.get("navident").asText(),
-                eventStateAggregate.get("orgEnhetId").asText(),
-                eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asText()) : null,
-                Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
-                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null,
+                eventStateAggregate.get("navident").asString(),
+                eventStateAggregate.get("orgEnhetId").asString(),
+                eventStateAggregate.hasNonNull("sektor") ? Sektor.valueOf(eventStateAggregate.get("sektor").asString()) : null,
+                Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asString() : null),
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asString()),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asString()) : null,
                 tilknytningType,
-                eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asText() : null,
-                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asText() : null
+                eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asString() : null,
+                eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asString() : null
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);
@@ -112,10 +112,9 @@ class KafkaStreamProcessor {
         var tilknytningstypeNode = eventStateAggregate.findValue("orgtilknytningType");
         tilknytningstypeNode = tilknytningstypeNode == null ? eventStateAggregate.findValue("tilknytningtype") : tilknytningstypeNode;
 
-        var tilknytningstypeText = tilknytningstypeNode == null || tilknytningstypeNode.isNull() ? null : tilknytningstypeNode.asText();
+        var tilknytningstypeText = tilknytningstypeNode == null || tilknytningstypeNode.isNull() ? null : tilknytningstypeNode.asString();
         tilknytningstypeText = "MIDLERTIDLIG".equals(tilknytningstypeText) ? "MIDLERTIDIG" : tilknytningstypeText;
 
-        var tilknytningtype = tilknytningstypeText == null ? null : Tilknytningtype.valueOf(tilknytningstypeText);
-        return tilknytningtype;
+        return tilknytningstypeText == null ? null : Tilknytningtype.valueOf(tilknytningstypeText);
     }
 }

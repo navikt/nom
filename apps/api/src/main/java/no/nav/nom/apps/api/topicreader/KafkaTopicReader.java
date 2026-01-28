@@ -1,16 +1,16 @@
 package no.nav.nom.apps.api.topicreader;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -23,11 +23,11 @@ public class KafkaTopicReader {
     @Value("${app.kafka.ressurs.eventsourceTopic}") String ressursEventSourcetopic;
     @Value("${app.kafka.orgEnhet.eventsourceTopic}") String orgEnhetEventSourcetopic;
     private final KafkaProperties kafkaProperties;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public KafkaTopicReader(KafkaProperties kafkaProperties, ObjectMapper objectMapper) {
+    public KafkaTopicReader(KafkaProperties kafkaProperties, JsonMapper jsonMapper) {
         this.kafkaProperties = kafkaProperties;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     public List<JsonNode> getRessursEvents(int maxRecords, long fromOffset, int partition) {
@@ -75,8 +75,9 @@ public class KafkaTopicReader {
 
     private Optional<JsonNode> consumerRecordToJsonNode(ConsumerRecord<String, String> record) {
         try {
-            return Optional.of(objectMapper.readTree(record.value()));
-        } catch (JsonProcessingException ignored) { }
+            return Optional.of(jsonMapper.readTree(record.value()));
+        } catch (JacksonException ignored) {
+        }
         return Optional.empty();
     }
 }

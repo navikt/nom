@@ -53,9 +53,6 @@ spring:
       idle-timeout: 30000
       max-lifetime: 2000000
       connection-timeout: 30000
-  r2dbc:
-    url: r2dbc:postgresql://${POSTGRES_DB_HOST}:5432/nom-remedy-integrasjon
-    username: nom-remedy-integrasjon-admin
 
   flyway:
     enabled: true
@@ -80,7 +77,7 @@ spring:
           password: ${KAFKA_CREDSTORE_PASSWORD}
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
       auto-offset-reset: latest
       properties:
         spring.json.trusted.packages: '*'
@@ -104,6 +101,11 @@ spring:
         provider:
           azure:
             issuer-uri: ${azure.issuer-uri}
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 azure:
   issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0

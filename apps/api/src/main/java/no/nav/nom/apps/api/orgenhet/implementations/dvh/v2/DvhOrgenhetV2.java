@@ -1,8 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -10,6 +7,9 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.libs.utils.common.util.DateValidator;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -106,7 +106,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         return date;
     }
 
-    public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper) {
+    public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, JsonMapper jsonMapper) {
         if (getGyldigFom().isAfter(dvhOrgenhetV2.getGyldigFom())) {
             this.agressoGyldigFom = dvhOrgenhetV2.getAgressoGyldigFom();
         }
@@ -118,7 +118,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         }
 
         if (!this.getRawData().isArray()) {
-            this.setRawData(objectMapper.createArrayNode().add(this.getRawData()));
+            this.setRawData(jsonMapper.createArrayNode().add(this.getRawData()));
         }
         ((ArrayNode) this.getRawData()).add(dvhOrgenhetV2.getRawData());
 
@@ -133,18 +133,18 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     public static DvhOrgenhetV2 fromOrds(JsonNode node) {
         var enhet = new DvhOrgenhetV2();
         enhet.setRawData(node);
-        enhet.setAgressoId(node.get("orgenhet_kode").asText());
-        enhet.setOrgNiv(node.get("orgnode_niv").asText());
-        enhet.navn = node.get("orgenhet_navn").asText();
-        enhet.agressoOrgenhetType = node.get("enhettype_navn").asText(null);
-        enhet.agressoGyldigFom = node.get("orgenhet_fra_dato").asText();
-        val tempGyldigTom = node.get("orgenhet_til_dato").asText();
+        enhet.setAgressoId(node.get("orgenhet_kode").asString());
+        enhet.setOrgNiv(node.get("orgnode_niv").asString());
+        enhet.navn = node.get("orgenhet_navn").asString();
+        enhet.agressoOrgenhetType = node.get("enhettype_navn").asString(null);
+        enhet.agressoGyldigFom = node.get("orgenhet_fra_dato").asString();
+        val tempGyldigTom = node.get("orgenhet_til_dato").asString();
         enhet.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;
-        enhet.orgenhetStatus = node.get("orgenhet_status").asText().toUpperCase();
+        enhet.orgenhetStatus = node.get("orgenhet_status").asString().toUpperCase();
         enhet.stillingMaksDato = node.hasNonNull("stilling_maks_gyldig_til_dato") ?
-            localDateOf(node.get("stilling_maks_gyldig_til_dato").asText()) : null;
-        enhet.dvhLastetDato = localDateOf(node.get("lastet_dato").asText());
-        enhet.lederRessursNr = node.hasNonNull("leder_ressursnr") ? node.get("leder_ressursnr").asText() : null;
+            localDateOf(node.get("stilling_maks_gyldig_til_dato").asString()) : null;
+        enhet.dvhLastetDato = localDateOf(node.get("lastet_dato").asString());
+        enhet.lederRessursNr = node.hasNonNull("leder_ressursnr") ? node.get("leder_ressursnr").asString() : null;
 
         // Hvis stillingMaksDato er før Agresso sin gyldigFom dato, er den nok knyttet
         // til en tidligere enhet med samme agressoId.

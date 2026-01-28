@@ -1,7 +1,7 @@
 package no.nav.nom.libs.utils.common.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

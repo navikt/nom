@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.organisering.evtlistener;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +17,7 @@ import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -47,12 +47,12 @@ public class OrgenhetRenamedListener {
     private final Configuration freemarkerConfig;
     private final MicrosoftGraphClient microsoftGraphClient;
     private final AppProperties.EpostVarselForEnhetNavnendring params;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     public OrgenhetRenamedListener(
         DvhStartupLoadMonitor dvhStartupLoadMonitor, OrgenhetService orgenhetService,
         RemedyEnhetMapperService remedyEnhetMapperService, Configuration freemarkerConfig, MicrosoftGraphClient microsoftGraphClient,
-        AppProperties appProperties, ObjectMapper objectMapper
+        AppProperties appProperties, JsonMapper jsonMapper
     ) {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.orgenhetService = orgenhetService;
@@ -60,7 +60,7 @@ public class OrgenhetRenamedListener {
         this.freemarkerConfig = freemarkerConfig;
         this.microsoftGraphClient = microsoftGraphClient;
         this.params = appProperties.epostVarselForEnhetNavnendring();
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     @KafkaListener(
@@ -166,12 +166,12 @@ public class OrgenhetRenamedListener {
             return null;
         }
         // Lage fake OrganiseringState objekt siden state repo ikke har historikk
-        var input = objectMapper.valueToTree(avsluttetEvt.getMetadata().inputMetadata().inputInterfaceMethodArguments());
-        var id = input.get("id").asText();
-        var navn = input.get("navn").asText();
-        var idOver = input.get("idOver").asText();
-        var navnOver = input.get("navnOver").asText();
-        var gyldigFom = LocalDate.parse(input.get("gyldigFom").asText(), DateTimeFormatter.ISO_DATE);
+        var input = jsonMapper.valueToTree(avsluttetEvt.getMetadata().inputMetadata().inputInterfaceMethodArguments());
+        var id = input.get("id").asString();
+        var navn = input.get("navn").asString();
+        var idOver = input.get("idOver").asString();
+        var navnOver = input.get("navnOver").asString();
+        var gyldigFom = LocalDate.parse(input.get("gyldigFom").asString(), DateTimeFormatter.ISO_DATE);
         var organiseringState = new OrganiseringState(
             avsluttetEvt.getFid(),
             id,

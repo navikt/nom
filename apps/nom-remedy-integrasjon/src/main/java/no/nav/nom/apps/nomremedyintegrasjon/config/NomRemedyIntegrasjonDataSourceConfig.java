@@ -5,10 +5,10 @@ import lombok.SneakyThrows;
 import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
+import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -28,7 +28,7 @@ import javax.sql.DataSource;
     entityManagerFactoryRef = "nomRemedyIntegrasjonEntityManagerFactory",
     transactionManagerRef = "nomRemedyIntegrasjonTransactionManager",
     basePackages = {
-        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa",
+        "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent",
         "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate",
         "no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate"
     }

@@ -19,7 +19,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = RessursSluttdatoOppdatertEventV1.class),
         @JsonSubTypes.Type(value = RessursSluttetEventV1.class),
         @JsonSubTypes.Type(value = RessursStartDatoOppdatertV1.class),
-        @JsonSubTypes.Type(value = RessursTekniskSlettetEventV1.class)
+        @JsonSubTypes.Type(value = RessursTekniskSlettetEventV1.class),
+        @JsonSubTypes.Type(value = RessursTilknytningtypeOppdatertV1.class),
     }
 )
 public abstract class RessursEvent extends Event {

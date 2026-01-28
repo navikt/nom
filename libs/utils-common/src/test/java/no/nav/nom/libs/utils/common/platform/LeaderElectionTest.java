@@ -1,6 +1,5 @@
 package no.nav.nom.libs.utils.common.platform;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +11,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
@@ -41,7 +41,7 @@ public class LeaderElectionTest {
     LeaderElection leaderElection;
 
     @Autowired
-    ObjectMapper mapper;
+    JsonMapper mapper;
 
     @Autowired
     ConfigurableEnvironment environment;

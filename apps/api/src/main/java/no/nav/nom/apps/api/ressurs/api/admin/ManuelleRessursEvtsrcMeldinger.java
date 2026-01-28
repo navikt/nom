@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.admin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -444,7 +444,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
         @Parameter(description = "Sluttdato for ressursen som skal oppdateres") @RequestParam(required = false) LocalDate sluttDato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ) throws JsonProcessingException {
+    ) throws JacksonException {
         var ressursState = ressursStateRepository.findByNavident(navident);
 
         if (ressursState.isEmpty()) {
@@ -490,8 +490,8 @@ public class ManuelleRessursEvtsrcMeldinger {
             .visningsnavn(ressursState.get().visningsnavn().toString())
             .message("Ressursens sluttdato er oppdatert, men eventuell nødvendig justering av orgtilknytninger må du gjøre manuelt via medarbeiderens profilside.")
             .build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonStr = objectMapper.writeValueAsString(response);
+        JsonMapper jsonMapper = new JsonMapper();
+        String jsonStr = jsonMapper.writeValueAsString(response);
         return ResponseEntity.ok().body(jsonStr);
     }
 
@@ -582,7 +582,7 @@ public class ManuelleRessursEvtsrcMeldinger {
         @Parameter(description = "NAVIDENT for ressursen") @RequestParam String navident,
         @Parameter(description = "Ny sektor som for ressursen som skal settes") @RequestParam Sektor sektor,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
-    ) throws JsonProcessingException {
+    ) throws JacksonException {
         var ressursState = ressursStateRepository.findByNavident(navident);
 
         if (ressursState.isEmpty()) {
@@ -628,8 +628,8 @@ public class ManuelleRessursEvtsrcMeldinger {
             .visningsnavn(ressursState.get().visningsnavn().toString())
             .message("Ressursen %s har byttet sektor til %s.".formatted(navident, sektor))
             .build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonStr = objectMapper.writeValueAsString(response);
+        JsonMapper jsonMapper = new JsonMapper();
+        String jsonStr = jsonMapper.writeValueAsString(response);
         return ResponseEntity.ok().body(jsonStr);
     }
 

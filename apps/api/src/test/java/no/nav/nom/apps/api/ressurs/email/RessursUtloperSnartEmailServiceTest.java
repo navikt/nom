@@ -4,7 +4,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.common.DateUtils;
-import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@ExtendWith({SpringExtension.class})
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @ContextConfiguration(classes = {Configuration.class})
 public class RessursUtloperSnartEmailServiceTest {
 
@@ -205,7 +205,7 @@ public class RessursUtloperSnartEmailServiceTest {
     @Test
     public void testGetUtlopendeRessurser_OT_has_different_gyldigTom_then_ressurs_sluttdato() {
         // setup data
-        String ressusNavIdent = "ressurNavnOgNavIdent";
+        String ressursNavident = "ressurNavnOgNavIdent";
         String ressursForNavn = "ressursForNavn";
         String ressursEtterNavn = "ressursForNavn";
         Visningsnavn vis1 = new Visningsnavn(ressursForNavn, Optional.empty(), ressursEtterNavn);
@@ -222,34 +222,28 @@ public class RessursUtloperSnartEmailServiceTest {
         String agressoId = "orgEnhetAgressoId123456";
         String orgNiva = "Nivaa";
 
-        when(orgEnhetStateRepository.findById(orgEnhet)).thenReturn(
-            Optional.of(OrgEnhetState.builder()
-                .id(orgEnhet)
-                .navn(orgEnhetNavn)
-                .agressoId(agressoId)
-                .agressoOrgNivaa(orgNiva)
-                .gyldigFom(LocalDate.now().minusDays(10))
-                .gyldigTom(LocalDate.now().plusDays(10))
-                .build()
+        when(ressursStateRepository.findAllActiveRessurser()).thenReturn(
+            Map.of(
+                ressursNavident, RessursState.builder()
+                    .navident(ressursNavident)
+                    .visningsnavn(vis1)
+                    .startdato(ressursSluttdato.minusYears(5))
+                    .sluttdato(ressursSluttdato)
+                    .build(),
+                ressursNavIdent2, RessursState.builder()
+                    .navident(ressursNavIdent2)
+                    .visningsnavn(vis2)
+                    .startdato(ressursSluttdato.minusYears(5))
+                    .sluttdato(ressursSluttdato2)
+                    .build()
             )
         );
 
-        when(orgEnhetLederService.getAktivLederForOrgEnhet(any()))
-            .thenReturn(Optional.of(new OrgEnhetLederState("1", "L123456", orgEnhet, LocalDate.now().minusYears(1), null, null)));
-
-//        when(orgEnhetMapper.hentOrgEnhetLedere(any(), any(), any())).thenReturn(List.of(
-//                RessursState.builder()
-//                    .visningsnavn(new Visningsnavn("Leder", Optional.empty(), "Ledersen"))
-//                    .navident("L123456")
-//                    .build()
-//            )
-//        );
-
-        when(orgtilknytningStateRepository.findByNavident(ressusNavIdent)).thenReturn(
+        when(orgtilknytningStateRepository.findByNavident(ressursNavident)).thenReturn(
             List.of(
                 OrgtilknytningState.builder()
                     .erDagligOppfolging(true)
-                    .navident(ressusNavIdent)
+                    .navident(ressursNavident)
                     .orgEnhetId(orgEnhet)
                     .gyldigFom(ressursSluttdato.minusYears(5))
                     .gyldigTom(ressursSluttdato.minusDays(7))
@@ -268,21 +262,6 @@ public class RessursUtloperSnartEmailServiceTest {
             )
         );
 
-        when(ressursStateRepository.findAllActiveRessurser()).thenReturn(
-            Map.of(
-                "ressurs1", RessursState.builder()
-                    .navident(ressusNavIdent)
-                    .visningsnavn(vis1)
-                    .sluttdato(ressursSluttdato)
-                    .build(),
-                "ressurs2", RessursState.builder()
-                    .navident(ressursNavIdent2)
-                    .visningsnavn(vis2)
-                    .sluttdato(ressursSluttdato2)
-                    .build()
-            )
-        );
-
         // test
         var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
 
@@ -290,7 +269,7 @@ public class RessursUtloperSnartEmailServiceTest {
         List<RessursUtloperData> expected = List.of(
             RessursUtloperData.builder()
                 .ressurNavn(vis1.getFormattedVisningsnavn())
-                .ressursNavident(ressusNavIdent)
+                .ressursNavident(ressursNavident)
                 .ressursSluttdato(ressursSluttdato)
                 .sistEndretAvNavidenter(Collections.emptySet())
                 .build(),

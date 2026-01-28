@@ -1,8 +1,8 @@
 package no.nav.nom.apps.nom.unit4.unit4;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -30,7 +30,7 @@ public class Unit4Client {
 
     private final static MediaType UNIT4_MEDIETYPE_JSON_PATCH = new MediaType("application", "json-patch+json");
     private final WebClient webClient = WebClient.create();
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private final TokenRepository tokenRepository;
 
@@ -80,7 +80,7 @@ public class Unit4Client {
 
 
     public JsonNode createRessurs(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
-        val body = objectMapper.writeValueAsString(unit4RessursDto);
+        val body = jsonMapper.writeValueAsString(unit4RessursDto);
         log.debug(TEAM_LOGS, "Create unit4 ressurs:\n{}", body);
         try {
             JsonNode response =
@@ -124,7 +124,7 @@ public class Unit4Client {
     }
 
     public JsonNode patchRessurs(String personId, List<Unit4PatchRequest> unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
-        val body = objectMapper.writeValueAsString(unit4PatchRequest);
+        val body = jsonMapper.writeValueAsString(unit4PatchRequest);
         val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + "/" + personId;
         log.debug(TEAM_LOGS, "Patch unit4 ressurs [{}]:\n{}", url, body);
 
@@ -207,7 +207,7 @@ public class Unit4Client {
 
     private void logIfErrorMessageInBody(String body) {
         if (body != null && body.length() > 0) {
-            ObjectMapper mapper = new ObjectMapper();
+            JsonMapper mapper = new JsonMapper();
             JsonNode bodyNode = null;
             try {
                 bodyNode = mapper.readTree(body);

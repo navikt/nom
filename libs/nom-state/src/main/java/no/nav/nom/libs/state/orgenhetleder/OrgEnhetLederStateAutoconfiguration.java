@@ -1,6 +1,5 @@
 package no.nav.nom.libs.state.orgenhetleder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.libs.state.common.DefaultStateAutoconfiguration;
@@ -11,7 +10,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
@@ -19,7 +18,8 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 
@@ -60,13 +60,13 @@ public class OrgEnhetLederStateAutoconfiguration extends DefaultStateAutoconfigu
     @Bean
     @ConditionalOnMissingBean(name = "nomStateOrgEnhetLederConsumerFactory")
     @ConditionalOnProperty(value = "nom.libs.state.orgenhet-leder.enabled")
-    ConsumerFactory<String, OrgEnhetLederState> nomStateOrgEnhetLederConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        return getDefaultOrgEnhetLederConsumerFactory(properties.buildConsumerProperties(), objectMapper);
+    ConsumerFactory<String, OrgEnhetLederState> nomStateOrgEnhetLederConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        return getDefaultOrgEnhetLederConsumerFactory(properties.buildConsumerProperties(), jsonMapper);
     }
 
-    static ConsumerFactory<String, OrgEnhetLederState> getDefaultOrgEnhetLederConsumerFactory(Map<String, Object> configs, ObjectMapper objectMapper) {
+    static ConsumerFactory<String, OrgEnhetLederState> getDefaultOrgEnhetLederConsumerFactory(Map<String, Object> configs, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(configs,
-            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JsonDeserializer<>(OrgEnhetLederState.class, objectMapper))
+            new StringDeserializer(), new ErrorHandlingDeserializer<>(new JacksonJsonDeserializer<>(OrgEnhetLederState.class, jsonMapper))
         );
     }
 
