@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                     .requestMatchers(
                         "/internal/**",
-                        "v3/api-docs/**",
+                        "/v3/api-docs/**",
                         "/error"
                     ).permitAll()
                     .anyRequest().fullyAuthenticated()
@@ -62,7 +62,11 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
-        return JwtDecoders.fromIssuerLocation(properties.getJwt().getIssuerUri());
+        var issuerUri = properties.getJwt().getIssuerUri();
+        if (issuerUri == null || issuerUri.isBlank()) {
+            throw new IllegalStateException("JWT is missing issuer URI");
+        }
+        return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 
     private boolean isLocalEnv(Environment environment) {

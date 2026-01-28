@@ -40,7 +40,11 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
-        return JwtDecoders.fromIssuerLocation(properties.getJwt().getIssuerUri());
+        var issuerUri = properties.getJwt().getIssuerUri();
+        if (issuerUri == null || issuerUri.isBlank()) {
+            throw new IllegalStateException("JWT is missing issuer URI");
+        }
+        return JwtDecoders.fromIssuerLocation(issuerUri);
     }
 
     @Bean
