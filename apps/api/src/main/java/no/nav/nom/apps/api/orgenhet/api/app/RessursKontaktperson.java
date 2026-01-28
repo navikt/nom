@@ -39,7 +39,17 @@ public class RessursKontaktperson {
     public static List<RessursKontaktperson> from(RessursState ressurs, String jobbtelefon, String privattelefon, List<Kontaktinfo> kontaktinfo) {
         if (kontaktinfo.isEmpty()) {
             return List.of(
-                new RessursKontaktperson(ressurs.navident(), ressurs.visningsnavn().fornavn(), ressurs.visningsnavn().etternavn(), jobbtelefon, privattelefon, null, null, null, null)
+                new RessursKontaktperson(
+                    ressurs.navident(),
+                    ressurs.visningsnavn().fornavn(),
+                    ressurs.visningsnavn().etternavn(),
+                    StringUtils.trimToNull(jobbtelefon),
+                    StringUtils.trimToNull(privattelefon),
+                    null,
+                    null,
+                    null,
+                    null
+                )
             );
         }
 
