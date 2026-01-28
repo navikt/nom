@@ -44,7 +44,7 @@ function OrgenhetLederPage() {
     ...getOrgenhetLederStatesOptions(search),
     gcTime: Number.POSITIVE_INFINITY,
     staleTime: Number.POSITIVE_INFINITY,
-  }).data;
+  });
 
   const orgenhetsLeaderStates = orgenhetsLeaderStatesQuery.data;
 
