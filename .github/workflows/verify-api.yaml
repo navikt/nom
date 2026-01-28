@@ -8,6 +8,7 @@ on:
       - 'apps/api/**'
       - 'libs/utils-common/**'
       - 'libs/lucene-wrapper/**'
+      - 'libs/graphql-by-staterepo/**'
       - 'libs/contract-nom-dto/**'
       - '.github/*/verify-api.yaml'
       - 'apps/pom.xml'
