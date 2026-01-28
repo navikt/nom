@@ -22,11 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("GraphQL.HentLederForRessursFlereNivaer")
 public class LederForRessursTest extends GraphQlTestBase {
 
-
-    public LederForRessursTest() {
-
-    }
-
     public void resetState(
     ) {
         orgEnhetLederStateRepository.clear();
@@ -80,7 +75,7 @@ public class LederForRessursTest extends GraphQlTestBase {
 
 
     @Test
-    @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet, stye ressursLeder dato innenfor OT dato ")
+    @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet, styr ressursLeder dato innenfor OT dato ")
     void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet_styr_dato_i_ressursLeder_info_innenfor_ot_dato() {
         resetState(); // workaround da testene per nå kan påvirke hverandre (pga samme navident i bruk?)
 
@@ -110,10 +105,10 @@ public class LederForRessursTest extends GraphQlTestBase {
         orgtilknytningStateRepository.update(ot.fid(), ot);
 
         var lederStateSegSelv = OrgEnhetLederState.builder().fid("LEDER_FID_1").orgEnhetId(orgenhet.id()).navident(ressurs.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(LocalDate.now().minusDays(16)).build();
-        var lederlederState =   OrgEnhetLederState.builder().fid("LEDER_FID_2").orgEnhetId(ledersLederEnhet.id()).navident(leder1.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(null).build();
+        var lederslederState =   OrgEnhetLederState.builder().fid("LEDER_FID_2").orgEnhetId(ledersLederEnhet.id()).navident(leder1.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(null).build();
         var lederState2 =       OrgEnhetLederState.builder().fid("LEDER_FID_3").orgEnhetId(orgenhet.id()).navident(leder2.navident()).startdato(LocalDate.now().minusDays(15)).sluttdato(null).build();
         orgEnhetLederStateRepository.update(lederStateSegSelv.fid(),lederStateSegSelv);
-        orgEnhetLederStateRepository.update(lederlederState.fid(),lederlederState);
+        orgEnhetLederStateRepository.update(lederslederState.fid(),lederslederState);
         orgEnhetLederStateRepository.update(lederState2.fid(),lederState2);
 
         final var response = gqlUtil.postForResource("ressurs/ledere_over_rekursivt.graphql");
@@ -131,5 +126,64 @@ public class LederForRessursTest extends GraphQlTestBase {
         assertEquals(lederState2.startdato(),       LocalDate.parse(ledere.get(1).get("gyldigFom").textValue()));
         assertEquals(ot.gyldigTom(),                LocalDate.parse(ledere.get(1).get("gyldigTom").textValue()));
         assertEquals(orgenhet.id(),                 ledere.get(1).get("orgEnhet").get("id").textValue());
+    }
+
+    @Test
+    @DisplayName("Hente leder gjennom flere nivåer for ressurs som er leder av sin enhet, styr ressursLeder dato innenfor OT dato - ett ekstra nivå")
+    void hente_leder_gjennom_flere_nivaaer_for_ressurs_som_leder_enhet_styr_dato_i_ressursLeder_info_innenfor_ot_dato_ekstra_nivaa() {
+        resetState(); // workaround da testene per nå kan påvirke hverandre (pga samme navident i bruk?)
+
+        var ressurs = new RessursStateBuilder(1).navident("testNavIdent1").build();
+        var leder1 = new RessursStateBuilder(1).navident("leder1").personident("01011000000").build();
+        var leder2 = new RessursStateBuilder(1).navident("leder2").personident("01011011111").build();
+
+        ressursStateRepository.update(ressurs);
+        ressursStateRepository.update(leder1);
+        ressursStateRepository.update(leder2);
+
+        var orgenhet = new OrgEnhetStateBuilder(1).id("ID_1").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var ledersLederEnhet = new OrgEnhetStateBuilder(1).id("idLederEnhet").navn("Leder sin enhet").agressoOrgNivaa("ORGNIV3").lederFid(leder2.fid()).build();
+        var ledersLedersLederEnhet = new OrgEnhetStateBuilder(1).id("idLederLedersEnhet").navn("Leder sin leders enhet").agressoOrgNivaa("ORGNIV2").lederFid(leder2.fid()).build();
+
+        orgEnhetStateRepository.update(orgenhet);
+        orgEnhetStateRepository.update(ledersLederEnhet);
+        orgEnhetStateRepository.update(ledersLedersLederEnhet);
+
+        organiseringStateRepository.update(new OrganiseringState("FID_1", orgenhet.id(), orgenhet.navn(), ledersLederEnhet.id(), ledersLederEnhet.navn(), LocalDate.now().minusYears(1), null));
+        organiseringStateRepository.update(new OrganiseringState("FID_2", ledersLederEnhet.id(), ledersLederEnhet.navn(), ledersLedersLederEnhet.id(), ledersLedersLederEnhet.navn(), LocalDate.now().minusYears(1), null));
+
+        var ot = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .build();
+        orgtilknytningStateRepository.update(ot.fid(), ot);
+
+        var lederStateSegSelv = OrgEnhetLederState.builder().fid("LEDER_FID_1").orgEnhetId(orgenhet.id()).navident(ressurs.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(null).build();
+        var lederLederStateSegSelv = OrgEnhetLederState.builder().fid("LEDER_FID_1").orgEnhetId(ledersLederEnhet.id()).navident(ressurs.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(LocalDate.now().minusDays(15)).build();
+        var lederslederState =   OrgEnhetLederState.builder().fid("LEDER_FID_2").orgEnhetId(ledersLedersLederEnhet.id()).navident(leder1.navident()).startdato(LocalDate.now().minusYears(1)).sluttdato(null).build();
+        var lederlederState2 =       OrgEnhetLederState.builder().fid("LEDER_FID_3").orgEnhetId(ledersLederEnhet.id()).navident(leder2.navident()).startdato(LocalDate.now().minusDays(14)).sluttdato(null).build();
+        orgEnhetLederStateRepository.update(lederStateSegSelv.fid(),lederStateSegSelv);
+        orgEnhetLederStateRepository.update(lederLederStateSegSelv.fid(),lederLederStateSegSelv);
+        orgEnhetLederStateRepository.update(lederslederState.fid(),lederslederState);
+        orgEnhetLederStateRepository.update(lederlederState2.fid(),lederlederState2);
+
+        final var response = gqlUtil.postForResource("ressurs/ledere_over_rekursivt.graphql");
+
+        final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
+        assertEquals(2, ledere.size());
+
+        // Navident til leder på første nivå der ressurs ikke selv er leder skal returneres
+        assertEquals(leder1.navident(),                  ledere.get(0).get("ressurs").get("navident").textValue());
+        assertEquals(ot.gyldigFom(),                     LocalDate.parse(ledere.get(0).get("gyldigFom").textValue()));
+        assertEquals(lederLederStateSegSelv.sluttdato(), LocalDate.parse(ledere.get(0).get("gyldigTom").textValue()));
+        assertEquals(ledersLedersLederEnhet.id(),        ledere.get(0).get("orgEnhet").get("id").textValue());
+
+        assertEquals(leder2.navident(),             ledere.get(1).get("ressurs").get("navident").textValue());
+        assertEquals(lederlederState2.startdato(),  LocalDate.parse(ledere.get(1).get("gyldigFom").textValue()));
+        assertEquals(ot.gyldigTom(),                LocalDate.parse(ledere.get(1).get("gyldigTom").textValue()));
+        assertEquals(ledersLederEnhet.id(),         ledere.get(1).get("orgEnhet").get("id").textValue());
     }
 }

@@ -19,6 +19,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class LederResolver {
@@ -110,37 +112,72 @@ public class LederResolver {
         if (kunDOL) {
             oter = oter.stream().filter(OrgtilknytningState::erDagligOppfolging).toList();
         }
-        List<LederForRessurs> lederForRessurs = new ArrayList<>();
+        List<LederForRessurs> ledereForRessurs = new ArrayList<>();
         oter.forEach(ot -> {
+            var lederForRessursPerOt = new ArrayList<LederForRessurs>();
             var lederStates = getLedereForOrgEnhetIPeriode(ot.orgEnhetId(), ot.gyldigFom(), ot.gyldigTom());
             lederStates.forEach(lederState -> {
                 if (lederState.navident().equals(navident)) {
                     getLedereForOverOrgenheterSomIkkeErAngittNavident(ot.orgEnhetId(), lederState.startdato(), lederState.sluttdato(), navident).forEach(
-                        overEnhetLederState -> lederForRessurs.add(new LederForRessurs(
+                        overEnhetLederState -> lederForRessursPerOt.add(new LederForRessurs(
                                 overEnhetLederState.navident(),
                                 overEnhetLederState.orgEnhetId(),
-                                DateUtils.foer(overEnhetLederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : overEnhetLederState.startdato(),
-                                DateUtils.etter(overEnhetLederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : overEnhetLederState.sluttdato(),
+                                DateUtil.foer(overEnhetLederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : overEnhetLederState.startdato(),
+                                DateUtil.etter(overEnhetLederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : overEnhetLederState.sluttdato(),
                                 ot.erDagligOppfolging()
                             )
                         ));
                 } else {
-                    lederForRessurs.add(new LederForRessurs(
+                    lederForRessursPerOt.add(new LederForRessurs(
                         lederState.navident(),
                         ot.orgEnhetId(),
-                        DateUtils.foer(lederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
-                        DateUtils.etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
+                        DateUtil.foer(lederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
+                        DateUtil.etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
                         ot.erDagligOppfolging()
                     ));
                 }
             });
+            ledereForRessurs.addAll(ryddOverlappendePerioderForSammeEnhet(lederForRessursPerOt));
         });
-        return lederForRessurs.stream().sorted(lederForRessursComparator).toList();
+        return ledereForRessurs.stream().sorted(lederForRessursComparator).toList();
     }
+
+    private List<LederForRessurs> ryddOverlappendePerioderForSammeEnhet(List<LederForRessurs> ledereForRessurs) {
+        List<LederForRessurs> ryddetLedereForRessurs = new ArrayList<>();
+        ledereForRessurs.stream()
+                .sorted(Comparator.comparing(LederForRessurs::startdato))
+                .forEach(leder -> {
+                    var min = ledereForRessurs.stream()
+                        .filter(otherLeder ->
+                            !Objects.equals(otherLeder.startdato(), leder.startdato())
+                                && otherLeder.startdato().isAfter(leder.startdato())
+                                && DateUtil.intervalCoversDate(otherLeder.startdato(), otherLeder.sluttdato(), leder.sluttdato())
+                        )
+                        .map(LederForRessurs::startdato)
+                        .min(Comparator.naturalOrder());
+
+                    if (min.isPresent() && !Objects.equals(min.get(), leder.sluttdato())) {
+                        ryddetLedereForRessurs.add(new LederForRessurs(leder, min.get().minusDays(1)));
+                    } else {
+                        ryddetLedereForRessurs.add(leder);
+                    }
+                });
+        return ryddetLedereForRessurs;
+    }
+
+//    private boolean isCovered(OrgEnhetLederState state, List<OrgEnhetLederState> lederStates) {
+//        return lederStates.stream()
+//            .anyMatch(otherState ->
+//                !Objects.equals(otherState.fid(), state.fid())
+//                    && PeriodeUtil.intervalCoversDate(otherState.startdato(), otherState.sluttdato(), state.startdato())
+//                    && PeriodeUtil.intervalCoversDate(otherState.startdato(), otherState.sluttdato(), state.sluttdato())
+//            );
+//    }
+
 
     private List<OrgEnhetLederState> getLedereForOrgEnhetIPeriode(String orgEnhetId, LocalDate startdato, LocalDate sluttdato) {
         return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream()
-            .filter(lederState -> DateUtils.overlapsInterval(startdato, sluttdato, lederState.startdato(), lederState.sluttdato()))
+            .filter(lederState -> DateUtil.overlapsInterval(startdato, sluttdato, lederState.startdato(), lederState.sluttdato()))
             .sorted(orgEnhetLederStateComparator)
             .toList();
     }
@@ -151,21 +188,21 @@ public class LederResolver {
             if (!lederState.navident().equals(navident)) {
                 lederStates.add(
                     lederState.toBuilder()
-                        .startdato(DateUtils.foer(lederState.startdato(), startdato) ? startdato : lederState.startdato())
-                        .sluttdato(DateUtils.etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato())
+                        .startdato(DateUtil.foer(lederState.startdato(), startdato) ? startdato : lederState.startdato())
+                        .sluttdato(DateUtil.etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato())
                         .build()
                 );
             } else {
                 // Har enheten flere overordnede enheter i perioden (e.g. organiseringen har endret seg)?
                 organiseringStateRepository.findById(orgEnhetId).stream()
                     .filter(organiseringState -> organiseringState.id().equals(orgEnhetId))
-                    .filter(organiseringState -> DateUtils.overlapsInterval(startdato, sluttdato, organiseringState))
+                    .filter(organiseringState -> DateUtil.overlapsInterval(startdato, sluttdato, organiseringState.gyldigFom(), organiseringState.gyldigTom()))
                     .forEach(organiseringState ->
                         lederStates.addAll(
                             getLedereForOverOrgenheterSomIkkeErAngittNavident(
                                 organiseringState.idOver(),
-                                DateUtils.foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
-                                DateUtils.etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
+                                DateUtil.foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
+                                DateUtil.etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
                                 navident
                             )
                         )
@@ -187,8 +224,6 @@ public class LederResolver {
             .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo))
             .thenComparing(OrgEnhetLederState::orgEnhetId);
 
-    // ****
-
 
     private Optional<Ressurs> getLederRessurs(OrgEnhetLederState lederState) {
         return ressursStateRepository.findByNavident(lederState.navident(), MappingUtils::toRessurs);
@@ -201,7 +236,6 @@ public class LederResolver {
         return null;
     }
 
-
     record LederForRessurs(
         String lederNavident,
         String orgEnhetId,
@@ -209,47 +243,8 @@ public class LederResolver {
         LocalDate sluttdato,
         boolean erDagligOppfolging
     ) {
-        public boolean isActive() {
-            return (startdato == null || !startdato.isAfter(LocalDate.now())) &&
-                (sluttdato == null || !sluttdato.isBefore(LocalDate.now()));
+        public LederForRessurs(LederForRessurs other, LocalDate newSluttdato) {
+            this(other.lederNavident, other.orgEnhetId, other.startdato, newSluttdato, other.erDagligOppfolging);
         }
     }
-
-    // todo, unngå duplisering av koden
-    //    stort sett tatt fra PeriodeUtil klassen i api
-    private static class DateUtils{
-        static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
-
-        private static boolean foer(LocalDate dato, LocalDate sjekkMotDato) {
-            dato = dato == null ? NO_END_DATE : dato;
-            return dato.isBefore(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato);
-        }
-
-        static boolean etter(LocalDate dato, LocalDate sjekkMotDato) {
-            dato = dato == null ? NO_END_DATE : dato;
-            return dato.isAfter(sjekkMotDato == null ? NO_END_DATE : sjekkMotDato);
-        }
-
-        static boolean overlapsInterval(LocalDate start, LocalDate end, OrganiseringState organiseringState) {
-            end = end == null ? NO_END_DATE : end;
-            start = start == null ? LocalDate.MIN : start;
-            return organiseringState.gyldigFom().isBefore(dayAfter(end)) &&
-                (organiseringState.gyldigTom() == null || organiseringState.gyldigTom().isAfter(dayBefore(start)));
-        }
-
-        private static LocalDate dayAfter(LocalDate localDate) { return localDate.plusDays(1); }
-
-        private static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
-
-        public static boolean overlapsInterval(LocalDate startDateA, LocalDate endDateA, LocalDate startDateB, LocalDate endDateB) {
-            endDateA = endDateA == null ? NO_END_DATE : endDateA;
-            endDateB = endDateB == null ? NO_END_DATE : endDateB;
-            startDateA = startDateA == null ? LocalDate.MIN : startDateA;
-            startDateB = startDateB == null ? LocalDate.MIN : startDateB;
-
-            return startDateA.isBefore(dayAfter(endDateB)) && endDateA.isAfter(dayBefore(startDateB));
-        }
-    }
-
-
 }
