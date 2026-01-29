@@ -544,7 +544,7 @@ public class RessursController {
 
     @ExceptionHandler(Exception.class)
     private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
-        log.error("Intern feil ved opprettelse av ny ressurs", exception);
+        log.error("Intern feil i ressurs api", exception);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
