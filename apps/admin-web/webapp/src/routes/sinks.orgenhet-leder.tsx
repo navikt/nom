@@ -44,19 +44,10 @@ function OrgenhetLederPage() {
 
   const orgEnhetLederEvents = orgEnhetLederEventsQuery.data;
 
-  const orgenhetsLeaderStatesQuery = useSuspenseQuery({
-    ...getOrgenhetLederStatesOptions(search),
-    gcTime: Number.POSITIVE_INFINITY,
-    staleTime: Number.POSITIVE_INFINITY,
-  });
-
-  const orgenhetsLeaderStates = orgenhetsLeaderStatesQuery.data;
-
   return (
     <KafkaEventTableForOrgenhetLeder
       kafkaEvents={orgEnhetLederEvents}
       linkPrefix={"/state/orgenhet-leder"}
-      orgenhetsLeaderStates={orgenhetsLeaderStates}
     />
   );
 }
