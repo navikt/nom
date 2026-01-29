@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.dvh;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
@@ -18,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @ActiveProfiles("test")
@@ -33,7 +33,7 @@ public class DvhTestBase {
     protected DvhRestConsumer dvhRestConsumer;
 
     @Autowired
-    protected ObjectMapper om;
+    protected JsonMapper om;
 
     @Autowired
     protected DvhRepository dvhRepository;

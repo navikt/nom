@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.clients.dvhords;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
 import org.springframework.context.annotation.Profile;
@@ -12,6 +11,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriUtils;
+import tools.jackson.databind.JsonNode;
 
 import java.nio.charset.StandardCharsets;
 

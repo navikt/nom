@@ -56,7 +56,7 @@ spring:
           password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       acks: all
       retries: 30
       properties:
@@ -79,6 +79,11 @@ spring:
         provider:
           dvh-ords:
             token-uri: https://dvh.adeo.no/ords/dvh/oauth/token
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 ---
 spring:

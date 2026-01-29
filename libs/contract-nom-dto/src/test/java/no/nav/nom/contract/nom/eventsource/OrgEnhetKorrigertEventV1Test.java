@@ -1,29 +1,27 @@
 package no.nav.nom.contract.nom.eventsource;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-//import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 public class OrgEnhetKorrigertEventV1Test {
 
-    private static JsonSerde<Object> objectSerde;
+    private static JacksonJsonSerde<Object> objectSerde;
 
     @BeforeAll
     public static void createSerde() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
+        JsonMapper jsonMapper = new JsonMapper().rebuild()
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+            .build();
 
-        objectSerde = new JsonSerde<>(Object.class, objectMapper);
+        objectSerde = new JacksonJsonSerde<>(Object.class, jsonMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
     }
@@ -37,11 +35,11 @@ public class OrgEnhetKorrigertEventV1Test {
 
         final var eventSerde = objectSerde.copyWithType(OrgEnhetEvent.class);
 
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.findAndRegisterModules();
+//        JsonMapper jsonMapper = new JsonMapper();
+//        jsonMapper.findAndRegisterModules();
 
         eventSerde.deserializer().deserialize("dummy", json);
-//        OrgEnhetEvent orgEnhetEvent = objectMapper
+//        OrgEnhetEvent orgEnhetEvent = jsonMapper
 //            .readerFor(OrgEnhetEvent.class)
 //            .readValue(json);
 

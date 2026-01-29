@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -9,6 +7,8 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public class DvhOrgEnhetMockUtils {
 
     private final List<DvhOrgEnhetMock> response = new LinkedList<>();
     private final AppProperties appProperties;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private void mockDvhOrgEnhetResponse(String response) {
         stubFor(get("/dvh_nom/nom_ords_hrorg_orgenhet.json").willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
@@ -48,9 +48,9 @@ public class DvhOrgEnhetMockUtils {
 
     @SneakyThrows
     private void createResponse(List<DvhOrgEnhetMock> orgenhetMocks) {
-        val response = objectMapper.createObjectNode();
-        response.set("items", objectMapper.convertValue(orgenhetMocks, JsonNode.class));
-        mockDvhOrgEnhetResponse(objectMapper.writeValueAsString(response));
+        val response = jsonMapper.createObjectNode();
+        response.set("items", jsonMapper.convertValue(orgenhetMocks, JsonNode.class));
+        mockDvhOrgEnhetResponse(jsonMapper.writeValueAsString(response));
     }
 
     public OrgEnhetState dvhMockToState(DvhOrgEnhetMock dvhMock, int nr, String from, String to) {

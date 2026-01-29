@@ -1,15 +1,15 @@
 package no.nav.nom.apps.api.organisering.evtlistener;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.Map;
@@ -18,9 +18,9 @@ import java.util.Map;
 public class OrganiseringEventSourceListenerConfig {
 
     @Bean
-    ConsumerFactory<String, OrganiseringEvent> organiseringEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonDeserializer = new JsonDeserializer<>(OrganiseringEvent.class, objectMapper);
-        jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"), true);
+    ConsumerFactory<String, OrganiseringEvent> organiseringEventConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        final var jsonDeserializer = new JacksonJsonDeserializer<>(OrganiseringEvent.class, jsonMapper);
+        jsonDeserializer.configure(Map.of(JacksonJsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"), true);
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
     }
 

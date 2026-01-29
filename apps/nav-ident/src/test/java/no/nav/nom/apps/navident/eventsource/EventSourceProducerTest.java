@@ -45,10 +45,17 @@ public class EventSourceProducerTest extends EmbeddedKafkaTestBase {
                 .personOppslagVisited(true)
                 .idGeneratorVisited(true)
                 .responsProdusentVisited(true)
-                .respons(Respons.builder().httpStatus(HttpStatus.CREATED).body(Respons.Body.builder().navident("A000000").build()).build())
+                .respons(
+                    Respons.builder()
+                    .httpStatus(HttpStatus.CREATED)
+                        .body(
+                            Respons.Body.builder()
+                                .navident("A000000")
+                                .build())
+                        .build())
                 .build();
         kafkaTemplate.send(topic, need);
 
-        Awaitility.await().atMost(15, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.size() > 0);
+        Awaitility.await().atMost(15, SECONDS).pollInterval(10, MILLISECONDS).until(() -> !navidenter.isEmpty());
     }
 }

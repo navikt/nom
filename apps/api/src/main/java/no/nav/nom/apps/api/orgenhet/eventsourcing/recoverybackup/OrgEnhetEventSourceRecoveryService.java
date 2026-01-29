@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;
@@ -9,6 +7,8 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -22,7 +22,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.collectToOrderedMap;
 public class OrgEnhetEventSourceRecoveryService {
     private final OrgEnhetEventSourceRepository repository;
     private final OrgEnhetEventProducer orgEnhetEventProducer;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final LeaderElection leaderElection;
 
     @Transactional
@@ -32,9 +32,9 @@ public class OrgEnhetEventSourceRecoveryService {
             alleEventsource.forEach((key, event) -> {
                 try {
                     if (dryRun) {
-                        log.info("Replaying {}: {}", event.get("type"), event.asText());
+                        log.info("Replaying {}: {}", event.get("type"), event.asString());
                     } else {
-                        OrgEnhetEvent orgEnhetOpprettetEventV1 = objectMapper.convertValue(event, OrgEnhetEvent.class);
+                        OrgEnhetEvent orgEnhetOpprettetEventV1 = jsonMapper.convertValue(event, OrgEnhetEvent.class);
                         orgEnhetEventProducer.replayMessage(key, orgEnhetOpprettetEventV1);
                     }
                 } catch (Exception e) {

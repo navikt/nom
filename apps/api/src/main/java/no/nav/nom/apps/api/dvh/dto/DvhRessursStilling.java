@@ -1,10 +1,10 @@
 package no.nav.nom.apps.api.dvh.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Value;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -45,9 +45,9 @@ public class DvhRessursStilling {
 
     private static String getNullableOrErrorStringNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
-        return (node.isNull() || node.asText().startsWith("-")) ?
+        return (node.isNull() || node.asString().startsWith("-")) ?
             null :
-            node.asText();
+            node.asString();
     }
 
     public Sektor getSektor() {
@@ -82,19 +82,19 @@ public class DvhRessursStilling {
 
         if (nonNull(navident)) {
             dvhRessursStillingBuilder
-                .stillingDatoFom(localDateOf(json.get("fra_dato").asText()))
-                .stillingDatoTom(localDateOf(json.get("til_dato").asText()))
+                .stillingDatoFom(localDateOf(json.get("fra_dato").asString()))
+                .stillingDatoTom(localDateOf(json.get("til_dato").asString()))
                 .stillingAgressoId(getNullableOrErrorStringNode(json, "orgenhet"))
-                .stillingOrgenhetNavn(json.get("orgenhet_besk").asText())
+                .stillingOrgenhetNavn(json.get("orgenhet_besk").asString())
                 .ressursAgressoId(getNullableOrErrorStringNode(json, "orgenhet_paa_ressurs"))
                 .ressursOrgenhetNiv(getNullableOrErrorStringNode(json, "orgenhet_paa_ressurs_niva"))
                 .ressursRemedyEnhetId(getNullableOrErrorStringNode(json, "remedy_enhet_id"))
                 .stillingRessursAgressoId(getNullableOrErrorStringNode(json, "stilling_orgenhet_paa_ressurs"))
                 .stillingAnsettelsesTypeBesk(getNullableOrErrorStringNode(json, "ansettelsestype_besk"))
-                .ressursAgressoDatoFom(localDateOf(json.get("agresso_date_from").asText()))
-                .ressursAgressoDatoTom(localDateOf(json.get("agresso_date_to").asText()))
-                .ressursDvhDatoFom(localDateOf(json.get("date_from").asText()))
-                .ressursDvhDatoTom(localDateOf(json.get("date_to").asText()));
+                .ressursAgressoDatoFom(localDateOf(json.get("agresso_date_from").asString()))
+                .ressursAgressoDatoTom(localDateOf(json.get("agresso_date_to").asString()))
+                .ressursDvhDatoFom(localDateOf(json.get("date_from").asString()))
+                .ressursDvhDatoTom(localDateOf(json.get("date_to").asString()));
         }
 
         return dvhRessursStillingBuilder.build();

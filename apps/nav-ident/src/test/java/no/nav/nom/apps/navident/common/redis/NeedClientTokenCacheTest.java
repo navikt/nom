@@ -2,8 +2,11 @@ package no.nav.nom.apps.navident.common.redis;
 
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
@@ -13,8 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
 
 @Import(TestRedisConfiguration.class)
 @EnableCaching
@@ -25,6 +29,20 @@ class NeedClientTokenCacheTest extends SpringBootTestBase {
     @Mock AnonymousAuthenticationToken anonAuthentication;
     @Mock SecurityContext securityContext;
     @Mock Jwt jwt;
+
+    private AutoCloseable mocks;
+
+    @BeforeEach
+    void initMocks() {
+        mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        if (mocks != null) {
+            mocks.close();
+        }
+    }
 
     @Test
     public void cachePutAndHit() {

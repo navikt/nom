@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.pdl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -90,21 +90,21 @@ public class PdlClient {
         final var kjonn = person.get("kjoenn")
             .get(0)
             .get("kjoenn")
-            .asText();
+            .asString();
 
         final var jsonFoedsel = person.get("foedselsdato").get(0);
 
         // foedselsdato might be missing, foedselsaar is always present.
-        LocalDate foedselsdato = jsonFoedsel.hasNonNull("foedselsdato") ? LocalDate.parse(jsonFoedsel.get("foedselsdato").asText()) :
+        LocalDate foedselsdato = jsonFoedsel.hasNonNull("foedselsdato") ? LocalDate.parse(jsonFoedsel.get("foedselsdato").asString()) :
             LocalDate.of(jsonFoedsel.get("foedselsaar").asInt(), 1, 1);
 
 
         return Person.builder()
             .fornavn(navn.get("fornavn")
-                .asText())
-            .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
+                .asString())
+            .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asString() : null)
             .etternavn(navn.get("etternavn")
-                .asText())
+                .asString())
             .kjonn(Kjonn.valueOf(kjonn))
             .foedselsdato(foedselsdato)
             .build();

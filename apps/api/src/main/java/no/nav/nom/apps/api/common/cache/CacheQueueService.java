@@ -1,13 +1,13 @@
 package no.nav.nom.apps.api.common.cache;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ public class CacheQueueService {
 
         if(existingCacheQueue != null) {
             log.info("CacheQueue already exists for {}. Cache will be updated. Existing: {}, to be added: {}", cacheKey, existingCacheQueue, otEndretData);
-            ObjectReader reader = new ObjectMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
+            ObjectReader reader = new JsonMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
             List<OTEndretData> payload = reader.readValue(existingCacheQueue.getPayload());
             payload.add(otEndretData);
 
-            existingCacheQueue.setPayload(new ObjectMapper().convertValue(removeDuplicateOTChangesEntries(payload), JsonNode.class));
+            existingCacheQueue.setPayload(new JsonMapper().convertValue(removeDuplicateOTChangesEntries(payload), JsonNode.class));
             log.info("CacheQueue updated: {}", existingCacheQueue);
             cacheQueueRepository.save(existingCacheQueue);
         } else {
@@ -44,7 +44,7 @@ public class CacheQueueService {
             CacheQueue cacheQueue = new CacheQueue();
             cacheQueue.setCacheKey(cacheKey);
             cacheQueue.setCacheType(CacheType.OTENDRINGER.toString());
-            cacheQueue.setPayload(new ObjectMapper().convertValue(payload, JsonNode.class));
+            cacheQueue.setPayload(new JsonMapper().convertValue(payload, JsonNode.class));
             log.info("CacheQueue added: {}", cacheQueue);
             cacheQueueRepository.save(cacheQueue);
         }
@@ -70,7 +70,7 @@ public class CacheQueueService {
     public Map<String, List<OTEndretData>> getOTEndringerFromCache() {
         Map <String, List<OTEndretData>> otEndringer = new HashMap<>();
         List<CacheQueue> cacheQueues = cacheQueueRepository.findAllByType(CacheType.OTENDRINGER.toString());
-        ObjectReader reader = new ObjectMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
+        ObjectReader reader = new JsonMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
         cacheQueues.forEach(cacheQueue -> {
             try {
                 List<OTEndretData> payload = reader.readValue(cacheQueue.getPayload());

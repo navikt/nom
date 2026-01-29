@@ -1,10 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -19,6 +14,7 @@ import org.apache.kafka.streams.TopologyTestDriver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Properties;
 
@@ -31,7 +27,7 @@ public class EventsourceToExternalEventsTestTopology {
     static final String ORGTILKNYTNING_INPUT_TOPIC = "orgtilknytningInputTopic";
     static final String RESSURS_HENDELSE_OUTPUT_TOPIC = "ressursHendelseOutputTopic";
 
-    ObjectMapper objectMapper = configureObjectMapper();
+    JsonMapper jsonMapper = configureJsonMapper();
 
     private TopologyTestDriver topologyTestDriver;
 
@@ -58,7 +54,7 @@ public class EventsourceToExternalEventsTestTopology {
     private void setupKafkaTransformer() {
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
-        final var objectSerde = kafkaConfig.objectSerde(objectMapper);
+        final var objectSerde = kafkaConfig.objectSerde(jsonMapper);
 
         when(appProperties.ressursEvtsrcTopic()).thenReturn(RESSURS_INPUT_TOPIC);
         when(appProperties.orgtilknytningEvtsrcTopic()).thenReturn(ORGTILKNYTNING_INPUT_TOPIC);
@@ -66,7 +62,7 @@ public class EventsourceToExternalEventsTestTopology {
 
 
         new EventsourceToExternalEvents(
-                objectMapper,
+            jsonMapper,
                 objectSerde,
                 streamsBuilder,
                 appProperties
@@ -87,14 +83,9 @@ public class EventsourceToExternalEventsTestTopology {
 
     }
 
-    private static ObjectMapper configureObjectMapper() {
-        final var objectMapper = new ObjectMapper();
+    private static JsonMapper configureJsonMapper() {
 
-        return objectMapper.findAndRegisterModules()
-                .registerModule(new ParameterNamesModule())
-                .registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return new JsonMapper();
     }
 
 }

@@ -37,7 +37,7 @@ import org.apache.kafka.streams.state.Stores;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -55,7 +55,7 @@ public class EventsrcToHendelser {
         @Value("${app.kafka.organisering-evtsrc-topic}") String organiseringEvtsrcTopic,
         @Value("${app.kafka.orgtilknytning-evtsrc-topic}") String orgtilknytningEvtsrcTopic,
         @Value("${app.kafka.state-topic.v1}") String stateTopic,
-        JsonSerde<Object> objectSerde,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();

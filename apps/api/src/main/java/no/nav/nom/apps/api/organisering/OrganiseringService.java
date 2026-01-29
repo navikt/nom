@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.organisering;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
@@ -16,6 +14,8 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,19 +33,19 @@ public class OrganiseringService {
 
     private final OrgenhetService orgenhetService;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private final OrganiseringEventCommandService organiseringEventCommandService;
 
     public OrganiseringService(
         OrganiseringStateRepository organiseringStateRepository, OrgenhetService orgenhetService,
         OrganiseringEventCommandService organiseringEventCommandService,
-        ObjectMapper objectMapper
+        JsonMapper jsonMapper
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.organiseringEventCommandService = organiseringEventCommandService;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
@@ -205,7 +205,7 @@ public class OrganiseringService {
     }
 
     public JsonNode getRawData(OrganiseringState organiseringState) {
-        return this.objectMapper.valueToTree(organiseringState);
+        return this.jsonMapper.valueToTree(organiseringState);
     }
 
     private InputMetadata createInputMetadata() {

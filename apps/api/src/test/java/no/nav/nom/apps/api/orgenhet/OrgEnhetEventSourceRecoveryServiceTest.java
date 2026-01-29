@@ -1,9 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventProducer;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSource;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSourceRecoveryService;
@@ -15,6 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class OrgEnhetEventSourceRecoveryServiceTest {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    JsonMapper jsonMapper = new JsonMapper();
 
     public OrgEnhetEventSourceRecoveryServiceTest() {
-        objectMapper.registerModule(new JavaTimeModule());
+        jsonMapper.rebuild().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
     }
 
     @Mock
-    private ObjectMapper objectMapperMock;
+    private JsonMapper objectMapperMock;
 
     @Mock
     private LeaderElection leaderElection;
@@ -256,8 +256,8 @@ public class OrgEnhetEventSourceRecoveryServiceTest {
         jsonNodeStrings.forEach(jsonNodeString -> {
             JsonNode jsonNode;
             try {
-                jsonNode = objectMapper.readTree(jsonNodeString);
-            } catch (JsonProcessingException e) {
+                jsonNode = jsonMapper.readTree(jsonNodeString);
+            } catch (JacksonException e) {
                 throw new RuntimeException(e);
             }
             jsonNodes.add(new OrgEnhetEventSource("event-" + count.incrementAndGet(), jsonNode));

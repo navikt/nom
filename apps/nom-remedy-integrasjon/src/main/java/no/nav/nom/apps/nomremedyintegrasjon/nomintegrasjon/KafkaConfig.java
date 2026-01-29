@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.RessursState;
 import org.apache.kafka.common.TopicPartition;
@@ -8,7 +7,7 @@ import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -24,17 +23,19 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.backoff.FixedBackOff;
+import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
 public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, no.nav.nom.contract.nom.state.RessursState>>
-    nomRessursStateKafkaListenerContainerFactory(ConsumerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateConsumerFactory, DefaultErrorHandler ressursErrorHandler) {
+    nomRessursStateKafkaListenerContainerFactory(ConsumerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateConsumerFactory,
+                                                 DefaultErrorHandler ressursErrorHandler) {
         var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, no.nav.nom.contract.nom.state.RessursState>();
         concurrentKafkaListenerContainerFactory.setConsumerFactory(nomRessursStateConsumerFactory);
         concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
@@ -44,9 +45,9 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, RessursState> nomRessursStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<RessursState> jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
+    public ConsumerFactory<String, RessursState> nomRessursStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        JacksonJsonDeserializer<RessursState> jacksonJsonDeserializer = new JacksonJsonDeserializer<>(RessursState.class, jsonMapper);
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jacksonJsonDeserializer);
     }
 
     @Bean
@@ -61,9 +62,9 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, OrgtilknytningState> nomOrgtilknytningStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<OrgtilknytningState> jsonDeserializer = new JsonDeserializer<>(OrgtilknytningState.class, objectMapper);
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
+    public ConsumerFactory<String, OrgtilknytningState> nomOrgtilknytningStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        JacksonJsonDeserializer<OrgtilknytningState> jacksonJsonDeserializer = new JacksonJsonDeserializer<>(OrgtilknytningState.class, jsonMapper);
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jacksonJsonDeserializer);
     }
 
     @Bean
@@ -95,8 +96,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, no.nav.nom.contract.nom.state.OrgtilknytningState> nomOrgtilknytningStateDltProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonSerializer = new JsonSerializer<no.nav.nom.contract.nom.state.OrgtilknytningState>(objectMapper);
+    ProducerFactory<String, no.nav.nom.contract.nom.state.OrgtilknytningState> nomOrgtilknytningStateDltProducerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        final var jsonSerializer = new JacksonJsonSerializer<no.nav.nom.contract.nom.state.OrgtilknytningState>(jsonMapper);
         properties.setClientId("nomOrgtilknytningStateDltProducer");
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
@@ -112,8 +113,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateDltProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonSerializer = new JsonSerializer<no.nav.nom.contract.nom.state.RessursState>(objectMapper);
+    ProducerFactory<String, no.nav.nom.contract.nom.state.RessursState> nomRessursStateDltProducerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        final var jsonSerializer = new JacksonJsonSerializer<no.nav.nom.contract.nom.state.RessursState>(jsonMapper);
         properties.setClientId("nomRessursStateDltProducer");
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }

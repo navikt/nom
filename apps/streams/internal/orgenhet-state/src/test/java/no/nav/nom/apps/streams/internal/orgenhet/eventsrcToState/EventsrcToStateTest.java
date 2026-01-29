@@ -1,10 +1,5 @@
 package no.nav.nom.apps.streams.internal.orgenhet.eventsrcToState;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.Event;
@@ -25,6 +20,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +28,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 public class EventsrcToStateTest {
-    private ObjectMapper objectMapper = configureObjectMapper();
+    private JsonMapper jsonMapper = configureJsonMapper();
     private TestInputTopic<String, OrgEnhetEvent> inputTopic;
     private TestOutputTopic<String, OrgEnhetState> outputTopic;
 
@@ -196,13 +192,13 @@ public class EventsrcToStateTest {
     private void setupKafkaTransformer(){
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
-        final var objectSerde = kafkaConfig.objectSerde(objectMapper);
+        final var objectSerde = kafkaConfig.objectSerde(jsonMapper);
 
 
         new EventsrcToState(
                 "inputTopic",
                 "outputTopic",
-                objectMapper,
+            jsonMapper,
                 objectSerde,
                 streamsBuilder
         );
@@ -218,13 +214,7 @@ public class EventsrcToStateTest {
         outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), orgEnhetStateSerde.deserializer());
     }
 
-    private static ObjectMapper configureObjectMapper(){
-        final var objectMapper = new ObjectMapper();
-
-        return objectMapper.findAndRegisterModules()
-                .registerModule(new ParameterNamesModule())
-                .registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    private static JsonMapper configureJsonMapper() {
+        return new JsonMapper();
     }
 }

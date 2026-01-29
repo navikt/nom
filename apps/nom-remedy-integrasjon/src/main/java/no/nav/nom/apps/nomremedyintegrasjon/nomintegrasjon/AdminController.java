@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.HtmlUtils;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -91,11 +90,6 @@ public class AdminController {
     public ResponseEntity<String> deleteErrorState(@PathVariable String fid) {
         nomRemedyIntegrasjonService.deleteErrorState(fid);
         return ResponseEntity.ok("Slettet error state med id: " + HtmlUtils.htmlEscape(fid));
-    }
-
-    @GetMapping(value = "getAllDelayStates")
-    public ResponseEntity<Flux<Event>> getAllDelayStates() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonService.getAllDelayedEvents());
     }
 
     @GetMapping(value = "getAllDelayedEventsBlocking")

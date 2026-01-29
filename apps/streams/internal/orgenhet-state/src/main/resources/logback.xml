@@ -7,6 +7,8 @@
         </encoder>
     </appender>
 
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
 <!-- NOM loggers -->
 <!--    <logger name="no.nav.nom" level="debug" />-->
 

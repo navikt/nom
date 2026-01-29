@@ -18,11 +18,11 @@ import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties;
 import no.nav.nom.apps.api.common.security.JWTFilter;
 import no.nav.nom.apps.api.common.security.SecurityConfig;
 import no.nav.nom.apps.api.graphql.GraphQlStateReposConfig;
-import no.nav.nom.apps.api.graphql.NomGraphQlSupportImpl;
 import no.nav.nom.apps.api.graphql.NomGraphQlControllerImpl;
+import no.nav.nom.apps.api.graphql.NomGraphQlSupportImpl;
 import no.nav.nom.apps.api.graphql.config.ExceptionhandlerConfig;
-import no.nav.nom.libs.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.gql.NomGraphQlAutoConfiguration;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
 import no.nav.security.mock.oauth2.MockOAuth2Server;
@@ -30,15 +30,13 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration;
-import org.springframework.boot.autoconfigure.graphql.servlet.GraphQlWebMvcAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.filter.TypeExcludeFilters;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTypeExcludeFilter;
-import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureHttpGraphQlTester;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.graphql.autoconfigure.GraphQlAutoConfiguration;
+import org.springframework.boot.graphql.autoconfigure.servlet.GraphQlWebMvcAutoConfiguration;
+import org.springframework.boot.graphql.test.autoconfigure.tester.AutoConfigureHttpGraphQlTester;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -69,7 +67,6 @@ import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
 
 @Slf4j
 @ActiveProfiles({"GraphQLTest", "test","localgql"})
-@TypeExcludeFilters({GraphQlTypeExcludeFilter.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @AutoConfigureHttpGraphQlTester

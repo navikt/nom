@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSource;
@@ -9,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,18 +19,18 @@ public class OrgEnhetEventProducer {
 
     private final KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate;
     private final OrgEnhetEventSourceRepository orgEnhetEventSourceRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final boolean shouldSaveToDb;
 
     public OrgEnhetEventProducer(
             KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate,
             OrgEnhetEventSourceRepository orgEnhetEventSourceRepository,
-            ObjectMapper objectMapper,
+            JsonMapper jsonMapper,
             LocalConfiguration localConfiguration
     ) {
         this.orgEnhetEventProducerTemplate = orgEnhetEventProducerTemplate;
         this.orgEnhetEventSourceRepository = orgEnhetEventSourceRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
@@ -48,6 +48,6 @@ public class OrgEnhetEventProducer {
     }
 
     private void saveToDB(OrgEnhetEvent event, String eventKey) {
-        orgEnhetEventSourceRepository.save(OrgEnhetEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
+        orgEnhetEventSourceRepository.save(OrgEnhetEventSource.builder().eventKey(eventKey).payload(jsonMapper.valueToTree(event)).build());
     }
 }
