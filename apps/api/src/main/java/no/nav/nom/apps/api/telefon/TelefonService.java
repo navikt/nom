@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -55,6 +56,14 @@ public class TelefonService {
                 );
 
         return sorted;
+    }
+
+    public List<Telefon> hentTelefonnummreForAktiveRessurser() {
+        return ressursStateRepository.findAllActiveRessurser().values()
+            .stream().filter(ressurs -> ressurs.jobbtelefon() != null && StringUtils.trim(ressurs.jobbtelefon().nummer()) != null)
+            .map(ressurs -> new Telefon(ressurs.navident(), ressurs.jobbtelefon().nummer(), ressurs.jobbtelefon().type()))
+            .sorted(telefonComparator())
+            .toList();
     }
 
     public List<Telefon> fetchNavTelefoner() {
