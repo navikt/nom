@@ -105,11 +105,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory(KafkaProperties properties, JsonMapper objectMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgEnhetLederState.class, objectMapper));
+            new JacksonJsonDeserializer<>(OrgEnhetLederState.class, objectMapper)
+        );
     }
 
     @Bean
