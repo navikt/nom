@@ -4,10 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import {
-  getOrgenhetLederEventsOptions,
-  searchSchema,
-} from "~/api/queries.ts";
+import { getOrgenhetLederEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
 import { KafkaEventTableForOrgenhetLeder } from "~/components/KafkaEventTableForOrgenhetLeder.tsx";

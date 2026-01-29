@@ -1,5 +1,5 @@
 import { FilesIcon } from "@navikt/aksel-icons";
-import {Button, HGrid, HStack, Spacer, Table, VStack} from "@navikt/ds-react";
+import { Button, HGrid, HStack, Spacer, Table, VStack } from "@navikt/ds-react";
 import { Link } from "@tanstack/react-router";
 import React from "react";
 import { JsonView } from "react-json-view-lite";
@@ -54,15 +54,20 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                 </Table.HeaderCell>
                 <Table.DataCell>{kafkaEvent.navident}</Table.DataCell>
                 <Table.DataCell>
-                  <JsonModal data={kafkaEvent} text={kafkaEvent.data?.type? kafkaEvent.data?.type.split("$")[0] : ''} />
+                  <JsonModal
+                    data={kafkaEvent}
+                    text={
+                      kafkaEvent.data?.type
+                        ? kafkaEvent.data?.type.split("$")[0]
+                        : ""
+                    }
+                  />
                 </Table.DataCell>
                 <Table.DataCell>
                   {formatDisplayDatetime(kafkaEvent.metadata?.createdTimestamp)}
                 </Table.DataCell>
                 <Table.DataCell>
-                  {formatDisplayDatetime(
-                    kafkaEvent.metadata?.createdTimestamp,
-                  )}
+                  {formatDisplayDatetime(kafkaEvent.metadata?.createdTimestamp)}
                 </Table.DataCell>
               </Table.ExpandableRow>
             );
@@ -113,7 +118,11 @@ export function EmbeddedJsonView(props: { jsonData: object | any[] }) {
   );
 }
 
-export function OrgenhetLederEventDateRange({ events }: { events: OrgEnhetLederEventWithNavident[] }) {
+export function OrgenhetLederEventDateRange({
+  events,
+}: {
+  events: OrgEnhetLederEventWithNavident[];
+}) {
   const latestEvent = events[0];
   const firstEvent = events[events.length - 1];
 
