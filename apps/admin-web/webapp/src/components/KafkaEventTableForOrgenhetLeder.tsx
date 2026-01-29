@@ -1,33 +1,25 @@
 import { FilesIcon } from "@navikt/aksel-icons";
-import { Button, HGrid, Table, VStack } from "@navikt/ds-react";
+import { Button, HGrid, HStack, Spacer, Table, VStack } from "@navikt/ds-react";
 import { Link } from "@tanstack/react-router";
 import React from "react";
 import { JsonView } from "react-json-view-lite";
 
-import { EventDateRange } from "~/components/EventDateRange.tsx";
-import { EventOrigination } from "~/components/EventOrigination.tsx";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
-import type { KafkaEvent } from "~/types.ts";
-import type { OrgEnhetLederState } from "~/types/nom-admin/nom-admin-models.ts";
+import type { OrgEnhetLederEventWithNavident } from "~/types/nom-admin/nom-admin-models.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
 
 export function KafkaEventTableForOrgenhetLeder(props: {
-  kafkaEvents: KafkaEvent[];
+  kafkaEvents: OrgEnhetLederEventWithNavident[];
   linkPrefix: string;
-  orgenhetsLeaderStates: OrgEnhetLederState[];
 }) {
   const kafkaEvents = props.kafkaEvents;
   const { data, sort, handleSort } = useTableSort(kafkaEvents ?? [], "dato");
 
-  function getNavident(fid: string): string | undefined {
-    return props.orgenhetsLeaderStates.find((l) => l.fid === fid)?.navident;
-  }
-
   return (
     <div>
-      <EventDateRange events={kafkaEvents} />
+      <OrgenhetLederEventDateRange events={kafkaEvents} />
       <Table
         onSortChange={(sortKey) => handleSort(sortKey)}
         size="small"
@@ -60,17 +52,22 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                     {kafkaEvent.fid}
                   </Link>
                 </Table.HeaderCell>
+                <Table.DataCell>{kafkaEvent.navident}</Table.DataCell>
                 <Table.DataCell>
-                  {getNavident(kafkaEvent.fid) ?? "—"}
-                </Table.DataCell>
-                <Table.DataCell>
-                  <JsonModal data={kafkaEvent} text={kafkaEvent.type} />
+                  <JsonModal
+                    data={kafkaEvent}
+                    text={
+                      kafkaEvent.data?.type
+                        ? kafkaEvent.data?.type.split("$")[0]
+                        : ""
+                    }
+                  />
                 </Table.DataCell>
                 <Table.DataCell>
                   {formatDisplayDatetime(kafkaEvent.metadata?.createdTimestamp)}
                 </Table.DataCell>
                 <Table.DataCell>
-                  <EventOrigination metadata={kafkaEvent.metadata} />
+                  {formatDisplayDatetime(kafkaEvent.metadata?.createdTimestamp)}
                 </Table.DataCell>
               </Table.ExpandableRow>
             );
@@ -118,5 +115,33 @@ export function EmbeddedJsonView(props: { jsonData: object | any[] }) {
         </>
       )}
     </HGrid>
+  );
+}
+
+export function OrgenhetLederEventDateRange({
+  events,
+}: {
+  events: OrgEnhetLederEventWithNavident[];
+}) {
+  const latestEvent = events[0];
+  const firstEvent = events[events.length - 1];
+
+  return (
+    <HStack>
+      <div>
+        Viser {events.length} events i perioden{" "}
+        {formatDisplayDatetime(firstEvent?.metadata?.createdTimestamp)} -{" "}
+        {formatDisplayDatetime(latestEvent?.metadata?.createdTimestamp)}
+      </div>
+      <Spacer />
+      <Button
+        icon={<FilesIcon />}
+        onClick={() => copyToClipboard(events)}
+        size={"xsmall"}
+        variant={"secondary"}
+      >
+        Kopier JSON[]
+      </Button>
+    </HStack>
   );
 }
