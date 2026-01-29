@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
@@ -17,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,10 +25,10 @@ import java.util.concurrent.CompletableFuture;
 public class OrgEnhetCommandService {
 
     private final OrgEnhetEventProducer eventProducer;
-    private final ObjectMapper objectMapper;
-    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, ObjectMapper objectMapper) {
+    private final JsonMapper jsonMapper;
+    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, JsonMapper jsonMapper) {
         this.eventProducer = eventProducer;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     public String opprettOrgEnhet(OpprettOrgEnhet opprettOrgEnhet) {
@@ -44,7 +44,7 @@ public class OrgEnhetCommandService {
     private OrgEnhetOpprettetEventV1 getOpprettEvent(String fid, OpprettOrgEnhet opprettOrgEnhet) {
         OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData additionalAgressoData = null;
         if (opprettOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
-            var input = objectMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
+            var input = jsonMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             try {
                 var raw = input.isArray() ? input.get(0): input;
                 DvhOrgenhetV2 dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
@@ -88,7 +88,7 @@ public class OrgEnhetCommandService {
     public CompletableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
         OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
-            var input = objectMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
+            var input = jsonMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             var raw = input.isArray() ? input.get(0): input;
             DvhOrgenhetV2 dvhOrgenhet2 = DvhOrgenhetV2.fromOrds(raw);
             additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(

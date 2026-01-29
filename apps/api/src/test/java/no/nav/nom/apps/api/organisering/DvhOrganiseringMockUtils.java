@@ -1,16 +1,13 @@
 package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -22,7 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 public class DvhOrganiseringMockUtils {
 
     private final List<DvhOrganiseringMock> response = new CopyOnWriteArrayList<>();
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     public void addToResponse(DvhOrganiseringMock... organiseringer) throws JsonProcessingException {
         response.addAll(List.of(organiseringer));
@@ -36,9 +33,9 @@ public class DvhOrganiseringMockUtils {
     }
 
     private void createResponse(List<DvhOrganiseringMock> dvhOrganiseringMocks) throws JsonProcessingException {
-        val response = objectMapper.createObjectNode();
-        response.set("NOM_HRORG_HIERARKI2_v2Response", objectMapper.convertValue(dvhOrganiseringMocks, JsonNode.class));
-        mockDvhOrgEnhetResponse(objectMapper.writeValueAsString(response));
+        val response = jsonMapper.createObjectNode();
+        response.set("NOM_HRORG_HIERARKI2_v2Response", jsonMapper.convertValue(dvhOrganiseringMocks, JsonNode.class));
+        mockDvhOrgEnhetResponse(jsonMapper.writeValueAsString(response));
     }
 
     private void mockDvhOrgEnhetResponse(String response) {

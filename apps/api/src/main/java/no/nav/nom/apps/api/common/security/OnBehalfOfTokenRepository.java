@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.common.security;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
@@ -16,6 +15,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
 import java.util.Date;
@@ -77,7 +77,7 @@ public class OnBehalfOfTokenRepository {
             .bodyToMono(JsonNode.class)
             .block();
 
-        val accessToken = SignedJWT.parse(createTokenResponseBody.get("access_token").asText());
+        val accessToken = SignedJWT.parse(createTokenResponseBody.get("access_token").asString());
         cachedAadTokensByUserAndScope.put(cacheKey, accessToken);
         return accessToken;
     }

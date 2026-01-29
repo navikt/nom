@@ -1,7 +1,7 @@
 package no.nav.nom.libs.utils.common.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -16,6 +16,6 @@ public class DateTimeUtil {
     }
 
     public static LocalDateTime parseStringToLocalDateTime(JsonNode createdTimestamp) {
-        return LocalDateTime.parse(createdTimestamp.get("metadata").get("createdTimestamp").asText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return LocalDateTime.parse(createdTimestamp.get("metadata").get("createdTimestamp").asString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }

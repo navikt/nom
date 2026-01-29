@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -60,6 +59,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

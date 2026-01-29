@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
@@ -30,11 +29,12 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
@@ -96,12 +96,12 @@ public class OrganiseringTest extends OrganiseringTestBase {
         organiseringStateRepository.clear();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
-            .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
+            .consumerProps(embeddedKafkaBroker, "consumerGroup", false));
 
         DefaultKafkaConsumerFactory<String, OrganiseringEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(
             consumerProps,
             new StringDeserializer(),
-            new JsonDeserializer<>(OrganiseringEvent.class, objectMapper)
+            new JacksonJsonDeserializer<>(OrganiseringEvent.class, jsonMapper)
         );
 
         recordsQueue = new LinkedBlockingQueue<>();

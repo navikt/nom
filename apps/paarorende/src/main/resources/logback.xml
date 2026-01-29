@@ -10,6 +10,9 @@
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>
 
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
+
     <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>

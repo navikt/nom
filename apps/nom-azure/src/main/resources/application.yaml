@@ -39,7 +39,11 @@ spring:
       password: ${VALKEY_PASSWORD_NOM_AZURE_CACHE:}
       ssl:
         enabled: true
-
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 
 unleash:

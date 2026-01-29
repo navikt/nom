@@ -21,6 +21,8 @@
 <!--    <logger name="org.dataloader" level="trace"/>-->
 <!--    <logger name="org.springframework.graphql" level="trace"/>-->
 <!--    <logger name="org.springframework.boot.autoconfigure.graphql" level="trace"/>-->
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
 
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>

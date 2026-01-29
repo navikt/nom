@@ -1,6 +1,5 @@
 package no.nav.nom.libs.state;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.libs.state.common.AbstractNomStateListener;
 import no.nav.nom.libs.state.common.PropertiesAutoConfig;
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -20,6 +19,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(classes = {
         PropertiesAutoConfig.class
         , KafkaProperties.class
-        , ObjectMapper.class
+        , JsonMapper.class
 })
 @DirtiesContext
 @EmbeddedKafka(partitions = 1)

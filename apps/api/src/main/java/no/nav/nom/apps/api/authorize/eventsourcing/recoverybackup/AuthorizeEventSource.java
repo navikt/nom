@@ -1,12 +1,12 @@
 package no.nav.nom.apps.api.authorize.eventsourcing.recoverybackup;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import tools.jackson.databind.JsonNode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

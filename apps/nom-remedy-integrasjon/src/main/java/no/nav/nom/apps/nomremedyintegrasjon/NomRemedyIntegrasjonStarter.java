@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 public class NomRemedyIntegrasjonStarter {
-    public static void main(String[] args){
+    static void main(String[] args){
         SpringApplication.run(NomRemedyIntegrasjonStarter.class, args);
     }
 }

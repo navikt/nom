@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
-import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -23,15 +21,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
+import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -149,7 +141,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario42.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        final var outputOrganisasjonsEnhetId = outputRessurs.get("orgTilknytninger").get(0).get("orgEnhet").get("agressoId").asText();
+        final var outputOrganisasjonsEnhetId = outputRessurs.get("orgTilknytninger").get(0).get("orgEnhet").get("agressoId").asString();
 
         assertEquals(orgenhet.agressoId(), outputOrganisasjonsEnhetId);
     }
@@ -209,11 +201,11 @@ public class RessursTest extends GraphQlTestBase {
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
-        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asString());
 
-        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
-        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asString());
     }
 
     @Test
@@ -230,11 +222,11 @@ public class RessursTest extends GraphQlTestBase {
         assertEquals(2, ressurser.size());
 
         // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asText());
-        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asString());
 
-        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asText());
-        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asText());
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asString());
     }
 
     @Test
@@ -265,13 +257,13 @@ public class RessursTest extends GraphQlTestBase {
             .hasSize(3)
             .get();
 
-        ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
+        ressurser.sort(Comparator.comparing(j -> j.get("id").asString()));
 
-        assertEquals("testNavIdent1@dummy.mail", ressurser.get(0).get("ressurs").get("epost").asText());
-        assertEquals(ressurser.get(0).get("ressurs").get("visningsNavn").asText(), ressurs1.visningsnavn().getFormattedVisningsnavn());
-        assertEquals("testNavIdent2@dummy.mail", ressurser.get(1).get("ressurs").get("epost").asText());
-        assertEquals(ressurser.get(1).get("ressurs").get("visningsNavn").asText(), ressurs2.visningsnavn().getFormattedVisningsnavn());
-        assertEquals(ressurser.get(2).get("ressurs").get("visningsNavn").asText(), ressurs3.visningsnavn().getFormattedVisningsnavn());
+        assertEquals("testNavIdent1@dummy.mail", ressurser.get(0).get("ressurs").get("epost").asString());
+        assertEquals(ressurser.get(0).get("ressurs").get("visningsNavn").asString(), ressurs1.visningsnavn().getFormattedVisningsnavn());
+        assertEquals("testNavIdent2@dummy.mail", ressurser.get(1).get("ressurs").get("epost").asString());
+        assertEquals(ressurser.get(1).get("ressurs").get("visningsNavn").asString(), ressurs2.visningsnavn().getFormattedVisningsnavn());
+        assertEquals(ressurser.get(2).get("ressurs").get("visningsNavn").asString(), ressurs3.visningsnavn().getFormattedVisningsnavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         response.errors().satisfy(errors -> assertEquals(1, errors.size()));

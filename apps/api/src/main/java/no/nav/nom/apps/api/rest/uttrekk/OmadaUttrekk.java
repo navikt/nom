@@ -1,13 +1,11 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -184,23 +182,22 @@ public class OmadaUttrekk {
 
         log.info("Eksporterer telefonnummer med ny aggregering");
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            telefonService.hentPrioriterteTelefonnummer().forEach(
-                    (navident, telefon) -> {
-                        var prioritertNummer = telefon.getFirst();
-                        try {
-                            printer.printRecord(
-                                    navident,
-                                    formaterTelefonnummer(prioritertNummer.nummer()),
-                                    prioritertNummer.type(),
-                                    ""
-                            );
+            telefonService.hentTelefonnummreForAktiveRessurser().forEach(
+                telefon -> {
+                    try {
+                        printer.printRecord(
+                            telefon.navident(),
+                            formaterTelefonnummer(telefon.nummer()),
+                            telefon.type(),
+                            ""
+                        );
 
-                            writer.close();
-                        } catch (IOException e) {
-                            log.error("Error writing to CSV", e);
-                            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                        }
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
                     }
+                }
             );
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));

@@ -14,11 +14,12 @@ spring:
       url: jdbc:tc:postgresql:14.4:///nom-remedy-integrasjon
       username: test
       password: test
-
-  r2dbc:
-    url: r2dbc:tc:postgresql:14.4:///nom-remedy-integrasjon
-    username: test
-    password: test
+      #driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
   kafka:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
@@ -26,7 +27,7 @@ spring:
       security.protocol: PLAINTEXT
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
     consumer:
       auto-offset-reset: earliest
       group-id: test

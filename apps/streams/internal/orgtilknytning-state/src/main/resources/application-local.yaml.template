@@ -9,4 +9,4 @@ spring:
         on-shutdown: true
         on-startup: true
 
-server.port: 8083
+server.port: 8084

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.recoverybackup.OrgEnhetLederEventSource;
@@ -9,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,18 +19,18 @@ public class OrgEnhetLederEventProducer {
 
     private final KafkaTemplate<String, OrgEnhetLederEvent> orgEnhetLederEventProducerTemplate;
     private final OrgEnhetLederEventSourceRepository orgEnhetLederEventSourceRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final boolean shouldSaveToDb;
 
     public OrgEnhetLederEventProducer(
         KafkaTemplate<String, OrgEnhetLederEvent> orgEnhetLederEventProducerTemplate,
         OrgEnhetLederEventSourceRepository orgEnhetLederEventSourceRepository,
-        ObjectMapper objectMapper,
+        JsonMapper jsonMapper,
         LocalConfiguration localConfiguration
     ) {
         this.orgEnhetLederEventProducerTemplate = orgEnhetLederEventProducerTemplate;
         this.orgEnhetLederEventSourceRepository = orgEnhetLederEventSourceRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
@@ -48,6 +48,6 @@ public class OrgEnhetLederEventProducer {
     }
 
     private void saveToDB(OrgEnhetLederEvent event, String eventKey) {
-        orgEnhetLederEventSourceRepository.save(OrgEnhetLederEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
+        orgEnhetLederEventSourceRepository.save(OrgEnhetLederEventSource.builder().eventKey(eventKey).payload(jsonMapper.valueToTree(event)).build());
     }
 }

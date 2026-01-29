@@ -6,7 +6,6 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import {
   getOrgenhetLederEventsOptions,
-  getOrgenhetLederStatesOptions,
   searchSchema,
 } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";

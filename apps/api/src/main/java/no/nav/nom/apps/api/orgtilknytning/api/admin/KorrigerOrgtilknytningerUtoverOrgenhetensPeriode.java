@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +18,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -58,7 +58,7 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
         var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
 
-        ObjectMapper mapper = new ObjectMapper();
+        JsonMapper mapper = new JsonMapper();
         StringBuffer str = new StringBuffer();
         aktiveTilknytningerUtoverEnhetPeriode.forEach( ot -> {
                 var orgenhet = orgenhetService.getById(ot.orgEnhetId()).get();

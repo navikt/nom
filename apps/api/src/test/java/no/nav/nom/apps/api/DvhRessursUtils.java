@@ -1,10 +1,10 @@
 package no.nav.nom.apps.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -17,11 +17,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 @Component
 public class DvhRessursUtils {
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final List<RessursMock> ressursMocks = new LinkedList<>();
 
-    public DvhRessursUtils(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public DvhRessursUtils(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
 
@@ -45,7 +45,7 @@ public class DvhRessursUtils {
     }
 
     private StubMapping mockResponse(List<RessursMock> ressursMocks) {
-        var body = objectMapper.createObjectNode().set("NOM_ANSATTE_BUCKETS_v2Response", objectMapper.convertValue(ressursMocks, JsonNode.class));
+        var body = jsonMapper.createObjectNode().set("NOM_ANSATTE_BUCKETS_v2Response", jsonMapper.convertValue(ressursMocks, JsonNode.class));
 
         return stubFor(
                 get("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2")

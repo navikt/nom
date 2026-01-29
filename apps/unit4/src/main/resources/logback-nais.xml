@@ -47,6 +47,8 @@
 
     <!-- NOM loggers -->
     <logger name="no.nav.nom" level="DEBUG" />
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>

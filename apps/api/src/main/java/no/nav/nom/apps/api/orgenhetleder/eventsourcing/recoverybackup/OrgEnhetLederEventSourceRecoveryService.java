@@ -1,13 +1,13 @@
 package no.nav.nom.apps.api.orgenhetleder.eventsourcing.recoverybackup;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederEventProducer;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -21,7 +21,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.collectToOrderedMap;
 public class OrgEnhetLederEventSourceRecoveryService {
     private final OrgEnhetLederEventSourceRepository repository;
     private final OrgEnhetLederEventProducer eventProducer;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final LeaderElection leaderElection;
 
     public void replayAllEventsource(boolean dryRun) {
@@ -30,9 +30,9 @@ public class OrgEnhetLederEventSourceRecoveryService {
             alleEventsource.forEach((key, event) -> {
                 try {
                     if (dryRun) {
-                        log.info("Replaying {}: {}", event.get("type").asText(), event.asText());
+                        log.info("Replaying {}: {}", event.get("type").asString(), event.asString());
                     } else {
-                        OrgEnhetLederEvent orgEnhetLederEvent = objectMapper.convertValue(event, OrgEnhetLederEvent.class);
+                        OrgEnhetLederEvent orgEnhetLederEvent = jsonMapper.convertValue(event, OrgEnhetLederEvent.class);
                         eventProducer.replayMessage(key, orgEnhetLederEvent);
                     }
                 } catch (Exception e) {

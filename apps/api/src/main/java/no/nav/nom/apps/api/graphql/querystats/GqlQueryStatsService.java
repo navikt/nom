@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.graphql.querystats;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class GqlQueryStatsService {
     private final Set<String> knownHashes = ConcurrentHashMap.newKeySet(); // simple caching
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     private final GqlQueryRepository gqlQueryRepository;
     private final GqlQueryUsageRepository gqlQueryUsageRepository;
@@ -63,7 +63,7 @@ public class GqlQueryStatsService {
 
     public void registerFieldUsage(List<FieldPathEntry> fieldPathList, String operationName, String consumer) {
         execute(() -> {
-            JsonNode json = objectMapper.valueToTree(fieldPathList);
+            JsonNode json = jsonMapper.valueToTree(fieldPathList);
             String jsonArray = json.toString();
 
             log.debug("Field/path jsonArray, operation and consumer: {}, {} and {}", jsonArray, operationName, consumer);

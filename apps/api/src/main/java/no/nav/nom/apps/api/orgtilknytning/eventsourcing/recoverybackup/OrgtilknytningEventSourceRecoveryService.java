@@ -1,13 +1,13 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -21,7 +21,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.collectToOrderedMap;
 public class OrgtilknytningEventSourceRecoveryService {
     private final OrgtilknytningEventSourceRepository repository;
     private final OrgtilknytningEventProducer eventProducer;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final LeaderElection leaderElection;
 
 
@@ -31,9 +31,9 @@ public class OrgtilknytningEventSourceRecoveryService {
             alleEventsource.forEach((key, event) -> {
                 try {
                     if (dryRun) {
-                        log.info("Replaying {}: {}", event.get("type").asText(), event);
+                        log.info("Replaying {}: {}", event.get("type").asString(), event);
                     } else {
-                        OrgtilknytningEvent orgtilknytningEvent = objectMapper.convertValue(event, OrgtilknytningEvent.class);
+                        OrgtilknytningEvent orgtilknytningEvent = jsonMapper.convertValue(event, OrgtilknytningEvent.class);
                         eventProducer.replayMessage(key, orgtilknytningEvent);
                     }
                 } catch (Exception e) {
