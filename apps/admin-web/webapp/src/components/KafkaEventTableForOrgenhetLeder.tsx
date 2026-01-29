@@ -54,7 +54,7 @@ export function KafkaEventTableForOrgenhetLeder(props: {
                 </Table.HeaderCell>
                 <Table.DataCell>{kafkaEvent.navident}</Table.DataCell>
                 <Table.DataCell>
-                  <JsonModal data={kafkaEvent} text={kafkaEvent.type} />
+                  <JsonModal data={kafkaEvent} text={kafkaEvent.data?.type? kafkaEvent.data?.type.split("$")[0] : ''} />
                 </Table.DataCell>
                 <Table.DataCell>
                   {formatDisplayDatetime(kafkaEvent.metadata?.createdTimestamp)}
