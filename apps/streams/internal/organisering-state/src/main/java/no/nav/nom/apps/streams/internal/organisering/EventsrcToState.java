@@ -54,8 +54,8 @@ public class EventsrcToState {
                 fid,
                     eventStateAggregate.get("id").asString(),
                     eventStateAggregate.get("navn").asString(),
-                eventStateAggregate.get("idOver").asText(),
-                eventStateAggregate.get("navnOver").asText(),
+                eventStateAggregate.get("idOver").asString(),
+                eventStateAggregate.get("navnOver").asString(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null
             );

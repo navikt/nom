@@ -249,7 +249,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
             .collect(
                 toMap(
                     o -> o.get("retning").asText(),
-                    o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                    o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
                 )
             );
 
@@ -333,7 +333,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
@@ -389,7 +389,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
@@ -444,7 +444,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4_b.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
+        final var outputLeder = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
 
         assertEquals(ressurs.navident(), outputLeder.ressurs().getNavIdent());
         assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.ressurs().getPersonIdent());
@@ -474,7 +474,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario32_b.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
+        final var outputLedere = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
 
         assertEquals(0, outputLedere.size());
     }
@@ -591,7 +591,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario41_b.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
+        final var outputKoblinger = jsonMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
 
         assertEquals(1, outputKoblinger.size());
 

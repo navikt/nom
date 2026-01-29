@@ -16,6 +16,6 @@ public class DateTimeUtil {
     }
 
     public static LocalDateTime parseStringToLocalDateTime(JsonNode createdTimestamp) {
-        return LocalDateTime.parse(createdTimestamp.get("metadata").get("createdTimestamp").asText(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return LocalDateTime.parse(createdTimestamp.get("metadata").get("createdTimestamp").asString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }
