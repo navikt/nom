@@ -6,17 +6,19 @@ import no.nav.nom.apps.rdbmsdata.repository.MasteredRessursRepository;
 import no.nav.nom.apps.rdbmsdata.repository.Organisering;
 import no.nav.nom.apps.rdbmsdata.repository.OrganiseringRepository;
 import no.nav.nom.apps.rdbmsdata.repository.Orgenhet;
+import no.nav.nom.apps.rdbmsdata.repository.OrgenhetLeder;
+import no.nav.nom.apps.rdbmsdata.repository.OrgenhetLederRepository;
 import no.nav.nom.apps.rdbmsdata.repository.OrgenhetRepository;
 import no.nav.nom.apps.rdbmsdata.repository.Orgtilknytning;
 import no.nav.nom.apps.rdbmsdata.repository.OrgtilknytningRepository;
 import no.nav.nom.apps.rdbmsdata.repository.Ressurs;
 import no.nav.nom.apps.rdbmsdata.repository.RessursRepository;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -30,16 +32,20 @@ public class KafkaListeners {
     private final OrgenhetRepository orgenhetRepository;
     private final OrgtilknytningRepository orgtilknytningRepository;
     private final MasteredRessursRepository masteredRessursRepository;
+    private final OrgenhetLederRepository orgenhetLederRepository;
 
     public KafkaListeners(RessursRepository ressursRepository, OrganiseringRepository organiseringRepository,
                           OrgenhetRepository orgenhetRepository,
                           OrgtilknytningRepository orgtilknytningRepository,
-                          MasteredRessursRepository masteredRessursRepository) {
+                          MasteredRessursRepository masteredRessursRepository,
+                          OrgenhetLederRepository orgenhetLederRepository
+    ) {
         this.ressursRepository = ressursRepository;
         this.organiseringRepository = organiseringRepository;
         this.orgenhetRepository = orgenhetRepository;
         this.orgtilknytningRepository = orgtilknytningRepository;
         this.masteredRessursRepository = masteredRessursRepository;
+        this.orgenhetLederRepository = orgenhetLederRepository;
     }
 
     @KafkaListener(
@@ -109,6 +115,20 @@ public class KafkaListeners {
                 masteredRessursRepository.save(masteredRessurs);
             } else {
                 masteredRessursRepository.delete(masteredRessurs);
+            }
+        });
+    }
+
+    @KafkaListener(
+        containerFactory = "orgEnhetLederStateKafkaListenerContainerFactory",
+        topics = "${app.kafka.orgenhet-leder.state-topic}"
+    )
+    public void onOrgenhetLederState(ConsumerRecords<String, OrgEnhetLederState> records) {
+        records.forEach(record -> {
+            if (record.value() != null) {
+                orgenhetLederRepository.save(OrgenhetLeder.from(record.value()));
+            } else {
+                orgenhetLederRepository.delete(new OrgenhetLeder(record.key()));
             }
         });
     }

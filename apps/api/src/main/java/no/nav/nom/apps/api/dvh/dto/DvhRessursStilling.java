@@ -65,8 +65,8 @@ public class DvhRessursStilling {
         return switch (ansettelsesBeskTypeValue) {
             case "Fast" -> Tilknytningtype.FAST;
             case "Midlertidig karakter § 9a" -> Tilknytningtype.MIDLERTIDIG;
-            case "Uforutsett behov § 9e" -> Tilknytningtype.UFORUTSETT_BEHOV;
-            case "Vikar § 9b" -> Tilknytningtype.VIKAR;
+            case "Uforutsett behov § 9e" -> Tilknytningtype.MIDLERTIDIG; // "Uforutsett behov" or "Vikar" tilknitningstype to Midlertid
+            case "Vikar § 9b" -> Tilknytningtype.MIDLERTIDIG;
             case "Utdanningsstillinger § 9d" -> Tilknytningtype.UTDANNINGSSTILLINGER;
             case "Praksisarbeid § 9c" -> Tilknytningtype.PRAKSISARBEID;
             default -> null;

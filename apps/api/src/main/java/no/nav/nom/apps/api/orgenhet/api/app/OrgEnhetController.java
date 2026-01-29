@@ -42,19 +42,19 @@ public class OrgEnhetController {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederService orgEnhetLederService;
     private final OrgEnhetMapper orgEnhetMapper;
-    private final KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator;
+    private final KontaktpersonerService kontaktpersonerService;
     private final AuthResolver authResolver;
 
     public OrgEnhetController(
         OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService,
         OrgEnhetMapper orgEnhetMapper,
-        KontaktpersonerExcelGenerator kontaktpersonerExcelGenerator,
+        KontaktpersonerService kontaktpersonerService,
         AuthResolver authResolver
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.orgEnhetMapper = orgEnhetMapper;
-        this.kontaktpersonerExcelGenerator = kontaktpersonerExcelGenerator;
+        this.kontaktpersonerService = kontaktpersonerService;
         this.authResolver = authResolver;
     }
 
@@ -134,8 +134,23 @@ public class OrgEnhetController {
             throw new AccessDeniedException(accessDeniedError);
         }
 
-        kontaktpersonerExcelGenerator.generateExcelFile(response, orgenhetId);
+        kontaktpersonerService.generateExcelFile(response, orgenhetId);
 
+    }
+
+    @GetMapping("/kontaktpersoner/{orgenhetId}")
+    public List<RessursKontaktperson> getKontaktpersonerForOrgenhetId(@PathVariable String orgenhetId) {
+        var loggedInUser = SecurityUtil.getAuthenticatedNavIdent();
+        var isAdminToEnhet = SecurityUtil.loggedInUserHasAccessScope(NomApiAccessScope.ADMIN);
+        boolean kanRedigereOrgenhet = authResolver.kanRessursRedigereOrgenhet(loggedInUser, orgenhetId);
+
+        if (!isAdminToEnhet && !kanRedigereOrgenhet) {
+            var accessDeniedError = String.format("Bruker %s har ikke tilgang til å se ressurser og kontaktpersoner for orgenhet %s", loggedInUser, orgenhetId);
+            log.error(accessDeniedError);
+            throw new AccessDeniedException(accessDeniedError);
+        }
+
+        return kontaktpersonerService.getKontaktpersonerForRessurserUnder(orgenhetId);
     }
 
     @GetMapping

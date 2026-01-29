@@ -1,6 +1,7 @@
 package no.nav.nom.apps.rdbmsdata.config;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -103,6 +104,23 @@ public class KafkaConfig {
         return factory;
     }
 
+    @Bean
+    public ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        return new DefaultKafkaConsumerFactory<>(
+            properties.buildConsumerProperties(null),
+            new StringDeserializer(),
+            new JsonDeserializer<>(OrgEnhetLederState.class, objectMapper));
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OrgEnhetLederState>>
+    orgEnhetLederStateKafkaListenerContainerFactory(ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory) {
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetLederState>();
+        factory.setConsumerFactory(OrgEnhetLederStateConsumerFactory);
+        factory.setBatchListener(true);
+        factory.setContainerCustomizer(retryCustomizer());
+        return factory;
+    }
 
     @Bean
     public ConsumerFactory<String, LocalDateTime> nomMasteredRessursConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {

@@ -1,0 +1,18 @@
+query {
+    organisasjonsenhet(where: {agressoId: "testId3", agressoOrgNiv: "ORGNIV3"}) {
+        agressoId
+        navn
+        organiseringer{
+            retning
+            orgEnhet{
+                id
+                agressoId
+                navn
+                gyldigFom
+                gyldigTom
+            }
+            gyldigFom
+            gyldigTom
+        }
+    }
+}

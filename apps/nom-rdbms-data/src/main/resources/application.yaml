@@ -11,6 +11,8 @@ app:
       state-topic: org.nom.intern-organisering-state
     mastered-ressurs:
       evtsrc-topic: org.nom.nom-mastered-ressurs
+    orgenhet-leder:
+      state-topic: org.nom.intern-orgenhet-leder-state
 
 nom.libs.state.delegert-leder.enabled: true
 

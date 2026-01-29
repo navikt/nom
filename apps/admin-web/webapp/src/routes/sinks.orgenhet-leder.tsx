@@ -4,10 +4,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { getOrgenhetLederEventsOptions, searchSchema } from "~/api/queries.ts";
+import {
+  getOrgenhetLederEventsOptions,
+  getOrgenhetLederStatesOptions,
+  searchSchema,
+} from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
-import { KafkaEventTable } from "~/components/KafkaEventTable.tsx";
+import { KafkaEventTableForOrgenhetLeder } from "~/components/KafkaEventTableForOrgenhetLeder.tsx";
 
 export const Route = createFileRoute("/sinks/orgenhet-leder")({
   loaderDeps: ({ search }) => search,
@@ -40,10 +44,19 @@ function OrgenhetLederPage() {
 
   const orgEnhetLederEvents = orgEnhetLederEventsQuery.data;
 
+  const orgenhetsLeaderStatesQuery = useSuspenseQuery({
+    ...getOrgenhetLederStatesOptions(search),
+    gcTime: Number.POSITIVE_INFINITY,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+
+  const orgenhetsLeaderStates = orgenhetsLeaderStatesQuery.data;
+
   return (
-    <KafkaEventTable
+    <KafkaEventTableForOrgenhetLeder
       kafkaEvents={orgEnhetLederEvents}
       linkPrefix={"/state/orgenhet-leder"}
+      orgenhetsLeaderStates={orgenhetsLeaderStates}
     />
   );
 }

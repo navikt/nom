@@ -1,0 +1,15 @@
+query {
+    ressurs(where: {navident: "testNavIdent1"}) {
+        navident
+        ledere(utvalg: ALLE) {
+            ressurs {
+                navident
+            }
+            gyldigFom
+            gyldigTom
+            orgEnhet {
+                id
+            }
+        }
+    }
+}
