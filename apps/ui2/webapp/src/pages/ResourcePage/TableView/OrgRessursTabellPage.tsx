@@ -168,19 +168,19 @@ export const OrgRessursTabellPage = () => {
 
           <div
             css={css`
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: var(--a-spacing-1);
-  `}
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-top: var(--a-spacing-1);
+            `}
           >
             <div>
               <Checkbox
                 checked={includeUnderliggende}
                 css={css`
-        color: #000;
-        font-size: 1.2rem;
-      `}
+                  color: #000;
+                  font-size: 1.2rem;
+                `}
                 onChange={(event) => {
                   setIncludeUnderliggende(event.target.checked);
                 }}
@@ -191,14 +191,17 @@ export const OrgRessursTabellPage = () => {
 
               <BodyShort
                 css={css`
-        margin-top: var(--a-spacing-2);
-      `}
+                  margin-top: var(--a-spacing-2);
+                `}
               >
                 Antall medarbeidere: <b>{ressurserNavidents.length}</b>
               </BodyShort>
             </div>
 
             <Button
+              css={css`
+                align-self: end;
+              `}
               icon={<FileExcelIcon />}
               loading={isDownloading}
               onClick={handleDownloadExcel}

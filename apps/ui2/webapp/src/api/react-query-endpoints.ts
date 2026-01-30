@@ -23,11 +23,12 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
-  OrgenhetLederByNavidentResponse,
+  OrgEnhetLederResponse,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
   Person,
   Ressurs,
+  RessursKontaktperson,
   RessursLeder,
   SessionInfoResponse,
   UpdateFysiskeBrukerstederRequest,
@@ -333,10 +334,10 @@ export const getOrgenhetLederByNavIdent = {
   queryKey: (navident: string) => ["getOrgenhetLederByNavIdent", navident],
   queryFn: async (navident: string) =>
     (
-      await axios.get<OrgenhetLederByNavidentResponse[]>(
+      await axios.get<OrgEnhetLederResponse[]>(
         `${NOM_API_BASE_PATH}/app/orgenhetleder/by-navident/${navident}`,
       )
-    ).data as OrgenhetLederByNavidentResponse[],
+    ).data as OrgEnhetLederResponse[],
 };
 
 export const getOrgEnheterSomKanHaRessurser = {
@@ -488,6 +489,19 @@ export function harLederTilgangForNavidentOptions(navident: string) {
         )
       ).data,
     enabled: !!navident,
+  });
+}
+
+export function getKonaktpersonerForOrgEnhet(orgEnhetId: string) {
+  return queryOptions({
+    queryKey: ["TILGANG", "NAVIDENT", orgEnhetId],
+    queryFn: async () =>
+      (
+        await axios.get<RessursKontaktperson[]>(
+          `${NOM_API_BASE_PATH}/app/orgenheter/kontaktpersoner/${orgEnhetId}`,
+        )
+      ).data,
+    enabled: !!orgEnhetId,
   });
 }
 

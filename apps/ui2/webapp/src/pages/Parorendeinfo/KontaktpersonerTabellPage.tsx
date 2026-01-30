@@ -7,7 +7,9 @@ import React, { useState } from "react";
 
 import {
   downloadExcelKontaktpersonerForOrgenhetByOrgenhetId,
+  getKonaktpersonerForOrgEnhet,
   getOrgEnhet,
+  harLederTilgangForNavidentOptions,
   harLederTilgangForOrgenhetOptions,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
@@ -140,16 +142,41 @@ export function KontaktpersonerTabellPage() {
 }
 
 function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const sortedKontaktpersoner = mockKontaktpersoner.sort((a, b) => {
-    const navnCompare = a.navn.localeCompare(b.navn);
+  const kontaktpersonerQuery = useQuery(
+    getKonaktpersonerForOrgEnhet(orgEnhet.id),
+  );
+
+  if (kontaktpersonerQuery.isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        `}
+      >
+        <Loader size="3xlarge" />
+        <span>Laster...</span>
+      </div>
+    );
+  }
+
+  const kontaktpersoner = kontaktpersonerQuery.data;
+
+  const sortedKontaktpersoner = kontaktpersoner?.sort((a, b) => {
+    const aFulltNavn = `${a.fornavn} ${a.etternavn}`;
+    const bFulltNavn = `${b.fornavn} ${b.etternavn}`;
+
+    const navnCompare = aFulltNavn.localeCompare(bFulltNavn);
     if (navnCompare !== 0) return navnCompare;
 
-    const prioritetCompare = a.kontaktpersonPrioritet.localeCompare(
-      b.kontaktpersonPrioritet,
-    );
+    const aPrioritet = a.kontaktpersonProritet ?? "";
+    const bPrioritet = b.kontaktpersonProritet ?? "";
+
+    const prioritetCompare = aPrioritet.localeCompare(bPrioritet);
     if (prioritetCompare !== 0) return prioritetCompare;
 
-    return a.kontaktpersonNavn.localeCompare(b.kontaktpersonNavn);
+    return (a.kontaktpersonNavn ?? "").localeCompare(b.kontaktpersonNavn ?? "");
   });
 
   return (
@@ -190,7 +217,7 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           height: 48px;
         `}
       >
-        {sortedKontaktpersoner.map((kontaktpersonRad, index) => (
+        {sortedKontaktpersoner?.map((kontaktpersonRad, index) => (
           <Table.Row
             css={css`
               height: 48px;
@@ -199,11 +226,11 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             shadeOnHover={false}
           >
             <Table.DataCell>{kontaktpersonRad.navident}</Table.DataCell>
-            <Table.DataCell>{kontaktpersonRad.navn}</Table.DataCell>
+            <Table.DataCell>{`${kontaktpersonRad.fornavn} ${kontaktpersonRad.etternavn}`}</Table.DataCell>
             <Table.DataCell>
               {[
-                formatTlf(kontaktpersonRad.jobbtelefon),
-                formatTlf(kontaktpersonRad.privattelefon),
+                formatTlf(kontaktpersonRad.jobbtelefon ?? ""),
+                formatTlf(kontaktpersonRad.privattelefon ?? ""),
               ]
                 .filter(Boolean)
                 .join(", ")}
@@ -219,10 +246,10 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               }
             </Table.DataCell>
             <Table.DataCell>
-              {formatTlf(kontaktpersonRad.kontaktpersonTelefonnummer)}
+              {formatTlf(kontaktpersonRad.kontaktpersonTelefonnr ?? "")}
             </Table.DataCell>
             <Table.DataCell>
-              {kontaktpersonRad.kontaktpersonPrioritet}
+              {kontaktpersonRad.kontaktpersonProritet}
             </Table.DataCell>
           </Table.Row>
         ))}
