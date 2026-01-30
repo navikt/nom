@@ -42,7 +42,7 @@
         <swagger-annotations-jakarta.version>2.2.41</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
-        <org.wiremock-spring-boot.version>4.0.8</org.wiremock-spring-boot.version>
+        <org.wiremock-spring-boot.version>4.0.9</org.wiremock-spring-boot.version>
         <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.3.Final</hibernate-validator.version>
@@ -55,7 +55,7 @@
         <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>5.5.1</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <wiremock-spring-boot.version>4.0.8</wiremock-spring-boot.version>
+        <wiremock-spring-boot.version>4.0.9</wiremock-spring-boot.version>
 
     </properties>
 
