@@ -7,7 +7,7 @@ import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,14 +16,14 @@ import static java.util.Objects.isNull;
 
 public class GenericApiEventDeserializer implements Deserializer<Object> {
     private final Logger logger = LoggerFactory.getLogger(GenericApiEventDeserializer.class);
-    private final Map<String, JsonSerde<?>> serdeMappings;
+    private final Map<String, JacksonJsonSerde<?>> serdeMappings;
 
     public GenericApiEventDeserializer() {
         this.serdeMappings = new HashMap<>();
-        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v2.RessursState", new JsonSerde<>(RessursStateKafkaDTO.class));
-        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v3.RessursState", new JsonSerde<>(RessursStateKafkaDTO.class));
-        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v3.OrgEnhetState", new JsonSerde<>(OrgEnhetStateDTO.class));
-        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse", new JsonSerde<>(HendelseDTO.class));
+        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v2.RessursState", new JacksonJsonSerde<>(RessursStateKafkaDTO.class));
+        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.ressurs.state.v3.RessursState", new JacksonJsonSerde<>(RessursStateKafkaDTO.class));
+        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v3.OrgEnhetState", new JacksonJsonSerde<>(OrgEnhetStateDTO.class));
+        serdeMappings.put("no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse", new JacksonJsonSerde<>(HendelseDTO.class));
     }
 
     @Override
@@ -40,7 +40,7 @@ public class GenericApiEventDeserializer implements Deserializer<Object> {
     public Object deserialize(String topic, Headers headers, byte[] data) {
         if (headers.lastHeader("__TypeId__") != null) {
             String typeIdValue = new String(headers.lastHeader("__TypeId__").value());
-            JsonSerde<?> targetSerde = serdeMappings.get(typeIdValue);
+            JacksonJsonSerde<?> targetSerde = serdeMappings.get(typeIdValue);
 
             if (!isNull(targetSerde)) {
                 try {

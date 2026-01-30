@@ -3,6 +3,7 @@ package no.nav.nom.apps.admin;
 import no.nav.nom.apps.admin.dto.EventSearchParams;
 import no.nav.nom.apps.admin.dto.deadletter.DeadLetterDTO;
 import no.nav.nom.apps.admin.dto.hendelse.HendelseDTO;
+import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetLederEventWithNavidentDTO;
 import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetStateDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
@@ -21,18 +22,21 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.admin.dto.EventSearchParams.eventFilter;
 import static no.nav.nom.apps.admin.utils.safeSubList;
@@ -42,7 +46,7 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 public class SinkController {
 
     private static final int NUMBER_OF_EVENTS = 500;
-    
+
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
@@ -53,6 +57,7 @@ public class SinkController {
     private final RessursHendelseApiRepository ressursHendelseApiRepository;
     private final DeadLetterRepository deadLetterRepository;
     private final OrgenhetLederEvtsrcRepository orgenhetLederEvtsrcRepository;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     public SinkController(
         RessursEvtsrcRepository ressursEvtsrcRepository,
@@ -64,7 +69,8 @@ public class SinkController {
         OrgtilknytningEvtsrcRepository orgtilknytningEvtsrcRepository,
         RessursHendelseApiRepository ressursHendelseApiRepository,
         DeadLetterRepository deadLetterRepository,
-        OrgenhetLederEvtsrcRepository orgenhetLederEvtsrcRepository
+        OrgenhetLederEvtsrcRepository orgenhetLederEvtsrcRepository,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
@@ -76,6 +82,7 @@ public class SinkController {
         this.ressursHendelseApiRepository = ressursHendelseApiRepository;
         this.deadLetterRepository = deadLetterRepository;
         this.orgenhetLederEvtsrcRepository = orgenhetLederEvtsrcRepository;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
     }
 
 
@@ -98,11 +105,32 @@ public class SinkController {
 
     @GetMapping(value = "/orgenhetLederEvents")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
-    public List<OrgEnhetLederEvent> getOrgEnhetLederEvents(@Valid EventSearchParams eventSearchParams) {
+    public List<OrgEnhetLederEventWithNavidentDTO> getOrgEnhetLederEvents(@Valid EventSearchParams eventSearchParams) {
         int fromOffset = eventSearchParams.getFromOffset();
         List<OrgEnhetLederEvent> events = orgenhetLederEvtsrcRepository.getOrgenhetLederEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
+        List<OrgEnhetLederEvent> orgEnhetLederEvents = safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
 
-        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+        List<OrgEnhetLederState> orgEnhetLederStates  = orgEnhetLederStateRepository.getAll().stream().toList();
+        Map<String, String> fidsWithNonNullNavident = orgEnhetLederStates.stream()
+            .filter(state -> state.navident() != null && !state.navident().isBlank())
+            .collect(Collectors.toMap(
+                OrgEnhetLederState::fid,
+                OrgEnhetLederState::navident,
+                (existing, replacement) -> existing
+            ));
+
+
+        List<OrgEnhetLederEventWithNavidentDTO> orgEnhetLederEventsWithNavident = orgEnhetLederEvents.stream()
+            .map(e -> new OrgEnhetLederEventWithNavidentDTO(
+                e.getFid(),
+                (OrgEnhetLederEvent.Data) e.getData(),
+                e.getMetadata(),
+                fidsWithNonNullNavident.get(e.getFid())
+            ))
+            .toList(); // Java 16+
+
+        //orgEnhetLederStateRepository
+        return orgEnhetLederEventsWithNavident;
     }
 
     @GetMapping(value = "/orgtilknytningEvents")
@@ -173,22 +201,23 @@ public class SinkController {
         Pattern pattern = Pattern.compile(regexNavident);
         Matcher matcher = pattern.matcher(eventSearchParams.getFilterText());
         Set<String> eventFids = new HashSet<>();
-        List<RessursEvent> events;
         if (matcher.find()) {
-            eventFids.addAll(ressursEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+            var fids = ressursEvtsrcRepository.getNavidentToFidMap().get(matcher.group());
+            if (fids != null) {
+                eventFids.addAll(fids);
+            }
         }
 
         if (!eventFids.isEmpty()) {
-            events = new ArrayList<>();
-            eventFids.forEach(fid -> events.addAll(ressursEvtsrcRepository.getRessursEvtsrc().stream()
-                .filter(event -> event.getFid().equals(fid))
-                .toList()));
+            // Use stream to collect all matching events
+            return ressursEvtsrcRepository.getRessursEvtsrc().stream()
+                .filter(event -> eventFids.contains(event.getFid()))
+                .toList();
         } else {
-            events = ressursEvtsrcRepository.getRessursEvtsrc().stream()
+            return ressursEvtsrcRepository.getRessursEvtsrc().stream()
                 .filter(eventFilter(new EventSearchParams(fromOffset, eventSearchParams.getFilterText())))
                 .toList();
         }
-        return events;
     }
 
     private List<OrgtilknytningEvent> getAllMatchingOrgtilknytningEvents(EventSearchParams eventSearchParams) {
@@ -198,24 +227,22 @@ public class SinkController {
         Pattern pattern = Pattern.compile(regexNavident);
         Matcher matcher = pattern.matcher(eventSearchParams.getFilterText());
         Set<String> eventFids = new HashSet<>();
-        List<OrgtilknytningEvent> events;
         if (matcher.find()) {
             var oter = orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group());
             if (oter != null) {
-                eventFids.addAll(orgtilknytningEvtsrcRepository.getNavidentToFidMap().get(matcher.group()));
+                eventFids.addAll(oter);
             }
         }
 
         if (!eventFids.isEmpty()) {
-            events = new ArrayList<>();
-            eventFids.forEach(fid -> events.addAll(orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
-                .filter(event -> event.getFid().equals(fid))
-                .toList()));
+            // Build a new list using streams, do not modify while iterating
+            return orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
+                .filter(event -> eventFids.contains(event.getFid()))
+                .toList();
         } else {
-            events = orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
+            return orgtilknytningEvtsrcRepository.getOrgtilknytningEvtsrc().stream()
                 .filter(eventFilter(new EventSearchParams(fromOffset, eventSearchParams.getFilterText())))
                 .toList();
         }
-        return events;
     }
 }

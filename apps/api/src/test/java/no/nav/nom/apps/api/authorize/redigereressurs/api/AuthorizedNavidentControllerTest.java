@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.authorize.redigereressurs.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,7 +41,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
     AuthorizedNavident authorizedNavident;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
 
     @Test
@@ -150,7 +150,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(jsonMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isOk());
     }
@@ -166,7 +166,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(jsonMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isBadRequest());
 
@@ -178,7 +178,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(jsonMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isOk());
     }
@@ -194,7 +194,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(jsonMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomWriteUserToken_Leder_B()))
             .andExpect(status().isOk());
     }
@@ -207,7 +207,7 @@ public class AuthorizedNavidentControllerTest extends RestTestBase {
 
         mockMvc.perform(post(API_URL + "/addDelegatedAuthorization")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(jsonMapper.writeValueAsString(request))
                 .header("Authorization", "Bearer " + nomAdminUserToken()))
             .andExpect(status().isBadRequest());
     }

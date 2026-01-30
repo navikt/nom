@@ -39,7 +39,10 @@ export function NavidentOffsetSearchBar({ route }: { route: AnyRoute }) {
       to: route.to,
       search: {
         ...search,
-        filterText: values.filterText ?? undefined,
+        navident:
+          values.navident && values.navident !== ""
+            ? values.navident
+            : undefined,
         fromOffset: values.fromOffset
           ? Number.parseInt(values.fromOffset)
           : undefined,
@@ -49,8 +52,8 @@ export function NavidentOffsetSearchBar({ route }: { route: AnyRoute }) {
 
   const tilbakestill = () => {
     methods.reset({
-      navident: "",
-      fromOffset: 0,
+      navident: undefined,
+      fromOffset: undefined,
     });
 
     const newSearch = {
@@ -69,11 +72,11 @@ export function NavidentOffsetSearchBar({ route }: { route: AnyRoute }) {
     <form className="flex gap-4 p-6" onSubmit={submitHandler}>
       <TextField label="Navident" {...methods.register("navident")} />
       <TextField label="Fra offset" {...methods.register("fromOffset")} />
-      <Button className="h-fit mt-8" type="submit">
+      <Button className="h-fit mt-8 self-end" type="submit">
         Søk
       </Button>
       <Button
-        className="h-fit mt-8"
+        className="h-fit mt-8 self-end"
         onClick={tilbakestill}
         type="button"
         variant="tertiary"

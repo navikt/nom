@@ -1,8 +1,5 @@
 package no.nav.nom.apps.streams.internal.orgenehetleder.eventsrctostate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederSlettetEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
@@ -15,8 +12,11 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 
@@ -29,17 +29,18 @@ public class EventsrcToState {
     public EventsrcToState(
         @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
         @Value("${app.kafka.stateTopic}") String stateTopic,
-        ObjectMapper objectMapper,
-        JsonSerde<Object> objectSerde,
+        JsonMapper jsonMapper,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(OrgEnhetLederEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
+            .filter((k, v) -> !v.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((key, value) -> value.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (key, event, state) -> {
                     if (event instanceof OrgEnhetLederSlettetEventV1) {
                         state.put("TOMBSTONE", true);
@@ -47,7 +48,7 @@ public class EventsrcToState {
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     }
-                    state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                    state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                     if (nonNull(event.getMetadata()) && nonNull(event.getMetadata().inputMetadata().origination())) {
                         var origination = event.getMetadata().inputMetadata().origination();
                         if (nonNull(origination.initiatedBy())) state.put("sistEndretAv",  origination.initiatedBy());
@@ -66,9 +67,12 @@ public class EventsrcToState {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
+            if ( eventStateAggregate.get("navident") == null) {
+                log.error("Missing Navident for FID {}", fid);
+            }
             return new  OrgEnhetLederState(
                 fid,
-                eventStateAggregate.get("navident").asText(),
+                eventStateAggregate.get("navident").asString(),
                 eventStateAggregate.get("orgEnhetId").asText(),
                 eventStateAggregate.hasNonNull("startdato") ? LocalDate.parse(eventStateAggregate.get("startdato").asText()) : null,
                 eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null,

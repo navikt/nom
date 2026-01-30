@@ -211,7 +211,6 @@ function EditPersonopplysningerButton({
   if (canEditPersonopplysninger) {
     return (
       <Button
-        data-cy="endre-personopplysninger-button"
         icon={<PencilIcon aria-hidden />}
         onClick={() =>
           navigate({

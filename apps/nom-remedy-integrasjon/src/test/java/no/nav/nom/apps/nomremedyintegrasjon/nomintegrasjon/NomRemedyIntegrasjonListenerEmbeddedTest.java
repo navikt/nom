@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -147,7 +147,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
         // Assert
 
         Map<String, Object> props = KafkaTestUtils.consumerProps("dlt-test-group", "false", embeddedKafkaBroker);
-        JsonDeserializer<RessursState> deserializer = new JsonDeserializer<>(RessursState.class);
+        JacksonJsonDeserializer<RessursState> deserializer = new JacksonJsonDeserializer<>(RessursState.class);
         deserializer.addTrustedPackages("*");
         Consumer<String, RessursState> ressursStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
         ressursStateConsumer.subscribe(Collections.singletonList(dlqTopic));
@@ -177,7 +177,7 @@ public class NomRemedyIntegrasjonListenerEmbeddedTest {
         // Assert
 
         Map<String, Object> props = KafkaTestUtils.consumerProps("dlt-test-group", "false", embeddedKafkaBroker);
-        JsonDeserializer<OrgtilknytningState> deserializer = new JsonDeserializer<>(OrgtilknytningState.class);
+        JacksonJsonDeserializer<OrgtilknytningState> deserializer = new JacksonJsonDeserializer<>(OrgtilknytningState.class);
         deserializer.addTrustedPackages("*");
         Consumer<String, OrgtilknytningState> orgtilknytningStateConsumer = new KafkaConsumer<>(props, new StringDeserializer(), deserializer);
         orgtilknytningStateConsumer.subscribe(Collections.singletonList(dlqTopic));

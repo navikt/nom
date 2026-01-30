@@ -41,9 +41,6 @@ spec:
     - team: tilgangsmaskin
       application: populasjonstilgangskontroll
       access: read
-    - team: nom
-      application: skjermede-personer
-      access: read
 
 ---
 

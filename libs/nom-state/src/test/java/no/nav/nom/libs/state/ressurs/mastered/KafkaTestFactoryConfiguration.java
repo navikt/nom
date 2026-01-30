@@ -1,10 +1,5 @@
 package no.nav.nom.libs.state.ressurs.mastered;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +9,11 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
 
@@ -28,16 +25,16 @@ public class KafkaTestFactoryConfiguration {
     @Autowired
     EmbeddedKafkaBroker embeddedKafka;
 
-    ObjectMapper objectMapper = configureObjectMapper();
+    JsonMapper jsonMapper = configureJsonMapper();
 
     @Bean
     ConsumerFactory<String, LocalDateTime> nomStateMasteredRessursConsumerFactory() {
-        return getDefaultMasteredRessursConsumerFactory(KafkaTestUtils.producerProps(embeddedKafka), objectMapper);
+        return getDefaultMasteredRessursConsumerFactory(KafkaTestUtils.producerProps(embeddedKafka), jsonMapper);
     }
 
     @Bean
     ProducerFactory<String, LocalDateTime> masteredRessursStateProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(KafkaTestUtils.producerProps(embeddedKafka), new StringSerializer(), new JsonSerializer<>(objectMapper));
+        return new DefaultKafkaProducerFactory<>(KafkaTestUtils.producerProps(embeddedKafka), new StringSerializer(), new JacksonJsonSerializer<>(jsonMapper));
     }
 
     @Bean
@@ -57,13 +54,11 @@ public class KafkaTestFactoryConfiguration {
         return new KafkaTemplate<>(stringStateProducerFactory);
     }
 
-    private static ObjectMapper configureObjectMapper() {
-        final var objectMapper = new ObjectMapper();
+    private static JsonMapper configureJsonMapper() {
+        final var jsonMapper = new JsonMapper();
 
-        return objectMapper.findAndRegisterModules()
-            .registerModule(new ParameterNamesModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return jsonMapper.rebuild()
+                .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                .build();
     }
 }

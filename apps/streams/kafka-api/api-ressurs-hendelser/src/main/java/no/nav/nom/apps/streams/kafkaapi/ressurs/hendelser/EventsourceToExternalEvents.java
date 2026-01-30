@@ -1,8 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.Orgtilknytning;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent;
 import no.nav.nom.contract.nom.Sektor;
@@ -20,8 +17,11 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -33,8 +33,8 @@ public class EventsourceToExternalEvents {
 
 
     public EventsourceToExternalEvents(
-        ObjectMapper objectMapper,
-        JsonSerde<Object> objectSerde,
+        JsonMapper jsonMapper,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder,
         AppProperties appProperties
     ) {
@@ -57,7 +57,7 @@ public class EventsourceToExternalEvents {
             .filter((key, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((key, event) -> event.getFid(), Grouped.with(stringSerde, ressursEventSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (String key, RessursEvent newEvent, ObjectNode ressursAggregate) -> {
                     ressursAggregate.put("fid", newEvent.getFid());
 
@@ -80,9 +80,9 @@ public class EventsourceToExternalEvents {
                             ),
                             newEvent.getMetadata().inputMetadata()
                         );
-                        ressursAggregate.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                        ressursAggregate.setAll(jsonMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
                     } else {
-                        ressursAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
+                        ressursAggregate.setAll(jsonMapper.convertValue(newEvent.getData(), ObjectNode.class));
                     }
 
 
@@ -102,7 +102,7 @@ public class EventsourceToExternalEvents {
             .selectKey((key, ressursJson) -> ressursJson.get("navident").asText())
             .groupByKey(Grouped.with(stringSerde, jsonSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (String key, ObjectNode newEvent, ObjectNode ressursAggregate) -> {
                     ressursAggregate.setAll(newEvent);
 
@@ -130,11 +130,11 @@ public class EventsourceToExternalEvents {
             .filter((key, event) -> !event.getFid().startsWith("FID_MANUELL")) // Ikke behandle manuelle test ressurser/orgtilknytninger
             .groupBy((String key, OrgtilknytningEvent event) -> event.getFid(), Grouped.with(stringSerde, orgtilknytningEventSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (String key, OrgtilknytningEvent newEvent, ObjectNode orgtilknytningAggregate) -> {
                     orgtilknytningAggregate.put("fid", newEvent.getFid());
 
-                    orgtilknytningAggregate.setAll(objectMapper.convertValue(newEvent.getData(), ObjectNode.class));
+                    orgtilknytningAggregate.setAll(jsonMapper.convertValue(newEvent.getData(), ObjectNode.class));
 
                     // Hvis DagligOppfolgingEndretEvent mottas og setter DOL så kan OTen gå videre til neste steg
                     // For påfølgende eventer hvor DOL er satt skal join ikke trigges
@@ -158,7 +158,7 @@ public class EventsourceToExternalEvents {
             .selectKey((key, otJson) -> otJson.get("navident").asText())
             .groupByKey(Grouped.with(stringSerde, jsonSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (String key, ObjectNode newEvent, ObjectNode orgtilknytningAggregate) -> {
                     orgtilknytningAggregate.setAll(newEvent);
 

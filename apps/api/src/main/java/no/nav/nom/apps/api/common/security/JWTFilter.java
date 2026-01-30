@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.common.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
@@ -51,9 +52,10 @@ public class JWTFilter extends OncePerRequestFilter {
                         context.setAuthentication(authentication);
                         SecurityContextHolder.setContext(context);
                     });
-        } catch (RuntimeException e) {
+        } catch (AuthenticationException e) {
             // Consider catching OAuth2AuthenticationException or AuthenticationException instead
             log.warn("Failed to validate JWT token", e);
+            SecurityContextHolder.clearContext();
         }
 
         chain.doFilter(request, response);

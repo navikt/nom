@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -124,9 +125,10 @@ public class OrgtilknytningRestService {
     // Påser at det ikke sendes unødvendige endring-events (endring-events som ikke gir ny verdi til state)
     // TODO: Valider at det til en hver tid finnes en aktiv daglig oppfolging
     public void oppdaterOrgtilknytningerForRessurs(String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, authResolver.kanRedigereRessurs(navident), navident);
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
+
+        validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, tilknyttetRessurs);
 
         var existingOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(navident).stream()
             .collect(Collectors.toMap(OrgtilknytningState::fid, Function.identity()));
@@ -246,9 +248,12 @@ public class OrgtilknytningRestService {
         }
     }
 
-    private void validateOppdaterOrgtilknytningerForRessursRequest(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
-                                                                   boolean isLoggedInUserLederForNavident, String navident) {
+    private void validateOppdaterOrgtilknytningerForRessursRequest(
+        OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
+        RessursState ressursState
+    ) {
         validateEndreOrgtilknytningUnderSeksMaaneder(oppdaterOrgtilknytningerForRessursRequest);
+        validateHasFysiskBrukersted(ressursState);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
 
@@ -258,7 +263,13 @@ public class OrgtilknytningRestService {
 
         validateOrgtilknytningTypeSektorCombination(oppdaterOrgtilknytningerForRessursRequest);
 
-        validateOrgtilknytningForVikafossen(oppdaterOrgtilknytningerForRessursRequest, navident);
+        validateOrgtilknytningForVikafossen(oppdaterOrgtilknytningerForRessursRequest, ressursState);
+    }
+
+    private void validateHasFysiskBrukersted(RessursState ressursState) {
+        if (isNull(ressursState.primaryFysiskBrukersted()) || ressursState.primaryFysiskBrukersted().isEmpty()) {
+            FysiskBrukerstedNotFoundException.fysiskBrukerstedIsNull(ressursState.visningsnavn().getFormattedVisningsnavn(), ressursState.navident());
+        }
     }
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
@@ -400,8 +411,10 @@ public class OrgtilknytningRestService {
         }
     }
 
-    private void validateOrgtilknytningForVikafossen(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest, String navident) {
-        var ressurs = ressursStateRepository.findByNavident(navident) .orElseThrow(() -> RessursNotFoundException.navident(navident));
+    private void validateOrgtilknytningForVikafossen(
+        OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest,
+        RessursState ressurs
+    ) {
         var isVikafossen = ressurs.identType().equals(IdentType.VIKAFOSSEN);
 
         if (isVikafossen) {
@@ -799,7 +812,7 @@ public class OrgtilknytningRestService {
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
-            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default -> authResolver.kanRedigereRessurs(navident);
         };
     }
@@ -816,7 +829,7 @@ public class OrgtilknytningRestService {
                 || authResolver.kanRedigereRessurs(navident)
                 || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
             case VIKAFOSSEN ->
-                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default ->
                 authResolver.kanRedigereRessurs(navident)
                 || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -44,7 +43,6 @@ import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -61,6 +59,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -240,10 +239,7 @@ public class RessursRestService {
             loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
             getAuthenticatedNavIdent().equals(ressursState.navident());
 
-        var showFysiskBrukerSted = loggedInUserHasAccessScope(ADMIN) ||
-            loggedInUserHasAccessScope(NomApiAccessScope.NOM_REMEDY_INTEGRASJON_APP) ||
-            authResolver.kanRedigereRessurs(ressursState.navident()) ||
-            getAuthenticatedNavIdent().equals(ressursState.navident());
+        var showFysiskBrukerSted = isShowFysiskBrukerSted(ressursState);
 
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
 
@@ -899,7 +895,7 @@ public class RessursRestService {
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN);
-            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default -> authResolver.kanOppretteRessurs(orgenhet);
         };
     }
@@ -908,7 +904,7 @@ public class RessursRestService {
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
-            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN, ADMIN); // NOM admin skal fratas denne rollen etterhvert
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default -> authResolver.kanRedigereRessurs(navident);
         };
     }

@@ -25,11 +25,6 @@ public class PictureController {
         this.cachePictures = cachePictures;
     }
 
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello World");
-    }
-
     @GetMapping(value="/picture/{navident}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> lookupProfilePictureByNavIdent(@PathVariable String navident) {
         countPictureRequested.increment();

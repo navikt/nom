@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTi
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -271,6 +272,17 @@ public class OrgtilknytningController {
     public ResponseEntity<StandardResponse> handleConflict(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
+    @ExceptionHandler(
+        {
+            FysiskBrukerstedNotFoundException.class,
+        }
+    )
+    public ResponseEntity<StandardResponse> handleMissingFysiskBrukerstedMissing(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 

@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.unit4.unit4.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;

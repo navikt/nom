@@ -3,12 +3,14 @@ package no.nav.nom.apps.navident.common.cache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.OAuth2ResourceServerProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.stereotype.Component;
 
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_X_REQUEST_ID_KEY;
 
 @Component
 @RequiredArgsConstructor

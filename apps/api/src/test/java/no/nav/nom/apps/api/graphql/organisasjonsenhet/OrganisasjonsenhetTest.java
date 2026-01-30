@@ -1,9 +1,5 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.api.graphql.GraphQLTestUtil;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
 import no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -18,8 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,7 +40,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
 
     @Autowired
-    public ObjectMapper objectMapper;
+    public JsonMapper jsonMapper;
 
     @BeforeEach
     protected void setup() {
@@ -112,12 +111,53 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
     }
 
     @Test
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå")
+    void scenario113_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        orgEnhetStateRepository.update(orgenhet);
+
+        final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario113_b.graphql")
+            .path("organisasjonsenheter")
+            .entityList(OrgEnhetResult.class)
+            .get();
+
+        assertEquals(orgenhet.agressoId(), outputEnhet.getFirst().getId());
+        assertEquals(ResultCode.OK, outputEnhet.getFirst().getCode());
+        assertEquals(orgenhet.agressoOrgNivaa(), outputEnhet.getFirst().getOrgNiv());
+    }
+
+    @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
     void scenario114() {
         var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
         orgEnhetStateRepository.update(orgenhet);
 
         final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario114.graphql")
+            .path("organisasjonsenheter")
+            .entityList(OrgEnhetResult.class)
+            .get();
+
+        final var actualTestId4 = getEnhetInList(orgenhet.agressoId(), outputEnhet);
+        final var actualNotFound = getEnhetInList("notFoundId", outputEnhet);
+
+        assertTrue(actualTestId4.isPresent());
+        assertEquals(orgenhet.agressoId(), actualTestId4.get().getId());
+        assertEquals(orgenhet.agressoOrgNivaa(), actualTestId4.get().getOrgNiv());
+        assertEquals(ResultCode.OK, actualTestId4.get().getCode());
+
+        assertTrue(actualNotFound.isPresent());
+        assertEquals("notFoundId", actualNotFound.get().getId());
+        assertEquals("ORGNIV2", actualNotFound.get().getOrgNiv());
+        assertEquals(ResultCode.NOT_FOUND, actualNotFound.get().getCode());
+    }
+
+    @Test
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
+    void scenario114_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        orgEnhetStateRepository.update(orgenhet);
+
+        final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario114_b.graphql")
             .path("organisasjonsenheter")
             .entityList(OrgEnhetResult.class)
             .get();
@@ -177,8 +217,39 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(
                 toMap(
+                    o -> o.get("retning").asString(),
+                    o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                )
+            );
+
+        assertEquals(orgenhet1.agressoId(), organiserteEnheter.get("over").getAgressoId());
+        assertEquals(orgenhet2.agressoId(), organiserteEnheter.get("under").getAgressoId());
+    }
+
+    @Test
+    @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
+    void scenario21_b() {
+        var orgenhet1 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn4").agressoId("testId4").agressoOrgNivaa("ORGNIV2").build();
+        var orgenhet2 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet3 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+
+        orgEnhetStateRepository.update(orgenhet1);
+        orgEnhetStateRepository.update(orgenhet2);
+        orgEnhetStateRepository.update(orgenhet3);
+
+        OrganiseringState organiseringState1 = getOrganiseringState("organisering_1", orgenhet2, orgenhet3, LocalDate.now(), null);
+        OrganiseringState organiseringState2 = getOrganiseringState("organisering_2", orgenhet3, orgenhet1, LocalDate.now(), null);
+        organiseringStateRepository.update(organiseringState1);
+        organiseringStateRepository.update(organiseringState2);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario3_b.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+            .collect(
+                toMap(
                     o -> o.get("retning").asText(),
-                    o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                    o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
                 )
             );
 
@@ -206,8 +277,8 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(
                 toMap(
-                    o -> o.get("retning").asText(),
-                    o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                    o -> o.get("retning").asString(),
+                    o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
                 )
             );
 
@@ -236,8 +307,33 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
+                o -> o.get("retning").asString(),
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+            ));
+
+        assertThat(organiserteEnheter).hasSize(1);
+        assertEquals(orgenhet2.agressoId(), organiserteEnheter.get("over").getAgressoId());
+    }
+
+    @Test
+    @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
+    void scenario33_b() {
+        var orgenhet1 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhet2 = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+
+        orgEnhetStateRepository.update(orgenhet1);
+        orgEnhetStateRepository.update(orgenhet2);
+
+        OrganiseringState organiseringState = getOrganiseringState("organisering_1", orgenhet1, orgenhet2, LocalDate.now(), null);
+        organiseringStateRepository.update(organiseringState);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario33_b.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+            .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
@@ -263,8 +359,37 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(toMap(
+                o -> o.get("retning").asString(),
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+            ));
+
+        assertThat(organiserteEnheter).hasSize(1);
+
+        assertEquals("ID_2", organiserteEnheter.get("over").getId());
+        assertEquals(orgenhetOver.agressoId(), organiserteEnheter.get("over").getAgressoId());
+    }
+
+    @Test
+    @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
+    void scenario33_b_new_organisering() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+        var orgenhetOver = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+        var orgenhetUnder = OrgenhetTestUtils.createDefault().toBuilder().navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+        orgEnhetStateRepository.update(orgenhetOver);
+        orgEnhetStateRepository.update(orgenhetUnder);
+
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(1, orgenhet, orgenhetOver));
+        organiseringStateRepository.update(orgEnhetStateToOrganiseringState(2, orgenhetUnder, orgenhet));
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario33_b.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+            .collect(toMap(
                 o -> o.get("retning").asText(),
-                o -> objectMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
+                o -> jsonMapper.convertValue(o.get("orgEnhet"), OrgEnhet.class)
             ));
 
         assertThat(organiserteEnheter).hasSize(1);
@@ -293,11 +418,38 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
+        final var outputLeder = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
 
         assertEquals(ressurs.navident(), outputLeder.ressurs().getNavIdent());
         assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.ressurs().getPersonIdent());
     }
+
+    @Test
+    @DisplayName("Tester at graphQL spørring på leder hvor enhet har leder gir leder")
+    void scenario31_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
+
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario4_b.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLeder = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).getFirst();
+
+        assertEquals(ressurs.navident(), outputLeder.ressurs().getNavIdent());
+        assertEquals(ressurs.personident().replaceFirst(".{5}$","*****"), outputLeder.ressurs().getPersonIdent());
+    }
+
 
     @Test
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
@@ -308,7 +460,21 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario32.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
+        final var outputLedere = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
+
+        assertEquals(0, outputLedere.size());
+    }
+
+    @Test
+    @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
+    void scenario32_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId3").agressoOrgNivaa("ORGNIV3").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario32_b.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLedere = jsonMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
 
         assertEquals(0, outputLedere.size());
     }
@@ -335,9 +501,36 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
 
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asString());
+        assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asString());
+    }
+
+    @Test
+    @DisplayName("Henter ut person navn i kontekst av enhet leder spørring - ikke slå opp mot PDL mer")
+    void scenario34_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
+
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34_b.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
+
         assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asText());
         assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asText());
     }
+
 
     @Test
     @DisplayName("Leser kobling fra graphQl")
@@ -362,7 +555,43 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario41.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
+        final var outputKoblinger = jsonMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
+
+        assertEquals(1, outputKoblinger.size());
+
+        final var outputKobling = outputKoblinger.get(0);
+        assertEquals("2020-01-01", outputKobling.getGyldigFom().toString());
+        assertNull(outputKobling.getGyldigTom());
+
+        final var outputRessurs = outputKoblinger.get(0).getRessurs();
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(sladdetPersonident(ressurs.personident()), outputRessurs.getPersonIdent());
+    }
+
+    @Test
+    @DisplayName("Leser kobling fra graphQl")
+    void scenario41_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
+
+        orgtilknytningStateRepository.update(
+            "FID_1",
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressurs.navident())
+                .orgEnhetId("ID_1")
+                .gyldigFom(LocalDate.of(2020, 1, 1))
+                .build()
+        );
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario41_b.graphql");
+
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputKoblinger = jsonMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
 
         assertEquals(1, outputKoblinger.size());
 
@@ -383,6 +612,19 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         orgEnhetStateRepository.update(orgenhet);
 
         final var response = gqlUtil.postForResource("organisasjonsenhet/scenario42.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        assertThat(outputEnhetJson.get("koblinger")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
+    void scenario42_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn10").agressoId("testId10").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario42_b.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();
@@ -410,10 +652,35 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
 
+        assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asString());
+        assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asString());
+    }
+
+    @Test
+    @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
+    void scenario43_b() {
+        var orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn").agressoId("testId1").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(orgenhet);
+
+        var ressurs = createRessursState("1");
+        ressursStateRepository.update(ressurs);
+
+        var leder = OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(ressurs.navident())
+            .orgEnhetId(orgenhet.id())
+            .startdato(LocalDate.now().minusYears(1))
+            .build();
+        orgEnhetLederStateRepository.update(leder.fid(),leder);
+
+        final var response = gqlUtil.postForResource("organisasjonsenhet/scenario34_b.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLederJson = outputEnhetJson.get("leder").get(0).get("ressurs");
+
         assertEquals(ressurs.visningsnavn().getFornavnMellomnavn(), outputLederJson.get("fornavn").asText());
         assertEquals(ressurs.visningsnavn().etternavn(), outputLederJson.get("etternavn").asText());
     }
-
 
     @Test
     @DisplayName("Hent flere orgenheter basert på liste av IDer")
@@ -435,7 +702,33 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
                         """;
 
         final var response = gqlUtil.postForQuery(graphqlQry);
-        var x = response.path("orgEnheter").entityList(Object.class).hasSize(1);
+        response.path("orgEnheter").entityList(Object.class).hasSize(1);
+
+    }
+
+    @Test
+    @DisplayName("Hent flere orgenheter basert på orgniv")
+    void scenario45(){
+        var target1Orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_1").navn("testNavn1").agressoId("testId1").agressoOrgNivaa("ORGNIV2").build();
+        var target2Orgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_3").navn("testNavn1").agressoId("testId1").agressoOrgNivaa("ORGNIV2").build();
+        var ignoreOrgenhet = OrgenhetTestUtils.createDefault().toBuilder().id("ID_2").navn("testNavn2").agressoId("testId2").agressoOrgNivaa("ORGENHET").build();
+
+        orgEnhetStateRepository.update(target1Orgenhet);
+        orgEnhetStateRepository.update(target2Orgenhet);
+        orgEnhetStateRepository.update(ignoreOrgenhet);
+
+        // language=graphql
+        var graphqlQry = """
+                        query X{
+                            orgEnheter(where: {orgNiv: "ORGNIV2"}) {
+                                code
+                                id
+                            }
+                        }
+                        """;
+
+        final var response = gqlUtil.postForQuery(graphqlQry);
+        response.path("orgEnheter").entityList(Object.class).hasSize(2);
 
 
     }

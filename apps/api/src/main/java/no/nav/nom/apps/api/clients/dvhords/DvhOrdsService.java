@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.clients.dvhords;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
@@ -13,6 +12,7 @@ import no.nav.nom.apps.api.orgtilknytning.dvh.DvhEksternRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -140,8 +140,8 @@ public class DvhOrdsService {
             log.info("Henter statlige tilknytninger fra ORDS DVH - page {}", page++);
             AtomicReference<String> nextUrl = new AtomicReference<>();
             pagedJson.get("links").forEach(n -> {
-                if (n.get("rel").asText().equals("next")) {
-                    nextUrl.set(n.get("href").asText());
+                if (n.get("rel").asString().equals("next")) {
+                    nextUrl.set(n.get("href").asString());
                 }
             });
             if (nextUrl.get() == null) {
@@ -260,12 +260,12 @@ public class DvhOrdsService {
     }
 
     private boolean determineEnhetActive(JsonNode e) {
-        return e.get("orgnode_status").asText().equals("N");
+        return e.get("orgnode_status").asString().equals("N");
     }
 
     private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
         // 'deltar i rekruttering' og 'nav ventelønn' er kun for intern bruk i agresso.
-        val orgnodeKode = jsonNode.get("orgnode_kode").asText();
+        val orgnodeKode = jsonNode.get("orgnode_kode").asString();
         val deltarIRekruttering = orgnodeKode.matches("0+");
         val navVenteloenn = orgnodeKode.equals("9999920");
         return !(deltarIRekruttering || navVenteloenn);
@@ -273,13 +273,12 @@ public class DvhOrdsService {
 
     private String getAsText(JsonNode e, String field) {
         JsonNode jsonNode = e.get(field);
-        return jsonNode == null ? "<null>" : jsonNode.asText();
+        return jsonNode == null ? "<null>" : jsonNode.asString();
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
-        var isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
         var userRef1 = jsonNode.get("userrefeerence1");
 
-        return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
+        return (userRef1.asString().startsWith("PT-") || userRef1.asString().startsWith("PK-"));
     }
 }

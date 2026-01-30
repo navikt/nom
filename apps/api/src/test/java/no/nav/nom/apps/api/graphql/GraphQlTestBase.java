@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
@@ -14,17 +13,18 @@ import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.BeansException;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.graphql.tester.GraphQlTesterAutoConfiguration;
+import org.springframework.boot.graphql.test.autoconfigure.tester.GraphQlTesterAutoConfiguration;
+import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.graphql.ExecutionGraphQlService;
 import org.springframework.graphql.test.tester.ExecutionGraphQlServiceTester;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.test.context.ContextConfiguration;
+import tools.jackson.databind.json.JsonMapper;
 
 @ContextConfiguration(
     classes = {
@@ -74,13 +74,12 @@ abstract public class GraphQlTestBase implements ApplicationContextAware {
 
 
         {
-            var objectMapper = applicationContext.getBean(ObjectMapper.class);
+            var jsonMapper = applicationContext.getBean(JsonMapper.class);
             var executionGraphQlService = applicationContext.getBean(ExecutionGraphQlService.class);
 
             var executionGraphQLServiceTester = ExecutionGraphQlServiceTester.builder(executionGraphQlService)
-                .encoder(new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_GRAPHQL_RESPONSE,
-                    MediaType.APPLICATION_JSON, MediaType.APPLICATION_GRAPHQL))
-                .decoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON))
+                .encoder(new JacksonJsonEncoder(jsonMapper, MediaType.APPLICATION_GRAPHQL_RESPONSE, MediaType.APPLICATION_JSON))
+                .decoder(new JacksonJsonDecoder(jsonMapper, MediaType.APPLICATION_JSON))
                 .build();
 
             // todo, make this work

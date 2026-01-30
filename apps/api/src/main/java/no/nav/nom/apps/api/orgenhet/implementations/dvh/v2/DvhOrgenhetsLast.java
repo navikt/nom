@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -16,6 +15,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -36,7 +36,7 @@ import static java.util.Objects.nonNull;
 @Service
 @RequiredArgsConstructor
 public class DvhOrgenhetsLast {
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final ValidationService validationService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
@@ -96,7 +96,7 @@ public class DvhOrgenhetsLast {
                                     val enhetCompare = list.get(j);
                                     boolean shouldMerge = withinOneMonth(enhetLast, enhetCompare) || isOverlapping(enhetLast, enhetCompare);
                                     if (shouldMerge) {
-                                        enhetCompare.merge(enhetLast, objectMapper);
+                                        enhetCompare.merge(enhetLast, jsonMapper);
                                         list.remove(enhetLast);
                                     }
                                 }

@@ -19,14 +19,14 @@ import { Route as StateIndexRouteImport } from './routes/state.index'
 import { Route as SinksIndexRouteImport } from './routes/sinks.index'
 import { Route as StateRessursRouteImport } from './routes/state.ressurs'
 import { Route as StateOrgtilknytningRouteImport } from './routes/state.orgtilknytning'
-import { Route as StateOrgenhetRouteImport } from './routes/state.orgenhet'
 import { Route as StateOrgenhetLederRouteImport } from './routes/state.orgenhet-leder'
+import { Route as StateOrgenhetRouteImport } from './routes/state.orgenhet'
 import { Route as StateOrganiseringRouteImport } from './routes/state.organisering'
 import { Route as SinksTilgangRouteImport } from './routes/sinks.tilgang'
 import { Route as SinksRessursRouteImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgtilknytningRouteImport } from './routes/sinks.orgtilknytning'
-import { Route as SinksOrgenhetRouteImport } from './routes/sinks.orgenhet'
 import { Route as SinksOrgenhetLederRouteImport } from './routes/sinks.orgenhet-leder'
+import { Route as SinksOrgenhetRouteImport } from './routes/sinks.orgenhet'
 import { Route as SinksNomMasteredRouteImport } from './routes/sinks.nom-mastered'
 import { Route as SinksDeadLetterRouteImport } from './routes/sinks.dead-letter'
 import { Route as SinksApiRessursHendelserRouteImport } from './routes/sinks.api-ressurs-hendelser'
@@ -89,14 +89,14 @@ const StateOrgtilknytningRoute = StateOrgtilknytningRouteImport.update({
   path: '/orgtilknytning',
   getParentRoute: () => StateRoute,
 } as any)
-const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
-  id: '/orgenhet',
-  path: '/orgenhet',
-  getParentRoute: () => StateRoute,
-} as any)
 const StateOrgenhetLederRoute = StateOrgenhetLederRouteImport.update({
   id: '/orgenhet-leder',
   path: '/orgenhet-leder',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
+  id: '/orgenhet',
+  path: '/orgenhet',
   getParentRoute: () => StateRoute,
 } as any)
 const StateOrganiseringRoute = StateOrganiseringRouteImport.update({
@@ -119,14 +119,14 @@ const SinksOrgtilknytningRoute = SinksOrgtilknytningRouteImport.update({
   path: '/orgtilknytning',
   getParentRoute: () => SinksRoute,
 } as any)
-const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
-  id: '/orgenhet',
-  path: '/orgenhet',
-  getParentRoute: () => SinksRoute,
-} as any)
 const SinksOrgenhetLederRoute = SinksOrgenhetLederRouteImport.update({
   id: '/orgenhet-leder',
   path: '/orgenhet-leder',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
+  id: '/orgenhet',
+  path: '/orgenhet',
   getParentRoute: () => SinksRoute,
 } as any)
 const SinksNomMasteredRoute = SinksNomMasteredRouteImport.update({
@@ -454,18 +454,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StateOrgtilknytningRouteImport
       parentRoute: typeof StateRoute
     }
-    '/state/orgenhet': {
-      id: '/state/orgenhet'
-      path: '/orgenhet'
-      fullPath: '/state/orgenhet'
-      preLoaderRoute: typeof StateOrgenhetRouteImport
-      parentRoute: typeof StateRoute
-    }
     '/state/orgenhet-leder': {
       id: '/state/orgenhet-leder'
       path: '/orgenhet-leder'
       fullPath: '/state/orgenhet-leder'
       preLoaderRoute: typeof StateOrgenhetLederRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/orgenhet': {
+      id: '/state/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/state/orgenhet'
+      preLoaderRoute: typeof StateOrgenhetRouteImport
       parentRoute: typeof StateRoute
     }
     '/state/organisering': {
@@ -496,18 +496,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksOrgtilknytningRouteImport
       parentRoute: typeof SinksRoute
     }
-    '/sinks/orgenhet': {
-      id: '/sinks/orgenhet'
-      path: '/orgenhet'
-      fullPath: '/sinks/orgenhet'
-      preLoaderRoute: typeof SinksOrgenhetRouteImport
-      parentRoute: typeof SinksRoute
-    }
     '/sinks/orgenhet-leder': {
       id: '/sinks/orgenhet-leder'
       path: '/orgenhet-leder'
       fullPath: '/sinks/orgenhet-leder'
       preLoaderRoute: typeof SinksOrgenhetLederRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/orgenhet': {
+      id: '/sinks/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/sinks/orgenhet'
+      preLoaderRoute: typeof SinksOrgenhetRouteImport
       parentRoute: typeof SinksRoute
     }
     '/sinks/nom-mastered': {
@@ -618,6 +618,7 @@ interface SinksRouteChildren {
   SinksDeadLetterRoute: typeof SinksDeadLetterRoute
   SinksNomMasteredRoute: typeof SinksNomMasteredRoute
   SinksOrgenhetRoute: typeof SinksOrgenhetRoute
+  SinksOrgenhetLederRoute: typeof SinksOrgenhetLederRoute
   SinksOrgtilknytningRoute: typeof SinksOrgtilknytningRoute
   SinksRessursRoute: typeof SinksRessursRoute
   SinksTilgangRoute: typeof SinksTilgangRoute
@@ -632,6 +633,7 @@ const SinksRouteChildren: SinksRouteChildren = {
   SinksDeadLetterRoute: SinksDeadLetterRoute,
   SinksNomMasteredRoute: SinksNomMasteredRoute,
   SinksOrgenhetRoute: SinksOrgenhetRoute,
+  SinksOrgenhetLederRoute: SinksOrgenhetLederRoute,
   SinksOrgtilknytningRoute: SinksOrgtilknytningRoute,
   SinksRessursRoute: SinksRessursRoute,
   SinksTilgangRoute: SinksTilgangRoute,
@@ -643,6 +645,7 @@ const SinksRouteWithChildren = SinksRoute._addFileChildren(SinksRouteChildren)
 interface StateRouteChildren {
   StateOrganiseringRoute: typeof StateOrganiseringRoute
   StateOrgenhetRoute: typeof StateOrgenhetRoute
+  StateOrgenhetLederRoute: typeof StateOrgenhetLederRoute
   StateOrgtilknytningRoute: typeof StateOrgtilknytningRoute
   StateRessursRoute: typeof StateRessursRoute
   StateIndexRoute: typeof StateIndexRoute
@@ -651,6 +654,7 @@ interface StateRouteChildren {
 const StateRouteChildren: StateRouteChildren = {
   StateOrganiseringRoute: StateOrganiseringRoute,
   StateOrgenhetRoute: StateOrgenhetRoute,
+  StateOrgenhetLederRoute: StateOrgenhetLederRoute,
   StateOrgtilknytningRoute: StateOrgtilknytningRoute,
   StateRessursRoute: StateRessursRoute,
   StateIndexRoute: StateIndexRoute,

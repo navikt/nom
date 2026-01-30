@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.pdlutils;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -9,6 +8,7 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 
@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 @RequiredArgsConstructor
 public class PdlUtils {
     private final AppProperties appProperties;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private void mockPdlResponse(String response) {
         stubFor(post("/graphql")
@@ -36,19 +36,19 @@ public class PdlUtils {
 
         val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
 
-        val foedselsdato = objectMapper.createObjectNode()
+        val foedselsdato = jsonMapper.createObjectNode()
                 .put("foedselsdato", LocalDate.now().toString())
                 .put("foedselsaar", 2000);
 
-        var personDataJson = objectMapper.createObjectNode();
-        personDataJson.set("navn", objectMapper.createArrayNode().add(objectMapper.valueToTree(navn)));
-        personDataJson.set("kjoenn", objectMapper.createArrayNode().add(objectMapper.valueToTree(kjoenn)));
-        personDataJson.set("foedselsdato", objectMapper.createArrayNode().add(foedselsdato));
+        var personDataJson = jsonMapper.createObjectNode();
+        personDataJson.set("navn", jsonMapper.createArrayNode().add(jsonMapper.valueToTree(navn)));
+        personDataJson.set("kjoenn", jsonMapper.createArrayNode().add(jsonMapper.valueToTree(kjoenn)));
+        personDataJson.set("foedselsdato", jsonMapper.createArrayNode().add(foedselsdato));
 
-        var result = objectMapper.createObjectNode();
-        result.set("data", objectMapper.createObjectNode().set("hentPerson", personDataJson));
+        var result = jsonMapper.createObjectNode();
+        result.set("data", jsonMapper.createObjectNode().set("hentPerson", personDataJson));
 
-        mockPdlResponse(objectMapper.writeValueAsString(result));
+        mockPdlResponse(jsonMapper.writeValueAsString(result));
 
         return navn;
     }

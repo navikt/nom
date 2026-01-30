@@ -99,4 +99,4 @@ spec:
           namespace: nom
       external:
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io

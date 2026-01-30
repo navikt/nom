@@ -4,11 +4,11 @@ import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.micrometer.metrics.autoconfigure.MetricsAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration

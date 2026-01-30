@@ -26,6 +26,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -118,12 +120,22 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @Captor
     ArgumentCaptor<EndreOrgtilknytningSektorCommand> endreOrgtilknytningSektorCommandArgumentCaptor;
 
+    private AutoCloseable mocks;
+
     @BeforeEach
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
         when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
         clearOrgtilknytninger();
         ressursStateRepository.clear();
+        mocks = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        if (mocks != null) {
+            mocks.close();
+        }
     }
 
     @Test
@@ -1674,7 +1686,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin - ny tilgangsvalidering")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvise legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin - ny tilgangsvalidering")
     void test_legg_til_orgtilknytning_for_vikafossen_som_nom_admin_eksisterende_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1720,11 +1732,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             testToken.nomAdminUser(),
             oppdaterOrgtilknytningerForRessursRequest
         )
-            .expectStatus().isOk();
+            .expectStatus().isForbidden();
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvis legge til orgtilknytning for VIKAFOSSEN hvis du er nom admin på feil enhet")
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} avvis at admin får lov til å endre på vikafossen ansatte")
     void test_avvis_legg_til_orgtilknytning_for_vikafossen_som_nom_admin_eksisterende_paa_feil_enhet() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1770,7 +1782,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             testToken.nomAdminUser(),
             oppdaterOrgtilknytningerForRessursRequest
         )
-            .expectStatus().isBadRequest();
+            .expectStatus().isForbidden();
     }
 
     @Test

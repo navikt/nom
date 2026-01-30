@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.u4diff;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
@@ -12,6 +11,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -31,17 +31,17 @@ public class U4DiffPaaMastrede {
     private final U4DiffRepository u4DiffRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursStateRepository ressursStateRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     public U4DiffPaaMastrede(U4DiffRepository u4DiffRepository, OrgEnhetStateRepository orgEnhetStateRepository,
-                             RessursStateRepository ressursStateRepository, ObjectMapper objectMapper,
+                             RessursStateRepository ressursStateRepository, JsonMapper jsonMapper,
                              OrgtilknytningStateRepository orgtilknytningStateRepository
     ) {
         this.u4DiffRepository = u4DiffRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursStateRepository = ressursStateRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
@@ -155,7 +155,7 @@ public class U4DiffPaaMastrede {
 
     private void periodeManglerIU4(OrgtilknytningState ot, String navident, U4DiffType diffType) {
         var orgenhet = orgEnhetStateRepository.findById(ot.orgEnhetId()).orElseThrow();
-        var otJson = objectMapper.valueToTree(ot);
+        var otJson = jsonMapper.valueToTree(ot);
         u4DiffRepository.save(U4Diff.builder()
                 .kilde(U4DiffKilde.STILLINGER)
                 .navident(navident)
@@ -174,7 +174,7 @@ public class U4DiffPaaMastrede {
     private void forskjellIPerioder(StillingPeriode sp, OrgtilknytningState ot, String navident) {
         if (erStillingPeriodeEgentligLikOT(sp, ot)) return;
         var orgenhet = orgEnhetStateRepository.findById(ot.orgEnhetId()).orElseThrow();
-        var otJson = objectMapper.valueToTree(ot);
+        var otJson = jsonMapper.valueToTree(ot);
         u4DiffRepository.save(U4Diff.builder()
                 .kilde(U4DiffKilde.STILLINGER)
                 .navident(navident)

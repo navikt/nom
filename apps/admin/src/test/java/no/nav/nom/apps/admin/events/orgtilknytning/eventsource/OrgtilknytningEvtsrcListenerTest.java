@@ -1,19 +1,15 @@
 package no.nav.nom.apps.admin.events.orgtilknytning.eventsource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OrgtilknytningEvtsrcListenerTest {
-    private ObjectMapper objectMapper = configureObjectMapper();
+    private JsonMapper jsonMapper = configureJsonMapper();
     private OrgtilknytningEvtsrcListener orgtilknytningEvtsrcListener = new OrgtilknytningEvtsrcListener(null, "listenerId");
 
     @Test
@@ -61,19 +57,15 @@ class OrgtilknytningEvtsrcListenerTest {
         JsonNode result = orgtilknytningEvtsrcListener.replaceIllegalEnumMidlertidlig(jsonString);
         assertEquals(expected, result.toString());
         try {
-            objectMapper.treeToValue(result, OrgtilknytningEvent.class);
-        } catch (JsonProcessingException e) {
+            jsonMapper.treeToValue(result, OrgtilknytningEvent.class);
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static ObjectMapper configureObjectMapper() {
-        final var objectMapper = new ObjectMapper();
+    private static JsonMapper configureJsonMapper() {
+        final var jsonMapper = new JsonMapper();
 
-        return objectMapper.findAndRegisterModules()
-            .registerModule(new ParameterNamesModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return jsonMapper;
     }
 }

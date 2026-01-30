@@ -11,9 +11,11 @@ import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.LederTilgangState;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class TilgangDelegertUtloeperEmailService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final Configuration freemarkerConfig;
     private final MicrosoftGraphClient microsoftGraphClient;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     public TilgangDelegertUtloeperEmailService(
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
@@ -49,7 +51,8 @@ public class TilgangDelegertUtloeperEmailService {
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         Configuration freemarkerConfig,
-        MicrosoftGraphClient microsoftGraphClient
+        MicrosoftGraphClient microsoftGraphClient,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository
     ) {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
@@ -58,6 +61,7 @@ public class TilgangDelegertUtloeperEmailService {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.freemarkerConfig = freemarkerConfig;
         this.microsoftGraphClient = microsoftGraphClient;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
     }
 
 
@@ -88,8 +92,10 @@ public class TilgangDelegertUtloeperEmailService {
         try {
             List<String> recipientNavidents = List.of(expiringDelegering.av(), expiringDelegering.til());
             var adRessurser = adClient.fetchInAdRessursInBatches(recipientNavidents);
-
-            var lederAdRessurs = adRessurser.get(expiringDelegering.av());
+            String delegertAvNavident = orgEnhetLederStateRepository.getActiveForOrgEnhet(expiringDelegering.orgenhetId())
+                .map(OrgEnhetLederState::navident)
+                .orElse(expiringDelegering.av());
+            var lederAdRessurs = adRessurser.get(delegertAvNavident);
             var delegertLederAdRessurs = Optional.ofNullable(adRessurser.get(expiringDelegering.til()));
             var delegertLederNavn = delegertLederAdRessurs.map(AdRessurs::getDisplayName).orElse("Ukjent Navn");
 

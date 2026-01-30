@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.contract.nom.Sektor;
@@ -30,7 +29,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -39,6 +38,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -88,7 +88,7 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Autowired
     private MasteredRessursStateRepository masteredRessursStateRepository;
@@ -120,12 +120,12 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         masteredRessursStateRepository.clear();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
-            .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
+            .consumerProps(embeddedKafkaBroker, "consumerGroup", false));
 
         DefaultKafkaConsumerFactory<String, OrgtilknytningEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(
             consumerProps,
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
+            new JacksonJsonDeserializer<>(OrgtilknytningEvent.class, jsonMapper)
         );
 
         recordsQueue = new LinkedBlockingQueue<>();
@@ -141,7 +141,7 @@ class ImportMissingOrgtilknytningerTest extends TestBase {
         // Ekstra listener for NOM mastered topic
         nomMasteredRecordsQueue = new LinkedBlockingQueue<>();
 
-        var jsonSerializer = new JsonDeserializer<LocalDateTime>(objectMapper);
+        var jsonSerializer = new JacksonJsonDeserializer<LocalDateTime>(jsonMapper);
         jsonSerializer.addTrustedPackages("java.time");
 
         DefaultKafkaConsumerFactory<String, LocalDateTime> nomMasteredConsumerFactory = new DefaultKafkaConsumerFactory<>(

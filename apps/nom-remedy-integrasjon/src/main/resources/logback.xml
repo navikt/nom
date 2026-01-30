@@ -2,6 +2,8 @@
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
     <root level="info">
         <appender-ref ref="stdout_json" />
     </root>

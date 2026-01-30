@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: nom-intern-orgenhet-leder-state
+  name: nom-intern-orgenhet-leder-state-v2
   namespace: org
   annotations:
     nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
@@ -19,15 +19,17 @@ spec:
     max: 1
   liveness:
     path: /internal/health/liveness
-    initialDelay: 30
     periodSeconds: 5
-    failureThreshold: 5
+    failureThreshold: 3
   readiness:
+    path: /internal/health/readiness
+    periodSeconds: 5
+    failureThreshold: 3
+  startup:
     path: /internal/health/readiness
     initialDelay: 30
     periodSeconds: 5
-    timeout: 4
-    failureThreshold: 5
+    failureThreshold: 15
   resources:
     requests:
       cpu: 100m

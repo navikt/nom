@@ -55,6 +55,11 @@ export const Route = createFileRoute("/sinks")({
             value="/sinks/orgtilknytning"
           />
           <Tabs.Tab
+            label="Historikk leder"
+            onClick={() => navigate({ to: "/sinks/orgenhet-leder", search })}
+            value="/sinks/orgenhet-leder"
+          />
+          <Tabs.Tab
             label="NOM mastered"
             onClick={() => navigate({ to: "/sinks/nom-mastered", search })}
             value="/sinks/nom-mastered"
@@ -85,11 +90,6 @@ export const Route = createFileRoute("/sinks")({
             label="Remedy Dead Letter"
             onClick={() => navigate({ to: "/sinks/dead-letter", search })}
             value={"/sinks/dead-letter"}
-          />
-          <Tabs.Tab
-            label="Orgenhet leder"
-            onClick={() => navigate({ to: "/sinks/orgenhet-leder", search })}
-            value="/sinks/orgenhet-leder"
           />
         </Tabs.List>
         <Outlet />

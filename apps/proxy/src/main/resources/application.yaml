@@ -26,6 +26,11 @@ spring:
     base: ${LDAP_BASE}
     template:
       ignore-partial-result-exception: true
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 azure:
   issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0

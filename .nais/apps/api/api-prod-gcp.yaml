@@ -265,6 +265,12 @@ spec:
         - application: brev-sikkerhetsnett
           namespace: isa
           cluster: prod-gcp
+        - application: nom-to-bq
+          namespace: nada
+          cluster: prod-gcp
+        - application: nav-persondata-api
+          namespace: holmes
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
@@ -276,7 +282,7 @@ spec:
         - application: logging
           namespace: nais-system
       external:
-        - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: org-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io

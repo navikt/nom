@@ -5,7 +5,8 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
     <logger name="no.nav" level="debug" />
 
 

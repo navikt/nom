@@ -1,14 +1,14 @@
 package no.nav.nom.apps.api.orgtilknytning.api.email;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 
@@ -16,9 +16,9 @@ import java.time.Duration;
 @Configuration
 public class OrgtilknytningEvtsrcKafkaConfig {
     @Bean
-    ConsumerFactory<String, String> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, String> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
             new StringDeserializer()
         );

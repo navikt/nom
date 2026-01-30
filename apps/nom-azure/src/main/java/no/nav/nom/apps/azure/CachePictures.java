@@ -81,9 +81,6 @@ public class CachePictures {
                 log.debug("Missing from cache, need to fetch for navident: " + navident);
                 return fetchAndUpdate(navident);
             }
-            // TODO, refetch if remaining TTL is less than some fraction of the default TTL
-            //  var tresholdForRefreshOfPresentValue = DEFAULT_TTL.dividedBy(3);
-            //  var thresholdForRefreshOfMissingValue = DEFAULT_TTL.dividedBy(3).multipliedBy(2);
 
             if (CODE_NO_PICTURE.equals(maybeBase64Img)) {
                 log.debug("Entry for missing picture found in cache for navident: " + navident);

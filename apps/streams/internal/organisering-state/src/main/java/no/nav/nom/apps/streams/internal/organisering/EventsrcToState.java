@@ -1,8 +1,5 @@
 package no.nav.nom.apps.streams.internal.organisering;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.apache.kafka.common.serialization.Serdes;
@@ -14,8 +11,11 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 
@@ -26,8 +26,8 @@ public class EventsrcToState {
     public EventsrcToState(
         @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
         @Value("${app.kafka.stateTopic}") String stateTopic,
-        ObjectMapper objectMapper,
-        JsonSerde<Object> objectSerde,
+        JsonMapper jsonMapper,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
@@ -35,9 +35,10 @@ public class EventsrcToState {
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
-            .aggregate(objectMapper::createObjectNode,
+                .aggregate(
+                        jsonMapper::createObjectNode,
                 (key, event, state) -> {
-                    state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                    state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                     return state;
                 },
                 Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
@@ -51,10 +52,10 @@ public class EventsrcToState {
         try {
             return new OrganiseringState(
                 fid,
-                eventStateAggregate.get("id").asText(),
-                eventStateAggregate.get("navn").asText(),
-                eventStateAggregate.get("idOver").asText(),
-                eventStateAggregate.get("navnOver").asText(),
+                    eventStateAggregate.get("id").asString(),
+                    eventStateAggregate.get("navn").asString(),
+                eventStateAggregate.get("idOver").asString(),
+                eventStateAggregate.get("navnOver").asString(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null
             );

@@ -95,8 +95,10 @@ export const OrgRessursTabellPageInner = ({
       return <></>;
     }
 
-    let sortData = customSortByOrgEnhetName(data, sort);
-    sortData = sortData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+    const sortData = customSortByOrgEnhetName(data, sort).slice(
+      (page - 1) * rowsPerPage,
+      page * rowsPerPage,
+    );
 
     return (
       <div

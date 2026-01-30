@@ -1,0 +1,7 @@
+query {
+    organisasjonsenheter(where: {agressoOrgNiv: "ORGNIV2"}) {
+        id
+        orgNiv
+        code
+    }
+}

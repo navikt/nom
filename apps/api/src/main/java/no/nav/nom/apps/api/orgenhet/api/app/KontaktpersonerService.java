@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import com.ctc.wstx.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.kontaktinfo.Kontaktinfo;
 import no.nav.nom.apps.api.clients.kontaktinfo.KontaktinfoClient;
@@ -16,6 +17,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +40,7 @@ import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 
 @Slf4j
 @Service
-public class KontaktpersonerExcelGenerator {
+public class KontaktpersonerService {
 
     private final OrgenhetService orgenhetService;
     private final OrgEnhetMapper orgEnhetMapper;
@@ -47,11 +50,11 @@ public class KontaktpersonerExcelGenerator {
     private final ExcelGenerator excelGenerator;
     private final TelefonService telefonService;
 
-    public KontaktpersonerExcelGenerator(KontaktinfoClient kontaktinfoClient,
-                                         OrgenhetService orgenhetService,
-                                         OrgEnhetMapper orgEnhetMapper,
-                                         OrgtilknytningStateRepository orgtilknytningStateRepository,
-                                         RessursRestService ressursRestService, TelefonService telefonService
+    public KontaktpersonerService(KontaktinfoClient kontaktinfoClient,
+                                  OrgenhetService orgenhetService,
+                                  OrgEnhetMapper orgEnhetMapper,
+                                  OrgtilknytningStateRepository orgtilknytningStateRepository,
+                                  RessursRestService ressursRestService, TelefonService telefonService
     ) {
         this.kontaktinfoClient = kontaktinfoClient;
         this.orgenhetService = orgenhetService;
@@ -63,25 +66,7 @@ public class KontaktpersonerExcelGenerator {
     }
 
     public void generateExcelFileToServletResponse(HttpServletResponse response, OrgEnhet orgEnhet, List<Ressurs> sortedRessurser) throws IOException {
-        List<RessursKontaktinfo> kontaktinfoForRessurser;
-
-        // Try to get the contact info for ressurser
-        try {
-            kontaktinfoForRessurser = kontaktinfoClient
-                .getKontaktinfoForRessurser(
-                    sortedRessurser.stream().map(r -> r.state().navident()).toList(),
-                    orgEnhet.id()
-                );
-            log.info(TEAM_LOGS, "Received kontaktinfo for orgenhet {}: {}", orgEnhet.id(), kontaktinfoForRessurser);
-            log.info("Received {} kontaktinfo for orgenhet {}", kontaktinfoForRessurser.size(), orgEnhet.id());
-        } catch (Exception e) {
-            if (e instanceof AccessDeniedException) {
-                throw e;
-            } else {
-                log.error("Failed to get kontaktinfo for orgenhet {}", orgEnhet.id(), e);
-                throw new RuntimeException(e.getMessage());
-            }
-        }
+        var kontaktinfoForRessurser = getKontaktinfoForRessurser(sortedRessurser, orgEnhet.id());
 
         Map<String, Ressurs> ressursPerNavident = sortedRessurser.stream()
             .collect(Collectors.toMap(r -> r.state().navident(), r -> r));
@@ -130,6 +115,31 @@ public class KontaktpersonerExcelGenerator {
             generateExcelFileToServletResponse(response, orgEnhet.get(), sortedRessurser);
 
         }
+    }
+
+    public List<RessursKontaktperson> getKontaktpersonerForRessurserUnder(String orgenhetId) {
+        var orgEnhet = orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapToOrgEnhet);
+
+        if (orgEnhet.isEmpty()) {
+            String notFoundError = "Orgenhet not found while retrieving kontaktinfo for ressurser: " + orgenhetId;
+            log.error(notFoundError);
+            throw new OrgEnhetNotFoundException(notFoundError);
+        }
+
+        var sortedRessurser = getSortedRessurserInAndUnderliggendeOrgenheter(orgenhetId);
+        var kontaktinfoPerRessurs = getKontaktinfoForRessurser(sortedRessurser, orgEnhet.get().id())
+            .stream().collect(Collectors.toMap(RessursKontaktinfo::ressursNavident, RessursKontaktinfo::kontaktinfo));
+
+
+        return sortedRessurser.stream().map(ressurs ->
+            RessursKontaktperson.from(
+                ressurs.state(),
+                telefonService.getPrioritertTelefonnummer(ressurs.state().navident()),
+                getPrimaryTelefonForRessurs(ressurs),
+                kontaktinfoPerRessurs.getOrDefault(ressurs.state().navident(), Collections.emptyList())
+            )
+        ).flatMap(List::stream).toList();
     }
 
 
@@ -214,6 +224,30 @@ public class KontaktpersonerExcelGenerator {
             log.error("Error generating excel file. ", e);
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private List<RessursKontaktinfo> getKontaktinfoForRessurser(List<Ressurs> ressurser, String orgenhetId) {
+        List<RessursKontaktinfo> kontaktinfoForRessurser;
+
+        // Try to get the contact info for ressurser
+        try {
+            kontaktinfoForRessurser = kontaktinfoClient
+                .getKontaktinfoForRessurser(
+                    ressurser.stream().map(r -> r.state().navident()).toList(),
+                    orgenhetId
+                );
+            log.info(TEAM_LOGS, "Received kontaktinfo for orgenhet {}: {}", orgenhetId, kontaktinfoForRessurser);
+            log.info("Received {} kontaktinfo for orgenhet {}", kontaktinfoForRessurser.size(), orgenhetId);
+        } catch (Exception e) {
+            if (e instanceof AccessDeniedException) {
+                throw e;
+            } else {
+                log.error("Failed to get kontaktinfo for orgenhet {}", orgenhetId, e);
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
+        return kontaktinfoForRessurser;
     }
 
     private static void addRow(Row row, Ressurs ressurs, Kontaktinfo kontaktinfo, int index) {

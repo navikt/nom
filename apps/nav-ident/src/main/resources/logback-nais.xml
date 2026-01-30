@@ -47,6 +47,9 @@
 
     <logger name="no.nav.nom" level="INFO" />
 
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
+
     <!-- Quiet down kafka logging -->
     <logger name="org.apache.kafka" level="warn" />
     <logger name="org.apache.zookeeper" level="warn" />

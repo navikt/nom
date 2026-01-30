@@ -1,10 +1,10 @@
 package no.nav.nom.apps.api.dvh.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("Tester basic parsing av Json objekter fra DVH")
 class DvhRessursStillingTestResponse {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final JsonMapper mapper = new JsonMapper();
 
     @Test
     @SneakyThrows
