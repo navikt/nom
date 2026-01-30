@@ -17,10 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import React, { useState } from "react";
-import type { SubmitHandler } from "react-hook-form";
 import { FormProvider, useController, useForm } from "react-hook-form";
-import AsyncSelect from "react-select/async";
-import { string } from "yup";
 import * as yup from "yup";
 
 import { getOrgEnhet, getOrgEnhetList } from "~/api/react-query-endpoints";
@@ -31,13 +28,10 @@ import {
   AsyncSearch,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import {
-  dateWithoutTimezone,
-  formatDateWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetVisning } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OrgEnhet, Ressurs } from "~/types/api-models";
+import type { OrgEnhet } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
@@ -102,9 +96,7 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
     resolver: yupResolver(validationSchema),
   });
 
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
-    console.log(values);
-  };
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
 
   return (
     <FormProvider {...methods}>
@@ -217,8 +209,6 @@ async function searchIfEnoughInput(searchTerm: string) {
       filter: filter,
     },
   });
-
-  console.log(resultRaw);
 
   const resultRessurser = resultRaw.data.data.searchRessurs;
 
