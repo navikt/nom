@@ -1,29 +1,51 @@
 import { css } from "@emotion/react";
-import { PlusCircleIcon } from "@navikt/aksel-icons";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FloppydiskIcon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
+  DatePicker,
   Heading,
+  HelpText,
   HStack,
   Loader,
+  Select,
+  TextField,
+  useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import React, { useState } from "react";
+import type { SubmitHandler } from "react-hook-form";
+import { FormProvider, useController, useForm } from "react-hook-form";
+import AsyncSelect from "react-select/async";
+import { string } from "yup";
+import * as yup from "yup";
 
 import { getOrgEnhet, getOrgEnhetList } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
+import {
+  AsyncSearch,
+  SelectLayoutWrapper,
+} from "~/components/select/CustomSelectComponents";
+import {
+  dateWithoutTimezone,
+  formatDateWithoutTimezone,
+} from "~/dateUtils/dateUtils";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetVisning } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OrgEnhet } from "~/types/api-models";
+import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
 
-  const [selectedOrgEnhet, setSelectedOrgEnhet] = useState<string | null>(null);
+  const [selectedOrgEnhetId, setSelectedOrgEnhet] = useState<string | null>(
+    null,
+  );
 
   const handleOpprettHerClick = (id: string) => setSelectedOrgEnhet(id);
 
@@ -33,24 +55,201 @@ export const OpprettOrgEnhet = () => {
 
   return (
     <>
-      <PageBanner text="Opprett organisasjonsenhet" />
+      <PageBanner text="Opprett ny organisasjonsenhet" />
 
       <ContentWrapper>
         <ContainerWithHighlightedTop padding={6}>
-          <Heading level="2" size="small">
-            1. Plassering
-          </Heading>
+          <VelgOrgEnhetPlassering
+            handleOpprettHerClick={handleOpprettHerClick}
+            selectedOrgEnhetId={selectedOrgEnhetId}
+          />
 
-          <OrgHierarki handleOpprettHerClick={handleOpprettHerClick} />
-
-          {!!selectedOrgEnhet && (
-            <OrgEnhetVisningWrapper orgEnhetId={selectedOrgEnhet} />
-          )}
+          <OrgEnhetInfoForm orgEnhetId={selectedOrgEnhetId} />
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
   );
 };
+
+function VelgOrgEnhetPlassering({
+  handleOpprettHerClick,
+  selectedOrgEnhetId,
+}: {
+  handleOpprettHerClick: (id: string) => void;
+  selectedOrgEnhetId: string | null;
+}) {
+  return (
+    <>
+      <Heading level="2" size="medium">
+        Plassering
+      </Heading>
+
+      <OrgHierarki handleOpprettHerClick={handleOpprettHerClick} />
+
+      {!!selectedOrgEnhetId && (
+        <OrgEnhetVisningWrapper orgEnhetId={selectedOrgEnhetId} />
+      )}
+    </>
+  );
+}
+
+function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
+  if (!orgEnhetId) {
+    return;
+  }
+
+  const methods = useForm({
+    resolver: yupResolver(validationSchema),
+  });
+
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
+    console.log(values);
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onValid)}>
+        <VStack gap="4">
+          <Heading level="2" size="medium">
+            Om enheten
+          </Heading>
+
+          <TextField
+            {...methods.register("orgEnhetNavn")}
+            description="Enheten kan ikke ha likt navn som en annen enhet"
+            error={methods.formState.errors.orgEnhetNavn?.message}
+            label="Navn på den nye organisasjonsenhet"
+          />
+
+          <FormRessursSearchWrapper name="lederRessursFid" />
+
+          <FormDateWrapper name="gyldigFom" />
+
+          <Select
+            css={css`
+              width: fit-content;
+            `}
+            {...methods.register("orgEnhetType")}
+            error={methods.formState.errors.orgEnhetType?.message}
+            label="Organisasjonsenhetstype"
+          >
+            <option value="" />
+            {Object.values(OrgEnhetsType).map((orgEnhetsType) => (
+              <option key={orgEnhetsType} value={orgEnhetsType}>
+                {orgEnhetsType}
+              </option>
+            ))}
+          </Select>
+
+          <TextField
+            css={css`
+              width: 20%;
+            `}
+            {...methods.register("firesiffer")}
+            error={methods.formState.errors.firesiffer?.message}
+            label="Firesiffer"
+          />
+
+          <Button
+            css={css`
+              align-self: end;
+              width: fit-content;
+            `}
+            icon={<FloppydiskIcon aria-hidden />}
+            size="small"
+            type="submit"
+            variant="primary"
+          >
+            Lagre
+          </Button>
+        </VStack>
+      </form>
+    </FormProvider>
+  );
+}
+
+function FormRessursSearchWrapper({ name }: { name: string }) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  return (
+    <SelectLayoutWrapper
+      error={fieldState.error}
+      htmlFor="Leder"
+      label="Leder for ny organisasjonsenhet"
+    >
+      <AsyncSearch
+        loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
+        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
+          inputValue.length < 3
+            ? "Du må skrive minst 3 tegn for å søke"
+            : `Fant ingen resultater for "${inputValue}"`
+        }
+        onChange={(selectedOption: { label: string; value: string } | null) =>
+          field.onChange(selectedOption?.value ?? "")
+        }
+        placeholder="Søk etter medarbeider"
+      />
+    </SelectLayoutWrapper>
+  );
+}
+
+async function searchIfEnoughInput(searchTerm: string) {
+  if (searchTerm.length < 3) {
+    return [];
+  }
+
+  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
+        searchRessurs(term: $searchTerm, filter: $filter) {
+          navident
+          visningsnavn
+        }
+      }`;
+
+  const filter = { statusSelection: "AKTIV" };
+
+  const resultRaw = await axios.post("/frackend/nom-api/graphql", {
+    operationName: "ressurs",
+    query: searchQuery,
+    variables: {
+      searchTerm: searchTerm,
+      filter: filter,
+    },
+  });
+
+  console.log(resultRaw);
+
+  const resultRessurser = resultRaw.data.data.searchRessurs;
+
+  return resultRessurser.map((ressurs: any) => ({
+    label: ressurs.visningsnavn,
+    value: ressurs.fid,
+  }));
+}
+
+function FormDateWrapper({ name }: { name: string }) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const datePickerProperties = useDatepicker({
+    onDateChange: async (date) => {
+      field.onChange(date ? formatDateWithoutTimezone(date) : undefined);
+    },
+  });
+
+  return (
+    <DatePicker {...datePickerProperties.datepickerProps}>
+      <DatePicker.Input
+        error={fieldState.error?.message}
+        ref={field.ref}
+        {...datePickerProperties.inputProps}
+        label="Dato"
+      />
+    </DatePicker>
+  );
+}
 
 function OrgHierarki({
   handleOpprettHerClick,
@@ -305,3 +504,31 @@ function OrgEnhetVisningWrapper({ orgEnhetId }: { orgEnhetId?: string }) {
     )
   );
 }
+
+enum OrgEnhetsType {
+  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
+  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
+  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
+  DIREKTORAT = "DIREKTORAT",
+  DIR = "DIR",
+  FYLKE = "FYLKE",
+  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
+  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
+  KLAGEINSTANS = "KLAGEINSTANS",
+  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
+  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
+  NAV_KONTOR = "NAV_KONTOR",
+  TILTAK = "TILTAK",
+  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
+}
+
+const validationSchema = yup.object({
+  orgEnhetNavn: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
+  lederRessursFid: yup.string().required("Obligatorisk"),
+  firesiffer: yup.string().required("Obligatorisk"),
+  orgEnhetType: yup
+    .mixed<OrgEnhetsType>()
+    .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
+    .nullable(),
+});
