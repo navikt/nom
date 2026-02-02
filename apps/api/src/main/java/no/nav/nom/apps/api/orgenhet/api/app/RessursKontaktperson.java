@@ -67,7 +67,7 @@ public class RessursKontaktperson {
             StringUtils.trimToNull(Stream.of(kontaktinfo.fornavn(), kontaktinfo.etternavn()).filter(Objects::nonNull).collect(Collectors.joining(" "))),
             kontaktinfo.relasjon(),
             kontaktinfo.telefon(),
-            Optional.of(kontaktinfo.prioritet()).map(Object::toString).orElse(null)
+            Optional.ofNullable(kontaktinfo.prioritet()).map(Object::toString).orElse(null)
         );
     }
 }
