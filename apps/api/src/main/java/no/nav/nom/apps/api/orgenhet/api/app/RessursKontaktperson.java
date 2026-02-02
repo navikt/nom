@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,7 +67,7 @@ public class RessursKontaktperson {
             StringUtils.trimToNull(Stream.of(kontaktinfo.fornavn(), kontaktinfo.etternavn()).filter(Objects::nonNull).collect(Collectors.joining(" "))),
             kontaktinfo.relasjon(),
             kontaktinfo.telefon(),
-            kontaktinfo.prioritet().toString()
+            Optional.of(kontaktinfo.prioritet()).map(Object::toString).orElse(null)
         );
     }
 }
