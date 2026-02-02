@@ -704,7 +704,8 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
 
   const lederForOrgenheterFiltrert = lederForOrgenheter.filter(
-    (orgEnhet) => !skjulteEksterneOrgEnheter.includes(orgEnhet.orgEnhetId),
+    (orgEnhet) =>
+      !skjulteEksterneOrgEnheter.includes(orgEnhet?.orgEnhetId ?? ""),
   );
 
   if (lederForOrgenheterFiltrert.length === 0) {
@@ -739,7 +740,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         {unikeOrgEnheter.map((orgEnhet) => (
           <ReactRouterLink
             key={orgEnhet.orgEnhetId}
-            params={{ id: orgEnhet.orgEnhetId }}
+            params={{ id: orgEnhet?.orgEnhetId ?? "" }}
             search={{}}
             to="/org/$id"
           >

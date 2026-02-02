@@ -184,7 +184,42 @@ export interface Jobbtelefon {
   type?: TelefonType;
 }
 
-export type JsonNode = any;
+export interface JsonNode {
+  array?: boolean;
+  bigDecimal?: boolean;
+  bigInteger?: boolean;
+  binary?: boolean;
+  boolean?: boolean;
+  container?: boolean;
+  double?: boolean;
+  embeddedValue?: boolean;
+  empty?: boolean;
+  float?: boolean;
+  floatingPointNumber?: boolean;
+  int?: boolean;
+  integralNumber?: boolean;
+  long?: boolean;
+  missingNode?: boolean;
+  nodeType?:
+    | "ARRAY"
+    | "BINARY"
+    | "BOOLEAN"
+    | "MISSING"
+    | "NULL"
+    | "NUMBER"
+    | "OBJECT"
+    | "POJO"
+    | "STRING";
+  null?: boolean;
+  number?: boolean;
+  object?: boolean;
+  pojo?: boolean;
+  short?: boolean;
+  string?: boolean;
+  /** @deprecated */
+  textual?: boolean;
+  valueNode?: boolean;
+}
 
 export interface LederTilgangForOrgenhetRequest {
   delegertTilNavident: string;
@@ -387,6 +422,7 @@ export interface Ressurs {
   /** @format date */
   startdato?: string;
   telefoner: Telefon[];
+  tilknytningtype?: Tilknytningtype;
   visningsnavn: Visningsnavn;
 }
 
@@ -394,6 +430,18 @@ export interface RessursFilter {
   sektor?: Sektor;
   /** @format date */
   sluttdato?: string;
+}
+
+export interface RessursKontaktperson {
+  etternavn?: string;
+  fornavn?: string;
+  jobbtelefon?: string;
+  kontaktpersonNavn?: string;
+  kontaktpersonPrioritet?: string;
+  kontaktpersonRelasjon?: string;
+  kontaktpersonTelefonnr?: string;
+  navident?: string;
+  privattelefon?: string;
 }
 
 export interface RessursLeder {
@@ -424,6 +472,7 @@ export interface RessursState {
   sluttdato?: string;
   /** @format date */
   startdato?: string;
+  tilknytningtype?: Tilknytningtype;
   visningsnavn: Visningsnavn;
 }
 
@@ -487,18 +536,4 @@ export interface Visningsnavn {
   etternavn: string;
   fornavn: string;
   mellomnavn?: string;
-}
-
-export interface OrgenhetLederByNavidentResponse {
-  fid: string;
-  navident: string;
-  visningsnavn: {
-    fornavn: string;
-    mellomnavn?: string;
-    etternavn: string;
-  };
-  orgEnhetId: string;
-  orgEnhetNavn: string;
-  startdato: string;
-  sluttdato?: string | null;
 }
