@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent;
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Getter
 @ToString
-public class DelayedEventJpa {
+public class DelayedEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

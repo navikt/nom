@@ -1,13 +1,13 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursEventProducer;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -21,7 +21,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.collectToOrderedMap;
 public class RessursEventSourceRecoveryService {
     private final RessursEventSourceRepository repository;
     private final RessursEventProducer eventProducer;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final LeaderElection leaderElection;
 
     public void replayAllEventsource(boolean dryRun) {
@@ -31,7 +31,7 @@ public class RessursEventSourceRecoveryService {
                     if (dryRun) {
                         log.info("Replaying {}: {}", event.get("type"), event);
                     } else {
-                        RessursEvent ressursEvent = objectMapper.convertValue(event, RessursEvent.class);
+                        RessursEvent ressursEvent = jsonMapper.convertValue(event, RessursEvent.class);
                         eventProducer.replayMessage(key, ressursEvent);
                     }
                 } catch (Exception e) {

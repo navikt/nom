@@ -47,7 +47,7 @@ public class ResponsProdusent {
             }
             code = HttpStatus.OK;
         } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
-            code = HttpStatus.CREATED;
+            code = HttpStatus.CREATED; // Må være 2xx - Remedy takler ikke feilkoder...
             id = need.generertId;
             feilmelding = "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet";
         } else if (need.generertId == null && !need.pdlPersonider.isEmpty()) {

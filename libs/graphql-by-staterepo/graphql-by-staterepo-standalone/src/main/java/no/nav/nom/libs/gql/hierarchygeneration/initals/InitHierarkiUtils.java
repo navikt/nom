@@ -1,9 +1,7 @@
 package no.nav.nom.libs.gql.hierarchygeneration.initals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,12 +16,7 @@ import java.util.UUID;
 public interface InitHierarkiUtils {
 
     static void writeStateObjectsToTmpFile(List<Object> stateObjects){
-        ObjectMapper mapper = new ObjectMapper();
-        { // fix up mapper
-            mapper.registerModule(new Jdk8Module());
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        }
+        JsonMapper mapper = new JsonMapper().rebuild().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
         record StateContext(String stateClassName, Object stateData) {}
 

@@ -11,13 +11,15 @@ import static java.util.Collections.emptySet;
 public class OrgEnheterSearch {
     private final Set<String> agressoIder;
     private final Set<String> orgenhetskategori;
-    private final String orgNiv;
+    private final String orgNiv;  // Deprekert Jan 2026
+    private final String agressoOrgNiv;
     private final Set<String> ider;
 
-    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, String orgNiv, Set<String> ider) {
+    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, String orgNiv, String agressoOrgNiv, Set<String> ider) {
         this.agressoIder = agressoIder;
         this.orgenhetskategori = orgenhetskategori;
         this.orgNiv = orgNiv;
+        this.agressoOrgNiv = agressoOrgNiv;
         this.ider = ider;
     }
 
@@ -31,6 +33,10 @@ public class OrgEnheterSearch {
 
     public String getOrgNiv() {
         return this.orgNiv;
+    }
+
+    public String agressoOrgNiv(){
+        return this.agressoOrgNiv;
     }
 
     public Set<String> getIder() {
@@ -77,13 +83,13 @@ public class OrgEnheterSearch {
         var that = (OrgEnheterSearch) obj;
         return Objects.equals(this.agressoIder, that.agressoIder) &&
             Objects.equals(this.orgenhetskategori, that.orgenhetskategori) &&
-            Objects.equals(this.orgNiv, that.orgNiv) &&
+            Objects.equals(this.agressoOrgNiv, that.agressoOrgNiv) &&
             Objects.equals(this.ider, that.ider);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agressoIder, orgenhetskategori, orgNiv, ider);
+        return Objects.hash(agressoIder, orgenhetskategori, agressoOrgNiv, ider);
     }
 
     @Override
@@ -91,15 +97,13 @@ public class OrgEnheterSearch {
         return "OrgEnheterSearch[" +
             "agressoIder=" + agressoIder + ", " +
             "orgenhetskategori=" + orgenhetskategori + ", " +
-            "orgNiv=" + orgNiv + ", " +
+            "agressoOrgNiv=" + agressoOrgNiv + ", " +
             "IDer=" + ider + ']';
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
-        return new OrgEnheterSearch(emptySet(), emptySet(), null, emptySet());
+        return new OrgEnheterSearch(emptySet(), emptySet(), null, null, emptySet());
     }
 
     public static OrgEnheterSearch EMPTY_SEARCH = emptyOrgEnheterSearch();
-
-
 }

@@ -10,6 +10,8 @@
  * ---------------------------------------------------------------
  */
 
+import {MetaData} from "~/types.ts";
+
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_READONLY = "ROLE_READONLY",
@@ -228,6 +230,15 @@ export interface OrgEnhetLederState {
   /** @format date */
   sluttdato?: string;
   sistEndretAv?: string;
+}
+
+export interface OrgEnhetLederEventWithNavident {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+  navident: string;
 }
 
 export interface OrganiseringStateSearchParams {

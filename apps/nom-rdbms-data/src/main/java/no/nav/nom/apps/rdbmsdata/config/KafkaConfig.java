@@ -1,14 +1,13 @@
 package no.nav.nom.apps.rdbmsdata.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -18,12 +17,11 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Random;
 
 @Slf4j
 @Configuration
@@ -31,11 +29,12 @@ import java.util.Random;
 public class KafkaConfig {
 
     @Bean
-    public ConsumerFactory<String, RessursState> ressursStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, RessursState> ressursStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(RessursState.class, objectMapper));
+            new JacksonJsonDeserializer<>(RessursState.class, jsonMapper)
+        );
     }
 
     @Bean
@@ -49,11 +48,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, OrgEnhetState> orgenhetStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, OrgEnhetState> orgenhetStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgEnhetState.class, objectMapper));
+            new JacksonJsonDeserializer<>(OrgEnhetState.class, jsonMapper)
+        );
     }
 
     @Bean
@@ -67,11 +67,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, OrganiseringState> organiseringStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, OrganiseringState> organiseringStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrganiseringState.class, objectMapper));
+            new JacksonJsonDeserializer<>(OrganiseringState.class, jsonMapper)
+        );
     }
 
     @Bean
@@ -85,11 +86,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, OrgtilknytningState> orgtilknytningStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, OrgtilknytningState> orgtilknytningStateConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgtilknytningState.class, objectMapper));
+            new JacksonJsonDeserializer<>(OrgtilknytningState.class, jsonMapper)
+        );
     }
 
     @Bean
@@ -102,13 +104,32 @@ public class KafkaConfig {
         return factory;
     }
 
+    @Bean
+    public ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory(KafkaProperties properties, JsonMapper objectMapper) {
+        return new DefaultKafkaConsumerFactory<>(
+            properties.buildConsumerProperties(),
+            new StringDeserializer(),
+            new JacksonJsonDeserializer<>(OrgEnhetLederState.class, objectMapper)
+        );
+    }
 
     @Bean
-    public ConsumerFactory<String, LocalDateTime> nomMasteredRessursConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OrgEnhetLederState>>
+    orgEnhetLederStateKafkaListenerContainerFactory(ConsumerFactory<String, OrgEnhetLederState> OrgEnhetLederStateConsumerFactory) {
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetLederState>();
+        factory.setConsumerFactory(OrgEnhetLederStateConsumerFactory);
+        factory.setBatchListener(true);
+        factory.setContainerCustomizer(retryCustomizer());
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, LocalDateTime> nomMasteredRessursConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(LocalDateTime.class, objectMapper));
+            new JacksonJsonDeserializer<>(LocalDateTime.class, jsonMapper)
+        );
     }
 
     @Bean

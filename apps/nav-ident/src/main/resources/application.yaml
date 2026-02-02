@@ -54,7 +54,7 @@ spring:
       trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       acks: all
       retries: 30
       properties:
@@ -63,7 +63,7 @@ spring:
         max.in.flight.requests.per.connection: 1
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
       auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
@@ -90,7 +90,13 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: 6379
-      
+
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
+
 azure:
   issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
 

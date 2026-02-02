@@ -1,10 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent;
 import no.nav.nom.contract.nom.IdentType;
@@ -38,6 +33,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 public class EventsourceToExternalEventsTest extends EventsourceToExternalEventsTestTopology {
 
-    private final ObjectMapper prettyPrintMapper;
+    private final JsonMapper prettyPrintMapper;
 
     private static final String RESSURS_FID = "Ressurs_FID_1";
     private static final String NAVIDENT = "A123456";
@@ -63,10 +61,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
     private static final LocalDate NOW = LocalDate.now();
 
     public EventsourceToExternalEventsTest() {
-        prettyPrintMapper = new ObjectMapper();
-        prettyPrintMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        prettyPrintMapper.registerModule(new JavaTimeModule());
-        prettyPrintMapper.registerModule(new Jdk8Module());
+        prettyPrintMapper = new JsonMapper(JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT));
     }
 
     @Test
@@ -501,7 +496,7 @@ public class EventsourceToExternalEventsTest extends EventsourceToExternalEvents
     private String prettyPrint(Object input) {
         try {
             return prettyPrintMapper.writeValueAsString(input);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "An error occurred: " + e.getMessage();
         }
     }

@@ -1,15 +1,15 @@
 package no.nav.nom.apps.api.common.cache;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.json.JsonMapper;
 
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -26,7 +26,7 @@ public class CacheQueueRepositoryTest {
         cacheQueue = new CacheQueue();
         cacheQueue.setCacheType(CacheType.OTENDRINGER.toString());
         cacheQueue.setCacheKey("cacheKey");
-        cacheQueue.setPayload(new ObjectMapper().readTree("{\"key\": \"value\"}"));
+        cacheQueue.setPayload(new JsonMapper().readTree("{\"key\": \"value\"}"));
         cacheQueueRepository.save(cacheQueue);
     }
 
@@ -83,7 +83,7 @@ public class CacheQueueRepositoryTest {
         CacheQueue cacheQueueDuplicateKey = new CacheQueue();
         cacheQueueDuplicateKey.setCacheType(CacheType.OTENDRINGER.toString());
         cacheQueueDuplicateKey.setCacheKey("cacheKey");
-        cacheQueueDuplicateKey.setPayload(new ObjectMapper().readTree("{\"key2\": \"value2\"}"));
+        cacheQueueDuplicateKey.setPayload(new JsonMapper().readTree("{\"key2\": \"value2\"}"));
         cacheQueueRepository.save(cacheQueueDuplicateKey);
 
         // execute
@@ -102,13 +102,13 @@ public class CacheQueueRepositoryTest {
         CacheQueue cacheQueueDuplicateKey = new CacheQueue();
         cacheQueueDuplicateKey.setCacheType(CacheType.OTENDRINGER.toString());
         cacheQueueDuplicateKey.setCacheKey("cacheKey");
-        cacheQueueDuplicateKey.setPayload(new ObjectMapper().readTree("{\"key2\": \"value2\"}"));
+        cacheQueueDuplicateKey.setPayload(new JsonMapper().readTree("{\"key2\": \"value2\"}"));
         cacheQueueRepository.save(cacheQueueDuplicateKey);
 
         CacheQueue cacheQueueNewKey = new CacheQueue();
         cacheQueueNewKey.setCacheType(CacheType.OTENDRINGER.toString());
         cacheQueueNewKey.setCacheKey("cacheKey3");
-        cacheQueueNewKey.setPayload(new ObjectMapper().readTree("{\"key3\": \"value3\"}"));
+        cacheQueueNewKey.setPayload(new JsonMapper().readTree("{\"key3\": \"value3\"}"));
         cacheQueueRepository.save(cacheQueueNewKey);
 
         // execute

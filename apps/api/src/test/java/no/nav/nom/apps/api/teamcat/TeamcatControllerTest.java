@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.teamcat;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.clients.ad.AdClient;
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -35,8 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.mockito.ArgumentMatchers.any;

@@ -20,11 +20,13 @@ spring:
       properties:
         commit.interval.ms: 0
         default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-        default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+        default.value.serde: org.springframework.kafka.support.serializer.JacksonJsonSerde
     bootstrap-servers: ${KAFKA_BROKERS}
   jackson:
-    serialization:
-      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 management:
   endpoint:

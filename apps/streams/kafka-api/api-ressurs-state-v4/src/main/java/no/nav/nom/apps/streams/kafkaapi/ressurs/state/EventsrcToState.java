@@ -1,11 +1,6 @@
 
 package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.Orgtilknytning;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.OrgtilknytningExt;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.RessursState;
@@ -35,8 +30,13 @@ import org.apache.kafka.streams.processor.api.FixedKeyProcessorSupplier;
 import org.apache.kafka.streams.processor.api.FixedKeyRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.AbstractMap;
@@ -50,8 +50,8 @@ class EventsrcToState {
     final AppProperties appProperties;
 
     public EventsrcToState(
-        ObjectMapper objectMapper,
-        JsonSerde<Object> objectSerde,
+        JsonMapper jsonMapper,
+        JacksonJsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder,
         AppProperties appProperties
     ) {
@@ -66,8 +66,8 @@ class EventsrcToState {
         final var ressursEventExtSerde = objectSerde.copyWithType(RessursEventExt.class);
         final var orgtilknytningEventExtSerde = objectSerde.copyWithType(OrgtilknytningEventExt.class);
 
-        final JavaType ressursMapEntryType = objectMapper.getTypeFactory().constructParametricType(Map.Entry.class, String.class, RessursStateExt.class);
-        final JavaType orgtilknytningMapType = objectMapper.getTypeFactory().constructParametricType(Map.class, String.class, OrgtilknytningExt.class);
+        final JavaType ressursMapEntryType = jsonMapper.getTypeFactory().constructParametricType(Map.Entry.class, String.class, RessursStateExt.class);
+        final JavaType orgtilknytningMapType = jsonMapper.getTypeFactory().constructParametricType(Map.class, String.class, OrgtilknytningExt.class);
 
         // Aggreger ressurs evtsrc til en Json med sum av verdier, returner per navident
         var ressursAggregateKTable = streamsBuilder.stream(appProperties.ressursEvtsrcTopic(), Consumed.with(stringSerde, ressursEventSerde))
@@ -75,7 +75,7 @@ class EventsrcToState {
             .processValues(new TransformToRessursEventExtendedMedRecordMetadata()) // Legg på offset/timestamp metadata
             .groupBy((k, v) -> v.ressursEvent().getFid(), Grouped.with(stringSerde, ressursEventExtSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (key, extEvent, state) -> {
                     var event = extEvent.ressursEvent();
                     state.put("kafkaOffset", extEvent.messageMetadata().offset());
@@ -101,13 +101,13 @@ class EventsrcToState {
                                     ),
                                     event.getMetadata().inputMetadata()
                             );
-                            state.setAll(objectMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
+                            state.setAll(jsonMapper.convertValue(jobbtelefonOppdatertEventV1.getData(), ObjectNode.class));
                         } else if (event instanceof RessursTilknytningtypeOppdatertV1) {
-                            var evtSrcFeltVerdier = objectMapper.convertValue(event.getData(), ObjectNode.class);
+                            var evtSrcFeltVerdier = jsonMapper.convertValue(event.getData(), ObjectNode.class);
                             evtSrcFeltVerdier.remove("sektor"); // Denne eventtypen skulle aldri hatt sektor i dataene sine. Dette var en typo feil.
                             state.setAll(evtSrcFeltVerdier);
                         } else {
-                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                            state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                         }
                     }
                     state.put("fid", event.getFid()); // Keep fid - Ønsker å benytte denne som key på output
@@ -130,7 +130,7 @@ class EventsrcToState {
             .processValues(new TransformToOrgtilknytningEventExtendedMedRecordMetadata()) // Legg på offset/timestamp metadata
             .groupBy((k, v) -> v.orgtilknytningEvent().getFid(), Grouped.with(stringSerde, orgtilknytningEventExtSerde))
             .aggregate(
-                objectMapper::createObjectNode,
+                jsonMapper::createObjectNode,
                 (key, extEvent, state) -> {
                     var event = extEvent.orgtilknytningEvent();
                     state.put("kafkaOffset", extEvent.messageMetadata().offset());
@@ -142,7 +142,7 @@ class EventsrcToState {
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     } else {
-                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                     }
                     state.put("fid", event.getFid());
                     return state;
@@ -170,7 +170,7 @@ class EventsrcToState {
 
 
         var identType = streamsBuilder.stream(appProperties.navidentTopic(), Consumed.with(stringSerde, stringSerde))
-            .mapValues(v -> navidentTopicValueToJson(v, objectMapper))
+            .mapValues(v -> navidentTopicValueToJson(v, jsonMapper))
             .groupBy(
                 (k, v) -> v.get("payload").get("navident").asText(),
                 Grouped.with(stringSerde, jsonSerde)
@@ -206,16 +206,16 @@ class EventsrcToState {
             .to(appProperties.stateTopic(), Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
-    private static ObjectNode navidentTopicValueToJson(String value, ObjectMapper objectMapper) {
+    private static ObjectNode navidentTopicValueToJson(String value, JsonMapper jsonMapper) {
         try {
-            var parsedObjNode = objectMapper.readValue(value, ObjectNode.class);
+            var parsedObjNode = jsonMapper.readValue(value, ObjectNode.class);
             var payload = parsedObjNode.get("payload");
             var hasExpectedFields = payload.has("identType") && payload.has("navident");
             if (!hasExpectedFields) {
                 throw new RuntimeException("JSON fra navident topic hadde ikke-forventede felter");
             }
             return parsedObjNode;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Feil ved JSON parsing fra navident topic");
         }
     }

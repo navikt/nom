@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 
@@ -22,13 +22,13 @@ public record DvhEksternRessurs(
         try {
             return new DvhEksternRessurs(
                 json.toPrettyString(),
-                json.get("nav_ident").asText(),
+                json.get("nav_ident").asString(),
                 getNullableStringNode(json, "remedy_enhet_id"),
                 getNullableStringNode(json, "orgenhet_paa_ressurs"),
                 getNullableStringNode(json, "orgenhet_paa_ressurs_niva"),
-                LocalDate.parse(json.get("remedy_start_dato").asText()),
+                LocalDate.parse(json.get("remedy_start_dato").asString()),
                 getOrNullIfMaxDate(json, "remedy_slutt_dato"),
-                "JA".equals(json.get("remedy_aktiv").asText())
+                "JA".equals(json.get("remedy_aktiv").asString())
             );
         } catch (Exception e) {
             log.error("Unable to parse DvhEksternRessurs from {}", json.toString(), e);
@@ -40,13 +40,13 @@ public record DvhEksternRessurs(
         JsonNode node = json.get(field_name);
         LocalDate date = null;
         if (!node.isNull()) {
-            date = LocalDate.parse(node.asText());
+            date = LocalDate.parse(node.asString());
         }
         return MAX_DATE.equals(date) ? null : date;
     }
 
     private static String getNullableStringNode(JsonNode json, String field_name) {
         JsonNode node = json.get(field_name);
-        return node.isNull() ? null : node.asText();
+        return node.isNull() ? null : node.asString();
     }
 }

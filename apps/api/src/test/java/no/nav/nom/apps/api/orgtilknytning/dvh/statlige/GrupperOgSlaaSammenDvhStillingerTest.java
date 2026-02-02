@@ -735,7 +735,7 @@ class GrupperOgSlaaSammenDvhStillingerTest extends TestBase {
         assertEquals("AGRID_1", forsteStillingPeriode.stilling().agressoId());
         assertEquals(Tilknytningtype.FAST, forsteStillingPeriode.tilknytningtype());
         assertEquals("AGRID_2", andreStillingPeriode.stilling().agressoId());
-        assertEquals(Tilknytningtype.UFORUTSETT_BEHOV, andreStillingPeriode.tilknytningtype());
+        assertEquals(Tilknytningtype.MIDLERTIDIG, andreStillingPeriode.tilknytningtype());
     }
 
     @Test

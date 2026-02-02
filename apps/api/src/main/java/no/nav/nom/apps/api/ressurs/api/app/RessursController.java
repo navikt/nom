@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -35,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.JsonNode;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -545,7 +544,7 @@ public class RessursController {
 
     @ExceptionHandler(Exception.class)
     private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
-        log.error("Intern feil ved opprettelse av ny ressurs", exception);
+        log.error("Intern feil i ressurs api", exception);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)

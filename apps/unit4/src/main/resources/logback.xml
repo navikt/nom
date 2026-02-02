@@ -6,7 +6,8 @@
             <pattern>%date{ISO8601} [%-5level] %logger{25} %replace(Nav-Consumer-Id=%mdc{Nav-Consumer-Id} ){'Nav-Consumer-Id= ',''}%replace(Nav-Call-Id=%mdc{Nav-Call-Id} ){'Nav-Call-Id= ',''}-- %message%n</pattern>
         </encoder>
     </appender>
-
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>

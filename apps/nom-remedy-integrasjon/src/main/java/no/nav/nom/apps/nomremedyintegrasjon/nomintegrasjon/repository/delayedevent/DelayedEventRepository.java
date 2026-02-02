@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface DelayedEventRepository extends JpaRepository<DelayedEventJpa, UUID> {
+public interface DelayedEventRepository extends JpaRepository<DelayedEvent, UUID> {
 
-    List<DelayedEventJpa> findByDelayedUntilLessThanEqual(LocalDate localDate);
+    List<DelayedEvent> findByDelayedUntilLessThanEqual(LocalDate localDate);
 
     @Modifying
     @Query(value = "DELETE FROM delayed_event WHERE event ->> 'fid' = :fid", nativeQuery = true)

@@ -1,10 +1,10 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -17,7 +17,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
 
@@ -27,8 +27,8 @@ public class KafkaConfig {
     /* Ressurs Topic */
 
     @Bean
-    public ConsumerFactory<String, RessursEvent> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<RessursEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
+    public ConsumerFactory<String, RessursEvent> consumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        JacksonJsonDeserializer<RessursEvent> jsonEventDeserializer = new JacksonJsonDeserializer<>(jsonMapper);
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
     }
 

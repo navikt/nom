@@ -1,10 +1,9 @@
 package no.nav.nom.apps.api.dvh.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -48,12 +47,12 @@ public class DvhOrganisering {
 
     public static DvhOrganisering fromOrds(JsonNode jsonNode) {
         return DvhOrganisering.builder()
-            .agressoIdOver(jsonNode.get("orgnode_kode_over").asText())
-            .orgNivOver(jsonNode.get("orgnode_niva_over").asText())
-            .navnOver(jsonNode.get("orgnode_navn_over").asText())
-            .agressoIdUnder(jsonNode.get("orgnode_kode").asText())
-            .orgNivUnder(jsonNode.get("orgnode_niva").asText())
-            .navnUnder(jsonNode.get("orgnode_navn").asText())
+            .agressoIdOver(jsonNode.get("orgnode_kode_over").asString())
+            .orgNivOver(jsonNode.get("orgnode_niva_over").asString())
+            .navnOver(jsonNode.get("orgnode_navn_over").asString())
+            .agressoIdUnder(jsonNode.get("orgnode_kode").asString())
+            .orgNivUnder(jsonNode.get("orgnode_niva").asString())
+            .navnUnder(jsonNode.get("orgnode_navn").asString())
             .gyldigFom(LocalDate.now().minusDays(1))
             .build();
     }

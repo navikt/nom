@@ -115,6 +115,11 @@ spring:
         provider:
           azure:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 unleash:
   endpoint:

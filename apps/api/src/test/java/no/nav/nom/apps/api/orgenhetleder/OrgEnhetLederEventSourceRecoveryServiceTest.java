@@ -1,9 +1,5 @@
 package no.nav.nom.apps.api.orgenhetleder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederEventProducer;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.recoverybackup.OrgEnhetLederEventSource;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.recoverybackup.OrgEnhetLederEventSourceRecoveryService;
@@ -15,6 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class OrgEnhetLederEventSourceRecoveryServiceTest {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    JsonMapper jsonMapper = new JsonMapper();
 
     public OrgEnhetLederEventSourceRecoveryServiceTest() {
-        objectMapper.registerModule(new JavaTimeModule());
+        jsonMapper.rebuild().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
     }
 
     @Mock
-    private ObjectMapper objectMapperMock;
+    private JsonMapper objectMapperMock;
 
     @Mock
     private LeaderElection leaderElection;
@@ -145,9 +145,9 @@ public class OrgEnhetLederEventSourceRecoveryServiceTest {
         jsonNodeStrings.forEach(jsonNodeString -> {
             JsonNode jsonNode;
             try {
-                jsonNode = objectMapper.readTree(jsonNodeString);
-            } catch (JsonProcessingException jpe) {
-                throw new RuntimeException(jpe);
+                jsonNode = jsonMapper.readTree(jsonNodeString);
+            } catch (JacksonException je) {
+                throw new RuntimeException(je);
             }
             jsonNodes.add(new OrgEnhetLederEventSource("event-" + count.getAndIncrement(), jsonNode));
         });

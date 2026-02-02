@@ -1,8 +1,5 @@
 package no.nav.nom.apps.streams.internal.orgenhet.eventsrcToState;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
@@ -18,8 +15,11 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,8 +31,8 @@ class EventsrcToState {
     public EventsrcToState(
             @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
             @Value("${app.kafka.stateTopic}") String stateTopic,
-            ObjectMapper objectMapper,
-            JsonSerde<Object> objectSerde,
+            JsonMapper jsonMapper,
+            JacksonJsonSerde<Object> objectSerde,
             StreamsBuilder streamsBuilder
     ){
         final var stringSerde = Serdes.String();
@@ -41,14 +41,14 @@ class EventsrcToState {
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
                 .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
                 .aggregate(
-                        objectMapper::createObjectNode,
+                        jsonMapper::createObjectNode,
                         (key, event, state) -> {
                             if(event.getAdditionalData() instanceof OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData data){
-                                state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
+                                state.set("additionalData", jsonMapper.convertValue(data, ObjectNode.class));
                             } else if (event.getAdditionalData() instanceof OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData data){
-                                state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
+                                state.set("additionalData", jsonMapper.convertValue(data, ObjectNode.class));
                             }
-                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                            state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
@@ -58,11 +58,11 @@ class EventsrcToState {
     }
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
-        String overordnetOrgEnhetFid = eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null;
-        String lederFid = eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null;
+        String overordnetOrgEnhetFid = eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asString() : null;
+        String lederFid = eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asString() : null;
 
-        NomNivaa orgEnhetsKategori = eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null;
-        OrgEnhetsType orgEnhetsType =  eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null;
+        NomNivaa orgEnhetsKategori = eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asString()) : null;
+        OrgEnhetsType orgEnhetsType =  eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asString()) : null;
 
         // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);

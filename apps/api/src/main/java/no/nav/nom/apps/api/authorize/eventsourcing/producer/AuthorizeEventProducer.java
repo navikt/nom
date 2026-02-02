@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.authorize.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.authorize.eventsourcing.recoverybackup.AuthorizeEventSource;
 import no.nav.nom.apps.api.authorize.eventsourcing.recoverybackup.AuthorizeEventSourceRepository;
 import no.nav.nom.apps.api.common.LocalConfiguration;
@@ -9,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,18 +19,18 @@ public class AuthorizeEventProducer {
 
     private final KafkaTemplate<String, AuthorizationEvent> authorizeEventProducerTemplate;
     private final AuthorizeEventSourceRepository authorizeEventSourceRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final boolean shouldSaveToDb;
 
     public AuthorizeEventProducer(
             KafkaTemplate<String, AuthorizationEvent> authorizeEventProducerTemplate,
             AuthorizeEventSourceRepository authorizeEventSourceRepository,
-            ObjectMapper objectMapper,
+            JsonMapper jsonMapper,
             LocalConfiguration localConfiguration
     ) {
         this.authorizeEventProducerTemplate = authorizeEventProducerTemplate;
         this.authorizeEventSourceRepository = authorizeEventSourceRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
@@ -48,6 +48,6 @@ public class AuthorizeEventProducer {
     }
 
     private void saveToDB(AuthorizationEvent event, String eventKey) {
-        authorizeEventSourceRepository.save(AuthorizeEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
+        authorizeEventSourceRepository.save(AuthorizeEventSource.builder().eventKey(eventKey).payload(jsonMapper.valueToTree(event)).build());
     }
 }
