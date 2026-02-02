@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup.OrgtilknytningEventSource;
@@ -9,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -19,18 +19,18 @@ public class OrgtilknytningEventProducer {
 
     private final KafkaTemplate<String, OrgtilknytningEvent> orgtilknytningEventProducerTemplate;
     private final OrgtilknytningEventSourceRepository orgtilknytningEventSourceRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final boolean shouldSaveToDb;
 
     public OrgtilknytningEventProducer(
             KafkaTemplate<String, OrgtilknytningEvent> orgtilknytningEventProducerTemplate,
             OrgtilknytningEventSourceRepository orgtilknytningEventSourceRepository,
-            ObjectMapper objectMapper,
+            JsonMapper jsonMapper,
             LocalConfiguration localConfiguration
     ) {
         this.orgtilknytningEventProducerTemplate = orgtilknytningEventProducerTemplate;
         this.orgtilknytningEventSourceRepository = orgtilknytningEventSourceRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
@@ -48,6 +48,6 @@ public class OrgtilknytningEventProducer {
     }
 
     private void saveToDB(OrgtilknytningEvent event, String eventKey) {
-        orgtilknytningEventSourceRepository.save(OrgtilknytningEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
+        orgtilknytningEventSourceRepository.save(OrgtilknytningEventSource.builder().eventKey(eventKey).payload(jsonMapper.valueToTree(event)).build());
     }
 }

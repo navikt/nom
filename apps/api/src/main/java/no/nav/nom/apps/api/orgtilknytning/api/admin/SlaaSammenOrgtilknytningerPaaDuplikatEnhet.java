@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.api.admin;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -261,7 +261,7 @@ public class SlaaSammenOrgtilknytningerPaaDuplikatEnhet {
 
 
     private InputMetadata getMetadata(String gammelFeilEnhetId, String nyKorrektEnhetId) {
-        ObjectMapper mapper = new ObjectMapper();
+        JsonMapper mapper = new JsonMapper();
         ObjectNode node = mapper.createObjectNode();
         node.put("Gammel enhetId", gammelFeilEnhetId);
         node.put("Ny enhetId", nyKorrektEnhetId);

@@ -4,7 +4,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.fysiskbrukersted.repository.FysiskBrukerstedReadOnlyRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -13,6 +13,7 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 @EnableWireMock
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class}, classes = {TestConfiguration.class})
 @EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource", "org.nom.orgtilknytning-eventsource"}, controlledShutdown = true)
+@AutoConfigureWebTestClient
 public abstract class TestBase {
 
     public static final String LOGGED_IN_USER_NAVIDENT = "A321321";

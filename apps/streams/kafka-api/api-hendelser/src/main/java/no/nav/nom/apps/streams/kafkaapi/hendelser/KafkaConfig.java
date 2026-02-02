@@ -1,6 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
@@ -15,7 +14,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.config.KafkaStreamsCustomizer;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 
 @EnableKafka
@@ -24,8 +25,8 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 public class KafkaConfig {
 
     @Bean
-    public JsonSerde<Object> objectSerde(ObjectMapper objectMapper) {
-        final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
+    public JacksonJsonSerde<Object> objectSerde(JsonMapper jsonMapper) {
+        final var objectSerde = new JacksonJsonSerde<>(Object.class, jsonMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetEvent.class.getPackageName());
@@ -34,7 +35,7 @@ public class KafkaConfig {
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(Hendelse.class.getPackageName());
-        objectSerde.deserializer().addTrustedPackages(com.fasterxml.jackson.databind.node.ObjectNode.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         return objectSerde;
     }
 

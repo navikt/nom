@@ -6,10 +6,8 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredVa
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.aggregatestate.AggregateStateRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventJpa;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.jpa.DelayedEventRepository;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventR2dbc;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.r2dbc.DelayedEventReactiveRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEvent;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.delayedevent.DelayedEventRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorState;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.errorstate.ErrorStateRepository;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
@@ -25,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,7 +53,6 @@ public class NomRemedyIntegrasjonService {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final DelayedEventRepository delayedEventRepository;
-    private final DelayedEventReactiveRepository delayedEventReactiveRepository;
     private final ThreadLocal<Boolean> isAdmin = ThreadLocal.withInitial(() -> false);
 
     public NomRemedyIntegrasjonService(
@@ -67,8 +63,7 @@ public class NomRemedyIntegrasjonService {
         ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        DelayedEventRepository delayedEventRepository,
-        DelayedEventReactiveRepository delayedEventReactiveRepository
+        DelayedEventRepository delayedEventRepository
     ) {
         this.leaderElection = leaderElection;
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
@@ -78,7 +73,6 @@ public class NomRemedyIntegrasjonService {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.delayedEventRepository = delayedEventRepository;
-        this.delayedEventReactiveRepository = delayedEventReactiveRepository;
     }
 
     @Transactional
@@ -459,13 +453,9 @@ public class NomRemedyIntegrasjonService {
 
     }
 
-    public Flux<Event> getAllDelayedEvents() {
-        return delayedEventReactiveRepository.findAll().map(DelayedEventR2dbc::getEvent);
-    }
-
     public List<Event> getAllDelayedEventsBlocking() {
         return delayedEventRepository.findAll().stream()
-            .map(DelayedEventJpa::getEvent)
+            .map(DelayedEvent::getEvent)
             .toList();
     }
 

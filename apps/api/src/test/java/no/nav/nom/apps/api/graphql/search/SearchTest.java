@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.search;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
 import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.graphql.GraphQlTestBase;
@@ -11,8 +10,9 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.graphql.GraphQlTest;
+import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -105,7 +105,7 @@ public class SearchTest extends GraphQlTestBase {
 
         final var resultTypes = StreamSupport
             .stream(searchResults.spliterator(), false)
-            .map(result -> result.get("__typename").asText())
+            .map(result -> result.get("__typename").asString())
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         assertEquals(2, searchResults.size());

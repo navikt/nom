@@ -74,6 +74,8 @@ export const OrgRessursTabellPage = () => {
 
   const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(id);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const excelFilNavn = () => {
     return includeUnderliggende &&
       underliggendeOrgEnhetQuery.isSuccess &&
@@ -87,10 +89,12 @@ export const OrgRessursTabellPage = () => {
       navidenter: ressurserNavidents,
       topOrgEnhetId: orgEnhetQuery.data?.id,
     };
+    setIsDownloading(true);
     await downloadExcelByListNavident(
       excelExportRequest as ExcelExportRequest,
       excelFilNavn(),
     );
+    setIsDownloading(false);
   };
 
   if (orgEnhetQuery.isLoading || underliggendeOrgEnhetQuery.isLoading) {
@@ -102,7 +106,7 @@ export const OrgRessursTabellPage = () => {
           justify-content: center;
         `}
       >
-        <Loader size="3xlarge" variant="neutral" />
+        <Loader size="3xlarge" />
       </div>
     );
   }
@@ -138,13 +142,14 @@ export const OrgRessursTabellPage = () => {
   ) {
     return (
       <>
-        <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || ""} />
+        <PageBanner text={"Medarbeidere i " + orgEnhetQuery.data?.navn || id} />
 
         <ContentWrapper limitWidth={false}>
           <SmartLink
             css={css`
               display: flex;
               width: fit-content;
+              font-size: 1.2rem;
               color: #000;
             `}
             href={`/org/${id}`}
@@ -165,13 +170,11 @@ export const OrgRessursTabellPage = () => {
             css={css`
               display: flex;
               justify-content: space-between;
+              align-items: flex-start;
+              margin-top: var(--a-spacing-1);
             `}
           >
-            <div
-              css={css`
-                margin-top: var(--a-spacing-2);
-              `}
-            >
+            <div>
               <Checkbox
                 checked={includeUnderliggende}
                 css={css`
@@ -197,14 +200,14 @@ export const OrgRessursTabellPage = () => {
 
             <Button
               css={css`
-                height: fit-content;
                 align-self: end;
               `}
               icon={<FileExcelIcon />}
+              loading={isDownloading}
               onClick={handleDownloadExcel}
               variant="secondary"
             >
-              Til Excel
+              Eksportér til Excel
             </Button>
           </div>
 

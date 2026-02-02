@@ -14,6 +14,11 @@ public class ClientConfig {
     private String baseUrl;
 
     @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
+
+    @Bean
     public WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
         ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
             new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);

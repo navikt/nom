@@ -7,7 +7,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { getOrgenhetLederEventsOptions, searchSchema } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { GenericSearchBar } from "~/components/GenericSearchBar.tsx";
-import { KafkaEventTable } from "~/components/KafkaEventTable.tsx";
+import { KafkaEventTableForOrgenhetLeder } from "~/components/KafkaEventTableForOrgenhetLeder.tsx";
 
 export const Route = createFileRoute("/sinks/orgenhet-leder")({
   loaderDeps: ({ search }) => search,
@@ -41,7 +41,7 @@ function OrgenhetLederPage() {
   const orgEnhetLederEvents = orgEnhetLederEventsQuery.data;
 
   return (
-    <KafkaEventTable
+    <KafkaEventTableForOrgenhetLeder
       kafkaEvents={orgEnhetLederEvents}
       linkPrefix={"/state/orgenhet-leder"}
     />

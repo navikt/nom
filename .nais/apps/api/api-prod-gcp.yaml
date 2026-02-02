@@ -265,6 +265,12 @@ spec:
         - application: brev-sikkerhetsnett
           namespace: isa
           cluster: prod-gcp
+        - application: nom-to-bq
+          namespace: nada
+          cluster: prod-gcp
+        - application: nav-persondata-api
+          namespace: holmes
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

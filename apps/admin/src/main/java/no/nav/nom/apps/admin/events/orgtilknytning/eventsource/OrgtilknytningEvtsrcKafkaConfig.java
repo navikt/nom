@@ -1,16 +1,16 @@
 package no.nav.nom.apps.admin.events.orgtilknytning.eventsource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 
@@ -19,9 +19,9 @@ import java.time.Duration;
 @EnableKafka
 public class OrgtilknytningEvtsrcKafkaConfig {
     @Bean
-    ConsumerFactory<String, String> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, String> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
-            properties.buildConsumerProperties(null),
+            properties.buildConsumerProperties(),
             new StringDeserializer(),
             new StringDeserializer()
         );
@@ -46,18 +46,18 @@ public class OrgtilknytningEvtsrcKafkaConfig {
     }
 
 //    @Bean
-//    public JsonSerde<S> orgtilknytningObjectSerde(ObjectMapper objectMapper){
-//        final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
+//    public JacksonJsonSerde<S> orgtilknytningObjectSerde(JsonMapper jsonMapper){
+//        final var objectSerde = new JacksonJsonSerde<>(Object.class, jsonMapper);
 //        objectSerde.deserializer().addTrustedPackages(OrgtilknytningEvent.class.getPackageName());
 //        return objectSerde;
 //    }
 
 //    @Bean
-//    ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+//    ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEvtsrcConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
 //        return new DefaultKafkaConsumerFactory<>(
 //            properties.buildConsumerProperties(),
 //            new StringDeserializer(),
-//            new JsonDeserializer<>(OrgtilknytningEvent.class, objectMapper)
+//            new JacksonJsonDeserializer<>(OrgtilknytningEvent.class, jsonMapper)
 //        );
 //    }
 //

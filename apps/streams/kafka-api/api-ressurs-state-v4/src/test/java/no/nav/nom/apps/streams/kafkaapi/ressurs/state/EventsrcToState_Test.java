@@ -1,6 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.Orgtilknytning;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v4.RessursState;
@@ -19,6 +18,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.apache.kafka.streams.KeyValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -798,10 +798,10 @@ public class EventsrcToState_Test extends EventsrcToStateTestTopology {
     }
 
     private String navidentEvent(String navident, IdentType identType) {
-        ObjectNode payload = objectMapper.createObjectNode();
+        ObjectNode payload = jsonMapper.createObjectNode();
         payload.put("navident", navident);
         payload.put("identType", identType.toString());
-        ObjectNode node = objectMapper.createObjectNode();
+        ObjectNode node = jsonMapper.createObjectNode();
         node.set("payload", payload);
         return node.toString();
     }

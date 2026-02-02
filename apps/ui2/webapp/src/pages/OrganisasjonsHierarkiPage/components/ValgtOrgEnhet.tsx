@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { ChevronDownDoubleIcon } from "@navikt/aksel-icons";
 import {
-  BodyShort,
   Button,
   Dropdown,
   Heading,
@@ -14,10 +13,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
-import React, { useState } from "react";
+import React from "react";
 
 import {
-  downloadExcelKontaktPersonserForOrgenhetByOrgenhetId,
   getOrgEnheterSomKanHaRessurser,
   getRessurserByListNavident,
   getTeamcatSection,
@@ -279,42 +277,22 @@ function MedarbeidereList({
   visTabellKnapp: boolean;
   valgtOrgenhetKanHaRessurser: boolean;
 }) {
-  const [isDownloading, setIsDownloading] = useState(false);
-
   if (ressurser.length === 0) {
     return visTabellKnapp ? (
-      <>
-        <div
-          css={css`
-            display: flex;
-            justify-content: end;
-            align-items: center;
-            margin-top: var(--a-spacing-6);
-          `}
-        >
-          <DropdownMeny
-            orgEnhet={orgEnhet}
-            setIsDownloading={setIsDownloading}
-            valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
-            visRessursAdministeringKnapper={visRessursAdministeringKnapper}
-          />
-        </div>
-
-        {isDownloading && (
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              margin: auto;
-              gap: var(--a-spacing-2);
-            `}
-          >
-            <Loader size="3xlarge" />
-            <BodyShort size="large">Eksporterer kontaktpersoner...</BodyShort>
-          </div>
-        )}
-      </>
+      <div
+        css={css`
+          display: flex;
+          justify-content: end;
+          align-items: center;
+          margin-top: var(--a-spacing-6);
+        `}
+      >
+        <DropdownMeny
+          orgEnhet={orgEnhet}
+          valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
+          visRessursAdministeringKnapper={visRessursAdministeringKnapper}
+        />
+      </div>
     ) : (
       <></>
     );
@@ -357,27 +335,11 @@ function MedarbeidereList({
         {visTabellKnapp && (
           <DropdownMeny
             orgEnhet={orgEnhet}
-            setIsDownloading={setIsDownloading}
             valgtEnhetKanHaRessurser={valgtOrgenhetKanHaRessurser}
             visRessursAdministeringKnapper={visRessursAdministeringKnapper}
           />
         )}
       </div>
-
-      {isDownloading && (
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: auto;
-            gap: var(--a-spacing-2);
-          `}
-        >
-          <Loader size="3xlarge" />
-          <BodyShort size="large">Eksporterer kontaktpersoner...</BodyShort>
-        </div>
-      )}
 
       <VStack gap="4">
         {interneRessurser.length > 0 && (
@@ -490,12 +452,10 @@ function MedarbeidereList({
 function DropdownMeny({
   orgEnhet,
   visRessursAdministeringKnapper,
-  setIsDownloading,
   valgtEnhetKanHaRessurser,
 }: {
   orgEnhet: OrgEnhet;
   visRessursAdministeringKnapper: boolean;
-  setIsDownloading: (value: boolean) => void;
   valgtEnhetKanHaRessurser: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
@@ -503,22 +463,6 @@ function DropdownMeny({
 
   const hasWriteAccessForOrgenhet =
     useQuery(harLederTilgangForOrgenhetOptions(orgEnhet.id)).data ?? false;
-
-  const excelFilNavn = () => {
-    return "kontaktpersoner for orgenhet - " + orgEnhet?.navn + ".xlsx";
-  };
-
-  const handleDownloadKontaktpersonerExcel = async () => {
-    try {
-      setIsDownloading(true);
-      await downloadExcelKontaktPersonserForOrgenhetByOrgenhetId(
-        orgEnhet.id,
-        excelFilNavn(),
-      );
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   const adminOrWriteForOrgenhet =
     (hasWriteAccess && hasWriteAccessForOrgenhet) || hasAdminAccess;
@@ -535,7 +479,7 @@ function DropdownMeny({
     valgtEnhetKanHaRessurser &&
     hasAdminAccess;
 
-  const visKontaktpersonEksport =
+  const visKontaktpersonTabell =
     adminOrWriteForOrgenhet && !eksternSamarbeidspartner;
 
   return (
@@ -607,15 +551,15 @@ function DropdownMeny({
               </>
             )}
 
-            {visKontaktpersonEksport && (
+            {visKontaktpersonTabell && (
               <>
                 <Dropdown.Menu.Divider />
-                <Dropdown.Menu.GroupedList.Item
-                  as={Link}
-                  onClick={handleDownloadKontaktpersonerExcel}
-                >
-                  Eksportér kontaktpersoner til Excel
-                </Dropdown.Menu.GroupedList.Item>
+
+                <SmartLink href={`/kontaktpersoner-tabell/${orgEnhet.id}`}>
+                  <Dropdown.Menu.GroupedList.Item as={Link}>
+                    Tabellvisning av kontaktpersoner
+                  </Dropdown.Menu.GroupedList.Item>
+                </SmartLink>
               </>
             )}
           </Dropdown.Menu.GroupedList>

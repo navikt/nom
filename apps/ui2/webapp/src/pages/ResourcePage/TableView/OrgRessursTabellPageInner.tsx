@@ -103,7 +103,7 @@ export const OrgRessursTabellPageInner = ({
     return (
       <div
         css={css`
-          margin-top: 20px;
+          margin-top: var(--a-spacing-4);
         `}
       >
         <Table
@@ -117,6 +117,7 @@ export const OrgRessursTabellPageInner = ({
           onSortChange={(sortKey) => handleSort(sortKey)}
           size="small"
           sort={sort}
+          zebraStripes
         >
           <Table.Header
             css={css`
@@ -127,7 +128,6 @@ export const OrgRessursTabellPageInner = ({
             <Table.Row
               css={css`
                 height: 48px;
-                border-width: 0 0 1px;
               `}
             >
               <Table.ColumnHeader scope="col" sortKey="navident" sortable>
@@ -170,9 +170,7 @@ export const OrgRessursTabellPageInner = ({
             {sortData.map((ressurs) => (
               <Table.Row
                 css={css`
-                  --ac-table-row-border: none;
                   height: 48px;
-                  border-width: 0 0 1px;
                 `}
                 key={ressurs.navident}
                 shadeOnHover={false}
@@ -232,7 +230,7 @@ export const OrgRessursTabellPageInner = ({
         <Pagination
           count={Math.ceil(data.length / rowsPerPage)}
           css={css`
-            margin-top: 24px;
+            margin-top: var(--a-spacing-6);
             display: flex;
             align-items: center;
             justify-content: center;

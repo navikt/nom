@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.person;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.TestTokensGenerator;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 
@@ -72,8 +72,8 @@ public class PersonTest extends RestTestBase {
 
         Assertions.assertNotNull(responseBody);
         Assertions.assertEquals(responseBody.size(), 4);
-        Assertions.assertEquals(responseBody.get("error").asText(), "Forbidden");
-        Assertions.assertEquals(responseBody.get("path").asText(), path);
+        Assertions.assertEquals(responseBody.get("error").asString(), "Forbidden");
+        Assertions.assertEquals(responseBody.get("path").asString(), path);
         Assertions.assertTrue(responseBody.has("status"));
         Assertions.assertTrue(responseBody.has("timestamp"));
 

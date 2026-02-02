@@ -112,7 +112,7 @@ spring:
           azure:
             issuer-uri: ${mock-oauth2-server.baseUrl}/aad
 
-# Testcontainers automagikk. Med jdbc:tc: driver kjøres basen automatisk opp i en test container
+  # Testcontainers automagikk. Med jdbc:tc: driver kjøres basen automatisk opp i en test container
 # https://www.testcontainers.org/modules/databases/jdbc/
   datasource:
     url: jdbc:tc:postgresql:12:///postgres-api

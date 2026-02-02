@@ -1,15 +1,15 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.Random;
@@ -19,10 +19,10 @@ public class RessursEventListenerConfig {
 
 
     @Bean
-    ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonDeserializer = new JsonDeserializer<>(RessursEvent.class, objectMapper);
+    ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
+        final var jacksonJsonDeserializer = new JacksonJsonDeserializer<>(RessursEvent.class, jsonMapper);
 
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jacksonJsonDeserializer);
     }
 
     @Bean

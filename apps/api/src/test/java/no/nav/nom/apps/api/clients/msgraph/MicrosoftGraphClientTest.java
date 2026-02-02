@@ -1,12 +1,12 @@
 package no.nav.nom.apps.api.clients.msgraph;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.newtestbase.WireMockTestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {MicrosoftGraphClient.class, ObjectMapper.class, WebClientAutoConfiguration.class})
+@SpringBootTest(classes = {MicrosoftGraphClient.class, JsonMapper.class, WebClientAutoConfiguration.class})
 class MicrosoftGraphClientTest extends WireMockTestBase {
 
     private static final String ENTRA_ID_GROUP = "e152f131-2d26-4834-b6a0-30b2415f0385";
@@ -29,7 +29,7 @@ class MicrosoftGraphClientTest extends WireMockTestBase {
     private static final String EMAIL_PATH = "/users/ikke.svar.nom@nav.no/sendMail";
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     @Autowired
     private MicrosoftGraphClient microsoftGraphClient;
@@ -79,7 +79,7 @@ class MicrosoftGraphClientTest extends WireMockTestBase {
                 .willReturn(aResponse()
                         .withStatus(400)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(errorResponse)
+                        .withBody(jsonMapper.writeValueAsString(errorResponse)
                 )
         ));
         
@@ -113,7 +113,7 @@ class MicrosoftGraphClientTest extends WireMockTestBase {
     }
 
     private void stubForGet(String url, ODataResponse<EntraIdUser> response) throws JsonProcessingException {
-        String responseBody = objectMapper.writeValueAsString(response);
+        String responseBody = jsonMapper.writeValueAsString(response);
         stubFor(get(urlEqualTo(url))
                 .withHeader("authorization", matching("Bearer tokenValue"))
                 .willReturn(aResponse()

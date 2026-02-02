@@ -191,6 +191,11 @@ spring:
   http:
     codecs:
       max-in-memory-size: 400MB
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
 
 management:
   metrics:

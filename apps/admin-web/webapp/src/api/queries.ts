@@ -16,6 +16,7 @@ import type {
   ImportedRemedyUser,
   MasteredRessursDTO,
   OrgEnhetArbeidsomraadeInfo,
+  OrgEnhetLederEventWithNavident,
   OrgEnhetLederState,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
@@ -110,7 +111,7 @@ export function getOrgenhetLederEventsOptions(search: searchType) {
         await ky.get(
           `${API_BASE_URL}/sinks/orgenhetLederEvents?${queryString.stringify(search, { skipNull: true })}`,
         )
-      ).json<KafkaEvent[]>(),
+      ).json<OrgEnhetLederEventWithNavident[]>(),
   });
 }
 

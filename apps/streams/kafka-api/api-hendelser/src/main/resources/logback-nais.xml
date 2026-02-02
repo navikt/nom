@@ -21,6 +21,9 @@
 <!-- Spring Security logger -->
 <!--    <logger name="org.springframework.security" level="trace"/>-->
 
+    <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
+    <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
     </root>

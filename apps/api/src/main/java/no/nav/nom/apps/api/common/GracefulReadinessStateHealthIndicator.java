@@ -1,9 +1,9 @@
 package no.nav.nom.apps.api.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.availability.ReadinessStateHealthIndicator;
-import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.availability.ApplicationAvailability;
+import org.springframework.boot.health.application.ReadinessStateHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
@@ -47,7 +47,7 @@ public class GracefulReadinessStateHealthIndicator extends ReadinessStateHealthI
     }
 
     @Override
-    public Health getHealth(boolean includeDetails) {
-        return shuttingDown ? Health.outOfService().build() : super.getHealth(includeDetails);
+    public Health health(boolean includeDetails) {
+        return shuttingDown ? Health.outOfService().build() : super.health(includeDetails);
     }
 }

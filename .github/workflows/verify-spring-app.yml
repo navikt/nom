@@ -25,4 +25,4 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: mvn verify --projects :${{ inputs.maven-project }} --also-make --batch-mode
+        run: mvn clean verify -U --projects :${{ inputs.maven-project }} --also-make --batch-mode

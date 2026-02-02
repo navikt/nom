@@ -4,6 +4,7 @@ import no.nav.nom.apps.proxy.common.AppProperties;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.wiremock.spring.ConfigureWireMock;
@@ -16,6 +17,7 @@ import org.wiremock.spring.EnableWireMock;
     @ConfigureWireMock(
         filesUnderDirectory = "src/test/resources")
 })
+@AutoConfigureWebTestClient
 public class TestBase {
 
     @Autowired

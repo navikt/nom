@@ -1,17 +1,17 @@
 package no.nav.nom.apps.api.common.cache;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -58,7 +58,7 @@ public class CacheQueueServiceTest {
 
         // assert
         CacheQueue queue = cacheQueueService.findQueue(navident, CacheType.OTENDRINGER.toString());
-        ObjectReader reader = new ObjectMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
+        ObjectReader reader = new JsonMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
         List<OTEndretData> otEndringer = reader.readValue(queue.getPayload());
         assertEquals(1, otEndringer.size());
         assertEquals(otEndringerData, otEndringer.get(0));

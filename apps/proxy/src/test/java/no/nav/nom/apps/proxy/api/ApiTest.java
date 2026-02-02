@@ -75,7 +75,7 @@ public class ApiTest extends ApiTestBase {
             .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+            .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
     }
 
     @Test

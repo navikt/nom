@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.dvh.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +7,7 @@ import lombok.val;
 import no.nav.nom.apps.api.telefon.Telefon;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
+import tools.jackson.databind.JsonNode;
 
 @Data
 @Builder
@@ -19,7 +19,7 @@ public class DvhTelefon {
     String beskrivelse;
 
     public static DvhTelefon fromOrds(JsonNode jsonNode) {
-        val userref1 = jsonNode.get("userrefeerence1").asText();
+        val userref1 = jsonNode.get("userrefeerence1").asString();
         DvhTelefonType type;
         if (userref1.startsWith("PK-")) {
             type = DvhTelefonType.KONTORTELEFON;
@@ -27,15 +27,15 @@ public class DvhTelefon {
             type = DvhTelefonType.TJENESTETELEFON;
         } else {
             // TODO, håndtere bedre?
-            log.error("DvhTelefon.type satt til null! " + jsonNode.get("userreference1").asText());
+            log.error("DvhTelefon.type satt til null! " + jsonNode.get("userreference1").asString());
             return null;
         }
 
         return DvhTelefon.builder()
-            .navIdent(jsonNode.get("navident").asText())
-            .nummer(jsonNode.get("msisdn").asText())
+            .navIdent(jsonNode.get("navident").asString())
+            .nummer(jsonNode.get("msisdn").asString())
             .type(type)
-            .beskrivelse(jsonNode.get("typename").asText())
+            .beskrivelse(jsonNode.get("typename").asString())
             .build();
     }
 

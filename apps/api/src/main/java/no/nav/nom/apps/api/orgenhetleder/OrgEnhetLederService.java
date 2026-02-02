@@ -82,9 +82,16 @@ public class OrgEnhetLederService {
                             .filter(orgEnhetLederState -> orgEnhetLederState.navident().equals(dvhLedere.getNavIdent()))
                             .findFirst();
 
+                        var isDevMANUELLLeder = aktivLedere.stream()
+                            .filter(orgEnhetLederState -> orgEnhetLederState.fid().startsWith("FID_MANUELL"))
+                            .findFirst();
+
                         if (oneOfCurrentLeadersMatchDvhLeader.isPresent()) {
                             log.info("Fant matchende aktiv leder i DVH og NOM: {}", oneOfCurrentLeadersMatchDvhLeader.get());
                             aktivLedere.remove(oneOfCurrentLeadersMatchDvhLeader.get());
+                        } else if(isDevMANUELLLeder.isPresent()) {
+                            log.info("Fant MANUELL test leder NOM: {}", isDevMANUELLLeder.get());
+                            aktivLedere.remove(isDevMANUELLLeder.get());
                         } else {
                             log.info("Fant ingen matchende leder i NOM, lagrer {}", dvhLedere.getNavIdent());
                             var newFid = orgEnhetLederCommandService.opprettOrgEnhetLeder(new OpprettOrgEnhetLeder(

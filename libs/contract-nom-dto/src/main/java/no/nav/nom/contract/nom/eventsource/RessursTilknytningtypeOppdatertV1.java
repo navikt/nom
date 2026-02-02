@@ -1,19 +1,23 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
-import java.time.LocalDateTime;
-
 public class RessursTilknytningtypeOppdatertV1 extends RessursEvent {
-    @JsonCreator
-    public RessursTilknytningtypeOppdatertV1(String fid, TilknytningtypeOppdatertEventData data, Metadata metadata) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public RessursTilknytningtypeOppdatertV1(
+        @JsonProperty("fid") String fid,
+        @JsonProperty("data") TilknytningtypeOppdatertEventData data,
+        @JsonProperty("metadata") Metadata metadata) {
         super(fid, data, metadata, null);
     }
 
+    @JsonIgnore
     public RessursTilknytningtypeOppdatertV1(String fid, TilknytningtypeOppdatertEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
+        this(fid, data, Metadata.from(inputMetadata));
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

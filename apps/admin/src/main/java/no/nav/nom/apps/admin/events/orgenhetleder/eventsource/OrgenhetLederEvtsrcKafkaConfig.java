@@ -1,17 +1,17 @@
 package no.nav.nom.apps.admin.events.orgenhetleder.eventsource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 
@@ -21,11 +21,11 @@ import java.time.Duration;
 public class OrgenhetLederEvtsrcKafkaConfig {
 
     @Bean
-    ConsumerFactory<String, OrgEnhetLederEvent> orgenhetLederEvtsrcConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    ConsumerFactory<String, OrgEnhetLederEvent> orgenhetLederEvtsrcConsumerFactory(KafkaProperties properties, JsonMapper jsonMapper) {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonDeserializer<>(OrgEnhetLederEvent.class, objectMapper)
+            new JacksonJsonDeserializer<>(OrgEnhetLederEvent.class, jsonMapper)
         );
     }
 

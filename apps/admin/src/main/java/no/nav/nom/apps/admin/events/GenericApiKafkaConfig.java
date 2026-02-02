@@ -5,14 +5,14 @@ import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonSerde;
+import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class GenericApiKafkaConfig {
         return new DefaultKafkaConsumerFactory<>(
             properties.buildConsumerProperties(),
             new StringDeserializer(),
-            new JsonSerde<>(RessursStateKafkaDTO.class).deserializer()
+            new JacksonJsonSerde<>(RessursStateKafkaDTO.class).deserializer()
         );
     }
 
@@ -81,7 +81,7 @@ public class GenericApiKafkaConfig {
 
     @Bean
     ConsumerFactory<String, RessursHendelseKafkaDTO> ressursHendelseKafkaConsumerFactory(KafkaProperties properties) {
-        var jsonSerde = new JsonSerde<>(RessursHendelseKafkaDTO.class);
+        var jsonSerde = new JacksonJsonSerde<>(RessursHendelseKafkaDTO.class);
         jsonSerde.deserializer().addTrustedPackages("no.nav.nom.apps.streams.kafkaapi.ressurs.hendelser.v1.RessursOpprettetEvent");
 
         return new DefaultKafkaConsumerFactory<>(

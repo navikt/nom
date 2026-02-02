@@ -1,19 +1,16 @@
 package no.nav.nom.libs.gql;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
 import no.nav.nom.libs.gql.resolvers.OrgtilknytningResolver;
 import no.nav.nom.libs.gql.resolvers.RessursResolver;
 import no.nav.nom.libs.gql.resolvers.SearchResolver;
-import no.nav.nom.contract.nom.state.OrgEnhetLederState;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepositoryImpl;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -29,16 +26,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -133,14 +127,14 @@ public class NomGqlApplication {
         private final OrgtilknytningStateRepositoryImpl orgtilknytningStateRepository;
         private final OrganiseringStateRepositoryImpl organiseringStateRepository;
 
-        public FileSourcedRepositories(ObjectMapper objectMapper, Environment env) {
+        public FileSourcedRepositories(JsonMapper jsonMapper, Environment env) {
             this.ressursStateRepository = new RessursStateRepositoryImpl();
             this.orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();
             this.orgEnhetLederStateRepository = new OrgEnhetLederStateRepositoryImpl();
             this.orgtilknytningStateRepository = new OrgtilknytningStateRepositoryImpl();
             this.organiseringStateRepository = new OrganiseringStateRepositoryImpl();
 
-            var stateObjects = this.readStateObjectsFromFile(env.getProperty(STATE_OBJECTS_PATH), objectMapper );
+            var stateObjects = this.readStateObjectsFromFile(env.getProperty(STATE_OBJECTS_PATH), jsonMapper);
 
             for(var so : stateObjects){
                 switch(so){
@@ -198,13 +192,13 @@ public class NomGqlApplication {
             return NomGraphqlSupportInterface.dummyImplementation();
         }
 
-        private List<Object> readStateObjectsFromFile(String pathProperty, ObjectMapper objectMapper){
+        private List<Object> readStateObjectsFromFile(String pathProperty, JsonMapper jsonMapper){
             try {
                 var s = Files.readString(Path.of(pathProperty));
-                var tree = objectMapper.readTree(s);
+                var tree = jsonMapper.readTree(s);
                 if(tree.isArray()){
                     var arr = (ArrayNode) tree;
-                    return arr.valueStream().map(it -> stateObjectFromJson(it, objectMapper)).toList();
+                    return arr.valueStream().map(it -> stateObjectFromJson(it, jsonMapper)).toList();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -213,14 +207,14 @@ public class NomGqlApplication {
         }
 
 
-        private Object stateObjectFromJson(JsonNode objectNode, ObjectMapper objectMapper){
+        private Object stateObjectFromJson(JsonNode objectNode, JsonMapper jsonMapper){
             var stateClassName = objectNode.get("stateClassName").asText();
             var stateData = objectNode.get("stateData");
 
             var possibleStateClasses = List.of(RessursState.class, OrgEnhetState.class, OrgtilknytningState.class, OrgEnhetLederState.class, OrganiseringState.class);
             for(var c : possibleStateClasses){
                 if(c.getName().equals(stateClassName)){
-                    return objectMapper.convertValue(stateData, c);
+                    return jsonMapper.convertValue(stateData, c);
                 }
             }
             throw new RuntimeException("Bad state object");
