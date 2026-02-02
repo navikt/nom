@@ -37,15 +37,15 @@ import { isInDevelopment } from "~/utils";
 export const OpprettOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
 
+  if (!hasAdminAccess) {
+    return;
+  }
+
   const [selectedOrgEnhetId, setSelectedOrgEnhet] = useState<string | null>(
     null,
   );
 
   const handleOpprettHerClick = (id: string) => setSelectedOrgEnhet(id);
-
-  if (!hasAdminAccess) {
-    return;
-  }
 
   return (
     <>
@@ -213,8 +213,8 @@ async function searchIfEnoughInput(searchTerm: string) {
   const resultRessurser = resultRaw.data.data.searchRessurs;
 
   return resultRessurser.map((ressurs: any) => ({
-    label: ressurs.visningsnavn,
-    value: ressurs.fid,
+    label: `${ressurs.visningsnavn} (${ressurs.navident})`,
+    value: ressurs.navident,
   }));
 }
 
