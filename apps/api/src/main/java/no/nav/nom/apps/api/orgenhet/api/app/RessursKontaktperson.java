@@ -28,7 +28,7 @@ public class RessursKontaktperson {
     private String kontaktpersonNavn;
     private String kontaktpersonRelasjon;
     private String kontaktpersonTelefonnr;
-    private String kontaktpersonProritet;
+    private String kontaktpersonPrioritet;
 
     public static List<RessursKontaktperson> from(RessursKontaktinfo ressursKontaktinfo, Visningsnavn visningsnavn, String jobbtelefon, String privattelefon) {
         return ressursKontaktinfo.kontaktinfo().stream().map(kontaktinfo -> from(
