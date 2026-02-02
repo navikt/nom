@@ -437,7 +437,7 @@ export interface RessursKontaktperson {
   fornavn?: string;
   jobbtelefon?: string;
   kontaktpersonNavn?: string;
-  kontaktpersonProritet?: string;
+  kontaktpersonPrioritet?: string;
   kontaktpersonRelasjon?: string;
   kontaktpersonTelefonnr?: string;
   navident?: string;

@@ -169,8 +169,8 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const navnCompare = aFulltNavn.localeCompare(bFulltNavn);
     if (navnCompare !== 0) return navnCompare;
 
-    const aPrioritet = a.kontaktpersonProritet ?? "";
-    const bPrioritet = b.kontaktpersonProritet ?? "";
+    const aPrioritet = a.kontaktpersonPrioritet ?? "";
+    const bPrioritet = b.kontaktpersonPrioritet ?? "";
 
     const prioritetCompare = aPrioritet.localeCompare(bPrioritet);
     if (prioritetCompare !== 0) return prioritetCompare;
@@ -248,7 +248,7 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               {formatTlf(kontaktpersonRad.kontaktpersonTelefonnr ?? "")}
             </Table.DataCell>
             <Table.DataCell>
-              {kontaktpersonRad.kontaktpersonProritet}
+              {kontaktpersonRad.kontaktpersonPrioritet}
             </Table.DataCell>
           </Table.Row>
         ))}
