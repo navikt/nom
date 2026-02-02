@@ -6,7 +6,6 @@ import {
   Button,
   DatePicker,
   Heading,
-  HelpText,
   HStack,
   Loader,
   Select,
