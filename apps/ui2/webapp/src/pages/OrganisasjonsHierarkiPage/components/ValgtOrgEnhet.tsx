@@ -508,34 +508,46 @@ function DropdownMeny({
               Administrering av medarbeidere
             </Dropdown.Menu.GroupedList.Heading>
 
-            <Dropdown.Menu.GroupedList.Item
-              as={Link}
-              href={`/org/table/${orgEnhet.id}`}
-            >
-              Tabellvisning av ansatte i denne enheten og underliggende enheter
-            </Dropdown.Menu.GroupedList.Item>
+            <SmartLink href={`/org/table/${orgEnhet.id}`}>
+              <Dropdown.Menu.GroupedList.Item
+                css={css`
+                  color: var(--a-text-action);
+                `}
+              >
+                Tabellvisning av ansatte i denne enheten og underliggende
+                enheter
+              </Dropdown.Menu.GroupedList.Item>
+            </SmartLink>
 
             {visOpprettMedarbeidere && (
               <>
                 <Dropdown.Menu.Divider />
-                <Dropdown.Menu.GroupedList.Item
-                  as={Link}
-                  href="/ressurs/create/1"
-                >
-                  Opprett medarbeider
-                </Dropdown.Menu.GroupedList.Item>
+
+                <SmartLink href="/ressurs/create/1">
+                  <Dropdown.Menu.GroupedList.Item
+                    css={css`
+                      color: var(--a-text-action);
+                    `}
+                  >
+                    Opprett medarbeider
+                  </Dropdown.Menu.GroupedList.Item>
+                </SmartLink>
               </>
             )}
 
             {visMasseflytting && (
               <>
                 <Dropdown.Menu.Divider />
-                <Dropdown.Menu.GroupedList.Item
-                  as={Link}
-                  href={`/masseflytting/${orgEnhet.id}`}
-                >
-                  Flytt én eller flere medarbeidere
-                </Dropdown.Menu.GroupedList.Item>
+
+                <SmartLink href={`/masseflytting/${orgEnhet.id}`}>
+                  <Dropdown.Menu.GroupedList.Item
+                    css={css`
+                      color: var(--a-text-action);
+                    `}
+                  >
+                    Flytt én eller flere medarbeidere
+                  </Dropdown.Menu.GroupedList.Item>
+                </SmartLink>
               </>
             )}
 
