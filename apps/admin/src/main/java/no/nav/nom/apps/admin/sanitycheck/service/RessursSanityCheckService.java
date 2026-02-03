@@ -214,7 +214,7 @@ public class RessursSanityCheckService {
     }
 
     public List<RessursState> finnDuplikateRessurserPaaSammeNavident() {
-        var alleRessurser = ressursStateRepository.getAll();
+        var alleRessurser = ressursStateRepository.getAllByFid();
 
         Set<String> fidNavidenter = new HashSet<>();
         return alleRessurser.stream()
