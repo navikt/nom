@@ -29,8 +29,10 @@ import {
 } from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { OrgEnhetVisning } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
+import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type { OrgEnhet } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
@@ -80,7 +82,10 @@ function VelgOrgEnhetPlassering({
       <OrgHierarki handleOpprettHerClick={handleOpprettHerClick} />
 
       {!!selectedOrgEnhetId && (
-        <OrgEnhetVisningWrapper orgEnhetId={selectedOrgEnhetId} />
+        <OrgEnhetInfoWrapper
+          heading="Enheten blir opprettet under"
+          orgEnhetId={selectedOrgEnhetId}
+        />
       )}
     </>
   );
@@ -112,7 +117,7 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
             label="Navn på den nye organisasjonsenhet"
           />
 
-          <FormRessursSearchWrapper name="lederRessursFid" />
+          <FormRessursSearchWrapper name="lederRessursId" />
 
           <FormDateWrapper name="gyldigFom" />
 
@@ -125,11 +130,13 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
             label="Organisasjonsenhetstype"
           >
             <option value="" />
-            {Object.values(OrgEnhetsType).map((orgEnhetsType) => (
-              <option key={orgEnhetsType} value={orgEnhetsType}>
-                {orgEnhetsType}
-              </option>
-            ))}
+            {Object.values(OrgEnhetsType)
+              .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
+              .map((orgEnhetsType) => (
+                <option key={orgEnhetsType} value={orgEnhetsType}>
+                  {OrgEnhetsTypeNameMapping[orgEnhetsType]}
+                </option>
+              ))}
           </Select>
 
           <TextField
@@ -450,7 +457,13 @@ function OrgHierarkiLine() {
   );
 }
 
-function OrgEnhetVisningWrapper({ orgEnhetId }: { orgEnhetId?: string }) {
+export function OrgEnhetInfoWrapper({
+  orgEnhetId,
+  heading,
+}: {
+  orgEnhetId?: string;
+  heading: string;
+}) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
     queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
@@ -485,39 +498,18 @@ function OrgEnhetVisningWrapper({ orgEnhetId }: { orgEnhetId?: string }) {
           display: grid;
         `}
       >
-        <OrgEnhetVisning
-          heading="Enheten blir opprettet under"
-          orgEnhet={orgEnhet}
-        />
+        <OrgEnhetInfo heading={heading} orgEnhet={orgEnhet} />
       </div>
     )
   );
 }
 
-enum OrgEnhetsType {
-  ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
-  NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
-  ARBEIDSRAADGIVNING = "ARBEIDSRAADGIVNING",
-  DIREKTORAT = "DIREKTORAT",
-  DIR = "DIR",
-  FYLKE = "FYLKE",
-  NAV_FAMILIE_OG_PENSJONSYTELSER = "NAV_FAMILIE_OG_PENSJONSYTELSER",
-  HJELPEMIDLER_OG_TILRETTELEGGING = "HJELPEMIDLER_OG_TILRETTELEGGING",
-  KLAGEINSTANS = "KLAGEINSTANS",
-  NAV_KONTAKTSENTER = "NAV_KONTAKTSENTER",
-  KONTROLL_KONTROLLENHET = "KONTROLL_KONTROLLENHET",
-  NAV_KONTOR = "NAV_KONTOR",
-  TILTAK = "TILTAK",
-  NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
-}
-
 const validationSchema = yup.object({
   orgEnhetNavn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
-  lederRessursFid: yup.string().required("Obligatorisk"),
+  lederRessursId: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().required("Obligatorisk"),
   orgEnhetType: yup
     .mixed<OrgEnhetsType>()
-    .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
-    .nullable(),
+    .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
 });

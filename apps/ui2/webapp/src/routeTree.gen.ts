@@ -20,6 +20,7 @@ import { Route as RessursIdRouteImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgIdRouteImport } from './routes/org.$id'
 import { Route as MasseflyttingIdRouteImport } from './routes/masseflytting.$id'
+import { Route as KorrigerOrganisasjonsenhetIdRouteImport } from './routes/korriger-organisasjonsenhet.$id'
 import { Route as KontaktpersonerIdRouteImport } from './routes/kontaktpersoner.$id'
 import { Route as KontaktpersonerTabellIdRouteImport } from './routes/kontaktpersoner-tabell.$id'
 import { Route as RessursCreateStepRouteImport } from './routes/ressurs.create.$step'
@@ -82,6 +83,12 @@ const MasseflyttingIdRoute = MasseflyttingIdRouteImport.update({
   path: '/masseflytting/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KorrigerOrganisasjonsenhetIdRoute =
+  KorrigerOrganisasjonsenhetIdRouteImport.update({
+    id: '/korriger-organisasjonsenhet/$id',
+    path: '/korriger-organisasjonsenhet/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const KontaktpersonerIdRoute = KontaktpersonerIdRouteImport.update({
   id: '/kontaktpersoner/$id',
   path: '/kontaktpersoner/$id',
@@ -111,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
+  '/korriger-organisasjonsenhet/$id': typeof KorrigerOrganisasjonsenhetIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
@@ -128,6 +136,7 @@ export interface FileRoutesByTo {
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
+  '/korriger-organisasjonsenhet/$id': typeof KorrigerOrganisasjonsenhetIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
@@ -146,6 +155,7 @@ export interface FileRoutesById {
   '/tilganger': typeof TilgangerRoute
   '/kontaktpersoner-tabell/$id': typeof KontaktpersonerTabellIdRoute
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
+  '/korriger-organisasjonsenhet/$id': typeof KorrigerOrganisasjonsenhetIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/tilganger'
     | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
+    | '/korriger-organisasjonsenhet/$id'
     | '/masseflytting/$id'
     | '/org/$id'
     | '/ressurs-terminate/$id'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/tilganger'
     | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
+    | '/korriger-organisasjonsenhet/$id'
     | '/masseflytting/$id'
     | '/org/$id'
     | '/ressurs-terminate/$id'
@@ -199,6 +211,7 @@ export interface FileRouteTypes {
     | '/tilganger'
     | '/kontaktpersoner-tabell/$id'
     | '/kontaktpersoner/$id'
+    | '/korriger-organisasjonsenhet/$id'
     | '/masseflytting/$id'
     | '/org/$id'
     | '/ressurs-terminate/$id'
@@ -217,6 +230,7 @@ export interface RootRouteChildren {
   TilgangerRoute: typeof TilgangerRoute
   KontaktpersonerTabellIdRoute: typeof KontaktpersonerTabellIdRoute
   KontaktpersonerIdRoute: typeof KontaktpersonerIdRoute
+  KorrigerOrganisasjonsenhetIdRoute: typeof KorrigerOrganisasjonsenhetIdRoute
   MasseflyttingIdRoute: typeof MasseflyttingIdRoute
   OrgIdRoute: typeof OrgIdRoute
   RessursTerminateIdRoute: typeof RessursTerminateIdRoute
@@ -306,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasseflyttingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/korriger-organisasjonsenhet/$id': {
+      id: '/korriger-organisasjonsenhet/$id'
+      path: '/korriger-organisasjonsenhet/$id'
+      fullPath: '/korriger-organisasjonsenhet/$id'
+      preLoaderRoute: typeof KorrigerOrganisasjonsenhetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kontaktpersoner/$id': {
       id: '/kontaktpersoner/$id'
       path: '/kontaktpersoner/$id'
@@ -345,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   TilgangerRoute: TilgangerRoute,
   KontaktpersonerTabellIdRoute: KontaktpersonerTabellIdRoute,
   KontaktpersonerIdRoute: KontaktpersonerIdRoute,
+  KorrigerOrganisasjonsenhetIdRoute: KorrigerOrganisasjonsenhetIdRoute,
   MasseflyttingIdRoute: MasseflyttingIdRoute,
   OrgIdRoute: OrgIdRoute,
   RessursTerminateIdRoute: RessursTerminateIdRoute,

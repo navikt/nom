@@ -387,6 +387,8 @@ function UtvidOrgEnhetKort({
   orgEnhet: OrgEnhet;
   defaultOpen?: boolean;
 }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   const [expanded, setExpanded] = useState(defaultOpen);
 
   const ledereForOrgEnhetQuery = useQuery({
@@ -479,7 +481,31 @@ function UtvidOrgEnhetKort({
               />
             </HStack>
 
-            <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
+            <div
+              css={css`
+                display: flex;
+                align-items: end;
+                justify-content: space-between;
+              `}
+            >
+              <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
+
+              {hasAdminAccess && (
+                <SmartLink
+                  href={`/korriger-organisasjonsenhet/${orgEnhet.id}`}
+                  target="_blank"
+                >
+                  <Button
+                    css={css`
+                      height: fit-content;
+                    `}
+                    variant="secondary"
+                  >
+                    Korrigér
+                  </Button>
+                </SmartLink>
+              )}
+            </div>
           </VStack>
         )}
       </div>

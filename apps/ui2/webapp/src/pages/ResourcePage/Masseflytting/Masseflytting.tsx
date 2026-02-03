@@ -320,7 +320,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           display: grid;
         `}
       >
-        <OrgEnhetVisning heading="Flytt fra" orgEnhet={orgEnhet} />
+        <OrgEnhetInfo heading="Flytt fra" orgEnhet={orgEnhet} />
       </div>
 
       <VStack
@@ -566,7 +566,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   );
 }
 
-export function OrgEnhetVisning({
+export function OrgEnhetInfo({
   orgEnhet,
   heading,
 }: {
