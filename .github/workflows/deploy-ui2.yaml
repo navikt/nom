@@ -43,23 +43,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
+      - name: Build webapp and decide minification yes/no
+        working-directory: apps/ui2/webapp
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || "${{ github.event.inputs.minify }}" == 'false' ]]; then
+            echo "Webapp build: Skipping minification";
+            npm run build -- --minify=false;
+          else
+            echo "Webapp build: With minification";
+            npm run build;
+          fi
+
       - name: Install graphiql (playground) dependencies
         working-directory: apps/ui2/gql-playground
         run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-
-
-      - name: Build webapp and decide minification yes/no
-        working-directory: apps/ui2/webapp
-        run: |
-          if [[ "${GITHUB_REF}" != "refs/heads/main" || "${{ github.event.inputs.minify }}" == 'false' ]]; then
-            echo "Webapp build: Skipping minification"
-            npm run build -- --minify=false;
-          else
-            echo "Webapp build: With minification"
-            npm run build
-          fi
 
       - name: Build graphiql (playground)
         working-directory: apps/ui2/gql-playground
