@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.pdl;
 
+import io.netty.channel.ChannelOption;
 import no.nav.nom.apps.api.common.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,18 +8,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.GraphQlResponse;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import tools.jackson.databind.JsonNode;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
 public class PdlClient {
+    private static int RESPONSE_TIMEOUT_IN_SECONDS = 10;
+
     private static final Logger logger = LoggerFactory.getLogger(PdlClient.class);
     private final static String PDL_HENT_PERSON_QUERY = // language=graphql
         """
@@ -49,10 +55,15 @@ public class PdlClient {
     ) {
         final var pdlProperties = appProperties.clients().pdl();
 
+        HttpClient httpClient = HttpClient.create()
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, RESPONSE_TIMEOUT_IN_SECONDS * 1000)
+            .responseTimeout(Duration.ofSeconds(RESPONSE_TIMEOUT_IN_SECONDS));
+
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
         this.graphQlClient = HttpGraphQlClient.builder(
             builder.clone()
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
             .filter(oAuth2Filter))
             .url(pdlProperties.baseUrl() + "/graphql")
             .headers(headers -> {
