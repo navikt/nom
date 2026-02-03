@@ -49,19 +49,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
 
-      - name: Build webapp
-        working-directory: apps/ui2/webapp
-        run: npm run build
 
-      - name: Build webapp (minify ON)
-        working-directory: apps/ui2/webapp
-        if: ${{ inputs.minify == 'true' }}
-        run: npm run build
-
-      - name: Build webapp (minify OFF, or branch != main)
-        working-directory: apps/ui2/webapp
-        if: ${{ inputs.minify == 'false' || github.ref != 'refs/heads/main' }}
-        run: npm run build -- --minify=false
+      - name: Build webapp and decide minification yes/no
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || "${{ github.event.inputs.minify }}" == 'false' ]]; then
+            echo "Webapp build: Skipping minification"
+            npm run build -- --minify=false;
+          else
+            echo "Webapp build: With minification"
+            npm run build
+          fi
 
       - name: Build graphiql (playground)
         working-directory: apps/ui2/gql-playground
