@@ -824,6 +824,7 @@ function FormDateWrapper({
   const { field } = useController({
     name,
   });
+
   const datePickerProperties = useDatepicker({
     onDateChange: async (date) => {
       field.onChange(date ? formatDateWithoutTimezone(date) : undefined);
