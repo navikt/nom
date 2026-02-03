@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/korriger-organisasjonsenhet/$id")({
-  component: RouteComponent,
-});
+import { KorrigerOrgEnhet } from "~/pages/OrganizationMastering/KorrigerOrgEnhet";
 
-function RouteComponent() {
-  return <div>Hello "/korriger-organisasjonsenhet/$id"!</div>;
-}
+export const Route = createFileRoute("/korriger-organisasjonsenhet/$id")({
+  component: KorrigerOrgEnhet,
+});
