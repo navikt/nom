@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.api.email.OTEndretData;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectReader;
@@ -31,7 +32,7 @@ public class CacheQueueService {
 
         if(existingCacheQueue != null) {
             log.info("CacheQueue already exists for {}. Cache will be updated. Existing: {}, to be added: {}", cacheKey, existingCacheQueue, otEndretData);
-            ObjectReader reader = new JsonMapper().readerFor(new TypeReference<List<OTEndretData>>() {});
+            ObjectReader reader = new JsonMapper().rebuild().enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION).build().readerFor(new TypeReference<List<OTEndretData>>() {});
             List<OTEndretData> payload = reader.readValue(existingCacheQueue.getPayload());
             payload.add(otEndretData);
 

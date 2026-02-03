@@ -75,6 +75,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
@@ -390,6 +391,8 @@ public class RessursRestService {
 
     public RessursState createRessursAndNotify(OpprettRessursRequest request, InputMetadata metadata) {
         validateOpprettRessursRequest(request);
+        log.info(TEAM_LOGS, "Prosesserer createRessursAndNotify for {} - {}", request.personident(), request.visningsetternavn());
+
         final var navident = createNavident(request);
         final var existingRessursByNavident = ressursStateRepository.findByNavident(navident);
 
@@ -421,6 +424,8 @@ public class RessursRestService {
 
 
     private RessursState createRessurs(OpprettRessursRequest request, String navident, InputMetadata metaData) {
+        log.info(TEAM_LOGS, "Oppretter ny ressurs i NOM med navident {} for personident {}", navident, request.personident());
+        
         final var pdlPerson = pdlClient.hentPerson(request.personident());
 
         if (!isNull(request.visningsmellomnavn()) && request.visningsmellomnavn().isBlank()) {
@@ -452,6 +457,11 @@ public class RessursRestService {
 
 
         try {
+            if (ressursStateRepository.findByNavident(navident).isPresent()) {
+                throw new DuplicateRessursException(
+                    String.format("Det finnes allerede en ressurs med navident %s", navident)
+                );
+            }
             RessursState opprettetRessurs = ressursCommandService.createRessursSync(opprettRessursCommand);
             nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());
 
@@ -508,7 +518,7 @@ public class RessursRestService {
                 );
             }
 
-            logger.debug("createRessurs for {} - {}", navident, request.visningsetternavn());
+            logger.info("createRessurs for {} - {}", navident, request.visningsetternavn());
 
             return opprettetRessurs;
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
@@ -641,7 +651,7 @@ public class RessursRestService {
                 metadata
             );
 
-        logger.debug("createRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
+        logger.info("reactivateRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 
         try {
             emailNotificationForReaktivertRessurs(existingRessurs, reaktivertRessurs);
