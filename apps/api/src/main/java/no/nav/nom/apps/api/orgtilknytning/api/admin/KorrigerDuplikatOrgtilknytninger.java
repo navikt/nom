@@ -99,15 +99,15 @@ public class KorrigerDuplikatOrgtilknytninger {
                     duplikat.gyldigTom(),
                     new InputMetadata(
                         "Swagger",
-                        "Korriger duplikate aktive org enheter",
+                        "Korriger duplikate Orgtilknytninger",
                         node,
                         new Origination("nom-api", "nom-api")
                     ),
                     null
                 );
 
-            String eventStr =  "Fjern orgtilknytning event for fid=%s, inputmeta=%s"
-                .formatted(duplikat.fid(), fjernOrgtilknytning.inputMetadata());
+            String eventStr =  "Fjern orgtilknytning event (navident: %s) for fid=%s, inputmeta=%s"
+                .formatted(duplikat.navident(), duplikat.fid(), fjernOrgtilknytning.inputMetadata());
             str.append(eventStr).append("\n");
             log.info(eventStr);
             if (performUpdate) orgtilknytningCommandService.fjernOrgtilknytning(duplikat.fid(), fjernOrgtilknytning);
