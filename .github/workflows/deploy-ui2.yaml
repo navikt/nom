@@ -10,6 +10,13 @@ on:
       - 'apps/ui2/**'
       - '.nais/apps/ui2/**'
   workflow_dispatch:
+    inputs:
+      minify:
+        description: "Enable minification?"
+        type: boolean
+        required: true
+        default: true
+
 
 defaults:
   run:
@@ -45,6 +52,16 @@ jobs:
       - name: Build webapp
         working-directory: apps/ui2/webapp
         run: npm run build
+
+      - name: Build webapp (minify ON)
+        working-directory: apps/ui2/webapp
+        if: ${{ inputs.minify == 'true' }}
+        run: npm run build
+
+      - name: Build webapp (minify OFF, or branch != main)
+        working-directory: apps/ui2/webapp
+        if: ${{ inputs.minify == 'false' || github.ref != 'refs/heads/main' }}
+        run: npm run build -- --minify=false
 
       - name: Build graphiql (playground)
         working-directory: apps/ui2/gql-playground
