@@ -653,29 +653,7 @@ public class RessursRestService {
 
         logger.info("reactivateRessurs for {} - {}", reaktivertRessurs.navident(), request.visningsetternavn());
 
-        try {
-            emailNotificationForReaktivertRessurs(existingRessurs, reaktivertRessurs);
-        } catch (Exception ignored) {}
-
         return reaktivertRessurs;
-    }
-
-    private void emailNotificationForReaktivertRessurs(RessursState existingRessurs, RessursState reaktivertRessurs) {
-        try {
-            List<String> recipients = new ArrayList<>();
-            recipients.add("Linn.Renate.Fredriksen@nav.no");
-            recipients.add("Christian.Prestvik@nav.no");
-            recipients.add("Roy.Grini@nav.no");
-
-            var emailMessage = new EmailMessage("Reaktivering av ressurs - " + existingRessurs.navident(),
-            """
-            Navident: %s
-            
-            Tidligere sektor: %s
-            Ny sektor: %s
-            """.formatted(existingRessurs.navident(), existingRessurs.sektor(), reaktivertRessurs.sektor()), recipients);
-            microsoftGraphClient.sendEmail(emailMessage).subscribe();
-        } catch (Exception ignored) {}
     }
 
     private String createNavident(OpprettRessursRequest request) {
