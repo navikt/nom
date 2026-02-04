@@ -14,11 +14,16 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -26,15 +31,38 @@ public class OrgEnhetCommandService {
 
     private final OrgEnhetEventProducer eventProducer;
     private final JsonMapper jsonMapper;
-    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, JsonMapper jsonMapper) {
+    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
+
+    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, JsonMapper jsonMapper, NomStateOrgEnhetListener nomStateOrgEnhetListener) {
         this.eventProducer = eventProducer;
         this.jsonMapper = jsonMapper;
+        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
     }
 
     public String opprettOrgEnhet(OpprettOrgEnhet opprettOrgEnhet) {
         String fid = PrefixedUlidCreator.createOrgEnhetUlid();
         opprettOrgEnhet(fid, opprettOrgEnhet);
         return fid;
+    }
+
+    public OrgEnhetState opprettOrgEnhetSync(OpprettOrgEnhet opprettOrgEnhet) throws ExecutionException, InterruptedException, TimeoutException {
+        boolean exceptionThrown = false;
+        final var fid = PrefixedUlidCreator.createOrgEnhetUlid();
+        final var response = nomStateOrgEnhetListener.waitForStateAfterEventCreation(fid);
+        opprettOrgEnhet(fid, opprettOrgEnhet);
+
+        try {
+            return response.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            exceptionThrown = true;
+            nomStateOrgEnhetListener.removeWait(fid);
+            log.error("Error waiting for orgenhet to be created", e);
+            throw e;
+        } finally {
+            if (exceptionThrown) {
+                avikleOrgEnhet(fid, new AvvikleOrgEnhet(opprettOrgEnhet.gyldigFom(), opprettOrgEnhet.inputMetadata()));
+            }
+        }
     }
 
     private CompletableFuture<SendResult<String, OrgEnhetEvent>> opprettOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
