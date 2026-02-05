@@ -69,9 +69,12 @@ public class KorrigerDuplikatOrgtilknytninger {
                 OrgtilknytningState original = null;
                 for (OrgtilknytningState ot : otEr) {
                     if (original != null) {
-                        if (original.orgEnhetId().equals(ot.orgEnhetId())
-                            && original.gyldigFom().equals(ot.gyldigFom())
+                        if (   Objects.equals(original.orgEnhetId(), ot.orgEnhetId())
+                            && Objects.equals(original.gyldigFom(), ot.gyldigFom())
                             && Objects.equals(original.gyldigTom(), ot.gyldigTom())
+                            && Objects.equals(original.sektor(), ot.sektor())
+                            && Objects.equals(original.erDagligOppfolging(), ot.erDagligOppfolging())
+                            && Objects.equals(original.orgtilknytningType(), ot.orgtilknytningType())
                         ) {
                             duplikater.putIfAbsent(original.fid(), new ArrayList<>());
                             duplikater.get(original.fid()).add(ot);
