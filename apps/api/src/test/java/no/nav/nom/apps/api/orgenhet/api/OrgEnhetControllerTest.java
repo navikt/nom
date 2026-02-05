@@ -258,6 +258,56 @@ public class OrgEnhetControllerTest extends RestTestBase {
         );
     }
 
+    @Test
+    void should_return_403_if_non_admin_user() {
+        var overordnetId = "orgEnhet123";
+        var lederNavident = "X123456";
+        var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
+            .overordnetOrgEnhetId(overordnetId)
+            .orgEnhetNavn("Nav ny orgEnhet")
+            .gyldigFom(LocalDate.now())
+            .lederRessursNavident(lederNavident)
+            .firesiffer("1234")
+            .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .build();
+
+        webTestClient.post()
+            .uri("/app/orgenheter/opprett")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .bodyValue(opprettOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isForbidden();
+    }
+
+    @Test
+    void should_throw_exception_when_ressurs_does_not_exist() {
+        var overordnetId = "orgEnhet123";
+        var lederNavident = "X123456";
+        var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
+            .overordnetOrgEnhetId(overordnetId)
+            .orgEnhetNavn("Nav ny orgEnhet")
+            .gyldigFom(LocalDate.now())
+            .lederRessursNavident(lederNavident)
+            .firesiffer("1234")
+            .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .build();
+
+        var overordnetOrgEnhet = map(orgEnhetState());
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        when(orgenhetService.getById(overordnetId)).thenReturn(Optional.of(overordnetOrgEnhet));
+
+        when(ressursService.findByNavident(lederNavident)).thenReturn(Optional.empty());
+
+        webTestClient.post()
+            .uri("/app/orgenheter/opprett")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(opprettOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isNotFound();
+    }
+
 
     private WebTestClient.ResponseSpec postOrgenhetType(String accessToken, SetOrgEnhetsTypeRequest requestBody) {
         return webTestClient.post()

@@ -16,14 +16,17 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -278,7 +281,7 @@ public class OrgEnhetController {
         if (unleash.isEnabled("nom-api.orgenhet-mastring"))
             return ResponseEntity.status(HttpStatus.CREATED).body(orgEnhetRestService.opprettOrgEnhet(opprettOrgEnhetRequest));
         else
-            return ResponseEntity.ok(new OpprettOrgEnhetResponse(
+            return ResponseEntity.status(HttpStatus.CREATED).body(new OpprettOrgEnhetResponse(
                 "ab123c",
                 opprettOrgEnhetRequest.orgEnhetNavn(),
                 opprettOrgEnhetRequest.overordnetOrgEnhetId(),
@@ -291,6 +294,25 @@ public class OrgEnhetController {
                 opprettOrgEnhetRequest.orgEnhetsType()
             ));
 
+    }
+
+    @ExceptionHandler({
+        OrgEnhetNotFoundException.class,
+        RessursNotFoundException.class
+    })
+    public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
+    }
+
+    @ExceptionHandler({
+        DuplicateOrgEnhetNameException.class
+    })
+    public ResponseEntity<StandardResponse> handleDuplicateOrgEnhetName(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
     }
 
 }

@@ -86,7 +86,7 @@ public class OrgEnhetRestService {
             orgEnhetIdGenerator.newId(),
             opprettOrgEnhetRequest.orgEnhetNavn(),
             opprettOrgEnhetRequest.gyldigFom().isAfter(LocalDate.now()) ? LocalDate.now() : opprettOrgEnhetRequest.gyldigFom(),
-            overordnetOrgEnhet.getOverordnetOrgEnhetFid(),
+            overordnetOrgEnhet.getFid(),
             ressursState.fid(),
             inputMetadata
         );
