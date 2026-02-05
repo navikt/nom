@@ -25,7 +25,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -129,22 +128,26 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
     @PostMapping("/korrigerOrgEnhet")
     public ResponseEntity<String> korrigerOrgEnhet(
         @Parameter(description = "OrgEnhet Fid") @RequestParam String orgEnhetFid,
-        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
-        @RequestBody KorrigerOrgEnhet korrigerOrgEnhet
+        @Parameter(description = "OrgEnhet navn") @RequestParam(required = false) String orgEnhetNavn,
+        @Parameter(description = "OrgEnhet gyldigFom") @RequestParam(required = false) LocalDate orgEnhetGyldigFom,
+        @Parameter(description = "OrgEnhet gyldigTom") @RequestParam(required = false) LocalDate orgEnhetGyldigTom,
+        @Parameter(description = "OrgEnhet OverordnetOrgEnhetFid") @RequestParam(required = false) String orgEnhetOverordnetOrgEnhetFid,
+        @Parameter(description = "OrgEnhet LederRessursFid") @RequestParam(required = false) String lederRessursFid,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam(required = false) String confirm
     ) {
         var orgEnhet = orgenhetService.getByFid(orgEnhetFid).orElseThrow(() -> OrgEnhetNotFoundException.fid(orgEnhetFid));
 
-        var ressursState = ressursStateRepository.findByFid(korrigerOrgEnhet.lederRessursFid())
+        var ressursState = ressursStateRepository.findByFid(lederRessursFid)
             .filter(r -> isActive(r.startdato(), r.sluttdato()))
-            .orElseThrow(() -> RessursNotFoundException.fid(korrigerOrgEnhet.lederRessursFid()));
+            .orElseThrow(() -> RessursNotFoundException.fid(lederRessursFid));
 
-        orgenhetService.getByFid(korrigerOrgEnhet.overordnetOrgEnhetFid())
-            .orElseThrow(() -> OrgEnhetNotFoundException.fid(korrigerOrgEnhet.overordnetOrgEnhetFid()));
+        orgenhetService.getByFid(orgEnhetOverordnetOrgEnhetFid)
+            .orElseThrow(() -> OrgEnhetNotFoundException.fid(orgEnhetOverordnetOrgEnhetFid));
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Orgenhet %s - %s kan korrigeres, men vil ikke utføres da handling ikke er bekreftet".formatted(
-                    HtmlUtils.htmlEscape(orgEnhetFid), HtmlUtils.htmlEscape(korrigerOrgEnhet.navn())));
+                    HtmlUtils.htmlEscape(orgEnhetFid), HtmlUtils.htmlEscape(orgEnhetNavn)));
         }
 
 
@@ -152,15 +155,15 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
             orgEnhetFid,
             new KorrigerOrgEnhet(
                 orgEnhet.getId(),
-                isNull(korrigerOrgEnhet.navn()) ? orgEnhet.getNavn() : korrigerOrgEnhet.navn(),
-                isNull(korrigerOrgEnhet.gyldigFom()) ? orgEnhet.getGyldigFom() : korrigerOrgEnhet.gyldigFom(),
-                isNull(korrigerOrgEnhet.gyldigTom()) ? orgEnhet.getGyldigTom() : korrigerOrgEnhet.gyldigTom(),
-                isNull(korrigerOrgEnhet.overordnetOrgEnhetFid()) ? orgEnhet.getOverordnetOrgEnhetFid() : korrigerOrgEnhet.overordnetOrgEnhetFid(),
-                isNull(korrigerOrgEnhet.lederRessursFid()) ? ressursState.fid() : korrigerOrgEnhet.lederRessursFid(),
+                isNull(orgEnhetNavn) ? orgEnhet.getNavn() : orgEnhetNavn,
+                isNull(orgEnhetGyldigFom) ? orgEnhet.getGyldigFom() : orgEnhetGyldigFom,
+                isNull(orgEnhetGyldigTom) ? orgEnhet.getGyldigTom() :orgEnhetGyldigTom,
+                isNull(orgEnhetOverordnetOrgEnhetFid) ? orgEnhet.getOverordnetOrgEnhetFid() : orgEnhetOverordnetOrgEnhetFid,
+                isNull(lederRessursFid) ? ressursState.fid() : lederRessursFid,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",
                     "korrigerOrgEnhet",
-                    korrigerOrgEnhet.id(),
+                    orgEnhet.getId(),
                     new Origination(
                         SecurityUtil.getAuthenticatedNavIdent(),
                         "Admin swagger/rest"
@@ -169,8 +172,8 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
             )
         );
 
-        return ResponseEntity.ok().body("OrgEnhet %s - %s har blitt korrigert med følgende data: %s".formatted(
-            HtmlUtils.htmlEscape(korrigerOrgEnhet.id()), HtmlUtils.htmlEscape(korrigerOrgEnhet.navn()), korrigerOrgEnhet));
+        return ResponseEntity.ok().body("OrgEnhet %s - %s har blitt korrigert".formatted(
+            HtmlUtils.htmlEscape(orgEnhet.getId()), HtmlUtils.htmlEscape(orgEnhetNavn)));
     }
 
 }
