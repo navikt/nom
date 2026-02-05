@@ -133,7 +133,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         @Parameter(description = "OrgEnhet gyldigTom") @RequestParam(required = false) LocalDate orgEnhetGyldigTom,
         @Parameter(description = "OrgEnhet OverordnetOrgEnhetFid") @RequestParam(required = false) String orgEnhetOverordnetOrgEnhetFid,
         @Parameter(description = "OrgEnhet LederRessursFid") @RequestParam(required = false) String lederRessursFid,
-        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam(required = false) String confirm
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ) {
         var orgEnhet = orgenhetService.getByFid(orgEnhetFid).orElseThrow(() -> OrgEnhetNotFoundException.fid(orgEnhetFid));
 
