@@ -220,11 +220,11 @@ public class ManuelleOrganiseringEvtsrcMeldinger {
     )
     @PostMapping("/lagOpprettOrganiseringCmd")
     public ResponseEntity<String> opprettOrganisering(
-        @Parameter(description = "Enhet ID for enheten som organiseres") @RequestParam(required = false) String id,
-        @Parameter(description = "Navn for enheten som organiseres") @RequestParam(required = false) String navn,
-        @Parameter(description = "Enhet ID for enheten som denne er organisert under") @RequestParam(required = false) String idOver,
-        @Parameter(description = "Navn for enheten som denne er organisert under") @RequestParam(required = false) String navnOver,
-        @Parameter(description = "GyldigFom for organiseringen") @RequestParam(required = false) LocalDate gyldigFom,
+        @Parameter(description = "Enhet ID for enheten som organiseres") @RequestParam String id,
+        @Parameter(description = "Navn for enheten som organiseres") @RequestParam String navn,
+        @Parameter(description = "Enhet ID for enheten som denne er organisert under") @RequestParam String idOver,
+        @Parameter(description = "Navn for enheten som denne er organisert under") @RequestParam String navnOver,
+        @Parameter(description = "GyldigFom for organiseringen") @RequestParam LocalDate gyldigFom,
         @Parameter(description = "GyldigTom for organiseringen") @RequestParam(required = false) LocalDate gyldigTom,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
