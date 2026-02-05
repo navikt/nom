@@ -25,6 +25,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -128,8 +129,8 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
     @PostMapping("/korrigerOrgEnhet")
     public ResponseEntity<String> korrigerOrgEnhet(
         @Parameter(description = "OrgEnhet Fid") @RequestParam String orgEnhetFid,
-        @Parameter(description = "KorrigerOrgEnhet") @RequestParam KorrigerOrgEnhet korrigerOrgEnhet,
-        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @RequestBody KorrigerOrgEnhet korrigerOrgEnhet
     ) {
         var orgEnhet = orgenhetService.getByFid(orgEnhetFid).orElseThrow(() -> OrgEnhetNotFoundException.fid(orgEnhetFid));
 
