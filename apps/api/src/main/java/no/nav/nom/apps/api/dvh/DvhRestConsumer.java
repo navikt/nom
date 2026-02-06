@@ -107,9 +107,11 @@ public class DvhRestConsumer {
             }
         }
 
-        if (!unleash.isEnabled("nom-api.dvh-last") && !dvhStartupLoadMonitor.hasCompleted()) {
-            log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH {}", durationAsH24(start));
-            dvhStartupLoadMonitor.setCompleted();
+        if (!unleash.isEnabled("nom-api.dvh-last")) {
+            if (!dvhStartupLoadMonitor.hasCompleted()) {
+                dvhStartupLoadMonitor.setCompleted();
+            }
+            log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
             return;
         }
 
