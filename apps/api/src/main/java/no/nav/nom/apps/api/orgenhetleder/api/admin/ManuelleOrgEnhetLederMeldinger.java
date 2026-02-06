@@ -213,6 +213,18 @@ public class ManuelleOrgEnhetLederMeldinger {
             .body("Fant ikke OrgEnhetLederState med FID %s".formatted(HtmlUtils.htmlEscape(fid))));
     }
 
+    @Operation(
+        description = "Slett OrgEnhetLeder manuelt",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
     @DeleteMapping("/slettManuelleOrgEnhetLederState")
     public ResponseEntity<String> slettManuelleOrgEnhetLederState(
         @Parameter(description = "FID for leder som skal slettes") @RequestParam String fid,
