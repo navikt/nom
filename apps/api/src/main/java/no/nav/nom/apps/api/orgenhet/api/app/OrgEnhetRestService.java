@@ -129,6 +129,7 @@ public class OrgEnhetRestService {
             orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, oppdaterOrgEnhetLederStartdato);
 
             return new OpprettOrgEnhetResponse(
+                orgEnhetState.fid(),
                 orgEnhetState.id(),
                 orgEnhetState.navn(),
                 opprettOrganisering.idOver(),

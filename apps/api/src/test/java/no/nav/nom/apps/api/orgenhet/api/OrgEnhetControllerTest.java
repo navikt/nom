@@ -244,6 +244,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         assertThat(response).isEqualTo(
             OpprettOrgEnhetResponse.builder()
+                .orgEnhetFid(orgEnhetState.fid())
                 .orgEnhetId(orgEnhetState.id())
                 .orgEnhetNavn(orgEnhetState.navn())
                 .overordnetOrgEnhetId(overordnetOrgEnhet.getId())

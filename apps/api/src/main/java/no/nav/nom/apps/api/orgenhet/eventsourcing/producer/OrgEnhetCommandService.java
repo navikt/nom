@@ -87,6 +87,14 @@ public class OrgEnhetCommandService {
                 log.error("Problem converting orgEnhet info from dvh", e);
                 log.info("dvh data: {}", input.toPrettyString());
             }
+        } else {
+            additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
+                "00",
+                opprettOrgEnhet.navn(),
+                "ORGNIVX",
+                "",
+                "00-" + opprettOrgEnhet.navn() + "ORGNIVX"
+            );
         }
         return new OrgEnhetOpprettetEventV1(
                 fid,
@@ -125,6 +133,14 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getOrgNiv(),
                     dvhOrgenhet2.getAgressoOrgenhetType(),
                     dvhOrgenhet2.getUniqueAgressoId()
+            );
+        } else {
+            additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
+                "00",
+                korrigerOrgEnhet.navn(),
+                "ORGNIVX",
+                "",
+                "00-" + korrigerOrgEnhet.navn() + "ORGNIVX"
             );
         }
 
