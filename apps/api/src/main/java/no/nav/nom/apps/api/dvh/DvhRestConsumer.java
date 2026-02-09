@@ -83,11 +83,6 @@ public class DvhRestConsumer {
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
 
-        if (!unleash.isEnabled("nom-api.dvh-last")) {
-            log.info("DVH lasten er skrudd av i Unleash");
-            return;
-        }
-
         log.info("Starter schedulert oppdatering fra DVH");
         if (skipScheduledRunIfDuringDvhUpdate()) {
             return;
@@ -110,6 +105,14 @@ public class DvhRestConsumer {
             } catch (Exception logMe) {
                 log.error("Waiting for initialState last feilet", logMe);
             }
+        }
+
+        if (!unleash.isEnabled("nom-api.dvh-last")) {
+            if (!dvhStartupLoadMonitor.hasCompleted()) {
+                dvhStartupLoadMonitor.setCompleted();
+            }
+            log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
+            return;
         }
 
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));

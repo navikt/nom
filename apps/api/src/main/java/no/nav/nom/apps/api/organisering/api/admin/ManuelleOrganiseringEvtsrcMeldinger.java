@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -202,6 +203,69 @@ public class ManuelleOrganiseringEvtsrcMeldinger {
                 HtmlUtils.htmlEscape(fid),
                 eksisterende.get().id(),
                 eksisterende.get().idOver()
+            ));
+    }
+
+    @Operation(
+        description = "Lag manuell OpprettOrganiseringCmd EvtSrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
+    @PostMapping("/lagOpprettOrganiseringCmd")
+    public ResponseEntity<String> opprettOrganisering(
+        @Parameter(description = "Enhet ID for enheten som organiseres") @RequestParam String id,
+        @Parameter(description = "Navn for enheten som organiseres") @RequestParam String navn,
+        @Parameter(description = "Enhet ID for enheten som denne er organisert under") @RequestParam String idOver,
+        @Parameter(description = "Navn for enheten som denne er organisert under") @RequestParam String navnOver,
+        @Parameter(description = "GyldigFom for organiseringen") @RequestParam LocalDate gyldigFom,
+        @Parameter(description = "GyldigTom for organiseringen") @RequestParam(required = false) LocalDate gyldigTom,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Organisering med for orgEnhet med ID %s ble ikke opprettet da det ikke var bekfreftet".formatted(
+                    HtmlUtils.htmlEscape(id)
+                ));
+        }
+
+        organiseringEventCommandService.opprettOrganisering(
+            new OpprettOrganiseringCmd(
+                id,
+                navn,
+                idOver,
+                navnOver,
+                gyldigFom,
+                gyldigTom,
+                new InputMetadata(
+                    "/api/admin/manuelleEvtsrcMeldinger",
+                    "lagOpprettOrganiseringCmd",
+                    Map.of(
+                        "id", id,
+                        "navn", navn,
+                        "idOver", idOver,
+                        "navnOver", navnOver,
+                        "gyldigFom", gyldigFom == null ? "" : gyldigFom.toString(),
+                        "gyldigTom", gyldigTom == null ? "" : gyldigTom.toString()
+                    ),
+                    new Origination(
+                        SecurityUtil.getAuthenticatedNavIdent(),
+                        "Admin swagger/rest"
+                    )
+                )
+            )
+        );
+
+        return ResponseEntity.ok()
+            .body("Organisering med OrgEnhet ID %s er nå opprettet.".formatted(
+                HtmlUtils.htmlEscape(id)
             ));
     }
 
