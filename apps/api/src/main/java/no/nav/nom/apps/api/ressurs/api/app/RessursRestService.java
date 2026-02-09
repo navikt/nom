@@ -2,8 +2,6 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
-import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
-import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -62,7 +60,6 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -109,7 +106,6 @@ public class RessursRestService {
     private final FysiskBrukerstedService fysiskBrukerstedService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
-    private final MicrosoftGraphClient microsoftGraphClient;
     private final OrgEnhetLederService orgEnhetLederService;
 
     @Value("${app.orgenhet.vikafossenId}")
@@ -123,13 +119,17 @@ public class RessursRestService {
         OrgtilknytningRestService orgtilknytningRestService,
         NIKClient nikClient,
         PdlClient pdlClient,
-        NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient, OrgEnhetStateRepository orgEnhetStateRepository,
+        NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient,
+        OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
         KafkaTopicReader kafkaTopicReader,
         NomMastered nomMastered,
-        AuthResolver authResolver, FysiskBrukerstedService fysiskBrukerstedService, RemedyEnhetMapperService remedyEnhetMapperService,
-        OrgtilknytningService orgtilknytningService, MicrosoftGraphClient microsoftGraphClient, OrgEnhetLederService orgEnhetLederService
+        AuthResolver authResolver,
+        FysiskBrukerstedService fysiskBrukerstedService,
+        RemedyEnhetMapperService remedyEnhetMapperService,
+        OrgtilknytningService orgtilknytningService,
+        OrgEnhetLederService orgEnhetLederService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -148,7 +148,6 @@ public class RessursRestService {
         this.fysiskBrukerstedService = fysiskBrukerstedService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
-        this.microsoftGraphClient = microsoftGraphClient;
         this.orgEnhetLederService = orgEnhetLederService;
     }
 

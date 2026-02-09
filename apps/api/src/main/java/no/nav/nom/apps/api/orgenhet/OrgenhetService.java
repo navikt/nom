@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -68,7 +69,6 @@ public class OrgenhetService {
     public Optional<IOrgenhet> getById(String id) {
         return orgEnhetStateRepository.findById(id).map(this::map);
     }
-
 
     public Optional<IOrgenhet> getByFid(String fid) {
         return orgEnhetStateRepository.findByFid(fid).map(this::map);
@@ -140,6 +140,12 @@ public class OrgenhetService {
 
     public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
         return organiserteEnheter;
+    }
+
+    public boolean activeOrFutureWithEqualName(String name) {
+        return orgEnhetStateRepository.getAll().stream()
+            .filter(orgEnhetState -> orgEnhetState.isActive() || orgEnhetState.gyldigFom().isAfter(LocalDate.now()))
+            .anyMatch(orgEnhetState -> orgEnhetState.navn().equalsIgnoreCase(name));
     }
 
 
