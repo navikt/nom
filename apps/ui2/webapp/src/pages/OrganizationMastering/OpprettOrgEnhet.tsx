@@ -13,13 +13,19 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import axios from "axios";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet, getOrgEnhetList } from "~/api/react-query-endpoints";
+import {
+  getOrgEnhet,
+  getOrgEnhetList,
+  opprettOrgEnhet,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
@@ -28,10 +34,11 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OrgEnhet } from "~/types/api-models";
+import type { OpprettOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
@@ -96,11 +103,37 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
     return;
   }
 
+  const navigate = useNavigate();
+
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
+  const opprettOrgEnhetMutation = useMutation<
+    unknown,
+    AxiosError<Error>,
+    OpprettOrgEnhetRequest
+  >({
+    mutationFn: async (request) => {
+      return opprettOrgEnhet(request);
+    },
+    onSuccess: async () => {
+      showToast({ text: "Opprettet" });
+
+      navigate({
+        to: "/organisasjonsmastring",
+      }).then();
+    },
+  });
+
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
+    const request: OpprettOrgEnhetRequest = {
+      ...values,
+      overordnetOrgEnhetId: orgEnhetId,
+    };
+
+    opprettOrgEnhetMutation.mutate(request);
+  };
 
   return (
     <FormProvider {...methods}>
@@ -117,7 +150,7 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
             label="Navn på den nye organisasjonsenhet"
           />
 
-          <FormRessursSearchWrapper name="lederRessursId" />
+          <FormRessursSearchWrapper name="lederRessursNavident" />
 
           <FormDateWrapper name="gyldigFom" />
 
@@ -125,8 +158,8 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
             css={css`
               width: fit-content;
             `}
-            {...methods.register("orgEnhetType")}
-            error={methods.formState.errors.orgEnhetType?.message}
+            {...methods.register("orgEnhetsType")}
+            error={methods.formState.errors.orgEnhetsType?.message}
             label="Organisasjonsenhetstype"
           >
             <option value="" />
@@ -254,7 +287,7 @@ function OrgHierarki({
 }) {
   const inDevelopment = isInDevelopment();
 
-  const developmentLenker = ["fa965e", "me177r", "ju219d", "hu797w", "tu734a"];
+  const developmentLenker = ["fa965e", "me177r", "sy471r", "hu797w", "tu734a"];
   const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];
 
   const topOrgEnhetIder = inDevelopment ? developmentLenker : productionLenker;
@@ -507,9 +540,9 @@ export function OrgEnhetInfoWrapper({
 const validationSchema = yup.object({
   orgEnhetNavn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
-  lederRessursId: yup.string().required("Obligatorisk"),
+  lederRessursNavident: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().required("Obligatorisk"),
-  orgEnhetType: yup
+  orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
 });

@@ -86,6 +86,7 @@ export function TerminateResourcePage() {
     },
     onSuccess: () => {
       showToast({ text: "Oppdatert" });
+
       navigate({ params: { id }, to: "/ressurs/$id" }).then();
     },
   });
