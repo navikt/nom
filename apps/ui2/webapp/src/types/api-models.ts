@@ -277,6 +277,32 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
   setRessursStartdato: boolean;
 }
 
+export interface OpprettOrgEnhetRequest {
+  firesiffer?: string;
+  /** @format date */
+  gyldigFom?: string;
+  lederRessursNavident?: string;
+  orgEnhetNavn?: string;
+  orgEnhetsType?: OrgEnhetsType;
+  overordnetOrgEnhetId?: string;
+}
+
+export interface OpprettOrgEnhetResponse {
+  firesiffer?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  lederRessursNavident?: string;
+  lederRessursNavn?: string;
+  orgEnhetFid?: string;
+  orgEnhetId?: string;
+  orgEnhetNavn?: string;
+  orgEnhetsType?: OrgEnhetsType;
+  overordnetOrgEnhetId?: string;
+  overordnetOrgEnhetNavn?: string;
+}
+
 export interface OpprettRessursRequest {
   ansettelsesType: AnsettelsesType;
   fysiskBrukerstedNr: string;

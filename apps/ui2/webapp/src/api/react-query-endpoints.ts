@@ -20,6 +20,8 @@ import type {
   MasseFlyttingRequest,
   MinimalRessurs,
   OppdaterOrgtilknytningerForRessursRequest,
+  OpprettOrgEnhetRequest,
+  OpprettOrgEnhetResponse,
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
@@ -664,6 +666,13 @@ export const updateFysiskBrukerstedForRessurser = async (
 export const createRessurs = async (request: OpprettRessursRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(
     `${NOM_API_BASE_PATH}/app/ressurser`,
+    request,
+  );
+};
+
+export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
+  return axios.post<unknown, AxiosResponse<OpprettOrgEnhetResponse>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/opprett`,
     request,
   );
 };
