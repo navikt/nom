@@ -180,12 +180,10 @@ public class ManuelleOrgEnhetLederMeldinger {
     @PutMapping("/oppdaterManuellOrgEnhetLederSluttdato")
     public ResponseEntity<String> oppdaterManuellOrgEnhetLederSluttdato(
         @Parameter(description = "FID for leder i OrgEnhet hvor sluttdato skal oppdateres") @RequestParam String fid,
-        @Parameter(description = "Sluttdato for leder i OrgEnhet") @RequestParam LocalDate sluttdato,
+        @Parameter(description = "Sluttdato for leder i OrgEnhet") @RequestParam(required = false) LocalDate sluttdato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ) {
         if (!validFid(fid)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-        if (isNull(sluttdato)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         if (!"CONFIRM".equals(confirm)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
