@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @Type(value = OrgEnhetAvvikletEventV1.class),
     @Type(value = OrgEnhetKorrigertEventV1.class),
     @Type(value = OrgEnhetTypeEndretEventV1.class),
-    @Type(value = NomNivaaEndretEventV1.class)
+    @Type(value = NomNivaaEndretEventV1.class),
+    @Type(value = OrgEnhetEndretNavnEventV1.class)
 })
 public abstract class OrgEnhetEvent extends Event {
 

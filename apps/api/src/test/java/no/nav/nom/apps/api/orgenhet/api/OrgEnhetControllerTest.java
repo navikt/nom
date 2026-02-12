@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettO
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
@@ -18,6 +19,7 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Oppdate
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OpprettOrgEnhetLeder;
 import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -47,6 +49,7 @@ import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -309,6 +312,145 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .expectStatus().isNotFound();
     }
 
+    @Test
+    void should_update_orgEnhetNavn() {
+        String orgEnhetId = "abc123d";
+        String orgEnhetOverId = "efg456h";
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState organisering = organiseringState().toBuilder()
+            .id(orgEnhetId)
+            .idOver(orgEnhetOverId)
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+        organiseringStateRepository.update(organisering);
+
+        RessursState lederRessurs = ressursState();
+        ressursStateRepository.update(lederRessurs);
+
+        orgEnhetLederStateRepository.update("FID_1", OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(lederRessurs.navident())
+            .orgEnhetId(orgEnhetId)
+            .startdato(LocalDate.now().minusMonths(3))
+            .build());
+
+        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+            .navn("Nav Ny Lokal Kontor")
+            .gyldigFom(orgEnhet.gyldigFom())
+            .gyldigTom(orgEnhet.gyldigTom())
+            .lederRessursNavident(lederRessurs.navident())
+            .firesiffer("1234")
+            .orgEnhetsType(orgEnhet.orgEnhetsType())
+            .build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var oppdatertOrgEnhet = webTestClient.put().uri("/app/orgenheter/oppdater")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(oppdaterOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        String standardResponseMessageExpectation = String.format("OrgEnhet har endret navn fra %s til %s\\n", orgEnhet.navn(), oppdaterOrgEnhetRequest.navn());
+
+        assertNotNull(oppdatertOrgEnhet);
+        assertThat(standardResponseMessageExpectation).isEqualTo(oppdatertOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_throw_exception_not_found_when_missing_organisering() {
+        String orgEnhetId = "abc123d";
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+
+        RessursState lederRessurs = ressursState();
+        ressursStateRepository.update(lederRessurs);
+
+        orgEnhetLederStateRepository.update("FID_1", OrgEnhetLederState.builder()
+            .fid("FID_1")
+            .navident(lederRessurs.navident())
+            .orgEnhetId(orgEnhetId)
+            .startdato(LocalDate.now().minusMonths(3))
+            .build());
+
+        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+            .navn("Nav Ny Lokal Kontor")
+            .gyldigFom(orgEnhet.gyldigFom())
+            .gyldigTom(orgEnhet.gyldigTom())
+            .lederRessursNavident(lederRessurs.navident())
+            .firesiffer("1234")
+            .orgEnhetsType(orgEnhet.orgEnhetsType())
+            .build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var oppdatertOrgEnhet = webTestClient.put().uri("/app/orgenheter/oppdater")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(oppdaterOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        var standardResponseMessageExpectation = String.format("Organisering id %s ble ikke funnet", orgEnhet.id());
+
+        assertNotNull(oppdatertOrgEnhet);
+        assertThat(standardResponseMessageExpectation).isEqualTo(oppdatertOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_throw_forbidden_exception_when_if_non_admin_user() {
+        String orgEnhetId = "abc123d";
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        RessursState lederRessurs = ressursState();
+
+        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+            .navn("Nav Ny Lokal Kontor")
+            .gyldigFom(orgEnhet.gyldigFom())
+            .gyldigTom(orgEnhet.gyldigTom())
+            .lederRessursNavident(lederRessurs.navident())
+            .firesiffer("1234")
+            .orgEnhetsType(orgEnhet.orgEnhetsType())
+            .build();
+
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        webTestClient.put().uri("/app/orgenheter/oppdater")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
+            .bodyValue(oppdaterOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isForbidden();
+    }
 
     private WebTestClient.ResponseSpec postOrgenhetType(String accessToken, SetOrgEnhetsTypeRequest requestBody) {
         return webTestClient.post()

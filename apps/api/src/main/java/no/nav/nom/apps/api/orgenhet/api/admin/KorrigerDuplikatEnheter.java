@@ -69,10 +69,10 @@ public class KorrigerDuplikatEnheter {
                         new Origination("nom-api", "nom-api")
                     )
                 );
-            String eventStr =  "AvikleEvent for fid=%s, id=%s, date=%s og inputmeta=%s".formatted(duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
+            String eventStr =  "AvvikleEvent for fid=%s, id=%s, date=%s og inputmeta=%s".formatted(duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
             str.append(eventStr).append("\n");
             log.info(eventStr);
-            if (performUpdate) orgEnhetCommandService.avikleOrgEnhet(duplikat.getFid(), avvikleOrgEnhet);
+            if (performUpdate) orgEnhetCommandService.avvikleOrgEnhet(duplikat.getFid(), avvikleOrgEnhet);
         }));
         return str.toString();
     }
