@@ -92,7 +92,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
                     orgenhet.getGyldigFom(), requireNonNullElse(orgenhet.getGyldigTom(), ""), HtmlUtils.htmlEscape(gyldigTom.toString())));
         }
 
-        orgEnhetCommandService.avikleOrgEnhet(
+        orgEnhetCommandService.avvikleOrgEnhet(
             orgenhet.getFid(),
             new AvvikleOrgEnhet(
                 gyldigTom,

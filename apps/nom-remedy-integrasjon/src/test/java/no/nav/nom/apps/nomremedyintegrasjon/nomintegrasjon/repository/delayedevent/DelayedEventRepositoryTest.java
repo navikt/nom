@@ -7,8 +7,6 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,7 +28,6 @@ public class DelayedEventRepositoryTest extends TestBase {
         delayedEventRepository.deleteAll();
     }
 
-    @ParameterizedTest(name = "{1}")
     @MethodSource("should_deserialize_event_input")
     @DisplayName("Should save and deserialize events of type")
     void shouldDeserializeEvent(Event event, Class<Event> expectedType) {
@@ -53,7 +50,7 @@ public class DelayedEventRepositoryTest extends TestBase {
         );
     }
 
-    @Test
+
     void test_findByDelayedUntilBefore() {
 
         var today = LocalDate.now();

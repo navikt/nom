@@ -269,7 +269,7 @@ public class DvhOrgenhetsLast {
             gyldigTom,
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
-        orgEnhetCommandService.avikleOrgEnhet(fid, avvikleOrgEnhet);
+        orgEnhetCommandService.avvikleOrgEnhet(fid, avvikleOrgEnhet);
     }
 
     // Hvis det er forskjell mellom dvh og state, send korrigering

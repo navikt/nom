@@ -3,13 +3,17 @@ package no.nav.nom.apps.api.orgenhet.api.app;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OppdaterOrgEnhetNavnCmd;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
@@ -20,11 +24,15 @@ import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -42,6 +50,7 @@ public class OrgEnhetRestService {
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrganiseringEventCommandService organiseringEventCommandService;
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
+    private final OrganiseringStateRepository organiseringStateRepository;
 
     public OrgEnhetRestService(
         OrgEnhetIdGenerator orgEnhetIdGenerator,
@@ -49,7 +58,8 @@ public class OrgEnhetRestService {
         RessursService ressursService,
         OrgEnhetCommandService orgEnhetCommandService,
         OrganiseringEventCommandService organiseringEventCommandService,
-        OrgEnhetLederCommandService orgEnhetLederCommandService
+        OrgEnhetLederCommandService orgEnhetLederCommandService,
+        OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgEnhetIdGenerator = orgEnhetIdGenerator;
         this.orgenhetService = orgenhetService;
@@ -57,6 +67,7 @@ public class OrgEnhetRestService {
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.organiseringEventCommandService = organiseringEventCommandService;
         this.orgEnhetLederCommandService = orgEnhetLederCommandService;
+        this.organiseringStateRepository = organiseringStateRepository;
     }
 
 
@@ -144,6 +155,52 @@ public class OrgEnhetRestService {
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public String oppdaterOrgEnhet(OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
+        List<String> oppdaterteElementer = new ArrayList<>();
+        var orgEnhetState = orgenhetService.getById(oppdaterOrgEnhetRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(oppdaterOrgEnhetRequest.id()));
+        var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
+        boolean hasChange = false;
+
+        InputMetadata inputMetadata = new InputMetadata(
+            "REST-API",
+            "oppdaterOrgEnhet",
+            oppdaterOrgEnhetRequest,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        if (!Objects.equals(oppdaterOrgEnhetRequest.navn(), orgEnhetState.getNavn())) {
+            hasChange = true;
+            var oppdaterNavn = new OppdaterOrgEnhetNavnCmd(
+                oppdaterOrgEnhetRequest.navn(),
+                inputMetadata
+            );
+
+            orgEnhetCommandService.oppdaterNavnOrgEnhet(orgEnhetState.getFid(), oppdaterNavn);
+            oppdaterteElementer.add(String.format("OrgEnhet har endret navn fra %s til %s", orgEnhetState.getNavn(), oppdaterOrgEnhetRequest.navn()));
+        }
+
+        if (hasChange) {
+            final var opprettOrganisering = new EndreOrganiseringCmd(
+                orgEnhetState.getId(),
+                oppdaterOrgEnhetRequest.navn(),
+                organiseringState.idOver(),
+                organiseringState.navnOver(),
+                orgEnhetState.getGyldigFom(),
+                orgEnhetState.getGyldigTom(),
+                inputMetadata
+            );
+
+            organiseringEventCommandService.endreOrganisering(organiseringState.fid(), opprettOrganisering);
+        }
+
+        StringBuilder builder = new StringBuilder();
+        oppdaterteElementer.forEach(result -> builder.append(result).append("\\n"));
+
+        return builder.toString();
     }
 }

@@ -107,7 +107,7 @@ public class DvhRestConsumer {
             }
         }
 
-        if (!unleash.isEnabled("nom-api.dvh-last")) {
+        if (unleash.isEnabled("nom-api.dvh-last")) {
             if (!dvhStartupLoadMonitor.hasCompleted()) {
                 dvhStartupLoadMonitor.setCompleted();
             }

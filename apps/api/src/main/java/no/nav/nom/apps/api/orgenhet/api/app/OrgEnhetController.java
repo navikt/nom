@@ -11,7 +11,9 @@ import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -297,9 +300,28 @@ public class OrgEnhetController {
 
     }
 
+    @Operation(
+        description = "Oppdater OrgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/oppdater")
+    public ResponseEntity<StandardResponse> oppdaterOrgEnhet(@RequestBody OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
+        if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    StandardResponse.builder()
+                        .message(orgEnhetRestService.oppdaterOrgEnhet(oppdaterOrgEnhetRequest))
+                        .build());
+        } else {
+            return ResponseEntity.ok().build();
+        }
+    }
+
     @ExceptionHandler({
         OrgEnhetNotFoundException.class,
-        RessursNotFoundException.class
+        RessursNotFoundException.class,
+        OrganiseringNotFoundException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {
         return ResponseEntity
