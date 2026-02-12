@@ -136,24 +136,40 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
 }
 
 async function queryForOrgenhet(
-  orgenhetId: string,
+  orgEnhetId: string | null,
+  agressoId: string | null,
 ): Promise<SearchResultRaw[]> {
-  const orgenhetQuery = `query orgEnhet($orgenhetId: String) {
-    orgEnhet(where: {id: $orgenhetId}){
-      __typename
-      id
-      navn
-    }
-  }`;
+  const orgenhetQuery = `
+    query getOrgEnheter(
+      $orgenhetIds: [String!]
+      $agressoIds: [String!]
+    ) {
+      orgEnheter(
+        where: {
+          ider: $orgenhetIds
+          agressoIder: $agressoIds
+        }
+      ) {
+        orgEnhet {
+          __typename
+          id
+          navn
+        }
+      }
+    }`;
+
   const result = await axios.post("/frackend/nom-api/graphql", {
-    operationName: "orgEnhet",
+    operationName: "getOrgEnheter",
     query: orgenhetQuery,
     variables: {
-      orgenhetId: orgenhetId,
+      orgenhetIds: orgEnhetId ? [orgEnhetId] : null,
+      agressoIds: agressoId ? [agressoId] : null,
     },
   });
 
-  return [result.data.data.orgEnhet];
+  return result.data.data.orgEnheter
+    .map((entry: any) => entry.orgEnhet)
+    .filter((result: any) => !!result);
 }
 
 export async function queryForRessurs(
@@ -185,7 +201,7 @@ export async function queryForRessurs(
     },
   });
 
-  return [result.data.data.ressurs];
+  return [result.data.data.ressurs].filter((result) => !!result);
 }
 
 export async function commonSearch(
@@ -196,21 +212,33 @@ export async function commonSearch(
     ? inputValue.toUpperCase()
     : null;
   const lookupTelefon = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
+    ? `47${inputValue.replaceAll(/\s/g, "")}` // Siden telefonnummer er lagret med "47" først
+    : null;
+
+  const lookupOrgenhetId = /^[A-Za-z]{2}\d{3}[A-Za-z]$/.test(
+    inputValue.replaceAll(/\s/g, ""),
+  )
+    ? inputValue.replaceAll(/\s/g, "")
+    : null;
+  const lookupAgressoId = /^\d+$/.test(inputValue.replaceAll(/\s/g, ""))
     ? inputValue.replaceAll(/\s/g, "")
     : null;
 
-  const lookupOrgenhetId = /^[A-Za-z]{2}\d{3}[A-Za-z]$/.test(inputValue)
-    ? inputValue
-    : null;
+  const result = [];
 
   if (lookupNavident || lookupTelefon) {
-    return await queryForRessurs(lookupNavident, lookupTelefon);
-  }
-  if (lookupOrgenhetId) {
-    return await queryForOrgenhet(inputValue);
+    result.push(...(await queryForRessurs(lookupNavident, lookupTelefon)));
   }
 
-  // fritekst søk på navn
+  if (lookupOrgenhetId || lookupAgressoId) {
+    result.push(...(await queryForOrgenhet(lookupOrgenhetId, lookupAgressoId)));
+  }
+
+  if (lookupNavident || lookupTelefon || lookupOrgenhetId || lookupAgressoId) {
+    return result;
+  }
+
+  // Fritekstsøk på navn
   // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
   const inputHasWhitespace = /\s/.test(inputValue.trim());
   const wrappedInputValue = inputHasWhitespace
