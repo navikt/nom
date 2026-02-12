@@ -337,6 +337,9 @@ public class OmadaUttrekk {
     }
 
     String formaterTelefonnummer(String telefon) {
+        if (telefon == null) {
+            return "";
+        }
         telefon = telefon.replace(" ", "");
 
         if (telefon.startsWith("+")) {
