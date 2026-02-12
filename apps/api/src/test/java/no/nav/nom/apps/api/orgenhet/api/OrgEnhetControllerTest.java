@@ -363,7 +363,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .returnResult()
             .getResponseBody();
 
-        String standardResponseMessageExpectation = String.format("OrgEnhet har endret navn fra %s til %s\n", orgEnhet.navn(), oppdaterOrgEnhetRequest.navn());
+        String standardResponseMessageExpectation = String.format("OrgEnhet har endret navn fra %s til %s\\n", orgEnhet.navn(), oppdaterOrgEnhetRequest.navn());
 
         assertNotNull(oppdatertOrgEnhet);
         assertThat(standardResponseMessageExpectation).isEqualTo(oppdatertOrgEnhet.getMessage());
