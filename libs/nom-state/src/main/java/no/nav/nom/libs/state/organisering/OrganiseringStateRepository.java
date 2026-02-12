@@ -2,9 +2,11 @@ package no.nav.nom.libs.state.organisering;
 
 import no.nav.nom.contract.nom.state.OrganiseringState;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrganiseringStateRepository {
     Optional<OrganiseringState> findByFid(String fid);
@@ -19,12 +21,7 @@ public interface OrganiseringStateRepository {
 
     void update(OrganiseringState organiseringState);
 
-    void putEventAggregate(OrganiseringState organiseringState);
-    void removeEventAggregate(OrganiseringState organiseringState);
-
     int count();
-
-    void logRepositoryState();
 
     Map<String, OrganiseringState> getActiveOrganisering();
 
@@ -39,4 +36,12 @@ public interface OrganiseringStateRepository {
     boolean orgEnhetHasParent(String id);
     
     boolean orgEnhetHasChildren(String id);
+
+    Set<OrganiseringState> getEnhetOgOrganiseringerNedover(String id);
+
+    Set<OrganiseringState> getEnhetOgOrganiseringerOppover(String id);
+
+    Set<Object> getChildrenEnhetIdsFlattened(String id);
+
+    Set<Object> getParentEnhetIdsFlattened(String id);
 }

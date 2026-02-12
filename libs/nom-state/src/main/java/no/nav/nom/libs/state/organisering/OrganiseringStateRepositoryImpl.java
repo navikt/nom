@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -22,13 +21,14 @@ import static java.util.Objects.nonNull;
 
 @Service
 public class OrganiseringStateRepositoryImpl implements OrganiseringStateRepository {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
-    private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);   // Den siste registrerte OrganiseringState event for orgEnhet id
-    private final Map<String, List<OrganiseringState>> organiseringerById = new ConcurrentHashMap<>(16, 0.9f, 1);   // Alle organiseringer for orgEnhet id
-    private final Map<String, List<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>();
+    private final Map<String, List<OrganiseringState>> organiseringerById = new ConcurrentHashMap<>();   // Alle organiseringer for orgEnhet id
+    private final Map<String, List<OrganiseringState>> allOrganiseringerContainingId = new ConcurrentHashMap<>();
+
+    private final Map<String, Set<OrganiseringState>> enhetOgOrganiseringerNedover = new ConcurrentHashMap<>(); // Alle organiseringer for orgEnhetene i organiseringen nedover
+    private final Map<String, Set<OrganiseringState>> enhetOgOrganiseringerOppover = new ConcurrentHashMap<>(); // Alle organiseringer for orgEnheten og alle organiseringer for orgEnhetene i organiseringen oppover
 
     @Override
     public Optional<OrganiseringState> findByFid(String fid) {
@@ -61,23 +61,54 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     @Override
     public void clear() {
         organiseringByFid.clear();
-        organiseringById.clear();
         organiseringerById.clear();
         allOrganiseringerContainingId.clear();
     }
 
     @Override
     public void update(OrganiseringState organiseringState) {
-        putEventAggregate(organiseringState);
+        if (!isValid(organiseringState)) {
+            return;
+        }
+
+        // Behandle organisesringer med lik start og sluttdato som slettet
+        if (isCreatedAndDeletedToday(organiseringState)) {
+            removeEventAggregate(organiseringState);
+        } else {
+            putEventAggregate(organiseringState);
+        }
     }
 
-    @Override
+    private boolean isValid(OrganiseringState organiseringState) {
+        if (ObjectUtils.isEmpty(organiseringState.fid())) {
+            logger.error("OrganiseringState mangler 'fid': {}", organiseringState);
+            return false;
+        }
+        if (ObjectUtils.isEmpty(organiseringState.id())) {
+            logger.error("OrganiseringState mangler 'id': {}", organiseringState);
+            return false;
+        }
+        if (ObjectUtils.isEmpty(organiseringState.idOver())) {
+            logger.error("OrganiseringState mangler 'idOver': {}", organiseringState);
+            return false;
+        }
+        if(organiseringState.gyldigFom() != null && organiseringState.gyldigTom() != null) {
+            if(organiseringState.gyldigFom().isAfter(organiseringState.gyldigTom())) {
+                logger.error("OrganiseringState har ugyldige datoer: {}", organiseringState);
+            }
+        }
+        return true;
+    }
+
     public void putEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.put(organiseringState.fid(), organiseringState);
-        organiseringById.put(organiseringState.id(), organiseringState);
 
         putOrUpdateOrganiseringerForId(organiseringState);
         putOrUpdateAllOrganiseringer(organiseringState);
+
+        // Må etter de to over
+        putOrUpdateEnhetOgOrganiseringerNedover(organiseringState);
+        putOrUpdateEnhetOgOrganiseringerOppover(organiseringState);
     }
 
     private void putOrUpdateAllOrganiseringer(OrganiseringState newOrganisering) {
@@ -89,43 +120,26 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
             return;
         }
 
-        if (allOrganiseringerContainingId.containsKey(id)) {
-            var organiseringerContainingId = allOrganiseringerContainingId.get(id);
-            var connectedOrganiseringerWithSameId = organiseringerContainingId.stream()
-                .filter(o -> o.id().equals(id))
-                .toList();
+        allOrganiseringerContainingId.computeIfAbsent(id, _ -> new CopyOnWriteArrayList<>());
+        var organiseringerContainingId = allOrganiseringerContainingId.get(id);
 
-            if (!connectedOrganiseringerWithSameId.isEmpty()) {
-                logger.trace("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, id, connectedOrganiseringerWithSameId);
-                organiseringerContainingId.removeAll(connectedOrganiseringerWithSameId);
-                organiseringerContainingId.add(newOrganisering);
-            } else {
-                logger.trace("Key {} legger til {}", id, newOrganisering);
-                organiseringerContainingId.add(newOrganisering);
-            }
-        } else {
-            logger.trace("Oppretter key {} med {}", id, newOrganisering);
-            allOrganiseringerContainingId.put(id, new CopyOnWriteArrayList<>(List.of(newOrganisering)));
-        }
+        // Finnes samme FID - så bytt ut med ny state
+        organiseringerContainingId.stream()
+            .filter(o -> o.fid().equals(newOrganisering.fid()))
+            .findFirst()
+            .ifPresent(organiseringerContainingId::remove);
 
-        if (allOrganiseringerContainingId.containsKey(idOver)) {
-            var organiseringerContainingIdOver = allOrganiseringerContainingId.get(idOver);
-            var identicalOrganiseringer = organiseringerContainingIdOver.stream()
-                .filter(organisering -> organisering.id().equals(id) && organisering.idOver().equals(idOver))
-                .toList();
+        organiseringerContainingId.add(newOrganisering);
 
-            if (!identicalOrganiseringer.isEmpty()) {
-                logger.trace("Forsøker å legge til {}, men key '{}' inneholder allerede {}", newOrganisering, idOver, identicalOrganiseringer);
-                organiseringerContainingIdOver.removeAll(identicalOrganiseringer);
-                organiseringerContainingIdOver.add(newOrganisering);
-            } else {
-                logger.trace("Key {} legger til {}", idOver, newOrganisering);
-                allOrganiseringerContainingId.get(idOver).add(newOrganisering);
-            }
-        } else {
-            logger.trace("Oppretter key {} med {}", idOver, newOrganisering);
-            allOrganiseringerContainingId.put(idOver, new CopyOnWriteArrayList<>(List.of(newOrganisering)));
-        }
+        allOrganiseringerContainingId.computeIfAbsent(idOver, _ -> new CopyOnWriteArrayList<>());
+        var organiseringerContainingIdOver = allOrganiseringerContainingId.get(idOver);
+
+        // Finnes samme FID - så bytt ut med ny state
+        organiseringerContainingIdOver.stream()
+            .filter(o -> o.fid().equals(newOrganisering.fid()))
+            .findFirst()
+            .ifPresent(organiseringerContainingIdOver::remove);
+        organiseringerContainingIdOver.add(newOrganisering);
     }
 
     private void putOrUpdateOrganiseringerForId(OrganiseringState organiseringState) {
@@ -135,7 +149,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
                 .filter(o -> o.fid().equals(organiseringState.fid()))
                 .findFirst();
             if (organiseringForSammeFid.isEmpty()) {
-                organiseringerById.put(organiseringState.id(), new CopyOnWriteArrayList<>(List.of(organiseringState)));
+                organiseringerById.get(organiseringState.id()).add(organiseringState);
             } else {
                 organiseringerForId.remove(organiseringForSammeFid.get());
                 organiseringerForId.add(organiseringState);
@@ -145,14 +159,85 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         }
     }
 
-    @Override
+    private void putOrUpdateEnhetOgOrganiseringerNedover(OrganiseringState organiseringState) {
+        // Denne organiseringen kan peke oppover på meg
+        // -> jeg må da legge til alle organiseringer som inneholder idOver i nedover-kartet for id
+
+        var meg = organiseringState.idOver();
+
+        var alleMineNedoverOrganiseringer = enhetOgOrganiseringerNedover.computeIfAbsent(meg, _ -> new HashSet<>());
+
+        Set<OrganiseringState> mineNedoverOrganiseringerFraDenneStaten = new HashSet<>();
+        mineNedoverOrganiseringerFraDenneStaten.add(organiseringState);
+
+        addStateBelowRecursively(mineNedoverOrganiseringerFraDenneStaten, organiseringState.id());
+
+        alleMineNedoverOrganiseringer.addAll(mineNedoverOrganiseringerFraDenneStaten);
+
+        // -> Og de over meg må få mitt nedoverkart
+        addMineNedoverStatesTilParentsRecursively(meg, alleMineNedoverOrganiseringer);
+    }
+
+    private void addMineNedoverStatesTilParentsRecursively(String meg, Set<OrganiseringState> mineNedoverOrganiseringerFraDenneStaten) {
+        findById(meg).forEach(parentOrganisering -> {
+            var minParent = parentOrganisering.idOver();
+            // legg mine under-organiseringer hos min parent
+            enhetOgOrganiseringerNedover.computeIfAbsent(minParent, _ -> new HashSet<>())
+                .addAll(mineNedoverOrganiseringerFraDenneStaten);
+            addMineNedoverStatesTilParentsRecursively(minParent, mineNedoverOrganiseringerFraDenneStaten);
+        });
+    }
+
+    private void addStateBelowRecursively(Set<OrganiseringState> organiseringer, String id) {
+        allOrganiseringerContainingId.get(id).stream()
+            .filter(organisering -> organisering.idOver().equals(id))
+            .forEach(o ->{
+                if(organiseringer.add(o)) {
+                    addStateBelowRecursively(organiseringer, o.id());
+                }
+            });
+    }
+
+    private void putOrUpdateEnhetOgOrganiseringerOppover(OrganiseringState organiseringState) {
+        var meg = organiseringState.id();
+
+        var alleMineOppoverOrganiseringer = enhetOgOrganiseringerOppover.computeIfAbsent(meg, k -> new HashSet<>());
+
+        Set<OrganiseringState> mineOppoverOrganiseringerFraDenneStaten = new HashSet<>();
+        mineOppoverOrganiseringerFraDenneStaten.add(organiseringState);
+
+        addStateAboveRecursively(mineOppoverOrganiseringerFraDenneStaten, organiseringState.idOver());
+
+        alleMineOppoverOrganiseringer.addAll(mineOppoverOrganiseringerFraDenneStaten);
+
+        // -> Og de over meg må få mitt nedoverkart
+        addMineOppoverStatesTilChildrenRecursively(meg, alleMineOppoverOrganiseringer);
+    }
+
+    private void addMineOppoverStatesTilChildrenRecursively(String meg, Set<OrganiseringState> mineOppoverOrganiseringerFraDenneStaten) {
+        allOrganiseringerContainingId.get(meg).stream()
+                .filter(organisering -> organisering.idOver().equals(meg))
+                .forEach(childOrganisering -> {
+                    var minChild = childOrganisering.id();
+                    // legg mine over-organiseringer hos mine children
+                    enhetOgOrganiseringerOppover.computeIfAbsent(minChild, k -> new HashSet<>())
+                            .addAll(mineOppoverOrganiseringerFraDenneStaten);
+                    addMineOppoverStatesTilChildrenRecursively(minChild, mineOppoverOrganiseringerFraDenneStaten);
+                });
+    }
+
+    private void addStateAboveRecursively(Set<OrganiseringState> organiseringer, String idOver) {
+        allOrganiseringerContainingId.get(idOver).stream()
+            .filter(organisering -> organisering.id().equals(idOver))
+            .forEach(o ->{
+                if(organiseringer.add(o)) {
+                    addStateAboveRecursively(organiseringer, o.idOver());
+                }
+            });
+    }
+
     public void removeEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.remove(organiseringState.fid());
-        organiseringById.forEach((key, value) -> {
-            if (value.fid().equals(organiseringState.fid())) {
-                organiseringById.remove(key);
-            }
-        });
         allOrganiseringerContainingId.forEach((key, value) -> value.forEach(state -> {
             if (state.fid().equals(organiseringState.fid())) {
                 // delete the matched element from list and update allOrganiseringerContainingId with new list
@@ -179,60 +264,14 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
                 }
             }
         }));
+
+        enhetOgOrganiseringerNedover.forEach((_, organiseringer) -> organiseringer.remove(organiseringState));
+        enhetOgOrganiseringerOppover.forEach((_, organiseringer) -> organiseringer.remove(organiseringState));
     }
 
     @Override
     public int count() {
         return organiseringByFid.size();
-    }
-
-    @Override
-    public void logRepositoryState() {
-        if (!logger.isDebugEnabled()) return;
-
-        logger.debug("organiseringByFid: {} organiseringById: {} allOrganiseringerContainingId: {} Aktive organiseringer: {}", organiseringByFid.size(), organiseringById.size(), allOrganiseringerContainingId.size(), getActiveOrganisering().size());
-
-        // Note: detailed information about organiseringByFid, organiseringById and allOrganiseringerContainingId is logged at TRACE level
-        try {
-            StringBuilder message = new StringBuilder("Diff: difference_organiseringByFid_organiseringById ");
-            for (String fid: organiseringByFid.keySet()) {
-                OrganiseringState organiseringState = organiseringByFid.get(fid);
-                String id = organiseringState.id();
-                if(!organiseringById.containsKey(id)) {
-                    message.append(" id: ").append(id).append(" in organiseringByFid is not in organiseringById ");
-                }
-            }
-            logger.trace(message.toString());
-
-            StringBuilder message1 = new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringById ");
-            for (String id: allOrganiseringerContainingId.keySet()) {
-                if(!organiseringById.containsKey(id)) {
-                    message1.append(" id: ").append(id).append(" in allOrganiseringerContainingId is not in organiseringById ");
-                }
-            }
-            logger.trace(message1.toString());
-
-            StringBuilder message2= new StringBuilder("Diff: difference_allOrganiseringerContainingId_organiseringByFid ");
-            for (String id: organiseringById.keySet()) {
-                int count = 0;
-                List<String> fids = new ArrayList<>();
-                for (String fid: organiseringByFid.keySet()) {
-                    OrganiseringState organiseringState = organiseringByFid.get(fid);
-                    if(organiseringState.id().equals(id)) {
-                        count ++;
-                        fids.add(fid);
-                    }
-                }
-                if(count > 1) {
-                    message2.append(" id: ").append(id).append(" in organiseringById duplicate in organiseringByFid ").append(fids);
-                }
-            }
-            logger.trace(message2.toString());
-
-        } catch (Exception e) {
-            // trace logging errors
-            logger.trace(e.getLocalizedMessage());
-        }
     }
 
     @Override
@@ -290,6 +329,30 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     public boolean orgEnhetHasChildren(String id) {
         return getOrganiseringerContainingId(id).stream()
                 .anyMatch(organiseringState -> organiseringState.idOver().equals(id));
+    }
+
+    @Override
+    public Set<OrganiseringState> getEnhetOgOrganiseringerNedover(String id) {
+        return enhetOgOrganiseringerNedover.getOrDefault(id, Collections.emptySet());
+    }
+
+    @Override
+    public Set<OrganiseringState> getEnhetOgOrganiseringerOppover(String id) {
+        return enhetOgOrganiseringerOppover.getOrDefault(id, Collections.emptySet());
+    }
+
+    @Override
+    public Set<Object> getChildrenEnhetIdsFlattened(String id) {
+        return getEnhetOgOrganiseringerNedover(id).stream()
+            .map(OrganiseringState::id)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Object> getParentEnhetIdsFlattened(String id) {
+        return getEnhetOgOrganiseringerOppover(id).stream()
+            .map(OrganiseringState::id)
+            .collect(Collectors.toSet());
     }
 
     private boolean isActive(OrganiseringState organiseringState) {
