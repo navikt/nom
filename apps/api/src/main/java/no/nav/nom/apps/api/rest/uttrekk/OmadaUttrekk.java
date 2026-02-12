@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,6 +14,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -51,6 +53,9 @@ public class OmadaUttrekk {
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private final TelefonService telefonService;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+    private final Unleash unleash;
+
+    public static final String UNLEASH_OMADA_NYTT_FORMAT = "nom.omada.nytt_format";
 
     private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
 
@@ -60,7 +65,7 @@ public class OmadaUttrekk {
         OrgtilknytningService orgtilknytningService,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
         OrganiseringStateRepository organiseringStateRepository,
-        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository
+        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -69,6 +74,7 @@ public class OmadaUttrekk {
         this.organiseringStateRepository = organiseringStateRepository;
         this.telefonService = telefonService;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -84,22 +90,43 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
+        final var cSVFormat =
+            unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)
+             ? getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato", "personident", "identtype", "tilknytningtype", "primaryTelefonnummer")
+             : getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             ressursStateRepository.getAll().forEach(ressurs -> {
                 try {
-                    printer.printRecord(
-                        ressurs.fid(),
-                        ressurs.navident(),
-                        ressurs.visningsnavn().fornavn().trim(),
-                        ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),
-                        ressurs.visningsnavn().etternavn().trim(),
-                        ressurs.visningsnavn().getFormattedVisningsnavn(),
-                        ressurs.sektor(),
-                        ressurs.sluttdato() != null ? ressurs.sluttdato().format(dateTimeFormatter) : "",
-                        ressurs.startdato() != null ? ressurs.startdato().format(dateTimeFormatter) : ""
-                    );
+                    if (unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)) {
+                        printer.printRecord(
+                            ressurs.fid(),
+                            ressurs.navident(),
+                            ressurs.visningsnavn().fornavn().trim(),
+                            ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),
+                            ressurs.visningsnavn().etternavn().trim(),
+                            ressurs.visningsnavn().getFormattedVisningsnavn(),
+                            ressurs.sektor(),
+                            ressurs.sluttdato() != null ? ressurs.sluttdato().format(dateTimeFormatter) : "",
+                            ressurs.startdato() != null ? ressurs.startdato().format(dateTimeFormatter) : "",
+                            ressurs.personident(),
+                            ressurs.identType() != null ? ressurs.identType().name() : "",
+                            ressurs.tilknytningtype() != null ? ressurs.tilknytningtype().name() : "",
+                            getPrimaryTelefonnummer(ressurs)
+                        );
+                    } else {
+                        printer.printRecord(
+                            ressurs.fid(),
+                            ressurs.navident(),
+                            ressurs.visningsnavn().fornavn().trim(),
+                            ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),
+                            ressurs.visningsnavn().etternavn().trim(),
+                            ressurs.visningsnavn().getFormattedVisningsnavn(),
+                            ressurs.sektor(),
+                            ressurs.sluttdato() != null ? ressurs.sluttdato().format(dateTimeFormatter) : "",
+                            ressurs.startdato() != null ? ressurs.startdato().format(dateTimeFormatter) : ""
+                        );
+                    }
 
                     writer.close();
                 } catch (IOException e) {
@@ -126,30 +153,56 @@ public class OmadaUttrekk {
     ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat(
-            "navident",
-            "org_enhet_id",
-            "fid",
-            "erDagligOppfolging",
-            "gyldig_fom",
-            "gyldig_tom",
-            "masseflyttet_fra_org_enhet_id"
-        );
+        final var cSVFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT) ?
+            getCSVFormat(
+                "navident",
+                "org_enhet_id",
+                "fid",
+                "erDagligOppfolging",
+                "gyldig_fom",
+                "gyldig_tom",
+                "masseflyttet_fra_org_enhet_id",
+                "sektor",
+                "tilknytningtype"
+            )
+            : getCSVFormat(
+                "navident",
+                "org_enhet_id",
+                "fid",
+                "erDagligOppfolging",
+                "gyldig_fom",
+                "gyldig_tom",
+                "masseflyttet_fra_org_enhet_id"
+            );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgtilknytningService.getAll()
                 .stream().filter(ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {
-                        printer.printRecord(
-                            kobling.navident(),
-                            kobling.orgEnhetId(),
-                            kobling.fid(),
-                            kobling.erDagligOppfolging(),
-                            kobling.gyldigFom().format(dateTimeFormatter),
-                            nonNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
-                            Objects.requireNonNullElse(kobling.masseflyttetFraFid(), "")
-                        );
+                        if (unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)) {
+                            printer.printRecord(
+                                kobling.navident(),
+                                kobling.orgEnhetId(),
+                                kobling.fid(),
+                                kobling.erDagligOppfolging(),
+                                kobling.gyldigFom().format(dateTimeFormatter),
+                                nonNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
+                                Objects.requireNonNullElse(kobling.masseflyttetFraFid(), ""),
+                                kobling.sektor() != null ? kobling.sektor() : "",
+                                kobling.orgtilknytningType() != null ? kobling.orgtilknytningType() : ""
+                            );
+                        } else {
+                            printer.printRecord(
+                                kobling.navident(),
+                                kobling.orgEnhetId(),
+                                kobling.fid(),
+                                kobling.erDagligOppfolging(),
+                                kobling.gyldigFom().format(dateTimeFormatter),
+                                nonNull(kobling.gyldigTom()) ? kobling.gyldigTom().format(dateTimeFormatter) : "",
+                                Objects.requireNonNullElse(kobling.masseflyttetFraFid(), "")
+                            );
+                        }
 
                         writer.close();
                     } catch (IOException e) {
@@ -272,6 +325,11 @@ public class OmadaUttrekk {
 
     private String getLederNavident(IOrgenhet orgenhet) {
         return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident).orElse("");
+    }
+
+    private String getPrimaryTelefonnummer(RessursState ressursState) {
+        var nummer = ressursState.jobbtelefon() != null ? ressursState.jobbtelefon().nummer() : ressursState.primaryTelefonnummer();
+        return formaterTelefonnummer(nummer);
     }
 
     String formaterTelefonnummer(String telefon) {
