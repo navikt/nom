@@ -90,15 +90,17 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
 
+        var brukNyttFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT);
+
         final var cSVFormat =
-            unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)
+            brukNyttFormat
              ? getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato", "personident", "identtype", "tilknytningtype", "primaryTelefonnummer")
              : getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             ressursStateRepository.getAll().forEach(ressurs -> {
                 try {
-                    if (unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)) {
+                    if (brukNyttFormat) {
                         printer.printRecord(
                             ressurs.fid(),
                             ressurs.navident(),
@@ -153,7 +155,9 @@ public class OmadaUttrekk {
     ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT) ?
+        var brukNyttFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT);
+
+        final var cSVFormat = brukNyttFormat ?
             getCSVFormat(
                 "navident",
                 "org_enhet_id",
@@ -180,7 +184,7 @@ public class OmadaUttrekk {
                 .stream().filter(ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {
-                        if (unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT)) {
+                        if (brukNyttFormat) {
                             printer.printRecord(
                                 kobling.navident(),
                                 kobling.orgEnhetId(),
