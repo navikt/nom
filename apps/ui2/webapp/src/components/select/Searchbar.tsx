@@ -224,17 +224,25 @@ export async function commonSearch(
     ? inputValue.replaceAll(/\s/g, "")
     : null;
 
-  const result = [];
+  const lookupRessurs = lookupNavident || lookupTelefon;
+  const lookupOrgEnhet = lookupOrgenhetId || lookupAgressoId;
 
-  if (lookupNavident || lookupTelefon) {
-    result.push(...(await queryForRessurs(lookupNavident, lookupTelefon)));
-  }
+  if (lookupRessurs || lookupOrgEnhet) {
+    const result: SearchResultRaw[] = [];
 
-  if (lookupOrgenhetId || lookupAgressoId) {
-    result.push(...(await queryForOrgenhet(lookupOrgenhetId, lookupAgressoId)));
-  }
+    const promises = [];
 
-  if (lookupNavident || lookupTelefon || lookupOrgenhetId || lookupAgressoId) {
+    if (lookupRessurs) {
+      promises.push(queryForRessurs(lookupNavident, lookupTelefon));
+    }
+
+    if (lookupOrgEnhet) {
+      promises.push(queryForOrgenhet(lookupOrgenhetId, lookupAgressoId));
+    }
+
+    const results = await Promise.all(promises);
+    results.forEach((r) => result.push(...r));
+
     return result;
   }
 
@@ -244,6 +252,7 @@ export async function commonSearch(
   const wrappedInputValue = inputHasWhitespace
     ? "'" + inputValue + "'"
     : inputValue;
+
   const searchResults = await performSearch(wrappedInputValue);
   return searchResults.filter((element) => rawResultFilter(element));
 }
