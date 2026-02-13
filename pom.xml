@@ -31,7 +31,7 @@
         <gcp.libraries-bom.version>26.75.0</gcp.libraries-bom.version>
         <springdoc.version>3.0.1</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
-        <hypersistence-utils-hibernate-71.version>3.15.1</hypersistence-utils-hibernate-71.version>
+        <hypersistence-utils-hibernate-71.version>3.15.2</hypersistence-utils-hibernate-71.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
         <unleash.version>11.2.1</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
