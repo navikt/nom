@@ -31,7 +31,7 @@
         <gcp.libraries-bom.version>26.75.0</gcp.libraries-bom.version>
         <springdoc.version>3.0.1</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
-        <hypersistence-utils-hibernate-71.version>3.15.1</hypersistence-utils-hibernate-71.version>
+        <hypersistence-utils-hibernate-71.version>3.15.2</hypersistence-utils-hibernate-71.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
         <unleash.version>11.2.1</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
@@ -42,7 +42,7 @@
         <swagger-annotations-jakarta.version>2.2.42</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
-        <org.wiremock-spring-boot.version>4.0.8</org.wiremock-spring-boot.version>
+        <org.wiremock-spring-boot.version>4.1.0</org.wiremock-spring-boot.version>
         <mock-oauth2-server.version>3.0.1</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.3.Final</hibernate-validator.version>
@@ -55,7 +55,6 @@
         <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>5.5.1</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <wiremock-spring-boot.version>4.1.0</wiremock-spring-boot.version>
 
     </properties>
 
