@@ -287,7 +287,7 @@ public class OrgEnhetController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new OpprettOrgEnhetResponse(
                 "FID-1",
                 "ab123c",
-                opprettOrgEnhetRequest.orgEnhetNavn(),
+                opprettOrgEnhetRequest.navn(),
                 opprettOrgEnhetRequest.overordnetOrgEnhetId(),
                 "TEST",
                 opprettOrgEnhetRequest.gyldigFom(),

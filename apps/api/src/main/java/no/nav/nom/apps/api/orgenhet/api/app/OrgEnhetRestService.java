@@ -79,8 +79,8 @@ public class OrgEnhetRestService {
             .filter(r -> isActive(r.startdato(), r.sluttdato()))
             .orElseThrow(() -> RessursNotFoundException.navident(opprettOrgEnhetRequest.lederRessursNavident()));
 
-        if (orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.orgEnhetNavn())) {
-            throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.orgEnhetNavn());
+        if (orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.navn())) {
+            throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.navn());
         }
 
         InputMetadata inputMetadata = new InputMetadata(
@@ -95,7 +95,7 @@ public class OrgEnhetRestService {
 
         final var opprettOrgEnhet = new OpprettOrgEnhet(
             orgEnhetIdGenerator.newId(),
-            opprettOrgEnhetRequest.orgEnhetNavn(),
+            opprettOrgEnhetRequest.navn(),
             opprettOrgEnhetRequest.gyldigFom().isAfter(LocalDate.now()) ? LocalDate.now() : opprettOrgEnhetRequest.gyldigFom(),
             overordnetOrgEnhet.getFid(),
             ressursState.fid(),
