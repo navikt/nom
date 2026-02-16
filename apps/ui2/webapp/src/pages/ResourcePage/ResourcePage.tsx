@@ -33,6 +33,13 @@ export const ResourcePage = () => {
 
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
+  const hasAdminAccess = useHasAdminAccess();
+  const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
+
+  const hasRobotAccess = useHasRobotAccess();
+  const hasVikafossenAccess = useHasVikafossenAccess();
+  const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(id),
     queryFn: () => getRessurs.queryFn(id),
@@ -40,23 +47,22 @@ export const ResourcePage = () => {
 
   const ressurs = ressursQuery.data;
 
-  const hasAdminAccess = useHasAdminAccess();
   const canSeeError = (() => {
     switch (ressurs?.identType) {
       case IdentType.ROBOT: {
-        return useHasRobotAccess() || hasAdminAccess;
+        return hasRobotAccess || hasAdminAccess;
       }
 
       case IdentType.VIKAFOSSEN: {
-        return useHasVikafossenAccess();
+        return hasVikafossenAccess;
       }
 
       case IdentType.UTENLANDSK_KONSULENT: {
-        return useHasUtenlandskKonsulentAccess() || hasAdminAccess;
+        return hasUtenlandskKonsulentAccess || hasAdminAccess;
       }
 
       default: {
-        return useHasAdminOrWriteAccess();
+        return hasAdminOrWriteAccess;
       }
     }
   })();

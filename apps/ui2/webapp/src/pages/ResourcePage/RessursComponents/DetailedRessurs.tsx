@@ -498,12 +498,12 @@ function OrganisationHierarchyTree({
     queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
   });
 
+  const orgEnhet = orgEnhetQuery.data;
+
   const hasAdminAccess = useHasAdminAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
-
-  const orgEnhet = orgEnhetQuery.data;
 
   if (!orgEnhet) {
     return <></>;
