@@ -270,6 +270,18 @@ export interface MinimalRessurs {
   visningsnavn: string;
 }
 
+export interface OppdaterOrgEnhetRequest {
+  firesiffer?: string;
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  id?: string;
+  lederRessursNavident?: string;
+  navn?: string;
+  orgEnhetsType?: OrgEnhetsType;
+}
+
 export interface OppdaterOrgtilknytningerForRessursRequest {
   eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
