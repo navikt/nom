@@ -14,7 +14,7 @@
     <version>1.1.0</version>
 
     <properties>
-        <openapi-generator-maven-plugin.version>7.18.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.19.0</openapi-generator-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -160,7 +160,7 @@
         <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot</artifactId>
-            <version>${wiremock-spring-boot.version}</version>
+            <version>${org.wiremock-spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
 

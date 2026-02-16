@@ -11,14 +11,14 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
-import axios from "axios";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import axios, { type AxiosError } from "axios";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet } from "~/api/react-query-endpoints";
+import { getOrgEnhet, oppdaterOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { PageBanner } from "~/components/PageBanner";
@@ -27,10 +27,11 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type { OrgEnhet } from "~/types/api-models";
+import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
@@ -96,13 +97,15 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId: string }) {
 }
 
 function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const navigate = useNavigate();
+
   const methods = useForm({
     defaultValues: {
-      orgEnhetNavn: orgEnhet.navn,
+      navn: orgEnhet.navn,
       gyldigFom: orgEnhet.gyldigFom,
-      lederRessursId: orgEnhet.leder.navident,
+      lederRessursNavident: orgEnhet.leder.navident,
       firesiffer: orgEnhet.remedyEnhetId ?? "",
-      orgEnhetType: orgEnhet.orgEnhetsType,
+      orgEnhetsType: orgEnhet.orgEnhetsType,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -112,21 +115,45 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     value: orgEnhet.leder.navident,
   };
 
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
+  const oppdaterOrgEnhetMutation = useMutation<
+    unknown,
+    AxiosError<Error>,
+    OppdaterOrgEnhetRequest
+  >({
+    mutationFn: async (request) => {
+      return oppdaterOrgEnhet(request);
+    },
+    onSuccess: async () => {
+      showToast({ text: "Oppdatert" });
+
+      navigate({
+        to: "/organisasjonsmastring",
+      }).then();
+    },
+  });
+
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
+    const request: OppdaterOrgEnhetRequest = {
+      ...values,
+      id: orgEnhet.id,
+    };
+
+    oppdaterOrgEnhetMutation.mutate(request);
+  };
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
         <VStack gap="4">
           <TextField
-            {...methods.register("orgEnhetNavn")}
+            {...methods.register("navn")}
             description="Enheten kan ikke ha likt navn som en annen enhet"
-            error={methods.formState.errors.orgEnhetNavn?.message}
+            error={methods.formState.errors.navn?.message}
             label="Navn på organisasjonsenhet"
           />
 
           <FormRessursSearchWrapper
-            name="lederRessursId"
+            name="lederRessursNavident"
             orgEnhetLederOption={existingOrgEnhetLederOption}
           />
 
@@ -136,8 +163,8 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             css={css`
               width: fit-content;
             `}
-            {...methods.register("orgEnhetType")}
-            error={methods.formState.errors.orgEnhetType?.message}
+            {...methods.register("orgEnhetsType")}
+            error={methods.formState.errors.orgEnhetsType?.message}
             label="Organisasjonsenhetstype"
           >
             {!orgEnhet.orgEnhetsType && <option value="" />}
@@ -271,11 +298,11 @@ async function searchIfEnoughInput(searchTerm: string) {
 }
 
 const validationSchema = yup.object({
-  orgEnhetNavn: yup.string().required("Obligatorisk"),
+  navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
-  lederRessursId: yup.string().required("Obligatorisk"),
-  firesiffer: yup.string().required("Obligatorisk"),
-  orgEnhetType: yup
+  lederRessursNavident: yup.string().required("Obligatorisk"),
+  firesiffer: yup.string().optional(),
+  orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
 });

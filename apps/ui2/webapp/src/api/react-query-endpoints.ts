@@ -19,7 +19,10 @@ import type {
   LederTilgangState,
   MasseFlyttingRequest,
   MinimalRessurs,
+  OppdaterOrgEnhetRequest,
   OppdaterOrgtilknytningerForRessursRequest,
+  OpprettOrgEnhetRequest,
+  OpprettOrgEnhetResponse,
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
@@ -664,6 +667,20 @@ export const updateFysiskBrukerstedForRessurser = async (
 export const createRessurs = async (request: OpprettRessursRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(
     `${NOM_API_BASE_PATH}/app/ressurser`,
+    request,
+  );
+};
+
+export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
+  return axios.post<unknown, AxiosResponse<OpprettOrgEnhetResponse>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/opprett`,
+    request,
+  );
+};
+
+export const oppdaterOrgEnhet = async (request: OppdaterOrgEnhetRequest) => {
+  return axios.put<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/oppdater`,
     request,
   );
 };

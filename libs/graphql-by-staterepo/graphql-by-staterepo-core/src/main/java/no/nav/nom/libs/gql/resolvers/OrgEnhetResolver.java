@@ -104,12 +104,12 @@ public class OrgEnhetResolver {
                 .map(MappingUtils::toOrgEnhet);
         }
 
-        public List<OrgEnhetResult> orgenheterByAgressoData(Set<String> agressoIds, String orgNiv, Set<NomNivaa> nomNivaaSet){
+        public List<OrgEnhetResult> orgenheterByAgressoData(Set<String> agressoIds, String agressoOrgNiv, Set<NomNivaa> nomNivaaSet){
             // if no agressoIdHashSet are specified, then we want to filter everything by the other agresso parameters
             var orgenhetStateListByAgressoIdSet = agressoIds.isEmpty() ? this.orgEnhetStateRepository.getAll() : this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds);
 
             var filteredOrgenhetStateList = orgenhetStateListByAgressoIdSet.stream()
-                .filter(e -> orgNiv == null || orgNiv.equals(e.agressoOrgNivaa()))
+                .filter(e -> agressoOrgNiv == null || agressoOrgNiv.equals(e.agressoOrgNivaa()))
                 .filter(e -> nomNivaaSet.isEmpty() || nomNivaaSet.contains(e.nomNivaa()))
                 .toList();
 
@@ -121,8 +121,8 @@ public class OrgEnhetResolver {
                 .toList());
 
             var notFoundElements = agressoIds.stream()
-                .filter(id -> !foundAgressoIds.contains(id))
-                .map(id -> OrgEnhetResult.notFound(id, orgNiv))
+                .filter(agressoId -> !foundAgressoIds.contains(agressoId))
+                .map(agressoId -> OrgEnhetResult.notFound(agressoId, agressoOrgNiv))
                 .toList();
 
             orgEnhetResults.addAll(notFoundElements);

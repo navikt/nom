@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,19 +11,28 @@ import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,22 +50,29 @@ import java.util.stream.Collectors;
 @RequestMapping(value = {"/app/orgenheter"})
 public class OrgEnhetController {
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetRestService orgEnhetRestService;
     private final OrgEnhetLederService orgEnhetLederService;
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerService kontaktpersonerService;
     private final AuthResolver authResolver;
+    private final Unleash unleash;
 
     public OrgEnhetController(
-        OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService,
+        OrgenhetService orgenhetService,
+        OrgEnhetRestService orgEnhetRestService,
+        OrgEnhetLederService orgEnhetLederService,
         OrgEnhetMapper orgEnhetMapper,
         KontaktpersonerService kontaktpersonerService,
-        AuthResolver authResolver
+        AuthResolver authResolver,
+        Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
+        this.orgEnhetRestService = orgEnhetRestService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerService = kontaktpersonerService;
         this.authResolver = authResolver;
+        this.unleash = unleash;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -254,6 +271,71 @@ public class OrgEnhetController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest) {
         return orgenhetService.setOrgEnhetsType(setOrgEnhetsTypeRequest);
+    }
+
+
+    @PostMapping("/opprett")
+    @Operation(
+        description = "Opprett ny orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<OpprettOrgEnhetResponse> opprettOrgEnhet(@Valid @RequestBody OpprettOrgEnhetRequest opprettOrgEnhetRequest) {
+        if (unleash.isEnabled("nom-api.orgenhet-mastring"))
+            return ResponseEntity.status(HttpStatus.CREATED).body(orgEnhetRestService.opprettOrgEnhet(opprettOrgEnhetRequest));
+        else
+            return ResponseEntity.status(HttpStatus.CREATED).body(new OpprettOrgEnhetResponse(
+                "FID-1",
+                "ab123c",
+                opprettOrgEnhetRequest.navn(),
+                opprettOrgEnhetRequest.overordnetOrgEnhetId(),
+                "TEST",
+                opprettOrgEnhetRequest.gyldigFom(),
+                null,
+                opprettOrgEnhetRequest.lederRessursNavident(),
+                "Nav Navesen",
+                opprettOrgEnhetRequest.firesiffer(),
+                opprettOrgEnhetRequest.orgEnhetsType()
+            ));
+
+    }
+
+    @Operation(
+        description = "Oppdater OrgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/oppdater")
+    public ResponseEntity<StandardResponse> oppdaterOrgEnhet(@RequestBody OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
+        if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    StandardResponse.builder()
+                        .message(orgEnhetRestService.oppdaterOrgEnhet(oppdaterOrgEnhetRequest))
+                        .build());
+        } else {
+            return ResponseEntity.ok().build();
+        }
+    }
+
+    @ExceptionHandler({
+        OrgEnhetNotFoundException.class,
+        RessursNotFoundException.class,
+        OrganiseringNotFoundException.class
+    })
+    public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
+    }
+
+    @ExceptionHandler({
+        DuplicateOrgEnhetNameException.class
+    })
+    public ResponseEntity<StandardResponse> handleDuplicateOrgEnhetName(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
     }
 
 }

@@ -180,12 +180,10 @@ public class ManuelleOrgEnhetLederMeldinger {
     @PutMapping("/oppdaterManuellOrgEnhetLederSluttdato")
     public ResponseEntity<String> oppdaterManuellOrgEnhetLederSluttdato(
         @Parameter(description = "FID for leder i OrgEnhet hvor sluttdato skal oppdateres") @RequestParam String fid,
-        @Parameter(description = "Sluttdato for leder i OrgEnhet") @RequestParam LocalDate sluttdato,
+        @Parameter(description = "Sluttdato for leder i OrgEnhet") @RequestParam(required = false) LocalDate sluttdato,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm
     ) {
         if (!validFid(fid)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-        if (isNull(sluttdato)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         if (!"CONFIRM".equals(confirm)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
@@ -213,6 +211,18 @@ public class ManuelleOrgEnhetLederMeldinger {
             .body("Fant ikke OrgEnhetLederState med FID %s".formatted(HtmlUtils.htmlEscape(fid))));
     }
 
+    @Operation(
+        description = "Slett OrgEnhetLeder manuelt",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
     @DeleteMapping("/slettManuelleOrgEnhetLederState")
     public ResponseEntity<String> slettManuelleOrgEnhetLederState(
         @Parameter(description = "FID for leder som skal slettes") @RequestParam String fid,

@@ -66,18 +66,18 @@ class EventsrcToState {
 
         // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
-        String uniqueAgressoId = additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asText() : null;
-        String agressoId = additionalData.isPresent() && additionalData.get().hasNonNull("agressoId") ? additionalData.get().get("agressoId").asText() : null;
-        String agressoOrgNivaa = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgNivaa") ? additionalData.get().get("agressoOrgNivaa").asText() : null;
-        String agressoOrgenhetType = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgenhetType") ? additionalData.get().get("agressoOrgenhetType").asText() : null;
+        String uniqueAgressoId = additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asString() : null;
+        String agressoId = additionalData.isPresent() && additionalData.get().hasNonNull("agressoId") ? additionalData.get().get("agressoId").asString() : null;
+        String agressoOrgNivaa = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgNivaa") ? additionalData.get().get("agressoOrgNivaa").asString() : null;
+        String agressoOrgenhetType = additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgenhetType") ? additionalData.get().get("agressoOrgenhetType").asString() : null;
 
         try {
             return new OrgEnhetState(
                 fid,
-                eventStateAggregate.get("id").asText(),
-                eventStateAggregate.get("navn").asText(),
-                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null,
+                eventStateAggregate.get("id").asString(),
+                eventStateAggregate.get("navn").asString(),
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asString()),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asString()) : null,
                 overordnetOrgEnhetFid,
                 lederFid,
                 orgEnhetsType,

@@ -6,19 +6,26 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEn
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OppdaterOrgEnhetNavnCmd;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEndretNavnEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -26,15 +33,38 @@ public class OrgEnhetCommandService {
 
     private final OrgEnhetEventProducer eventProducer;
     private final JsonMapper jsonMapper;
-    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, JsonMapper jsonMapper) {
+    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
+
+    public OrgEnhetCommandService(OrgEnhetEventProducer eventProducer, JsonMapper jsonMapper, NomStateOrgEnhetListener nomStateOrgEnhetListener) {
         this.eventProducer = eventProducer;
         this.jsonMapper = jsonMapper;
+        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
     }
 
     public String opprettOrgEnhet(OpprettOrgEnhet opprettOrgEnhet) {
         String fid = PrefixedUlidCreator.createOrgEnhetUlid();
         opprettOrgEnhet(fid, opprettOrgEnhet);
         return fid;
+    }
+
+    public OrgEnhetState opprettOrgEnhetSync(OpprettOrgEnhet opprettOrgEnhet) throws ExecutionException, InterruptedException, TimeoutException {
+        boolean exceptionThrown = false;
+        final var fid = PrefixedUlidCreator.createOrgEnhetUlid();
+        final var response = nomStateOrgEnhetListener.waitForStateAfterEventCreation(fid);
+        opprettOrgEnhet(fid, opprettOrgEnhet);
+
+        try {
+            return response.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            exceptionThrown = true;
+            nomStateOrgEnhetListener.removeWait(fid);
+            log.error("Error waiting for orgenhet to be created", e);
+            throw e;
+        } finally {
+            if (exceptionThrown) {
+                avvikleOrgEnhet(fid, new AvvikleOrgEnhet(opprettOrgEnhet.gyldigFom(), opprettOrgEnhet.inputMetadata()));
+            }
+        }
     }
 
     private CompletableFuture<SendResult<String, OrgEnhetEvent>> opprettOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
@@ -59,6 +89,14 @@ public class OrgEnhetCommandService {
                 log.error("Problem converting orgEnhet info from dvh", e);
                 log.info("dvh data: {}", input.toPrettyString());
             }
+        } else {
+            additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
+                "00",
+                opprettOrgEnhet.navn(),
+                "ORGNIVX",
+                "",
+                "00-" + opprettOrgEnhet.navn() + "ORGNIVX"
+            );
         }
         return new OrgEnhetOpprettetEventV1(
                 fid,
@@ -74,7 +112,17 @@ public class OrgEnhetCommandService {
         );
     }
 
-    public CompletableFuture<SendResult<String, OrgEnhetEvent>> avikleOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> oppdaterNavnOrgEnhet(String fid, OppdaterOrgEnhetNavnCmd oppdaterOrgEnhet) {
+        return eventProducer.sendMessage(new OrgEnhetEndretNavnEventV1(
+            fid,
+            new OrgEnhetEndretNavnEventV1.OrgEnhetNavnEndretEventData(
+                oppdaterOrgEnhet.navn()
+            ),
+            oppdaterOrgEnhet.inputMetadata()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> avvikleOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
         return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
                 fid,
                 new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
@@ -97,6 +145,14 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getOrgNiv(),
                     dvhOrgenhet2.getAgressoOrgenhetType(),
                     dvhOrgenhet2.getUniqueAgressoId()
+            );
+        } else {
+            additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
+                "00",
+                korrigerOrgEnhet.navn(),
+                "ORGNIVX",
+                "",
+                "00-" + korrigerOrgEnhet.navn() + "ORGNIVX"
             );
         }
 

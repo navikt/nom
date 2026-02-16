@@ -322,7 +322,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(2)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(2)).avvikleOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -396,7 +396,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -445,7 +445,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -481,7 +481,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), any());
         verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
@@ -535,7 +535,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         // Mock1+2 er slått sammen i parsing.
         // Lager 'FID_1' [2020.08 - ]
         verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(0)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(0)).avvikleOrgEnhet(any(), any());
 
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
@@ -586,7 +586,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         //      FID_2: [2020.08 - 2020.11]
 
         verify(orgEnhetCommandService, times(1 + 1)).opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))));
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(argThat(arg -> arg.equals("FID_1")), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(argThat(arg -> arg.equals("FID_1")), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
         verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
@@ -640,7 +640,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -658,7 +658,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), any());
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -711,7 +711,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
 
         assertEquals(localDateOf(stillingMaxTil), avvikleOrgEnhetCaptor.getValue().gyldigTom());
     }
@@ -750,7 +750,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
-        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
+        verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
 
         assertEquals(localDateOf(stillingMaxTil), avvikleOrgEnhetCaptor.getValue().gyldigTom());
     }

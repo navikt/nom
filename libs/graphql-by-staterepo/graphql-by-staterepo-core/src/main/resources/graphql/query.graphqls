@@ -40,7 +40,7 @@ input OrgEnheterSearch {
     agressoIder: [String!]
     orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
     nomNivaa: [NomNivaa!]
-    orgNiv: String  @deprecated(reason: "orgEnhetsKategori er erstattet med agressoOrgNiv")
+    orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
     agressoOrgNiv: String
     ider: [String!]
 }
@@ -62,9 +62,11 @@ input RessurserSearch {
 
 type OrgEnhetResult {
     code: ResultCode!
-    id: String
+    id: String  @deprecated(reason: "id er erstattet med agressoId")
+    agressoId: String
     nomId: String
-    orgNiv: String
+    orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
     organisasjonsenhet: OrgEnhet    @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet
 }
