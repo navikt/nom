@@ -270,6 +270,29 @@ export interface MinimalRessurs {
   visningsnavn: string;
 }
 
+export interface OppdaterOrgEnhetRequest {
+  /** @example 1234 */
+  firesiffer?: string;
+  /**
+   * @format date
+   * @example "2026-01-31"
+   */
+  gyldigFom?: string;
+  /**
+   * @format date
+   * @example "2026-03-31"
+   */
+  gyldigTom?: string;
+  /** @example "ab123c" */
+  id?: string;
+  /** @example "A123456" */
+  lederRessursNavident?: string;
+  /** @example "Nav Lokal Kontor" */
+  navn?: string;
+  /** @example "DIREKTORAT" */
+  orgEnhetsType?: OrgEnhetsType;
+}
+
 export interface OppdaterOrgtilknytningerForRessursRequest {
   eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
@@ -278,26 +301,34 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
 }
 
 export interface OpprettOrgEnhetRequest {
+  /** @example 1234 */
   firesiffer?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @example "2026-01-31"
+   */
   gyldigFom?: string;
+  /** @example "A123456" */
   lederRessursNavident?: string;
-  orgEnhetNavn?: string;
+  /** @example "Nav Lokal kontor" */
+  navn?: string;
+  /** @example "DIREKTORAT" */
   orgEnhetsType?: OrgEnhetsType;
+  /** @example "de456f" */
   overordnetOrgEnhetId?: string;
 }
 
 export interface OpprettOrgEnhetResponse {
+  fid?: string;
   firesiffer?: string;
   /** @format date */
   gyldigFom?: string;
   /** @format date */
   gyldigTom?: string;
+  id?: string;
   lederRessursNavident?: string;
   lederRessursNavn?: string;
-  orgEnhetFid?: string;
-  orgEnhetId?: string;
-  orgEnhetNavn?: string;
+  navn?: string;
   orgEnhetsType?: OrgEnhetsType;
   overordnetOrgEnhetId?: string;
   overordnetOrgEnhetNavn?: string;
