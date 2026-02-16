@@ -31,11 +31,7 @@ import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type {
-  OppdaterOrgEnhetRequest,
-  OpprettOrgEnhetRequest,
-  OrgEnhet,
-} from "~/types/api-models";
+import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
@@ -109,7 +105,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       gyldigFom: orgEnhet.gyldigFom,
       lederRessursNavident: orgEnhet.leder.navident,
       firesiffer: orgEnhet.agressoId ?? "",
-      orgEnhetType: orgEnhet.orgEnhetsType,
+      orgEnhetsType: orgEnhet.orgEnhetsType,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -122,7 +118,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const oppdaterOrgEnhetMutation = useMutation<
     unknown,
     AxiosError<Error>,
-    OpprettOrgEnhetRequest
+    OppdaterOrgEnhetRequest
   >({
     mutationFn: async (request) => {
       return oppdaterOrgEnhet(request);
@@ -140,7 +136,6 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const request: OppdaterOrgEnhetRequest = {
       ...values,
       id: orgEnhet.id,
-      gyldigTom: "2027-01-01",
     };
 
     oppdaterOrgEnhetMutation.mutate(request);
@@ -168,8 +163,8 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             css={css`
               width: fit-content;
             `}
-            {...methods.register("orgEnhetType")}
-            error={methods.formState.errors.orgEnhetType?.message}
+            {...methods.register("orgEnhetsType")}
+            error={methods.formState.errors.orgEnhetsType?.message}
             label="Organisasjonsenhetstype"
           >
             {!orgEnhet.orgEnhetsType && <option value="" />}
@@ -307,7 +302,7 @@ const validationSchema = yup.object({
   gyldigFom: yup.string().required("Obligatorisk"),
   lederRessursNavident: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().required("Obligatorisk"),
-  orgEnhetType: yup
+  orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
 });

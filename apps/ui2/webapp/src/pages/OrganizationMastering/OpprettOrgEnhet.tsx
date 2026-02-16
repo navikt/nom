@@ -144,9 +144,9 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
           </Heading>
 
           <TextField
-            {...methods.register("orgEnhetNavn")}
+            {...methods.register("navn")}
             description="Enheten kan ikke ha likt navn som en annen enhet"
-            error={methods.formState.errors.orgEnhetNavn?.message}
+            error={methods.formState.errors.navn?.message}
             label="Navn på den nye organisasjonsenhet"
           />
 
@@ -538,7 +538,7 @@ export function OrgEnhetInfoWrapper({
 }
 
 const validationSchema = yup.object({
-  orgEnhetNavn: yup.string().required("Obligatorisk"),
+  navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
   lederRessursNavident: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().required("Obligatorisk"),
