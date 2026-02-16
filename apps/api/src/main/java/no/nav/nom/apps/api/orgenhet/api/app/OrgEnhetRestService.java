@@ -25,6 +25,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -81,6 +82,8 @@ public class OrgEnhetRestService {
             throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.navn());
         }
 
+        String navn = WordUtils.capitalize(opprettOrgEnhetRequest.navn());
+
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
             "opprettOrgEnhet",
@@ -93,7 +96,7 @@ public class OrgEnhetRestService {
 
         final var opprettOrgEnhet = new OpprettOrgEnhet(
             orgEnhetIdGenerator.newId(),
-            opprettOrgEnhetRequest.navn(),
+            navn,
             opprettOrgEnhetRequest.gyldigFom().isAfter(LocalDate.now()) ? LocalDate.now() : opprettOrgEnhetRequest.gyldigFom(),
             overordnetOrgEnhet.getFid(),
             ressursState.fid(),
@@ -157,8 +160,16 @@ public class OrgEnhetRestService {
 
     public String oppdaterOrgEnhet(OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
         List<String> oppdaterteElementer = new ArrayList<>();
+
         var orgEnhetState = orgenhetService.getById(oppdaterOrgEnhetRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(oppdaterOrgEnhetRequest.id()));
         var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
+
+        if (orgenhetService.activeOrFutureWithEqualName(oppdaterOrgEnhetRequest.navn())) {
+            throw DuplicateOrgEnhetNameException.name(oppdaterOrgEnhetRequest.navn());
+        }
+
+        String navn = WordUtils.capitalize(oppdaterOrgEnhetRequest.navn());
+
         boolean hasChange = false;
 
         InputMetadata inputMetadata = new InputMetadata(
@@ -174,18 +185,18 @@ public class OrgEnhetRestService {
         if (!Objects.equals(oppdaterOrgEnhetRequest.navn(), orgEnhetState.getNavn())) {
             hasChange = true;
             var oppdaterNavn = new OppdaterOrgEnhetNavnCmd(
-                oppdaterOrgEnhetRequest.navn(),
+                navn,
                 inputMetadata
             );
 
             orgEnhetCommandService.oppdaterNavnOrgEnhet(orgEnhetState.getFid(), oppdaterNavn);
-            oppdaterteElementer.add(String.format("OrgEnhet har endret navn fra %s til %s", orgEnhetState.getNavn(), oppdaterOrgEnhetRequest.navn()));
+            oppdaterteElementer.add(String.format("OrgEnhet har endret navn fra %s til %s", orgEnhetState.getNavn(), navn));
         }
 
         if (hasChange) {
             final var opprettOrganisering = new EndreOrganiseringCmd(
                 orgEnhetState.getId(),
-                oppdaterOrgEnhetRequest.navn(),
+                navn,
                 organiseringState.idOver(),
                 organiseringState.navnOver(),
                 orgEnhetState.getGyldigFom(),

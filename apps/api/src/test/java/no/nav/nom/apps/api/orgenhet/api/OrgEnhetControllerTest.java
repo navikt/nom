@@ -208,7 +208,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .fid("FID_1")
             .overordnetOrgEnhetFid(overordnetOrgEnhet.getFid())
-            .navn(opprettOrgEnhetRequest.navn())
+            .navn("Nav Ny OrgEnhet")
             .gyldigFom(opprettOrgEnhetRequest.gyldigFom())
             .gyldigTom(null)
             .lederFid(ressursState.get().fid())
