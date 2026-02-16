@@ -104,7 +104,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       navn: orgEnhet.navn,
       gyldigFom: orgEnhet.gyldigFom,
       lederRessursNavident: orgEnhet.leder.navident,
-      firesiffer: orgEnhet.agressoId ?? "",
+      firesiffer: orgEnhet.remedyEnhetId ?? "",
       orgEnhetsType: orgEnhet.orgEnhetsType,
     },
     resolver: yupResolver(validationSchema),
@@ -301,7 +301,7 @@ const validationSchema = yup.object({
   navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
   lederRessursNavident: yup.string().required("Obligatorisk"),
-  firesiffer: yup.string().required("Obligatorisk"),
+  firesiffer: yup.string().optional(),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
