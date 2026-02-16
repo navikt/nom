@@ -25,8 +25,6 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,7 +41,6 @@ import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
 @Service
 public class OrgEnhetRestService {
 
-    private final static Logger logger = LoggerFactory.getLogger(OrgEnhetRestService.class);
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
     private final OrgenhetService orgenhetService;
     private final RessursService ressursService;
@@ -72,6 +69,7 @@ public class OrgEnhetRestService {
 
 
     public OpprettOrgEnhetResponse opprettOrgEnhet(OpprettOrgEnhetRequest opprettOrgEnhetRequest) {
+        log.info("OpprettOrgEnhetRequest: {}", opprettOrgEnhetRequest);
         var overordnetOrgEnhet = orgenhetService.getById(opprettOrgEnhetRequest.overordnetOrgEnhetId())
             .orElseThrow(() -> OrgEnhetNotFoundException.id(opprettOrgEnhetRequest.overordnetOrgEnhetId()));
 

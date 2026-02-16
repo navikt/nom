@@ -280,7 +280,7 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<OpprettOrgEnhetResponse> opprettOrgEnhet(@RequestBody OpprettOrgEnhetRequest opprettOrgEnhetRequest) {
+    public ResponseEntity<OpprettOrgEnhetResponse> opprettOrgEnhet(@Valid @RequestBody OpprettOrgEnhetRequest opprettOrgEnhetRequest) {
         if (unleash.isEnabled("nom-api.orgenhet-mastring"))
             return ResponseEntity.status(HttpStatus.CREATED).body(orgEnhetRestService.opprettOrgEnhet(opprettOrgEnhetRequest));
         else
