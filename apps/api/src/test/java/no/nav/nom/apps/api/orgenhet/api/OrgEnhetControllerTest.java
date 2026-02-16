@@ -194,7 +194,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var lederNavident = "X123456";
         var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
             .overordnetOrgEnhetId(overordnetId)
-            .orgEnhetNavn("Nav ny orgEnhet")
+            .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
             .firesiffer("1234")
@@ -208,7 +208,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .fid("FID_1")
             .overordnetOrgEnhetFid(overordnetOrgEnhet.getFid())
-            .navn(opprettOrgEnhetRequest.orgEnhetNavn())
+            .navn(opprettOrgEnhetRequest.navn())
             .gyldigFom(opprettOrgEnhetRequest.gyldigFom())
             .gyldigTom(null)
             .lederFid(ressursState.get().fid())
@@ -221,7 +221,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         when(ressursService.findByNavident(lederNavident)).thenReturn(ressursState);
 
-        when(orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.orgEnhetNavn())).thenReturn(false);
+        when(orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.navn())).thenReturn(false);
 
         when(orgEnhetCommandService.opprettOrgEnhetSync(any(OpprettOrgEnhet.class))).thenReturn(orgEnhetState);
 
@@ -247,9 +247,9 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         assertThat(response).isEqualTo(
             OpprettOrgEnhetResponse.builder()
-                .orgEnhetFid(orgEnhetState.fid())
-                .orgEnhetId(orgEnhetState.id())
-                .orgEnhetNavn(orgEnhetState.navn())
+                .fid(orgEnhetState.fid())
+                .id(orgEnhetState.id())
+                .navn(orgEnhetState.navn())
                 .overordnetOrgEnhetId(overordnetOrgEnhet.getId())
                 .overordnetOrgEnhetNavn(overordnetOrgEnhet.getNavn())
                 .gyldigFom(orgEnhetState.gyldigFom())
@@ -268,7 +268,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var lederNavident = "X123456";
         var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
             .overordnetOrgEnhetId(overordnetId)
-            .orgEnhetNavn("Nav ny orgEnhet")
+            .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
             .firesiffer("1234")
@@ -289,7 +289,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         var lederNavident = "X123456";
         var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
             .overordnetOrgEnhetId(overordnetId)
-            .orgEnhetNavn("Nav ny orgEnhet")
+            .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
             .firesiffer("1234")

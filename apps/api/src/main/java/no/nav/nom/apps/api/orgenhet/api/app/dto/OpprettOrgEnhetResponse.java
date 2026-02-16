@@ -7,9 +7,9 @@ import java.time.LocalDate;
 
 @Builder(toBuilder = true)
 public record OpprettOrgEnhetResponse(
-    String orgEnhetFid,
-    String orgEnhetId,
-    String orgEnhetNavn,
+    String fid,
+    String id,
+    String navn,
     String overordnetOrgEnhetId,
     String overordnetOrgEnhetNavn,
     LocalDate gyldigFom,
