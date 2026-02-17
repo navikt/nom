@@ -154,6 +154,11 @@ async function queryForOrgenhet(
           __typename
           id
           navn
+          organiseringer(retning: over) {
+            orgEnhet {
+              id
+            }
+          }
         }
       }
     }`;
@@ -169,7 +174,10 @@ async function queryForOrgenhet(
 
   return result.data.data.orgEnheter
     .map((entry: any) => entry.orgEnhet)
-    .filter((result: any) => !!result);
+    .filter(Boolean)
+    .filter((result: any) =>
+      agressoId ? (result.organiseringer?.length ?? 0) > 0 : true,
+    );
 }
 
 export async function queryForRessurs(
