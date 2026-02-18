@@ -32,8 +32,8 @@ public class CacheQueueService {
 
         if(existingCacheQueue != null) {
             log.info("CacheQueue already exists for {}. Cache will be updated. Existing: {}, to be added: {}", cacheKey, existingCacheQueue, otEndretData);
-            ObjectReader reader = new JsonMapper().rebuild().enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION).build().readerFor(new TypeReference<List<OTEndretData>>() {});
-            List<OTEndretData> payload = reader.readValue(existingCacheQueue.getPayload());
+            JsonMapper mapper = new JsonMapper(JsonMapper.builder().enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION));
+            List<OTEndretData> payload = mapper.readValue(existingCacheQueue.getPayload().toString(), new TypeReference<>() {});
             payload.add(otEndretData);
 
             existingCacheQueue.setPayload(new JsonMapper().convertValue(removeDuplicateOTChangesEntries(payload), JsonNode.class));
