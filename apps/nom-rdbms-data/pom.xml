@@ -90,7 +90,7 @@
             <!-- previously named com.vladmihalcea:hibernate-types-55 -->
             <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-71</artifactId>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
