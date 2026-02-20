@@ -114,7 +114,9 @@ public class FiksEventsourcePayloadService {
     // package-private for testability
     Map<String, String> readKafkaTopicFromOffset(String topic, long fromOffset) {
         Map<String, String> messages = new HashMap<>();
-        try (var kafkaConsumer = new KafkaConsumer<String, String>(kafkaProperties.buildConsumerProperties())) {
+        Map<String, Object> consumerProps = new HashMap<>(kafkaProperties.buildConsumerProperties());
+        consumerProps.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "FiksEventsourcePayloadService");
+        try (var kafkaConsumer = new KafkaConsumer<String, String>(consumerProps)) {
             TopicPartition topicPartition = new TopicPartition(topic, 0);
             kafkaConsumer.assign(List.of(topicPartition));
 

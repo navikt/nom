@@ -245,11 +245,11 @@ management:
 app:
   fiksEventsourcePayload:
     offsets:
-      ressurs: 0
-      orgenhet: 0
-      orgenhetLeder: 0
-      orgtilknytning: 0
-      organisering: 0
+      ressurs: 865000 # 865444
+      orgenhet: 795000 # 795909
+      orgenhetLeder: 1104000 # 1104798
+      orgtilknytning: 1786900 # 1787058
+      organisering: 14000 # 14911
       authorize: 0
   email:
     enabled: false
@@ -464,12 +464,12 @@ server.tomcat.mbeanregistry.enabled: true
 app:
   fiksEventsourcePayload:
     offsets:
-      ressurs: 0
-      orgenhet: 0
-      orgenhetLeder: 0
-      orgtilknytning: 0
-      organisering: 0
-      authorize: 0
+      ressurs: 932000 # 932901
+      orgenhet: 790000 # 790761
+      orgenhetLeder: 9900 # 9928
+      orgtilknytning: 944000 # 945017
+      organisering: 9400 # 9439
+      authorize: 1100 # 1139
   granted-authorities:
     clients:
       nom-ui2:
