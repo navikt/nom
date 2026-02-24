@@ -19,6 +19,7 @@ import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,8 @@ public class ManuelleAutorizedEvtsrcMeldinger {
     private final DelegertLederStateRepository delegertLederStateRepository;
     private final OrgenhetService orgenhetService;
     private final AuthorizedNavident authorizedNavident;
+    @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
+    @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
 
     public ManuelleAutorizedEvtsrcMeldinger(AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
                                             OrgenhetService orgenhetService, AuthorizedNavident authorizedNavident
@@ -140,7 +143,10 @@ public class ManuelleAutorizedEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEscape(orgenhetId));
         }
 
-        authorizedNavident.sjekkParametereDelegertLeder(lederNavident, delegertNavident, orgenhetId, gyldigTom);
+        //TODO (hamkel): Fjern dette når ORG-2848 er ferdig implementert
+        if (!orgenhetId.equals(helfoOrgenhetId) && !orgenhetId.equals(skattOrgenhetId)) {
+            authorizedNavident.sjekkParametereDelegertLeder(lederNavident, delegertNavident, orgenhetId, gyldigTom);
+        }
         authorizedNavident.sjekkOmOrgenhetAlleredeDelegertTilNavident(orgenhetId, delegertNavident);
 
         if (!"CONFIRM".equals(confirm)) {
