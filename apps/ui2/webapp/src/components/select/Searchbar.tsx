@@ -251,6 +251,18 @@ export async function commonSearch(
     const results = await Promise.all(promises);
     results.forEach((r) => result.push(...r));
 
+    if (/^\d{6}$/.test(inputValue.trim())) {
+      const inputHasWhitespace = /\s/.test(inputValue.trim());
+      const wrappedInputValue = inputHasWhitespace
+        ? "'" + inputValue + "'"
+        : inputValue;
+
+      const searchResults = await performSearch(wrappedInputValue);
+      result.push(
+        ...searchResults.filter((element) => rawResultFilter(element)),
+      );
+    }
+
     return result;
   }
 
