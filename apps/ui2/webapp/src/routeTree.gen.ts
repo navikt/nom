@@ -13,6 +13,7 @@ import { Route as TilgangerRouteImport } from './routes/tilganger'
 import { Route as OrganisasjonsmastringRouteImport } from './routes/organisasjonsmastring'
 import { Route as OpprettOrganisasjonsenhetRouteImport } from './routes/opprett-organisasjonsenhet'
 import { Route as MasseflyttingFysiskBrukerstedRouteImport } from './routes/masseflytting-fysisk-brukersted'
+import { Route as AvsluttOrganisasjonsenhetRouteImport } from './routes/avslutt-organisasjonsenhet'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
 import { Route as RessursCreatespecialRouteImport } from './routes/ressurs.createspecial'
@@ -46,6 +47,12 @@ const MasseflyttingFysiskBrukerstedRoute =
   MasseflyttingFysiskBrukerstedRouteImport.update({
     id: '/masseflytting-fysisk-brukersted',
     path: '/masseflytting-fysisk-brukersted',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AvsluttOrganisasjonsenhetRoute =
+  AvsluttOrganisasjonsenhetRouteImport.update({
+    id: '/avslutt-organisasjonsenhet',
+    path: '/avslutt-organisasjonsenhet',
     getParentRoute: () => rootRouteImport,
   } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -112,6 +119,7 @@ const OrgTableIdRoute = OrgTableIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
@@ -149,6 +158,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/avslutt-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/avslutt-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/avslutt-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
@@ -224,6 +237,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AvsluttOrganisasjonsenhetRoute: typeof AvsluttOrganisasjonsenhetRoute
   MasseflyttingFysiskBrukerstedRoute: typeof MasseflyttingFysiskBrukerstedRoute
   OpprettOrganisasjonsenhetRoute: typeof OpprettOrganisasjonsenhetRoute
   OrganisasjonsmastringRoute: typeof OrganisasjonsmastringRoute
@@ -269,6 +283,13 @@ declare module '@tanstack/react-router' {
       path: '/masseflytting-fysisk-brukersted'
       fullPath: '/masseflytting-fysisk-brukersted'
       preLoaderRoute: typeof MasseflyttingFysiskBrukerstedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avslutt-organisasjonsenhet': {
+      id: '/avslutt-organisasjonsenhet'
+      path: '/avslutt-organisasjonsenhet'
+      fullPath: '/avslutt-organisasjonsenhet'
+      preLoaderRoute: typeof AvsluttOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -360,6 +381,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AvsluttOrganisasjonsenhetRoute: AvsluttOrganisasjonsenhetRoute,
   MasseflyttingFysiskBrukerstedRoute: MasseflyttingFysiskBrukerstedRoute,
   OpprettOrganisasjonsenhetRoute: OpprettOrganisasjonsenhetRoute,
   OrganisasjonsmastringRoute: OrganisasjonsmastringRoute,

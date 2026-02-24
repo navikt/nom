@@ -51,6 +51,7 @@ export const Route = createRootRouteWithContext<{
       "/tilganger",
       "/kontaktpersoner-tabell",
       "/korriger-organisasjonsenhet/",
+      "/avslutt-organisasjonsenhet",
     ];
 
     const showChristmasBanner = !routesWithPageBanner.some((bannerRoute) =>
