@@ -90,22 +90,6 @@ function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
       />
 
       <AvsluttOrgEnhetInner orgEnhet={orgEnhet} />
-
-      <div
-        css={css`
-          display: flex;
-          justify-content: end;
-          gap: var(--a-spacing-4);
-        `}
-      >
-        <SmartLink href="/organisasjonsmastring">
-          <Button size="small" variant="secondary">
-            Avbryt
-          </Button>
-        </SmartLink>
-
-        <Button size="small">Lagre</Button>
-      </div>
     </>
   );
 }
@@ -113,50 +97,6 @@ function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
 function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [sluttdato, setSluttdato] = useState<string>("");
 
-  return (
-    <>
-      <DatePickerWrapper onChange={setSluttdato} />
-
-      <AvslutningTillattStatus orgEnhet={orgEnhet} sluttdato={sluttdato} />
-    </>
-  );
-}
-
-interface RessursAvhengighet {
-  navident: string;
-  navn: string;
-  sluttdato?: string;
-}
-
-function AvslutningTillattStatus({
-  sluttdato,
-  orgEnhet,
-}: {
-  sluttdato?: string;
-  orgEnhet: OrgEnhet;
-}) {
-  if (!sluttdato) {
-    return;
-  }
-
-  return (
-    <VStack gap="4">
-      <Heading level="2" size="medium">
-        Avhengigheter:
-      </Heading>
-
-      <AvslutningTillatStatusInner orgEnhet={orgEnhet} sluttdato={sluttdato} />
-    </VStack>
-  );
-}
-
-function AvslutningTillatStatusInner({
-  sluttdato,
-  orgEnhet,
-}: {
-  sluttdato: string;
-  orgEnhet: OrgEnhet;
-}) {
   const ulovligeOrgtilknytninger = orgEnhet.ressursKoblinger.filter(
     (tilknytning) => nomDateIsAfter(tilknytning.gyldigTom, sluttdato),
   );
@@ -168,7 +108,7 @@ function AvslutningTillatStatusInner({
   const ulovligeRessurserQuery = useQuery({
     queryKey: getRessurserByListNavident.queryKey(ulovligeNavidenter),
     queryFn: () => getRessurserByListNavident.queryFn(ulovligeNavidenter),
-    enabled: ulovligeNavidenter.length > 0,
+    enabled: ulovligeNavidenter.length > 0 && !!sluttdato,
   });
 
   const ulovligeRessurser = ulovligeRessurserQuery.data;
@@ -190,21 +130,84 @@ function AvslutningTillatStatusInner({
   const underliggendeOrgEnheterQuery = useQuery({
     queryKey: getOrgEnhetList.queryKey(orgEnhetIder),
     queryFn: () => getOrgEnhetList.queryFn(orgEnhetIder),
-    enabled: orgEnhetIder.length > 0,
+    enabled: orgEnhetIder.length > 0 && !!sluttdato,
   });
 
   const underliggendeOrgEnheter = underliggendeOrgEnheterQuery.data;
 
-  const orgEnhetAvhengigheter = (
-    underliggendeOrgEnheter?.filter((enhet) =>
-      nomDateIsAfter(enhet.gyldigTom, sluttdato),
-    ) ?? []
-  ).sort((a, b) => a.navn.localeCompare(b.navn));
+  const orgEnhetAvhengigheter =
+    underliggendeOrgEnheter
+      ?.filter((enhet) => nomDateIsAfter(enhet.gyldigTom, sluttdato))
+      .sort((a, b) => a.navn.localeCompare(b.navn)) ?? [];
 
-  if (
-    ulovligeRessurserQuery.isLoading ||
-    underliggendeOrgEnheterQuery.isLoading
-  ) {
+  return (
+    <>
+      <DatePickerWrapper error="Test" onChange={setSluttdato} />
+
+      {!!sluttdato && (
+        <AvslutningTillattStatus
+          loading={
+            ulovligeRessurserQuery.isLoading ||
+            underliggendeOrgEnheterQuery.isLoading
+          }
+          orgEnhetAvhengigheter={orgEnhetAvhengigheter}
+          ressursAvhengigheter={ressursAvhengigheter}
+        />
+      )}
+
+      <div
+        css={css`
+          display: flex;
+          justify-content: end;
+          gap: var(--a-spacing-4);
+        `}
+      >
+        <SmartLink href="/organisasjonsmastring">
+          <Button size="small" variant="secondary">
+            Avbryt
+          </Button>
+        </SmartLink>
+
+        <Button size="small">Lagre</Button>
+      </div>
+    </>
+  );
+}
+
+function AvslutningTillattStatus({
+  ressursAvhengigheter,
+  orgEnhetAvhengigheter,
+  loading,
+}: {
+  ressursAvhengigheter: RessursAvhengighet[];
+  orgEnhetAvhengigheter: OrgEnhet[];
+  loading: boolean;
+}) {
+  return (
+    <VStack gap="4">
+      <Heading level="2" size="medium">
+        Avhengigheter:
+      </Heading>
+
+      <AvslutningTillatStatusInner
+        loading={loading}
+        orgEnhetAvhengigheter={orgEnhetAvhengigheter}
+        ressursAvhengigheter={ressursAvhengigheter}
+      />
+    </VStack>
+  );
+}
+
+function AvslutningTillatStatusInner({
+  ressursAvhengigheter,
+  orgEnhetAvhengigheter,
+  loading,
+}: {
+  ressursAvhengigheter: RessursAvhengighet[];
+  orgEnhetAvhengigheter: OrgEnhet[];
+  loading: boolean;
+}) {
+  if (loading) {
     return (
       <div
         css={css`
@@ -257,7 +260,7 @@ function RessursAvhengigheter({
 }: {
   ressursAvhengigheter: RessursAvhengighet[];
 }) {
-  if (!ressursAvhengigheter || ressursAvhengigheter?.length === 0) {
+  if (ressursAvhengigheter?.length === 0) {
     return;
   }
 
@@ -328,7 +331,7 @@ function OrgEnhetAvhengigheter({
 }: {
   orgEnhetAvhengigheter: OrgEnhet[];
 }) {
-  if (!orgEnhetAvhengigheter || orgEnhetAvhengigheter.length === 0) {
+  if (orgEnhetAvhengigheter.length === 0) {
     return;
   }
 
@@ -416,4 +419,10 @@ function DatePickerWrapper({
       />
     </DatePicker>
   );
+}
+
+interface RessursAvhengighet {
+  navident: string;
+  navn: string;
+  sluttdato?: string;
 }
