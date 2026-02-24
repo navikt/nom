@@ -5,6 +5,9 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.gql.lucenesearch.LuceneService;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
@@ -186,7 +189,6 @@ public class NomGqlApplication {
             return this.orgEnhetStateRepository;
         }
 
-
         @Bean
         public NomGraphqlSupportInterface graphqlSupport() {
             return NomGraphqlSupportInterface.dummyImplementation();
@@ -231,7 +233,8 @@ public class NomGqlApplication {
             LederResolver lederResolver,
             RessursResolver ressursResolver,
             SearchResolver searchResolver,
-            NomGraphqlSupportInterface graphqlSupportInterface
+            NomGraphqlSupportInterface graphqlSupportInterface,
+            LuceneService luceneService
         ) {
             super(
                 orgEnhetResolver,
@@ -242,6 +245,14 @@ public class NomGqlApplication {
                 searchResolver,
                 graphqlSupportInterface
             );
+            {
+                // For å få lucene-søk til å fungere
+                ressursResolver.ressurser(RessurserSearch.EMPTY_SEARCH).forEach(it -> luceneService.invalidateRessurs(it.getRessurs().getNavident()));
+                orgEnhetResolver.orgEnheter(OrgEnheterSearch.EMPTY_SEARCH).forEach(it -> luceneService.invalidateOrgenhet(it.getNomId()));
+
+                luceneService.addInvalidatedEntitiesToIndex();
+            }
+
         }
     }
 

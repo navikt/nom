@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,6 +72,8 @@ public class InitHierarkiIdGenerator {
             .fid("fid-" + navIdentStr)
             .sektor(Sektor.NAV_STATLIG)
             .personident(navIdentStr.substring(1) + navIdentStr.substring(2))
+            .startdato(LocalDate.now().minusDays(90L))
+            .sluttdato(null)
             .identType(IdentType.STANDARD);
     }
 }
