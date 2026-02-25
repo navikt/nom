@@ -37,7 +37,7 @@
         <opencsv.version>5.12.0</opencsv.version>
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
-        <ulid-creator.version>5.2.3</ulid-creator.version>
+        <ulid-creator.version>5.2.4</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <swagger-annotations-jakarta.version>2.2.42</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.2</wiremock.version>
