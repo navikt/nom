@@ -120,7 +120,7 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       if (ressursAvhengigheter.length > 0 || orgEnhetAvhengigheter.length > 0) {
         setDisplayErrorSummary(true);
       } else {
-        console.log("Would save");
+        //TODO: Backend-call
       }
     }
   };
