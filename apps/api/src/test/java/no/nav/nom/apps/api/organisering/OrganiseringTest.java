@@ -263,7 +263,7 @@ public class OrganiseringTest extends OrganiseringTestBase {
         var organiseringState_avsluttet = organiseringState.toBuilder()
             .gyldigTom(newGyldigTom)
             .build();
-        organiseringStateRepository.putEventAggregate(organiseringState_avsluttet);
+        organiseringStateRepository.update(organiseringState_avsluttet);
 
         // Change organisering from DVH. Organisering is same as the one received in step 1, but it will have new fid
         when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(dvhOrganisering));

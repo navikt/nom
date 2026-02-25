@@ -21,6 +21,38 @@ public class InitHierarkiByBuilder {
     public final OrgEnhetState ENHET_NAV = idGen.orgEnhetStateBuilder("NAV").nomNivaa(null).build();
 
     public final OrgEnhetState ENHET_ARB_OG_TJEN = idGen.orgEnhetStateBuilder("arb_og_tjen").nomNivaa(NomNivaa.LINJEENHET).build();
+    public final OrgEnhetState ENHET_DIR = idGen.orgEnhetStateBuilder("direktorat")
+        .nomNivaa(NomNivaa.DRIFTSENHET)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+
+    public final OrgEnhetState ENHET_TEK = idGen.orgEnhetStateBuilder("teknologi-avd")
+        .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+    public final OrgEnhetState ENHET_TEK_UTV = idGen.orgEnhetStateBuilder("tek-seksjon-utvikling")
+        .nomNivaa(null)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+    public final OrgEnhetState ENHET_TEK_UTV1 = idGen.orgEnhetStateBuilder("tek-utvikling-1").nomNivaa(null).orgEnhetsType(OrgEnhetsType.DIREKTORAT).build();
+    public final OrgEnhetState ENHET_TEK_UTV1A = idGen.orgEnhetStateBuilder("tek-utvikling-1A").nomNivaa(null).orgEnhetsType(OrgEnhetsType.DIREKTORAT).build();
+
+
+    public final OrgEnhetState ENHET_TEK_DATA = idGen.orgEnhetStateBuilder("tek-seksjon-data").nomNivaa(null).orgEnhetsType(OrgEnhetsType.DIREKTORAT).build();
+
+    public final OrgEnhetState ENHET_JUR = idGen.orgEnhetStateBuilder("juridisk-avd")
+        .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+    public final OrgEnhetState ENHET_JUR_PERSONVERN = idGen.orgEnhetStateBuilder("jur-seksjon-personvern")
+        .nomNivaa(null)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+    public final OrgEnhetState ENHET_JUR_STYRING = idGen.orgEnhetStateBuilder("jur-seksjon-styring")
+        .nomNivaa(null)
+        .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+        .build();
+
 
     public final OrgEnhetState ENHET_NORDLAND = idGen.orgEnhetStateBuilder("Nordland")
         .nomNivaa(NomNivaa.DRIFTSENHET)
@@ -28,33 +60,84 @@ public class InitHierarkiByBuilder {
         .build();
 
     public final OrgEnhetState ENHET_SORTLAND = idGen.orgEnhetStateBuilder("Sortland").build();
-    public final OrgEnhetState ENHET_SORTLAND_7S = idGen.orgEnhetStateBuilder("Sortland 7-siffer").nomNivaa(null).orgEnhetsType(OrgEnhetsType.NAV_KONTOR).build();
+    public final OrgEnhetState ENHET_SORTLAND_7S = idGen.orgEnhetStateBuilder("Sortland 7-siffer")
+        .nomNivaa(null)
+        .orgEnhetsType(OrgEnhetsType.NAV_KONTOR)
+        .build();
 
     public final OrgEnhetState ENHET_NARVIK = idGen.orgEnhetStateBuilder("Narvik").build();
     public final OrgEnhetState ENHET_NARVIK_7S = idGen.orgEnhetStateBuilder("Narvik 7-siffer").nomNivaa(null).orgEnhetsType(OrgEnhetsType.NAV_KONTOR).build();
 
 
-
-
     public final RessursState LEDER_NAV = idGen.ressursStateBuilder("NAV-leder").build();
     public final RessursState LEDER_ARB_OG_TJEN = idGen.ressursStateBuilder("Arb-og-tjen-leder").build();
+
+    public final RessursState LEDER_DIR = idGen.ressursStateBuilder("DIR-leder").build();
+
+    public final RessursState LEDER_TEK = idGen.ressursStateBuilder("Tek-leder").build();
+    public final RessursState LEDER_TEK_UTV = idGen.ressursStateBuilder("Tek-utvikling-leder").build();
+    public final RessursState LEDER_TEK_UTV1 = idGen.ressursStateBuilder("Tek-utvikling-1-leder").build();
+    public final RessursState LEDER_TEK_UTV1A = idGen.ressursStateBuilder("Tek-utvikling-1A-leder").build();
+
+    public final RessursState LEDER_TEK_DATA = idGen.ressursStateBuilder("Tek-data-leder").build();
+
+
+    public final RessursState LEDER_JUR = idGen.ressursStateBuilder("Jur-leder").build();
+    public final RessursState LEDER_JUR_PERSONVERN = idGen.ressursStateBuilder("Jur-personvern-leder").build();
+    public final RessursState LEDER_JUR_STYRING = idGen.ressursStateBuilder("Jur-styring-leder").build();
+
     public final RessursState LEDER_NORDLAND = idGen.ressursStateBuilder("Nordland-leder").build();
     public final RessursState LEDER_SORTLAND = idGen.ressursStateBuilder("Sortland-leder").build();
     public final RessursState LEDER_SORTLAND_7S = idGen.ressursStateBuilder("Sortland-7siffer-leder").build();
-    public final RessursState LEDER_NARVIK = idGen.ressursStateBuilder("Narvik-leder","A123456").build();
+    public final RessursState LEDER_NARVIK = idGen.ressursStateBuilder("Narvik-leder", "A123456").build();
 
 
     public final List<RessursState> ANSATTE_SORTLAND = Stream.of(1, 2, 3, 4, 5, 6, 7)
         .map(it -> idGen.ressursStateBuilder("Sortland ressurs " + it).build())
         .toList();
-    public final List<RessursState> ANSATTE_NARVIK = Stream.of(1, 2, 3, 4).map(it -> idGen.ressursStateBuilder("Narvik ressurs " + it).build()
-    ).toList();
+    public final List<RessursState> ANSATTE_NARVIK = Stream.of(1, 2, 3, 4).map(it -> idGen.ressursStateBuilder("Narvik ressurs " + it).build()).toList();
+
+    public final List<RessursState> UTVIKLERE = Stream.of(1, 2, 3).map(it -> idGen.ressursStateBuilder("Utvikler ressurs" + it).build()).toList();
 
 
     public final TestOrgNode testHierarki = TestOrgNode.createRootNode(
         ENHET_NAV,
         TestOrgLeder.simpleList(LEDER_NAV),
         List.of(
+            TestOrgNode.createAggregateNode(
+                ENHET_DIR,
+                LEDER_DIR,
+                List.of(
+                    TestOrgNode.createAggregateNode(
+                        ENHET_TEK,
+                        LEDER_TEK,
+                        List.of(
+                            TestOrgNode.createAggregateNode(
+                                ENHET_TEK_UTV,
+                                LEDER_TEK_UTV,
+                                List.of(
+                                    TestOrgNode.createAggregateNode(
+                                        ENHET_TEK_UTV1,
+                                        LEDER_TEK_UTV1,
+                                        List.of(
+                                            TestOrgNode.createOrgenhet(TestOrganisering.standard(),ENHET_TEK_UTV1A, LEDER_TEK_UTV1A, UTVIKLERE)
+                                        )
+                                    )
+                                )
+                            ),
+                            TestOrgNode.createAggregateNode(ENHET_TEK_DATA, LEDER_TEK_DATA, List.of())
+                        )
+                    ),
+                    TestOrgNode.createAggregateNode(
+                        ENHET_JUR,
+                        LEDER_JUR,
+                        List.of(
+                            TestOrgNode.createAggregateNode(ENHET_JUR_PERSONVERN, LEDER_JUR_PERSONVERN, List.of()),
+                            TestOrgNode.createAggregateNode(ENHET_JUR_STYRING, LEDER_JUR_STYRING, List.of())
+                        )
+                    )
+                )
+            ),
             TestOrgNode.createAggregateNode(
                 ENHET_ARB_OG_TJEN,
                 LEDER_ARB_OG_TJEN,
@@ -95,8 +178,7 @@ public class InitHierarkiByBuilder {
     );
 
 
-
-    static void main(){
+    static void main() {
         var stateObjectsFromHierarchy = new InitHierarkiByBuilder().testHierarki.generateStateObjects();
         InitHierarkiUtils.writeStateObjectsToTmpFile(stateObjectsFromHierarchy);
     }

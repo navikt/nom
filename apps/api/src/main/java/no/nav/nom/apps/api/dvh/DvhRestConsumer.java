@@ -118,18 +118,25 @@ public class DvhRestConsumer {
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
-        loadOrganiseringerFromDvh();
+
+        // Denne kommer før oppdatering av orgenheter - gjør at noen organiseringer feiler når ny enhet ikke er opprettet enda
+        // Men - vi må ha den her så lenge saveOrganiseringer(...) til orgenhetService benyttes - slik at hver pod er oppdatert med denne infoen.
+        // Skal fjernes når det over er tatt vekk
+        // Legger inn lesningen av denne under i lederElection delen for å sikre oppdaterte enheter først
+        loadOrganiseringerFromDvh(false); // Hvis dette er leader og schedulert, skal ikke oppdaterring gjøres - altså force er false
 
         if (!dvhStartupLoadMonitor.hasCompleted() && dvhTelefoner != null && !dvhTelefoner.isEmpty()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
 
-        if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
+        if (leaderElection.isLeader() && erKlokkeslettISafeTidsromForKonsistentLastFraDVH()) { // Oppdater state fra dvh - holder at en Pod gjør dette
+            log.info("Start leader schedulert oppdatering fra DVH");
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
 
             // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
             loadLedereFromDvh();
+            loadOrganiseringerFromDvh(true); // Her kan leader oppdatere
 
             // Finn OTer utenfor hierarki - og autoflytt om mulig
             findOTUtenforHierarki();
@@ -334,7 +341,8 @@ public class DvhRestConsumer {
 
             dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
 
-            if (forceEvtSrcUpdate || (leaderElection.isLeader() && erKlokkeslettISafeTidsromForKonsistentLastFraDVH())) {
+            if (forceEvtSrcUpdate) { // Kun leader schedulert trigget eller trigget fra swagger admin
+                log.info("Oppdaterer evtsrc med nye Organiseringer fra dvh");
                 organiseringService.saveOrganiseringer(organiseringer);
             }
         } catch (Exception e) {

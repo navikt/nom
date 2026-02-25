@@ -5,6 +5,8 @@ import java.time.LocalDate;
 public class TestOrganisering {
     public final LocalDate fom;
     public final LocalDate tom;
+
+    // changed post construction
     TestOrgNode nodeAbove;
 
     private TestOrganisering(LocalDate fom, LocalDate tom) {

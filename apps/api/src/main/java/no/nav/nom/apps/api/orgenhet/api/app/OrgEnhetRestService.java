@@ -164,10 +164,6 @@ public class OrgEnhetRestService {
         var orgEnhetState = orgenhetService.getById(oppdaterOrgEnhetRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(oppdaterOrgEnhetRequest.id()));
         var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
 
-        if (orgenhetService.activeOrFutureWithEqualName(oppdaterOrgEnhetRequest.navn())) {
-            throw DuplicateOrgEnhetNameException.name(oppdaterOrgEnhetRequest.navn());
-        }
-
         String navn = WordUtils.capitalize(oppdaterOrgEnhetRequest.navn());
 
         boolean hasChange = false;
@@ -183,6 +179,9 @@ public class OrgEnhetRestService {
         );
 
         if (!Objects.equals(oppdaterOrgEnhetRequest.navn(), orgEnhetState.getNavn())) {
+            if (orgenhetService.activeOrFutureWithEqualName(oppdaterOrgEnhetRequest.navn())) {
+                throw DuplicateOrgEnhetNameException.name(oppdaterOrgEnhetRequest.navn());
+            }
             hasChange = true;
             var oppdaterNavn = new OppdaterOrgEnhetNavnCmd(
                 navn,
