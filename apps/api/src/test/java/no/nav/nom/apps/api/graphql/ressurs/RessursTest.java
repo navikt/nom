@@ -291,7 +291,7 @@ public class RessursTest extends GraphQlTestBase {
 
         final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
         assertEquals(1, lederFor.size());
-        assertEquals(orgenhet.agressoId(), lederFor.get(0).get("orgEnhet").get("agressoId").textValue());
+        assertEquals(orgenhet.agressoId(), lederFor.get(0).get("orgEnhet").get("agressoId").stringValue());
     }
 
     @Test
@@ -319,7 +319,7 @@ public class RessursTest extends GraphQlTestBase {
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertEquals(1, ledere.size());
-        assertEquals(leder.navident(), ledere.get(0).get("ressurs").get("navIdent").textValue());
+        assertEquals(leder.navident(), ledere.get(0).get("ressurs").get("navIdent").stringValue());
     }
 
     @Test
@@ -373,7 +373,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario71.graphql");
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertEquals(1, ledere.size());
-        assertEquals(overLederRessurs.navident(), ledere.get(0).get("ressurs").get("navIdent").textValue());
+        assertEquals(overLederRessurs.navident(), ledere.get(0).get("ressurs").get("navIdent").stringValue());
     }
 
     @Test
@@ -388,8 +388,8 @@ public class RessursTest extends GraphQlTestBase {
         response.errors();
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(ressurs.navident(), outputRessurs.get("navident").stringValue());
+        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").stringValue());
     }
 
     @Test
@@ -403,8 +403,8 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario53.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(ressurs.navident(), outputRessurs.get("navident").textValue());
-        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(ressurs.navident(), outputRessurs.get("navident").stringValue());
+        assertEquals(telefonNummer.substring(2), outputRessurs.get("telefon").get(0).get("nummer").stringValue());
     }
 
 
@@ -422,10 +422,10 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").stringValue());
         assertEquals(2, outputRessurs.get("telefon").size());
-        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
-        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").textValue());
+        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").stringValue());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").stringValue());
     }
 
     @Test
@@ -442,10 +442,10 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(jobbtelefon, outputRessurs.get("primaryTelefon").stringValue());
         assertEquals(2, outputRessurs.get("telefon").size());
-        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
-        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").textValue());
+        assertEquals(jobbtelefon, outputRessurs.get("telefon").get(0).get("nummer").stringValue());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(1).get("nummer").stringValue());
     }
 
     @Test
@@ -461,9 +461,9 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(nomTelefon, outputRessurs.get("primaryTelefon").textValue());
+        assertEquals(nomTelefon, outputRessurs.get("primaryTelefon").stringValue());
         assertEquals(1, outputRessurs.get("telefon").size());
-        assertEquals(nomTelefon, outputRessurs.get("telefon").get(0).get("nummer").textValue());
+        assertEquals(nomTelefon, outputRessurs.get("telefon").get(0).get("nummer").stringValue());
     }
 
     @Test
@@ -478,7 +478,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario9.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertNull(outputRessurs.get("primaryTelefon").textValue());
+        assertNull(outputRessurs.get("primaryTelefon").stringValue());
         assertEquals(0, outputRessurs.get("telefon").size());
     }
 
@@ -493,7 +493,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(IdentType.STANDARD.name(), outputRessurs.get("identType").textValue());
+        assertEquals(IdentType.STANDARD.name(), outputRessurs.get("identType").stringValue());
     }
 
     @Test
@@ -507,7 +507,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(IdentType.ROBOT.name(), outputRessurs.get("identType").textValue());
+        assertEquals(IdentType.ROBOT.name(), outputRessurs.get("identType").stringValue());
     }
 
     @Test
@@ -521,7 +521,7 @@ public class RessursTest extends GraphQlTestBase {
         final var response = gqlUtil.postForResource("ressurs/scenario10.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
-        assertEquals(IdentType.UKJENT.name(), outputRessurs.get("identType").textValue());
+        assertEquals(IdentType.UKJENT.name(), outputRessurs.get("identType").stringValue());
     }
 
     @Test

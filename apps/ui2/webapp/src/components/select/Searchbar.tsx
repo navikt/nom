@@ -220,7 +220,7 @@ export async function commonSearch(
     ? inputValue.toUpperCase()
     : null;
   const lookupTelefon = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
-    ? `47${inputValue.replaceAll(/\s/g, "")}` // Siden telefonnummer er lagret med "47" først
+    ? inputValue.replaceAll(/\s/g, "")
     : null;
 
   const lookupOrgenhetId = /^[A-Za-z]{2}\d{3}[A-Za-z]$/.test(

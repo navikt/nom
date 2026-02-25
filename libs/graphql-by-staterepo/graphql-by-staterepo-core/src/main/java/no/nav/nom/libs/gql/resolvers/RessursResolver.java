@@ -1,20 +1,20 @@
 package no.nav.nom.libs.gql.resolvers;
 
-import no.nav.nom.libs.gql.MappingUtils;
-import no.nav.nom.libs.gql.projections.RessursSearch;
-import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
+import no.nav.nom.libs.gql.MappingUtils;
+import no.nav.nom.libs.gql.projections.RessursSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Component
 public class RessursResolver {
@@ -37,12 +37,14 @@ public class RessursResolver {
             return ressursStateRepository.findByPersonident(personident).map(MappingUtils::toRessurs);
         }
 
-        var tlf = search.getTelefonNummer();
-        if (tlf != null) {
+        var telefonNummer = search.getTelefonNummer();
+        if (telefonNummer != null) {
             return ressursStateRepository.getAll().stream()
                 .filter(ressursState -> {
-                    var jobbTelefon = ressursState.jobbtelefon();
-                    return jobbTelefon != null && jobbTelefon.nummer().equals(tlf);
+                    var jobbTelefonNummer = nonNull(ressursState.jobbtelefon()) ? Jobbtelefon.stripCountryCode(ressursState.jobbtelefon().nummer()) : null;
+                    var primaryTelefon = ressursState.primaryTelefonnummer();
+                    return (nonNull(jobbTelefonNummer) && jobbTelefonNummer.equals(telefonNummer))
+                        || (nonNull(primaryTelefon) && !primaryTelefon.isBlank() && primaryTelefon.equals(telefonNummer));
                 }).map(MappingUtils::toRessurs).findFirst();
         }
         return Optional.empty();
