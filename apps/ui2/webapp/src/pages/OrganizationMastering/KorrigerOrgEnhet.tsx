@@ -21,6 +21,7 @@ import * as yup from "yup";
 import { getOrgEnhet, oppdaterOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import {
   AsyncSearch,
@@ -87,7 +88,7 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId: string }) {
   return (
     <>
       <OrgEnhetInfoWrapper
-        heading="Informasjon om organisasjonsenhet"
+        heading="Valgt organisasjonsenhet"
         orgEnhetId={orgEnhetId}
       />
 
@@ -186,18 +187,27 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             label="Firesiffer"
           />
 
-          <Button
+          <div
             css={css`
-              align-self: end;
-              width: fit-content;
+              display: flex;
+              justify-content: end;
+              gap: var(--a-spacing-4);
             `}
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-            variant="primary"
           >
-            Lagre
-          </Button>
+            <SmartLink href="/organisasjonsmastring">
+              <Button size="small" variant="secondary">
+                Avbryt
+              </Button>
+            </SmartLink>
+
+            <Button
+              icon={<FloppydiskIcon aria-hidden />}
+              size="small"
+              type="submit"
+            >
+              Lagre
+            </Button>
+          </div>
         </VStack>
       </form>
     </FormProvider>
