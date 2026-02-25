@@ -6,6 +6,7 @@ import {
   Button,
   DatePicker,
   Heading,
+  List,
   Loader,
   Table,
   useDatepicker,
@@ -97,6 +98,28 @@ function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
 function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [sluttdato, setSluttdato] = useState<string>("");
 
+  const [displayDateError, setDisplayDateError] = useState<boolean>(false);
+  const [displayErrorSummary, setDisplayErrorSummary] =
+    useState<boolean>(false);
+
+  const handleDateChange = (date: string) => {
+    setSluttdato(date);
+
+    if (!!date) {
+      setDisplayDateError(false);
+    } else {
+      setDisplayErrorSummary(false);
+    }
+  };
+
+  const handleSaveClick = () => {
+    if (!sluttdato) {
+      setDisplayDateError(true);
+    } else {
+      setDisplayErrorSummary(true);
+    }
+  };
+
   const ulovligeOrgtilknytninger = orgEnhet.ressursKoblinger.filter(
     (tilknytning) => nomDateIsAfter(tilknytning.gyldigTom, sluttdato),
   );
@@ -142,7 +165,10 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   return (
     <>
-      <DatePickerWrapper error="Test" onChange={setSluttdato} />
+      <DatePickerWrapper
+        error={displayDateError && !sluttdato ? "Obligatorisk" : undefined}
+        onChange={handleDateChange}
+      />
 
       {!!sluttdato && (
         <AvslutningTillattStatus
@@ -154,6 +180,32 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           ressursAvhengigheter={ressursAvhengigheter}
         />
       )}
+
+      {displayErrorSummary &&
+        (ressursAvhengigheter.length > 0 ||
+          orgEnhetAvhengigheter.length > 0) && (
+          <Alert variant="error">
+            <Heading level="3" size="small">
+              For å kunne gå videre må du rette opp i følgende:
+            </Heading>
+
+            <List>
+              {ressursAvhengigheter.length > 0 && (
+                <List.Item>
+                  Medarbeidere ansatt i denne enheten må flyttes eller avvikles
+                  før angitt dato
+                </List.Item>
+              )}
+
+              {orgEnhetAvhengigheter.length > 0 && (
+                <List.Item>
+                  Enheter under denne enheten må flyttes eller avvikles før
+                  angitt dato
+                </List.Item>
+              )}
+            </List>
+          </Alert>
+        )}
 
       <div
         css={css`
@@ -168,7 +220,9 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           </Button>
         </SmartLink>
 
-        <Button size="small">Lagre</Button>
+        <Button onClick={handleSaveClick} size="small">
+          Lagre
+        </Button>
       </div>
     </>
   );
