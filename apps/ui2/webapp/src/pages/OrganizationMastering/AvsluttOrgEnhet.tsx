@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
   BodyLong,
@@ -86,7 +87,7 @@ function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
   return (
     <>
       <OrgEnhetInfoWrapper
-        heading="Avslutt organisasjonsenhet"
+        heading="Valgt organisasjonsenhet"
         orgEnhetId={orgEnhetId}
       />
 
@@ -224,7 +225,11 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           </Button>
         </SmartLink>
 
-        <Button onClick={handleSaveClick} size="small">
+        <Button
+          icon={<FloppydiskIcon aria-hidden />}
+          onClick={handleSaveClick}
+          size="small"
+        >
           Lagre
         </Button>
       </div>
@@ -244,7 +249,7 @@ function AvslutningTillattStatus({
   return (
     <VStack gap="4">
       <Heading level="2" size="medium">
-        Avhengigheter:
+        Avhengigheter
       </Heading>
 
       <AvslutningTillatStatusInner
