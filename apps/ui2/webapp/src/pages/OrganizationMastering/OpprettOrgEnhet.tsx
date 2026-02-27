@@ -1,7 +1,12 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FloppydiskIcon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
+  CheckmarkCircleFillIcon,
+  FloppydiskIcon,
+  PlusCircleIcon,
+} from "@navikt/aksel-icons";
+import {
+  BodyLong,
   BodyShort,
   Button,
   DatePicker,
@@ -15,7 +20,7 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type { AxiosError } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
@@ -37,9 +42,15 @@ import {
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OpprettOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
+import type {
+  OpprettOrgEnhetRequest,
+  OpprettOrgEnhetResponse,
+  OrgEnhet,
+} from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
@@ -49,6 +60,9 @@ export const OpprettOrgEnhet = () => {
   if (!hasAdminAccess) {
     return;
   }
+
+  const [opprettResponse, setOpprettResponse] =
+    useState<OpprettOrgEnhetResponse>();
 
   const [selectedOrgEnhetId, setSelectedOrgEnhet] = useState<string | null>(
     null,
@@ -61,30 +75,55 @@ export const OpprettOrgEnhet = () => {
       <PageBanner text="Opprett ny organisasjonsenhet" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop padding={6}>
-          <VelgOrgEnhetPlassering
-            handleOpprettHerClick={handleOpprettHerClick}
-            selectedOrgEnhetId={selectedOrgEnhetId}
-          />
+        {!!opprettResponse ? (
+          <ContainerWithHighlightedTop
+            icon={opprettRessursIconRoundedBackground}
+            padding={6}
+            title={
+              <HStack gap="4">
+                <CheckmarkCircleFillIcon
+                  css={css`
+                    color: var(--a-surface-success-hover);
+                    font-size: var(--a-font-size-heading-xlarge);
+                  `}
+                />
+                Organisasjonsenheten er nå registrert i NOM
+              </HStack>
+            }
+          >
+            <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />
+          </ContainerWithHighlightedTop>
+        ) : (
+          <>
+            <ContainerWithHighlightedTop padding={6}>
+              <VelgOrgEnhetPlassering
+                handleOpprettHerClick={handleOpprettHerClick}
+                selectedOrgEnhetId={selectedOrgEnhetId}
+              />
 
-          <OrgEnhetInfoForm orgEnhetId={selectedOrgEnhetId} />
+              <OrgEnhetInfoForm
+                orgEnhetId={selectedOrgEnhetId}
+                setOpprettResponse={setOpprettResponse}
+              />
 
-          {!selectedOrgEnhetId && (
-            <div
-              css={css`
-                display: flex;
-                justify-content: end;
-                gap: var(--a-spacing-4);
-              `}
-            >
-              <SmartLink href="/organisasjonsmastring">
-                <Button size="small" variant="secondary">
-                  Avbryt
-                </Button>
-              </SmartLink>
-            </div>
-          )}
-        </ContainerWithHighlightedTop>
+              {!selectedOrgEnhetId && (
+                <div
+                  css={css`
+                    display: flex;
+                    justify-content: end;
+                    gap: var(--a-spacing-4);
+                  `}
+                >
+                  <SmartLink href="/organisasjonsmastring">
+                    <Button size="small" variant="secondary">
+                      Avbryt
+                    </Button>
+                  </SmartLink>
+                </div>
+              )}
+            </ContainerWithHighlightedTop>
+          </>
+        )}
       </ContentWrapper>
     </>
   );
@@ -115,31 +154,39 @@ function VelgOrgEnhetPlassering({
   );
 }
 
-function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
+function OrgEnhetInfoForm({
+  orgEnhetId,
+  setOpprettResponse,
+}: {
+  orgEnhetId: string | null;
+  setOpprettResponse: (response: any) => void;
+}) {
   if (!orgEnhetId) {
     return;
   }
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
 
   const opprettOrgEnhetMutation = useMutation<
-    unknown,
+    AxiosResponse<OpprettOrgEnhetResponse>,
     AxiosError<Error>,
     OpprettOrgEnhetRequest
   >({
     mutationFn: async (request) => {
       return opprettOrgEnhet(request);
     },
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      setOpprettResponse(response);
+
       showToast({ text: "Opprettet" });
 
-      navigate({
-        to: "/organisasjonsmastring",
-      }).then();
+      // navigate({
+      //   to: "/organisasjonsmastring",
+      // }).then();
     },
   });
 
@@ -303,6 +350,41 @@ function FormDateWrapper({ name }: { name: string }) {
         label="Dato"
       />
     </DatePicker>
+  );
+}
+
+function OrgEnhetOpprettetKvittering({
+  opprettResponse,
+}: {
+  opprettResponse: any;
+}) {
+  const opprettetOrgEnhet = opprettResponse.data;
+
+  return (
+    <>
+      <BodyLong>
+        Organisasjonsenheten <b>{opprettetOrgEnhet.navn}</b> er nå registrert i
+        NOM med ID <b>{opprettetOrgEnhet.id}</b>.
+      </BodyLong>
+
+      <VStack
+        css={css`
+          width: 70%;
+          margin: auto;
+        `}
+        gap="4"
+      >
+        <PanelLink
+          href={`/org/${opprettetOrgEnhet.id}`}
+          label="Gå til organisasjonsenhet"
+        />
+
+        <PanelLink
+          href="/organisasjonsmastring"
+          label="Gå tilbake til forsiden"
+        />
+      </VStack>
+    </>
   );
 }
 

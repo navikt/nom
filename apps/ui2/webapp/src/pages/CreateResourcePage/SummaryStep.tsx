@@ -346,7 +346,7 @@ function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
   );
 }
 
-function PanelLink({ label, href }: { label: string; href: string }) {
+export function PanelLink({ label, href }: { label: string; href: string }) {
   return (
     <SmartLink
       css={css`
