@@ -117,8 +117,6 @@ public class OrganiseringService {
             ));
 
         logger.info("Antall organiseringer ikke lenger mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
-
-        organiseringStateRepository.logRepositoryState();
     }
 
     public record OrganiseringIdTuple(

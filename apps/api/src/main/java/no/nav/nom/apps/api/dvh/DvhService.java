@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,15 @@ public class DvhService {
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederService orgEnhetLederService;
+
+    Set<String> eksludeAlerts = Set.of(
+        "HELFO-Helfo-ORGNIV0",
+        "NAV-NAV-ORGNIV0",
+        "RIKSREVISJON-Riksrevisjonen-ORGNIV0",
+        "SKATT-Skattedirektoratet-ORGNIV0",
+        "VIKAFOSSEN-VikaFossen-ORGNIV0",
+        "2013003-Alta - Kvanangen - Loppa avdeling Arbeidsinkludering-ORGENHET" // Gammel 'feilentry' i U4 - don't care
+    );
 
     public DvhService(
         RessursStateRepository ressursStateRepository,
@@ -99,26 +109,19 @@ public class DvhService {
             .filter(o -> {
                 final var overEnhet = cachedEnheter.get(o.uniqueAgressoIdOver());
                 final var underEnhet = cachedEnheter.get(o.uniqueAgressoIdUnder());
+                String msg = "Organisering relasjon mislyktes, overenhet: %s, underenhet: %s, "
+                    .formatted(o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
                 if (overEnhet == null && underEnhet == null) {
-                    log.info(
-                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Over- og Underenhet mangler",
-                        o.uniqueAgressoIdOver(),
-                        o.uniqueAgressoIdUnder()
-                    );
+                    msg += "Over- og Underenhet mangler";
                 } else if (overEnhet == null) {
-                    log.info(
-                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler",
-                        o.uniqueAgressoIdOver(),
-                        o.uniqueAgressoIdUnder()
-                    );
+                    msg += "Overenhet mangler";
                 } else if (underEnhet == null) {
-                    log.info(
-                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler",
-                        o.uniqueAgressoIdOver(),
-                        o.uniqueAgressoIdUnder()
-                    );
+                    msg += "Underenhet mangler";
                 } else {
                     return true;
+                }
+                if (!eksludeAlerts.contains(o.uniqueAgressoIdUnder())) {
+                    log.warn(msg);
                 }
                 return false;
             })

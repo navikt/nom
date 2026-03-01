@@ -125,7 +125,7 @@
         <dependency>
             <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-71</artifactId>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>

@@ -318,9 +318,14 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           padding: var(--a-spacing-4) var(--a-spacing-6);
           border-radius: var(--a-border-radius-large);
           display: grid;
+          gap: var(--a-spacing-2);
         `}
       >
-        <OrgEnhetInfo heading="Flytt fra" orgEnhet={orgEnhet} />
+        <Heading level="1" size="xsmall">
+          Flytt fra
+        </Heading>
+
+        <OrgEnhetInfo orgEnhet={orgEnhet} />
       </div>
 
       <VStack
@@ -333,7 +338,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         gap="4"
       >
         <VStack gap="2">
-          <Heading level="1" size="medium">
+          <Heading level="1" size="xsmall">
             Flytt til
           </Heading>
 
@@ -566,34 +571,18 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   );
 }
 
-export function OrgEnhetInfo({
-  orgEnhet,
-  heading,
-}: {
-  orgEnhet: OrgEnhet;
-  heading?: string;
-}) {
+export function OrgEnhetInfo({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <VStack gap="2">
-      {!!heading && (
-        <Heading level="2" size="medium">
-          {heading}
-        </Heading>
-      )}
+      <BodyShort
+        css={css`
+          font-size: var(--a-font-size-xlarge);
+        `}
+      >
+        <b>{orgEnhet.navn}</b>
+      </BodyShort>
 
-      <VStack gap="2">
-        <BodyShort
-          css={css`
-            font-size: var(--a-font-size-xlarge);
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-          `}
-        >
-          {orgEnhet.navn}
-        </BodyShort>
-
-        <EnhetKontekstInfo orgEnhet={orgEnhet} />
-      </VStack>
+      <EnhetKontekstInfo orgEnhet={orgEnhet} />
     </VStack>
   );
 }

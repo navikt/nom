@@ -154,6 +154,11 @@ async function queryForOrgenhet(
           __typename
           id
           navn
+          organiseringer(retning: over) {
+            orgEnhet {
+              id
+            }
+          }
         }
       }
     }`;
@@ -169,7 +174,10 @@ async function queryForOrgenhet(
 
   return result.data.data.orgEnheter
     .map((entry: any) => entry.orgEnhet)
-    .filter((result: any) => !!result);
+    .filter(Boolean)
+    .filter((result: any) =>
+      agressoId ? (result.organiseringer?.length ?? 0) > 0 : true,
+    );
 }
 
 export async function queryForRessurs(
@@ -212,7 +220,7 @@ export async function commonSearch(
     ? inputValue.toUpperCase()
     : null;
   const lookupTelefon = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
-    ? `47${inputValue.replaceAll(/\s/g, "")}` // Siden telefonnummer er lagret med "47" først
+    ? inputValue.replaceAll(/\s/g, "")
     : null;
 
   const lookupOrgenhetId = /^[A-Za-z]{2}\d{3}[A-Za-z]$/.test(
@@ -242,6 +250,18 @@ export async function commonSearch(
 
     const results = await Promise.all(promises);
     results.forEach((r) => result.push(...r));
+
+    if (/^\d{6}$/.test(inputValue.trim())) {
+      const inputHasWhitespace = /\s/.test(inputValue.trim());
+      const wrappedInputValue = inputHasWhitespace
+        ? "'" + inputValue + "'"
+        : inputValue;
+
+      const searchResults = await performSearch(wrappedInputValue);
+      result.push(
+        ...searchResults.filter((element) => rawResultFilter(element)),
+      );
+    }
 
     return result;
   }

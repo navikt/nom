@@ -491,19 +491,40 @@ function UtvidOrgEnhetKort({
               <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
 
               {hasAdminAccess && (
-                <SmartLink
-                  href={`/korriger-organisasjonsenhet/${orgEnhet.id}`}
-                  target="_blank"
+                <div
+                  css={css`
+                    display: flex;
+                    gap: var(--a-spacing-2);
+                  `}
                 >
-                  <Button
-                    css={css`
-                      height: fit-content;
-                    `}
-                    variant="secondary"
+                  <SmartLink
+                    href={`/korriger-organisasjonsenhet/${orgEnhet.id}`}
+                    target="_blank"
                   >
-                    Korrigér
-                  </Button>
-                </SmartLink>
+                    <Button
+                      css={css`
+                        height: fit-content;
+                      `}
+                      variant="secondary"
+                    >
+                      Korrigér
+                    </Button>
+                  </SmartLink>
+
+                  <SmartLink
+                    href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
+                    target="_blank"
+                  >
+                    <Button
+                      css={css`
+                        height: fit-content;
+                      `}
+                      variant="secondary"
+                    >
+                      Avslutt
+                    </Button>
+                  </SmartLink>
+                </div>
               )}
             </div>
           </VStack>

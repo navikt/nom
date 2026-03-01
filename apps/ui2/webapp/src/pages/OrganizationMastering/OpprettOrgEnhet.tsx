@@ -28,6 +28,7 @@ import {
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import {
   AsyncSearch,
@@ -67,6 +68,22 @@ export const OpprettOrgEnhet = () => {
           />
 
           <OrgEnhetInfoForm orgEnhetId={selectedOrgEnhetId} />
+
+          {!selectedOrgEnhetId && (
+            <div
+              css={css`
+                display: flex;
+                justify-content: end;
+                gap: var(--a-spacing-4);
+              `}
+            >
+              <SmartLink href="/organisasjonsmastring">
+                <Button size="small" variant="secondary">
+                  Avbryt
+                </Button>
+              </SmartLink>
+            </div>
+          )}
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
@@ -181,18 +198,27 @@ function OrgEnhetInfoForm({ orgEnhetId }: { orgEnhetId: string | null }) {
             label="Firesiffer"
           />
 
-          <Button
+          <div
             css={css`
-              align-self: end;
-              width: fit-content;
+              display: flex;
+              justify-content: end;
+              gap: var(--a-spacing-4);
             `}
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-            variant="primary"
           >
-            Lagre
-          </Button>
+            <SmartLink href="/organisasjonsmastring">
+              <Button size="small" variant="secondary">
+                Avbryt
+              </Button>
+            </SmartLink>
+
+            <Button
+              icon={<FloppydiskIcon aria-hidden />}
+              size="small"
+              type="submit"
+            >
+              Lagre
+            </Button>
+          </div>
         </VStack>
       </form>
     </FormProvider>
@@ -523,16 +549,24 @@ export function OrgEnhetInfoWrapper({
 
   return (
     !!orgEnhet && (
-      <div
-        css={css`
-          background-color: #deecef;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
-          display: grid;
-        `}
-      >
-        <OrgEnhetInfo heading={heading} orgEnhet={orgEnhet} />
-      </div>
+      <VStack gap="2">
+        {!!heading && (
+          <Heading level="2" size="small">
+            {heading}
+          </Heading>
+        )}
+
+        <div
+          css={css`
+            background-color: #deecef;
+            padding: var(--a-spacing-4);
+            border-radius: var(--a-border-radius-xlarge);
+            display: grid;
+          `}
+        >
+          <OrgEnhetInfo orgEnhet={orgEnhet} />
+        </div>
+      </VStack>
     )
   );
 }
