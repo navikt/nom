@@ -14,6 +14,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -39,6 +40,8 @@ public class RessursOpprettetEmailService {
     private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetLederService orgEnhetLederService;
     private final Configuration freemarkerConfig;
+
+    @Value("${app.email.servicetorget-email}") String servicetorgetEmail;
 
     public RessursOpprettetEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -85,6 +88,11 @@ public class RessursOpprettetEmailService {
 
             //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
             log.info("Sender epost subject: {} recipients: {}", subject, recipientList);
+
+            // for ressurs with fysisk brukersted = Fyrstikkaleen 1 i.e 2700, add servicetorget to the receipient list
+            if(opprettetRessurs.primaryFysiskBrukersted().equals("2700")){
+                recipientList.add(servicetorgetEmail);
+            }
 
             EmailMessage message = new EmailMessage(subject, body, recipientList);
             microsoftGraphClient.sendEmail(message).subscribe();

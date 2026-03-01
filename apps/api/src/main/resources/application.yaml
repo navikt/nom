@@ -245,6 +245,7 @@ management:
 app:
   email:
     enabled: false
+    servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   clients:
     microsoft-graph:
       send-email: false
