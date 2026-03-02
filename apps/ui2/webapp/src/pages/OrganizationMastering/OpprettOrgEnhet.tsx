@@ -19,7 +19,6 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import React, { useState } from "react";
@@ -61,8 +60,7 @@ export const OpprettOrgEnhet = () => {
     return;
   }
 
-  const [opprettResponse, setOpprettResponse] =
-    useState<OpprettOrgEnhetResponse>();
+  const [opprettResponse, setOpprettResponse] = useState<any>();
 
   const [selectedOrgEnhetId, setSelectedOrgEnhet] = useState<string | null>(
     null,
@@ -165,8 +163,6 @@ function OrgEnhetInfoForm({
     return;
   }
 
-  //const navigate = useNavigate();
-
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -183,10 +179,6 @@ function OrgEnhetInfoForm({
       setOpprettResponse(response);
 
       showToast({ text: "Opprettet" });
-
-      // navigate({
-      //   to: "/organisasjonsmastring",
-      // }).then();
     },
   });
 
@@ -465,7 +457,9 @@ function OrgHierarkiStack({
       !!underliggendeOrgEnhetIder && underliggendeOrgEnhetIder.length > 0,
   });
 
-  const underliggendeOrgEnheter = underliggendeOrgEnheterQuery.data ?? [];
+  const underliggendeOrgEnheter = (
+    underliggendeOrgEnheterQuery.data ?? []
+  ).sort((a, b) => a.navn.localeCompare(b.navn));
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
