@@ -22,6 +22,7 @@ import {
   Select,
   Tag,
   useDatepicker,
+  VStack,
 } from "@navikt/ds-react";
 import {
   useMutation,
@@ -698,6 +699,8 @@ function OrgEnhetFormPart({
     enabled: !!field.orgEnhetId,
   });
 
+  const orgEnhet = orgEnhetQuery.data;
+
   const selectOrgEnhet = !existingOt && !vikafossen;
 
   return (
@@ -708,19 +711,15 @@ function OrgEnhetFormPart({
           justify-content: space-between;
         `}
       >
-        <div>
+        <VStack gap="2">
           <Heading size="medium">
             {selectOrgEnhet
               ? "Legg til ny organisasjonstilknytning"
-              : orgEnhetQuery.data?.navn}
+              : orgEnhet?.navn}
           </Heading>
 
-          {!selectOrgEnhet && (
-            <BodyShort>
-              Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
-            </BodyShort>
-          )}
-        </div>
+          {!selectOrgEnhet && <OrgEnhetInformasjon orgEnhet={orgEnhet} />}
+        </VStack>
 
         {existingOt ? (
           <>
@@ -765,7 +764,7 @@ function OrgEnhetFormPart({
       </div>
 
       {selectOrgEnhet && (
-        <div>
+        <VStack gap="2">
           <div
             css={css`
               margin-top: var(--a-spacing-4);
@@ -775,17 +774,38 @@ function OrgEnhetFormPart({
               name={`mappedeOrgtilknytninger.${index}.orgEnhetId`}
             />
           </div>
-
-          <BodyShort
-            css={css`
-              margin-top: var(--a-spacing-2);
-            `}
-          >
-            Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
-          </BodyShort>
-        </div>
+          <OrgEnhetInformasjon orgEnhet={orgEnhet} />
+        </VStack>
       )}
     </>
+  );
+}
+
+function OrgEnhetInformasjon({ orgEnhet }: { orgEnhet?: OrgEnhet }) {
+  return (
+    <HStack gap="4">
+      {!!orgEnhet && (
+        <>
+          <BodyShort>
+            NOM-ID: <b>{orgEnhet.id}</b>
+          </BodyShort>
+
+          <BodyShort>
+            Enhet i Remedy: <b>{orgEnhet.remedyEnhetId}</b>
+          </BodyShort>
+
+          <BodyShort>
+            Unit4-ID: <b>{orgEnhet.agressoId}</b>
+          </BodyShort>
+
+          {orgEnhet.gyldigTom && (
+            <BodyShort>
+              Avslutningsdato: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+            </BodyShort>
+          )}
+        </>
+      )}
+    </HStack>
   );
 }
 
