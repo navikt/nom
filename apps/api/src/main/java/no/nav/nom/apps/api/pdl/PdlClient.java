@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 import tools.jackson.databind.JsonNode;
 
 import java.time.Duration;
@@ -55,7 +56,16 @@ public class PdlClient {
     ) {
         final var pdlProperties = appProperties.clients().pdl();
 
-        HttpClient httpClient = HttpClient.create()
+        ConnectionProvider fssConnectionProvider = ConnectionProvider.builder("PDL_fss-connection-pool")
+            .maxConnections(20)
+            .maxIdleTime(Duration.ofMinutes(10))
+            .maxLifeTime(Duration.ofMinutes(55))
+            .pendingAcquireTimeout(Duration.ofSeconds(30))
+            .evictInBackground(Duration.ofMinutes(5))
+            .lifo()
+            .build();
+
+        HttpClient httpClient = HttpClient.create(fssConnectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, RESPONSE_TIMEOUT_IN_SECONDS * 1000)
             .responseTimeout(Duration.ofSeconds(RESPONSE_TIMEOUT_IN_SECONDS));
 
