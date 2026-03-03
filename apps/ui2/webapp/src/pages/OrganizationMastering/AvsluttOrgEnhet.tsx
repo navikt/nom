@@ -13,24 +13,32 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import React, { useState } from "react";
 
 import {
+  avvikleOrgEnhet,
   getOrgEnhet,
   getOrgEnhetList,
   getRessurserByListNavident,
+  updateFysiskBrukerstedForRessurser,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import type { OrgEnhet } from "~/types/api-models";
+import type {
+  AvvikleOrgEnhetRequest,
+  OrgEnhet,
+  UpdatePrimaryFysiskBrukerstedForRessurserRequest,
+} from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const AvsluttOrgEnhet = () => {
@@ -113,6 +121,25 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     }
   };
 
+  const navigate = useNavigate();
+
+  const avvikleOrgEnhetMutation = useMutation<
+    unknown,
+    AxiosError<Error>,
+    AvvikleOrgEnhetRequest
+  >({
+    mutationFn: async (request) => {
+      return avvikleOrgEnhet(orgEnhet.id, request);
+    },
+    onSuccess: async () => {
+      showToast({ text: "Avsluttet" });
+
+      navigate({
+        to: "/",
+      }).then();
+    },
+  });
+
   const handleSaveClick = () => {
     if (!sluttdato) {
       setDisplayDateError(true);
@@ -120,7 +147,7 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       if (ressursAvhengigheter.length > 0 || orgEnhetAvhengigheter.length > 0) {
         setDisplayErrorSummary(true);
       } else {
-        //TODO: Backend-call
+        avvikleOrgEnhetMutation.mutate({ gyldigTom: sluttdato });
       }
     }
   };

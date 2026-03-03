@@ -654,5 +654,6 @@ const validationSchema = yup.object({
   firesiffer: yup.string().required("Obligatorisk"),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
-    .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
+    .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
+    .required("Obligatorisk"),
 });
