@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettO
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
@@ -21,9 +22,12 @@ import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +51,7 @@ import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.organiseringState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
+import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -148,8 +153,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     public void should_return_orgEnheter_that_has_parent_as_orgEnheter_with_manager_navIdenter() {
-        String orgEnhetId = "abc123d";
-        String orgEnhetOverId = "efg456h";
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
 
         OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
                 .id(orgEnhetId)
@@ -314,8 +319,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     void should_update_orgEnhetNavn() {
-        String orgEnhetId = "abc123d";
-        String orgEnhetOverId = "efg456h";
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
 
         OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .navn("Nav Lokal Kontor")
@@ -371,7 +376,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     void test_should_throw_exception_not_found_when_missing_organisering() {
-        String orgEnhetId = "abc123d";
+        String orgEnhetId = "ab123c";
 
         OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .navn("Nav Lokal Kontor")
@@ -421,7 +426,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
     @Test
     void test_should_throw_forbidden_exception_when_if_non_admin_user() {
-        String orgEnhetId = "abc123d";
+        String orgEnhetId = "ab123c";
 
         OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .navn("Nav Lokal Kontor")
@@ -450,6 +455,478 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .bodyValue(oppdaterOrgEnhetRequest)
             .exchange()
             .expectStatus().isForbidden();
+    }
+
+    @Test
+    void test_should_set_end_date_on_orgenhet_with_ressurser() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .id(orgEnhetOverId)
+            .gyldigTom(null)
+            .build();
+
+        OrganiseringState organisering = organiseringState().toBuilder()
+            .id(orgEnhetId)
+            .idOver(orgEnhetOverId)
+            .build();
+
+        OrgtilknytningState orgtilknytningStateEn = OrgtilknytningState.builder().
+            fid("FID_1")
+            .navident("S987654")
+            .orgEnhetId(orgEnhet.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        OrgtilknytningState orgtilknytningStateTo = OrgtilknytningState.builder().
+            fid("FID_2")
+            .navident("S987653")
+            .orgEnhetId(orgEnhet.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+        orgEnhetStateRepository.update(overOrgEnhetState);
+        organiseringStateRepository.update(organisering);
+        orgtilknytningStateRepository.update(orgtilknytningStateEn.fid(),  orgtilknytningStateEn);
+        orgtilknytningStateRepository.update(orgtilknytningStateTo.fid(),  orgtilknytningStateTo);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var avvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        String standardResponseMessageExpectation = String.format("Enhet %s (%s) har fått satt sluttdato til %s", orgEnhet.navn(), orgEnhet.id(), avvikleOrgEnhetRequest.gyldigTom());
+
+        assertNotNull(avvikletOrgEnhet);
+        assertThat(standardResponseMessageExpectation).isEqualTo(avvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_set_end_date_on_orgenhet_with_underenheter_and_ressurser() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_1")
+            .id(orgEnhetOverId)
+            .gyldigTom(null)
+            .build();
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_2")
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        var underOrgEnhetEn = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_3")
+            .navn("Nav Lokal Underkontor 1")
+            .id("ab124c")
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        var underOrgEnhetTo = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_4")
+            .navn("Nav Lokal Underkontor 2")
+            .id("ab125c")
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState overOrganisering = organiseringState().toBuilder()
+            .id(overOrgEnhetState.id())
+            .idOver(null)
+            .gyldigFom(LocalDate.of(2022,1,1))
+            .build();
+
+        OrganiseringState organisering = orgEnhetStateToOrganiseringState(1, orgEnhet, overOrgEnhetState);
+
+        OrganiseringState underOrganiseringEn = orgEnhetStateToOrganiseringState(2, underOrgEnhetEn, orgEnhet);
+        OrganiseringState underOrganiseringTo = orgEnhetStateToOrganiseringState(3, underOrgEnhetTo, orgEnhet);
+
+        OrgtilknytningState orgtilknytningStateEn = OrgtilknytningState.builder()
+            .fid("FID_1")
+            .navident("S987654")
+            .orgEnhetId(underOrgEnhetEn.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        OrgtilknytningState orgtilknytningStateTo = OrgtilknytningState.builder()
+            .fid("FID_2")
+            .navident("S987653")
+            .orgEnhetId(underOrgEnhetTo.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+
+        orgEnhetStateRepository.update(overOrgEnhetState);
+
+        orgEnhetStateRepository.update(underOrgEnhetEn);
+        orgEnhetStateRepository.update(underOrgEnhetTo);
+
+        organiseringStateRepository.update(organisering);
+
+        organiseringStateRepository.update(overOrganisering);
+
+        organiseringStateRepository.update(underOrganiseringEn);
+        organiseringStateRepository.update(underOrganiseringTo);
+
+        orgtilknytningStateRepository.update(orgtilknytningStateEn.fid(),  orgtilknytningStateEn);
+        orgtilknytningStateRepository.update(orgtilknytningStateTo.fid(),  orgtilknytningStateTo);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var avvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        String standardResponseMessageExpectation = String.format("Enhet %s (%s) har fått satt sluttdato til %s", orgEnhet.navn(), orgEnhet.id(), avvikleOrgEnhetRequest.gyldigTom());
+
+        assertNotNull(avvikletOrgEnhet);
+        assertThat(standardResponseMessageExpectation).isEqualTo(avvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_refuse_to_set_end_date_on_orgenhet_because_of_over_orgenhet() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_1")
+            .id(orgEnhetOverId)
+            .gyldigTom(LocalDate.now().plusWeeks(1))
+            .build();
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_2")
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState overOrganisering = organiseringState().toBuilder()
+            .id(overOrgEnhetState.id())
+            .idOver(null)
+            .gyldigFom(LocalDate.of(2022,1,1))
+            .build();
+
+        OrganiseringState organisering = orgEnhetStateToOrganiseringState(1, orgEnhet, overOrgEnhetState);
+
+        orgEnhetStateRepository.update(orgEnhet);
+        orgEnhetStateRepository.update(overOrgEnhetState);
+
+        organiseringStateRepository.update(organisering);
+        organiseringStateRepository.update(overOrganisering);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var ikkeAvvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        var responseMessage = String.format(
+            "Kan ikke sette avviklings dato til enhet %s (%s) til å være etter overenheten %s (%s) sin avviklingsdato",
+            orgEnhet.navn(),
+            avvikleOrgEnhetRequest.gyldigTom(),
+            overOrgEnhetState.navn(),
+            overOrgEnhetState.gyldigTom());
+
+        assertNotNull(ikkeAvvikletOrgEnhet);
+        assertThat(responseMessage).isEqualTo(ikkeAvvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_refuse_to_set_end_date_on_orgenhet_because_of_under_orgenhet() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_1")
+            .id(orgEnhetOverId)
+            .gyldigTom(null)
+            .build();
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_2")
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        var underOrgEnhetEn = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_3")
+            .navn("Nav Lokal Underkontor 1")
+            .id("ab124c")
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(LocalDate.now().plusWeeks(3))
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState overOrganisering = organiseringState().toBuilder()
+            .id(overOrgEnhetState.id())
+            .idOver(null)
+            .gyldigFom(LocalDate.of(2022,1,1))
+            .build();
+
+        OrganiseringState organisering = orgEnhetStateToOrganiseringState(1, orgEnhet, overOrgEnhetState);
+        OrganiseringState underOrganiseringEn = orgEnhetStateToOrganiseringState(2, underOrgEnhetEn, orgEnhet);
+
+        orgEnhetStateRepository.update(orgEnhet);
+        orgEnhetStateRepository.update(overOrgEnhetState);
+        orgEnhetStateRepository.update(underOrgEnhetEn);
+
+        organiseringStateRepository.update(organisering);
+        organiseringStateRepository.update(overOrganisering);
+        organiseringStateRepository.update(underOrganiseringEn);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var ikkeAvvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        var responseMessage = String.format(
+            "Underliggende enhet %s (%s) har sluttdato etter %s (%s)",
+            underOrgEnhetEn.navn(),
+            underOrgEnhetEn.id(),
+            orgEnhet.navn(),
+            orgEnhet.id());
+
+        assertNotNull(ikkeAvvikletOrgEnhet);
+        assertThat(responseMessage).isEqualTo(ikkeAvvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_refuse_to_set_end_date_on_orgenhet_because_of_ressurs() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_1")
+            .id(orgEnhetOverId)
+            .gyldigTom(null)
+            .build();
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_2")
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState overOrganisering = organiseringState().toBuilder()
+            .id(overOrgEnhetState.id())
+            .idOver(null)
+            .gyldigFom(LocalDate.of(2022,1,1))
+            .build();
+
+        OrganiseringState organisering = orgEnhetStateToOrganiseringState(1, orgEnhet, overOrgEnhetState);
+
+        OrgtilknytningState orgtilknytningStateEn = OrgtilknytningState.builder()
+            .fid("FID_1")
+            .navident("S987654")
+            .orgEnhetId(orgEnhet.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(LocalDate.now().plusWeeks(3))
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+        orgEnhetStateRepository.update(overOrgEnhetState);
+
+        organiseringStateRepository.update(organisering);
+        organiseringStateRepository.update(overOrganisering);
+
+        orgtilknytningStateRepository.update(orgtilknytningStateEn.fid(), orgtilknytningStateEn);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var ikkeAvvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        var responseMessage = String.format(
+            "En eller flere ressurser i enhet %s (%s) har tilknytning til enheten etter gitt dato %s",
+            orgEnhet.id(),
+            orgEnhet.navn(),
+            avvikleOrgEnhetRequest.gyldigTom()
+        );
+
+        assertNotNull(ikkeAvvikletOrgEnhet);
+        assertThat(responseMessage).isEqualTo(ikkeAvvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_refuse_to_set_end_date_on_orgenhet_because_of_under_orgenhet_ressurs() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState overOrgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_1")
+            .id(orgEnhetOverId)
+            .gyldigTom(null)
+            .build();
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_2")
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        var underOrgEnhetEn = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .fid("FID_3")
+            .navn("Nav Lokal Underkontor 1")
+            .id("ab124c")
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(LocalDate.now().plusWeeks(2))
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState overOrganisering = organiseringState().toBuilder()
+            .id(overOrgEnhetState.id())
+            .idOver(null)
+            .gyldigFom(LocalDate.of(2022,1,1))
+            .build();
+
+        OrganiseringState organisering = orgEnhetStateToOrganiseringState(1, orgEnhet, overOrgEnhetState);
+        OrganiseringState underOrganiseringEn = orgEnhetStateToOrganiseringState(2, underOrgEnhetEn, orgEnhet);
+
+        OrgtilknytningState orgtilknytningStateEn = OrgtilknytningState.builder()
+            .fid("FID_1")
+            .navident("S987654")
+            .orgEnhetId(underOrgEnhetEn.id())
+            .sektor(Sektor.NAV_STATLIG)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now().minusYears(1))
+            .gyldigTom(null)
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .masseflyttetFraFid(null)
+            .sistEndretAv("X123456")
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+        orgEnhetStateRepository.update(overOrgEnhetState);
+        orgEnhetStateRepository.update(underOrgEnhetEn);
+
+        organiseringStateRepository.update(organisering);
+        organiseringStateRepository.update(overOrganisering);
+        organiseringStateRepository.update(underOrganiseringEn);
+
+
+        orgtilknytningStateRepository.update(orgtilknytningStateEn.fid(), orgtilknytningStateEn);
+
+        var avvikleOrgEnhetRequest = AvvikleOrgEnhetRequest.builder().gyldigTom(LocalDate.now().plusWeeks(2)).build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var ikkeAvvikletOrgEnhet = webTestClient.patch().uri("/app/orgenheter/avvikle/{orgEnhetId}", orgEnhetId)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(avvikleOrgEnhetRequest)
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        var responseMessage = String.format(
+            "En eller flere ressurser i enhet %s (%s) har tilknytning til enheten etter gitt dato %s",
+            underOrgEnhetEn.id(),
+            underOrgEnhetEn.navn(),
+            avvikleOrgEnhetRequest.gyldigTom()
+        );
+
+        assertNotNull(ikkeAvvikletOrgEnhet);
+        assertThat(responseMessage).isEqualTo(ikkeAvvikletOrgEnhet.getMessage());
     }
 
     private WebTestClient.ResponseSpec postOrgenhetType(String accessToken, SetOrgEnhetsTypeRequest requestBody) {
