@@ -208,7 +208,7 @@ public class RessursUtloperSnartEmailService {
             return;
         }
 
-        String subject = String.format("Ressurs opprettet %s (%s)",
+        String subject = String.format("Ressurs utløper snart %s (%s)",
             utlopendeRessurs.get().visningsnavn().getFormattedVisningsnavn(), utlopendeRessurs.get().navident()
         );
 
