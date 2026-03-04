@@ -342,7 +342,9 @@ public class RessursRestService {
 
             // if new fysisk brukersted = Fyrstikkaleen 1
             Set<String> updatesInFysiskeBrukersteder = new HashSet<>(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
-            ressursState.fysiskeBrukersteder().forEach(updatesInFysiskeBrukersteder::remove);
+            if(ressursState.fysiskeBrukersteder() !=null) {
+                ressursState.fysiskeBrukersteder().forEach(updatesInFysiskeBrukersteder::remove);
+            }
             if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().equals("2700") ||
                 updatesInFysiskeBrukersteder.contains("2700")
                 ){
