@@ -8,8 +8,6 @@ Tlfnr: ${resursTlfnr}
 Startdato i Nav: ${resursStartdato}
 Sluttdato i Nav: ${resursSlutdato}
 
-<Ved endring (altså personen har jobbet på annet fysisk brukersted før), vil eventet RessursFysiskeBrukerstederOppdatertEvent ha en changestamp som sier når endringen inntraff. Ved endring er det fint om e-posten sier:>
-
 <#if erRessursEndring == 1>
 Personen fikk oppdatert fysisk brukersted den ${resursEndringsdato}
 </#if>
