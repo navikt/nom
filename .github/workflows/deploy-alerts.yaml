@@ -53,27 +53,6 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/alerts/prod/nav-ident-alerts.yaml
 
-  apply-nom-ressurser-alerts:
-    name: Apply nom-ressurser alerts to cluster
-    permissions:
-      contents: "read"
-      id-token: "write"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-fss
-          RESOURCE: .nais/alerts/dev/nom-ressurser-alerts.yaml
-
-      - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-fss
-          RESOURCE: .nais/alerts/prod/nom-ressurser-alerts.yaml
 
   apply-nom-proxy-alerts:
     name: Apply nom-proxy alerts to cluster

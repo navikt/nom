@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
@@ -30,6 +31,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,6 +43,7 @@ import tools.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -318,6 +321,25 @@ public class OrgEnhetController {
         }
     }
 
+    @Operation(
+        description = "Avvikle en OrgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PatchMapping("/avvikle/{orgEnhetId}")
+    public ResponseEntity<StandardResponse> avvikleOrgEnhet(@PathVariable String orgEnhetId, @RequestBody AvvikleOrgEnhetRequest avvikleOrgEnhetRequest) {
+        if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(orgEnhetRestService.avvikleOrgEnhet(orgEnhetId, avvikleOrgEnhetRequest));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    StandardResponse.builder()
+                        .message(String.format("Enhet har fått satt sluttdato til %s", LocalDate.now()))
+                        .build());
+        }
+    }
+
     @ExceptionHandler({
         OrgEnhetNotFoundException.class,
         RessursNotFoundException.class,
@@ -326,6 +348,15 @@ public class OrgEnhetController {
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
+    }
+
+    @ExceptionHandler({
+        IllegalStateException.class
+    })
+    public ResponseEntity<StandardResponse> handleUnprocessableEntity(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_CONTENT)
             .body(StandardResponse.builder().message(e.getMessage()).build());
     }
 

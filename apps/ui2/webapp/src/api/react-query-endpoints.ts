@@ -11,6 +11,7 @@ import { queryOptions } from "@tanstack/react-query";
 
 import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type {
+  AvvikleOrgEnhetRequest,
   AvvikleRessursRequest,
   ExcelExportRequest,
   GetPersonRequest,
@@ -681,6 +682,16 @@ export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
 export const oppdaterOrgEnhet = async (request: OppdaterOrgEnhetRequest) => {
   return axios.put<unknown, AxiosResponse<unknown>>(
     `${NOM_API_BASE_PATH}/app/orgenheter/oppdater`,
+    request,
+  );
+};
+
+export const avvikleOrgEnhet = async (
+  orgEnhetId: string,
+  request: AvvikleOrgEnhetRequest,
+) => {
+  return axios.patch<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/avvikle/${orgEnhetId}`,
     request,
   );
 };

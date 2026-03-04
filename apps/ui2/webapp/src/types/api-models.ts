@@ -91,6 +91,14 @@ export enum AnsettelsesType {
   MIDLERTIDIG = "MIDLERTIDIG",
 }
 
+export interface AvvikleOrgEnhetRequest {
+  /**
+   * @format date
+   * @example "2026-12-31"
+   */
+  gyldigTom?: string;
+}
+
 export interface AvvikleRessursRequest {
   /** @format date */
   sluttDato: string;
@@ -282,7 +290,7 @@ export interface OppdaterOrgEnhetRequest {
    * @format date
    * @example "2026-03-31"
    */
-  gyldigTom?: string;
+  gyldigTom?: string | null;
   /** @example "ab123c" */
   id?: string;
   /** @example "A123456" */
@@ -301,21 +309,33 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
 }
 
 export interface OpprettOrgEnhetRequest {
-  /** @example 1234 */
-  firesiffer?: string;
+  /**
+   * @minLength 1
+   * @example 1234
+   */
+  firesiffer: string;
   /**
    * @format date
    * @example "2026-01-31"
    */
-  gyldigFom?: string;
-  /** @example "A123456" */
-  lederRessursNavident?: string;
-  /** @example "Nav Lokal kontor" */
-  navn?: string;
+  gyldigFom: string;
+  /**
+   * @minLength 1
+   * @example "A123456"
+   */
+  lederRessursNavident: string;
+  /**
+   * @minLength 1
+   * @example "Nav Lokal kontor"
+   */
+  navn: string;
   /** @example "DIREKTORAT" */
-  orgEnhetsType?: OrgEnhetsType;
-  /** @example "de456f" */
-  overordnetOrgEnhetId?: string;
+  orgEnhetsType: OrgEnhetsType;
+  /**
+   * @minLength 1
+   * @example "de456f"
+   */
+  overordnetOrgEnhetId: string;
 }
 
 export interface OpprettOrgEnhetResponse {
