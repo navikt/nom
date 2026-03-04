@@ -21,15 +21,18 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +47,7 @@ public class RessursUtloperSnartEmailService {
 
     private static final String SLUTTDATO_UTLOPER_VARSEL_TEMPLATE = "epostvarsel-utlopsdato.ftlh";
     private static final String SLUTTDATO_UTLOPER_VARSEL_FOR_ANSATT_TEMPLATE = "epostvarsel-utlopsdato-ansatt.ftlh";
+    private static final  String RESSURS_START_SLUTT_VARSEL_SERVICETORGET = "ressurs-start-slutt-varsel-servicetorget.ftlh";
     private final Logger log = LoggerFactory.getLogger(RessursUtloperSnartEmailService.class);
     private final MicrosoftGraphClient microsoftGraphClient;
     private final AdClient adClient;
@@ -56,6 +60,8 @@ public class RessursUtloperSnartEmailService {
     private final LeaderElection leaderElection;
     private final OrgEnhetLederService orgEnhetLederService;
     private final Unleash unleash;
+
+    @Value("${app.email.servicetorget-email}") String servicetorgetEmail;
 
     public RessursUtloperSnartEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -120,6 +126,10 @@ public class RessursUtloperSnartEmailService {
             if (unleash.isEnabled("nom.sluttdato-epost-ansatte")) {
                 ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
             }
+
+            if (unleash.isEnabled("nom.ressurs-fysisk-brukersted-Fyrstikkaleen1-epost-servicetorget")) {
+                ressursUtloperOmToUker.forEach(this::sendEmailTilServicetorget);
+            }
         }
     }
 
@@ -183,6 +193,68 @@ public class RessursUtloperSnartEmailService {
         } catch (IOException | TemplateException e) {
             throw new EmailSendingUnforeseenException("UtloperRessurs: Feil ved generering av epost innhold");
         }
+    }
+
+    private void sendEmailTilServicetorget(RessursUtloperData utlopendeRessursData) {
+        Optional<RessursState> utlopendeRessurs = ressursStateRepository.findByNavident(utlopendeRessursData.ressursNavident());
+
+        if(utlopendeRessurs.isEmpty()){
+            log.warn("Ressurs eksisterer ikke. Epost om utløpende ressurs vil ikke bli sendt");
+            return;
+        }
+
+        if(!utlopendeRessurs.get().primaryFysiskBrukersted().equals("2700")){
+            log.warn("Ressurses har ikke fysisk brukersted = Fyrstikkaleen 1. Epost om utløpende ressurs vil ikke bli sendt");
+            return;
+        }
+
+        String subject = String.format("Ressurs opprettet %s (%s)",
+            utlopendeRessurs.get().visningsnavn().getFormattedVisningsnavn(), utlopendeRessurs.get().navident()
+        );
+
+        // only send email for ressurses with fysisk brukersted = Fyrstikkaleen 1 i.e 2700, add servicetorget to the receipient list
+        try {
+            var recipient = Arrays.asList(servicetorgetEmail.split("\\s*[,;]\\s*"));
+            String body = getFormattedEmailBodyTilServicetorget(
+                utlopendeRessurs.get().visningsnavn().getFormattedVisningsnavn(),
+                utlopendeRessurs.get().navident(),
+                utlopendeRessurs.get().primaryTelefonnummer(),
+                utlopendeRessurs.get().startdato()!=null? utlopendeRessurs.get().startdato().toString():null,
+                utlopendeRessurs.get().sluttdato()!=null? utlopendeRessurs.get().sluttdato().toString():null,
+                0,
+                null
+            );
+            EmailMessage message = new EmailMessage(subject, body, recipient);
+            //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
+            log.info("Sender ressurs utløper snart epost til servicetorget body: {} recipients: {}", body, recipient);
+            microsoftGraphClient.sendEmail(message).subscribe();
+        } catch (ADResponseException e) {
+            EmailSendingUnforeseenException.emailNotFound(utlopendeRessurs.get().navident());
+        } catch (IOException | TemplateException e) {
+            throw new EmailSendingUnforeseenException("UtloperRessurs: Feil ved generering av epost innhold");
+        }
+    }
+
+    public String getFormattedEmailBodyTilServicetorget(String resursName,
+                                                        String navIdent,
+                                                        String resursTlfnr,
+                                                        String resursStartdato,
+                                                        String resursSlutdato,
+                                                        int erRessursEndring,
+                                                        String resursEndringsdato
+    ) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "resursName", resursName,
+            "navIdent", navIdent,
+            "resursTlfnr", resursTlfnr,
+            "resursStartdato", resursStartdato,
+            "resursSlutdato", resursSlutdato,
+            "erRessursEndring", erRessursEndring,
+            "resursEndringsdato", resursEndringsdato
+        );
+        freemarkerConfig.getTemplate(RESSURS_START_SLUTT_VARSEL_SERVICETORGET).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
     }
 
     private String generateEmailBody(RessursUtloperData utlopendeRessurs) throws IOException, TemplateException {

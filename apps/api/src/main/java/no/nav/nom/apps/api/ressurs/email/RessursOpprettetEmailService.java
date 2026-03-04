@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.Set;
 @Service
 public class RessursOpprettetEmailService {
     private static final String OPPRETTELSE_VARSEL_TEMPLATE = "opprettelse-varsel.ftlh";
+    private static final  String RESSURS_START_SLUTT_VARSEL_SERVICETORGET = "ressurs-start-slutt-varsel-servicetorget.ftlh";
     public static final String NAVIDENT = "NAVident";
 
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
@@ -40,6 +43,7 @@ public class RessursOpprettetEmailService {
     private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetLederService orgEnhetLederService;
     private final Configuration freemarkerConfig;
+    private final Unleash unleash;
 
     @Value("${app.email.servicetorget-email}") String servicetorgetEmail;
 
@@ -48,13 +52,15 @@ public class RessursOpprettetEmailService {
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
         Configuration freemarkerConfig,
-        OrgEnhetLederService orgEnhetLederService
+        OrgEnhetLederService orgEnhetLederService,
+        Unleash unleash
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetLederService = orgEnhetLederService;
         this.freemarkerConfig = freemarkerConfig;
+        this.unleash = unleash;
     }
 
     public void notifyByEmail(RessursState opprettetRessurs, OrgEnhetState orgEnhet) {
@@ -86,21 +92,37 @@ public class RessursOpprettetEmailService {
                 orgenhetName
             );
 
-            //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
-            log.info("Sender epost subject: {} recipients: {}", subject, recipientList);
-
-            // for ressurs with fysisk brukersted = Fyrstikkaleen 1 i.e 2700, add servicetorget to the receipient list
-            if(opprettetRessurs.primaryFysiskBrukersted().equals("2700")){
-                recipientList.add(servicetorgetEmail);
-            }
-
             EmailMessage message = new EmailMessage(subject, body, recipientList);
             microsoftGraphClient.sendEmail(message).subscribe();
 
+            // in addition send email to servicetorget
+            if (unleash.isEnabled("nom.ressurs-fysisk-brukersted-Fyrstikkaleen1-epost-servicetorget")) {
+                sendEmailTilServicetorget(opprettetRessurs, subject);
+            }
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
         } catch (IOException | TemplateException e) {
             throw new RessursOpprettetEmailException("Feil ved generering av epost innhold");
+        }
+    }
+
+    private void sendEmailTilServicetorget(RessursState opprettetRessurs, String subject) throws IOException, TemplateException {
+        // only send email for ressurses with fysisk brukersted = Fyrstikkaleen 1 i.e 2700, add servicetorget to the receipient list
+        if(opprettetRessurs.primaryFysiskBrukersted().equals("2700")){
+            var recipient = Arrays.asList(servicetorgetEmail.split("\\s*[,;]\\s*"));
+            String body = getFormattedEmailBodyTilServicetorget(
+                opprettetRessurs.visningsnavn().getFormattedVisningsnavn(),
+                opprettetRessurs.navident(),
+                opprettetRessurs.primaryTelefonnummer(),
+                opprettetRessurs.startdato()!=null? opprettetRessurs.startdato().toString():null,
+                opprettetRessurs.sluttdato()!=null? opprettetRessurs.sluttdato().toString():null,
+                0,
+                null
+            );
+            EmailMessage message = new EmailMessage(subject, body, recipient);
+            //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
+            log.info("Sender ressurs opprett epost til servicetorget body: {} recipients: {}", body, recipient);
+            microsoftGraphClient.sendEmail(message).subscribe();
         }
     }
 
@@ -111,6 +133,28 @@ public class RessursOpprettetEmailService {
             "navIdent", navIdent,
             "orgenhetName", orgenhetName);
         freemarkerConfig.getTemplate(OPPRETTELSE_VARSEL_TEMPLATE).process(model, stringWriter);
+        return stringWriter.getBuffer().toString();
+    }
+
+    public String getFormattedEmailBodyTilServicetorget(String resursName,
+                                                        String navIdent,
+                                                        String resursTlfnr,
+                                                        String resursStartdato,
+                                                        String resursSlutdato,
+                                                        int erRessursEndring,
+                                                        String resursEndringsdato
+                                                        ) throws IOException, TemplateException {
+        var stringWriter = new StringWriter();
+        var model = Map.of(
+            "resursName", resursName,
+            "navIdent", navIdent,
+            "resursTlfnr", resursTlfnr,
+            "resursStartdato", resursStartdato,
+            "resursSlutdato", resursSlutdato,
+            "erRessursEndring", erRessursEndring,
+            "resursEndringsdato", resursEndringsdato
+        );
+        freemarkerConfig.getTemplate(RESSURS_START_SLUTT_VARSEL_SERVICETORGET).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
     }
 
