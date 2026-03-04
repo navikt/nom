@@ -79,6 +79,7 @@ import {
   nomDateIsBefore,
   nomDateIsBeforeToday,
   nomDateIsSameOrAfter,
+  nomDateIsSameOrBefore,
   nomDateIsTodayOrAfter,
   nomDateIsTodayOrBefore,
   otCustomStortByDate,
@@ -690,7 +691,7 @@ function OrgEnhetFormPart({
   vikafossen: boolean;
   onRemove: () => void;
 }) {
-  const { watch } = useFormContext();
+  const { watch, getValues, setValue, trigger } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
 
   const orgEnhetQuery = useQuery({
@@ -702,6 +703,26 @@ function OrgEnhetFormPart({
   const orgEnhet = orgEnhetQuery.data;
 
   const selectOrgEnhet = !existingOt && !vikafossen;
+
+  useEffect(() => {
+    if (orgEnhetQuery.isLoading || !orgEnhet) {
+      return;
+    }
+
+    setValue(
+      `mappedeOrgtilknytninger.${index}.orgEnhetGyldigTom`,
+      orgEnhet.gyldigTom ?? null,
+      {
+        shouldValidate: true,
+      },
+    );
+  }, [orgEnhet, index, setValue, getValues]);
+
+  useEffect(() => {
+    if (!!field.gyldigTom) {
+      trigger(`mappedeOrgtilknytninger.${index}.gyldigTom`).then();
+    }
+  }, [watch(`mappedeOrgtilknytninger.${index}.orgEnhetId`), orgEnhet]);
 
   return (
     <>
@@ -774,6 +795,7 @@ function OrgEnhetFormPart({
               name={`mappedeOrgtilknytninger.${index}.orgEnhetId`}
             />
           </div>
+
           <OrgEnhetInformasjon orgEnhet={orgEnhet} />
         </VStack>
       )}
@@ -800,7 +822,8 @@ function OrgEnhetInformasjon({ orgEnhet }: { orgEnhet?: OrgEnhet }) {
 
           {orgEnhet.gyldigTom && (
             <BodyShort>
-              Avslutningsdato: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+              Avslutningsdato for enhet:{" "}
+              <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
             </BodyShort>
           )}
         </>
@@ -1381,6 +1404,18 @@ const orgtilknytningSchema = yup.object().shape({
 
         return !gyldigFom || nomDateIsSameOrAfter(value, gyldigFom);
       },
+    })
+    .test({
+      name: "gyldigTom-etter-orgenhet-sluttdato",
+      message: "Må være senest avslutningsdato for organisasjonsenheten",
+      test: function (value, context) {
+        const orgEnhetSluttdato = context.parent.orgEnhetGyldigTom;
+
+        return nomDateIsBeforeToday(orgEnhetSluttdato) &&
+          nomDateIsBeforeToday(value)
+          ? true
+          : nomDateIsSameOrBefore(value, orgEnhetSluttdato);
+      },
     }),
   sektor: yup.mixed().test({
     name: "sektor-obligatorisk-fremtid-aktiv",
@@ -1413,6 +1448,7 @@ const orgtilknytningSchema = yup.object().shape({
         return required ? !!value : true;
       },
     }),
+  orgEnhetGyldigTom: yup.string().nullable(),
 });
 
 const formValuesSchema = yup.object().shape({
