@@ -126,11 +126,16 @@ public class RessursUtloperSnartEmailService {
             if (unleash.isEnabled("nom.sluttdato-epost-ansatte")) {
                 ressursUtloperOmToUker.forEach(this::sendEmailTilAnsatt);
             }
+        }
 
+        // send e-post til Servicetorget om ressurser som utløp i går.
+        var ressurserUtloptIgaar = getRessurserUtloptIgaar();
+        if (!ressurserUtloptIgaar.isEmpty()) {
             if (unleash.isEnabled("nom.ressurs-fysisk-brukersted-Fyrstikkaleen1-epost-servicetorget")) {
-                ressursUtloperOmToUker.forEach(this::sendEmailTilServicetorget);
+                ressurserUtloptIgaar.forEach(this::sendEmailTilServicetorget);
             }
         }
+
     }
 
     private void sendEmail(RessursUtloperData utlopendeRessurs) {
@@ -315,6 +320,13 @@ public class RessursUtloperSnartEmailService {
             .toList();
     }
 
+    public List<RessursUtloperData> getRessurserUtloptIgaar() {
+        return ressursStateRepository.findAllWithSluttdatoBeforeToday().values().stream()
+            .filter(RessursUtloperSnartEmailService::ressursMedSluttdatoEqualToIgaar)
+            .map(this::finnOrgEnhetOgLederTilRessurs)
+            .toList();
+    }
+
     private RessursUtloperData finnOrgEnhetOgLederTilRessurs(RessursState ressurs) {
         try {
             var dolOrgtilknytning = orgtilknytningStateRepository.findByNavident(ressurs.navident()).stream()
@@ -386,6 +398,10 @@ public class RessursUtloperSnartEmailService {
     private static boolean ressursMedUtlopsDatoOmFemEllerToUker(RessursState ressurs) {
         return ressurs.sluttdato() != null && (ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(2)) ||
             ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(5)));
+    }
+
+    private static boolean ressursMedSluttdatoEqualToIgaar(RessursState ressurs) {
+        return ressurs.sluttdato() != null && (ressurs.sluttdato().isEqual(LocalDate.now().minusDays(1)));
     }
 
     private static boolean isRessursSluttdatoEqualToOrgtilknytningGyldigTom(RessursState ressurs, OrgtilknytningState orgtilknytningState) {
