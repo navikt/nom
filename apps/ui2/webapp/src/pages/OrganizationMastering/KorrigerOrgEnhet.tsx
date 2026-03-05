@@ -145,47 +145,49 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="4">
-          <TextField
-            {...methods.register("navn")}
-            description="Enheten kan ikke ha likt navn som en annen enhet"
-            error={methods.formState.errors.navn?.message}
-            label="Navn på organisasjonsenhet"
-          />
+        <VStack gap="9">
+          <VStack gap="4">
+            <TextField
+              {...methods.register("navn")}
+              description="Enheten kan ikke ha likt navn som en annen enhet"
+              error={methods.formState.errors.navn?.message}
+              label="Navn på organisasjonsenhet"
+            />
 
-          <FormRessursSearchWrapper
-            name="lederRessursNavident"
-            orgEnhetLederOption={existingOrgEnhetLederOption}
-          />
+            <FormRessursSearchWrapper
+              name="lederRessursNavident"
+              orgEnhetLederOption={existingOrgEnhetLederOption}
+            />
 
-          <FormDateWrapper name="gyldigFom" />
+            <FormDateWrapper name="gyldigFom" />
 
-          <Select
-            css={css`
-              width: fit-content;
-            `}
-            {...methods.register("orgEnhetsType")}
-            error={methods.formState.errors.orgEnhetsType?.message}
-            label="Organisasjonsenhetstype"
-          >
-            {!orgEnhet.orgEnhetsType && <option value="" />}
-            {Object.values(OrgEnhetsType)
-              .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
-              .map((orgEnhetsType) => (
-                <option key={orgEnhetsType} value={orgEnhetsType}>
-                  {OrgEnhetsTypeNameMapping[orgEnhetsType]}
-                </option>
-              ))}
-          </Select>
+            <Select
+              css={css`
+                width: fit-content;
+              `}
+              {...methods.register("orgEnhetsType")}
+              error={methods.formState.errors.orgEnhetsType?.message}
+              label="Organisasjonsenhetstype"
+            >
+              {!orgEnhet.orgEnhetsType && <option value="" />}
+              {Object.values(OrgEnhetsType)
+                .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
+                .map((orgEnhetsType) => (
+                  <option key={orgEnhetsType} value={orgEnhetsType}>
+                    {OrgEnhetsTypeNameMapping[orgEnhetsType]}
+                  </option>
+                ))}
+            </Select>
 
-          <TextField
-            css={css`
-              width: 20%;
-            `}
-            {...methods.register("firesiffer")}
-            error={methods.formState.errors.firesiffer?.message}
-            label="Firesiffer"
-          />
+            <TextField
+              css={css`
+                width: 20%;
+              `}
+              {...methods.register("firesiffer")}
+              error={methods.formState.errors.firesiffer?.message}
+              label="Firesiffer"
+            />
+          </VStack>
 
           <div
             css={css`
