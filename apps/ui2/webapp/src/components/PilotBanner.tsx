@@ -7,9 +7,10 @@ import {
 import { Heading, List } from "@navikt/ds-react";
 import React, { useState } from "react";
 
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
-const latestDisplayDate = "2025-09-30";
+const latestDisplayDate = "2026-03-31";
 
 const displayBanner = nomDateIsTodayOrAfter(latestDisplayDate);
 
@@ -37,6 +38,7 @@ export function PilotBanner() {
           display: flex;
           justify-content: center;
           align-items: center;
+          cursor: pointer;
         `}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -47,7 +49,9 @@ export function PilotBanner() {
           fontSize="24px"
         />
 
-        <Heading size="small">Nytt i NOM</Heading>
+        <Heading size="small">
+          Feil i organisasjonsenhet, -struktur eller -leder?
+        </Heading>
 
         <div
           css={css`
@@ -80,26 +84,22 @@ export function PilotBanner() {
             level="2"
             size="small"
           >
-            Juni 2025
+            Mars 2026
           </Heading>
 
-          <List.Item>Administrering av alle statlige ansatte</List.Item>
           <List.Item>
-            Opprettelse og administrering av ikke-standard identer som roboter
-            og utenlandske konsulenter
-          </List.Item>
-          <List.Item>
-            Tabelloversikt over medarbeideres kontaktpersoner
-          </List.Item>
-          <List.Item>
-            Masseflytting av medarbeidere til ny organisasjonsenhet
-          </List.Item>
-          <List.Item>
-            Masseflytting av medarbeidere til nytt fysisk brukersted
-          </List.Item>
-          <List.Item>
-            Oppdatert organisasjonskart og innplassering etter
-            omorganiseringsprosessen i direktoratet
+            NOM henter data om leder og organisasjonsenheter fra Unit4
+            (lønnssystemet). Når det er feil i data om leder eller
+            organisasjonsenheter må dette rettes i Unit4.{" "}
+            <SmartLink
+              href="https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx"
+              inline
+            >
+              Dette gjøres ved å sende lønnsskjemaer i Unit4 til NAV
+              Økonomitjeneste
+            </SmartLink>
+            . Hvis du har spørsmål til dette kan du kontakte NAV
+            Økonomitjeneste.
           </List.Item>
         </List>
       )}

@@ -415,6 +415,28 @@ app:
         orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
         sektor: NAV_STATLIG
 
+      - navident: Z993527         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990211         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990696         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990761         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994573         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990601         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993525         # Team AAP / Tor Idland
+        orgtilknytning: ve331g    # 8552101-IT utvikling 1-ORGENHET
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
