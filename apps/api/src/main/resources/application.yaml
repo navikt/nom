@@ -253,6 +253,7 @@ app:
       authorize: 0
   email:
     enabled: false
+    servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   clients:
     microsoft-graph:
       send-email: false
