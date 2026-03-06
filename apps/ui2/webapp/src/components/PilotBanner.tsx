@@ -4,7 +4,7 @@ import {
   ChevronUpIcon,
   InformationSquareFillIcon,
 } from "@navikt/aksel-icons";
-import { Heading, List } from "@navikt/ds-react";
+import { BodyLong, Heading, List } from "@navikt/ds-react";
 import React, { useState } from "react";
 
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -50,7 +50,7 @@ export function PilotBanner() {
         />
 
         <Heading size="small">
-          Feil i organisasjonsenhet, -struktur eller -leder?
+          Feil på organisasjonsenhet, organisasjonsstruktur eller leder?
         </Heading>
 
         <div
@@ -76,18 +76,7 @@ export function PilotBanner() {
             margin: var(--a-spacing-3) auto 0;
           `}
         >
-          <Heading
-            css={css`
-              margin-bottom: var(--a-spacing-2);
-              margin-left: var(--a-spacing-2);
-            `}
-            level="2"
-            size="small"
-          >
-            Mars 2026
-          </Heading>
-
-          <List.Item>
+          <BodyLong>
             NOM henter data om leder og organisasjonsenheter fra Unit4
             (lønnssystemet). Når det er feil i data om leder eller
             organisasjonsenheter må dette rettes i Unit4.{" "}
@@ -95,12 +84,12 @@ export function PilotBanner() {
               href="https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx"
               inline
             >
-              Dette gjøres ved å sende lønnsskjemaer i Unit4 til NAV
+              Dette gjøres ved å sende lønnsskjemaer i Unit4 til Nav
               Økonomitjeneste
             </SmartLink>
-            . Hvis du har spørsmål til dette kan du kontakte NAV
+            . Hvis du har spørsmål til dette kan du kontakte Nav
             Økonomitjeneste.
-          </List.Item>
+          </BodyLong>
         </List>
       )}
     </div>
