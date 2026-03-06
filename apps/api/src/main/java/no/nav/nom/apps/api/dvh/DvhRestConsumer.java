@@ -111,6 +111,9 @@ public class DvhRestConsumer {
             if (!dvhStartupLoadMonitor.hasCompleted()) {
                 dvhStartupLoadMonitor.setCompleted();
             }
+            manuelleRessurserOgLedereTilState.oppdater();
+            authorizedNavident.oppdaterLedereForOrgenheter();
+            
             log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
             return;
         }
