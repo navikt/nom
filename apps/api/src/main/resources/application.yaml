@@ -55,6 +55,8 @@ app:
       nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
+  email:
+    servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   dolly-ressurs:
     fysisk-brukersted-nr: none
     orgenhet-id: none
@@ -253,7 +255,6 @@ app:
       authorize: 0
   email:
     enabled: false
-    servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   clients:
     microsoft-graph:
       send-email: false
