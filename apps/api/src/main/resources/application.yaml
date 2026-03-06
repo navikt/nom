@@ -61,9 +61,6 @@ app:
     fysisk-brukersted-nr: none
     orgenhet-id: none
 
-  manuelle-ressurser-og-ledere:
-    enabled: false
-
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
 nom.libs.state.orgtilknytning.enabled: true
@@ -546,7 +543,8 @@ app:
       extended-readonly:
         group-id: "${EXTENDED_READONLY_GROUPID}"
         scopes: ["READONLY", "EXTENDED_READONLY"]
-
+  manuelle-ressurser-og-ledere:
+    enabled: false
   orgenhet:
     nav: py437s
     helfo: je305h
