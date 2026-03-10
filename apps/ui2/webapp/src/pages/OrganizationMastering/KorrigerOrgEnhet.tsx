@@ -13,8 +13,8 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import axios, { type AxiosError } from "axios";
-import React, { useState } from "react";
+import { type AxiosError } from "axios";
+import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -23,10 +23,6 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import {
-  AsyncSearch,
-  SelectLayoutWrapper,
-} from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
@@ -102,19 +98,13 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const methods = useForm({
     defaultValues: {
-      navn: orgEnhet.navn,
       gyldigFom: orgEnhet.gyldigFom,
-      lederRessursNavident: orgEnhet.leder.navident,
+
       firesiffer: orgEnhet.remedyEnhetId ?? "",
       orgEnhetsType: orgEnhet.orgEnhetsType,
     },
     resolver: yupResolver(validationSchema),
   });
-
-  const existingOrgEnhetLederOption = {
-    label: `${orgEnhet.leder.visningsnavn} (${orgEnhet.leder.navident})`,
-    value: orgEnhet.leder.navident,
-  };
 
   const oppdaterOrgEnhetMutation = useMutation<
     unknown,
@@ -147,18 +137,6 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       <form onSubmit={methods.handleSubmit(onValid)}>
         <VStack gap="9">
           <VStack gap="4">
-            <TextField
-              {...methods.register("navn")}
-              description="Enheten kan ikke ha likt navn som en annen enhet"
-              error={methods.formState.errors.navn?.message}
-              label="Navn på organisasjonsenhet"
-            />
-
-            <FormRessursSearchWrapper
-              name="lederRessursNavident"
-              orgEnhetLederOption={existingOrgEnhetLederOption}
-            />
-
             <FormDateWrapper name="gyldigFom" />
 
             <Select
@@ -240,79 +218,8 @@ function FormDateWrapper({ name }: { name: string }) {
   );
 }
 
-function FormRessursSearchWrapper({
-  name,
-  orgEnhetLederOption,
-}: {
-  name: string;
-  orgEnhetLederOption: any;
-}) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
-  const [lederChanged, setLederChanged] = useState<boolean>(false);
-
-  return (
-    <SelectLayoutWrapper
-      error={fieldState.error}
-      htmlFor="Leder"
-      label="Leder for ny organisasjonsenhet"
-    >
-      <AsyncSearch
-        loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
-        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-          inputValue.length < 3
-            ? "Du må skrive minst 3 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(selectedOption: { label: string; value: string } | null) => {
-          field.onChange(selectedOption?.value ?? "");
-
-          setLederChanged(true);
-        }}
-        placeholder="Søk etter medarbeider"
-        value={lederChanged ? undefined : orgEnhetLederOption}
-      />
-    </SelectLayoutWrapper>
-  );
-}
-
-async function searchIfEnoughInput(searchTerm: string) {
-  if (searchTerm.length < 3) {
-    return [];
-  }
-
-  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
-        searchRessurs(term: $searchTerm, filter: $filter) {
-          navident
-          visningsnavn
-        }
-      }`;
-
-  const filter = { statusSelection: "AKTIV" };
-
-  const resultRaw = await axios.post("/frackend/nom-api/graphql", {
-    operationName: "ressurs",
-    query: searchQuery,
-    variables: {
-      searchTerm: searchTerm,
-      filter: filter,
-    },
-  });
-
-  const resultRessurser = resultRaw.data.data.searchRessurs;
-
-  return resultRessurser.map((ressurs: any) => ({
-    label: `${ressurs.visningsnavn} (${ressurs.navident})`,
-    value: ressurs.navident,
-  }));
-}
-
 const validationSchema = yup.object({
-  navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
-  lederRessursNavident: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().optional(),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
