@@ -65,6 +65,8 @@ app:
       nom-write-robot:
         group-id: nomWriteRobotGroup
         scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
+  email:
+    servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   orgenhet:
     vikafossenId: dummyVikafossenId
     helfo: dummyHelfoId
@@ -121,3 +123,5 @@ UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token
 
 PDL_API_SCOPE: test
+
+SERVICETORGET_EPOST_ADDR: "a@b.c,d@e.f"

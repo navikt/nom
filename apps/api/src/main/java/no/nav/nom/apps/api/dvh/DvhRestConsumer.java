@@ -111,6 +111,9 @@ public class DvhRestConsumer {
             if (!dvhStartupLoadMonitor.hasCompleted()) {
                 dvhStartupLoadMonitor.setCompleted();
             }
+            manuelleRessurserOgLedereTilState.oppdater();
+            authorizedNavident.oppdaterLedereForOrgenheter();
+            
             log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
             return;
         }
@@ -136,6 +139,16 @@ public class DvhRestConsumer {
 
             // Sikre 'riktig orgenhet+organisering' før Sjekk på ot utenfor hierarki
             loadLedereFromDvh();
+
+            // Trenger en dummy pause her for å sikre at state for orgenheter er oppdatert
+            // Dette for å hindre - "Organisering relasjon mislyktes, overenhet" i setOrganiserteOrgenheter(...)
+            // I think....
+            try {
+                Thread.sleep(15_000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
             loadOrganiseringerFromDvh(true); // Her kan leader oppdatere
 
             // Finn OTer utenfor hierarki - og autoflytt om mulig

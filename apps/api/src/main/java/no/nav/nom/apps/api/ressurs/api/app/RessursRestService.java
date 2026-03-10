@@ -25,6 +25,7 @@ import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.DuplicateRessursException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.email.RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -107,6 +108,7 @@ public class RessursRestService {
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgEnhetLederService orgEnhetLederService;
+    private final RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService;
 
     @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
@@ -129,7 +131,8 @@ public class RessursRestService {
         FysiskBrukerstedService fysiskBrukerstedService,
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgtilknytningService orgtilknytningService,
-        OrgEnhetLederService orgEnhetLederService
+        OrgEnhetLederService orgEnhetLederService,
+        RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -149,6 +152,7 @@ public class RessursRestService {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgEnhetLederService = orgEnhetLederService;
+        this.ressursFyrstikkaleen1EmailService = ressursFyrstikkaleen1EmailService;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -335,6 +339,18 @@ public class RessursRestService {
                 )
             );
             nomMastered.markRessursAsMasteredInNom(ressursState.navident());
+
+            // if new fysisk brukersted = Fyrstikkaleen 1
+            Set<String> updatesInFysiskeBrukersteder = new HashSet<>(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+            if(ressursState.fysiskeBrukersteder() !=null) {
+                ressursState.fysiskeBrukersteder().forEach(updatesInFysiskeBrukersteder::remove);
+            }
+            if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().equals("2700") ||
+                updatesInFysiskeBrukersteder.contains("2700")
+                ){
+                ressursFyrstikkaleen1EmailService.sendEmailTilServicetorget(ressursState, LocalDate.now().toString());
+            }
+
         } else {
             logger.info("UpdateFysiskeBrukerstederRequest contained no new values, skipping update on ressurs with fid {}", fid);
         }

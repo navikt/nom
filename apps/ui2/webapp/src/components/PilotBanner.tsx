@@ -4,12 +4,13 @@ import {
   ChevronUpIcon,
   InformationSquareFillIcon,
 } from "@navikt/aksel-icons";
-import { Heading, List } from "@navikt/ds-react";
+import { BodyLong, Heading, List } from "@navikt/ds-react";
 import React, { useState } from "react";
 
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
-const latestDisplayDate = "2025-09-30";
+const latestDisplayDate = "2026-03-31";
 
 const displayBanner = nomDateIsTodayOrAfter(latestDisplayDate);
 
@@ -37,6 +38,7 @@ export function PilotBanner() {
           display: flex;
           justify-content: center;
           align-items: center;
+          cursor: pointer;
         `}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -47,7 +49,9 @@ export function PilotBanner() {
           fontSize="24px"
         />
 
-        <Heading size="small">Nytt i NOM</Heading>
+        <Heading size="small">
+          Feil på organisasjonsenhet, organisasjonsstruktur eller leder?
+        </Heading>
 
         <div
           css={css`
@@ -72,35 +76,20 @@ export function PilotBanner() {
             margin: var(--a-spacing-3) auto 0;
           `}
         >
-          <Heading
-            css={css`
-              margin-bottom: var(--a-spacing-2);
-              margin-left: var(--a-spacing-2);
-            `}
-            level="2"
-            size="small"
-          >
-            Juni 2025
-          </Heading>
-
-          <List.Item>Administrering av alle statlige ansatte</List.Item>
-          <List.Item>
-            Opprettelse og administrering av ikke-standard identer som roboter
-            og utenlandske konsulenter
-          </List.Item>
-          <List.Item>
-            Tabelloversikt over medarbeideres kontaktpersoner
-          </List.Item>
-          <List.Item>
-            Masseflytting av medarbeidere til ny organisasjonsenhet
-          </List.Item>
-          <List.Item>
-            Masseflytting av medarbeidere til nytt fysisk brukersted
-          </List.Item>
-          <List.Item>
-            Oppdatert organisasjonskart og innplassering etter
-            omorganiseringsprosessen i direktoratet
-          </List.Item>
+          <BodyLong>
+            NOM henter data om leder og organisasjonsenheter fra Unit4
+            (lønnssystemet). Når det er feil i data om leder eller
+            organisasjonsenheter må dette rettes i Unit4.{" "}
+            <SmartLink
+              href="https://navno.sharepoint.com/sites/intranett-lonnsadministrasjon/SitePages/L%C3%B8nnsskjema.aspx"
+              inline
+            >
+              Dette gjøres ved å sende lønnsskjemaer i Unit4 til Nav
+              Økonomitjeneste
+            </SmartLink>
+            . Hvis du har spørsmål til dette kan du kontakte Nav
+            Økonomitjeneste.
+          </BodyLong>
         </List>
       )}
     </div>

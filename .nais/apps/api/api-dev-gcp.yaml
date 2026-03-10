@@ -23,6 +23,7 @@ spec:
   envFrom:
     - secret: nom-api-unleash-api-token
     - secret: dvh-ords-secret
+    - secret: nom-epost-varsel-recipient
   image: "{{image}}"
   port: 8080
   ingresses:
