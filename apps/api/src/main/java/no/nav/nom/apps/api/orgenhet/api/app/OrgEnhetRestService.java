@@ -171,6 +171,9 @@ public class OrgEnhetRestService {
 
     public String oppdaterOrgEnhet(OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
         List<String> oppdaterteElementer = new ArrayList<>();
+        if (oppdaterOrgEnhetRequest.navn().isBlank()) {
+            throw new IllegalStateException("Navn kan ikke være blankt");
+        }
 
         var orgEnhetState = orgenhetService.getById(oppdaterOrgEnhetRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(oppdaterOrgEnhetRequest.id()));
         var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
