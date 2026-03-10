@@ -1,14 +1,18 @@
 import { css } from "@emotion/react";
-import { BodyShort, Loader } from "@navikt/ds-react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
+import { BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import axios from "axios";
-import React, { useState } from "react";
-import { useController } from "react-hook-form";
+import React from "react";
+import { FormProvider, useController, useForm } from "react-hook-form";
+import * as yup from "yup";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import {
   AsyncSearch,
@@ -16,6 +20,7 @@ import {
 } from "~/components/select/CustomSelectComponents";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
+import type { OrgEnhet } from "~/types/api-models";
 
 export const KorrigerOrgEnhetLeder = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -75,29 +80,63 @@ function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
         orgEnhetId={orgEnhetId}
       />
 
-      <>{orgEnhet.id}</>
+      <KorrigeringOrgEnhetLederForm orgEnhet={orgEnhet} />
     </>
   );
 }
 
-function FormRessursSearchWrapper({
-  name,
-  orgEnhetLederOption,
-}: {
-  name: string;
-  orgEnhetLederOption: any;
-}) {
+function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const methods = useForm({
+    resolver: yupResolver(validationSchema),
+  });
+
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
+    console.log(values);
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onValid)}>
+        <VStack gap="9">
+          <FormRessursSearchWrapper name="lederRessursNavident" />
+
+          <div
+            css={css`
+              display: flex;
+              justify-content: end;
+              gap: var(--a-spacing-4);
+            `}
+          >
+            <SmartLink href="/organisasjonsmastring">
+              <Button size="small" variant="secondary">
+                Avbryt
+              </Button>
+            </SmartLink>
+
+            <Button
+              icon={<FloppydiskIcon aria-hidden />}
+              size="small"
+              type="submit"
+            >
+              Lagre
+            </Button>
+          </div>
+        </VStack>
+      </form>
+    </FormProvider>
+  );
+}
+
+function FormRessursSearchWrapper({ name }: { name: string }) {
   const { field, fieldState } = useController({
     name,
   });
-
-  const [lederChanged, setLederChanged] = useState<boolean>(false);
 
   return (
     <SelectLayoutWrapper
       error={fieldState.error}
       htmlFor="Leder"
-      label="Leder for ny organisasjonsenhet"
+      label="Ny leder på organisasjonsenhet"
     >
       <AsyncSearch
         loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
@@ -108,11 +147,8 @@ function FormRessursSearchWrapper({
         }
         onChange={(selectedOption: { label: string; value: string } | null) => {
           field.onChange(selectedOption?.value ?? "");
-
-          setLederChanged(true);
         }}
         placeholder="Søk etter medarbeider"
-        value={lederChanged ? undefined : orgEnhetLederOption}
       />
     </SelectLayoutWrapper>
   );
@@ -148,3 +184,7 @@ async function searchIfEnoughInput(searchTerm: string) {
     value: ressurs.navident,
   }));
 }
+
+const validationSchema = yup.object({
+  lederRessursNavident: yup.string().required("Obligatorisk"),
+});
