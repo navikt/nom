@@ -498,7 +498,7 @@ function UtvidOrgEnhetKort({
                   `}
                 >
                   <SmartLink
-                    href={`/korriger-organisasjonsenhet/${orgEnhet.id}`}
+                    href={`/korriger-organisasjonsenhet?id=${orgEnhet.id}`}
                     target="_blank"
                   >
                     <Button

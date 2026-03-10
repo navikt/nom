@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type AxiosError } from "axios";
 import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
@@ -38,7 +38,7 @@ export const KorrigerOrgEnhet = () => {
     return;
   }
 
-  const { id } = useParams({ from: "/korriger-organisasjonsenhet/$id" });
+  const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
 
   return (
     <>
@@ -53,10 +53,11 @@ export const KorrigerOrgEnhet = () => {
   );
 };
 
-function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId: string }) {
+function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
+    enabled: !!orgEnhetId,
   });
 
   const orgEnhet = orgEnhetQuery.data;
