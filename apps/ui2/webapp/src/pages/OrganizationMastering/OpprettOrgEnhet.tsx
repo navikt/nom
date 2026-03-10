@@ -20,7 +20,6 @@ import {
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { AxiosError, AxiosResponse } from "axios";
-import axios from "axios";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -34,15 +33,12 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import {
-  AsyncSearch,
-  SelectLayoutWrapper,
-} from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
@@ -264,64 +260,6 @@ function OrgEnhetInfoForm({
       </form>
     </FormProvider>
   );
-}
-
-function FormRessursSearchWrapper({ name }: { name: string }) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
-  return (
-    <SelectLayoutWrapper
-      error={fieldState.error}
-      htmlFor="Leder"
-      label="Leder for ny organisasjonsenhet"
-    >
-      <AsyncSearch
-        loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
-        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-          inputValue.length < 3
-            ? "Du må skrive minst 3 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(selectedOption: { label: string; value: string } | null) =>
-          field.onChange(selectedOption?.value ?? "")
-        }
-        placeholder="Søk etter medarbeider"
-      />
-    </SelectLayoutWrapper>
-  );
-}
-
-async function searchIfEnoughInput(searchTerm: string) {
-  if (searchTerm.length < 3) {
-    return [];
-  }
-
-  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
-        searchRessurs(term: $searchTerm, filter: $filter) {
-          navident
-          visningsnavn
-        }
-      }`;
-
-  const filter = { statusSelection: "AKTIV" };
-
-  const resultRaw = await axios.post("/frackend/nom-api/graphql", {
-    operationName: "ressurs",
-    query: searchQuery,
-    variables: {
-      searchTerm: searchTerm,
-      filter: filter,
-    },
-  });
-
-  const resultRessurser = resultRaw.data.data.searchRessurs;
-
-  return resultRessurser.map((ressurs: any) => ({
-    label: `${ressurs.visningsnavn} (${ressurs.navident})`,
-    value: ressurs.navident,
-  }));
 }
 
 function FormDateWrapper({ name }: { name: string }) {

@@ -31,7 +31,7 @@ export const KorrigerOrgEnhetNavn = () => {
       <PageBanner text="Korrigér organisasjonsenhetsnavn" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop>
+        <ContainerWithHighlightedTop padding={6}>
           {hasAdminAccess ? (
             <KorrigeringOrgEnhetNavn orgEnhetId={id} />
           ) : (
