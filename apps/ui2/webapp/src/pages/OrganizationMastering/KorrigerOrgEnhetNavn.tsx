@@ -14,15 +14,15 @@ import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { OrgEnhet } from "~/types/api-models";
 
 export const KorrigerOrgEnhetNavn = () => {
   const hasAdminAccess = useHasAdminAccess();
-
-  if (!hasAdminAccess) {
-    return;
-  }
 
   const { id } = useSearch({ from: "/korriger-navn-organisasjonsenhet" });
 
@@ -32,7 +32,11 @@ export const KorrigerOrgEnhetNavn = () => {
 
       <ContentWrapper>
         <ContainerWithHighlightedTop>
-          <KorrigeringOrgEnhetNavn orgEnhetId={id} />
+          {hasAdminAccess ? (
+            <KorrigeringOrgEnhetNavn orgEnhetId={id} />
+          ) : (
+            <IkkeTilgangRedigering />
+          )}
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
@@ -65,7 +69,7 @@ function KorrigeringOrgEnhetNavn({ orgEnhetId }: { orgEnhetId?: string }) {
   }
 
   if (!orgEnhet) {
-    return;
+    return <OrgEnhetIkkeFunnet />;
   }
 
   return (

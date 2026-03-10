@@ -27,16 +27,16 @@ import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
-
-  if (!hasAdminAccess) {
-    return;
-  }
 
   const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
 
@@ -46,7 +46,11 @@ export const KorrigerOrgEnhet = () => {
 
       <ContentWrapper>
         <ContainerWithHighlightedTop padding={6}>
-          <KorrigeringOrgEnhet orgEnhetId={id} />
+          {hasAdminAccess ? (
+            <KorrigeringOrgEnhet orgEnhetId={id} />
+          ) : (
+            <IkkeTilgangRedigering />
+          )}
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
@@ -79,7 +83,7 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
   }
 
   if (!orgEnhet) {
-    return;
+    return <OrgEnhetIkkeFunnet />;
   }
 
   return (
@@ -100,7 +104,6 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
-
       firesiffer: orgEnhet.remedyEnhetId ?? "",
       orgEnhetsType: orgEnhet.orgEnhetsType,
     },
@@ -128,6 +131,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const request: OppdaterOrgEnhetRequest = {
       ...values,
       id: orgEnhet.id,
+      navn: orgEnhet.navn,
     };
 
     oppdaterOrgEnhetMutation.mutate(request);

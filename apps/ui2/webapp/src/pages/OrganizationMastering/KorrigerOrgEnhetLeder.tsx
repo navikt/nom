@@ -19,15 +19,15 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { OrgEnhet } from "~/types/api-models";
 
 export const KorrigerOrgEnhetLeder = () => {
   const hasAdminAccess = useHasAdminAccess();
-
-  if (!hasAdminAccess) {
-    return;
-  }
 
   const { id } = useSearch({ from: "/korriger-leder-organisasjonsenhet" });
 
@@ -37,7 +37,11 @@ export const KorrigerOrgEnhetLeder = () => {
 
       <ContentWrapper>
         <ContainerWithHighlightedTop>
-          <KorrigeringOrgEnhetLeder orgEnhetId={id} />
+          {hasAdminAccess ? (
+            <KorrigeringOrgEnhetLeder orgEnhetId={id} />
+          ) : (
+            <IkkeTilgangRedigering />
+          )}
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
@@ -70,7 +74,7 @@ function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
   }
 
   if (!orgEnhet) {
-    return;
+    return <OrgEnhetIkkeFunnet />;
   }
 
   return (
