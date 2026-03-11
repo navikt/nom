@@ -65,6 +65,32 @@ public class RessursOpprettetEmailServiceTest {
     }
 
     @Test
+    void testFreemarkerTemplateForServicetorget() throws TemplateException, IOException {
+        configuration.setClassForTemplateLoading(this.getClass(), "/templates/");
+        // setup data
+        data.put("resursName", "Resurs Name");
+        data.put("navIdent", "A123456");
+        data.put("resursTlfnr", "123456");
+        data.put("resursStartdato", "resursStartdato");
+        data.put("resursSlutdato", "resursSlutdato");
+        data.put("erRessursEndring", "0");
+        data.put("resursEndringsdato", "resursEndringsdato");
+
+        // check if autowiring works
+        Assertions.assertNotNull(configuration);
+
+        // test if loading template works
+        Template template = configuration.getTemplate("ressurs-start-slutt-varsel-servicetorget.ftlh");    // <-- load the template
+        // check if template is loaded
+        Assertions.assertNotNull(template);
+
+        // dump the generated output to System.err
+        var stringWriter = new StringWriter();
+        template.process(data, stringWriter);
+        System.err.println(stringWriter.getBuffer().toString());
+    }
+
+    @Test
     void test_appendAdditionalRecipients(){
         List<String> recipients = new ArrayList<>();
         recipients.add("a@b.com");

@@ -8,7 +8,7 @@ Tlfnr: ${resursTlfnr}
 Startdato i Nav: ${resursStartdato}
 Sluttdato i Nav: ${resursSlutdato}
 
-<#if erRessursEndring == 1>
+<#if erRessursEndring == "1">
 Personen fikk oppdatert fysisk brukersted den ${resursEndringsdato}
 </#if>
 
