@@ -181,8 +181,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 126300;1263;ORGNIV3;Alver (regionkontor Nordhordaland);Beholdt;;;JA;126300;ORGNIV3;leggInn;
 126600;1266;ORGNIV3;Masfjorden;Beholdt;;;JA;126600;ORGNIV3;leggInn;
 129900;1291;AGRESSOORGENHET;Vestland Arbeidslivssenter;;129900;ku380j;JA;129900;ORGNIV3;ku380j;
-129610;1296;ORGNIV3;Vestland Kompetansesenter for arbeidshelse;;1296;ty354v;JA;129610;ORGNIV3;ty354v;19.02.2026: Endret fra mapping til my580h til ty354v
-129610;1296;ORGNIV4;Vestland Kompetansesenter for arbeidshelse;;1296;;JA;129610;ORGNIV4;;10.03.2026: La til en ekstra mapping for 1296 på orgniv4 da det er forventet at det kommer en slik en fra U4, på samme U4-ID.
+1296100;1296;ORGNIV4;Vestland Kompetansesenter for arbeidshelse;;1296;;JA;1296100;ORGNIV4;;11.03.2026: Oppdatert til riktig U4-id
 140100;1401;ORGNIV3;Kinn;Beholdt;;;JA;140100;ORGNIV3;leggInn;
 141200;1412;ORGNIV3;Solund;Beholdt;;;JA;141200;ORGNIV3;leggInn;
 141300;1413;ORGNIV3;Hyllestad;Beholdt;;;JA;141300;ORGNIV3;leggInn;
