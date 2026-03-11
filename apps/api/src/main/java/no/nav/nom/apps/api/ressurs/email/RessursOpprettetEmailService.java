@@ -116,7 +116,7 @@ public class RessursOpprettetEmailService {
                 opprettetRessurs.primaryTelefonnummer(),
                 opprettetRessurs.startdato()!=null? opprettetRessurs.startdato().toString():null,
                 opprettetRessurs.sluttdato()!=null? opprettetRessurs.sluttdato().toString():null,
-                0,
+                "0",
                 null
             );
             EmailMessage message = new EmailMessage(subject, body, recipient);
@@ -141,7 +141,7 @@ public class RessursOpprettetEmailService {
                                                         String resursTlfnr,
                                                         String resursStartdato,
                                                         String resursSlutdato,
-                                                        int erRessursEndring,
+                                                        String erRessursEndring,
                                                         String resursEndringsdato
                                                         ) throws IOException, TemplateException {
         var stringWriter = new StringWriter();

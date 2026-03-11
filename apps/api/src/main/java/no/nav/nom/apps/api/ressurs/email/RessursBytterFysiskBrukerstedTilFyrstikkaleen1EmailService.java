@@ -52,7 +52,7 @@ public class RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService {
                 utlopendeRessurs.primaryTelefonnummer(),
                 utlopendeRessurs.startdato()!=null? utlopendeRessurs.startdato().toString():null,
                 utlopendeRessurs.sluttdato()!=null? utlopendeRessurs.sluttdato().toString():null,
-                1,
+                "1",
                 endretDato
             );
             EmailMessage message = new EmailMessage(subject, body, recipient);
@@ -73,7 +73,7 @@ public class RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService {
                                                         String resursTlfnr,
                                                         String resursStartdato,
                                                         String resursSlutdato,
-                                                        int erRessursEndring,
+                                                        String erRessursEndring,
                                                         String resursEndringsdato
     ) throws IOException, TemplateException {
         var stringWriter = new StringWriter();

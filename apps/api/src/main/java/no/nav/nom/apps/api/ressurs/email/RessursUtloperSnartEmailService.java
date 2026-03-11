@@ -226,7 +226,7 @@ public class RessursUtloperSnartEmailService {
                 utlopendeRessurs.get().primaryTelefonnummer(),
                 utlopendeRessurs.get().startdato()!=null? utlopendeRessurs.get().startdato().toString():null,
                 utlopendeRessurs.get().sluttdato()!=null? utlopendeRessurs.get().sluttdato().toString():null,
-                0,
+                "0",
                 null
             );
             EmailMessage message = new EmailMessage(subject, body, recipient);
@@ -245,7 +245,7 @@ public class RessursUtloperSnartEmailService {
                                                         String resursTlfnr,
                                                         String resursStartdato,
                                                         String resursSlutdato,
-                                                        int erRessursEndring,
+                                                        String erRessursEndring,
                                                         String resursEndringsdato
     ) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
