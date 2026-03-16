@@ -89,9 +89,7 @@ function KorrigeringOrgEnhetNavnForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     resolver: yupResolver(validationSchema),
   });
 
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
-    console.log(values);
-  };
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
 
   return (
     <FormProvider {...methods}>
