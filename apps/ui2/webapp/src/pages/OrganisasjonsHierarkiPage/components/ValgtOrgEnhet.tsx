@@ -483,89 +483,82 @@ function DropdownMeny({
     adminOrWriteForOrgenhet && !eksternSamarbeidspartner;
 
   return (
-    <div
-      css={css`
-        display: grid;
-      `}
-    >
-      <Dropdown>
-        <Button
-          as={Dropdown.Toggle}
-          icon={<ChevronDownDoubleIcon title="Alternativer" />}
-          size="small"
-          variant="secondary"
-        >
-          Alternativer
-        </Button>
+    <Dropdown>
+      <Button
+        as={Dropdown.Toggle}
+        icon={<ChevronDownDoubleIcon title="Alternativer" />}
+        size="small"
+        variant="secondary"
+      >
+        Alternativer
+      </Button>
 
-        <Dropdown.Menu
-          css={css`
-            width: 460px;
-          `}
-        >
-          <Dropdown.Menu.GroupedList>
-            <Dropdown.Menu.GroupedList.Heading>
-              Administrering av medarbeidere
-            </Dropdown.Menu.GroupedList.Heading>
+      <Dropdown.Menu
+        css={css`
+          width: 460px;
+        `}
+      >
+        <Dropdown.Menu.GroupedList>
+          <Dropdown.Menu.GroupedList.Heading>
+            Administrering av medarbeidere
+          </Dropdown.Menu.GroupedList.Heading>
 
-            <SmartLink href={`/org/table/${orgEnhet.id}`}>
-              <Dropdown.Menu.GroupedList.Item
-                css={css`
-                  color: var(--a-text-action);
-                `}
-              >
-                Tabellvisning av ansatte i denne enheten og underliggende
-                enheter
-              </Dropdown.Menu.GroupedList.Item>
-            </SmartLink>
+          <SmartLink href={`/org/table/${orgEnhet.id}`}>
+            <Dropdown.Menu.GroupedList.Item
+              css={css`
+                color: var(--a-text-action);
+              `}
+            >
+              Tabellvisning av ansatte i denne enheten og underliggende enheter
+            </Dropdown.Menu.GroupedList.Item>
+          </SmartLink>
 
-            {visOpprettMedarbeidere && (
-              <>
-                <Dropdown.Menu.Divider />
+          {visOpprettMedarbeidere && (
+            <>
+              <Dropdown.Menu.Divider />
 
-                <SmartLink href="/ressurs/create/1">
-                  <Dropdown.Menu.GroupedList.Item
-                    css={css`
-                      color: var(--a-text-action);
-                    `}
-                  >
-                    Opprett medarbeider
-                  </Dropdown.Menu.GroupedList.Item>
-                </SmartLink>
-              </>
-            )}
+              <SmartLink href="/ressurs/create/1">
+                <Dropdown.Menu.GroupedList.Item
+                  css={css`
+                    color: var(--a-text-action);
+                  `}
+                >
+                  Opprett medarbeider
+                </Dropdown.Menu.GroupedList.Item>
+              </SmartLink>
+            </>
+          )}
 
-            {visMasseflytting && (
-              <>
-                <Dropdown.Menu.Divider />
+          {visMasseflytting && (
+            <>
+              <Dropdown.Menu.Divider />
 
-                <SmartLink href={`/masseflytting/${orgEnhet.id}`}>
-                  <Dropdown.Menu.GroupedList.Item
-                    css={css`
-                      color: var(--a-text-action);
-                    `}
-                  >
-                    Flytt én eller flere medarbeidere
-                  </Dropdown.Menu.GroupedList.Item>
-                </SmartLink>
-              </>
-            )}
+              <SmartLink href={`/masseflytting/${orgEnhet.id}`}>
+                <Dropdown.Menu.GroupedList.Item
+                  css={css`
+                    color: var(--a-text-action);
+                  `}
+                >
+                  Flytt én eller flere medarbeidere
+                </Dropdown.Menu.GroupedList.Item>
+              </SmartLink>
+            </>
+          )}
 
-            {visKontaktpersonTabell && (
-              <>
-                <Dropdown.Menu.Divider />
+          {visKontaktpersonTabell && (
+            <>
+              <Dropdown.Menu.Divider />
 
-                <SmartLink href={`/kontaktpersoner-tabell/${orgEnhet.id}`}>
-                  <Dropdown.Menu.GroupedList.Item as={Link}>
-                    Tabellvisning av kontaktpersoner
-                  </Dropdown.Menu.GroupedList.Item>
-                </SmartLink>
-              </>
-            )}
-          </Dropdown.Menu.GroupedList>
-        </Dropdown.Menu>
-      </Dropdown>
-    </div>
+              <SmartLink href={`/kontaktpersoner-tabell/${orgEnhet.id}`}>
+                <Dropdown.Menu.GroupedList.Item as={Link}>
+                  Tabellvisning av kontaktpersoner
+                </Dropdown.Menu.GroupedList.Item>
+              </SmartLink>
+            </>
+          )}
+        </Dropdown.Menu.GroupedList>
+      </Dropdown.Menu>
+    </Dropdown>
   );
 }
 

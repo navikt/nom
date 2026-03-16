@@ -4,9 +4,8 @@ import { FloppydiskIcon } from "@navikt/aksel-icons";
 import { BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
-import axios from "axios";
 import React from "react";
-import { FormProvider, useController, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";

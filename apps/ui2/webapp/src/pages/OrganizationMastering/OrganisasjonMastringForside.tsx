@@ -1,12 +1,14 @@
 import { css } from "@emotion/react";
 import {
   ArrowRightLeftIcon,
+  ChevronDownDoubleIcon,
   PlusCircleIcon,
   TrashIcon,
 } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
+  Dropdown,
   Heading,
   HGrid,
   HStack,
@@ -497,33 +499,81 @@ function UtvidOrgEnhetKort({
                     gap: var(--a-spacing-2);
                   `}
                 >
-                  <SmartLink
-                    href={`/korriger-organisasjonsenhet?id=${orgEnhet.id}`}
-                    target="_blank"
-                  >
+                  <Dropdown>
                     <Button
-                      css={css`
-                        height: fit-content;
-                      `}
+                      as={Dropdown.Toggle}
+                      icon={<ChevronDownDoubleIcon title="Alternativer" />}
                       variant="secondary"
                     >
-                      Korrigér
+                      Alternativer
                     </Button>
-                  </SmartLink>
 
-                  <SmartLink
-                    href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
-                    target="_blank"
-                  >
-                    <Button
+                    <Dropdown.Menu
                       css={css`
-                        height: fit-content;
+                        width: 460px;
                       `}
-                      variant="secondary"
                     >
-                      Avslutt
-                    </Button>
-                  </SmartLink>
+                      <Dropdown.Menu.GroupedList>
+                        <Dropdown.Menu.GroupedList.Heading>
+                          Endre organisasjonsenhet
+                        </Dropdown.Menu.GroupedList.Heading>
+
+                        <SmartLink
+                          href={`/korriger-navn-organisasjonsenhet?id=${orgEnhet.id}`}
+                        >
+                          <Dropdown.Menu.GroupedList.Item
+                            css={css`
+                              color: var(--a-text-action);
+                            `}
+                          >
+                            Endre navn
+                          </Dropdown.Menu.GroupedList.Item>
+                        </SmartLink>
+
+                        <Dropdown.Menu.Divider />
+
+                        <SmartLink
+                          href={`/korriger-leder-organisasjonsenhet?id=${orgEnhet.id}`}
+                        >
+                          <Dropdown.Menu.GroupedList.Item
+                            css={css`
+                              color: var(--a-text-action);
+                            `}
+                          >
+                            Endre leder
+                          </Dropdown.Menu.GroupedList.Item>
+                        </SmartLink>
+
+                        <Dropdown.Menu.Divider />
+
+                        <SmartLink
+                          href={`/korriger-organisasjonsenhet?id=${orgEnhet.id}`}
+                        >
+                          <Dropdown.Menu.GroupedList.Item
+                            css={css`
+                              color: var(--a-text-action);
+                            `}
+                          >
+                            Endre informasjon
+                          </Dropdown.Menu.GroupedList.Item>
+                        </SmartLink>
+
+                        <Dropdown.Menu.Divider />
+
+                        <SmartLink
+                          href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
+                        >
+                          <Dropdown.Menu.GroupedList.Item
+                            css={css`
+                              color: var(--a-text-action);
+                            `}
+                          >
+                            Avslutt organisasjonsenhet
+                          </Dropdown.Menu.GroupedList.Item>
+                        </SmartLink>
+                      </Dropdown.Menu.GroupedList>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </div>
               )}
             </div>
