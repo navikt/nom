@@ -109,15 +109,16 @@ public class RessursOpprettetEmailService {
     private void sendEmailTilServicetorget(RessursState opprettetRessurs, String subject) throws IOException, TemplateException {
         // only send email for ressurses with fysisk brukersted = Fyrstikkaleen 1 i.e 2700, add servicetorget to the receipient list
         if(opprettetRessurs.primaryFysiskBrukersted().equals("2700")){
+            log.info("Sender epost til Servicetorget ved opprettelse av ressurs {}", opprettetRessurs);
             var recipient = Arrays.asList(servicetorgetEmail.split("\\s*[,;]\\s*"));
             String body = getFormattedEmailBodyTilServicetorget(
                 opprettetRessurs.visningsnavn().getFormattedVisningsnavn(),
                 opprettetRessurs.navident(),
-                opprettetRessurs.primaryTelefonnummer(),
-                opprettetRessurs.startdato()!=null? opprettetRessurs.startdato().toString():null,
-                opprettetRessurs.sluttdato()!=null? opprettetRessurs.sluttdato().toString():null,
+                opprettetRessurs.primaryTelefonnummer() != null ? opprettetRessurs.primaryTelefonnummer() : "",
+                opprettetRessurs.startdato()!=null? opprettetRessurs.startdato().toString():"",
+                opprettetRessurs.sluttdato()!=null? opprettetRessurs.sluttdato().toString():"",
                 "0",
-                null
+                ""
             );
             EmailMessage message = new EmailMessage(subject, body, recipient);
             //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
@@ -148,11 +149,11 @@ public class RessursOpprettetEmailService {
         var model = Map.of(
             "resursName", resursName,
             "navIdent", navIdent,
-            "resursTlfnr", resursTlfnr,
-            "resursStartdato", resursStartdato,
-            "resursSlutdato", resursSlutdato,
+            "resursTlfnr", resursTlfnr == null ? "" : resursTlfnr,
+            "resursStartdato", resursStartdato == null ? "" : resursStartdato,
+            "resursSlutdato", resursSlutdato == null ? "" : resursSlutdato,
             "erRessursEndring", erRessursEndring,
-            "resursEndringsdato", resursEndringsdato
+            "resursEndringsdato", resursEndringsdato == null ? "" : resursEndringsdato
         );
         freemarkerConfig.getTemplate(RESSURS_START_SLUTT_VARSEL_SERVICETORGET).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
