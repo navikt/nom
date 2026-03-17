@@ -132,7 +132,7 @@ public class OrgEnhetResolver {
             var organiseringerForSelection = getOrganiseringerForSelection(filter);
             enheterOrganisertIPeriode = enheterOrganisertIPeriode(organiseringerForSelection, filter.periodiskUtvalg());
 
-            lovenodeIderForSlection = organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter.organiseringSelection()));
+            lovenodeIderForSlection = organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter));
             alleEnheter = enheterOrganisertIPeriode.stream()
                 .map(orgEnhetStateRepository::findById)
                 .flatMap(Optional::stream)
@@ -155,7 +155,7 @@ public class OrgEnhetResolver {
         var enheterOrganisertIPeriode = enheterOrganisertIPeriode(organiseringerForSelection, filter.periodiskUtvalg());
         var lovenodeIderForSlection = filter.organiseringSelection() == ALLE
             ? organiseringStateRepository.getAlleLovnodeIder()
-            : organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter.organiseringSelection()));
+            : organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter));
 
         return unfilteredOrgenheter.stream()
             .filter(orgenhet -> Util.filterByPeriodiskUtvalg(orgenhet, filter.periodiskUtvalg()))
@@ -178,29 +178,27 @@ public class OrgEnhetResolver {
 
     OrgenhetIdOgUnderOrganiseringer getOrganiseringerForSelection(OrgEnheterSearchFilter filter) {
         var orgNivFilter = filter.organiseringSelection();
-        var nodeOrgEnhetId = getOrgenhetIdForNodeSelection(orgNivFilter);
+        var nodeOrgEnhetId = getOrgenhetIdForNodeSelection(filter);
         switch(orgNivFilter) {
             case ALLE -> {
                 return new OrgenhetIdOgUnderOrganiseringer("ALLE", new HashSet<>(organiseringStateRepository.getOrganiseringer()));
             }
-            case UNDER_TOPPNODE_NAV, UNDER_VIKAFOSSEN, UNDER_HELFO, UNDER_SKATT, UNDER_RIKSREVISJONEN -> {
+            case UNDER_TOPPNODE_NAV, UNDER_VIKAFOSSEN, UNDER_HELFO, UNDER_SKATT, UNDER_RIKSREVISJONEN, UNDER_ANGITT_ORGENHET -> {
                 return new OrgenhetIdOgUnderOrganiseringer(nodeOrgEnhetId, organiseringStateRepository.getEnhetOgOrganiseringerNedover(nodeOrgEnhetId));
-            }
-            case UNDER_ANGITT_ORGENHET -> {
-                var id = filter.organisertUnderOrgEnhetId();
-                return new OrgenhetIdOgUnderOrganiseringer(id, organiseringStateRepository.getEnhetOgOrganiseringerNedover(id));
             }
             default -> throw new IllegalArgumentException("Ukjent organisering selection i GQL OrgEnheterSearchFilter: " + orgNivFilter);
         }
     }
 
-    private String getOrgenhetIdForNodeSelection(OrgEnheterSearchFilter.OrganiseringSelection organiseringSelection) {
-        var nodeOrgEnhetId = switch(organiseringSelection) {
+    private String getOrgenhetIdForNodeSelection(OrgEnheterSearchFilter filter) {
+        var orgNivFilter = filter.organiseringSelection();
+        var nodeOrgEnhetId = switch(orgNivFilter) {
             case UNDER_TOPPNODE_NAV -> graphqlSupport.getNavToppnodeOrgEnhetId();
             case UNDER_VIKAFOSSEN -> graphqlSupport.getOverEnhetIdForVikafossenOrgEnhet();
             case UNDER_HELFO -> graphqlSupport.getOverEnhetIdForHelfoOrgEnhet();
             case UNDER_SKATT -> graphqlSupport.getOverEnhetIdForSkattOrgEnhet();
             case UNDER_RIKSREVISJONEN -> graphqlSupport.getOverEnhetIdForRiksrevOrgEnhet();
+            case UNDER_ANGITT_ORGENHET -> filter.organisertUnderOrgEnhetId();
             default -> null;
         };
         return nodeOrgEnhetId;
