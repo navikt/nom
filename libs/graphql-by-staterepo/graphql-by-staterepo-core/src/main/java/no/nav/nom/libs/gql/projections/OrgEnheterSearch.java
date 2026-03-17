@@ -10,14 +10,16 @@ import static java.util.Collections.emptySet;
 
 public class OrgEnheterSearch {
     private final Set<String> agressoIder;
-    private final Set<String> orgenhetskategori;
+    private final Set<String> orgEnhetsKategori;
+    private final Set<String> nomNivaa;
     private final String orgNiv;  // Deprekert Jan 2026
     private final String agressoOrgNiv;
     private final Set<String> ider;
 
-    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, String orgNiv, String agressoOrgNiv, Set<String> ider) {
+    public OrgEnheterSearch(Set<String> agressoIder, Set<String> orgenhetskategori, Set<String> nomNivaa, String orgNiv, String agressoOrgNiv, Set<String> ider) {
         this.agressoIder = agressoIder;
-        this.orgenhetskategori = orgenhetskategori;
+        this.orgEnhetsKategori = orgenhetskategori;
+        this.nomNivaa = nomNivaa;
         this.orgNiv = orgNiv;
         this.agressoOrgNiv = agressoOrgNiv;
         this.ider = ider;
@@ -27,9 +29,9 @@ public class OrgEnheterSearch {
         return this.agressoIder;
     }
 
-    public Set<String> getOrgEnhetsKategori() {
-        return this.orgenhetskategori;
-    }
+    public Set<String> getOrgEnhetsKategori() { return this.orgEnhetsKategori; }
+
+    public Set<String> getNomNivaa() { return this.nomNivaa;}
 
     public String getOrgNiv() {
         return this.orgNiv;
@@ -50,11 +52,21 @@ public class OrgEnheterSearch {
         return getAgressoIder();
     }
 
-    public Set<String> resolveNomNivaa() {
-        if (getOrgEnhetsKategori() == null) {
-            return emptySet();
+    public String resolveAgressoOrgNiv() {
+        if (agressoOrgNiv != null) { // orgNiv is deprecated
+            return agressoOrgNiv;
         }
-        return getOrgEnhetsKategori();
+        return orgNiv;
+    }
+
+    public Set<String> resolveNomNivaa() {
+        if (nomNivaa != null) {
+            return nomNivaa;
+        }
+        if (orgEnhetsKategori != null) {
+            return  orgEnhetsKategori;
+        }
+        return emptySet();
     }
 
     public Set<NomNivaa> resolveNomNivaaEnum() {
@@ -82,27 +94,27 @@ public class OrgEnheterSearch {
         }
         var that = (OrgEnheterSearch) obj;
         return Objects.equals(this.agressoIder, that.agressoIder) &&
-            Objects.equals(this.orgenhetskategori, that.orgenhetskategori) &&
+            Objects.equals(this.orgEnhetsKategori, that.orgEnhetsKategori) &&
             Objects.equals(this.agressoOrgNiv, that.agressoOrgNiv) &&
             Objects.equals(this.ider, that.ider);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agressoIder, orgenhetskategori, agressoOrgNiv, ider);
+        return Objects.hash(agressoIder, orgEnhetsKategori, agressoOrgNiv, ider);
     }
 
     @Override
     public String toString() {
         return "OrgEnheterSearch[" +
             "agressoIder=" + agressoIder + ", " +
-            "orgenhetskategori=" + orgenhetskategori + ", " +
+            "orgenhetskategori=" + orgEnhetsKategori + ", " +
             "agressoOrgNiv=" + agressoOrgNiv + ", " +
             "IDer=" + ider + ']';
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
-        return new OrgEnheterSearch(emptySet(), emptySet(), null, null, emptySet());
+        return new OrgEnheterSearch(emptySet(), emptySet(), emptySet(), null, null, emptySet());
     }
 
     public static OrgEnheterSearch EMPTY_SEARCH = emptyOrgEnheterSearch();

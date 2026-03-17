@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 public class NomGraphQlAutoConfiguration {
 
     @Bean
-    OrgEnhetResolver orgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository) {
-        return new OrgEnhetResolver(orgEnhetStateRepository);
+    OrgEnhetResolver orgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository, NomGraphqlSupportInterface graphqlSupportInterface, OrganiseringStateRepository organiseringStateRepository) {
+        return new OrgEnhetResolver(orgEnhetStateRepository, graphqlSupportInterface, organiseringStateRepository);
     }
 
     @Bean

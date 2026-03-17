@@ -14,6 +14,16 @@ public interface NomGraphqlSupportInterface {
 
     Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser);
 
+    String getNavToppnodeOrgEnhetId();
+
+    String getOverEnhetIdForVikafossenOrgEnhet();
+
+    String getOverEnhetIdForHelfoOrgEnhet();
+
+    String getOverEnhetIdForSkattOrgEnhet();
+
+    String getOverEnhetIdForRiksrevOrgEnhet();
+
     void count(DataFetchingEnvironment dataFetchingEnvironment);
 
     boolean isWaitingToIndexLucene();
@@ -35,6 +45,31 @@ public interface NomGraphqlSupportInterface {
             }
 
             @Override
+            public String getNavToppnodeOrgEnhetId() {
+                return "DUMMY";
+            }
+
+            @Override
+            public String getOverEnhetIdForVikafossenOrgEnhet() {
+                return "DUMMY";
+            }
+
+            @Override
+            public String getOverEnhetIdForHelfoOrgEnhet() {
+                return "DUMMY";
+            }
+
+            @Override
+            public String getOverEnhetIdForSkattOrgEnhet() {
+                return "DUMMY";
+            }
+
+            @Override
+            public String getOverEnhetIdForRiksrevOrgEnhet() {
+                return "DUMMY";
+            }
+
+            @Override
             public void count(DataFetchingEnvironment dataFetchingEnvironment) {
                 // do nothing
             }
@@ -45,6 +80,4 @@ public interface NomGraphqlSupportInterface {
             }
         };
     }
-
-
 }

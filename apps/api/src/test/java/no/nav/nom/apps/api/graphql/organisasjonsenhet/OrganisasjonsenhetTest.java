@@ -158,7 +158,7 @@ public class OrganisasjonsenhetTest extends GraphQlTestBase {
         orgEnhetStateRepository.update(orgenhet);
 
         final var outputEnhet = gqlUtil.postForResource("organisasjonsenhet/scenario114_b.graphql")
-            .path("organisasjonsenheter")
+            .path("orgEnheter")
             .entityList(OrgEnhetResult.class)
             .get();
 

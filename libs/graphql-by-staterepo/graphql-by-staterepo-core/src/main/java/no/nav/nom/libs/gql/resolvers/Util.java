@@ -2,9 +2,9 @@ package no.nav.nom.libs.gql.resolvers;
 
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.gql.resolvers.LederResolver;
 
 import java.time.LocalDate;
 
@@ -23,6 +23,7 @@ public class Util {
                 case OrgEnhetLederState o -> PeriodeUtil.isCurrentPeriod(o);
                 case OrgtilknytningState o -> PeriodeUtil.isCurrentPeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isCurrentPeriod(o);
+                case OrgEnhetState o -> PeriodeUtil.isCurrentPeriod(o);
                 default -> throwError(periodisertObject);
             };
             case FREMTIDIGE -> switch (periodisertObject) {
@@ -30,6 +31,7 @@ public class Util {
                 case OrgEnhetLederState o -> PeriodeUtil.isFuturePeriod(o);
                 case OrgtilknytningState o -> PeriodeUtil.isFuturePeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isFuturePeriod(o);
+                case OrgEnhetState o -> PeriodeUtil.isFuturePeriod(o);
                 default -> throwError(periodisertObject);
             };
             case HISTORISKE -> switch (periodisertObject) {
@@ -37,6 +39,7 @@ public class Util {
                 case OrgEnhetLederState o -> PeriodeUtil.isHistoricPeriod(o);
                 case OrgtilknytningState o -> PeriodeUtil.isHistoricPeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isHistoricPeriod(o);
+                case OrgEnhetState o -> PeriodeUtil.isHistoricPeriod(o);
                 default -> throwError(periodisertObject);
             };
         };
@@ -65,10 +68,14 @@ public class Util {
             return isCurrentOrFuturePeriod(leder) && leder.startdato().isBefore(tomorrow());
         }
 
+        public static boolean isCurrentPeriod(OrgEnhetState orgEnhet) {
+            return isCurrentOrFuturePeriod(orgEnhet) && orgEnhet.gyldigFom().isBefore(tomorrow());
+        }
+
+
         public static boolean isFuturePeriod(OrgtilknytningState orgtilknytning) {
             return orgtilknytning.gyldigFom().isAfter(LocalDate.now());
         }
-
 
         public static boolean isFuturePeriod(OrganiseringState organisering) {
             return organisering.gyldigFom().isAfter(LocalDate.now());
@@ -80,6 +87,10 @@ public class Util {
 
         public static boolean isFuturePeriod(LederResolver.LederForRessurs leder) {
             return leder.startdato().isAfter(LocalDate.now());
+        }
+
+        public static boolean isFuturePeriod(OrgEnhetState orgEnhet) {
+            return orgEnhet.gyldigFom().isAfter(LocalDate.now());
         }
 
 
@@ -104,10 +115,13 @@ public class Util {
             return requireNonNullElse(leder.sluttdato(), NO_END_DATE).isBefore(tomorrow());
         }
 
+        public static boolean isHistoricPeriod(OrgEnhetState orgEnhet){
+            return requireNonNullElse(orgEnhet.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
+        }
+
         public static boolean isCurrentOrFuturePeriod(OrganiseringState organisering) {
             return isNull(organisering.gyldigTom()) || organisering.gyldigTom().isAfter(yesterday());
         }
-
 
         public static boolean isCurrentOrFuturePeriod(OrgtilknytningState orgtilknytning) {
             return isNull(orgtilknytning.gyldigTom()) || orgtilknytning.gyldigTom().isAfter(yesterday());
@@ -119,6 +133,10 @@ public class Util {
 
         public static boolean isCurrentOrFuturePeriod(LederResolver.LederForRessurs leder) {
             return isNull(leder.sluttdato()) || leder.sluttdato().isAfter(yesterday());
+        }
+
+        public static boolean isCurrentOrFuturePeriod(OrgEnhetState orgEnhet) {
+            return isNull(orgEnhet.gyldigTom()) || orgEnhet.gyldigTom().isAfter(yesterday());
         }
 
 
