@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,5 +128,33 @@ public class OrganiseringStateRepositoryOrganieringerOverOgUnderTest {
         assertEquals(2, organiseringStateRepository.getParentEnhetIdsFlattened(ENHET_F).size());
         assertEquals(2, organiseringStateRepository.getParentEnhetIdsFlattened(ENHET_G).size());
         assertEquals(4, organiseringStateRepository.getParentEnhetIdsFlattened(ENHET_H).size());
+    }
+
+    @Test
+    public void verify_default_setup_lovnoder_under() {
+        setupDefaultOrganiseringer();
+
+        assertEquals(9, organiseringStateRepository.count());
+        assertEquals(5, organiseringStateRepository.getAlleLovnodeIder().size());
+
+        assertEquals(4, organiseringStateRepository.getLovnoderIderUnder(ENHET_A).size());
+        assertEquals(4, organiseringStateRepository.getLovnoderIderUnder(ENHET_B).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderIderUnder(ENHET_C).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderIderUnder(ENHET_D).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderIderUnder(ENHET_E).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderIderUnder(ENHET_F).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderIderUnder(ENHET_G).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderIderUnder(ENHET_H).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderIderUnder(ENHET_X).size());
+
+        assertEquals(4, organiseringStateRepository.getLovnoderUnder(ENHET_A).size());
+        assertEquals(4, organiseringStateRepository.getLovnoderUnder(ENHET_B).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderUnder(ENHET_C).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderUnder(ENHET_D).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderUnder(ENHET_E).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderUnder(ENHET_F).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderUnder(ENHET_G).size());
+        assertEquals(0, organiseringStateRepository.getLovnoderUnder(ENHET_H).size());
+        assertEquals(1, organiseringStateRepository.getLovnoderUnder(ENHET_X).size());
     }
 }
