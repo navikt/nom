@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
-const latestDisplayDate = "2026-03-31";
+const latestDisplayDate = "2026-04-30";
 
 const displayBanner = nomDateIsTodayOrAfter(latestDisplayDate);
 
