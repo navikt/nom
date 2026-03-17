@@ -39,7 +39,7 @@ export const NavHeader = () => {
       <div css={innerDiv}>
         <SmartLink
           css={css`
-            ${`margin-right: var(--a-spacing-${displayChristmasLogo ? "3" : 8})`};
+            ${`margin-right: var(--a-spacing-${displayChristmasLogo ? "3" : "8"})`};
           `}
           href="/"
           title="Hjem"
@@ -49,6 +49,7 @@ export const NavHeader = () => {
             src={displayChristmasLogo ? nomLogoCircleChristmas : nomLogoCircle}
           />
         </SmartLink>
+
         <div
           css={css`
             margin-right: var(--a-spacing-8);
@@ -56,6 +57,7 @@ export const NavHeader = () => {
         >
           <SearchBar />
         </div>
+
         <BurgerMenu />
       </div>
     </div>
