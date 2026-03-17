@@ -9,7 +9,7 @@ type Query {
     organisasjonsenhet(where: OrgEnhetSearch!): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")
     orgEnhet(where: OrgEnhetSearch!): OrgEnhet
     organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
-    orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
+    orgEnheter(where: OrgEnheterSearch, filter: OrgEnheterSearchFilter): [OrgEnhetResult!]!
     ressurs(where: RessursSearch!): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
 }
@@ -39,10 +39,17 @@ input OrgEnhetSearch {
 input OrgEnheterSearch {
     agressoIder: [String!]
     orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
-    nomNivaa: [NomNivaa!]
+    nomNivaa: [NomNivaa!] @deprecated(reason:"Benytt heller nomNivaa filter i OrgEnheterSearchFilter objektet")
     orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
     agressoOrgNiv: String
     ider: [String!]
+}
+
+input OrgEnheterSearchFilter {
+    lovnodeSelection: LovnodeSelection = ALLE
+    organiseringSelection: OrganiseringSelection = ALLE
+    nomNivaaSelection: [NomNivaa!]
+    periodiskUtvalg: PeriodiskUtvalgArg = ALLE
 }
 
 input RessursSearch {
@@ -80,6 +87,7 @@ type RessursResult {
 enum ResultCode {
     OK,
     NOT_FOUND,
+    NOT_IN_FILTER,
     ERROR
 }
 
@@ -106,6 +114,21 @@ enum GyldigTomSelection {
 enum OrgnivSelection {
     ORGNIV_ORGENHET,
     IKKE_ORGNIV_ORGENHET,
+    ALLE
+}
+
+enum LovnodeSelection {
+    LOVNODE_ENHET,
+    IKKE_LOVNODE_ENHET,
+    ALLE
+}
+
+enum OrganiseringSelection {
+    UNDER_TOPPNODE_NAV,
+    UNDER_HELFO,
+    UNDER_SKATT,
+    UNDER_RIKSREVISJONEN,
+    UNDER_VIKAFOSSEN,
     ALLE
 }
 

@@ -21,6 +21,7 @@ import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
@@ -70,8 +71,8 @@ public class NomGraphQlControllerImpl implements NomGraphQlControllerInterface {
     }
 
     @Override
-    public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
-        return delegate.orgEnheter(orgEnheterSearch, environment);
+    public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch orgEnheterSearch, OrgEnheterSearchFilter orgEnheterSearchFilter, DataFetchingEnvironment environment) {
+        return delegate.orgEnheter(orgEnheterSearch, orgEnheterSearchFilter, environment);
     }
 
     @Override
@@ -149,7 +150,7 @@ public class NomGraphQlControllerImpl implements NomGraphQlControllerInterface {
     @Override
     @Deprecated
     public List<OrgEnhetResult> organisasjonsenheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
-        return delegate.orgEnheter(orgEnheterSearch, environment);
+        return delegate.orgEnheter(orgEnheterSearch, OrgEnheterSearchFilter.ALLE, environment);
     }
 
     @Override

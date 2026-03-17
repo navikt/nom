@@ -25,7 +25,7 @@ app:
       token-uri: DUMMY
       base-url: ${NOM_API_BASEURL}/api/admin/dvhOrds
       enhet-path: /enheter?numRows=0
-      ressurs-stillinger-path: /statligeRessurserTilknytningerPaginated?offset=0&limit=100000
+      ressurs-stillinger-path: /statligeRessurserTilknytninger?numRows=0
       eksterne-ressurser-path: /eksterneRessurserTilknytninger?numRows=0
       ansatte-buckets-path: /ressurser?numRows=0
       tlf-path: /telefoner?numRows=0

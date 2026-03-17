@@ -21,6 +21,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 public class OrganiseringStateRepositoryImpl implements OrganiseringStateRepository {
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>();
@@ -311,10 +312,9 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
 
 
     @Override
-    public Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids) {
-        Set<String> idSet = new HashSet<>(ids);
+    public Map<String, OrganiseringState> getActiveOrganiseringInBulk(Set<String> ids) {
         return getActiveOrganisering().entrySet().stream()
-            .filter(entry -> idSet.contains(entry.getKey()))
+            .filter(entry -> ids.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

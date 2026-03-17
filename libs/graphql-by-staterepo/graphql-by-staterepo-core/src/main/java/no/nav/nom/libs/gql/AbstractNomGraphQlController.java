@@ -2,19 +2,6 @@ package no.nav.nom.libs.gql;
 
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.libs.gql.exception.NotRelevantForIntegrationTestingException;
-import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
-import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
-import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
-import no.nav.nom.libs.gql.projections.RessursSearch;
-import no.nav.nom.libs.gql.projections.RessursSearchFilter;
-import no.nav.nom.libs.gql.projections.RessurserSearch;
-import no.nav.nom.libs.gql.resolvers.LederResolver;
-import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
-import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
-import no.nav.nom.libs.gql.resolvers.OrgtilknytningResolver;
-import no.nav.nom.libs.gql.resolvers.RessursResolver;
-import no.nav.nom.libs.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
@@ -28,7 +15,19 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.RessursSearch;
+import no.nav.nom.libs.gql.projections.RessursSearchFilter;
+import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.resolvers.LederResolver;
+import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
+import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
+import no.nav.nom.libs.gql.resolvers.OrgtilknytningResolver;
+import no.nav.nom.libs.gql.resolvers.RessursResolver;
+import no.nav.nom.libs.gql.resolvers.SearchResolver;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -52,8 +51,6 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
     private final SearchResolver searchResolver;
 
     private final NomGraphqlSupportInterface graphqlSupport;
-
-
 
     public AbstractNomGraphQlController(
         OrgEnhetResolver orgEnhetResolver,
@@ -82,10 +79,13 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
 
     @QueryMapping("orgEnheter")
     @Override
-    public List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+    public List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch,
+                                           @Argument("filter") OrgEnheterSearchFilter orgEnheterSearchFilter,
+                                           DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         orgEnheterSearch = orgEnheterSearch == null ? OrgEnheterSearch.EMPTY_SEARCH : orgEnheterSearch;
-        return orgEnhetResolver.orgEnheter(orgEnheterSearch);
+        orgEnheterSearchFilter = orgEnheterSearchFilter == null ? OrgEnheterSearchFilter.ALLE : orgEnheterSearchFilter;
+        return orgEnhetResolver.orgEnheter(orgEnheterSearch, orgEnheterSearchFilter);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
@@ -208,7 +208,9 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
     @Deprecated(forRemoval = true)
     @QueryMapping("organisasjonsenhet")
     @Override
-    public Optional<OrgEnhet> organisasjonsenhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+    public Optional<OrgEnhet> organisasjonsenhet(
+        @Argument("where") OrgEnhetSearch orgEnhetSearch,
+        DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
         return orgEnhet(orgEnhetSearch, environment);
     }
@@ -218,7 +220,7 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
     @Override
     public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
-        return orgEnheter(orgEnheterSearch, environment);
+        return orgEnheter(orgEnheterSearch, OrgEnheterSearchFilter.ALLE, environment);
     }
 
     @Deprecated

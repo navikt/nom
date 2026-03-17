@@ -41,4 +41,44 @@ public class OrgEnhetResult {
         );
     }
 
+    public static OrgEnhetResult notInFilter(String agressoId, String agressoOrgNiv) {
+        return new OrgEnhetResult(
+            ResultCode.NOT_IN_FILTER,
+            agressoId,
+            agressoId,
+            null,
+            agressoOrgNiv,
+            agressoOrgNiv,
+            null,
+            null
+        );
+    }
+
+
+    public static OrgEnhetResult notFound(String nomId) {
+        return new OrgEnhetResult(
+            ResultCode.NOT_FOUND,
+            null,
+            null,
+            nomId,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
+    public static OrgEnhetResult notInFilter(String nomId) {
+        return new OrgEnhetResult(
+            ResultCode.NOT_IN_FILTER,
+            null,
+            null,
+            nomId,
+            null,
+            null,
+            null,
+            null
+        );
+    }
+
 }
