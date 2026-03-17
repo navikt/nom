@@ -12,9 +12,9 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import axios, { type AxiosError } from "axios";
-import React, { useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { type AxiosError } from "axios";
+import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -23,14 +23,14 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import {
-  AsyncSearch,
-  SelectLayoutWrapper,
-} from "~/components/select/CustomSelectComponents";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
@@ -38,11 +38,7 @@ import { OrgEnhetsType } from "~/types/api-models";
 export const KorrigerOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
 
-  if (!hasAdminAccess) {
-    return;
-  }
-
-  const { id } = useParams({ from: "/korriger-organisasjonsenhet/$id" });
+  const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
 
   return (
     <>
@@ -50,17 +46,22 @@ export const KorrigerOrgEnhet = () => {
 
       <ContentWrapper>
         <ContainerWithHighlightedTop padding={6}>
-          <KorrigeringOrgEnhet orgEnhetId={id} />
+          {hasAdminAccess ? (
+            <KorrigeringOrgEnhet orgEnhetId={id} />
+          ) : (
+            <IkkeTilgangRedigering />
+          )}
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
   );
 };
 
-function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId: string }) {
+function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
+    enabled: !!orgEnhetId,
   });
 
   const orgEnhet = orgEnhetQuery.data;
@@ -82,7 +83,7 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId: string }) {
   }
 
   if (!orgEnhet) {
-    return;
+    return <OrgEnhetIkkeFunnet />;
   }
 
   return (
@@ -102,19 +103,12 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const methods = useForm({
     defaultValues: {
-      navn: orgEnhet.navn,
       gyldigFom: orgEnhet.gyldigFom,
-      lederRessursNavident: orgEnhet.leder.navident,
       firesiffer: orgEnhet.remedyEnhetId ?? "",
       orgEnhetsType: orgEnhet.orgEnhetsType,
     },
     resolver: yupResolver(validationSchema),
   });
-
-  const existingOrgEnhetLederOption = {
-    label: `${orgEnhet.leder.visningsnavn} (${orgEnhet.leder.navident})`,
-    value: orgEnhet.leder.navident,
-  };
 
   const oppdaterOrgEnhetMutation = useMutation<
     unknown,
@@ -137,6 +131,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const request: OppdaterOrgEnhetRequest = {
       ...values,
       id: orgEnhet.id,
+      navn: orgEnhet.navn,
     };
 
     oppdaterOrgEnhetMutation.mutate(request);
@@ -145,47 +140,37 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="4">
-          <TextField
-            {...methods.register("navn")}
-            description="Enheten kan ikke ha likt navn som en annen enhet"
-            error={methods.formState.errors.navn?.message}
-            label="Navn på organisasjonsenhet"
-          />
+        <VStack gap="9">
+          <VStack gap="4">
+            <FormDateWrapper name="gyldigFom" />
 
-          <FormRessursSearchWrapper
-            name="lederRessursNavident"
-            orgEnhetLederOption={existingOrgEnhetLederOption}
-          />
+            <Select
+              css={css`
+                width: fit-content;
+              `}
+              {...methods.register("orgEnhetsType")}
+              error={methods.formState.errors.orgEnhetsType?.message}
+              label="Organisasjonsenhetstype"
+            >
+              {!orgEnhet.orgEnhetsType && <option value="" />}
+              {Object.values(OrgEnhetsType)
+                .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
+                .map((orgEnhetsType) => (
+                  <option key={orgEnhetsType} value={orgEnhetsType}>
+                    {OrgEnhetsTypeNameMapping[orgEnhetsType]}
+                  </option>
+                ))}
+            </Select>
 
-          <FormDateWrapper name="gyldigFom" />
-
-          <Select
-            css={css`
-              width: fit-content;
-            `}
-            {...methods.register("orgEnhetsType")}
-            error={methods.formState.errors.orgEnhetsType?.message}
-            label="Organisasjonsenhetstype"
-          >
-            {!orgEnhet.orgEnhetsType && <option value="" />}
-            {Object.values(OrgEnhetsType)
-              .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
-              .map((orgEnhetsType) => (
-                <option key={orgEnhetsType} value={orgEnhetsType}>
-                  {OrgEnhetsTypeNameMapping[orgEnhetsType]}
-                </option>
-              ))}
-          </Select>
-
-          <TextField
-            css={css`
-              width: 20%;
-            `}
-            {...methods.register("firesiffer")}
-            error={methods.formState.errors.firesiffer?.message}
-            label="Firesiffer"
-          />
+            <TextField
+              css={css`
+                width: 20%;
+              `}
+              {...methods.register("firesiffer")}
+              error={methods.formState.errors.firesiffer?.message}
+              label="Firesiffer"
+            />
+          </VStack>
 
           <div
             css={css`
@@ -238,79 +223,8 @@ function FormDateWrapper({ name }: { name: string }) {
   );
 }
 
-function FormRessursSearchWrapper({
-  name,
-  orgEnhetLederOption,
-}: {
-  name: string;
-  orgEnhetLederOption: any;
-}) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
-  const [lederChanged, setLederChanged] = useState<boolean>(false);
-
-  return (
-    <SelectLayoutWrapper
-      error={fieldState.error}
-      htmlFor="Leder"
-      label="Leder for ny organisasjonsenhet"
-    >
-      <AsyncSearch
-        loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
-        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-          inputValue.length < 3
-            ? "Du må skrive minst 3 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(selectedOption: { label: string; value: string } | null) => {
-          field.onChange(selectedOption?.value ?? "");
-
-          setLederChanged(true);
-        }}
-        placeholder="Søk etter medarbeider"
-        value={lederChanged ? undefined : orgEnhetLederOption}
-      />
-    </SelectLayoutWrapper>
-  );
-}
-
-async function searchIfEnoughInput(searchTerm: string) {
-  if (searchTerm.length < 3) {
-    return [];
-  }
-
-  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
-        searchRessurs(term: $searchTerm, filter: $filter) {
-          navident
-          visningsnavn
-        }
-      }`;
-
-  const filter = { statusSelection: "AKTIV" };
-
-  const resultRaw = await axios.post("/frackend/nom-api/graphql", {
-    operationName: "ressurs",
-    query: searchQuery,
-    variables: {
-      searchTerm: searchTerm,
-      filter: filter,
-    },
-  });
-
-  const resultRessurser = resultRaw.data.data.searchRessurs;
-
-  return resultRessurser.map((ressurs: any) => ({
-    label: `${ressurs.visningsnavn} (${ressurs.navident})`,
-    value: ressurs.navident,
-  }));
-}
-
 const validationSchema = yup.object({
-  navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
-  lederRessursNavident: yup.string().required("Obligatorisk"),
   firesiffer: yup.string().optional(),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()

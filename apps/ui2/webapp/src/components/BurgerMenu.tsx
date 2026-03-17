@@ -43,8 +43,8 @@ export function BurgerMenu() {
   const navigate = useNavigate();
 
   const adminLenke: string = globalThis.location.href.includes("nom.nav.no")
-    ? "https://nom-admin.ansatt.nav.no/sinks/ressurs"
-    : "https://nom-admin.intern.dev.nav.no/sinks/ressurs";
+    ? "https://nom-admin.ansatt.nav.no"
+    : "https://nom-admin.intern.dev.nav.no";
 
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(
