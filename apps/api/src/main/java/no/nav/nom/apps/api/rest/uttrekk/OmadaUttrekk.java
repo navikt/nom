@@ -33,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,6 +57,7 @@ public class OmadaUttrekk {
     private final Unleash unleash;
 
     public static final String UNLEASH_OMADA_NYTT_FORMAT = "nom.omada.nytt_format";
+    private static final String ORGENHET_KUN_HISTORISK_SLUTTDATO = "nom.omada.kun_historisk_sluttdato";
 
     private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
 
@@ -276,6 +278,8 @@ public class OmadaUttrekk {
 
         log.debug("Eksporterer orgenheter. Bruker ny organisering");
 
+        var kunHistoriskSluttdato = unleash.isEnabled(ORGENHET_KUN_HISTORISK_SLUTTDATO);
+
         final var cSVFormat =
             getCSVFormat(
                 "org_enhet_id",
@@ -296,6 +300,10 @@ public class OmadaUttrekk {
             orgenhetService.getAllEnheter()
                 .stream().filter(oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(orgenhet -> {
+                    var sluttdato =
+                        nonNull(orgenhet.getGyldigTom()) && (!kunHistoriskSluttdato || orgenhet.getGyldigTom().minusDays(1).isBefore(LocalDate.now()))
+                        ? orgenhet.getGyldigTom().format(dateTimeFormatter)
+                        : "";
                     try {
                         printer.printRecord(
                             orgenhet.getId(),
@@ -304,7 +312,7 @@ public class OmadaUttrekk {
                             orgenhet.getAgressoOrgenhetType(),
                             orgenhet.getNavn(),
                             orgenhet.getGyldigFom().format(dateTimeFormatter),
-                            nonNull(orgenhet.getGyldigTom()) ? orgenhet.getGyldigTom().format(dateTimeFormatter) : "",
+                            sluttdato,
                             getLederNavident(orgenhet),
                             nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : "",
                             nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
