@@ -10,6 +10,7 @@ import static java.util.Collections.emptySet;
 public record OrgEnheterSearchFilter(
     LovnodeSelection lovnodeSelection,
     OrganiseringSelection organiseringSelection,
+    String organisertUnderOrgEnhetId,
     Set<NomNivaa> nomNivaaSelection,
     PeriodiskUtvalgArg periodiskUtvalg
 ) {
@@ -25,6 +26,7 @@ public record OrgEnheterSearchFilter(
         UNDER_SKATT,
         UNDER_RIKSREVISJONEN,
         UNDER_VIKAFOSSEN,
+        UNDER_ANGITT_ORGENHET,
         ALLE
     }
 
@@ -35,7 +37,7 @@ public record OrgEnheterSearchFilter(
     }
 
     static OrgEnheterSearchFilter alle() {
-        return new OrgEnheterSearchFilter(LovnodeSelection.ALLE, OrganiseringSelection.ALLE, emptySet(), PeriodiskUtvalgArg.ALLE);
+        return new OrgEnheterSearchFilter(LovnodeSelection.ALLE, OrganiseringSelection.ALLE, null,  emptySet(), PeriodiskUtvalgArg.ALLE);
     }
 
     public static OrgEnheterSearchFilter ALLE = alle();

@@ -48,6 +48,7 @@ input OrgEnheterSearch {
 input OrgEnheterSearchFilter {
     lovnodeSelection: LovnodeSelection = ALLE
     organiseringSelection: OrganiseringSelection = ALLE
+    organisertUnderOrgEnhetId: String
     nomNivaaSelection: [NomNivaa!]
     periodiskUtvalg: PeriodiskUtvalgArg = ALLE
 }
@@ -129,6 +130,7 @@ enum OrganiseringSelection {
     UNDER_SKATT,
     UNDER_RIKSREVISJONEN,
     UNDER_VIKAFOSSEN,
+    UNDER_ANGITT_ORGENHET,
     ALLE
 }
 
