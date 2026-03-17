@@ -40,7 +40,13 @@ public interface OrganiseringStateRepository {
 
     Set<OrganiseringState> getEnhetOgOrganiseringerOppover(String id);
 
-    Set<Object> getChildrenEnhetIdsFlattened(String id);
+    Set<String> getChildrenEnhetIdsFlattened(String id);
 
-    Set<Object> getParentEnhetIdsFlattened(String id);
+    Set<String> getParentEnhetIdsFlattened(String id);
+    
+    Set<String> getAlleLovnodeIder();
+
+    Set<OrganiseringState> getLovnoderUnder(String id);
+
+    Set<String> getLovnoderIderUnder(String id);
 }

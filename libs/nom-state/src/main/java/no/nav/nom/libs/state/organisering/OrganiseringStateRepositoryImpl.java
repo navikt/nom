@@ -342,16 +342,47 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     @Override
-    public Set<Object> getChildrenEnhetIdsFlattened(String id) {
+    public Set<String> getChildrenEnhetIdsFlattened(String id) {
         return getEnhetOgOrganiseringerNedover(id).stream()
             .map(OrganiseringState::id)
             .collect(Collectors.toSet());
     }
 
     @Override
-    public Set<Object> getParentEnhetIdsFlattened(String id) {
+    public Set<String> getParentEnhetIdsFlattened(String id) {
         return getEnhetOgOrganiseringerOppover(id).stream()
             .map(OrganiseringState::id)
+            .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> getAlleLovnodeIder() {
+        var alleOverenhetIder = organiseringByFid.values().stream().map(OrganiseringState::idOver).collect(Collectors.toSet());
+        var alleEnheterMedOrganisering = organiseringByFid.values().stream().map(OrganiseringState::id).collect(Collectors.toSet());
+        var alleEnheterUtenUnderOrganisering = alleEnheterMedOrganisering.stream()
+            .filter(id -> !alleOverenhetIder.contains(id))
+            .collect(Collectors.toSet());
+        return alleEnheterUtenUnderOrganisering;
+    }
+
+    @Override
+    public Set<OrganiseringState> getLovnoderUnder(String id) {
+        var lovnoderIds = getLovnoderIderUnder(id);
+        return getEnhetOgOrganiseringerNedover(id).stream()
+            .filter(organisering  -> lovnoderIds.contains(organisering.id()))
+            .collect(Collectors.toSet());
+    }
+
+    // NB! Merk at hvis en enhet har i en gitt periode hatt underenheter, og i annen periode ikke hatt underenheter
+    // så vil den ikke defineres som en løvnode her - for enkelhetsskyld
+    @Override
+    public Set<String> getLovnoderIderUnder(String id) {
+        var childrenIds = getChildrenEnhetIdsFlattened(id);
+        var organiseringerUnderSineOverIder = getEnhetOgOrganiseringerNedover(id).stream()
+            .map(OrganiseringState::idOver)
+            .collect(Collectors.toSet());
+        return childrenIds.stream()
+            .filter(childId -> !organiseringerUnderSineOverIder.contains(childId))
             .collect(Collectors.toSet());
     }
 
