@@ -362,9 +362,29 @@ public class OmadaUttrekk {
     }
 
     private String getOrgenhetOver(IOrgenhet orgenhet) {
-        return organiseringStateRepository.findActiveById(orgenhet.getId())
+        var overenhet = organiseringStateRepository.findActiveById(orgenhet.getId())
             .map(OrganiseringState::idOver)
             .orElse("");
+
+        if (!unleash.isEnabled(ORGENHET_KUN_HISTORISK_SLUTTDATO)) {
+            return overenhet;
+        }
+
+        if (!overenhet.isEmpty()) {
+            return overenhet;
+        } else {
+            // Hvis det ikke er aktiv overenhet, lever overenhet som var gyldig i går, hvis den fantes
+            var dayBeforeYesterday = LocalDate.now().minusDays(2);
+            var today = LocalDate.now().minusDays(1);
+            return organiseringStateRepository.findById(orgenhet.getId()).stream()
+                .filter(org -> // Aktiv i går
+                    org.gyldigFom().isBefore(today) &&
+                    (org.gyldigTom() == null || org.gyldigTom().isAfter(dayBeforeYesterday))
+                )
+                .map(OrganiseringState::idOver)
+                .findFirst()
+                .orElse("");
+        }
     }
 
     private CSVFormat getCSVFormat(String... headers) {
