@@ -287,21 +287,21 @@ public class OrgEnhetController {
             map.put("Gyldig TOM", nonNull(orgEnhet.gyldigTom()) ? orgEnhet.gyldigTom() : "");
             map.put("Leder Navident", orgEnhet.leder().navident());
             map.put("Leder Navn", orgEnhet.leder().visningsnavn());
-            map.put("Org Enhet Nivå", orgEnhet.nomNivaa());
-            map.put("Org Enhet Type", orgEnhet.orgEnhetsType());
+            map.put("Org Enhet Nivå", nonNull(orgEnhet.nomNivaa()) ? orgEnhet.nomNivaa() : "");
+            map.put("Org Enhet Type", nonNull(orgEnhet.orgEnhetsType()) ? orgEnhet.orgEnhetsType() : "");
             map.put("Org Enhet ID Over", orgEnhet.overordnetEnhetId());
             map.put("Remedy Enhet ID", orgEnhet.remedyEnhetId());
             result.add(map);
         }
 
         var excelHeaders = result.getFirst().keySet().stream().toList();
-        var sheetName = String.format(
+        var filename = String.format(
             "OrgEnheter underliggende %s-%s",
             parentOrgEnhet.navn(),
             LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
         );
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.xlsx", sheetName));
-        excelGenerator.generateWorkbook(response, sheetName, excelHeaders, result);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.xlsx", filename));
+        excelGenerator.generateWorkbook(response, parentOrgEnhet.id(), excelHeaders, result);
     }
 
     @GetMapping("/isArbeidsomraade/{orgEnhetId}")
