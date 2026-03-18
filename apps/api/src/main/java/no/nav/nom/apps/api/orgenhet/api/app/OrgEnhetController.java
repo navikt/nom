@@ -267,7 +267,7 @@ public class OrgEnhetController {
         description = "Excel export av alle orgEnhet i tillegg til parent orgEnhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @GetMapping("parent-org-underliggende-excel/{parentId}")
+    @GetMapping("parent-og-underliggende-excel/{parentId}")
     public void getAlleUnderLiggendeOrgEnheterOgParentExcel(HttpServletResponse response, @PathVariable String parentId) throws IOException {
         var parentOrgEnhet = orgenhetService.getById(parentId)
             .map(orgEnhetMapper::mapToReducedOrgEnhet)
