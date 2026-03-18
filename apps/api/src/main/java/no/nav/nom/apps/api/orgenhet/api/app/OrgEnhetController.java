@@ -25,6 +25,8 @@ import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,8 +46,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @Tag(name = "OrgEnheter")
@@ -58,6 +66,7 @@ public class OrgEnhetController {
     private final OrgEnhetMapper orgEnhetMapper;
     private final KontaktpersonerService kontaktpersonerService;
     private final AuthResolver authResolver;
+    private final ExcelGenerator excelGenerator;
     private final Unleash unleash;
 
     public OrgEnhetController(
@@ -75,6 +84,7 @@ public class OrgEnhetController {
         this.orgEnhetMapper = orgEnhetMapper;
         this.kontaktpersonerService = kontaktpersonerService;
         this.authResolver = authResolver;
+        this.excelGenerator = new ExcelGenerator();
         this.unleash = unleash;
     }
 
@@ -117,8 +127,8 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<Boolean> kanRessursRedigereOrgenhet(
-        @PathVariable("navident") String navident,
-        @PathVariable("orgEnhetId") String orgEnhetId
+        @PathVariable String navident,
+        @PathVariable String orgEnhetId
     ) {
         OrgEnhet orgEnhet = orgenhetService.getById(orgEnhetId)
             .map(orgEnhetMapper::mapToOrgEnhet)
@@ -222,7 +232,7 @@ public class OrgEnhetController {
         description = "Henter ut id for alle underliggende organisasjonsenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable("parentId") String parentId) {
+    public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable String parentId) {
         return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
     }
 
@@ -231,11 +241,67 @@ public class OrgEnhetController {
         description = "Henter ut objekt for alle underliggende organisasjonsenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable("parentId") String parentId) {
+    public ResponseEntity<List<OrgEnhet>> getUnderliggendeOrgEnheterObjekt(@PathVariable String parentId) {
         return ResponseEntity.ok(orgenhetService.getAllUnderliggendeOrgEnhetById(parentId)
             .stream()
             .map(orgEnhetMapper::mapToOrgEnhet)
             .collect(Collectors.toList()));
+    }
+
+    @Operation(
+        description = "Henter ut alle orgEnheter i tillegg til parent orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/parent-og-underliggende/{parentId}")
+    public ResponseEntity<List<OrgEnhet>> getAlleUnderLiggendeOrgEnheterOgParent(@PathVariable String parentId) {
+        var parentOrgEnhet = orgenhetService.getById(parentId)
+            .map(orgEnhetMapper::mapToReducedOrgEnhet)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(parentId));
+        var underliggendeOrgEnheter = orgenhetService.getAllUnderliggendeOrgEnhetById(parentId)
+            .stream().map(orgEnhetMapper::mapToReducedOrgEnhet).collect(Collectors.toList());
+        underliggendeOrgEnheter.add(parentOrgEnhet);
+        return ResponseEntity.ok(underliggendeOrgEnheter);
+    }
+
+    @Operation(
+        description = "Excel export av alle orgEnhet i tillegg til parent orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("parent-org-underliggende-excel/{parentId}")
+    public void getAlleUnderLiggendeOrgEnheterOgParentExcel(HttpServletResponse response, @PathVariable String parentId) throws IOException {
+        var parentOrgEnhet = orgenhetService.getById(parentId)
+            .map(orgEnhetMapper::mapToReducedOrgEnhet)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(parentId));
+        var underliggendeOrgEnheter = orgenhetService.getAllUnderliggendeOrgEnhetById(parentId)
+            .stream().map(orgEnhetMapper::mapToReducedOrgEnhet).collect(Collectors.toList());
+        underliggendeOrgEnheter.addFirst(parentOrgEnhet);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (OrgEnhet orgEnhet : underliggendeOrgEnheter) {
+            LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+            map.put("Org Enhet ID", orgEnhet.id());
+            map.put("Agresso ID", orgEnhet.agressoId());
+            map.put("Agresso Org Nivå", orgEnhet.orgNiv());
+            map.put("Agresso Org Enhet Type", nonNull(orgEnhet.agressoOrgenhetType()) ? orgEnhet.agressoOrgenhetType() : "");
+            map.put("Org Enhet Navn", orgEnhet.navn());
+            map.put("Gyldig FOM", orgEnhet.gyldigFom());
+            map.put("Gyldig TOM", nonNull(orgEnhet.gyldigTom()) ? orgEnhet.gyldigTom() : "");
+            map.put("Leder Navident", orgEnhet.leder().navident());
+            map.put("Leder Navn", orgEnhet.leder().visningsnavn());
+            map.put("Org Enhet Nivå", orgEnhet.nomNivaa());
+            map.put("Org Enhet Type", orgEnhet.orgEnhetsType());
+            map.put("Org Enhet ID Over", orgEnhet.overordnetEnhetId());
+            map.put("Remedy Enhet ID", orgEnhet.remedyEnhetId());
+            result.add(map);
+        }
+
+        var excelHeaders = result.getFirst().keySet().stream().toList();
+        var sheetName = String.format(
+            "OrgEnheter underliggende %s-%s",
+            parentOrgEnhet.navn(),
+            LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+        );
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.xlsx", sheetName));
+        excelGenerator.generateWorkbook(response, sheetName, excelHeaders, result);
     }
 
     @GetMapping("/isArbeidsomraade/{orgEnhetId}")
@@ -243,7 +309,7 @@ public class OrgEnhetController {
         description = "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> checkIfOrgEnhetIsArbeidsomraade(@PathVariable("orgEnhetId") String orgEnhetId) {
+    public ResponseEntity<Boolean> checkIfOrgEnhetIsArbeidsomraade(@PathVariable String orgEnhetId) {
         return ResponseEntity.ok(orgenhetService.isOrgEnhetInArbeidsomraade(orgEnhetId));
     }
 
@@ -252,7 +318,7 @@ public class OrgEnhetController {
         description = "Sjekk om Organisasjonen tilhøerer et arbeidsområde.",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<Boolean> checkIfOrgEnhetIsDriftsenhet(@PathVariable("orgEnhetId") String orgEnhetId) {
+    public ResponseEntity<Boolean> checkIfOrgEnhetIsDriftsenhet(@PathVariable String orgEnhetId) {
         return ResponseEntity.ok(orgenhetService.isOrgenhetInDriftsenhet(orgEnhetId));
     }
 
@@ -366,6 +432,17 @@ public class OrgEnhetController {
     public ResponseEntity<StandardResponse> handleDuplicateOrgEnhetName(RuntimeException e) {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
+            .body(StandardResponse.builder().message(e.getMessage()).build());
+    }
+
+    @ExceptionHandler(
+        {
+            IOException.class
+        }
+    )
+    public ResponseEntity<StandardResponse> handleIOException(RuntimeException e) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(StandardResponse.builder().message(e.getMessage()).build());
     }
 
