@@ -25,6 +25,7 @@ import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
@@ -175,8 +176,8 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     }
 
     @Override
-    public List<RessursResult> ressurser(RessurserSearch search, DataFetchingEnvironment environment) {
-        return delegate.ressurser(search, environment);
+    public List<RessursResult> ressurser(RessurserSearch search, RessurserSearchFilter filter, DataFetchingEnvironment environment) {
+        return delegate.ressurser(search, filter, environment);
     }
 
     @Override

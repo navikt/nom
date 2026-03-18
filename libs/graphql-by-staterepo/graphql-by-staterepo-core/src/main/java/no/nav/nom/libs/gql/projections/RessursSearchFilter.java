@@ -45,14 +45,6 @@ public class RessursSearchFilter implements ResultLimit {
         return this.limit;
     }
 
-    enum SektorSelection{
-        EKSTERN,
-        STATLIG,
-        KOMMUNAL,
-        IKKE_EKSTERN,
-        ALLE,
-    }
-
     enum StatusSelection{
         AKTIV,
         INAKTIV,
