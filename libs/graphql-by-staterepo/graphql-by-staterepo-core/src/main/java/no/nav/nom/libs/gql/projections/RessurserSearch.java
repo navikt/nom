@@ -17,8 +17,6 @@ public class RessurserSearch {
         Set<String> personIdenter,
         Set<String> navidenter,
         Set<String> navIdenter
-
-
     ) {
         var personidenterSet = new HashSet<String>();
         Optional.ofNullable(personidenter).ifPresent(personidenterSet::addAll);

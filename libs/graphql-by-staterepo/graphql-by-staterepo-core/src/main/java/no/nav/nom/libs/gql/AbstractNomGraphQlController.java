@@ -22,6 +22,7 @@ import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
@@ -136,10 +137,13 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
 
     @QueryMapping("ressurser")
     @Override
-    public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment) {
+    public List<RessursResult> ressurser(@Argument("where") RessurserSearch ressurserSearch,
+                                         @Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+                                         DataFetchingEnvironment environment) {
         graphqlSupport.count(environment);
-        search = search == null ? RessurserSearch.EMPTY_SEARCH : search;
-        return ressursResolver.ressurser(search);
+        ressurserSearch = ressurserSearch == null ? RessurserSearch.EMPTY_SEARCH : ressurserSearch;
+        ressurserSearchFilter = ressurserSearchFilter == null ? RessurserSearchFilter.ALLE : ressurserSearchFilter;
+        return ressursResolver.ressurser(ressurserSearch, ressurserSearchFilter);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")

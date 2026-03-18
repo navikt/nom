@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.TestUtil.createRessursState;
@@ -76,20 +77,26 @@ public class RessursTest extends GraphQlTestBase {
             .entityList(RessursResult.class)
             .get();
 
+        var resultMap = response.stream()
+            .collect(Collectors.toMap(
+                RessursResult::getId,      // Use the 'id' field as the Map key
+                r -> r
+            ));
+
         assertEquals(4, response.size());
-        RessursResult navIdent = get(response, "testNavIdent1");
+        RessursResult navIdent = resultMap.get("testNavIdent1");
         assertEquals("testNavIdent1", navIdent.getId());
         assertEquals(ResultCode.OK, navIdent.getCode());
 
-        RessursResult navIdentNotFound = get(response, "notFoundNavIdent");
+        RessursResult navIdentNotFound = resultMap.get("notFoundNavIdent");
         assertEquals("notFoundNavIdent", navIdentNotFound.getId());
         assertEquals(ResultCode.NOT_FOUND, navIdentNotFound.getCode());
 
-        RessursResult personIdent = get(response, "testPersonIdent2");
+        RessursResult personIdent = resultMap.get("testPersonIdent2");
         assertEquals("testPersonIdent2", personIdent.getId());
         assertEquals(ResultCode.OK, personIdent.getCode());
 
-        RessursResult personIdentNotFound = get(response, "notFoundPersonIdent");
+        RessursResult personIdentNotFound = resultMap.get("notFoundPersonIdent");
         assertEquals("notFoundPersonIdent", personIdentNotFound.getId());
         assertEquals(ResultCode.NOT_FOUND, personIdentNotFound.getCode());
     }
@@ -200,12 +207,20 @@ public class RessursTest extends GraphQlTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asString());
-        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asString());
+        var resultMap = ressurser.stream()
+            .collect(Collectors.toMap(
+                r -> r.get("id").asString(),      // Use the 'id' field as the Map key
+                r -> r
+            ));
 
-        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asString());
-        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asString());
+        var result1 = resultMap.get(ressurs1.navident());
+        var result2 = resultMap.get(ressurs2.navident());
+
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  result1.get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             result1.get("ressurs").get("etternavn").asString());
+
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  result2.get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             result2.get("ressurs").get("etternavn").asString());
     }
 
     @Test
@@ -221,12 +236,21 @@ public class RessursTest extends GraphQlTestBase {
         final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
         assertEquals(2, ressurser.size());
 
-        // assertions krever samme rekkefølge i respons som i event-source
-        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  ressurser.get(0).get("ressurs").get("fornavn").asString());
-        assertEquals(ressurs1.visningsnavn().etternavn(),             ressurser.get(0).get("ressurs").get("etternavn").asString());
+        var resultMap = ressurser.stream()
+            .collect(Collectors.toMap(
+                r -> r.get("id").asString(),      // Use the 'id' field as the Map key
+                r -> r
+            ));
 
-        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  ressurser.get(1).get("ressurs").get("fornavn").asString());
-        assertEquals(ressurs2.visningsnavn().etternavn(),             ressurser.get(1).get("ressurs").get("etternavn").asString());
+        var result1 = resultMap.get(ressurs1.navident());
+        var result2 = resultMap.get(ressurs2.navident());
+
+        // assertions krever samme rekkefølge i respons som i event-source
+        assertEquals(ressurs1.visningsnavn().getFornavnMellomnavn(),  result1.get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs1.visningsnavn().etternavn(),             result1.get("ressurs").get("etternavn").asString());
+
+        assertEquals(ressurs2.visningsnavn().getFornavnMellomnavn(),  result2.get("ressurs").get("fornavn").asString());
+        assertEquals(ressurs2.visningsnavn().etternavn(),             result2.get("ressurs").get("etternavn").asString());
     }
 
     @Test
@@ -558,10 +582,6 @@ public class RessursTest extends GraphQlTestBase {
         resp.path("ressurs.orgTilknytning[1].orgEnhet.id").hasValue();
 
 
-    }
-
-    private RessursResult get(List<RessursResult> list, String ident) {
-        return list.stream().filter(o -> ident.equals(o.getId())).findFirst().orElseThrow();
     }
 
     private String sladdetPersonident(String personident){

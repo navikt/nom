@@ -24,6 +24,7 @@ import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -76,7 +77,11 @@ public interface NomGraphQlControllerInterface {
     Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment environment);
 
     @QueryMapping("ressurser")
-    List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment);
+    List<RessursResult> ressurser(
+        @Argument("where") RessurserSearch search,
+        @Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+        DataFetchingEnvironment environment
+    );
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment);

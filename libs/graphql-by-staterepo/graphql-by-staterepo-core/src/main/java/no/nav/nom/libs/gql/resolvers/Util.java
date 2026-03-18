@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
 
@@ -24,6 +25,7 @@ public class Util {
                 case OrgtilknytningState o -> PeriodeUtil.isCurrentPeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isCurrentPeriod(o);
                 case OrgEnhetState o -> PeriodeUtil.isCurrentPeriod(o);
+                case RessursState r -> PeriodeUtil.isCurrentPeriod(r);
                 default -> throwError(periodisertObject);
             };
             case FREMTIDIGE -> switch (periodisertObject) {
@@ -32,6 +34,7 @@ public class Util {
                 case OrgtilknytningState o -> PeriodeUtil.isFuturePeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isFuturePeriod(o);
                 case OrgEnhetState o -> PeriodeUtil.isFuturePeriod(o);
+                case RessursState r -> PeriodeUtil.isFuturePeriod(r);
                 default -> throwError(periodisertObject);
             };
             case HISTORISKE -> switch (periodisertObject) {
@@ -40,6 +43,7 @@ public class Util {
                 case OrgtilknytningState o -> PeriodeUtil.isHistoricPeriod(o);
                 case LederResolver.LederForRessurs o -> PeriodeUtil.isHistoricPeriod(o);
                 case OrgEnhetState o -> PeriodeUtil.isHistoricPeriod(o);
+                case RessursState r -> PeriodeUtil.isHistoricPeriod(r);
                 default -> throwError(periodisertObject);
             };
         };
@@ -72,6 +76,9 @@ public class Util {
             return isCurrentOrFuturePeriod(orgEnhet) && orgEnhet.gyldigFom().isBefore(tomorrow());
         }
 
+        public static boolean isCurrentPeriod(RessursState ressurs) {
+            return isCurrentOrFuturePeriod(ressurs) && (ressurs.startdato() == null || ressurs.startdato().isBefore(tomorrow()));
+        }
 
         public static boolean isFuturePeriod(OrgtilknytningState orgtilknytning) {
             return orgtilknytning.gyldigFom().isAfter(LocalDate.now());
@@ -93,10 +100,9 @@ public class Util {
             return orgEnhet.gyldigFom().isAfter(LocalDate.now());
         }
 
+        public static boolean isFuturePeriod(RessursState ressurs) { return ressurs.startdato() != null && ressurs.startdato().isAfter(LocalDate.now()); }
 
         public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
-
-
 
         public static boolean isHistoricPeriod(OrganiseringState organisering) {
             return requireNonNullElse(organisering.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
@@ -105,7 +111,6 @@ public class Util {
         public static boolean isHistoricPeriod(OrgtilknytningState orgtilknytning) {
             return requireNonNullElse(orgtilknytning.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
         }
-
 
         public static boolean isHistoricPeriod(OrgEnhetLederState leder){
             return requireNonNullElse(leder.sluttdato(), NO_END_DATE).isBefore(tomorrow());
@@ -118,6 +123,8 @@ public class Util {
         public static boolean isHistoricPeriod(OrgEnhetState orgEnhet){
             return requireNonNullElse(orgEnhet.gyldigTom(), NO_END_DATE).isBefore(tomorrow());
         }
+
+        public static boolean isHistoricPeriod(RessursState ressurs) { return requireNonNullElse(ressurs.sluttdato(), NO_END_DATE).isBefore(tomorrow()); }
 
         public static boolean isCurrentOrFuturePeriod(OrganiseringState organisering) {
             return isNull(organisering.gyldigTom()) || organisering.gyldigTom().isAfter(yesterday());
@@ -139,6 +146,9 @@ public class Util {
             return isNull(orgEnhet.gyldigTom()) || orgEnhet.gyldigTom().isAfter(yesterday());
         }
 
+        public static boolean isCurrentOrFuturePeriod(RessursState ressurs) {
+            return isNull(ressurs.sluttdato()) || ressurs.sluttdato().isAfter(yesterday());
+        }
 
         public static LocalDate today() { return LocalDate.now(); }
         public static LocalDate yesterday() { return today().minusDays(1); }

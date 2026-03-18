@@ -11,7 +11,7 @@ type Query {
     organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
     orgEnheter(where: OrgEnheterSearch, filter: OrgEnheterSearchFilter): [OrgEnhetResult!]!
     ressurs(where: RessursSearch!): Ressurs
-    ressurser(where: RessurserSearch): [RessursResult!]!
+    ressurser(where: RessurserSearch, filter: RessurserSearchFilter): [RessursResult!]!
 }
 
 union SearchResult = Ressurs | OrgEnhet
@@ -68,6 +68,12 @@ input RessurserSearch {
     personidenter: [String!]
 }
 
+input RessurserSearchFilter {
+    gjeldendeSektorSelection: SektorSelection = ALLE
+    identTypeSelection: IdentTypeSelection = ALLE
+    periodiskUtvalg: PeriodiskUtvalgArg = ALLE
+}
+
 type OrgEnhetResult {
     code: ResultCode!
     id: String  @deprecated(reason: "id er erstattet med agressoId")
@@ -98,6 +104,15 @@ enum SektorSelection{
     KOMMUNAL,
     IKKE_EKSTERN,
     ALLE,
+}
+
+enum IdentTypeSelection {
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT,
+    ALLE
 }
 
 enum StatusSelection{
