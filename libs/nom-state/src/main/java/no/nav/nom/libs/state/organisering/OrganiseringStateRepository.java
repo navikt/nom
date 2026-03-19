@@ -2,7 +2,6 @@ package no.nav.nom.libs.state.organisering;
 
 import no.nav.nom.contract.nom.state.OrganiseringState;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +30,7 @@ public interface OrganiseringStateRepository {
 
     List<OrganiseringState> getOrganiseringerContainingId(String id, boolean kunAktive);
 
-    Map<String, OrganiseringState> getActiveOrganiseringInBulk(List<String> ids);
+    Map<String, OrganiseringState> getActiveOrganiseringInBulk(Set<String> ids);
     
     boolean orgEnhetHasParent(String id);
     
@@ -41,7 +40,13 @@ public interface OrganiseringStateRepository {
 
     Set<OrganiseringState> getEnhetOgOrganiseringerOppover(String id);
 
-    Set<Object> getChildrenEnhetIdsFlattened(String id);
+    Set<String> getChildrenEnhetIdsFlattened(String id);
 
-    Set<Object> getParentEnhetIdsFlattened(String id);
+    Set<String> getParentEnhetIdsFlattened(String id);
+    
+    Set<String> getAlleLovnodeIder();
+
+    Set<OrganiseringState> getLovnoderUnder(String id);
+
+    Set<String> getLovnoderIderUnder(String id);
 }

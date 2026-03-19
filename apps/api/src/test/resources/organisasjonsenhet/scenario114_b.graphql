@@ -1,5 +1,5 @@
 query {
-    organisasjonsenheter(where: {agressoIder: ["testId4","notFoundId"], agressoOrgNiv: "ORGNIV2"}) {
+    orgEnheter(where: {agressoIder: ["testId4","notFoundId"], agressoOrgNiv: "ORGNIV2"}) {
         id
         orgNiv
         code

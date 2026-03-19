@@ -7,7 +7,9 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.gql.lucenesearch.LuceneService;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import no.nav.nom.libs.gql.resolvers.LederResolver;
 import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
 import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
@@ -247,8 +249,8 @@ public class NomGqlApplication {
             );
             {
                 // For å få lucene-søk til å fungere
-                ressursResolver.ressurser(RessurserSearch.EMPTY_SEARCH).forEach(it -> luceneService.invalidateRessurs(it.getRessurs().getNavident()));
-                orgEnhetResolver.orgEnheter(OrgEnheterSearch.EMPTY_SEARCH).forEach(it -> luceneService.invalidateOrgenhet(it.getNomId()));
+                ressursResolver.ressurser(RessurserSearch.EMPTY_SEARCH, RessurserSearchFilter.ALLE).forEach(it -> luceneService.invalidateRessurs(it.getRessurs().getNavident()));
+                orgEnhetResolver.orgEnheter(OrgEnheterSearch.EMPTY_SEARCH, OrgEnheterSearchFilter.ALLE).forEach(it -> luceneService.invalidateOrgenhet(it.getNomId()));
 
                 luceneService.addInvalidatedEntitiesToIndex();
             }

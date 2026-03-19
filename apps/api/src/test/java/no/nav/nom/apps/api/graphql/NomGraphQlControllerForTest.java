@@ -2,21 +2,6 @@ package no.nav.nom.apps.api.graphql;
 
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.libs.gql.AbstractNomGraphQlController;
-import no.nav.nom.libs.gql.NomGraphQlControllerInterface;
-import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
-import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
-import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
-import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
-import no.nav.nom.libs.gql.projections.RessursSearch;
-import no.nav.nom.libs.gql.projections.RessursSearchFilter;
-import no.nav.nom.libs.gql.projections.RessurserSearch;
-import no.nav.nom.libs.gql.resolvers.LederResolver;
-import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
-import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
-import no.nav.nom.libs.gql.resolvers.OrgtilknytningResolver;
-import no.nav.nom.libs.gql.resolvers.RessursResolver;
-import no.nav.nom.libs.gql.resolvers.SearchResolver;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
@@ -30,7 +15,23 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
+import no.nav.nom.libs.gql.AbstractNomGraphQlController;
+import no.nav.nom.libs.gql.NomGraphQlControllerInterface;
+import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.RessursSearch;
+import no.nav.nom.libs.gql.projections.RessursSearchFilter;
+import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
+import no.nav.nom.libs.gql.resolvers.LederResolver;
+import no.nav.nom.libs.gql.resolvers.OrgEnhetResolver;
+import no.nav.nom.libs.gql.resolvers.OrganiseringResolver;
+import no.nav.nom.libs.gql.resolvers.OrgtilknytningResolver;
+import no.nav.nom.libs.gql.resolvers.RessursResolver;
+import no.nav.nom.libs.gql.resolvers.SearchResolver;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
@@ -73,8 +74,12 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     }
 
     @Override
-    public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
-        return delegate.orgEnheter(orgEnheterSearch, environment);
+    public List<OrgEnhetResult> orgEnheter(
+        OrgEnheterSearch orgEnheterSearch,
+        OrgEnheterSearchFilter orgEnheterSearchFilter,
+        DataFetchingEnvironment environment
+    ) {
+        return delegate.orgEnheter(orgEnheterSearch, orgEnheterSearchFilter, environment);
     }
 
     @Override
@@ -151,7 +156,7 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     @Override
     @Deprecated
     public List<OrgEnhetResult> organisasjonsenheter(OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
-        return delegate.orgEnheter(orgEnheterSearch, environment);
+        return delegate.orgEnheter(orgEnheterSearch, OrgEnheterSearchFilter.ALLE, environment);
     }
 
     @Override
@@ -171,8 +176,8 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     }
 
     @Override
-    public List<RessursResult> ressurser(RessurserSearch search, DataFetchingEnvironment environment) {
-        return delegate.ressurser(search, environment);
+    public List<RessursResult> ressurser(RessurserSearch search, RessurserSearchFilter filter, DataFetchingEnvironment environment) {
+        return delegate.ressurser(search, filter, environment);
     }
 
     @Override

@@ -1,18 +1,29 @@
 package no.nav.nom.libs.gql.resolvers;
 
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.gql.MappingUtils;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 
@@ -51,37 +62,95 @@ public class RessursResolver {
 
     }
 
-    public List<RessursResult> ressurser(RessurserSearch search) {
+    public List<RessursResult> ressurser(RessurserSearch search, RessurserSearchFilter filter) {
+        var navIdenterSearch = search.resolveNavidenter();
+        var personIdenterSearch = search.resolvePersonidenter();
 
-        var outSize = search.resolveNavidenter().size() + search.resolvePersonidenter().size();
-        if (outSize == 0) { // return all
-            return this.ressursStateRepository.getAll()
-                .stream()
+        if (navIdenterSearch.isEmpty() && personIdenterSearch.isEmpty()) { // ingen 'where' search
+            var filtered = filter(ressursStateRepository.getAll(), filter);
+            return filtered.stream()
                 .map(it -> new RessursResult(MappingUtils.toRessurs(it), it.navident()))
                 .toList();
-        }
-
-        ArrayList<RessursResult> out = new ArrayList<>(outSize);
-        { // add navidnet results to output
-            var navIdenter = search.resolveNavidenter();
-            if (navIdenter != null && !navIdenter.isEmpty()) {
-                for(var n : navIdenter) {
-                    var maybeRessurs = this.ressursStateRepository.findByNavident(n).map(x -> new RessursResult(MappingUtils.toRessurs(x), n));
-                    maybeRessurs.ifPresentOrElse(out::add, () -> out.add(new RessursResult(n,null, ResultCode.NOT_FOUND)));
-                }
+        } else {
+            List<RessursResult> found = new ArrayList<>();
+            List<RessursResult> notFound = new ArrayList<>();
+            List<RessursResult> notInFilter= new ArrayList<>();
+            if (!navIdenterSearch.isEmpty()) {
+                List<RessursState> unfilteredRessurser = new ArrayList<>();
+                navIdenterSearch.forEach(n ->
+                    ressursStateRepository.findByNavident(n)
+                        .ifPresentOrElse(unfilteredRessurser::add, () -> notFound.add(new RessursResult(n,null, ResultCode.NOT_FOUND)))
+                );
+                var filtered = filter(unfilteredRessurser, filter);
+                filtered.stream()
+                    .map(r -> new RessursResult(MappingUtils.toRessurs(r), r.navident()))
+                    .forEach(found::add);
+                notInFilter.addAll(filteredOut(navIdenterSearch, unfilteredRessurser, filtered));
             }
-        }
-        { // add personident results to output
-            var personIdenter = search.resolvePersonidenter();
-            if (personIdenter != null && !personIdenter.isEmpty()) {
-                for(var p : personIdenter) {
-                    var maybeRessurs = this.ressursStateRepository.findByPersonident(p).map(x -> new RessursResult(MappingUtils.toRessurs(x), p));
-                    maybeRessurs.ifPresentOrElse(out::add, () -> out.add(new RessursResult(p,null, ResultCode.NOT_FOUND)));
-                }
+            if (!personIdenterSearch.isEmpty()) {
+                Set<RessursState> unfilteredRessurser = new HashSet<>();
+                personIdenterSearch.forEach(n ->
+                    ressursStateRepository.findByPersonident(n)
+                        .ifPresentOrElse(unfilteredRessurser::add, () -> notFound.add(new RessursResult(n,null, ResultCode.NOT_FOUND)))
+                );
+                var filtered = filter(unfilteredRessurser, filter);
+                filtered.stream()
+                    .map(r -> new RessursResult(MappingUtils.toRessurs(r), r.personident()))
+                    .forEach(found::add);
+                notInFilter.addAll(
+                    filteredOut(personIdenterSearch, unfilteredRessurser, filtered)
+                );
             }
-        }
 
-        return out;
-    
+            return Stream.of(found, notFound, notInFilter)
+                .flatMap(List::stream)
+                .toList();
+        }
+    }
+
+    List<RessursResult> filteredOut(Collection<String> ids, Collection<RessursState> unfilteredRessurser, Collection<RessursState> filteredRessurser) {
+        var foundIds = unfilteredRessurser.stream()
+            .flatMap(r -> Stream.of(r.navident(), r.personident()))
+            .collect(Collectors.toSet());
+        var foundAndFiltered = filteredRessurser.stream()
+            .flatMap(r -> Stream.of(r.navident(), r.personident()))
+            .collect(Collectors.toSet());
+        var filteredOutIds = foundIds.stream()
+            .filter(id -> !foundAndFiltered.contains(id))
+            .collect(Collectors.toSet());
+
+        return ids.stream()
+            .filter(filteredOutIds::contains)
+            .map(id -> new RessursResult(id, null, ResultCode.NOT_IN_FILTER))
+            .toList();
+    }
+
+    List<RessursState> filter(Collection<RessursState> unfilteredRessurser, RessurserSearchFilter filter) {
+        return unfilteredRessurser.stream()
+            .filter(filterBySektor(filter))
+            .filter(filterByIdenttype(filter))
+            .filter(ressurs -> Util.filterByPeriodiskUtvalg(ressurs, filter.periodiskUtvalg()))
+            .toList();
+    }
+
+    private static Predicate<RessursState> filterByIdenttype(RessurserSearchFilter filter) {
+        return (r) -> switch (filter.identTypeSelection()) {
+            case ROBOT -> r.identType() == IdentType.ROBOT;
+            case STANDARD -> r.identType() == IdentType.STANDARD;
+            case VIKAFOSSEN -> r.identType() == IdentType.VIKAFOSSEN;
+            case UTENLANDSK_KONSULENT -> r.identType() == IdentType.UTENLANDSK_KONSULENT;
+            case UKJENT -> r.identType() == IdentType.UKJENT;
+            case ALLE -> true;
+        };
+    }
+
+    private static Predicate<RessursState> filterBySektor(RessurserSearchFilter filter) {
+        return (r) -> switch (filter.gjeldendeSektorSelection()) {
+            case EKSTERN -> r.isEkstern();
+            case STATLIG -> r.isStatlig();
+            case KOMMUNAL -> r.isKommunal();
+            case IKKE_EKSTERN -> r.isStatlig() || r.isKommunal();
+            case ALLE -> true;
+        };
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.text.Collator;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -90,6 +91,35 @@ public class OrgEnhetMapper {
             hentOrgEnhetLedere(orgEnhet),
             orgEnhetLeder,
             orgtilknytningService.getByEnhet(orgEnhet.getId())
+        );
+    }
+
+    public OrgEnhet mapToReducedOrgEnhet(IOrgenhet orgEnhet) {
+
+        var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
+        var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id).orElse(null);
+        var orgEnhetLeder = orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId())
+            .flatMap(orgEnhetLederState -> ressursService.findByNavident(orgEnhetLederState.navident()))
+            .map(ressursState -> new MinimalRessurs(ressursState.navident(), ressursState.visningsnavn()
+                .getFormattedVisningsnavn())).orElse(null);
+
+        return new OrgEnhet(
+            orgEnhet.getId(),
+            orgEnhet.getFid(),
+            orgEnhet.getAgressoId(),
+            orgEnhet.getOrgNiv(),
+            orgEnhet.getAgressoOrgenhetType(),
+            orgEnhet.getNavn(),
+            orgEnhet.getGyldigFom(),
+            orgEnhet.getGyldigTom(),
+            orgEnhet.getNomNivaa(),
+            orgEnhet.getOrgEnhetsType(),
+            remedyEnhetId,
+            overordnetId,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            orgEnhetLeder,
+            Collections.emptyList()
         );
     }
 

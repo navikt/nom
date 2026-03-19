@@ -3,9 +3,28 @@ package no.nav.nom.libs.gql;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
+import no.nav.nom.contract.nom.api.graphql.Organisering;
+import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.api.graphql.RessursLeder;
+import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
+import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.libs.gql.exception.NotRelevantForIntegrationTestingException;
-import no.nav.nom.libs.gql.projections.*;
-import no.nav.nom.contract.nom.api.graphql.*;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
+import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
+import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.RessursSearch;
+import no.nav.nom.libs.gql.projections.RessursSearchFilter;
+import no.nav.nom.libs.gql.projections.RessurserSearch;
+import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -28,7 +47,11 @@ public interface NomGraphQlControllerInterface {
     Optional<OrgEnhet> orgEnhet(@Argument("where") OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment);
 
     @QueryMapping("orgEnheter")
-    List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment);
+    List<OrgEnhetResult> orgEnheter(
+        @Argument("where") OrgEnheterSearch orgEnheterSearch,
+        @Argument("filter") OrgEnheterSearchFilter orgEnheterSearchFilter,
+        DataFetchingEnvironment environment
+    );
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
     List<Organisering> organisering(
@@ -54,7 +77,11 @@ public interface NomGraphQlControllerInterface {
     Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment environment);
 
     @QueryMapping("ressurser")
-    List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment);
+    List<RessursResult> ressurser(
+        @Argument("where") RessurserSearch search,
+        @Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+        DataFetchingEnvironment environment
+    );
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")
     List<RessursOrgTilknytning> orgTilknytninger(Ressurs ressurs, @Argument("utvalg") PeriodiskUtvalgArg periodiskUtvalg, DataFetchingEnvironment environment);

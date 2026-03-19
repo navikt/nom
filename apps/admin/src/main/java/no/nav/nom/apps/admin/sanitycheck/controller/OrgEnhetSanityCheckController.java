@@ -40,7 +40,7 @@ public class OrgEnhetSanityCheckController {
 
     public OrgEnhetSanityCheckController(OrgEnhetSanityCheckService orgEnhetSanityCheckService) {
         this.orgEnhetSanityCheckService = orgEnhetSanityCheckService;
-        this.excelGenerator = new  ExcelGenerator();
+        this.excelGenerator = new ExcelGenerator();
     }
 
 
@@ -197,9 +197,9 @@ public class OrgEnhetSanityCheckController {
             var orgEnheterUtenOverEnhet = orgEnhetSanityCheckService.enhetUtenOverEnhet();
 
             List<Map<String, Object>> enheterUtenOverEnheterMap = SanityCheckMappingUtils.orgEnhetOrganiseringToMapList(orgEnheterUtenOverEnhet);
-            var headers = enheterUtenOverEnheterMap.getFirst().keySet().stream().toList();
+            var excelHeaders = enheterUtenOverEnheterMap.getFirst().keySet().stream().toList();
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=orgenhetUtenOverEnhet.xlsx");
-            excelGenerator.generateWorkbook(response, "orgenhetUtenOverEnhet", headers, enheterUtenOverEnheterMap);
+            excelGenerator.generateWorkbook(response, "orgenhetUtenOverEnhet", excelHeaders, enheterUtenOverEnheterMap);
         } catch (Exception e) {
             log.error("Failed to generate Excel file", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to generate Excel file");
