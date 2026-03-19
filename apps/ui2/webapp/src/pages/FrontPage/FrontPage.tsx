@@ -9,12 +9,12 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
+import { isInDevelopment, navToppnode } from "~/utils";
 
 export const FrontPage = () => {
   const inDevelopment = isInDevelopment();
 
-  const navOrgEnhetId = inDevelopment ? "sa312u" : "py437s";
+  const navOrgEnhetId = navToppnode();
 
   const developmentLenker = ["fa965e", "me177r", "ju219d", "hu797w", "tu734a"];
   const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];

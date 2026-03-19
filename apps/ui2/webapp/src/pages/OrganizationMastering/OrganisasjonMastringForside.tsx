@@ -45,11 +45,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
-import {
-  formatDisplayDate,
-  formatVisningsnavn,
-  isInDevelopment,
-} from "~/utils";
+import { formatDisplayDate, formatVisningsnavn, navToppnode } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -606,9 +602,7 @@ function HvemKanRedigereSection({
 }: {
   kanAdministrere: MinimalRessurs[];
 }) {
-  const inDevelopment = isInDevelopment();
-
-  const toppnodeOrgEnhetId = inDevelopment ? "sa312u" : "py437s";
+  const toppnodeOrgEnhetId = navToppnode();
 
   const toppnodeOrgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),

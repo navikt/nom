@@ -503,13 +503,25 @@ function DropdownMeny({
             Administrering av medarbeidere
           </Dropdown.Menu.GroupedList.Heading>
 
-          <SmartLink href={`/org/table/${orgEnhet.id}`}>
+          <SmartLink href={`/org/resources-table/${orgEnhet.id}`}>
             <Dropdown.Menu.GroupedList.Item
               css={css`
                 color: var(--a-text-action);
               `}
             >
               Tabellvisning av ansatte i denne enheten og underliggende enheter
+            </Dropdown.Menu.GroupedList.Item>
+          </SmartLink>
+
+          <Dropdown.Menu.Divider />
+
+          <SmartLink href={`/org/table?id=${orgEnhet.id}`}>
+            <Dropdown.Menu.GroupedList.Item
+              css={css`
+                color: var(--a-text-action);
+              `}
+            >
+              Tabellvisning av organisasjonsenheter
             </Dropdown.Menu.GroupedList.Item>
           </SmartLink>
 

@@ -26,6 +26,7 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
+import { navToppnode } from "~/utils";
 
 export function BurgerMenu() {
   const hasAdminAccess = useHasAdminAccess();
@@ -68,6 +69,8 @@ export function BurgerMenu() {
     hasVikafossenAccess ||
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
+
+  const showOrgEnhetTabellvisningLink = hasAdminAccess;
 
   const showOrgMastringLink = harRedigeringstilgang || hasAdminReadOnlyAccess;
 
@@ -163,9 +166,24 @@ export function BurgerMenu() {
             </>
           )}
 
-          {showOrgMastringLink && (
+          {showOrgEnhetTabellvisningLink && (
             <>
               <Dropdown.Menu.Divider />
+
+              <SmartLink href={`/org/table?id=${navToppnode()}`}>
+                <Dropdown.Menu.List.Item
+                  onClick={() => navigate({ to: "/organisasjonsmastring" })}
+                >
+                  <img alt="hierarki" src={hierarchyFilled} />
+                  <span>Tabellvisning organisasjonsenheter</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
+            </>
+          )}
+
+          {showOrgMastringLink && (
+            <>
+              {!showOrgEnhetTabellvisningLink && <Dropdown.Menu.Divider />}
 
               <SmartLink href="/organisasjonsmastring">
                 <Dropdown.Menu.List.Item

@@ -281,16 +281,6 @@ export const getOrgEnhet = {
     ).data,
 };
 
-export const getKostnadssted = {
-  queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
-  queryFn: async (orgEnhetId: string) =>
-    (
-      await axios.get<OrgKoststedMapping>(
-        `${ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH}/api/v1/mapping?orgenhetid=${orgEnhetId}`,
-      )
-    ).data,
-};
-
 export const getOrgEnhetList = {
   queryKey: (orgEnhetIder: string[]) => ["ORGENHETER_LIST", ...orgEnhetIder],
   queryFn: async (orgEnhetIder: string[]) =>
@@ -298,6 +288,29 @@ export const getOrgEnhetList = {
       await axios.post<string[], AxiosResponse<OrgEnhet[]>>(
         `${NOM_API_BASE_PATH}/app/orgenheter`,
         orgEnhetIder,
+      )
+    ).data,
+};
+
+export function getParentOgUnderliggende(orgEnhetId: string) {
+  return queryOptions({
+    queryKey: ["getParentOgUnderliggende", orgEnhetId],
+    queryFn: async () =>
+      (
+        await axios.get<OrgEnhet[]>(
+          `${NOM_API_BASE_PATH}/app/orgenheter/parent-og-underliggende/${orgEnhetId}`,
+        )
+      ).data,
+    enabled: !!orgEnhetId,
+  });
+}
+
+export const getKostnadssted = {
+  queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
+  queryFn: async (orgEnhetId: string) =>
+    (
+      await axios.get<OrgKoststedMapping>(
+        `${ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH}/api/v1/mapping?orgenhetid=${orgEnhetId}`,
       )
     ).data,
 };

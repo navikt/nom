@@ -46,7 +46,7 @@ export const Route = createRootRouteWithContext<{
       "/kontaktpersoner/",
       "/masseflytting/",
       "/masseflytting-fysisk-brukersted",
-      "/org/table/",
+      "/org/resources-table/",
       "/ressurs-terminate/",
       "/tilganger",
       "/kontaktpersoner-tabell",
