@@ -302,6 +302,10 @@ export function promiseIsRejected<T>(
   return promise.status === "rejected";
 }
 
+export function navToppnode() {
+  return isInDevelopment() ? "sa312u" : "py437s";
+}
+
 export function isHelfoOrgEnhet(orgEnhetId: string) {
   const helfoId = isInDevelopment() ? "mu405g" : "je305h";
 

@@ -22,12 +22,14 @@ import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.spec
 import { Route as RessursCreatespecialRouteImport } from './routes/ressurs.createspecial'
 import { Route as RessursIdRouteImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-terminate.$id'
+import { Route as OrgTableRouteImport } from './routes/org.table'
 import { Route as OrgIdRouteImport } from './routes/org.$id'
 import { Route as MasseflyttingIdRouteImport } from './routes/masseflytting.$id'
 import { Route as KontaktpersonerIdRouteImport } from './routes/kontaktpersoner.$id'
 import { Route as KontaktpersonerTabellIdRouteImport } from './routes/kontaktpersoner-tabell.$id'
 import { Route as RessursCreateStepRouteImport } from './routes/ressurs.create.$step'
 import { Route as OrgTableIdRouteImport } from './routes/org.table.$id'
+import { Route as OrgResourcesTableIdRouteImport } from './routes/org.resources-table.$id'
 
 const TilgangerRoute = TilgangerRouteImport.update({
   id: '/tilganger',
@@ -100,6 +102,11 @@ const RessursTerminateIdRoute = RessursTerminateIdRouteImport.update({
   path: '/ressurs-terminate/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrgTableRoute = OrgTableRouteImport.update({
+  id: '/org/table',
+  path: '/org/table',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrgIdRoute = OrgIdRouteImport.update({
   id: '/org/$id',
   path: '/org/$id',
@@ -126,8 +133,13 @@ const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrgTableIdRoute = OrgTableIdRouteImport.update({
-  id: '/org/table/$id',
-  path: '/org/table/$id',
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OrgTableRoute,
+} as any)
+const OrgResourcesTableIdRoute = OrgResourcesTableIdRouteImport.update({
+  id: '/org/resources-table/$id',
+  path: '/org/resources-table/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -145,10 +157,12 @@ export interface FileRoutesByFullPath {
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
+  '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
+  '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
@@ -166,10 +180,12 @@ export interface FileRoutesByTo {
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
+  '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
+  '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
@@ -188,10 +204,12 @@ export interface FileRoutesById {
   '/kontaktpersoner/$id': typeof KontaktpersonerIdRoute
   '/masseflytting/$id': typeof MasseflyttingIdRoute
   '/org/$id': typeof OrgIdRoute
+  '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
+  '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
   '/org/table/$id': typeof OrgTableIdRoute
   '/ressurs/create/$step': typeof RessursCreateStepRoute
 }
@@ -211,10 +229,12 @@ export interface FileRouteTypes {
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
+    | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
+    | '/org/resources-table/$id'
     | '/org/table/$id'
     | '/ressurs/create/$step'
   fileRoutesByTo: FileRoutesByTo
@@ -232,10 +252,12 @@ export interface FileRouteTypes {
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
+    | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
+    | '/org/resources-table/$id'
     | '/org/table/$id'
     | '/ressurs/create/$step'
   id:
@@ -253,10 +275,12 @@ export interface FileRouteTypes {
     | '/kontaktpersoner/$id'
     | '/masseflytting/$id'
     | '/org/$id'
+    | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
+    | '/org/resources-table/$id'
     | '/org/table/$id'
     | '/ressurs/create/$step'
   fileRoutesById: FileRoutesById
@@ -275,11 +299,12 @@ export interface RootRouteChildren {
   KontaktpersonerIdRoute: typeof KontaktpersonerIdRoute
   MasseflyttingIdRoute: typeof MasseflyttingIdRoute
   OrgIdRoute: typeof OrgIdRoute
+  OrgTableRoute: typeof OrgTableRouteWithChildren
   RessursTerminateIdRoute: typeof RessursTerminateIdRoute
   RessursIdRoute: typeof RessursIdRoute
   RessursCreatespecialRoute: typeof RessursCreatespecialRoute
   RessursSpecialreceiptRoute: typeof RessursSpecialreceiptRoute
-  OrgTableIdRoute: typeof OrgTableIdRoute
+  OrgResourcesTableIdRoute: typeof OrgResourcesTableIdRoute
   RessursCreateStepRoute: typeof RessursCreateStepRoute
 }
 
@@ -376,6 +401,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RessursTerminateIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/org/table': {
+      id: '/org/table'
+      path: '/org/table'
+      fullPath: '/org/table'
+      preLoaderRoute: typeof OrgTableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/org/$id': {
       id: '/org/$id'
       path: '/org/$id'
@@ -413,13 +445,32 @@ declare module '@tanstack/react-router' {
     }
     '/org/table/$id': {
       id: '/org/table/$id'
-      path: '/org/table/$id'
+      path: '/$id'
       fullPath: '/org/table/$id'
       preLoaderRoute: typeof OrgTableIdRouteImport
+      parentRoute: typeof OrgTableRoute
+    }
+    '/org/resources-table/$id': {
+      id: '/org/resources-table/$id'
+      path: '/org/resources-table/$id'
+      fullPath: '/org/resources-table/$id'
+      preLoaderRoute: typeof OrgResourcesTableIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
+
+interface OrgTableRouteChildren {
+  OrgTableIdRoute: typeof OrgTableIdRoute
+}
+
+const OrgTableRouteChildren: OrgTableRouteChildren = {
+  OrgTableIdRoute: OrgTableIdRoute,
+}
+
+const OrgTableRouteWithChildren = OrgTableRoute._addFileChildren(
+  OrgTableRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -435,11 +486,12 @@ const rootRouteChildren: RootRouteChildren = {
   KontaktpersonerIdRoute: KontaktpersonerIdRoute,
   MasseflyttingIdRoute: MasseflyttingIdRoute,
   OrgIdRoute: OrgIdRoute,
+  OrgTableRoute: OrgTableRouteWithChildren,
   RessursTerminateIdRoute: RessursTerminateIdRoute,
   RessursIdRoute: RessursIdRoute,
   RessursCreatespecialRoute: RessursCreatespecialRoute,
   RessursSpecialreceiptRoute: RessursSpecialreceiptRoute,
-  OrgTableIdRoute: OrgTableIdRoute,
+  OrgResourcesTableIdRoute: OrgResourcesTableIdRoute,
   RessursCreateStepRoute: RessursCreateStepRoute,
 }
 export const routeTree = rootRouteImport

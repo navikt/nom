@@ -27,7 +27,7 @@ import type { ExcelExportRequest, OrgEnhet } from "~/types/api-models";
 import { isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
-  const { id } = useParams({ from: "/org/table/$id" });
+  const { id } = useParams({ from: "/org/resources-table/$id" });
 
   const isOrgEnhetDriftsenhetQuery = useQuery({
     queryKey: isOrgEnhetDriftsenhet.queryKey(id),

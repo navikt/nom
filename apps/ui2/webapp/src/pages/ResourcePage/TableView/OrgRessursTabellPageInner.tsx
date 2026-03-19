@@ -92,7 +92,7 @@ export const OrgRessursTabellPageInner = ({
 
   if (ressursData) {
     if (!data) {
-      return <></>;
+      return;
     }
 
     const sortData = customSortByOrgEnhetName(data, sort).slice(
@@ -162,6 +162,7 @@ export const OrgRessursTabellPageInner = ({
               </Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
+
           <Table.Body
             css={css`
               height: 48px;

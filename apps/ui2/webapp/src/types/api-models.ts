@@ -96,7 +96,7 @@ export interface AvvikleOrgEnhetRequest {
    * @format date
    * @example "2026-12-31"
    */
-  gyldigTom?: string;
+  gyldigTom: string;
 }
 
 export interface AvvikleRessursRequest {
