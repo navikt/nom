@@ -70,8 +70,6 @@ export function BurgerMenu() {
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
 
-  const showOrgEnhetTabellvisningLink = hasAdminAccess;
-
   const showOrgMastringLink = harRedigeringstilgang || hasAdminReadOnlyAccess;
 
   const showTilgangerLink = harRedigeringstilgang;
@@ -166,34 +164,28 @@ export function BurgerMenu() {
             </>
           )}
 
-          {showOrgEnhetTabellvisningLink && (
-            <>
-              <Dropdown.Menu.Divider />
+          <>
+            <Dropdown.Menu.Divider />
 
-              <SmartLink href={`/org/table?id=${navToppnode()}`}>
-                <Dropdown.Menu.List.Item
-                  onClick={() => navigate({ to: "/organisasjonsmastring" })}
-                >
-                  <img alt="hierarki" src={hierarchyFilled} />
-                  <span>Tabellvisning organisasjonsenheter</span>
-                </Dropdown.Menu.List.Item>
-              </SmartLink>
-            </>
-          )}
+            <SmartLink href={`/org/table?id=${navToppnode()}`}>
+              <Dropdown.Menu.List.Item
+                onClick={() => navigate({ to: "/organisasjonsmastring" })}
+              >
+                <img alt="hierarki" src={hierarchyFilled} />
+                <span>Tabellvisning organisasjonsenheter</span>
+              </Dropdown.Menu.List.Item>
+            </SmartLink>
+          </>
 
           {showOrgMastringLink && (
-            <>
-              {!showOrgEnhetTabellvisningLink && <Dropdown.Menu.Divider />}
-
-              <SmartLink href="/organisasjonsmastring">
-                <Dropdown.Menu.List.Item
-                  onClick={() => navigate({ to: "/organisasjonsmastring" })}
-                >
-                  <img alt="hierarki" src={hierarchyFilled} />
-                  <span>Mine organisasjonsenheter</span>
-                </Dropdown.Menu.List.Item>
-              </SmartLink>
-            </>
+            <SmartLink href="/organisasjonsmastring">
+              <Dropdown.Menu.List.Item
+                onClick={() => navigate({ to: "/organisasjonsmastring" })}
+              >
+                <img alt="hierarki" src={hierarchyFilled} />
+                <span>Mine organisasjonsenheter</span>
+              </Dropdown.Menu.List.Item>
+            </SmartLink>
           )}
 
           {showTilgangerLink && (
