@@ -354,6 +354,20 @@ enum SektorSelection{
 }
 ----
 
+=== IdentTypeSelection
+Mulige identtype 'filtrerings'-valg
+[source,graphql]
+----
+enum IdentTypeSelection {
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT,
+    ALLE
+}
+----
+
 === StatusSelection
 Mulige status 'filtrerings'-valg basert på ressursens start/sluttdato
 [source,graphql]
