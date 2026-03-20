@@ -41,7 +41,6 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Import({
     DvhRestConsumer.class
-    , DvhRepository.class
     , DvhService.class
     , DvhOrgenhetsLast.class
     , DvhOrdsService.class

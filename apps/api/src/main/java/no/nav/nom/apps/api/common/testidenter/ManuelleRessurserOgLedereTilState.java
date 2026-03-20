@@ -1,19 +1,13 @@
 package no.nav.nom.apps.api.common.testidenter;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.libs.gql.lucenesearch.LuceneService;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -23,7 +17,6 @@ public class ManuelleRessurserOgLedereTilState {
     final OrgtilknytningStateRepository nomStateOrgtilknytningRepository;
     final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     final OrgenhetService orgenhetService;
-    final DvhRepository dvhRepository;
     final LuceneService luceneService;
 
     public ManuelleRessurserOgLedereTilState(
@@ -31,7 +24,7 @@ public class ManuelleRessurserOgLedereTilState {
         @Qualifier("nomStateRessursRepository") RessursStateRepository nomStateRessursRepository,
         @Qualifier("nomStateOrgtilknytningRepository") OrgtilknytningStateRepository nomStateOrgtilknytningRepository,
         @Qualifier("nomStateOrgEnhetLederRepository") OrgEnhetLederStateRepository orgEnhetLederStateRepository,
-        OrgenhetService orgenhetService, DvhRepository dvhRepository,
+        OrgenhetService orgenhetService,
         LuceneService luceneService
     ) {
         this.cfg = cfg;
@@ -39,7 +32,6 @@ public class ManuelleRessurserOgLedereTilState {
         this.nomStateOrgtilknytningRepository = nomStateOrgtilknytningRepository;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.orgenhetService = orgenhetService;
-        this.dvhRepository = dvhRepository;
         this.luceneService = luceneService;
     }
 

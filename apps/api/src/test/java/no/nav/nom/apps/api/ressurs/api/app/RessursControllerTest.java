@@ -23,12 +23,10 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessur
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
-import no.nav.nom.apps.api.telefon.Telefon;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -1297,32 +1295,6 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should return telefonnummer for given navident")
-    void test_getTelefonnummer() {
-        String navident = "x123456";
-        String expectedTelefonnummer = "12345678";
-
-        var telefoner = List.of(
-            new Telefon(null, expectedTelefonnummer, TelefonType.NAV_KONTOR_TELEFON)
-        );
-        when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
-        when(telefonService.getAlleTelefonnummer(navident))
-            .thenReturn(telefoner);
-
-        webTestClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummere")
-                .build(navident)
-            )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBodyList(Telefon.class)
-            .isEqualTo(telefoner);
-    }
-
-    @Test
     @SneakyThrows
     @DisplayName("Should reactivate same ressurs that has changed personident")
     void test_changed_personident() {
@@ -1410,34 +1382,6 @@ public class RessursControllerTest extends RestTestBase {
         verify(ressursCommandService, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
         verify(ressursCommandService, times(1)).oppdaterPersonidentCommand(any(), any());
 
-    }
-
-    @Test
-    @DisplayName("Should return list of telefonnummere for given navident")
-    void test_getTelefonnummere_should_return_list() {
-        String navident = "x123456";
-        String expectedTelefonnummer1 = "12345678";
-        String expectedTelefonnummer2 = "87654321";
-        var telefoner = List.of(
-            new Telefon(null, expectedTelefonnummer1, TelefonType.NAV_KONTOR_TELEFON),
-            new Telefon(null, expectedTelefonnummer2, TelefonType.PRIVAT_TELEFON)
-        );
-        when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(ressursState().toBuilder().navident(navident).build()));
-
-        when(telefonService.getAlleTelefonnummer(navident))
-            .thenReturn(telefoner);
-
-        webTestClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummere")
-                .build(navident)
-            )
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBodyList(Telefon.class)
-            .isEqualTo(telefoner);
     }
 
     @Test
@@ -2048,9 +1992,7 @@ public class RessursControllerTest extends RestTestBase {
             .jsonPath("personident")
             .isEqualTo(personident.replaceFirst(".{5}$", "*****"))
             .jsonPath("primaryFysiskBrukersted")
-            .value(it -> {
-                assertThat(it).isEqualTo("1234");
-            })
+            .value(it -> assertThat(it).isEqualTo("1234"))
             .jsonPath("fysiskeBrukersteder")
             .isArray()
             .jsonPath("fysiskeBrukersteder")

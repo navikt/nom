@@ -1,54 +1,31 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
 import no.nav.nom.apps.api.clients.ad.AdClient;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
-
 import no.nav.nom.contract.ad.AdRessurs;
-import no.nav.nom.contract.nom.TelefonType;
-
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class RessursContactDetailsResolver {
-
-    private final DvhRepository dvhRepository;
     private final AdClient adClient;
 
-    public RessursContactDetailsResolver(DvhRepository dvhRepository, AdClient adClient) {
-        this.dvhRepository = dvhRepository;
+    public RessursContactDetailsResolver(AdClient adClient) {
         this.adClient = adClient;
     }
 
-    public Optional<String> fetchEmail(String navident){
+    public Optional<String> fetchEmail(String navident) {
         return adClient.getAdRessurser(Set.of(navident)).getRessurser().stream().findFirst().map(AdRessurs::getEmail);
     }
 
-    public Map<String, Optional<String>> fetchEmails(List<String> navidentList){
-        return adClient.fetchInAdRessursInBatches(navidentList).values().stream().collect(Collectors.toMap(AdRessurs::getNavIdent, adRessurs ->  Optional.ofNullable(adRessurs.getEmail())));
-    }
-
-    public List<Ressurs.Telefon> fetchTelefoner(String navident) {
-        return dvhRepository.getTelefonNrListByNavIdent(navident)
+    public Map<String, Optional<String>> fetchEmails(List<String> navidentList) {
+        return adClient.fetchInAdRessursInBatches(navidentList)
+            .values()
             .stream()
-            .filter(Objects::nonNull)
-            .map(tlf -> new Ressurs.Telefon(tlf.getNummer(), mapType(tlf.getType())))
-            .toList();
-    }
-
-    private TelefonType mapType(DvhTelefon.DvhTelefonType dvhTelefonType) {
-        return switch (dvhTelefonType) {
-            case TJENESTETELEFON -> TelefonType.NAV_TJENESTE_TELEFON;
-            case KONTORTELEFON -> TelefonType.NAV_KONTOR_TELEFON;
-            default -> TelefonType.PRIVAT_TELEFON;
-        };
+            .collect(Collectors.toMap(AdRessurs::getNavIdent, adRessurs -> Optional.ofNullable(adRessurs.getEmail())));
     }
 }

@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelege
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
 import no.nav.nom.apps.api.common.DateUtils;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -87,7 +86,6 @@ public class AuthorizedNavident {
             RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
             OrgEnhetLederService orgEnhetLederService,
-            DvhRepository dvhRepository,
             TilgangDelegertEmailService tilgangDelegertEmailService
     ) {
         this.authorizeCommandService = authorizeCommandService;
