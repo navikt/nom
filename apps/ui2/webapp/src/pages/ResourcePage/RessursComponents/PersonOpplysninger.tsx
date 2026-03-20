@@ -352,26 +352,14 @@ export function TelefonNummere({
   ressurs: Ressurs;
   redigering?: boolean;
 }) {
-  const formaterOgFjernDuplikater = (numre: string[]) =>
-    Array.from(new Set(numre.map((nummer) => formatTlf(nummer))));
+  const jobbTelefonType =
+    ressurs.jobbtelefon?.type === TelefonType.NAV_TJENESTE_TELEFON
+      ? "Tjenestetelefon"
+      : "Kontortelefon";
 
-  const kontorTelefoner = formaterOgFjernDuplikater(
-    ressurs.telefoner
-      .filter(
-        (telefonnummer) =>
-          telefonnummer.type === TelefonType.NAV_KONTOR_TELEFON,
-      )
-      .map((telefonnummer) => telefonnummer.nummer),
-  );
-
-  const tjenesteTelefoner = formaterOgFjernDuplikater(
-    ressurs.telefoner
-      .filter(
-        (telefonnummer) =>
-          telefonnummer.type === TelefonType.NAV_TJENESTE_TELEFON,
-      )
-      .map((telefonnummer) => telefonnummer.nummer),
-  );
+  const jobbTelefonNummer = ressurs.jobbtelefon?.nummer
+    ? formatTlf(ressurs.jobbtelefon.nummer)
+    : undefined;
 
   const privatTelefon = ressurs.primaryTelefonnummer
     ? formatTlf(ressurs.primaryTelefonnummer)
@@ -379,23 +367,11 @@ export function TelefonNummere({
 
   return (
     <>
-      <LabelWithValue
-        label="Kontortelefon"
-        split
-        value={kontorTelefoner.join(", ")}
-      />
-
-      <LabelWithValue
-        label="Tjenestetelefon"
-        split
-        value={tjenesteTelefoner.join(", ")}
-      />
+      <LabelWithValue label={jobbTelefonType} split value={jobbTelefonNummer} />
 
       {!redigering && (
         <LabelWithValue
-          displayEmpty={
-            kontorTelefoner.length === 0 && tjenesteTelefoner.length === 0
-          }
+          displayEmpty={jobbTelefonNummer?.length === 0}
           label="Telefonnummer"
           split
           value={privatTelefon}
