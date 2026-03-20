@@ -14,6 +14,7 @@ Sist oppdatert 29.10.2025
 
 include::visjon.adoc[leveloffset=1]
 include::domenet.adoc[leveloffset=1]
+include::sporringer.adoc[leveloffset=1]
 include::integrasjon.adoc[leveloffset=1]
 // include::hendelser.adoc[leveloffset=1]
 
