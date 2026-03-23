@@ -69,7 +69,7 @@ export function EditPersonOpplysninger({
     resolver: yupResolver(validationSchema),
   });
 
-  const isUserAdmin = useHasAdminAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const { mutate, isPending } = useMutation<
     unknown,
@@ -79,7 +79,7 @@ export function EditPersonOpplysninger({
     mutationFn: async (values) => {
       let promises: Promise<unknown>[] = [];
 
-      if (hasSelfServiceAccess && !isUserAdmin) {
+      if (hasSelfServiceAccess && !hasAdminAccess) {
         if (
           checkIfDirtyField(
             ["primaryTelefonnummer"],
@@ -206,7 +206,7 @@ export function EditPersonOpplysninger({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        {hasSelfServiceAccess && !isUserAdmin ? (
+        {hasSelfServiceAccess && !hasAdminAccess ? (
           <>
             <Heading level="1" size="large">
               {formatVisningsnavn(ressurs.visningsnavn)}
@@ -325,11 +325,12 @@ export function EditPersonOpplysninger({
             }
           />
 
-          {hasSelfServiceAccess && !isUserAdmin ? (
+          {hasSelfServiceAccess && !hasAdminAccess ? (
             <FysiskBrukersted ressurs={ressurs} />
           ) : (
             <FysiskBrukerstedSelectFormPart
-              defaultValue={currentPrimaryFysiskBrukersted}
+              helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
               name="primaryFysiskBrukersted"
             />
           )}

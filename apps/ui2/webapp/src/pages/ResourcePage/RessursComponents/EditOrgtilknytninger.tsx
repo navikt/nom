@@ -21,7 +21,9 @@ import {
   Loader,
   Select,
   Tag,
+  UNSAFE_Combobox as Combobox,
   useDatepicker,
+  VStack,
 } from "@navikt/ds-react";
 import {
   useMutation,
@@ -45,6 +47,7 @@ import {
 import * as yup from "yup";
 
 import {
+  getFysiskeBrukersteder,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
@@ -60,6 +63,7 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
+import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
@@ -100,6 +104,7 @@ import {
 } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
+  capitalizeNameFysiskBrukersted,
   formatDisplayDate,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
@@ -411,6 +416,17 @@ function OrgtilknytningForm({
     }
   };
 
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) => {
+    return {
+      value: brukersted.brukerstedNr,
+      label: `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}`,
+    };
+  });
+
   if (isLoading) {
     return (
       <div
@@ -602,6 +618,22 @@ function OrgtilknytningForm({
                   triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
               </div>
+
+              <VStack
+                css={css`
+                  margin-top: var(--a-spacing-4);
+                `}
+                gap="4"
+              >
+                <FysiskBrukerstedSelectFormPart name={`${index}.test`} />
+
+                <Combobox
+                  isMultiSelect
+                  label="Ytterligere fysiske brukersteder"
+                  options={fysiskeBrukerstederOptions}
+                  size="small"
+                />
+              </VStack>
             </div>
           );
         })}

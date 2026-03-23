@@ -13,10 +13,11 @@ import { capitalizeNameFysiskBrukersted } from "~/utils";
 export function FysiskBrukerstedSelectFormPart({
   name = "fysiskBrukerstedNr",
   description,
+  helpText,
 }: {
   name?: string;
   description?: string;
-  defaultValue?: FysiskBrukersted;
+  helpText?: string;
 }) {
   const { control } = useFormContext();
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
@@ -31,8 +32,7 @@ export function FysiskBrukerstedSelectFormPart({
           description={description}
           error={fieldState.error}
           fysiskeBrukersteder={fysiskeBrukersteder}
-          helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
-          arbeide."
+          helpText={helpText}
           onChange={field.onChange}
           value={field.value}
         />
