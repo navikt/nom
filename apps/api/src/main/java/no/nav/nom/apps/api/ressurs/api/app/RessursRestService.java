@@ -206,8 +206,6 @@ public class RessursRestService {
             getAuthenticatedNavIdent().equals(ressursState.navident());
 
         var showFysiskBrukerSted = isShowFysiskBrukerSted(ressursState);
-
-        var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
 
         var personident = showPersonident
@@ -222,7 +220,6 @@ public class RessursRestService {
                 .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : null)
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
-            telefoner,
             epost.orElse(null),
             nomMastered.isMastered(ressursState.navident())
         );
@@ -245,8 +242,6 @@ public class RessursRestService {
 
         var showFysiskBrukerSted = isShowFysiskBrukerSted(ressursState);
 
-        var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
-
         var personident = showPersonident
             ? ressursState.personident()
             : ressursState.personident().replaceFirst(".{5}$", "*****");
@@ -258,7 +253,6 @@ public class RessursRestService {
                 .primaryFysiskBrukersted(showFysiskBrukerSted ? ressursState.primaryFysiskBrukersted() : null)
                 .fysiskeBrukersteder(showFysiskBrukerSted ? ressursState.fysiskeBrukersteder() : Collections.emptyList())
                 .build(),
-            telefoner,
             epost,
             nomMastered.isMastered(ressursState.navident())
         );

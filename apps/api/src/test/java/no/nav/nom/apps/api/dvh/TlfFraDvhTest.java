@@ -6,7 +6,6 @@ import no.nav.nom.apps.api.telefon.Telefon;
 import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -45,18 +45,18 @@ public class TlfFraDvhTest extends DvhTestBase {
         when(telefonService.getExistingTelefoner()).thenReturn(Map.of());
         when(telefonService.findRessursStateByNavident(anyString())).thenReturn(Optional.of(RessursState.builder().fid("ressurs-X").build()));
 
-        dvhRestConsumer.loadTlfFromDvh();
+        var telefoner = dvhRestConsumer.loadTlfFromDvh().stream().collect(Collectors.groupingBy(DvhTelefon::getNavIdent));
 
-        var tlfList1 = this.dvhRepository.getTelefonNrListByNavIdent("A123123");
+        var tlfList1 = telefoner.get("X923123");
         assertThat(tlfList1.getFirst().getNummer()).isEqualTo("4711220033");
 
-        var tlfList2 = this.dvhRepository.getTelefonNrListByNavIdent("A503999");
+        var tlfList2 = telefoner.get("X903999");
         assertThat(tlfList2.getFirst().getNummer()).isEqualTo("4733002999");
 
-        var tlfList3 = this.dvhRepository.getTelefonNrListByNavIdent("J509999");
+        var tlfList3 = telefoner.get("Z909999");
         assertThat(tlfList3.getFirst().getNummer()).isEqualTo("4733008888");
 
-        var tlfList4 = this.dvhRepository.getTelefonNrListByNavIdent("J501111");
+        var tlfList4 = telefoner.get("Z901111");
         assertThat(tlfList4.getFirst().getNummer()).isEqualTo("4733001111");
     }
 
@@ -68,11 +68,11 @@ public class TlfFraDvhTest extends DvhTestBase {
         when(telefonService.getExistingTelefoner()).thenReturn(Map.of());
         when(telefonService.findRessursStateByNavident(anyString())).thenReturn(Optional.of(RessursState.builder().fid("ressurs-X").build()));
 
-        dvhRestConsumer.loadTlfFromDvh();
+        var telefoner = dvhRestConsumer.loadTlfFromDvh().stream().collect(Collectors.groupingBy(DvhTelefon::getNavIdent));
 
-        val navidenter = List.of("A123123", "A321321", "A321320", "A440022", "A503020");
+        val navidenter = List.of("X923123", "X921321", "X921320", "X940022", "X903020");
         for (val navident : navidenter) {
-            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(navident)).hasSize(1);
+            assertThat(telefoner.get(navident)).hasSize(1);
         }
 
     }
@@ -84,7 +84,7 @@ public class TlfFraDvhTest extends DvhTestBase {
         stubTlfFromString(tlfDvhPayload);
 
         when(telefonService.getExistingTelefoner()).thenReturn(Map.of(
-            "ressurs-1", new Telefon("A123123", "4700000000", TelefonType.NAV_KONTOR_TELEFON),
+            "ressurs-1", new Telefon("X923123", "4700000000", TelefonType.NAV_KONTOR_TELEFON),
             "ressurs-5", new Telefon("X000000","4799999999", TelefonType.NAV_KONTOR_TELEFON)
         ));
 
@@ -92,10 +92,10 @@ public class TlfFraDvhTest extends DvhTestBase {
 
         dvhRestConsumer.oppdaterTelefonerFraDvh(
             List.of(
-                DvhTelefon.builder().navIdent("A123123").nummer("4711220033").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
-                DvhTelefon.builder().navIdent("A321321").nummer("4711330022").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
-                DvhTelefon.builder().navIdent("A321320").nummer("4721002102").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build(),
-                DvhTelefon.builder().navIdent("A440022").nummer("4722330011").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build()
+                DvhTelefon.builder().navIdent("X923123").nummer("4711220033").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
+                DvhTelefon.builder().navIdent("X921321").nummer("4711330022").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
+                DvhTelefon.builder().navIdent("X921320").nummer("4721002102").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build(),
+                DvhTelefon.builder().navIdent("X940022").nummer("4722330011").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build()
             ));
         // En telefon er fjernet (ressurs-5)
         verify(telefonService, times(1)).oppdaterRessursStateJobbtelefon(anyString(), anyString(), eq(null));
@@ -110,22 +110,22 @@ public class TlfFraDvhTest extends DvhTestBase {
         stubTlfFromString(tlfDvhPayloadOneUser);
 
         when(telefonService.getExistingTelefoner()).thenReturn(Map.of(
-            "ressurs-1", new Telefon("A123123", "4700000000", TelefonType.NAV_KONTOR_TELEFON)
+            "ressurs-1", new Telefon("X923123", "4700000000", TelefonType.NAV_KONTOR_TELEFON)
         ));
 
         dvhRestConsumer.oppdaterTelefonerFraDvh(
             List.of(
-                DvhTelefon.builder().navIdent("A123123").nummer("4711220033").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
-                DvhTelefon.builder().navIdent("A123123").nummer("4799999999").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
-                DvhTelefon.builder().navIdent("A123123").nummer("4788888888").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build(),
-                DvhTelefon.builder().navIdent("A123123").nummer("4712345678").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build()
+                DvhTelefon.builder().navIdent("X923123").nummer("4711220033").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
+                DvhTelefon.builder().navIdent("X923123").nummer("4799999999").type(DvhTelefon.DvhTelefonType.KONTORTELEFON).build(),
+                DvhTelefon.builder().navIdent("X923123").nummer("4788888888").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build(),
+                DvhTelefon.builder().navIdent("X923123").nummer("4712345678").type(DvhTelefon.DvhTelefonType.TJENESTETELEFON).build()
             ));
 
         Jobbtelefon expectedJobbtelefon = new Jobbtelefon("4712345678", TelefonType.NAV_TJENESTE_TELEFON);
         // En telefon er fjernet (ressurs-5)
         verify(telefonService, times(0)).oppdaterRessursStateJobbtelefon(anyString(), anyString(), eq(null));
         // En er endret (ressurs-1) med verdi 4 item i tlfDvhPayloadOneUser (4712345678)
-        verify(telefonService, times(1)).oppdaterRessursStateJobbtelefon(eq("ressurs-1"), eq("A123123"), eq(expectedJobbtelefon));
+        verify(telefonService, times(1)).oppdaterRessursStateJobbtelefon(eq("ressurs-1"), eq("X923123"), eq(expectedJobbtelefon));
     }
 
 
@@ -147,8 +147,8 @@ public class TlfFraDvhTest extends DvhTestBase {
           "items": [
             {
               "msisdn": "4711220033",
-              "navident": "A123123",
-              "userrefeerence1": "PK-A123123",
+              "navident": "X923123",
+              "userrefeerence1": "PK-X923123",
               "typeid": "53200",
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
@@ -159,8 +159,8 @@ public class TlfFraDvhTest extends DvhTestBase {
             },
             {
               "msisdn": "4799999999",
-              "navident": "A123123",
-              "userrefeerence1": "PK-A123123",
+              "navident": "X923123",
+              "userrefeerence1": "PK-X923123",
               "typeid": "53200",
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
@@ -171,8 +171,8 @@ public class TlfFraDvhTest extends DvhTestBase {
             },
             {
               "msisdn": "4788888888",
-              "navident": "A123123",
-              "userrefeerence1": "PT-A123123",
+              "navident": "X923123",
+              "userrefeerence1": "PT-X923123",
               "typeid": "53175",
               "typename": "Bedrift Total A (50 GB)",
               "typeaccesstype": "MOBILE",
@@ -183,8 +183,8 @@ public class TlfFraDvhTest extends DvhTestBase {
             },
             {
               "msisdn": "4712345678",
-              "navident": "A123123",
-              "userrefeerence1": "PT-A123123",
+              "navident": "X923123",
+              "userrefeerence1": "PT-X923123",
               "typeid": "53200",
               "typename": "Bedrift Total B (50 GB)",
               "typeaccesstype": "MOBILE",
@@ -203,8 +203,8 @@ public class TlfFraDvhTest extends DvhTestBase {
               "items": [
                 {
                   "msisdn": "4711220033",
-                  "navident": "A123123",
-                  "userrefeerence1": "PK-A123123",
+                  "navident": "X923123",
+                  "userrefeerence1": "PK-X923123",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -215,8 +215,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4711330022",
-                  "navident": "A321321",
-                  "userrefeerence1": "PK-A321321",
+                  "navident": "X921321",
+                  "userrefeerence1": "PK-X921321",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -227,8 +227,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4721002102",
-                  "navident": "A321320",
-                  "userrefeerence1": "PT-A321320",
+                  "navident": "X921320",
+                  "userrefeerence1": "PT-X921320",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -239,8 +239,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4722330011",
-                  "navident": "A440022",
-                  "userrefeerence1": "PK-A440022",
+                  "navident": "X940022",
+                  "userrefeerence1": "PK-X940022",
                   "typeid": "53200",
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -251,8 +251,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4733002200",
-                  "navident": "A503020",
-                  "userrefeerence1": "PT-A503020",
+                  "navident": "X903020",
+                  "userrefeerence1": "PT-X903020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -263,8 +263,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4733002999",
-                  "navident": "A503999",
-                  "userrefeerence1": "PT-A503020",
+                  "navident": "X903999",
+                  "userrefeerence1": "PT-X903020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -275,8 +275,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4733008888",
-                  "navident": "J509999",
-                  "userrefeerence1": "PT-A503020",
+                  "navident": "Z909999",
+                  "userrefeerence1": "PT-X903020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
@@ -287,8 +287,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 },
                 {
                   "msisdn": "4733001111",
-                  "navident": "J501111",
-                  "userrefeerence1": "PT-A503020",
+                  "navident": "Z901111",
+                  "userrefeerence1": "PT-X903020",
                   "typeid": "53175",
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",

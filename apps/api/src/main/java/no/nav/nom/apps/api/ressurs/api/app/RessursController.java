@@ -160,24 +160,6 @@ public class RessursController {
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
-    @GetMapping("/{navident}/telefonnummere")
-    @Operation(
-            description = "Henter en prioritert liste over alle telefonnumre til ressursen",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Telefonnummer"),
-    })
-    public ResponseEntity<List<Ressurs.Telefon>> getTelefonnumre(
-            @PathVariable String navident
-    ) {
-        List<Ressurs.Telefon> dtoTelefonnummer = telefonService.getAlleTelefonnummer(navident)
-                .stream()
-                .map(tlf -> new Ressurs.Telefon(tlf.nummer(), tlf.type()))
-                .toList();
-        return ResponseEntity.ok(dtoTelefonnummer);
-    }
-
     @GetMapping("/{navident}/telefonnummer")
     @Operation(
         description = "Henter prioritert telefonnummer for ressursen",

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -43,7 +42,6 @@ public class TeamcatController {
 
 
     private final AdClient adclient;
-    private final DvhRepository dvhRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
@@ -55,7 +53,6 @@ public class TeamcatController {
     public TeamcatController(
         RessursStateRepository ressursStateRepository,
         AdClient adclient,
-        DvhRepository dvhRepository,
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         Environment env,
@@ -64,7 +61,6 @@ public class TeamcatController {
         OrgEnhetMapper orgEnhetMapper
     ) {
         this.adclient = adclient;
-        this.dvhRepository = dvhRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.ressursStateRepository = ressursStateRepository;
@@ -102,12 +98,8 @@ public class TeamcatController {
 
         String out;
         switch (hierarchy.size()) {
-            case 1 -> {
-                out = hierarchy.get(0).getNavn();
-            }
-            case 2 -> {
-                out = hierarchy.get(1).getNavn();
-            }
+            case 1 -> out = hierarchy.get(0).getNavn();
+            case 2 -> out = hierarchy.get(1).getNavn();
             default -> {
                 var includesItDept = hierarchy.stream().filter(it -> it.getFid().equals(IT_AVDELING_ID)).findFirst();
                 if (includesItDept.isPresent()) {
@@ -148,7 +140,7 @@ public class TeamcatController {
         return ResponseEntity.ok(out);
     }
 
-    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource, PerRequestCache perRequestCache) {
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource) {
 
         var oeId = orgtilknytningService.getByNavIdent(navident)
             .stream()
@@ -175,11 +167,6 @@ public class TeamcatController {
         );
     }
 
-    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource) {
-        return getTeamcatRessursDTO(navident, ressurs, adResource, new PerRequestCache());
-    }
-
-
     @Operation(
         description = "Hent teamkatalog ressurser i batch",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -198,11 +185,10 @@ public class TeamcatController {
         var maybeRessursList = ressursStateRepository.findByNavidentBulk(navidentListInput);
         var out = new HashMap<String, TeamcatRessursDTO>(maybeRessursList.size());
 
-        var perRequestCache = new PerRequestCache();
         for (var x : maybeRessursList.entrySet()) {
             var ressurs = x.getValue();
             var navident = x.getKey();
-            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource, perRequestCache);
+            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource);
             out.put(navident, tmp);
         }
 
@@ -222,10 +208,9 @@ public class TeamcatController {
             .filter(it -> it.sluttdato() == null || it.sluttdato().isAfter(LocalDate.now()))
             .map(RessursState::navident).toList());
 
-        var perRequestCache = new PerRequestCache();
         var out = new HashMap<String, TeamcatRessursDTO>(alleressurser.size());
         for (var r : alleressurser) {
-            var tmp = getTeamcatRessursDTO(r.navident(), r, adResources, perRequestCache);
+            var tmp = getTeamcatRessursDTO(r.navident(), r, adResources);
             out.put(r.navident(), tmp);
         }
         return ResponseEntity.ok(out);

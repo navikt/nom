@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.test.MockOAuth2ServerInitializer;
-import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,9 +34,6 @@ public class DvhTestBase {
     @Autowired
     protected JsonMapper om;
 
-    @Autowired
-    protected DvhRepository dvhRepository;
-
     @MockitoBean
     protected TelefonService telefonService;
 
@@ -55,9 +51,4 @@ public class DvhTestBase {
 
     @MockitoBean
     protected OrganiseringStateRepository organiseringStateRepository;
-
-    @AfterEach
-    protected void clearRepository() {
-        dvhRepository.clearRepository();
-    }
 }

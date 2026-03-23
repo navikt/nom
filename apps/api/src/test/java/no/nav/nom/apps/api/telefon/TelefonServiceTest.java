@@ -1,11 +1,8 @@
 package no.nav.nom.apps.api.telefon;
 
 import no.nav.nom.apps.api.common.TestData;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterJobbTelefonCommand;
-import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -16,13 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.dvh.dto.DvhTelefon.DvhTelefonType.KONTORTELEFON;
-import static no.nav.nom.apps.api.dvh.dto.DvhTelefon.DvhTelefonType.TJENESTETELEFON;
+import static no.nav.nom.contract.nom.TelefonType.NAV_KONTOR_TELEFON;
 import static no.nav.nom.contract.nom.TelefonType.NAV_TJENESTE_TELEFON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,10 +37,6 @@ class TelefonServiceTest {
     private static final String PRIVATTELEFON_B = "4766666666";
 
     private static final String NAV_IDENT_X = "X123456";
-    private static final String TJENESTETELEFON_X = "4711111111";
-    
-    @Mock
-    private DvhRepository dvhRepositoryMock;
 
     @Mock
     private RessursStateRepository ressursStateRepositoryMock;
@@ -56,24 +46,6 @@ class TelefonServiceTest {
 
     @InjectMocks
     private TelefonService telefonService;
-    
-
-    @Test
-    void skal_returnere_liste_av_telefonobjekter_for_ressurser_som_har_privattelefon() {
-        var ressurser = Map.of(
-                NAV_IDENT_A, ressursState(NAV_IDENT_A, PRIVATTELEFON_A),
-                NAV_IDENT_B, ressursState(NAV_IDENT_B, PRIVATTELEFON_B),
-                NAV_IDENT_X, TestData.ressursState()
-        );
-        when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressurser);
-
-        var ressurserMedTelefon = telefonService.fetchPrivattelefoner();
-
-        assertThat(ressurserMedTelefon.size()).isEqualTo(2);
-        var telefon = ressurserMedTelefon.getFirst();
-        assertThat(telefon).isInstanceOf(Telefon.class);
-        assertThat(telefon.type()).isEqualTo(TelefonType.PRIVAT_TELEFON);
-    }
 
     @Test
     void skal_ikke_ta_med_privattelefonnr_som_er_tom_streng() {
@@ -83,43 +55,32 @@ class TelefonServiceTest {
         );
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressurser);
 
-        var ressurserMedTelefon = telefonService.fetchPrivattelefoner();
+        var ressurserMedTelefon = telefonService.hentTelefonnummreForAktiveRessurser();
 
-        assertThat(ressurserMedTelefon.size()).isEqualTo(1);
+        assertThat(ressurserMedTelefon.size()).isEqualTo(3);
     }
 
     @Test
     void should_combine_phone_numbers_and_return_a_map_with_lists_of_sorted_numbers() {
-        var telefoner = List.of(
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build(),
-                DvhTelefon.builder().navIdent(NAV_IDENT_X).nummer(TJENESTETELEFON_X).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
-        );
-        when(dvhRepositoryMock.getNavidentTelefonNrList()).thenReturn(telefoner);
-
         var ressurser = Map.of(
                 NAV_IDENT_A, ressursState(NAV_IDENT_A, PRIVATTELEFON_A),
                 NAV_IDENT_B, ressursState(NAV_IDENT_B, PRIVATTELEFON_B),
                 NAV_IDENT_X, TestData.ressursState()
         );
+
         when(ressursStateRepositoryMock.findAllActiveRessurser()).thenReturn(ressurser);
 
-        var sorterteTelefonnummer = telefonService.hentPrioriterteTelefonnummer();
+        var sorterteTelefonnummer = telefonService.hentTelefonnummreForAktiveRessurser();
 
 
-        assertThat(sorterteTelefonnummer.size()).isEqualTo(3);
-        assertThat(sorterteTelefonnummer.get(NAV_IDENT_A).getFirst().type()).isEqualTo(NAV_TJENESTE_TELEFON);
+        assertThat(sorterteTelefonnummer.size()).isEqualTo(5);
+        assertThat(sorterteTelefonnummer)
+            .anyMatch(telefon -> telefon.navident().equals(NAV_IDENT_A) && telefon.type() == NAV_TJENESTE_TELEFON);
     }
 
     @Test
     void should_return_tjenestetelefon_for_single_user_which_has_all_types() {
-        var telefoner = List.of(
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
-        );
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAV_IDENT_A)).thenReturn(telefoner);
-
-        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
+        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A).toBuilder().jobbtelefon(new Jobbtelefon(TJENESTETELEFON_A, NAV_TJENESTE_TELEFON)).build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
 
         var prioritertNummer = telefonService.getPrioritertTelefonnummer(NAV_IDENT_A);
@@ -128,12 +89,8 @@ class TelefonServiceTest {
 
     @Test
     void should_return_kontortelefon_for_single_user_which_has_kontortelefon_and_private_number() {
-        var telefoner = List.of(
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build()
-        );
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAV_IDENT_A)).thenReturn(telefoner);
 
-        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
+        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A).toBuilder().jobbtelefon(new Jobbtelefon(KONTORTELEFON_A, NAV_KONTOR_TELEFON)).build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
 
         var prioritertNummer = telefonService.getPrioritertTelefonnummer(NAV_IDENT_A);
@@ -142,9 +99,7 @@ class TelefonServiceTest {
 
     @Test
     void should_return_privattelefon_for_single_user_which_only_has_private_number() {
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAV_IDENT_A)).thenReturn(Collections.emptyList());
-
-        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
+        var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A).toBuilder().jobbtelefon(null).build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
 
         var prioritertNummer = telefonService.getPrioritertTelefonnummer(NAV_IDENT_A);
@@ -153,9 +108,7 @@ class TelefonServiceTest {
 
     @Test
     void should_return_null_for_single_user_which_no_phone_numbers() {
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAV_IDENT_X)).thenReturn(Collections.emptyList());
-
-        var ressursState = TestData.ressursState();
+        var ressursState = TestData.ressursState().toBuilder().jobbtelefon(null).build();
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_X)).thenReturn(Optional.of(ressursState));
 
         var prioritertNummer = telefonService.getPrioritertTelefonnummer(NAV_IDENT_X);
@@ -164,25 +117,19 @@ class TelefonServiceTest {
 
     @Test
     void should_return_sorted_list_of_numbers_for_single_user() {
-        var telefoner = List.of(
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(KONTORTELEFON_A).type(KONTORTELEFON).beskrivelse("Bla, bla").build(),
-                DvhTelefon.builder().navIdent(NAV_IDENT_A).nummer(TJENESTETELEFON_A).type(TJENESTETELEFON).beskrivelse("Bla, bla").build()
-        );
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAV_IDENT_A)).thenReturn(telefoner);
-
         var ressursState = ressursState(NAV_IDENT_A, PRIVATTELEFON_A);
         when(ressursStateRepositoryMock.findByNavident(NAV_IDENT_A)).thenReturn(Optional.ofNullable(ressursState));
 
         var alleTelefonnummer = telefonService.getAlleTelefonnummer(NAV_IDENT_A);
-        assertThat(alleTelefonnummer.size()).isEqualTo(3);
+        assertThat(alleTelefonnummer.size()).isEqualTo(2);
     }
 
     private RessursState ressursState(String navident, String primaryTelefonnummer) {
         return TestData.ressursState()
-                .toBuilder()
-                .navident(navident)
-                .primaryTelefonnummer(primaryTelefonnummer)
-                .build();
+            .toBuilder()
+            .navident(navident)
+            .primaryTelefonnummer(primaryTelefonnummer)
+            .build();
     }
 
     @Test

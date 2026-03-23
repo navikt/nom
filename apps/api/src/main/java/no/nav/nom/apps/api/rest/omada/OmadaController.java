@@ -6,18 +6,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +22,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static java.util.Objects.isNull;
 
 @Tag(name = "Eksport av data til Omada")
 @RestController
@@ -37,25 +32,22 @@ public class OmadaController {
 
     private final OrganiseringStateRepository organiseringStateRepository;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
-    private final DvhRepository dvhRepository;
     private final OrgEnhetLederService orgEnhetLederService;
     private final OrgenhetService orgenhetService;
-    private final RessursStateRepository ressursStateRepository;
+    private final TelefonService telefonService;
 
     public OmadaController(
         OrganiseringStateRepository organiseringStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
-        DvhRepository dvhRepository,
         OrgEnhetLederService orgEnhetLederService,
         OrgenhetService orgenhetService,
-        RessursStateRepository ressursStateRepository
+        TelefonService telefonService
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
-        this.dvhRepository = dvhRepository;
         this.orgEnhetLederService = orgEnhetLederService;
         this.orgenhetService = orgenhetService;
-        this.ressursStateRepository = ressursStateRepository;
+        this.telefonService = telefonService;
     }
 
     @Operation(
@@ -84,28 +76,13 @@ public class OmadaController {
 
     @GetMapping("/telefonnummer/{navIdent}")
     public ResponseEntity<OmadaRessursTelefonDTO> getRessursTelefon(@PathVariable String navIdent) {
-        var ressursState = ressursStateRepository.findByNavident(navIdent).orElse(null);
+        var prioritertTelefon = telefonService.getPrioritertTelefonnummer(navIdent);
 
-        if (!isNull(ressursState) && ressursState.isEkstern()) {
-            var primaryTelefonnummer = ressursState.primaryTelefonnummer();
-            if (primaryTelefonnummer != null) {
-                var ressursInfo = new OmadaRessursTelefonDTO(ressursState.navident(), primaryTelefonnummer);
-                logger.debug("Telefonnummer til Omada for ekstern ressurs {}: {}", navIdent, ressursInfo);
-                return ResponseEntity.ok(ressursInfo);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+        if (prioritertTelefon == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(new OmadaRessursTelefonDTO(navIdent, prioritertTelefon));
         }
-
-        return dvhRepository.getTelefonNrListByNavIdent(navIdent).stream()
-            .findFirst()
-            .map(dvhTelefon -> {
-                var ressursInfo = toOmadaRessursInfoDTO(dvhTelefon);
-
-                logger.debug("Telefonnummer til Omada for ressurs {}: {}", navIdent, ressursInfo);
-                return ResponseEntity.ok(ressursInfo);
-            })
-            .orElse(ResponseEntity.notFound().build());
     }
 
     private String getOrgenhetOver(String id) {
@@ -122,13 +99,6 @@ public class OmadaController {
 
     private String getLeder(IOrgenhet orgEnhet) {
         return orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet.getId()).map(OrgEnhetLederState::navident).orElse(null);
-    }
-
-    private OmadaRessursTelefonDTO toOmadaRessursInfoDTO(DvhTelefon dvhTelefon) {
-        return new OmadaRessursTelefonDTO(
-            dvhTelefon.getNavIdent(),
-            dvhTelefon.getNummer()
-        );
     }
 
 }

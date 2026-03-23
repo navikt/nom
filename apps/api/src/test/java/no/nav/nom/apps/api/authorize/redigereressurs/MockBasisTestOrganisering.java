@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
@@ -47,8 +45,6 @@ abstract public class MockBasisTestOrganisering {
     OrgenhetService orgenhetService;
     @MockitoBean
     OrgEnhetLederService orgEnhetLederService;
-    @MockitoBean
-    DvhRepository dvhRepository;
     @MockitoBean
     TilgangDelegertEmailService tilgangDelegertEmailService;
     @MockitoBean
