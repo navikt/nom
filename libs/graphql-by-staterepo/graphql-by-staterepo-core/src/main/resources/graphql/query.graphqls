@@ -29,20 +29,20 @@ input OrgEnhetSearchFilter {
 }
 
 input OrgEnhetSearch {
+    id: String
     agressoId: String
     orgNiv: String  @deprecated(reason: "orgEnhetsKategori er erstattet med agressoOrgNiv")
     agressoOrgNiv: String
     navn: String
-    id: String
 }
 
 input OrgEnheterSearch {
+    ider: [String!]
     agressoIder: [String!]
     orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
     nomNivaa: [NomNivaa!] @deprecated(reason:"Benytt heller nomNivaa filter i OrgEnheterSearchFilter objektet")
     orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
     agressoOrgNiv: String
-    ider: [String!]
 }
 
 input OrgEnheterSearchFilter {
@@ -103,7 +103,7 @@ enum SektorSelection{
     STATLIG,
     KOMMUNAL,
     IKKE_EKSTERN,
-    ALLE,
+    ALLE
 }
 
 enum IdentTypeSelection {

@@ -11,12 +11,10 @@ import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;

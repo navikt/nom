@@ -1,0 +1,506 @@
+= GraphQL API - Queries
+
+== Spørringer/Queries
+
+=== Query `search`
+Mulighet for å gjøre fritekstsøk på medarbeider og enhetsnavn. Litt ala selve søkefeltet i NOM grensesnittet (nom.nav.no).
+
+Gi et søkeord (`term`) som brukes til å søke etter både medarbeider og enhets basert på navn.
+`<<RessursSearchFilter,ressursFilter>>` og `<<OrgEnhetSearchFilter,orgEnhetFilter>>` er valgfrie parametere som kan brukes til å begrense søket ytterligere basert på spesifikke kriterier for ressurser og organisasjonsenheter.
+
+Returnerer en liste med `<<domenet.adoc#_ressurs,Ressurs>>` og/eller `<<domenet.adoc#_orgenhet,OrgEnhet>>` objekter som matcher søkekriteriene. Kan være tom.
+[source,graphql]
+----
+search(
+    term: String!
+    ressursFilter: RessursSearchFilter
+    orgEnhetFilter: OrgEnhetSearchFilter
+): [SearchResult!]!
+----
+=== Query `searchRessurs`
+Mulighet for å gjøre fritekstsøk på medarbeidernavn.
+
+Gi et søkeord (`term`) som brukes til å søke etter medarbeider basert på navn.
+`<<RessursSearchFilter,ressursFilter>>` er valgfri parameter som kan brukes til å begrense søket ytterligere basert på spesifikke kriterier for ressurser.
+
+Returnerer en liste med `<<domenet.adoc#_ressurs,Ressurs>>` objekter som matcher søkekriteriene. Kan være tom.
+[source,graphql]
+----
+searchRessurs(
+    term: String!,
+    filter: RessursSearchFilter
+): [Ressurs!]!
+----
+
+=== Query `searchOrgEnhet`
+Mulighet for å gjøre fritekstsøk på orgenhetsnavn.
+
+Gi et søkeord (`term`) som brukes til å søke etter orgenhet basert på navn.
+`<<OrgEnhetSearchFilter,orgEnhetFilter>>` er valgfri parameter som kan brukes til å begrense søket ytterligere basert på spesifikke kriterier for orgenheter.
+
+Returnerer en liste med `<<domenet.adoc#_orgenhet,OrgEnhet>>` objekter som matcher søkekriteriene. Kan være tom.
+[source,graphql]
+----
+searchOrgEnhet(
+    term: String!,
+    filter: OrgEnhetSearchFilter
+): [OrgEnhet!]!
+----
+
+=== Query `orgEnhet`
+
+Slå opp en organisasjons enhet.
+
+Input (`<<OrgEnhetSearch,where>>`) er enten NOM orgenhetsid, eller kombinasjon av Agresso/Unit4 id, orgnivå og navn.
+
+Returnerer en `<<domenet.adoc#_orgenhet,OrgEnhet>>` eller null hvis ikke funnet.
+[source,graphql]
+----
+orgEnhet(
+    where: OrgEnhetSearch!
+): OrgEnhet
+----
+
+[#orgEnheter_query]
+=== Query `orgEnheter`
+
+Slå opp en eller flere organisasjonsenheter, basert på lister med ider i `<<OrgEnheterSearch, where>>` parameteren, og/eller med kombinasjon av ulike filtrerings kriterier i `<<OrgEnheterSearchFilter, filter>>` parameteren.
+
+Filter kan brukes til å returnere enheter i bestemte deler organisasjonstreet, sett også ut fra filtrering på historisk, aktiv eller fremtidig perspektiv etc.
+
+Returnerer en liste med `<<OrgEnhetResult>>` objekter.
+
+[source,graphql]
+----
+orgEnheter(
+    where: OrgEnheterSearch,
+    filter: OrgEnheterSearchFilter
+): [OrgEnhetResult!]!
+----
+
+=== Query `organisasjonsenhet` (DEPREKERT - bruk <<Query `orgEnhet`,orgEnhet>> i stedet)
+
+=== Query `organisasjonsenheter` (DEPREKERT - bruk <<Query `orgEnheter`,orgEnheter>> i stedet)
+
+=== Query `ressurs`
+
+Slå opp en ressurs.
+
+Input (`<<RessursSearch,where>>`) er enten navident, personident/fnr eller telefonnummer.
+
+Returnerer en `<<domenet.adoc#_ressurs,Ressurs>>` eller null hvis ikke funnet.
+[source,graphql]
+----
+ressurs(
+    where: RessursSearch!
+): Ressurs
+----
+
+[#ressurser_query]
+=== Query `ressurser`
+
+Slå opp en eller flere ressurser, basert på lister med ider i `<<RessurserSearch, where>>` parameteren, og/eller med kombinasjon av ulike filtrerings kriterier i `<<RessurserSearchFilter, filter>>` parameteren.
+
+Filter kan brukes til å returnere ressurser med spesifikk `<<IdentTypeSelection, identtype>>`, `<<SektorSelection, sektor>>` og evt `<<PeriodiskUtvalgArg, periode>>` for ressursens start/slutt periode
+
+Returnerer en liste med `<<RessursResult>>` objekter.
+
+[source,graphql]
+----
+orgEnheter(
+    where: OrgEnheterSearch,
+    filter: OrgEnheterSearchFilter
+): [OrgEnhetResult!]!
+----
+
+
+== Parameter objekter for spørringer og resultat
+
+=== SearchResult
+Union type som representerer enten en `<<domenet.adoc#_ressurs,Ressurs>>` eller en `<<domenet.adoc#_orgEnhet,OrgEnhet>>`
+
+[source,graphql]
+----
+union SearchResult = Ressurs | OrgEnhet
+----
+
+=== RessursSearchFilter
+Begrenser utvalget å søke i ved fritekst søk på medarbeider
+[source,graphql]
+----
+input RessursSearchFilter {
+    sektorSelection: SektorSelection! = ALLE
+    statusSelection: StatusSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|sektorSelection|<<SektorSelection>>|Ja |ALLE | Begrenser søket til å kun inkludere ressurser som tilhører den valgte sektoren.
+
+Valget ALLE inkluderer ressurser fra alle sektorer.
+
+Valget IKKE_EKSTERN inkluderer ressurser fra både STATLIG og KOMMUNAL sektor.
+|statusSelection|<<StatusSelection>>|Ja |ALLE | Begrenser søket til å kun inkludere ressurser som tilhører den valgte sektoren.
+
+Valget ALLE inkluderer ressurser fra alle sektorer.
+
+Valget IKKE_EKSTERN inkluderer ressurser fra både STATLIG og KOMMUNAL sektor.
+|limit|<<ResultLimit>>|Ja |LIMIT_30 | Begrenser antall resultater returnert av spørringen
+|===
+
+=== OrgEnhetSearchFilter
+Begrenser utvalget å søke i ved fritekst søk på orgenhet
+[source,graphql]
+----
+input OrgEnhetSearchFilter {
+    orgnivSelection: OrgnivSelection! = ALLE
+    gyldigTomSelection: GyldigTomSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|orgnivSelection|<<OrgnivSelection>>|Ja |ALLE | Begrenser søket til å inkludere eller ekskludere orgenheter som har Agresso/Unit4 nivå 'Orgenhet' (nivået som representerer løvnodene hvor medarbeidere har sine tilknytninger).
+|gyldigTomSelection|<<GyldigTomSelection>>|Ja |ALLE | Begrenser søket til å inkludere eller ekskludere orgenheter hvor gyldig til og med dato er passert
+|limit|<<ResultLimit>>|Ja |LIMIT_30 | Begrenser antall resultater returnert av spørringen
+|===
+
+=== OrgEnhetSearch
+Parameter for oppslag etter en orgenhet
+
+[source,graphql]
+----
+input OrgEnhetSearch {
+    id: String
+    agressoId: String
+    orgNiv: String  @deprecated(reason: "orgEnhetsKategori er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
+    navn: String
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|id|String|Nei| | Slå opp enhet med angitt NOM orgenhets id.
+
+Hvis denne angis vil evt andre felt bli ignorert i oppslaget. +
+Man slår opp enten basert på NOM id eller triplet-en agressoId/agressoOrgNiv/navn
+|agressoId|String|Nei* | | Slå opp enhet med angitt Agresso id, orgNivå og navn.
+
+* Hvis oppslag på agressoId, må orgNiv/AgressoOrgNiv og navn oppgis i tillegg siden en enhet kun kan angis unik basert på alle tre feltene
+|orgNiv|String|Nei* | | Deprekert felt. Bruk feltet `agressoOrgNiv`
+|agressoOrgNiv|String|Nei* | | Slå opp enhet med angitt Agresso id, orgNivå og navn.
+
+* Hvis oppslag på agressoOrgNiv, må agressoId og navn oppgis i tillegg siden en enhet kun kan angis unik basert på alle tre feltene
+
+Hvis både feltet `orgNiv` og feltet `agressoOrgNiv` er oppgitt, vil `agressoOrgNiv` bli brukt for å matche orgnivået i stedet for `orgNiv`.
+|navn|String|Nei* | | Slå opp enhet med angitt Agresso id, orgNivå og navn.
+
+* Hvis oppslag på navn, må agressoId og navn oppgis i tillegg siden en enhet kun kan angis unik basert på alle tre feltene
+|===
+
+=== OrgEnheterSearch
+Parameter for oppslag etter orgenheter
+
+Man kan angi en liste med NOM orgenhetsider for oppslag.
+Man kan også angi en liste med Agresso/Unit4 ider, og begrense utvalget på Agresso/Unit4 orgnivå for oppslag.
+Angis begge deler, vil resultater fra begge deler bli inkludert i resultatet.
+
+[source,graphql]
+----
+input OrgEnheterSearch {
+    ider: [String!]
+    agressoIder: [String!]
+    orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
+    nomNivaa: [NomNivaa!] @deprecated(reason:"Benytt heller nomNivaa filter i OrgEnheterSearchFilter objektet")
+    orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|agressoIder|[String]|Nei| | Finn alle enheter for som matcher angitt Agresso/Unit4 id.
+|orgEnhetsKategori|[<<domenet.adoc#_nomnivaa,NomNivaa>>!]|Nei| | Deprekert felt, erstattet med nomNivaa filter i `<<OrgEnheterSearchFilter, OrgEnheterSearchFilter>>` objektet
+|nomNivaa|[<<domenet.adoc#_nomnivaa,NomNivaa>>!]|Nei| | Deprekert felt, erstattet med nomNivaa filter i `<<OrgEnheterSearchFilter, OrgEnheterSearchFilter>>` objektet
+|orgNiv|String|Nei | | Deprekert felt. Bruk feltet `agressoOrgNiv`
+|agressoOrgNiv|String|Nei | | Enheter slått opp med angitt Agresso/Unit4 ider angitt i feltet `agressoIder' kan begrenses til å kun være de enheter som har denne angitte Agresso/Unit4 orgenhetsnivået.
+|ider|[String!]|Nei| | Slå opp enheter med angitte NOM orgenhetsider.
+|===
+
+=== OrgEnheterSearchFilter
+Parameter for filtrering av orgenheter ved oppslag via `<<orgEnheter_query, orgEnheter>>` queryen
+
+Man kan velge alle enheter organisert innenfor en gitt node i organisasjonstreet, at har bestemt type `<<domenet.adoc#_nomnivaa,NomNivaa>>`, om den er Løvnode eler ikke (nederste enhet i organisasjonstreet).
+I tillegg kan man avgrense på periode (Historisk, aktiv, fremtidig). Dette sjekker enhetens gyldighetsperiode, og hvis det sjekkes tilknytning i organisasjonstreet så sjekkes også perioden for organisasjonstilknytningen.
+
+[source,graphql]
+----
+input OrgEnheterSearchFilter {
+    organiseringSelection: OrganiseringSelection = ALLE
+    organisertUnderOrgEnhetId: String
+    lovnodeSelection: LovnodeSelection = ALLE
+    nomNivaaSelection: [NomNivaa!]
+    periodiskUtvalg: PeriodiskUtvalgArg = ALLE
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt                       |Type                        |Påkrevd | Default verdi |Beskrivelse
+|organiseringSelection      |<<OrganiseringSelection>>   | Nei    | ALLE          | Kan styre å selektere enheter under Nav toppnode, eller toppnoden til noden av spesialenhetene som ikke er i det normal organisasjonstreet (Helfo, Skatt, etc).
+Man kan også angi selv en enhet som man skal bruke som toppnode for seleksjonen.
+Se feltet under.
+|organisertUnderOrgEnhetId  |String                      | Nei*    |               | Kan med denne selv velge hvilken toppnode i organisasjonstreet man ønsker å bruke for å selektere enheter. F.eks. hvis man velger her enhets iden til ' Rogaland' så vil kun enheter som er organisert under 'Rogaland' være med i filtreringen.
+
+Hvis dette feltet skal benyttes må man også velge `UNDER_ANGITT_ORGENHET` på `organiseringSelection` også.
+
+* Hvis feltet `organiseringSelection`er satt til `UNDER_ANGITT_ORGENHET` så er dette feltet påkrevd
+|lovnodeSelection           |<<LovnodeSelection>>        | Nei    | ALLE          | Kan her velge om man kun vil inkludere eller ekskludere løvnodeenheter i utvalget. Løvnodeenheter er enheter som ikke har noen underliggende enheter i organisasjonstreet, og dermed representerer det nederste nivået i organisasjonstreet hvor medarbeidere har sine tilknytninger.
+|nomNivaaSelection          |[<<domenet.adoc#_nomnivaa,NomNivaa>>!]             | Nei    |               | Angis det en eller flere `<<domenet.adoc#_nomnivaa,NomNivaa>>` i liste i denne parameteren, så må enheter som tas med i resultatet være en av dissse nivåene
+|periodiskUtvalg            |<<PeriodiskUtvalgArg>>      | Nei    | ALLE          | Kan velge historisk, aktive eller fremtidig (eller alle) som en periodisk filtrering.
+Enheten må være gyldig i angitt periode, og tilsvarende må evt organiseringsperiode være gyldig i angitt periode for å tas med i filtreringen når man filtrerer på organisering også.
+|===
+
+=== RessursSearch
+Parameter for oppslag etter en ressurs
+
+[source,graphql]
+----
+input RessursSearch {
+    navident: String
+    personident: String
+    telefonNummer: String
+    navIdent: String    @deprecated(reason: "navIdent er erstattet med navident")
+    personIdent: String     @deprecated(reason: "personIdent er erstattet med personident")
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|navident|String|Nei| | Slå opp ressurs med angitt navident.
+
+Tar presedens over personident og telefonnummer
+|personident|String|Nei | | Slå opp ressurs med angitt personident/fnr.
+
+Tar presedens over telefonnummer
+|navIdent|String|Nei | | Deprekert felt, erstattet med `navident`
+|personIdent|String|Nei | | Deprekert felt, erstattet med `personident`
+|===
+
+=== RessurserSearch
+Parameter for oppslag etter ressurser
+
+Man kan angi en liste med navidenter og/eller personidenter.
+Angis begge deler, vil resultater fra begge deler bli inkludert i resultatet.
+
+[source,graphql]
+----
+input RessurserSearch {
+    navidenter: [String!]
+    personidenter: [String!]
+    navIdenter: [String!] @deprecated(reason: "navIdenter er erstattet med navidenter")
+    personIdenter: [String!] @deprecated(reason: "personIdenter er erstattet med personidenter")
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt           |Type    |Påkrevd | Default verdi |Beskrivelse
+|navidenter|[String]|Nei| | Finn alle ressurser for som har angitt navidenter.
+|personidenter|[String]|Nei | | Finn alle ressurser for som har angitt personidenter/fnr.
+|navIdenter|[String]|Nei | | Deprekert felt, erstattet med `navidenter`
+|personIdenter|[String]|Nei | | Deprekert felt, erstattet med `personidenter`
+|===
+
+=== RessurserSearchFilter
+Parameter for filtrering av ressurser ved oppslag via `<<ressurser_query, ressurser>>` queryen
+
+[source,graphql]
+----
+input RessurserSearchFilter {
+    gjeldendeSektorSelection: SektorSelection = ALLE
+    identTypeSelection: IdentTypeSelection = ALLE
+    periodiskUtvalg: PeriodiskUtvalgArg = ALLE
+}
+----
+
+[%header],cols="10%,10%,5%,5%,70%"]
+|===
+|Felt                       |Type                        |Påkrevd | Default verdi |Beskrivelse
+|gjeldendeSektorSelection      |<<SektorSelection>>   | Nei    | ALLE          | Filtrer ressurser med angitt gjeldende sektor.
+|identTypeSelection    |<<IdentTypeSelection>>   |Nei          | ALLE   | Filtrer ressurser med angitt ident type.
+|periodiskUtvalg            |<<PeriodiskUtvalgArg>>      | Nei    | ALLE          | Filtrer på om ressurser har start/slutt periode som er historisk, aktive eller fremtidig (eller alle)
+|===
+
+=== SektorSelection
+Mulige sektor 'filtrerings'-valg
+[source,graphql]
+----
+enum SektorSelection{
+    EKSTERN,
+    STATLIG,
+    KOMMUNAL,
+    IKKE_EKSTERN,
+    ALLE
+}
+----
+
+=== IdentTypeSelection
+Mulige identtype 'filtrerings'-valg
+[source,graphql]
+----
+enum IdentTypeSelection {
+    ROBOT,
+    STANDARD,
+    VIKAFOSSEN,
+    UTENLANDSK_KONSULENT,
+    UKJENT,
+    ALLE
+}
+----
+
+=== StatusSelection
+Mulige status 'filtrerings'-valg basert på ressursens start/sluttdato
+[source,graphql]
+----
+enum StatusSelection{
+    AKTIV,
+    INAKTIV,
+    ALLE
+}
+----
+
+=== OrgnivSelection
+Mulige 'filtrerings'-valg på Agresso/U4 'orgenhet' nivå
+[source,graphql]
+----
+enum OrgnivSelection {
+    ORGNIV_ORGENHET,
+    IKKE_ORGNIV_ORGENHET,
+    ALLE
+}
+----
+
+=== GyldigTomSelection
+Mulige 'filtrerings'-valg på orgenhet gyldig til og med dato passert eller ikke
+[source,graphql]
+----
+enum GyldigTomSelection {
+    IKKE_PASSERT,
+    PASSERT,
+    ALLE
+}
+----
+
+=== LovnodeSelection
+Mulige 'filtrerings'-valg på om enheten er løvnode i organisasjonstreet (nederste nivå) eller ikke
+[source,graphql]
+----
+enum LovnodeSelection {
+    LOVNODE_ENHET,
+    IKKE_LOVNODE_ENHET,
+    ALLE
+}
+----
+
+=== OrganiseringSelection
+Mulige 'filtrerings'-valg på om enheten er organisert under ett gitt sted i organisasjonstreet
+[source,graphql]
+----
+enum OrganiseringSelection {
+    UNDER_TOPPNODE_NAV,
+    UNDER_HELFO,
+    UNDER_SKATT,
+    UNDER_RIKSREVISJONEN,
+    UNDER_VIKAFOSSEN,
+    UNDER_ANGITT_ORGENHET,
+    ALLE
+}
+----
+
+=== PeriodiskUtvalgArg
+Mulige 'filtrerings'-valg for å angi periode for seleksjonen/utvalget.
+F.eks. om enhet er fremtidig organisert under en gitt node, eller om Ressurs er historisk aktiv etc.
+[source,graphql]
+----
+enum PeriodiskUtvalgArg {
+    ALLE,
+    AKTIVE,
+    HISTORISKE,
+    FREMTIDIGE
+}
+----
+
+=== OrgEnhetResult
+Resultatobjekt i oppslag på orgenheter.
+Hvis det i det oppslaget ble angitt orgenhetsid i input, vil `ìd` for resultatobjektet referere til denne. Angis kombinasjon av agressoId/agressoOrgNiv/navn i inputen, vil `agressoId`, `agressoOrgNiv` og `navn` i resultatobjektet referere til disse.
+
+`<<ResultCode,code>>` feltet indikerer om spesifikke enhet angitt i `<<OrgEnhetSearch,where>>` inputen ble funnet eller ikke, eller om den ble funnet, men filtrert vekk av filteret i `<<OrgEnheterSearchFilter,filter>>` inputen.
+
+`<<domenet.adoc#_orgenhet,orgEnhet>>` feltet vil inneholde det faktiske OrgEnhet objektet som ble funnet
+
+[source,graphql]
+----
+type OrgEnhetResult {
+    code: ResultCode!
+    id: String  @deprecated(reason: "id er erstattet med agressoId")
+    agressoId: String
+    nomId: String
+    orgNiv: String  @deprecated(reason: "orgNiv er erstattet med agressoOrgNiv")
+    agressoOrgNiv: String
+    organisasjonsenhet: OrgEnhet    @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
+    orgEnhet: OrgEnhet
+}
+----
+
+=== RessursResult
+Resultatobjekt i oppslag på orgenheter.
+`id` feltet angir navident, personident eller telefonnummer som dette resultatet refererer til.
+`<<ResultCode,code>>` feltet indikerer om spesifikke enhet angitt i `<<RessurserSearch,where>>` inputen ble funnet eller ikke, eller om den ble funnet, men filtrert vekk av filteret i `<<RessurserSearchFilter,filter>>` inputen.
+
+`<<domenet.adoc#_ressurs,ressurs>>` feltet vil inneholde det faktiske Ressurs objektet som ble funnet
+
+[source,graphql]
+----
+type RessursResult {
+    code: ResultCode!
+    id: String!
+    ressurs: Ressurs
+}
+----
+
+=== ResultCode
+
+[source,graphql]
+----
+enum ResultCode {
+    OK,
+    NOT_FOUND,
+    NOT_IN_FILTER,
+    ERROR
+}
+----
+
+=== ResultLimit
+Mulige valg i begrensning av antall resultater returnert av spørringen
+[source,graphql]
+----
+enum ResultLimit {
+    LIMIT_10,
+    LIMIT_20,
+    LIMIT_30,
+    LIMIT_50,
+    LIMIT_100,
+    LIMIT_200,
+    UNLIMITED,
+}
+----
