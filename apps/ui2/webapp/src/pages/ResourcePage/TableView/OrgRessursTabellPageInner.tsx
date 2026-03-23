@@ -9,7 +9,6 @@ import {
   Table,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
 import {
@@ -24,7 +23,6 @@ import type {
   OrgEnhet,
   Ressurs,
   Sektor,
-  Telefon,
   Visningsnavn,
 } from "~/types/api-models";
 import {
@@ -255,7 +253,7 @@ interface CustomRessurs {
   navident: string;
   visningsnavn: Visningsnavn;
   primaryTelefonnummer?: string;
-  telefoner: Telefon[];
+  jobbtelefon: string | undefined;
   epost?: string;
   sektor: Sektor;
   orgEnheter: CustomOrgEnhet[];
@@ -297,7 +295,7 @@ const createCustomRessurser = (
       visningsnavn: ressurs.visningsnavn,
       primaryTelefonnummer: ressurs.primaryTelefonnummer,
       sektor: ressurs.sektor,
-      telefoner: ressurs.telefoner,
+      jobbtelefon: ressurs.jobbtelefon?.nummer,
       epost: ressurs.epost,
       orgEnheter: customOrgEnheter,
       tidligsteFom: tidligsteFomDato,
@@ -309,13 +307,14 @@ const createCustomRessurser = (
 };
 
 export function TelefonNummere({ ressurs }: { ressurs: CustomRessurs }) {
-  const telefonnummere = ressurs.primaryTelefonnummer
-    ? [{ nummer: ressurs.primaryTelefonnummer }, ...ressurs.telefoner]
-    : ressurs.telefoner;
+  const telefonnummere = [
+    ressurs.primaryTelefonnummer,
+    ressurs.jobbtelefon,
+  ].filter((nummer): nummer is string => !!nummer);
 
-  const uniqueTelefonnummere = uniqBy(telefonnummere, "nummer");
+  const uniqueTelefonnummere = [...new Set(telefonnummere)];
 
-  return uniqueTelefonnummere.map(({ nummer }) => formatTlf(nummer)).join(", ");
+  return uniqueTelefonnummere.map((nummer) => formatTlf(nummer)).join(", ");
 }
 
 function customSortByOrgEnhetName(

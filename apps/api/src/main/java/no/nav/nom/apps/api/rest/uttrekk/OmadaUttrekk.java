@@ -104,7 +104,7 @@ public class OmadaUttrekk {
                 try {
                     if (brukNyttFormat) {
                         printer.printRecord(
-                            ressurs.fid(),
+                            ressurs.fid(),  
                             ressurs.navident(),
                             ressurs.visningsnavn().fornavn().trim(),
                             ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),

@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api;
 
 import io.getunleash.Unleash;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
@@ -77,9 +76,6 @@ public abstract class TestBase {
     protected ResourceLoader resourceLoader;
 
     @Autowired
-    protected DvhRepository dvhRepository;
-
-    @Autowired
     private GenericStorage genericStorage;
 
     @Autowired
@@ -123,7 +119,6 @@ public abstract class TestBase {
 
     @BeforeEach
     void reset() {
-        dvhRepository.clearRepository();
         orgEnhetStateRepository.clear();
         organiseringStateRepository.clear();
         genericStorage.deleteAll();

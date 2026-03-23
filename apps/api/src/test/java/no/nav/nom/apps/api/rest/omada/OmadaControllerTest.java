@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.rest.omada;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -10,6 +9,7 @@ import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,13 +48,12 @@ class OmadaControllerTest extends RestTestBase {
     OrgenhetService orgenhetServiceMock;
 
     @MockitoBean
-    DvhRepository dvhRepositoryMock;
-
-    @MockitoBean
     OrgEnhetLederService orgEnhetLederService;
 
     @Autowired
     TestTokensGenerator testToken;
+    @MockitoBean
+    private TelefonService telefonService;
 
     @Test
     @DisplayName("Henter informasjon Omada trenger for orgEnhet")
@@ -136,8 +134,8 @@ class OmadaControllerTest extends RestTestBase {
     @Test
     @DisplayName("Hente telefonnummer for en ressurs")
     void should_return_phone_number_for_ressurs() {
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAVIDENT))
-            .thenReturn(List.of(getTelefonNummer()));
+        when(telefonService.getPrioritertTelefonnummer(NAVIDENT))
+            .thenReturn(getTelefonNummer().getNummer());
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)
@@ -149,9 +147,8 @@ class OmadaControllerTest extends RestTestBase {
     @Test
     @DisplayName("Første telefonnummer returneres for en ressurs")
     void should_return_first_phone_number_for_ressurs() {
-        var anotherPhoneNumber = DvhTelefon.builder().navIdent(NAVIDENT).nummer("11223344").build();
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAVIDENT))
-            .thenReturn(List.of(getTelefonNummer(), anotherPhoneNumber));
+        when(telefonService.getPrioritertTelefonnummer(NAVIDENT))
+            .thenReturn(getTelefonNummer().getNummer());
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)
@@ -165,8 +162,8 @@ class OmadaControllerTest extends RestTestBase {
     @Test
     @DisplayName("Returnerer 404 når ingen telefonnummer finnes for ressurs")
     void should_return_404_when_no_phone_number_is_found() {
-        when(dvhRepositoryMock.getTelefonNrListByNavIdent(NAVIDENT))
-            .thenReturn(Collections.emptyList());
+        when(telefonService.getPrioritertTelefonnummer(NAVIDENT))
+            .thenReturn(null);
 
         webTestClient.get()
             .uri("/api/v1/omada/telefonnummer/{navIdent}", NAVIDENT)

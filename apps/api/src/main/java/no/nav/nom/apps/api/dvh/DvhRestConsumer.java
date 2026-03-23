@@ -38,12 +38,10 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
-import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
 
 @Slf4j
 @Component
@@ -52,7 +50,6 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
 
-    private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomStateRessursListener nomStateRessursListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
@@ -241,13 +238,6 @@ public class DvhRestConsumer {
         }
     }
 
-    private Set<String> findAnnenStatNavIdenter(List<DvhRessurs> dvhRessurs) {
-        return dvhRessurs.stream()
-            .filter(r -> r.getRemedyAnsattType().equals(ANNEN_STATLIG.beskrivelse))
-            .map(DvhRessurs::getNavIdent)
-            .collect(Collectors.toSet());
-    }
-
     private void updateOrgtilknytningerStateFromDvh() {
         if (dvhStartupLoadMonitor.hasCompleted() && leaderElection.isLeader()) {
             log.info("Oppdater Orgtilnytninger state fra dvh");
@@ -273,7 +263,6 @@ public class DvhRestConsumer {
         try {
             List<DvhTelefon> tlfRader = dvhOrdsService.getTelefoner();
             log.info("Telefonnr lastet: Antall rader fra DVH = " + tlfRader.size());
-            dvhRepository.saveTlf(tlfRader);
             return tlfRader;
         } catch (Exception e) {
             log.error("Failure loading tlf data from DVH", e);
@@ -330,17 +319,14 @@ public class DvhRestConsumer {
         return new Jobbtelefon(telefon.nummer(), telefon.type());
     }
 
-    public boolean loadLedereFromDvh() {
+    public void loadLedereFromDvh() {
         log.info("Laster ledere fra dvh");
         try {
             var ledere = dvhOrdsService.getLedere();
-
             dvhService.saveLedere(ledere);
-            return true;
         } catch (Exception e) {
             log.error("Failure loading ledere data from DVH", e);
         }
-        return false;
     }
 
     public void loadOrganiseringerFromDvh() {

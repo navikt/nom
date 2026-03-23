@@ -6,7 +6,6 @@ import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.generated.model.Sektor;
-import no.nav.nom.generated.model.Telefon;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -110,23 +109,11 @@ public class NomApiClient {
             .retrieve()
             .onStatus(
                 status -> status.equals(HttpStatus.NOT_FOUND),
-                response -> Mono.error(new OrgtilknytningNotFoundException(String.format("Orgtilknytning with fid %s not found", fid)))
+                _ -> Mono.error(new OrgtilknytningNotFoundException(String.format("Orgtilknytning with fid %s not found", fid)))
             )
             .bodyToMono(OrgtilknytningState.class)
             .retryWhen(defaultRetry)
             .block();
-    }
-
-    public List<Telefon> getTelefonnummere(String navident) {
-        return nomApiAuthorizedWebClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/{navident}/telefonnummere")
-                .build(navident)
-            )
-            .retrieve()
-            .toEntityList(Telefon.class)
-            .retryWhen(defaultRetry)
-            .block().getBody();
     }
 
     public String getTelefonnummer(String navident) {

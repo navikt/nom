@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.rest.RestTestBase;
-import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -78,21 +77,20 @@ public class KontaktpersonerServiceTest extends RestTestBase {
                 .navident(ressursNavident1)
                 .visningsnavn(new Visningsnavn("R_Fornavn1", Optional.empty(), "Etternavn1"))
                 .build(),
-            List.of(new Ressurs.Telefon("1234", TelefonType.NAV_KONTOR_TELEFON)), "epost1@epost.com", true
+            "epost1@epost.com",
+            true
         );
         Ressurs ressurs2 = new Ressurs(
             ressursState().toBuilder()
                 .navident(ressursNavident2)
                 .visningsnavn(new Visningsnavn("R_Fornavn3", Optional.empty(), "Etternavn2"))
-                .build(),
-            List.of(new Ressurs.Telefon("4567", TelefonType.NAV_KONTOR_TELEFON)), "epost2@epost.com", true
+                .build(), "epost2@epost.com", true
         );
         Ressurs ressurs3 = new Ressurs(
             ressursState().toBuilder()
                 .navident(ressursNavident3)
                 .visningsnavn(new Visningsnavn("R_Fornavn2", Optional.empty(), "Etternavn3"))
-                .build(),
-            List.of(new Ressurs.Telefon("7890", TelefonType.PRIVAT_TELEFON)), "epost3@epost.com", false
+                .build(), "epost3@epost.com", false
         );
         var ressurser = List.of(ressurs1, ressurs2, ressurs3);
 
@@ -228,7 +226,7 @@ public class KontaktpersonerServiceTest extends RestTestBase {
         var ressursState = RessursState.builder()
             .navident(ANSATT_1_NAVIDENT)
             .build();
-        var ressurs = new Ressurs(ressursState, Collections.emptyList(), "", true);
+        var ressurs = new Ressurs(ressursState, "", true);
         var ressurser = Map.of(ANSATT_1_NAVIDENT, ressurs);
 
         List<Map<String, Object>> mappedLines = kontaktpersonerService.kontaktinfoToMapList(List.of(ressursKontaktinfo), ressurser);
@@ -282,7 +280,7 @@ public class KontaktpersonerServiceTest extends RestTestBase {
             .visningsnavn(new Visningsnavn(ANSATT_1_FORNAVN, Optional.empty(), ANSATT_1_ETTERNAVN))
             .build();
 
-        return new Ressurs(ressursState, Collections.emptyList(), "", true);
+        return new Ressurs(ressursState, "", true);
     }
 
     private Kontaktinfo kontaktinfo() {

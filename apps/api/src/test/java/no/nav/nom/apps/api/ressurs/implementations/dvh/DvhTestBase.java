@@ -5,7 +5,6 @@ import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
@@ -32,7 +31,6 @@ import no.nav.nom.libs.state.ressurs.NomStateRessursListener;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.NomStateMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
@@ -49,7 +47,6 @@ import tools.jackson.databind.json.JsonMapper;
 @SpringBootTest(
     classes = {
         DvhRestConsumer.class,
-        DvhRepository.class,
         RessursHendelseForEventsourceService.class,
         RessursCommandService.class,
         RessursEventProducer.class,
@@ -68,19 +65,11 @@ public abstract class DvhTestBase {
     protected DvhRestConsumer dvhRestConsumer;
 
     @Autowired
-    protected DvhRepository dvhRepository;
-
-    @Autowired
     protected JsonMapper jsonMapper;
 
     @BeforeEach
     protected void configureJackson() {
         jsonMapper.rebuild().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
-    }
-
-    @AfterEach
-    protected void clearRepository() {
-        dvhRepository.clearRepository();
     }
 
     // MOCKS
