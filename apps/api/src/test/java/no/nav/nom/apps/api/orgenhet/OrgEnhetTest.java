@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
@@ -754,6 +755,154 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService, times(1)).avvikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
 
         assertEquals(localDateOf(stillingMaxTil), avvikleOrgEnhetCaptor.getValue().gyldigTom());
+    }
+
+    @Test
+    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - Bytte navn")
+    void scenario40() {
+        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
+
+        var ksEnhet = OrgenhetTestUtils.createDefault().toBuilder()
+            .id("dummyKontaktsenterId")
+            .navn("Kontaktsenter")
+            .agressoId("25")
+            .agressoOrgNivaa("ORGNIV2")
+            .gyldigFom(LocalDate.of(2012, 1 , 1))
+            .build();
+
+        orgEnhetStateRepository.update(ksEnhet);
+
+
+        val ksEnhetMedNyttNavn = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("25")
+            .ORGENHET_NAVN("Nytt Kontaktsenter navn")
+            .ORGNODE_NIV("ORGNIV2")
+            .ORGENHET_FRA_PERIODE(201201)
+            .build();
+
+        dvhOrgenhetMockUtils.addToResponse(ksEnhetMedNyttNavn);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(0)).avvikleOrgEnhet(any(), any());
+    }
+
+    @Test
+    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - legges ned")
+    void scenario41() {
+        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
+
+        var ksEnhet = OrgenhetTestUtils.createDefault().toBuilder()
+            .id("dummyKontaktsenterId")
+            .navn("Kontaktsenter")
+            .agressoId("25")
+            .agressoOrgNivaa("ORGNIV2")
+            .uniqueAgressoId("25-Kontaktsenter-ORGNIV2")
+            .gyldigFom(LocalDate.of(2012, 1 , 1))
+            .build();
+
+        orgEnhetStateRepository.update(ksEnhet);
+
+
+        val ksEnhetMedNyttNavn = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("25")
+            .ORGENHET_NAVN("Kontaktsenter")
+            .ORGNODE_NIV("ORGNIV2")
+            .ORGENHET_FRA_PERIODE(201201)
+            .ORGENHET_STATUS("P")
+            .ORGENHET_TIL_PERIODE(202503)
+            .build();
+
+        dvhOrgenhetMockUtils.addToResponse(ksEnhetMedNyttNavn);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(0)).avvikleOrgEnhet(any(), any());
+    }
+
+    @Test
+    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - ingen endring")
+    void scenario42() {
+        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
+
+        var ksEnhet = OrgenhetTestUtils.createDefault().toBuilder()
+            .id("dummyKontaktsenterId")
+            .navn("Kontaktsenter")
+            .agressoId("25")
+            .agressoOrgNivaa("ORGNIV2")
+            .uniqueAgressoId("25-Kontaktsenter-ORGNIV2")
+            .gyldigFom(LocalDate.of(2012, 1 , 1))
+            .build();
+
+        orgEnhetStateRepository.update(ksEnhet);
+
+
+        val ksEnhetMedNyttNavn = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("25")
+            .ORGENHET_NAVN("Kontaktsenter")
+            .ORGNODE_NIV("ORGNIV2")
+            .ORGENHET_FRA_PERIODE(201201)
+            .build();
+
+        dvhOrgenhetMockUtils.addToResponse(ksEnhetMedNyttNavn);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(0)).avvikleOrgEnhet(any(), any());
+    }
+
+    @Test
+    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - godta andre endringer")
+    void scenario43() {
+        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
+
+        var ksEnhet = OrgenhetTestUtils.createDefault().toBuilder()
+            .id("dummyKontaktsenterId")
+            .navn("Kontaktsenter")
+            .agressoId("25")
+            .agressoOrgNivaa("ORGNIV2")
+            .uniqueAgressoId("25-Kontaktsenter-ORGNIV2")
+            .gyldigFom(LocalDate.of(2012, 1 , 1))
+            .build();
+
+        var annenEnhet = OrgenhetTestUtils.createDefault().toBuilder()
+            .id("Annen id")
+            .navn("navn")
+            .agressoId("14")
+            .agressoOrgNivaa("ORGNIV2")
+            .uniqueAgressoId("14-navn-ORGNIV2")
+            .gyldigFom(LocalDate.of(2012, 1 , 1))
+            .build();
+
+        orgEnhetStateRepository.update(ksEnhet);
+        orgEnhetStateRepository.update(annenEnhet);
+
+        val ksEnhetDvh = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("25")
+            .ORGENHET_NAVN("Kontaktsenter")
+            .ORGNODE_NIV("ORGNIV2")
+            .ORGENHET_FRA_PERIODE(201201)
+            .build();
+
+        val annenEnhetMedNyttNavn = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("14")
+            .ORGENHET_NAVN("Nytt navn")
+            .ORGNODE_NIV("ORGNIV2")
+            .ORGENHET_FRA_PERIODE(201201)
+            .build();
+
+        val nyEnhet = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("17")
+            .ORGENHET_NAVN("Ny enhet")
+            .ORGNODE_NIV("ORGNIV3")
+            .ORGENHET_FRA_PERIODE(201201)
+            .build();
+
+        dvhOrgenhetMockUtils.addToResponse(ksEnhetDvh, annenEnhetMedNyttNavn,  nyEnhet);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(0)).avvikleOrgEnhet(any(), any());
     }
 
     public static LocalDate localDateOf(OffsetDateTime date) {

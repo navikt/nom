@@ -260,7 +260,7 @@ public class DvhOrgenhetsLast {
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
 
-        // Vil ikke opprette ny orgenhet hvis samme navn og agressoId som eksisterende Kontaktsenter enhet
+        // Vil ikke opprette ny orgenhet hvis samme agressoId og orgnivå som eksisterende Kontaktsenter enhet
         if (kontrollerFlyttingAvKontaktsenter.blokkerOpprettAvEnhet(dvhOrgenhetV2.getNavn(), dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv())) {
             return null;
         }

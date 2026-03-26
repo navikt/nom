@@ -22,7 +22,7 @@ public class KontrollerFlyttingAvKontaktsenter {
     @Value("${app.kontrollerFlyttingAvKontaktsenter.eksisterendeOverId}") private String eksisterendeOverId;
     @Value("${app.kontrollerFlyttingAvKontaktsenter.nyOverId}") private String nyOverId;
 
-    private static final String UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER = "nom-api.dvh_last.block-unwanted-change-to-kontaktsenter";
+    public static final String UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER = "nom-api.dvh_last.block-unwanted-change-to-kontaktsenter";
 
     public KontrollerFlyttingAvKontaktsenter(Unleash unleash, OrgEnhetStateRepository orgenhetStateRepository) {
         this.unleash = unleash;
@@ -40,7 +40,13 @@ public class KontrollerFlyttingAvKontaktsenter {
         if (sammeNavnOgAgressoId) {
             log.error("ALERT - KontrollerFlyttingAvKontaktsenter: Forsøk på å opprette enhet med navn og AgressoId som kontaktsenteret. {}-{}-{}", agressoId, navn, orgNiv);
         }
-        return sammeNavnOgAgressoId;
+
+        var sammeAgressoIdOgOrgniv = Objects.equals(ksEnhet.agressoOrgNivaa(), orgNiv) && Objects.equals(ksEnhet.agressoId(), agressoId);
+        if (sammeAgressoIdOgOrgniv) {
+            log.error("ALERT - KontrollerFlyttingAvKontaktsenter: Forsøk på å opprette enhet med orgniv og AgressoId som kontaktsenteret. {}-{}-{}", agressoId, navn, orgNiv);
+        }
+
+        return sammeNavnOgAgressoId || sammeAgressoIdOgOrgniv;
     }
 
     public boolean blokkerEndringAvEnhet(String fid) {
@@ -79,7 +85,7 @@ public class KontrollerFlyttingAvKontaktsenter {
         var eksisterendeOverenhet = getEksisterendeOverEnhet();
 
         if (Objects.equals(ksEnhet.fid(), orgEnhet.getFid()) && !(Objects.equals(nyOverenhet.fid(), orgEnhetOver.getFid()) || Objects.equals(eksisterendeOverenhet.fid(), orgEnhetOver.getFid()))) {
-            log.error("ALERT - KontrollerFlyttingAvKontaktsenter: Forsøk på å endre organisering av kontaktsenter enhet til annen enhet enn forventet:\n", organiseringToString(dvhOrganisering, orgEnhet, orgEnhetOver));
+            log.error("ALERT - KontrollerFlyttingAvKontaktsenter: Forsøk på å endre organisering av kontaktsenter enhet til annen enhet enn forventet:\n{}", organiseringToString(dvhOrganisering, orgEnhet, orgEnhetOver));
             return true;
         }
         return false;

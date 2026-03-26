@@ -88,9 +88,6 @@ public class OrgEnhetTestBase {
     @MockitoBean
     NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
 
-    @MockitoBean
-    KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
-
     @BeforeEach
     void setup() {
         kafkaUtils.clearKafka();

@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
+import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetEventKafkaConfig;
@@ -71,6 +72,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
     , WebClientAutoConfiguration.class
+    , KontrollerFlyttingAvKontaktsenter.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 @EnableKafka

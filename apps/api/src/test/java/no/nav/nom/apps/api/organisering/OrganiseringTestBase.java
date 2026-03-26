@@ -42,7 +42,8 @@ import org.wiremock.spring.EnableWireMock;
         OrganiseringTestConfig.class,
         OrganiseringEventKafkaConfig.class,
         RessursStateAutoconfiguration.class,
-        OrganiseringStateAutoconfiguration.class
+        OrganiseringStateAutoconfiguration.class,
+        KontrollerFlyttingAvKontaktsenter.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.organisering-eventsource", "org.nom.intern-ressurs-state"},  controlledShutdown = true)
@@ -86,8 +87,5 @@ public class OrganiseringTestBase {
 
     @MockitoBean
     NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
-
-    @MockitoBean
-    KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
 }
 
