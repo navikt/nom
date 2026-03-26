@@ -339,6 +339,9 @@ spec:
         - application: nav-persondata-api
           namespace: holmes
           cluster: dev-gcp
+        - application: watson-admin-api
+          namespace: holmes
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident

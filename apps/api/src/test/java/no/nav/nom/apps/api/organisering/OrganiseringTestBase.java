@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.organisering;
 
+import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
@@ -85,5 +86,8 @@ public class OrganiseringTestBase {
 
     @MockitoBean
     NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+
+    @MockitoBean
+    KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
 }
 
