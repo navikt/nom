@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.DvhOrgEnhetMockUtils;
 import no.nav.nom.apps.api.KafkaUtils;
+import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
 import no.nav.nom.apps.api.telefon.TelefonService;
@@ -86,6 +87,9 @@ public class OrgEnhetTestBase {
     NomStateDelegertLederListener nomStateDelegertLederListener;
     @MockitoBean
     NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
+
+    @MockitoBean
+    KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
 
     @BeforeEach
     void setup() {

@@ -69,6 +69,10 @@ app:
     helfo: dummyHelfoId
     skatt: dummySkattId
     riksrev: dummyRiksrevId
+  kontrollerFlyttingAvKontaktsenter:
+    kontaktsenterId: dummyKontaktsenterId
+    eksisterendeOverId: dummyEksisterendeOverId
+    nyOverId: dummyNyOverId
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 

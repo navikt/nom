@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.organisering;
 
+import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
@@ -36,16 +37,18 @@ public class OrganiseringService {
     private final JsonMapper jsonMapper;
 
     private final OrganiseringEventCommandService organiseringEventCommandService;
+    private final KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
 
     public OrganiseringService(
         OrganiseringStateRepository organiseringStateRepository, OrgenhetService orgenhetService,
         OrganiseringEventCommandService organiseringEventCommandService,
-        JsonMapper jsonMapper
+        JsonMapper jsonMapper, KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.organiseringEventCommandService = organiseringEventCommandService;
         this.jsonMapper = jsonMapper;
+        this.kontrollerFlyttingAvKontaktsenter = kontrollerFlyttingAvKontaktsenter;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
@@ -77,6 +80,10 @@ public class OrganiseringService {
             if (orgEnhet.isPresent() && orgEnhetOver.isPresent()) {
                 Optional<OrganiseringState> organiseringState = getOrganiseringState(dvhOrganisering);
 
+                if (kontrollerFlyttingAvKontaktsenter.blokkerEndringAvOrganisering(dvhOrganisering, orgEnhet.get(), orgEnhetOver.get())) {
+                    continue;
+                }
+
                 if (organiseringState.isPresent()) {
                     if (hasOrganiseringChangedOrExpired(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.avsluttOrganisering(
@@ -107,14 +114,18 @@ public class OrganiseringService {
             organiseringIdsFromDvh,
             organiseringStateRepository.getActiveOrganisering()
         );
-        // Remove organiseringer we have already generated avslutt events for
+
         organiseringerToTerminate.stream()
             .filter(organiseringState -> !organiseringerTerminatedByUpdate.contains(organiseringState.fid()))
-            .peek(organiseringState -> numberOfTerminatedNotFromDvh.getAndIncrement())
-            .forEach(organiseringState -> organiseringEventCommandService.avsluttOrganisering(
-                organiseringState.fid(),
-                getAvsluttOrganiseringCmd(organiseringState.gyldigFom(), organiseringState)
-            ));
+            .forEach(organiseringState -> {
+                if (!kontrollerFlyttingAvKontaktsenter.blokkerAvslutningAvOrganisering(organiseringState.id())) {
+                    organiseringEventCommandService.avsluttOrganisering(
+                        organiseringState.fid(),
+                        getAvsluttOrganiseringCmd(organiseringState.gyldigFom(), organiseringState)
+                    );
+                    numberOfTerminatedNotFromDvh.getAndIncrement();
+                }
+            });
 
         logger.info("Antall organiseringer ikke lenger mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
     }
@@ -204,10 +215,6 @@ public class OrganiseringService {
 
     public JsonNode getRawData(OrganiseringState organiseringState) {
         return this.jsonMapper.valueToTree(organiseringState);
-    }
-
-    private InputMetadata createInputMetadata() {
-        return createInputMetadata(null);
     }
 
     private InputMetadata createInputMetadata(Object rawData) {

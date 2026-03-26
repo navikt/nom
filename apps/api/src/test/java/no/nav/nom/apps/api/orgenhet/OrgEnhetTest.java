@@ -52,6 +52,7 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
 
     @BeforeEach
     void resetOrgEnhetState() {
+        when(orgEnhetCommandService.opprettOrgEnhet(any())).thenReturn("DUMMY_FID");
         orgEnhetStateRepository.clear();
     }
 

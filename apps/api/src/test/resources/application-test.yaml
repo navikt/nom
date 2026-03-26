@@ -74,6 +74,10 @@ app:
     riksrev: dummyRiksrevisjonenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
     nav: dummyNavId
+  kontrollerFlyttingAvKontaktsenter:
+    kontaktsenterId: dummyKontaktsenterId
+    eksisterendeOverId: dummyEksisterendeOverId
+    nyOverId: dummyNyOverId
   dolly-ressurs:
     fysisk-brukersted-nr: dummyDollyFysiskBrukerstedNr
     orgenhet-id: dummyDollyOrgenhetId

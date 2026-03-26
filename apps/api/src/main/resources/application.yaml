@@ -341,6 +341,10 @@ app:
   dolly-ressurs:
     fysisk-brukersted-nr: 1424
     orgenhet-id: ra970u #Årdal
+  kontrollerFlyttingAvKontaktsenter:
+    kontaktsenterId: py135h
+    eksisterendeOverId: me177r
+    nyOverId: hu797w
   manuelle-ressurser-og-ledere:
     enabled: true
     ressurser:
@@ -555,6 +559,10 @@ app:
     riksrev: ke602d
     linjeenhetene: ry630r,te464t,se232x,ne994m
     vikafossenId: ru664y
+  kontrollerFlyttingAvKontaktsenter:
+    kontaktsenterId: ba923j
+    eksisterendeOverId: ry630r
+    nyOverId: se232x
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
