@@ -108,6 +108,7 @@ public class DvhRestConsumer {
             if (!dvhStartupLoadMonitor.hasCompleted()) {
                 dvhStartupLoadMonitor.setCompleted();
             }
+            loadOrganiseringerFromDvh(false);
             manuelleRessurserOgLedereTilState.oppdater();
             authorizedNavident.oppdaterLedereForOrgenheter();
             
