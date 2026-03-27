@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.organisering;
 
-import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventKafkaConfig;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
@@ -43,7 +42,6 @@ import org.wiremock.spring.EnableWireMock;
         OrganiseringEventKafkaConfig.class,
         RessursStateAutoconfiguration.class,
         OrganiseringStateAutoconfiguration.class,
-        KontrollerFlyttingAvKontaktsenter.class
     },
     initializers = MockOAuth2ServerInitializer.class)
 @EmbeddedKafka(partitions = 1,  topics = {"org.nom.organisering-eventsource", "org.nom.intern-ressurs-state"},  controlledShutdown = true)

@@ -5,7 +5,6 @@ import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -97,7 +96,6 @@ public class OrganiseringTest extends OrganiseringTestBase {
         var start = System.currentTimeMillis();
         // Always enable features for tests
         when(unleash.isEnabled(any())).thenReturn(true);
-        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(false);
 
         organiseringStateRepository.clear();
 
@@ -545,120 +543,6 @@ public class OrganiseringTest extends OrganiseringTestBase {
         assertThat(organisering3Message.id()).isEqualTo(orgEnhet3.id());
         assertThat(organisering3modifiedMessage.id()).isEqualTo(orgEnhet3_modified.id());
         assertThat(organisering3terminateMessage.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
-    }
-
-    @Test
-    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - ingen endring på organisering ")
-    void kontaktsenter_ingen_endring_paa_organisering() {
-        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
-
-        // mock orgEnhetService hvor vi finner NOM id
-        var gmlOverEnhet = mockOrgenhetServiceGetEnhet("dummyEksisterendeOverId", "gml_overenhet_id", "Nivå_1", "Gml overenhet");
-        var nyOverEnhet = mockOrgenhetServiceGetEnhet("dummyNyOverId", "ny_over_id", "Nivå_1", "Ny overenhet");
-        var ksEnhet = mockOrgenhetServiceGetEnhet("dummyKontaktsenterId", "ks_id", "Niva_3", "Kontaktsenter");
-
-        when(orgenhetService.getAllEnheter()).thenReturn(List.of(
-            new OrgEnhet(gmlOverEnhet), new OrgEnhet(nyOverEnhet), new OrgEnhet(ksEnhet)
-        ));
-
-        var organisering = DvhOrganisering.builder()
-            .agressoIdUnder(ksEnhet.agressoId())
-            .navnUnder(ksEnhet.navn())
-            .orgNivUnder(ksEnhet.agressoOrgNivaa())
-            .agressoIdOver(gmlOverEnhet.agressoId())
-            .navnOver(gmlOverEnhet.navn())
-            .orgNivOver(gmlOverEnhet.agressoOrgNivaa())
-            .build();
-
-        // stub organisering fra DVH
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering));
-
-        OrganiseringState organiseringState = getOrganiseringState("organisering", ksEnhet.id(), organisering.getNavnUnder(),
-            gmlOverEnhet.id(), organisering.getNavnOver(), LocalDate.now().minusDays(1), null);
-        organiseringStateRepository.update(organiseringState);
-
-        dvhRestConsumer.loadOrganiseringerFromDvh(true);
-
-        // vente til meldinger
-        await()
-            .atMost(1, SECONDS)
-            .pollInterval(10, MILLISECONDS)
-            .until(() -> recordsQueue.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - blokker endring på organisering til ukjent overenhet")
-    void kontaktsenter_endring_paa_organisering_ukjent_overenhet() {
-        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
-
-        // mock orgEnhetService hvor vi finner NOM id
-        var gmlOverEnhet = mockOrgenhetServiceGetEnhet("dummyEksisterendeOverId", "gml_overenhet_id", "Nivå_1", "Gml overenhet");
-        var nyOverEnhet = mockOrgenhetServiceGetEnhet("dummyNyOverId", "ny_over_id", "Nivå_1", "Ny overenhet");
-        var ksEnhet = mockOrgenhetServiceGetEnhet("dummyKontaktsenterId", "ks_id", "Niva_3", "Kontaktsenter");
-
-        when(orgenhetService.getAllEnheter()).thenReturn(List.of(
-            new OrgEnhet(gmlOverEnhet), new OrgEnhet(nyOverEnhet), new OrgEnhet(ksEnhet)
-        ));
-
-        var organisering = DvhOrganisering.builder()
-            .agressoIdUnder(ksEnhet.agressoId())
-            .navnUnder(ksEnhet.navn())
-            .orgNivUnder(ksEnhet.agressoOrgNivaa())
-            .agressoIdOver("Ukjent agressoId")
-            .navnOver("Ukjent overenhet")
-            .orgNivOver(gmlOverEnhet.agressoOrgNivaa())
-            .build();
-
-        // stub organisering fra DVH
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering));
-
-        OrganiseringState organiseringState = getOrganiseringState("organisering", ksEnhet.id(), organisering.getNavnUnder(),
-            gmlOverEnhet.id(), gmlOverEnhet.navn(), LocalDate.now().minusDays(1), null);
-        organiseringStateRepository.update(organiseringState);
-
-        dvhRestConsumer.loadOrganiseringerFromDvh(true);
-
-        // vente til meldinger
-        await()
-            .atMost(1, SECONDS)
-            .pollInterval(10, MILLISECONDS)
-            .until(() -> recordsQueue.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Teste blokkering av uønsket Kontaktsenter endring - ikke blokker endring på organisering til ny overenhet")
-    void kontaktsenter_endring_paa_organisering_ny_overenhet() {
-        when(unleash.isEnabled(KontrollerFlyttingAvKontaktsenter.UNLEASH_BLOCK_UNWANTED_CHANGE_TO_KONTAKTSENTER)).thenReturn(true);
-
-        // mock orgEnhetService hvor vi finner NOM id
-        var gmlOverEnhet = mockOrgenhetServiceGetEnhet("dummyEksisterendeOverId", "gml_overenhet_id", "Nivå_1", "Gml overenhet");
-
-        var nyOverEnhet = mockOrgenhetServiceGetEnhet("dummyNyOverId", "ny_over_id", "Nivå_1", "Ny overenhet");
-
-        var ksEnhet = mockOrgenhetServiceGetEnhet("dummyKontaktsenterId", "ks_id", "Niva_3", "Kontaktsenter");
-
-        var organisering = DvhOrganisering.builder()
-            .agressoIdUnder(ksEnhet.agressoId())
-            .navnUnder(ksEnhet.navn())
-            .orgNivUnder(ksEnhet.agressoOrgNivaa())
-            .agressoIdOver(nyOverEnhet.agressoId())
-            .navnOver(nyOverEnhet.navn())
-            .orgNivOver(nyOverEnhet.agressoOrgNivaa())
-            .build();
-        // stub organisering fra DVH
-        when(dvhOrdsService.getOrganiseringer()).thenReturn(List.of(organisering));
-
-        OrganiseringState organiseringState = getOrganiseringState("organisering", ksEnhet.id(), organisering.getNavnUnder(),
-            gmlOverEnhet.id(), gmlOverEnhet.navn(), LocalDate.now().minusDays(1), null);
-        organiseringStateRepository.update(organiseringState);
-
-        dvhRestConsumer.loadOrganiseringerFromDvh(true);
-
-        // vente til meldinger
-        await()
-            .atMost(1, SECONDS)
-            .pollInterval(10, MILLISECONDS)
-            .until(() -> recordsQueue.size() == 2);
     }
 
     //TODO test case for bare Abslutte en organisering
