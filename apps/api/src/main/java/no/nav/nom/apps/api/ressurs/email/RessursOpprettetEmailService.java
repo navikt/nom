@@ -26,6 +26,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -146,15 +147,16 @@ public class RessursOpprettetEmailService {
                                                         String resursEndringsdato
                                                         ) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
-        var model = Map.of(
-            "resursName", resursName,
-            "navIdent", navIdent,
-            "resursTlfnr", resursTlfnr == null ? "" : resursTlfnr,
-            "resursStartdato", resursStartdato == null ? "" : resursStartdato,
-            "resursSlutdato", resursSlutdato == null ? "" : resursSlutdato,
-            "erRessursEndring", erRessursEndring,
-            "resursEndringsdato", resursEndringsdato == null ? "" : resursEndringsdato
-        );
+
+        var model = new HashMap<String, Object>();
+        model.put("resursName", resursName);
+        model.put("navIdent", navIdent);
+        model.put("resursTlfnr", resursTlfnr != null ? resursTlfnr : "");
+        model.put("resursStartdato", resursStartdato != null ? resursStartdato : "");
+        model.put("resursSlutdato", resursSlutdato != null ? resursSlutdato : "");
+        model.put("erRessursEndring", erRessursEndring);
+        model.put("resursEndringsdato", resursEndringsdato != null ? resursEndringsdato : "");
+
         freemarkerConfig.getTemplate(RESSURS_START_SLUTT_VARSEL_SERVICETORGET).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
     }

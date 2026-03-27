@@ -77,15 +77,15 @@ public class RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService {
                                                         String resursEndringsdato
     ) throws IOException, TemplateException {
         var stringWriter = new StringWriter();
-        var model = Map.of(
-            "resursName", resursName,
-            "navIdent", navIdent,
-            "resursTlfnr", resursTlfnr,
-            "resursStartdato", resursStartdato,
-            "resursSlutdato", resursSlutdato,
-            "erRessursEndring", erRessursEndring,
-            "resursEndringsdato", resursEndringsdato
-        );
+        var model = new HashMap<String, Object>();
+        model.put("resursName", resursName);
+        model.put("navIdent", navIdent);
+        model.put("resursTlfnr", resursTlfnr != null ? resursTlfnr : "");
+        model.put("resursStartdato", resursStartdato != null ? resursStartdato : "");
+        model.put("resursSlutdato", resursSlutdato != null ? resursSlutdato : "");
+        model.put("erRessursEndring", erRessursEndring);
+        model.put("resursEndringsdato", resursEndringsdato != null ? resursEndringsdato : "");
+
         freemarkerConfig.getTemplate(RESSURS_START_SLUTT_VARSEL_SERVICETORGET).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
     }
