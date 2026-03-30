@@ -33,6 +33,10 @@ management:
       show-details: always
       probes:
         enabled: true
+      group:
+        readiness:
+          include:
+            - "KafkaReadiness"
   endpoints:
     web:
       exposure:
