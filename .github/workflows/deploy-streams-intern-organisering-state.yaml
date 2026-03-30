@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'dev/**'
     paths:
       - 'apps/streams/internal/organisering-state/**'
       - 'libs/contract-nom-dto/**'
