@@ -50,7 +50,7 @@ export function ConfirmStep() {
   });
 
   const selectOrgEnhet = orgEnhetQuery.data;
-  const lederNavn = formatVisningsnavn(selectOrgEnhet?.ledere[0]?.visningsnavn);
+  const lederNavn = formatVisningsnavn(selectOrgEnhet?.leder?.visningsnavn);
 
   const selectedFysiskBrukersted = useFysiskBrukersted(
     fysiskBrukerstedNr ?? "",
