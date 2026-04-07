@@ -39,7 +39,7 @@ public class ReadinessTest {
             } else {
                 Assertions.assertThat(readinessResult.getResponseBody()).contains(KafkaReadiness.class.getSimpleName());
             }
-            Thread.sleep(50 * i);
+            Thread.sleep(100 * i);
         }
         throw new IllegalStateException("Streams application was not ready by expected time threshold.");
     }

@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import no.nav.nom.contract.nom.eventsource.Event;
 import org.hibernate.annotations.Type;
+import tools.jackson.databind.JsonNode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,5 +39,5 @@ public class DelayedEvent {
 
     @Column(name = "event")
     @Type(JsonBinaryType.class)
-    private Event event;
+    private JsonNode event;
 }
