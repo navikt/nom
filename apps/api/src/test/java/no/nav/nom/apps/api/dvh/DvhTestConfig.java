@@ -52,7 +52,6 @@ import tools.jackson.databind.json.JsonMapper;
     , JsonMapper.class
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
-    , KontrollerFlyttingAvKontaktsenter.class
 })
 @EnableConfigurationProperties(value = AppProperties.class)
 public class DvhTestConfig {

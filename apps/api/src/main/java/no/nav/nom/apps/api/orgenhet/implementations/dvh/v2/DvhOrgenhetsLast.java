@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
-import no.nav.nom.apps.api.dvh.KontrollerFlyttingAvKontaktsenter;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -43,7 +42,6 @@ public class DvhOrgenhetsLast {
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;
     private final DvhOrdsService dvhOrdsService;
-    private final KontrollerFlyttingAvKontaktsenter kontrollerFlyttingAvKontaktsenter;
 
     /*
     1. Enheter blir avsluttet hos oss ved at maxstillingsdato settes. sluttdato settes ikke.
@@ -260,11 +258,6 @@ public class DvhOrgenhetsLast {
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
 
-        // Vil ikke opprette ny orgenhet hvis samme navn og agressoId som eksisterende Kontaktsenter enhet
-        if (kontrollerFlyttingAvKontaktsenter.blokkerOpprettAvEnhet(dvhOrgenhetV2.getNavn(), dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv())) {
-            return null;
-        }
-
         return orgEnhetCommandService.opprettOrgEnhet(opprettOrgEnhet);
     }
 
@@ -273,9 +266,6 @@ public class DvhOrgenhetsLast {
     }
 
     private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2, LocalDate gyldigTom) {
-        // Vil ikke avslutte eksisterende Kontaktsenter-enhet
-        if (kontrollerFlyttingAvKontaktsenter.blokkerAvslutningAvEnhet(fid)) return;
-
         final var avvikleOrgEnhet = new AvvikleOrgEnhet(
             gyldigTom,
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
@@ -294,10 +284,6 @@ public class DvhOrgenhetsLast {
         val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType(), dvhOrgenhetV2.getAgressoOrgenhetType());
 
         if (navnEndret || datoFOMEndret || datoTOMEndret ||agressoOrgEnhetTypeEndret) {
-
-            // Vil ikke endre på eksisterende Kontaktsenter-enhet
-            if (kontrollerFlyttingAvKontaktsenter.blokkerEndringAvEnhet(orgEnhetState.fid())) return;
-
             val korrigering = new KorrigerOrgEnhet(
                     orgEnhetState.id(),
                     dvhOrgenhetV2.getNavn(),

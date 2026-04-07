@@ -16,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1.Organise
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
@@ -81,6 +82,9 @@ public class OrganiseringTest extends OrganiseringTestBase {
 
     @Autowired
     private OrganiseringStateRepository organiseringStateRepository;
+
+    @MockitoBean
+    OrgEnhetStateRepository  orgEnhetStateRepository;
 
     BlockingQueue<ConsumerRecord<String, OrganiseringEvent>> recordsQueue;
 
@@ -626,10 +630,19 @@ public class OrganiseringTest extends OrganiseringTestBase {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues().toBuilder()
             .id(id)
             .navn(navn)
+            .agressoId(kode)
+            .agressoOrgNivaa(niva)
+            .uniqueAgressoId(id + "-" + navn + "-" + niva)
             .build();
 
         when(orgenhetService.getEnhetByAgressoIdNivaAndName(kode, niva, navn))
             .thenReturn(Optional.of(new OrgEnhet(orgEnhetState)));
+
+        when(orgenhetService.getById(id))
+            .thenReturn(Optional.of(new OrgEnhet(orgEnhetState)));
+
+        when(orgEnhetStateRepository.findById(id))
+            .thenReturn(Optional.of(orgEnhetState));
 
         return orgEnhetState;
     }

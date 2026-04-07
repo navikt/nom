@@ -16,6 +16,8 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
 
   - package-ecosystem: github-actions
@@ -23,6 +25,8 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
 
   - package-ecosystem: npm
@@ -62,4 +66,6 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
