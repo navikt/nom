@@ -1,5 +1,8 @@
+import { css } from "@emotion/react";
+import { HelpText, HStack, Select } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import type { FieldError } from "react-hook-form";
+import { useController } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 
 import type { FysiskBrukersted } from "~/api/react-query-endpoints";
@@ -20,6 +23,7 @@ export function FysiskBrukerstedSelectFormPart({
   helpText?: string;
 }) {
   const { control } = useFormContext();
+
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
@@ -77,6 +81,111 @@ export function FysiskBrukerstedSelect({
         value={currentOption ?? null}
       />
     </SelectLayoutWrapper>
+  );
+}
+
+export function FysiskBrukerstedSelectFormPartNew({
+  name,
+  label,
+  description,
+  helpText,
+  size,
+  fysiskeBrukersteder,
+}: {
+  name: string;
+  label?: string;
+  description?: string;
+  helpText?: string;
+  size?: "small" | "medium";
+  fysiskeBrukersteder?: FysiskBrukersted[];
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  return (
+    <FysiskBrukerstedSelectNew
+      description={description}
+      error={fieldState.error?.message}
+      fysiskeBrukersteder={fysiskeBrukersteder}
+      helpText={helpText}
+      label={label}
+      onChange={field.onChange}
+      size={size}
+      value={field.value}
+    />
+  );
+}
+
+export function FysiskBrukerstedSelectNew({
+  label = "Fysisk brukersted",
+  description,
+  helpText,
+  size = "medium",
+  fysiskeBrukersteder,
+  onChange,
+  error,
+  value,
+}: {
+  label?: string;
+  description?: string;
+  helpText?: string;
+  fysiskeBrukersteder?: FysiskBrukersted[];
+  onChange: (s: string) => void;
+  error?: string;
+  value?: string;
+  size?: "small" | "medium";
+}) {
+  return (
+    <Select
+      description={description}
+      error={error}
+      label={
+        <SelectLabelWithHelpText
+          helpText={helpText}
+          label={label}
+          size={size}
+        />
+      }
+      onChange={(option) => onChange(option.target.value)}
+      size={size}
+      value={value}
+    >
+      <option value="" />
+      {fysiskeBrukersteder?.map((fysiskBrukersted) => (
+        <option
+          key={fysiskBrukersted.brukerstedNr}
+          value={fysiskBrukersted.brukerstedNr}
+        >{`${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`}</option>
+      ))}
+    </Select>
+  );
+}
+
+function SelectLabelWithHelpText({
+  label,
+  helpText,
+  size,
+}: {
+  label: string;
+  helpText?: string;
+  size: string;
+}) {
+  return (
+    <HStack gap={size === "small" ? "1" : "2"}>
+      <div>{label}</div>
+      {helpText && (
+        <HelpText
+          css={css`
+            .navds-help-text__icon {
+              height: ${size === "small" ? "16px" : undefined};
+            }
+          `}
+        >
+          {helpText}
+        </HelpText>
+      )}
+    </HStack>
   );
 }
 
