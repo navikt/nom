@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { HelpText, HStack, Select } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import type { FieldError } from "react-hook-form";
+import type { FieldError, RefCallBack } from "react-hook-form";
 import { useController } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -111,6 +111,7 @@ export function FysiskBrukerstedSelectFormPartNew({
       helpText={helpText}
       label={label}
       onChange={field.onChange}
+      ref={field.ref}
       size={size}
       value={field.value}
     />
@@ -126,6 +127,7 @@ export function FysiskBrukerstedSelectNew({
   onChange,
   error,
   value,
+  ref,
 }: {
   label?: string;
   description?: string;
@@ -135,6 +137,7 @@ export function FysiskBrukerstedSelectNew({
   error?: string;
   value?: string;
   size?: "small" | "medium";
+  ref?: RefCallBack;
 }) {
   return (
     <Select
@@ -148,6 +151,7 @@ export function FysiskBrukerstedSelectNew({
         />
       }
       onChange={(option) => onChange(option.target.value)}
+      ref={ref}
       size={size}
       value={value}
     >

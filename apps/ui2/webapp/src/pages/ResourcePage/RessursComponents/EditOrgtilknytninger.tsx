@@ -63,7 +63,10 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
-import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
+import {
+  FysiskBrukerstedSelectFormPart,
+  FysiskBrukerstedSelectFormPartNew,
+} from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
@@ -400,17 +403,19 @@ function OrgtilknytningForm({
     ) {
       await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
         () => {
-          oppdaterOrgtilknytningerMutation.mutate(
-            lagOppdaterOrgtilknytningerRequest(
-              values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-              skalSetteRessursStartdato(
-                ressurs,
-                values.mappedeOrgtilknytninger ?? [],
-                tidligsteOrgDatoPre,
-              ),
-              ressurs.sektor,
-            ),
-          );
+          // oppdaterOrgtilknytningerMutation.mutate(
+          //   lagOppdaterOrgtilknytningerRequest(
+          //     values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+          //     skalSetteRessursStartdato(
+          //       ressurs,
+          //       values.mappedeOrgtilknytninger ?? [],
+          //       tidligsteOrgDatoPre,
+          //     ),
+          //     ressurs.sektor,
+          //   ),
+          // );
+
+          console.log("Would save");
         },
       );
     }
@@ -625,13 +630,16 @@ function OrgtilknytningForm({
                 `}
                 gap="4"
               >
-                <FysiskBrukerstedSelectFormPart name={`${index}.test`} />
-
-                <Combobox
-                  isMultiSelect
-                  label="Ytterligere fysiske brukersteder"
-                  options={fysiskeBrukerstederOptions}
+                <FysiskBrukerstedSelectFormPartNew
+                  fysiskeBrukersteder={fysiskeBrukersteder}
+                  label="Primært fysisk brukersted"
+                  name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukersted`}
                   size="small"
+                />
+
+                <FysiskBrukerstedSelectMultipleWrapper
+                  fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
+                  name={`mappedeOrgtilknytninger.${index}.ytterligereFysiskeBrukersteder`}
                 />
               </VStack>
             </div>
@@ -1136,6 +1144,38 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
+function FysiskBrukerstedSelectMultipleWrapper({
+  name,
+  fysiskeBrukerstederOptions,
+}: {
+  name: string;
+  fysiskeBrukerstederOptions: any;
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const handleToggleSelected = (option: any, isSelected: any) => {
+    if (isSelected) {
+      field.onChange([...(field.value || []), option]);
+    } else {
+      field.onChange((field.value || []).filter((v: any) => v !== option));
+    }
+  };
+
+  return (
+    <Combobox
+      error={fieldState.error?.message}
+      isMultiSelect
+      label="Ytterligere fysiske brukersteder"
+      onToggleSelected={handleToggleSelected}
+      options={fysiskeBrukerstederOptions}
+      ref={field.ref}
+      size="small"
+    />
+  );
+}
+
 function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
@@ -1423,6 +1463,31 @@ const orgtilknytningSchema = yup.object().shape({
         const required = nomDateIsTodayOrAfter(otTom) && !!otSektor;
 
         return required ? !!value : true;
+      },
+    }),
+  primaryFysiskBrukersted: yup.string().test({
+    name: "primary-fysisk-brukersted-obligatorisk-fremtid-aktiv",
+    message: "Obligatorisk",
+    test: function (value, context) {
+      const otTom = context?.parent?.gyldigTom ?? undefined;
+
+      const required = nomDateIsTodayOrAfter(otTom);
+
+      return required ? !!value : true;
+    },
+  }),
+  ytterligereFysiskeBrukersteder: yup
+    .array()
+    .of(yup.string())
+    .test({
+      name: "primary-fysisk-brukersted-ikke-i-ytterligere-liste",
+      message:
+        "Fysisk brukersted valgt som primært kan ikke også være valgt som ytterligere fysisk brukersted",
+      test: function (value, context) {
+        const primaryFysiskBrukersted =
+          context?.parent?.primaryFysiskBrukersted ?? undefined;
+
+        return !value?.includes(primaryFysiskBrukersted);
       },
     }),
 });
