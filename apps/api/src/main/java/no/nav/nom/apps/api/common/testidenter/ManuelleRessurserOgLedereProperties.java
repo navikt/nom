@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.common.testidenter;
 
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
@@ -55,6 +53,8 @@ public record ManuelleRessurserOgLedereProperties(
                 LocalDate.of(2022, 1, 1),
                 null,
                 null,
+                "2700",
+                List.of("2900"),
                 null,
                 "nom-api"
             );

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 import static no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository.DOLIs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -146,6 +147,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().minusYears(3),
         LocalDate.now().minusYears(1).minusDays(1),
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -158,6 +161,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().minusYears(1),
         LocalDate.now().plusYears(1).minusDays(1),
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -170,6 +175,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().plusYears(1),
         null,
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -183,6 +190,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().minusYears(1),
         null,
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -197,6 +206,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().minusYears(1),
         LocalDate.now().plusYears(1).minusDays(1),
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -209,6 +220,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().plusYears(1),
         null,
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
@@ -222,6 +235,8 @@ class OrgtilknytningStateRepositoryImplTest {
         LocalDate.now().minusYears(1),
         null,
         Tilknytningtype.FAST,
+        "2700",
+        Collections.emptyList(),
         null,
         "S123456"
     );
