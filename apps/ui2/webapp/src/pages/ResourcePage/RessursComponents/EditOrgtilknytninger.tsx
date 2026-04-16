@@ -403,19 +403,17 @@ function OrgtilknytningForm({
     ) {
       await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
         () => {
-          // oppdaterOrgtilknytningerMutation.mutate(
-          //   lagOppdaterOrgtilknytningerRequest(
-          //     values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-          //     skalSetteRessursStartdato(
-          //       ressurs,
-          //       values.mappedeOrgtilknytninger ?? [],
-          //       tidligsteOrgDatoPre,
-          //     ),
-          //     ressurs.sektor,
-          //   ),
-          // );
-
-          console.log("Would save");
+          oppdaterOrgtilknytningerMutation.mutate(
+            lagOppdaterOrgtilknytningerRequest(
+              values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+              skalSetteRessursStartdato(
+                ressurs,
+                values.mappedeOrgtilknytninger ?? [],
+                tidligsteOrgDatoPre,
+              ),
+              ressurs.sektor,
+            ),
+          );
         },
       );
     }
@@ -1362,6 +1360,9 @@ function lagOppdaterOrgtilknytningerRequest(
             ? Tilknytningtype.INGEN
             : orgtilknytning.orgtilknytningType,
         sektor: orgtilknytning.sektor,
+        primaryFysiskBrukerstedNummer: orgtilknytning.primaryFysiskBrukersted,
+        optionalFysiskBrukersteder:
+          orgtilknytning.ytterligereFysiskeBrukersteder,
       }),
     ),
     nyeOrgtilknytninger: nyeOrgtilknytninger.map((orgtilknytning) => ({
@@ -1374,6 +1375,8 @@ function lagOppdaterOrgtilknytningerRequest(
           ? Tilknytningtype.INGEN
           : orgtilknytning.orgtilknytningType,
       sektor: orgtilknytning.sektor ?? ressursSektor,
+      primaryFysiskBrukerstedNummer: orgtilknytning.primaryFysiskBrukersted,
+      optionalFysiskBrukersteder: orgtilknytning.ytterligereFysiskeBrukersteder,
     })),
     setRessursSluttdato: true,
     setRessursStartdato: setRessursStartdato,
@@ -1478,7 +1481,7 @@ const orgtilknytningSchema = yup.object().shape({
   }),
   ytterligereFysiskeBrukersteder: yup
     .array()
-    .of(yup.string())
+    .of(yup.string().defined())
     .test({
       name: "primary-fysisk-brukersted-ikke-i-ytterligere-liste",
       message:

@@ -145,6 +145,17 @@ export interface EndreOrgtilknytningRequest {
    * @default "##default"
    */
   gyldigTom?: string;
+  /**
+   * @uniqueItems true
+   * @default "##default"
+   * @example ["2700","2900"]
+   */
+  optionalFysiskBrukersteder?: string[];
+  /**
+   * @default "##default"
+   * @example 2700
+   */
+  primaryFysiskBrukerstedNummer?: string;
   /** @default "##default" */
   sektor?: Sektor;
   /** @default "##default" */
@@ -307,8 +318,19 @@ export interface LeggTilOrgtilknytningRequest {
    * @default "##default"
    */
   gyldigTom?: string;
+  /**
+   * @uniqueItems true
+   * @default "##default"
+   * @example ["2700","2900"]
+   */
+  optionalFysiskBrukersteder?: string[];
   /** @default "##default" */
   orgEnhetId: string;
+  /**
+   * @default "##default"
+   * @example 2700
+   */
+  primaryFysiskBrukerstedNummer?: string;
   /** @default "##default" */
   sektor: Sektor;
   /** @default "##default" */
@@ -597,6 +619,8 @@ export interface OrgEnhetStatistikkResponse {
 }
 
 export interface OrgtilknytningState {
+  /** @default "##default" */
+  additionalFysiskeBrukerstederNummer?: string[];
   /** @default false */
   erDagligOppfolging: boolean;
   /** @default "##default" */
@@ -619,6 +643,8 @@ export interface OrgtilknytningState {
   orgEnhetId: string;
   /** @default "##default" */
   orgtilknytningType?: Tilknytningtype;
+  /** @default "##default" */
+  primaryFysiskBrukerstedNummer?: string;
   /** @default "##default" */
   sektor?: Sektor;
   /** @default "##default" */
