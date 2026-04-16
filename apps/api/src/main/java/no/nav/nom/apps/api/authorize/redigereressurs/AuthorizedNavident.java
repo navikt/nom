@@ -440,9 +440,10 @@ public class AuthorizedNavident {
     private List<String> alleOrgenheterMellomDriftsenhetOgArbeidsomraade() {
         var arbeidsomraadeEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
             .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.ARBEIDSOMRAADE));
+        var sammarbeidsOrgEnheter = orgenhetService.getByIdBulk(List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId)).values().stream();
 
         Set<String> orgenheter = new HashSet<>();
-        arbeidsomraadeEnheter.forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
+        Stream.concat(arbeidsomraadeEnheter, sammarbeidsOrgEnheter).forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
         return orgenheter.stream().toList();
     }
 
