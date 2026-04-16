@@ -27,8 +27,7 @@ public record EndreOrgtilknytningRequest(
     LocalDate gyldigTom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     Tilknytningtype tilknytningtype,
-    @NotBlank(message = "Hoved fysisk brukersted kan ikke være tom")
-    @Schema(example = "2700", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(example = "2700", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     String primaryFysiskBrukerstedNummer,
     @Schema(example = "[\"2700\", \"2900\"]")
     Set<String> optionalFysiskBrukersteder

@@ -5,7 +5,6 @@ import lombok.Builder;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,8 +27,7 @@ public record LeggTilOrgtilknytningRequest(
     LocalDate gyldigTom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     Tilknytningtype tilknytningtype,
-    @NotBlank(message = "Hoved fysisk brukersted kan ikke være tom")
-    @Schema(example = "2700", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(example = "2700", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     String primaryFysiskBrukerstedNummer,
     @Schema(example = "[\"2700\", \"2900\"]")
     Set<String> optionalFysiskBrukersteder
