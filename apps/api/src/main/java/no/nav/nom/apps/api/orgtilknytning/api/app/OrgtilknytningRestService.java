@@ -557,8 +557,11 @@ public class OrgtilknytningRestService {
             }
         });
 
-        var optionalFysiskBrukerstederHasChanges = !new HashSet<>(orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer()).equals(new HashSet<>(
-            endreOrgtilknytningRequest.optionalFysiskBrukersteder()));
+        var optionalFysiskBrukerstederHasChanges = !new HashSet<>(requireNonNullElse(
+            orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
+            List.of()
+        )).equals(new HashSet<>(
+            requireNonNullElse(endreOrgtilknytningRequest.optionalFysiskBrukersteder(), List.of())));
 
         if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
             || optionalFysiskBrukerstederHasChanges) {

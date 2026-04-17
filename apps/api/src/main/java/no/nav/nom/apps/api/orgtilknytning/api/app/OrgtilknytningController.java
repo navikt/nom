@@ -284,6 +284,6 @@ public class OrgtilknytningController {
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(StandardResponse.builder().message("Server error").build());
+            .body(StandardResponse.builder().message(String.format("Uforutsett feil: %s", exception.getMessage())).build());
     }
 }
