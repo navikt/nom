@@ -485,6 +485,19 @@ export async function getDuplikateRessurserPaaNavident(): Promise<
     .json<RessursState[]>();
 }
 
+export async function getTekniskSlettedeSomFortsattFinnes(): Promise<
+  RessursState[]
+> {
+  return await ky
+    .get(
+      `${API_BASE_URL}/SanityCheck/ressurs/tekniskSlettedeSomFortsattFinnes`,
+      {
+        timeout: 120_000, // 120 seconds
+      },
+    )
+    .json<RessursState[]>();
+}
+
 export function getOrgtilknytningMedNegativPeriode() {
   return queryOptions({
     queryKey: ["API", "ORGTILKNYTNINGMEDNEGATIVPERIODE"],

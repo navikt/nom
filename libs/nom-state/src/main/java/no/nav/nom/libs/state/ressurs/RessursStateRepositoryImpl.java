@@ -79,6 +79,14 @@ public class RessursStateRepositoryImpl implements RessursStateRepository {
     }
 
     @Override
+    public Map<String, RessursState> findByFidBulk(List<String> alleFid) {
+        Set<String> fider = new HashSet<>(alleFid);
+        return ressursByNavident.entrySet().stream()
+            .filter(entry -> fider.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
     public Map<String, RessursState> findAllWithSluttdatoBeforeToday() {
         return ressursByNavident.values().stream()
             .filter(ressurs -> ressurs.sluttdato() != null)
