@@ -563,11 +563,15 @@ public class OrgtilknytningRestService {
             }
         });
 
+        log.info("Sjekker om valgfrie fysiske brukersteder har endringer");
         var optionalFysiskBrukerstederHasChanges = !new HashSet<>(requireNonNullElse(
             orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
             List.of()
         )).equals(new HashSet<>(
             requireNonNullElse(endreOrgtilknytningRequest.optionalFysiskBrukersteder(), List.of())));
+
+        log.info("Valgfrie fysiske brukersteder har endringer: {}", optionalFysiskBrukerstederHasChanges);
+        log.info("Sjekker om primary fysisk brukersted har endringer: {}", !Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer()));
 
         if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
             || optionalFysiskBrukerstederHasChanges) {
