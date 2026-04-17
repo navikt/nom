@@ -276,6 +276,7 @@ public class OrgtilknytningRestService {
 
     private void validateFysiskBrukersted(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(eksisterendeOrgtilknytning -> {
+            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())) return;
             var primaryFysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())
                 .orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer()));
             if (eksisterendeOrgtilknytning.optionalFysiskBrukersteder().size() > 5) {
