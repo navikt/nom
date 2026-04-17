@@ -269,6 +269,9 @@ spec:
         - application: nav-persondata-api
           namespace: holmes
           cluster: prod-gcp
+        - application: klage-lookup
+          namespace: klage
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

@@ -333,6 +333,9 @@ spec:
         - application: watson-admin-api
           namespace: holmes
           cluster: dev-gcp
+        - application: klage-lookup
+          namespace: klage
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
