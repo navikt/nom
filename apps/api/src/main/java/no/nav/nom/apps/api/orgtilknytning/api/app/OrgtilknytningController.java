@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.DuplicateFysiskBrukersted;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -244,6 +245,7 @@ public class OrgtilknytningController {
 
     @ExceptionHandler(
         {
+            FysiskBrukerstedNotFoundException.class,
             RessursNotFoundException.class,
             OrgtilknytningNotFoundException.class
         }
