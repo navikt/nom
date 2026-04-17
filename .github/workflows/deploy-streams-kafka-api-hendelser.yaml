@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'dev/**'
     paths:
       - 'apps/streams/kafka-api/api-hendelser/**'
       - 'libs/contract-nom-dto/**'

@@ -192,9 +192,6 @@ spec:
           namespace: org
           cluster: prod-fss
         - application: saas-proxy
-          namespace: teamcrm
-          cluster: prod-gcp
-        - application: saas-proxy
           namespace: platforce
           cluster: prod-gcp
         - application: salesforce
@@ -271,6 +268,9 @@ spec:
           cluster: prod-gcp
         - application: nav-persondata-api
           namespace: holmes
+          cluster: prod-gcp
+        - application: klage-lookup
+          namespace: klage
           cluster: prod-gcp
     outbound:
       rules:

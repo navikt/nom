@@ -10,6 +10,7 @@
         <version>1.1.0</version>
     </parent>
 
+    <name>NOM :: Apps :: Paarorende</name>
     <artifactId>paarorende</artifactId>
 
     <dependencies>
