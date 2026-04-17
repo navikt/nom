@@ -45,6 +45,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -563,15 +564,8 @@ public class OrgtilknytningRestService {
             }
         });
 
-        log.info("Sjekker om valgfrie fysiske brukersteder har endringer");
-        var optionalFysiskBrukerstederHasChanges = !new HashSet<>(requireNonNullElse(
-            orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
-            List.of()
-        )).equals(new HashSet<>(
-            requireNonNullElse(endreOrgtilknytningRequest.optionalFysiskBrukersteder(), List.of())));
-
-        log.info("Valgfrie fysiske brukersteder har endringer: {}", optionalFysiskBrukerstederHasChanges);
-        log.info("Sjekker om primary fysisk brukersted har endringer: {}", !Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer()));
+        var optionalFysiskBrukerstederHasChanges = optionalFysiskBrukerstederHasChanges(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
+        var optionalFysiskeBrukersteder = optionalFysiskBrukerstederHasChanges ? endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList() : new ArrayList<String>();
 
         if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
             || optionalFysiskBrukerstederHasChanges) {
@@ -581,11 +575,22 @@ public class OrgtilknytningRestService {
                     orgtilknytningStateBeforeChanges.navident(),
                     orgtilknytningStateBeforeChanges.orgEnhetId(),
                     endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
-                    endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList(),
+                    optionalFysiskeBrukersteder,
                     inputMetadata
                 )
             );
         }
+    }
+
+    private static boolean optionalFysiskBrukerstederHasChanges(
+        EndreOrgtilknytningRequest endreOrgtilknytningRequest,
+        OrgtilknytningState orgtilknytningStateBeforeChanges
+    ) {
+        return !new HashSet<>(requireNonNullElse(
+            orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
+            List.of()
+        )).equals(new HashSet<>(
+            requireNonNullElse(endreOrgtilknytningRequest.optionalFysiskBrukersteder(), List.of())));
     }
 
     private void leggTilOrgtilknytningForRessurs(String navident, LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
@@ -729,7 +734,9 @@ public class OrgtilknytningRestService {
                 && Objects.equals(endreOrgtilknytningRequest.gyldigTom(), currentOrgtilknytningState.gyldigTom())
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Objects.equals(endreOrgtilknytningRequest.tilknytningtype(), currentOrgtilknytningState.orgtilknytningType())
-                && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()))
+                && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor())
+                && Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), currentOrgtilknytningState.primaryFysiskBrukerstedNummer())
+                && optionalFysiskBrukerstederHasChanges(endreOrgtilknytningRequest, currentOrgtilknytningState))
         );
     }
 
