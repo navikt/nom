@@ -61,7 +61,7 @@ spec:
       cpu: 100m
       memory: 4Gi
     limits:
-      memory: 20Gi
+      memory: 15Gi
   prometheus:
     enabled: true
     path: /internal/prometheus
