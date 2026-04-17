@@ -607,6 +607,8 @@ public class RessursSanityCheckService {
             .map(Event::getFid)
             .toList();
 
+        log.info("Antall teknisk slettede: {}", alleTekniskSlettedeRessurser.size());
+
         return ressursStateRepository.findByFidBulk(alleTekniskSlettedeRessurser).values().stream().toList();
     }
 }
