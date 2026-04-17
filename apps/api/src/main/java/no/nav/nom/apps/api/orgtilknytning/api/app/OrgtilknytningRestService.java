@@ -564,11 +564,11 @@ public class OrgtilknytningRestService {
             }
         });
 
-        var optionalFysiskBrukerstederHasChanges = optionalFysiskBrukerstederHasChanges(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
-        var optionalFysiskeBrukersteder = optionalFysiskBrukerstederHasChanges ? endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList() : new ArrayList<String>();
+        var optionalFysiskBrukerstederAreEqual = optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
+        var optionalFysiskeBrukersteder = optionalFysiskBrukerstederAreEqual ? new ArrayList<String>() : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
 
         if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
-            || optionalFysiskBrukerstederHasChanges) {
+            || !optionalFysiskBrukerstederAreEqual) {
             orgtilknytningCommandService.endreFysiskeBrukersted(
                 new EndreFysiskeBrukerstederCommand(
                     orgtilknytningStateBeforeChanges.fid(),
@@ -582,11 +582,11 @@ public class OrgtilknytningRestService {
         }
     }
 
-    private static boolean optionalFysiskBrukerstederHasChanges(
+    private static boolean optionalFysiskBrukerstederAreEqual(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest,
         OrgtilknytningState orgtilknytningStateBeforeChanges
     ) {
-        return !new HashSet<>(requireNonNullElse(
+        return new HashSet<>(requireNonNullElse(
             orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
             List.of()
         )).equals(new HashSet<>(
@@ -736,7 +736,7 @@ public class OrgtilknytningRestService {
                 && Objects.equals(endreOrgtilknytningRequest.tilknytningtype(), currentOrgtilknytningState.orgtilknytningType())
                 && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor())
                 && Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), currentOrgtilknytningState.primaryFysiskBrukerstedNummer())
-                && optionalFysiskBrukerstederHasChanges(endreOrgtilknytningRequest, currentOrgtilknytningState))
+                && optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, currentOrgtilknytningState))
         );
     }
 
