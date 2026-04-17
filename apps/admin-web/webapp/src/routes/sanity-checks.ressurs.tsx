@@ -143,6 +143,9 @@ function RessursSanityChecks() {
         <option value="DuplikateRessurshendelser">
           Duplikate ressurs-hendelser
         </option>
+        <option value="RessursTekniskSlettet">
+          Ressurser som er teknisk slettet, men i State
+        </option>
       </Select>
       <ListSelector selected={selected} />
     </div>
