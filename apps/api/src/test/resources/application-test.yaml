@@ -68,12 +68,12 @@ app:
   email:
     servicetorget-email: ${SERVICETORGET_EPOST_ADDR}
   orgenhet:
-    vikafossenId: dummyVikafossenId
-    helfo: dummyHelfoId
-    skatt: dummySkattId
-    riksrev: dummyRiksrevisjonenId
+    nav-id: dummyNavId
+    helfo-id: dummyHelfoId
+    skatt-id: dummySkattId
+    riksrevisjonen-id: dummyRiksrevId
+    vikafossen-id: dummyVikafossenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
-    nav: dummyNavId
   dolly-ressurs:
     fysisk-brukersted-nr: dummyDollyFysiskBrukerstedNr
     orgenhet-id: dummyDollyOrgenhetId

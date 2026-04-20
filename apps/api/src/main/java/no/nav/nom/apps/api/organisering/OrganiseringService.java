@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -95,9 +96,13 @@ public class OrganiseringService {
                 }
                 organiseringIdsFromDvh.add(new OrganiseringIdTuple(orgEnhet.get().getId(), orgEnhetOver.get().getId()));
             } else {
-                logger.info("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: ({} {} {}) orgEnhetOver: ({} {} {})",
-                    dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder(),
-                    dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
+                if (!dvhOrganisering.getAgressoIdOver().equals("TOPP")) {
+                    logger.warn(
+                        "orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: ({} {} {}) orgEnhetOver: ({} {} {})",
+                        dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder(),
+                        dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver()
+                    );
+                }
             }
         }
 

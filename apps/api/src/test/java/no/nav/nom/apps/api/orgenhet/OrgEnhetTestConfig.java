@@ -71,8 +71,9 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
     , WebClientAutoConfiguration.class
+    , AktiveOrgenheterIHierarkiCache.class
 })
-@EnableConfigurationProperties(value = AppProperties.class)
+@EnableConfigurationProperties(AppProperties.class)
 @EnableKafka
 @AutoConfigureJson
 public class OrgEnhetTestConfig {

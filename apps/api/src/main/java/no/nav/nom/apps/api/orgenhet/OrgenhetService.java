@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -17,7 +19,6 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
+@Slf4j
 @Service
 public class OrgenhetService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,31 +51,32 @@ public class OrgenhetService {
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final KafkaTopicReader kafkaTopicReader;
     private final OrganiseringStateRepository organiseringStateRepository;
-    private List<IOrgenhet> organiserteEnheter = emptyList();
-    @Value("${app.orgenhet.vikafossenId}")
-    private String vikafossenOrgEnhetId;
-
+    private final AppProperties.Orgenhet orgenhetProperties;
+    private final AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache;
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository,
                            OrgEnhetCommandService orgEnhetCommandService,
                            KafkaTopicReader kafkaTopicReader,
-                           OrganiseringStateRepository organiseringStateRepository
+                           OrganiseringStateRepository organiseringStateRepository,
+                           AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache,
+                           AppProperties appProperties
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.kafkaTopicReader = kafkaTopicReader;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.aktiveOrgenheterIHierarkiCache = aktiveOrgenheterIHierarkiCache;
+        this.orgenhetProperties = appProperties.orgenhet();
     }
 
 
     public Optional<IOrgenhet> getById(String id) {
-        return orgEnhetStateRepository.findById(id).map(this::map);
+        return orgEnhetStateRepository.findById(id).map(OrgEnhet::new);
     }
 
     public Optional<IOrgenhet> getByFid(String fid) {
-        return orgEnhetStateRepository.findByFid(fid).map(this::map);
+        return orgEnhetStateRepository.findByFid(fid).map(OrgEnhet::new);
     }
-
 
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
@@ -81,30 +84,25 @@ public class OrgenhetService {
                     .stream()
                     .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
                     .max(comparing(OrgEnhetState::gyldigFom))
-                .map(this::map);
+                .map(OrgEnhet::new);
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
-
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
         return orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
             .stream()
             .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
             .max(comparing(OrgEnhetState::gyldigFom))
-            .map(this::map);
+            .map(OrgEnhet::new);
     }
-
-
-    public List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds) {
-        return orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds).stream()
-            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-            .map(this::map).toList();
-    }
-
 
     public Collection<IOrgenhet> getAllEnheter() {
-        return orgEnhetStateRepository.getAll().stream().map(this::map).toList();
+        return orgEnhetStateRepository.getAll().stream().map(OrgEnhet::new).collect(Collectors.toList());
+    }
+
+    public Collection<IOrgenhet> getAktiveEnheterIOrganisasjonen() {
+        return aktiveOrgenheterIHierarkiCache.getAktiveEnheterIOrganisasjonen();
     }
 
     // Returns orgEnheter that 
@@ -114,9 +112,9 @@ public class OrgenhetService {
         return orgEnhetStateRepository.getAll().stream()
             .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
             .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
-            .map(this::map)
-            .filter(iOrgenhet -> !iOrgenhet.getId().equals(vikafossenOrgEnhetId))
-            .toList();
+            .map(OrgEnhet::new)
+            .filter(iOrgenhet -> !iOrgenhet.getId().equals(orgenhetProperties.vikafossenId()))
+            .collect(Collectors.toList());
     }
 
     public Collection<IOrgenhet> getAllOrgEnheterThatCanHaveRessurser(String orgEnhetId) {
@@ -126,7 +124,8 @@ public class OrgenhetService {
         return underliggendeOrgEnhet.stream()
             .filter(orgEnhetState -> organiseringStateRepository.orgEnhetHasParent(orgEnhetState.id()))
             .filter(orgEnhetState -> !organiseringStateRepository.orgEnhetHasChildren(orgEnhetState.id()))
-            .map(this::map).toList();
+            .map(OrgEnhet::new)
+            .collect(Collectors.toList());
     }
 
     public boolean isOrgEnhetBeforeLeafNode(String orgEnhetId, Collection<IOrgenhet> orgEnheter) {
@@ -138,9 +137,7 @@ public class OrgenhetService {
             .allMatch(organiseringState -> organiseringState.idOver().equals(orgEnhetId));
     }
 
-    public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
-        return organiserteEnheter;
-    }
+
 
     public boolean activeOrFutureWithEqualName(String name) {
         return orgEnhetStateRepository.getAll().stream()
@@ -152,8 +149,8 @@ public class OrgenhetService {
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
         return orgEnhetStateRepository.getAll().stream()
             .filter(orgEnhetState -> !orgEnhetState.endedOnStartDate() && nonNull(orgEnhetState.agressoId()) && orgEnhetState.agressoId().contains(agressoId))
-            .map(this::map)
-            .toList();
+            .map(OrgEnhet::new)
+            .collect(Collectors.toList());
     }
 
     public List<IOrgenhet> exactMatchByAgressoId(String agressoId) {
@@ -162,26 +159,18 @@ public class OrgenhetService {
                 !orgEnhetState.endedOnStartDate()
                     && nonNull(orgEnhetState.agressoId())
                     && orgEnhetState.agressoId().equalsIgnoreCase(agressoId))
-            .map(this::map)
-            .toList();
+            .map(OrgEnhet::new)
+            .collect(Collectors.toList());
     }
 
     public Map<String, IOrgenhet> getByIdBulk(List<String> ids) {
-        return orgEnhetStateRepository.findByIdIn(ids).stream().collect(Collectors.toMap(OrgEnhetState::id, this::map));
+        return orgEnhetStateRepository.findByIdIn(ids).stream().collect(Collectors.toMap(OrgEnhetState::id, OrgEnhet::new));
     }
 
-    public Collection<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId) {
-        return getAllEnheterMedOrganisering().stream()
+    public List<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId) {
+        return getAktiveEnheterIOrganisasjonen().stream()
             .filter(orgenhet -> Objects.equals(orgenhet.getAgressoId(), agressoId))
             .toList();
-    }
-
-    public void setOrganiserteEnheter(List<IOrgenhet> organiserteEnheter) {
-        this.organiserteEnheter = organiserteEnheter;
-    }
-
-    private IOrgenhet map(OrgEnhetState orgEnhetState) {
-        return new OrgEnhet(orgEnhetState);
     }
 
     public List<String> findAllUnderliggendeOrgenheter(String id) {
@@ -223,7 +212,7 @@ public class OrgenhetService {
             return new HashSet<>(allUnderliggende);
         }).orElse(new HashSet<>());
 
-        return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(this::map).toList();
+        return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(OrgEnhet::new).collect(Collectors.toList());
     }
 
     public boolean isOrgEnhetInArbeidsomraade(String orgenhetId) {

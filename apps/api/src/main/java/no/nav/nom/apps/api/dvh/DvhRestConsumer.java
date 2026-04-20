@@ -339,8 +339,6 @@ public class DvhRestConsumer {
         try {
             var organiseringer = dvhOrdsService.getOrganiseringer();
 
-            dvhService.setOrganiserteOrgenheter(organiseringer); // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-
             if (forceEvtSrcUpdate) { // Kun leader schedulert trigget eller trigget fra swagger admin
                 log.info("Oppdaterer evtsrc med nye Organiseringer fra dvh");
                 organiseringService.saveOrganiseringer(organiseringer);

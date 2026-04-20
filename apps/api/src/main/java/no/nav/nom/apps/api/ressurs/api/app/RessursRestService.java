@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -110,7 +111,6 @@ public class RessursRestService {
     private final OrgEnhetLederService orgEnhetLederService;
     private final RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService;
 
-    @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
 
     public RessursRestService(
@@ -132,7 +132,8 @@ public class RessursRestService {
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgtilknytningService orgtilknytningService,
         OrgEnhetLederService orgEnhetLederService,
-        RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService
+        RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService,
+        AppProperties appProperties
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -153,6 +154,8 @@ public class RessursRestService {
         this.orgtilknytningService = orgtilknytningService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.ressursFyrstikkaleen1EmailService = ressursFyrstikkaleen1EmailService;
+
+        this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
