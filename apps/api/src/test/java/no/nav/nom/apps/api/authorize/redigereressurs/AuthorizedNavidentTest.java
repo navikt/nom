@@ -1,19 +1,17 @@
 package no.nav.nom.apps.api.authorize.redigereressurs;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
-import no.nav.nom.apps.api.clients.msgraph.EntraIdUser;
-import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.LederTilgangState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
@@ -26,24 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = AuthorizedNavident.class)
-@TestPropertySource(
-    properties = {
-        "app.clients.microsoft-graph.groups.nom-delegert=42d11885-1e29-4fc4-9eed-1b339c2c8e36",
-        "app.clients.microsoft-graph.groups.nom-leder=e9cd9267-9baf-4078-abb8-7251c4313d32",
-        "app.orgenhet.helfo=dummyHelfoId",
-        "app.orgenhet.skatt=dummySkattId",
-        "app.orgenhet.riksrev=dummyRiksrevisjonenId",
-        "app.orgenhet.nav=X"
-    }
-)
+@ActiveProfiles("test")
+@EnableConfigurationProperties(AppProperties.class)
 class AuthorizedNavidentTest extends MockBasisTestOrganisering {
-
-
 
     @MockitoBean
     AuthorizeCommandService authorizeCommandService;

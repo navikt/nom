@@ -131,7 +131,7 @@ class OTUtenforHierarkiTest {
     @Test
     @DisplayName("Test på basic ok finn ot utenfor hierarki")
     void test_basic_ok_finn_ot_utenfor_hierarki() {
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(enhet2, enhet3));
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(List.of(enhet2, enhet3));
         when(orgenhetService.getById(enhet1.getId())).thenReturn(Optional.of(enhet1));
         setupOrganisering();
 

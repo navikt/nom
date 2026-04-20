@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
@@ -13,6 +14,7 @@ import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.graphql.test.autoconfigure.tester.GraphQlTesterAutoConfiguration;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
 import org.springframework.context.ApplicationContext;
@@ -37,6 +39,7 @@ import tools.jackson.databind.json.JsonMapper;
         GraphQlTesterAutoConfiguration.class
     }
 )
+@EnableConfigurationProperties(AppProperties.class)
 abstract public class GraphQlTestBase implements ApplicationContextAware {
 
     protected OrgEnhetStateRepository orgEnhetStateRepository;

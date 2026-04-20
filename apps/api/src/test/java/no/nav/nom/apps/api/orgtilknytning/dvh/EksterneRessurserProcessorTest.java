@@ -395,7 +395,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
 
         when(orgenhetService.getEnhetByAgressoIdAndOrgniv(ORGENHET_VIKAFOSSEN.getAgressoId(), "ORGENHET")).thenReturn(Optional.of(ORGENHET_VIKAFOSSEN));
         when(orgtilknytningService.getByNavIdent("A000001")).thenReturn(List.of(mockPreviousOrgtilknytning));
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(ORGENHET_VIKAFOSSEN, ORGENHET_A));
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(List.of(ORGENHET_VIKAFOSSEN, ORGENHET_A));
         when(remedyEnhetMapperService.findByRemedyEnhetId(REMEDY_ENHET_2103.remedyEnhetId())).thenReturn(Optional.of(REMEDY_ENHET_2103));
 
         eksterneRessurserProcessor.process(ekstern);

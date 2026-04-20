@@ -59,7 +59,7 @@ public class OTUtenforHierarki {
         otUtenforHierarkieMedAlternativOrgenhet.clear();
         perAlternativOrgenhet.clear();
 
-        var aktiveOrgenheter = orgenhetService.getAllEnheterMedOrganisering();
+        var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
         var aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
         var oterUtenforHierarki = orgtilknytningService.getAll().stream()
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))

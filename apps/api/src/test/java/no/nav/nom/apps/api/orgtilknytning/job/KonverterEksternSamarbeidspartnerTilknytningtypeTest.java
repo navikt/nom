@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -9,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +21,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -29,6 +34,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
     private KonverterEksternSamarbeidspartnerTilknytningtype konverterEksternSamarbeidspartnerTilknytningtype;
+
+    AppProperties appProperties = new AppProperties(null, null, null, null, new AppProperties.Orgenhet("dummyNavId", "dummyHelfoId", "dummySkattId", "dummyRiksrevisjonId", "dummyVikafossenId", Set.of("linje-enhet","en-annen-linjeenhet")));
 
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -45,9 +52,7 @@ public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
             orgtilknytningStateRepository,
             orgtilknytningCommandService,
             nomMastered,
-            "dummyHelfoId",
-            "dummySkattId",
-            "dummyRiksrevisjonId"
+            appProperties
         );
 
         SecurityContext securityContext = mock(SecurityContext.class);
