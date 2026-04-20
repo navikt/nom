@@ -767,7 +767,7 @@ public class RessursRestService {
         validateChronologicalDates(request.startDato(), request.sluttDato());
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
-        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor(), "Ny_ressurs");
         validateOrgenhetForIdenttype(request.identType(), request.orgEnhetId());
     }
 

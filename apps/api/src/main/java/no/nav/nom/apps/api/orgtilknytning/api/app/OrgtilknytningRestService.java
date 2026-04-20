@@ -274,14 +274,15 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
+            var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid())
+                .orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
             if (!Objects.equals(origOT.orgtilknytningType(), endreOrgtilknytningRequest.tilknytningtype())) {
-                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor());
+                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor(), endreOrgtilknytningRequest.fid());
             }
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(nyeOrgtilknytningRequest ->
-            validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor())
+            validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor(), "ny_fid")
         );
     }
 
@@ -734,7 +735,7 @@ public class OrgtilknytningRestService {
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
         if (nonNull(endreTilknytningtypeRequest.tilknytningtype())) {
-            validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor());
+            validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor(), tilknyttetRessurs.navident());
         }
 
         orgtilknytningCommandService.endreTilknytningtype(
@@ -775,7 +776,7 @@ public class OrgtilknytningRestService {
         );
     }
 
-    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
+    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor, String otFidOrNavident) {
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
             Sektor.EKSTERN, List.of(
                 Tilknytningtype.KONSULENT,
@@ -802,8 +803,12 @@ public class OrgtilknytningRestService {
             )
         );
 
+        if (!allowedOrgtilknytningTypeForSektorMap.containsKey(sektor)) {
+            throw InvalidOrgtilknytningSektorException.sektorIsNullForFidOrNavident(otFidOrNavident);
+        }
+
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
-            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
+            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor, otFidOrNavident);
         }
 
     }
