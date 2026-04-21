@@ -803,8 +803,8 @@ public class OrgtilknytningRestService {
             )
         );
 
-        if (!allowedOrgtilknytningTypeForSektorMap.containsKey(sektor)) {
-            throw InvalidOrgtilknytningSektorException.sektorIsNullForFidOrNavident(otFidOrNavident);
+        if (sektor == null || !allowedOrgtilknytningTypeForSektorMap.containsKey(sektor))  {
+            throw InvalidOrgtilknytningSektorException.sektorIsNullOrInvalidForFidOrNavident(sektor, otFidOrNavident);
         }
 
         if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
