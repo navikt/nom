@@ -28,7 +28,7 @@ public class DvhDuplikatAgressoIdAnalyse {
 
     public String analyserDvhOrgenheterOgStateEnheter(String year) {
         enhetIdForEnheterIOrganisering.clear();
-        enhetIdForEnheterIOrganisering.addAll(orgenhetService.getAllEnheterMedOrganisering().stream().map(IOrgenhet::getId).collect(Collectors.toSet()));
+        enhetIdForEnheterIOrganisering.addAll(orgenhetService.getAktiveEnheterIOrganisasjonen().stream().map(IOrgenhet::getId).collect(Collectors.toSet()));
 
         log.info("Laster orgenhet v2 fra dvh");
         var dvhOrgenheter = dvhOrdsService.getOrgenheter();

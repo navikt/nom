@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -44,13 +45,13 @@ public class OrgEnhetNomNivaaHandler {
         OrgEnhetCommandService orgEnhetCommandService,
         OrgEnhetOverordnetResolver orgEnhetOverordnetResolver,
         OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver,
-        @Value("#{'${app.orgenhet.linjeenhetene}'.split(',')}") Set<String> linjeenheteneOrgEnhetIds
+        AppProperties appProperties
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.orgEnhetOverordnetResolver = orgEnhetOverordnetResolver;
         this.orgEnhetUnderordnetResolver = orgEnhetUnderordnetResolver;
-        this.linjeenheteneOrgEnhetIds = linjeenheteneOrgEnhetIds;
+        this.linjeenheteneOrgEnhetIds = appProperties.orgenhet().linjeenhetene();
     }
 
     public void mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEventV1) {

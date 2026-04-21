@@ -185,7 +185,7 @@ public class OrgenhetRenamedListener {
     }
 
     private IOrgenhet finnAlternativOrgenhet(IOrgenhet faktiskOrgenhet) {
-        var aktiveOrgenheter = orgenhetService.getAllEnheterMedOrganisering();
+        var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
         return aktiveOrgenheter.stream()
             .filter(oe -> oe.getAgressoId().equals(faktiskOrgenhet.getAgressoId()))
             .filter(oe -> oe.getOrgNiv().equals(faktiskOrgenhet.getOrgNiv()))

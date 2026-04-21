@@ -27,6 +27,8 @@ public interface RessursStateRepository {
 
     Map<String, RessursState> findByNavidentBulk(List<String> navIdenter);
 
+    Map<String, RessursState> findByFidBulk(List<String> alleFid);
+
     Map<String, RessursState> findAllWithSluttdatoBeforeToday();
 
     Map<String, RessursState> findAllActiveRessurser();

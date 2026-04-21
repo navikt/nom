@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -7,7 +8,6 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -32,15 +32,13 @@ public class KonverterEksternSamarbeidspartnerTilknytningtype {
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgtilknytningCommandService orgtilknytningCommandService,
         NomMastered nomMastered,
-        @Value("${app.orgenhet.helfo}") String helfo,
-        @Value("${app.orgenhet.skatt}") String skatt,
-        @Value("${app.orgenhet.riksrev}") String riksrev
+        AppProperties appProperties
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
-        this.helfo = helfo;
-        this.skatt = skatt;
-        this.riksrev = riksrev;
+        this.helfo = appProperties.orgenhet().helfoId();
+        this.skatt = appProperties.orgenhet().skattId();
+        this.riksrev = appProperties.orgenhet().riksrevisjonenId();
         this.nomMastered = nomMastered;
     }
 

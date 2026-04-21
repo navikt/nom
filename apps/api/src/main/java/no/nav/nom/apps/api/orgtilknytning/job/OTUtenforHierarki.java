@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.job;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
@@ -14,6 +15,7 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -33,17 +35,20 @@ public class OTUtenforHierarki {
 
     private final HashMap<OrgtilknytningState, IOrgenhet> otUtenforHierarkieMedAlternativOrgenhet = new HashMap<>();
     private final HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
+    private final AppProperties.Orgenhet orgenhetProperties;
 
     @Setter
     private boolean ventPaaState = true;
 
     public OTUtenforHierarki(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                             OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService
+                             OrganiseringStateRepository organiseringStateRepository, MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
+                             AppProperties appProperties
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.organiseringStateRepository = organiseringStateRepository;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
+        this.orgenhetProperties = appProperties.orgenhet();
     }
 
     public void findOTUtenforHierarkiFromDataLast() {
@@ -59,8 +64,15 @@ public class OTUtenforHierarki {
         otUtenforHierarkieMedAlternativOrgenhet.clear();
         perAlternativOrgenhet.clear();
 
-        var aktiveOrgenheter = orgenhetService.getAllEnheterMedOrganisering();
-        var aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
+        var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
+
+        // inkluder HELFO, SKATT, RIKSREVISJONEN og VIKAFOSSEN, da disse kan være gyldige
+        List<String> aktiveOrgenhetIder = new ArrayList<>(aktiveOrgenheter.stream().map(IOrgenhet::getId).toList());
+        aktiveOrgenhetIder.add(orgenhetProperties.helfoId());
+        aktiveOrgenhetIder.add(orgenhetProperties.skattId());
+        aktiveOrgenhetIder.add(orgenhetProperties.riksrevisjonenId());
+        aktiveOrgenhetIder.add(orgenhetProperties.vikafossenId());
+
         var oterUtenforHierarki = orgtilknytningService.getAll().stream()
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
             .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))

@@ -54,7 +54,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         StringBuffer output = new StringBuffer();
 
         // Finn alle orgtilknytninger til orgenhet som er avsluttet eller ikke er i hierarkiet
-        Collection<IOrgenhet> aktiveEnheter = orgenhetService.getAllEnheterMedOrganisering();
+        Collection<IOrgenhet> aktiveEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
         List<String> aktiveEnheterIds = aktiveEnheter.stream().map(IOrgenhet::getId).toList();
         List<IOrgenhet> ikkeAktiveEnheter = orgenhetService.getAllEnheter().stream().filter(o -> !aktiveEnheterIds.contains(o.getId())).toList();
         List<String> ikkeAktiveEnheterIds = ikkeAktiveEnheter.stream().map(IOrgenhet::getId).toList();

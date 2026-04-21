@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -54,6 +55,7 @@ public class NomRemedyIntegrasjonService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final DelayedEventRepository delayedEventRepository;
     private final ThreadLocal<Boolean> isAdmin = ThreadLocal.withInitial(() -> false);
+    private final JsonMapper jsonMapper;
 
     public NomRemedyIntegrasjonService(
         LeaderElection leaderElection,
@@ -63,7 +65,8 @@ public class NomRemedyIntegrasjonService {
         ErrorStateRepository errorStateRepository,
         RessursStateRepository ressursStateRepository,
         OrgtilknytningStateRepository orgtilknytningStateRepository,
-        DelayedEventRepository delayedEventRepository
+        DelayedEventRepository delayedEventRepository,
+        JsonMapper jsonMapper
     ) {
         this.leaderElection = leaderElection;
         this.remedyIntegrasjonRepositoryService = remedyIntegrasjonRepositoryService;
@@ -73,6 +76,7 @@ public class NomRemedyIntegrasjonService {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.delayedEventRepository = delayedEventRepository;
+        this.jsonMapper = jsonMapper;
     }
 
     @Transactional
@@ -112,7 +116,8 @@ public class NomRemedyIntegrasjonService {
                 List<UUID> oldDelayedEventsNotFoundToDelete = new ArrayList<>();
                 List<UUID> oldDelayedEventsConvertedToDelete = new ArrayList<>();
                 oldDelayedStates.forEach(state -> {
-                    var fid = state.getEvent().getFid();
+                    Event eventState = jsonMapper.treeToValue(state.getEvent(), Event.class);
+                    var fid = eventState.getFid();
                     var fidType = fid.contains("ressurs") ? RessursState.class.getSimpleName() : OrgtilknytningState.class.getSimpleName();
                     var navident = fidType.equals(OrgtilknytningState.class.getSimpleName()) ? orgtilknytningStateRepository.findByFid(fid)
                         .map(OrgtilknytningState::navident)
@@ -456,6 +461,7 @@ public class NomRemedyIntegrasjonService {
     public List<Event> getAllDelayedEventsBlocking() {
         return delayedEventRepository.findAll().stream()
             .map(DelayedEvent::getEvent)
+            .map(jsonNode -> jsonMapper.treeToValue(jsonNode, Event.class))
             .toList();
     }
 

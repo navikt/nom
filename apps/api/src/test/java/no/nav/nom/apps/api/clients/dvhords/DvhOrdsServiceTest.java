@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @SpringBootTest
 @ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class, WebClientAutoConfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
-@EnableConfigurationProperties(value = AppProperties.class)
+@EnableConfigurationProperties(AppProperties.class)
 @EnableWireMock({
     @ConfigureWireMock(
         filesUnderDirectory = "src/test/resources")

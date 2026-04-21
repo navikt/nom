@@ -58,7 +58,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
 })
-@EnableConfigurationProperties(value = AppProperties.class)
+@EnableConfigurationProperties(AppProperties.class)
 @EnableKafka
 @AutoConfigureJson
 public class OrganiseringTestConfig {

@@ -9,8 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -23,6 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DelayedEventRepositoryTest extends TestBase {
 
+    @Autowired
+    private JsonMapper jsonMapper;
+
     @BeforeEach
     void clearRepositories() {
         delayedEventRepository.deleteAll();
@@ -34,7 +39,7 @@ public class DelayedEventRepositoryTest extends TestBase {
         var savedDelayedEvent = delayedEventRepository.save(
             DelayedEvent.builder()
                 .delayedUntil(LocalDate.now())
-                .event(event)
+                .event(jsonMapper.valueToTree(event))
                 .build()
         );
 
@@ -61,7 +66,7 @@ public class DelayedEventRepositoryTest extends TestBase {
             Stream.of(today, yesterday, tomorrow).map(delayedUntil ->
                 DelayedEvent.builder()
                     .delayedUntil(delayedUntil)
-                    .event(ressursSluttdatoOppdatertEventV1(delayedUntil))
+                    .event(jsonMapper.valueToTree(ressursSluttdatoOppdatertEventV1(delayedUntil)))
                     .build()
             ).toList()
         );

@@ -13,6 +13,7 @@ import lombok.val;
 import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties;
 import no.nav.nom.apps.api.common.security.JWTFilter;
@@ -30,6 +31,7 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.graphql.autoconfigure.GraphQlAutoConfiguration;
 import org.springframework.boot.graphql.autoconfigure.servlet.GraphQlWebMvcAutoConfiguration;
 import org.springframework.boot.graphql.test.autoconfigure.tester.AutoConfigureHttpGraphQlTester;
@@ -70,6 +72,7 @@ import static no.nav.nom.apps.api.TestTokensGenerator.OAUTH_VALID_ISSUER;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @AutoConfigureHttpGraphQlTester
+@EnableConfigurationProperties(AppProperties.class)
 @ContextConfiguration(
     initializers = {MockOAuth2ServerInitializer.class},
     classes = {

@@ -9,11 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.admin.SanityCheckMappingUtils;
 import no.nav.nom.apps.admin.SwaggerConfig;
 import no.nav.nom.apps.admin.sanitycheck.StandardResponse;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RobotRessurs;
 import no.nav.nom.apps.admin.sanitycheck.service.RessursSanityCheckService;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -219,6 +219,20 @@ public class RessursSanityCheckController {
     @GetMapping(value = "/sluttetRessursMedLederRollePaaOrgEnhet")
     public ResponseEntity<List<RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse>> validerRessursMedLederRollePaaOrgEnhet() {
         return ok(ressursSanityCheckService.validerRessursMedLederRollePaaOrgEnhet());
+    }
+
+    @Operation(
+        description = "Liste over ressurser som har TekniskSlettetEvent, men som fortsatt finnes i state",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/tekniskSlettedeSomFortsattFinnes")
+    public ResponseEntity<List<RessursState>> tekniskSlettedeSomFortsattFinnes() {
+        return ok(ressursSanityCheckService.ressurserSomErTekniskSlettetSomFortsattFinnes());
     }
 
     private void exportRessurserTilIkkeAktivEnhet(HttpServletResponse response) throws IOException {
