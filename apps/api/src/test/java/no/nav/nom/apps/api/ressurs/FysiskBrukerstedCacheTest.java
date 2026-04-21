@@ -35,7 +35,8 @@ public class FysiskBrukerstedCacheTest {
 
     @Test
     public void testCacheHitForFysiskBrukersted() {
-        when(nomRemedyIntegrasjonClientMock.getFysiskeBrukersteder()).thenReturn(List.of(new FysiskBrukersted("123", "Test")));
+        when(nomRemedyIntegrasjonClientMock.getFysiskeBrukersteder()).thenReturn(List.of(
+            FysiskBrukersted.builder().nr("123").navn("Test").build()));
 
         assertEquals(1, fysiskBrukerstedCache.getAll().size());
         assertEquals(1, fysiskBrukerstedCache.getAll().size());
@@ -47,7 +48,7 @@ public class FysiskBrukerstedCacheTest {
 
     @Test
     public void testEvictCacheForFysiskBrukersted() {
-        when(nomRemedyIntegrasjonClientMock.getFysiskeBrukersteder()).thenReturn(List.of(new FysiskBrukersted("123", "Test")));
+        when(nomRemedyIntegrasjonClientMock.getFysiskeBrukersteder()).thenReturn(List.of(FysiskBrukersted.builder().nr("123").navn("Test").build()));
 
         assertEquals(1, fysiskBrukerstedCache.getAll().size());
         assertEquals(1, fysiskBrukerstedCache.getAll().size());

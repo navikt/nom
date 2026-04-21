@@ -40,14 +40,14 @@ public class MainManagerClient {
             }
 
             return response.getBody().items().stream()
-                .map(item -> new FysiskBrukersted(
-                    item.xid(),
-                    item.namePart(),
-                    item.address1(),
-                    item.zipCode(),
-                    item.city(),
-                    item.region()
-                ))
+                .map(item ->  FysiskBrukersted.builder()
+                    .nr(item.xid())
+                    .navn(item.namePart())
+                    .address(item.address1())
+                    .postnummer(item.zipCode())
+                    .poststed(item.city())
+                    .kommune(item.region())
+                    .build())
                 .toList();
         } catch (Exception e) {
             log.error("ALERT: Feil ved henting av sites fra MainManager", e);
