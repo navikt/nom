@@ -21,7 +21,12 @@ public record AppProperties(
         MicrosoftGraph microsoftGraph,
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
         DvhOrds dvhOrds,
-        NomPaarorende nomPaarorende
+        NomPaarorende nomPaarorende,
+        MainManager mainManager
+    ) {}
+
+    public record MainManager(
+        String baseUrl
     ) {}
 
     public record NomProxy(
