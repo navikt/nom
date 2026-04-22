@@ -307,7 +307,6 @@ function FysiskBrukerstedFlyttingTable() {
           background-color: #deecef;
           padding: var(--a-spacing-4) var(--a-spacing-6);
           border-radius: var(--a-border-radius-large);
-          display: grid;
         `}
         gap="4"
       >
