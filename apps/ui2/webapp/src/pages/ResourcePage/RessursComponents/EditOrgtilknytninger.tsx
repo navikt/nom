@@ -628,13 +628,13 @@ function OrgtilknytningForm({
                 <FysiskBrukerstedSelectFormPartNew
                   fysiskeBrukersteder={fysiskeBrukersteder}
                   label="Primært fysisk brukersted"
-                  name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukersted`}
+                  name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukerstedNummer`}
                   size="small"
                 />
 
                 <FysiskBrukerstedSelectMultipleWrapper
                   fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
-                  name={`mappedeOrgtilknytninger.${index}.ytterligereFysiskeBrukersteder`}
+                  name={`mappedeOrgtilknytninger.${index}.additionalFysiskeBrukerstederNummer`}
                 />
               </VStack>
             </div>
@@ -1357,9 +1357,10 @@ function lagOppdaterOrgtilknytningerRequest(
             ? Tilknytningtype.INGEN
             : orgtilknytning.orgtilknytningType,
         sektor: orgtilknytning.sektor,
-        primaryFysiskBrukerstedNummer: orgtilknytning.primaryFysiskBrukersted,
+        primaryFysiskBrukerstedNummer:
+          orgtilknytning.primaryFysiskBrukerstedNummer,
         optionalFysiskBrukersteder:
-          orgtilknytning.ytterligereFysiskeBrukersteder,
+          orgtilknytning.additionalFysiskeBrukerstederNummer,
       }),
     ),
     nyeOrgtilknytninger: nyeOrgtilknytninger.map((orgtilknytning) => ({
@@ -1372,8 +1373,10 @@ function lagOppdaterOrgtilknytningerRequest(
           ? Tilknytningtype.INGEN
           : orgtilknytning.orgtilknytningType,
       sektor: orgtilknytning.sektor ?? ressursSektor,
-      primaryFysiskBrukerstedNummer: orgtilknytning.primaryFysiskBrukersted,
-      optionalFysiskBrukersteder: orgtilknytning.ytterligereFysiskeBrukersteder,
+      primaryFysiskBrukerstedNummer:
+        orgtilknytning.primaryFysiskBrukerstedNummer,
+      optionalFysiskBrukersteder:
+        orgtilknytning.additionalFysiskeBrukerstederNummer,
     })),
     setRessursSluttdato: true,
     setRessursStartdato: setRessursStartdato,
@@ -1465,7 +1468,7 @@ const orgtilknytningSchema = yup.object().shape({
         return required ? !!value : true;
       },
     }),
-  primaryFysiskBrukersted: yup.string().test({
+  primaryFysiskBrukerstedNummer: yup.string().test({
     name: "primary-fysisk-brukersted-obligatorisk-fremtid-aktiv",
     message: "Obligatorisk",
     test: function (value, context) {
@@ -1476,7 +1479,7 @@ const orgtilknytningSchema = yup.object().shape({
       return required ? !!value : true;
     },
   }),
-  ytterligereFysiskeBrukersteder: yup
+  additionalFysiskeBrukerstederNummer: yup
     .array()
     .of(yup.string().defined())
     .test({
@@ -1484,10 +1487,10 @@ const orgtilknytningSchema = yup.object().shape({
       message:
         "Fysisk brukersted valgt som primært kan ikke også være valgt som ytterligere fysisk brukersted",
       test: function (value, context) {
-        const primaryFysiskBrukersted =
-          context?.parent?.primaryFysiskBrukersted ?? undefined;
+        const primaryFysiskBrukerstedNummer =
+          context?.parent?.primaryFysiskBrukerstedNummer ?? undefined;
 
-        return !value?.includes(primaryFysiskBrukersted);
+        return !value?.includes(primaryFysiskBrukerstedNummer);
       },
     }),
 });
