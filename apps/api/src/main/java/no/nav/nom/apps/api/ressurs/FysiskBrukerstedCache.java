@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.ressurs.api.app.NomRemedyIntegrasjonClient;
+import no.nav.nom.apps.api.ressurs.api.app.MainManagerClient;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,11 +18,11 @@ import static no.nav.nom.apps.api.ressurs.FysiskBrukerstedService.CACHE_TTL;
 @Component
 public class FysiskBrukerstedCache {
     @Autowired
-    private NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
+    private MainManagerClient mainManagerClient;
 
     @Cacheable(cacheNames = FYSISK_BRUKERSTED_CACHE_NAME, cacheManager = "cacheManager")
     public List<FysiskBrukersted> getAll() {
-        return nomRemedyIntegrasjonClient.getFysiskeBrukersteder();
+        return mainManagerClient.getFysiskeBrukersteder();
     }
 
     @CacheEvict(value = FYSISK_BRUKERSTED_CACHE_NAME, allEntries = true)
