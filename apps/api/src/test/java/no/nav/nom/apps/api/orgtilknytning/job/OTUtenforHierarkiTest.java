@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -19,7 +20,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
@@ -39,8 +42,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = {OTUtenforHierarki.class})
+@EnableConfigurationProperties(AppProperties.class)
 class OTUtenforHierarkiTest {
     @MockitoBean
     MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
@@ -131,7 +136,7 @@ class OTUtenforHierarkiTest {
     @Test
     @DisplayName("Test på basic ok finn ot utenfor hierarki")
     void test_basic_ok_finn_ot_utenfor_hierarki() {
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(enhet2, enhet3));
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(List.of(enhet2, enhet3));
         when(orgenhetService.getById(enhet1.getId())).thenReturn(Optional.of(enhet1));
         setupOrganisering();
 

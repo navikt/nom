@@ -24,9 +24,11 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -305,6 +307,14 @@ class RessursStateRepositoryFake implements RessursStateRepository {
     public Map<String, RessursState> findByNavidentBulk(List<String> navIdenter) {
         return ressursByNavident.entrySet().stream()
             .filter(entry -> navIdenter.contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<String, RessursState> findByFidBulk(List<String> alleFid) {
+        Set<String> fider = new HashSet<>(alleFid);
+        return ressursByNavident.entrySet().stream()
+            .filter(entry -> fider.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

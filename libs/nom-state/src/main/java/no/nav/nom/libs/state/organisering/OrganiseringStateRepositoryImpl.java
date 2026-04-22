@@ -386,7 +386,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
             .collect(Collectors.toSet());
     }
 
-    private boolean isActive(OrganiseringState organiseringState) {
+    public boolean isActive(OrganiseringState organiseringState) {
         return isGyldigTomNull(organiseringState) || (!isCreatedAndDeletedToday(organiseringState) && isGyldigTomTodayOrLater(organiseringState));
     }
 

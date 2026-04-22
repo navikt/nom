@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDele
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -48,16 +49,18 @@ public class ManuelleAutorizedEvtsrcMeldinger {
     private final DelegertLederStateRepository delegertLederStateRepository;
     private final OrgenhetService orgenhetService;
     private final AuthorizedNavident authorizedNavident;
-    @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
-    @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
+    private final String helfoOrgenhetId;
+    private final String skattOrgenhetId;
 
     public ManuelleAutorizedEvtsrcMeldinger(AuthorizeCommandService authorizeCommandService, DelegertLederStateRepository delegertLederStateRepository,
-                                            OrgenhetService orgenhetService, AuthorizedNavident authorizedNavident
+                                            OrgenhetService orgenhetService, AuthorizedNavident authorizedNavident, AppProperties appProperties
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
         this.orgenhetService = orgenhetService;
         this.authorizedNavident = authorizedNavident;
+        this.helfoOrgenhetId = appProperties.orgenhet().helfoId();
+        this.skattOrgenhetId = appProperties.orgenhet().skattId();
     }
 
     @Operation(

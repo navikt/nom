@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
-@EnableConfigurationProperties(value = AppProperties.class)
+@EnableConfigurationProperties(AppProperties.class)
 @EnableWireMock({
     @ConfigureWireMock(
         filesUnderDirectory = "src/test/resources")

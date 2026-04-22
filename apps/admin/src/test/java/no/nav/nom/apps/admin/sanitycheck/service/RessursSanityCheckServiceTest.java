@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
+import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.Sektor;
@@ -50,6 +51,9 @@ class RessursSanityCheckServiceTest {
     private RessursStateRepository ressursStateRepositoryMock;
 
     @Mock
+    private RessursEvtsrcRepository ressursEvtsrcRepository;
+
+    @Mock
     private OrgEnhetStateRepository orgEnhetStateRepositoryMock;
 
     @Mock
@@ -78,6 +82,7 @@ class RessursSanityCheckServiceTest {
     void setUp() {
         service = new RessursSanityCheckService(
                 ressursStateRepositoryMock,
+                ressursEvtsrcRepository,
                 orgEnhetStateRepositoryMock,
                 organiseringStateRepositoryMock,
                 orgtilknytningStateRepositoryMock,

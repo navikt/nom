@@ -94,7 +94,7 @@ public class StatistikkRestService {
             alleRessurser.stream().filter(RessursState::isEkstern).count()
         );
 
-        var alleOrgEnheter = orgenhetService.getAllEnheterMedOrganisering().stream().toList();
+        var alleOrgEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen().stream().toList();
         var antallLovNoder = orgenhetService.getAllOrgEnheterThatCanHaveRessurser().size();
 
         var antallNavArbeidOgYtelser = getAntallOrgEnhetsTyperBasedOnOrgEnhetsType(alleOrgEnheter, OrgEnhetsType.NAV_ARBEID_OG_YTELSER);
@@ -133,7 +133,7 @@ public class StatistikkRestService {
                 Thread.currentThread().interrupt();
             }
         }
-        var alleOrgEnheterSomErLinjeEllerDriftId = orgenhetService.getAllEnheterMedOrganisering()
+        var alleOrgEnheterSomErLinjeEllerDriftId = orgenhetService.getAktiveEnheterIOrganisasjonen()
             .stream()
             .filter(iOrgenhet -> nonNull(iOrgenhet.getNomNivaa()) &&
                 (iOrgenhet.getNomNivaa().equals(NomNivaa.LINJEENHET) || iOrgenhet.getNomNivaa().equals(NomNivaa.DRIFTSENHET)))

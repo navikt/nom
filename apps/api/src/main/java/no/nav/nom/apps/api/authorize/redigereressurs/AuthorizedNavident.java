@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDele
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -24,7 +25,6 @@ import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -66,11 +66,8 @@ public class AuthorizedNavident {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederService orgEnhetLederService;
     private final TilgangDelegertEmailService tilgangDelegertEmailService;
+    private final AppProperties.Orgenhet orgenhetProperties;
 
-    @Value("${app.orgenhet.nav}") String navOrgenhetId;
-    @Value("${app.orgenhet.helfo}") private String helfoOrgenhetId;
-    @Value("${app.orgenhet.skatt}") private String skattOrgenhetId;
-    @Value("${app.orgenhet.riksrev}") private String riksrevisjonenOrgenhetId;
     // Per leder for alle orgenheter på ARBEIDSOMRÅDE nivå og nedover. For den enkelte leder er alle under-nivåer lagt til.
     //   map <leder navident> -> Set<orgenhet-id>
     private final Map<String, HashSet<String>> lederForOrgenhetSomKanRedigere = new ConcurrentHashMap<>();
@@ -86,7 +83,8 @@ public class AuthorizedNavident {
             RessursStateRepository ressursStateRepository,
             OrgenhetService orgenhetService,
             OrgEnhetLederService orgEnhetLederService,
-            TilgangDelegertEmailService tilgangDelegertEmailService
+            TilgangDelegertEmailService tilgangDelegertEmailService,
+            AppProperties appProperties
     ) {
         this.authorizeCommandService = authorizeCommandService;
         this.delegertLederStateRepository = delegertLederStateRepository;
@@ -96,6 +94,7 @@ public class AuthorizedNavident {
         this.orgenhetService = orgenhetService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.tilgangDelegertEmailService = tilgangDelegertEmailService;
+        this.orgenhetProperties = appProperties.orgenhet();
     }
 
     public List<LederTilgangState> getLederTilgangerForUser() {
@@ -389,7 +388,7 @@ public class AuthorizedNavident {
                 .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, enhetId))
         );
 
-        List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).forEach(
+        List.of(orgenhetProperties.helfoId(), orgenhetProperties.skattId(), orgenhetProperties.riksrevisjonenId()).forEach(
             orgenhetId -> orgenhetService.getById(orgenhetId).flatMap(orgenhet -> orgEnhetLederService.getAktivLederForOrgEnhet(orgenhet.getId()).map(OrgEnhetLederState::navident))
                 .ifPresent(lederNavident -> appendToMapValueSet(nyMapLederToRedigerbarOrgenhet, lederNavident, orgenhetId))
         );
@@ -438,9 +437,9 @@ public class AuthorizedNavident {
     }
 
     private List<String> alleOrgenheterMellomDriftsenhetOgArbeidsomraade() {
-        var arbeidsomraadeEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
+        var arbeidsomraadeEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
             .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.ARBEIDSOMRAADE));
-        var sammarbeidsOrgEnheter = orgenhetService.getByIdBulk(List.of(helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId)).values().stream();
+        var sammarbeidsOrgEnheter = orgenhetService.getByIdBulk(List.of(orgenhetProperties.helfoId(), orgenhetProperties.skattId(), orgenhetProperties.riksrevisjonenId())).values().stream();
 
         Set<String> orgenheter = new HashSet<>();
         Stream.concat(arbeidsomraadeEnheter, sammarbeidsOrgEnheter).forEach(orgenhet -> alleEnheterIHierarkiFraArbeidsomraadeTilDriftsenhet(orgenhet, orgenheter));
@@ -474,7 +473,7 @@ public class AuthorizedNavident {
     }
 
     private List<String> alleEnheterIHierarkiFraDriftsenhet() {
-        var driftsenhetEnheter = orgenhetService.getAllEnheterMedOrganisering().stream()
+        var driftsenhetEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
             .filter(orgenhet -> Objects.equals(orgenhet.getNomNivaa(), NomNivaa.DRIFTSENHET) && orgenhetHarAktivOrganisering(orgenhet.getId()));
         List<String> orgenheter = new ArrayList<>();
         driftsenhetEnheter.forEach(orgenhet -> orgenheter.addAll(alleEnheterIHierarkiFra(orgenhet.getId())));
@@ -528,7 +527,8 @@ public class AuthorizedNavident {
 
     private boolean enhetInnenforHierarki(String orgId) {
         var sti = stiTilRotForEnhet(orgId, true);
-        return Stream.of(navOrgenhetId, helfoOrgenhetId, skattOrgenhetId, riksrevisjonenOrgenhetId).anyMatch(sti::contains);
+        return Stream.of(orgenhetProperties.navId(), orgenhetProperties.helfoId(), orgenhetProperties.skattId(), orgenhetProperties.riksrevisjonenId())
+            .anyMatch(sti::contains);
     }
 
     private <C extends Collection<String>> C beholdKunOrgenheterOverstIHierarkiet(C orgenhetIdList, Supplier<C> outputCollectionSupplier){

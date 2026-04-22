@@ -327,11 +327,11 @@ app:
           - READONLY
           - EXTENDED_READONLY
   orgenhet:
-    nav: sa312u
-    vikafossenId: ru151s
-    helfo: mu405g
-    skatt: ja464g
-    riksrev: ge146b
+    nav-id: sa312u
+    helfo-id: mu405g
+    skatt-id: ja464g
+    riksrevisjonen-id: ge146b
+    vikafossen-id: ru151s
     linjeenhetene: me177r,ju219d,tu734a,sy471r
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
@@ -407,6 +407,9 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
       - navident: Z993907         # Team ISA / Ingebjørg Semb Tørresen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990118         # Team ISA / Michael Venables
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
@@ -550,12 +553,12 @@ app:
   manuelle-ressurser-og-ledere:
     enabled: false
   orgenhet:
-    nav: py437s
-    helfo: je305h
-    skatt: ne938h
-    riksrev: ke602d
+    nav-id: py437s
+    helfo-id: je305h
+    skatt-id: ne938h
+    riksrevisjonen-id: ke602d
+    vikafossen-id: ru664y
     linjeenhetene: ry630r,te464t,se232x,ne994m
-    vikafossenId: ru664y
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
