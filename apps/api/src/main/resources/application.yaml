@@ -415,6 +415,9 @@ app:
       - navident: Z993907         # Team ISA / Ingebjørg Semb Tørresen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
+      - navident: Z990118         # Team ISA / Michael Venables
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
 
       - navident: Z994864         # Team Klage / Kristin Jacobsen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
