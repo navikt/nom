@@ -25,6 +25,7 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
+import type { ComboboxOption } from "@navikt/ds-react/cjs/form/combobox/types";
 import {
   useMutation,
   useQueries,
@@ -46,6 +47,7 @@ import {
 } from "react-hook-form";
 import * as yup from "yup";
 
+import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
   getFysiskeBrukersteder,
   getOrgEnhet,
@@ -417,15 +419,11 @@ function OrgtilknytningForm({
   };
 
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
-
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
-  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) => {
-    return {
-      value: brukersted.brukerstedNr,
-      label: `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}`,
-    };
-  });
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) =>
+    fysiskBrukerstedOptionMapping(brukersted),
+  );
 
   if (isLoading) {
     return (
@@ -1144,19 +1142,29 @@ function FysiskBrukerstedSelectMultipleWrapper({
   fysiskeBrukerstederOptions,
 }: {
   name: string;
-  fysiskeBrukerstederOptions: any;
+  fysiskeBrukerstederOptions: ComboboxOption[];
 }) {
   const { field, fieldState } = useController({
     name,
   });
 
-  const handleToggleSelected = (option: any, isSelected: any) => {
+  const handleToggleSelected = (option: string, isSelected: boolean) => {
     if (isSelected) {
       field.onChange([...(field.value || []), option]);
     } else {
-      field.onChange((field.value || []).filter((v: any) => v !== option));
+      field.onChange((field.value || []).filter((v: string) => v !== option));
     }
   };
+
+  const existingValues = field.value;
+  const selectedOptions =
+    existingValues?.length > 0 && fysiskeBrukerstederOptions?.length > 0
+      ? existingValues.map((value: string) =>
+          fysiskeBrukerstederOptions.find(
+            (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === value,
+          ),
+        )
+      : undefined;
 
   return (
     <Combobox
@@ -1166,6 +1174,7 @@ function FysiskBrukerstedSelectMultipleWrapper({
       onToggleSelected={handleToggleSelected}
       options={fysiskeBrukerstederOptions}
       ref={field.ref}
+      selectedOptions={selectedOptions}
       size="small"
     />
   );
@@ -1333,6 +1342,15 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
       </li>
     </ul>
   );
+}
+
+function fysiskBrukerstedOptionMapping(
+  fysiskBrukersted: FysiskBrukersted,
+): ComboboxOption {
+  return {
+    value: fysiskBrukersted.brukerstedNr,
+    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
+  };
 }
 
 function lagOppdaterOrgtilknytningerRequest(
