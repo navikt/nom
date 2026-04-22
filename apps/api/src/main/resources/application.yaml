@@ -43,6 +43,10 @@ app:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
     main-manager:
       base-url: ${MAIN_MANAGER_BASEURL}
+      username: ${MAIN_MANAGER_USERNAME}
+      password: ${MAIN_MANAGER_PASSWORD}
+      grant-type: password
+      token-path: /restapi/token
     dvh-ords:
       client_-id: ${DVH_ORDS_CLIENT_ID:dvh_client_id}
       client-secret: ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}

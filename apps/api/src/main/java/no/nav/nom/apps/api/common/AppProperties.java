@@ -30,7 +30,11 @@ public record AppProperties(
     ) {}
 
     public record MainManager(
-        String baseUrl
+        String baseUrl,
+        String username,
+        String password,
+        String grantType,
+        String tokenPath
     ) {}
 
     public record NomProxy(

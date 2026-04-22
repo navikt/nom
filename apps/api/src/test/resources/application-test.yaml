@@ -26,6 +26,10 @@ app:
       base-url: http://localhost:${wiremock.server.port}
     main-manager:
       base-url: http://localhost:${wiremock.server.port}
+      username: testuser
+      password: testpassword
+      grant-type: password
+      token-path: /restapi/token
     dvh-ords:
       base-url: http://localhost:${wiremock.server.port}
   granted-authorities:
