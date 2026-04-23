@@ -69,7 +69,7 @@
     "prettier": "3.8.3",
     "stylelint": "16.26.1",
     "stylelint-config-standard": "39.0.1",
-    "swagger-typescript-api": "13.2.16",
+    "swagger-typescript-api": "13.6.10",
     "typescript": "5.9.3",
     "vite": "^7.3.1",
     "vitest": "4.1.4"
