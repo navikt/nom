@@ -8,6 +8,7 @@ import lombok.Builder;
 public record FysiskBrukersted(
     String nr,
     String navn,
+    @Nullable String identification,
     @Nullable String address,
     @Nullable String postnummer,
     @Nullable String poststed,

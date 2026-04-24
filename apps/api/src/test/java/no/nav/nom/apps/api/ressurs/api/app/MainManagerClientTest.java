@@ -35,7 +35,7 @@ public class MainManagerClientTest extends TestBase {
                 )
         );
 
-        var body = new ClassPathResource("mainmanager/sites.json")
+        var body = new ClassPathResource("mainmanager/sites-testdata.json")
             .getContentAsString(StandardCharsets.UTF_8);
 
         stubFor(

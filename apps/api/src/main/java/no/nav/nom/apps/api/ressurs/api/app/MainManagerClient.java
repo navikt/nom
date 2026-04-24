@@ -86,6 +86,7 @@ public class MainManagerClient {
                 .map(item ->  FysiskBrukersted.builder()
                     .nr(item.xid())
                     .navn(item.namePart())
+                    .identification(item.identification())
                     .address(item.address1())
                     .postnummer(item.zipCode())
                     .poststed(item.city())
@@ -113,6 +114,7 @@ public class MainManagerClient {
     public record MainManagerSiteItem(
         @JsonProperty("XID") String xid,
         @JsonProperty("NamePart") String namePart,
+        @JsonProperty("Identification") String identification,
         @JsonProperty("Address1") String address1,
         @JsonProperty("ZipCode") String zipCode,
         @JsonProperty("City") String city,
