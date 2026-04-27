@@ -41,7 +41,6 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -95,7 +94,7 @@ public class OrgtilknytningRestService {
         NomMastered nomMastered,
         AuthResolver authResolver,
         MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
-        FysiskBrukerstedService fysiskBrukerstedService
+        FysiskBrukerstedService fysiskBrukerstedService,
         AppProperties appProperties
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
