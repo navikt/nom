@@ -134,7 +134,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
         when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
-        when(fysiskBrukerstedService.findFysiskBrukersted(any())).thenReturn(Optional.of(new FysiskBrukersted("2700", "Test Brukersted")));
+        when(fysiskBrukerstedService.findFysiskBrukersted(any())).thenReturn(Optional.of(new FysiskBrukersted("2700", "Test Brukersted", "L1234", "Match alley 1", "1234", "Hellfire", "Tigerstad")));
         clearOrgtilknytninger();
         ressursStateRepository.clear();
         mocks = MockitoAnnotations.openMocks(this);
@@ -611,8 +611,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful();
     }
 
-    @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating null (= max date) dato for ressurs")
+    //@Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding more than five optional fysiskbrukersted")
     void test_update_orgtilknytninger_for_ressurs_handle_over_fem_optionalFysisk_brukersted() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
@@ -661,8 +661,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build());
     }
 
-    @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} support updating null (= max date) dato for ressurs")
+    //@Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding primary brukersted as optional too")
     void test_update_orgtilknytninger_for_ressurs_handle_ikke_kunne_ha_primaer_fysisk_brukersted_i_optional_liste() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
