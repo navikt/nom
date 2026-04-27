@@ -221,7 +221,6 @@ class EventsrcToState {
                 parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse),
                 parseNullableFromJson(eventStateAggregate, "primaryFysiskBrukersted"),
                 fysiskBrukerstedList,
-
                 identTypeFromJson != null ? IdentType.valueOf(identTypeFromJson) : null,
                 eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asString() : null,
                 eventStateAggregate.hasNonNull("tilknytningtype") ? Tilknytningtype.valueOf(eventStateAggregate.get("tilknytningtype").asString()) : Tilknytningtype.ANNET

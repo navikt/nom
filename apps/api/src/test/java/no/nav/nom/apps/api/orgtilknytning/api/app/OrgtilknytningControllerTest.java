@@ -14,10 +14,13 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreT
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
+import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -44,9 +47,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -96,6 +101,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @MockitoBean
     RemedyEnhetMapperService remedyEnhetMapperService;
 
+    @MockitoBean
+    FysiskBrukerstedService fysiskBrukerstedService;
+
     @Autowired
     TestTokensGenerator testToken;
 
@@ -126,6 +134,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     void setInitialLoadCompleteAndEnableUnleashAndClearData() {
         when(nomStateRessursListener.hasReadToEndOnStartup()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
+        when(fysiskBrukerstedService.findFysiskBrukersted(any())).thenReturn(Optional.of(new FysiskBrukersted("2700", "Test Brukersted", "L1234", "Match alley 1", "1234", "Hellfire", "Tigerstad")));
         clearOrgtilknytninger();
         ressursStateRepository.clear();
         mocks = MockitoAnnotations.openMocks(this);
@@ -204,7 +213,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         when(unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)).thenReturn(false);
 
         var orgtilknytningToUpdate = orgtilknytningState();
-        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
+        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN)
+            .build()));
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
         when(authorizedNavident.kanBrukerRedigereRessurs(LOGGED_IN_USER_NAVIDENT, orgtilknytningToUpdate.navident())).thenReturn(true);
@@ -245,7 +256,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     @DisplayName("Should update tilknytningtype for orgtilknytning - ny tilgangsvalidering")
     void test_update_orgtilknytning_type_ny_tilgangsvalidering() {
         var orgtilknytningToUpdate = orgtilknytningState();
-        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder().sektor(Sektor.EKSTERN).build()));
+        when(ressursStateRepository.findByNavident(orgtilknytningToUpdate.navident())).thenReturn(Optional.of(ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN)
+            .build()));
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
         when(authorizedNavident.kanBrukerRedigereRessurs(LOGGED_IN_USER_NAVIDENT, orgtilknytningToUpdate.navident())).thenReturn(true);
@@ -308,7 +321,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should allow update tilknytningtype for orgtilknytning if tilknyttet ressurs is UTENLANDSK_KONSULENT og har rett tilgang - ny tilgangsvalidering")
+    @DisplayName(
+        "Should allow update tilknytningtype for orgtilknytning if tilknyttet ressurs is UTENLANDSK_KONSULENT og har rett tilgang - ny tilgangsvalidering"
+    )
     void test_allow_update_orgtilknytning_type_for_utenlandsk_konsulent_med_tilgang_ny_tilgangsvalidering() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false); // Ikke leder tilgang for ressurs
 
@@ -434,7 +449,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(),endreTilknytningtypeRequest())
+        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreTilknytningtypeRequest())
             .expectStatus().isForbidden();
     }
 
@@ -453,7 +468,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(),endreTilknytningtypeRequest())
+        postEndreTilknytningtypeRequest(orgtilknytningToUpdate.fid(), testToken.nomWriteGroupAndNomUiAzp(), endreTilknytningtypeRequest())
             .expectStatus().isForbidden();
     }
 
@@ -530,6 +545,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 newStartdato
             )
             .gyldigTom(newSluttdato)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Set.of("1000", "2000"))
             .build();
 
         var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
@@ -575,6 +592,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 newStartdato
             )
             .gyldigTom(newSluttdato)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Set.of("1000", "2000"))
             .build();
 
         var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
@@ -592,9 +611,106 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful();
     }
 
+    //@Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding more than five optional fysiskbrukersted")
+    void test_update_orgtilknytninger_for_ressurs_handle_over_fem_optionalFysisk_brukersted() {
+        when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
+
+        when(orgEnhetLederService.getEnheterByLeder("X987654")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
+        LocalDate newSluttdato = null;
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Set.of("1000", "2000", "3000", "4000", "5000", "6000"))
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest()
+            .expectBody(StandardResponse.class).isEqualTo(StandardResponse.builder()
+                .message("Listen for fysiske brukersteder kan ikke være mer enn fem elementer")
+                .build());
+    }
+
+    //@Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding primary brukersted as optional too")
+    void test_update_orgtilknytninger_for_ressurs_handle_ikke_kunne_ha_primaer_fysisk_brukersted_i_optional_liste() {
+        when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
+
+        when(orgEnhetLederService.getEnheterByLeder("X987654")).thenReturn(List.of(orgEnhet()));
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.EKSTERN).build();
+
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var newStartdato = existingOrgtilknytning.gyldigFom().plusMonths(1);
+        LocalDate newSluttdato = null;
+
+        var endreOrgtilknytningRequest = endreOrgtilknytningRequest(existingOrgtilknytning).toBuilder()
+            .gyldigFom(
+                newStartdato
+            )
+            .gyldigTom(newSluttdato)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Set.of("1000", "2700"))
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .eksisterendeOrgtilknytninger(List.of(endreOrgtilknytningRequest))
+            .nyeOrgtilknytninger(Collections.emptyList())
+            .setRessursStartdato(true)
+            .setRessursSluttdato(true)
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().isBadRequest();
+    }
+
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke redigere orgtilknytning som er over 6 maaneder gammel for ressurs")
-    void test_rediger_orgtilknytning_som_er_over_to_mnd_gammel() {
+    void test_rediger_orgtilknytning_som_er_over_seks_mnd_gammel() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
@@ -643,7 +759,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning som er under 2 maaneder gammel for ressurs")
-    void test_rediger_orgtilknytning_som_er_under_to_mnd_gammel() {
+    void test_rediger_orgtilknytning_som_er_under_seks_mnd_gammel() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
@@ -834,7 +950,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på ROBOT med robot admin - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på ROBOT med robot admin - ny tilgangsvalidering"
+    )
     void test_rediger_orgtilknytning_som_ikke_er_leder_for_paa_robot_ny_som_robot_admin_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -884,7 +1002,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på ROBOT med NOM admin - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på ROBOT med NOM admin - ny tilgangsvalidering"
+    )
     void test_rediger_orgtilknytning_som_ikke_er_leder_for_paa_robot_ny_som_nom_admin_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -934,7 +1054,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på VIKAFOSSEN med VIKAFOSSEN admin - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan redigere orgtilknytning du ikke er leder for på VIKAFOSSEN med VIKAFOSSEN admin - ny tilgangsvalidering"
+    )
     void test_rediger_orgtilknytning_som_ikke_er_leder_for_paa_vikafossen_ny_som_vikafossen_admin_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -984,7 +1106,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT - gammel tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT - gammel tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_som_ikke_er_leder_for_gammel_tilgangsvalidering() {
         when(unleash.isEnabled(BRUK_NY_TILGANGSVALIDERING)).thenReturn(false);
 
@@ -1035,7 +1159,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_som_ikke_er_leder_for_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1084,7 +1210,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT som NOM ADMIN - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning hvis du ikke er leder for gammel eller ny OT som NOM ADMIN - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_som_ikke_er_leder_for__som_nom_admin_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1134,7 +1262,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning på UTENLANDSK_KONSULENT hvis du ikke er leder for gammel eller ny OT som NOM ADMIN - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning på UTENLANDSK_KONSULENT hvis du ikke er leder for gammel eller ny OT som NOM ADMIN - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_paa_utenlandsk_konsulent_som_ikke_er_leder_for_som_nom_admin_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
@@ -1185,7 +1315,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning på VIKAFOSSEN hvis du er leder for gammel eller ny OT - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning på VIKAFOSSEN hvis du er leder for gammel eller ny OT - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_paa_vikafossen_som_ikke_leder_for_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
@@ -1436,7 +1568,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning for ROBOT hvis du er leder for gammel OT - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan legge til orgtilknytning for ROBOT hvis du er leder for gammel OT - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_for_robot_leder_for_eksisterende_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
@@ -1536,7 +1670,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning for VIKAFOSSEN hvis du er leder for gammel OT - ny tilgangsvalidering")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} kan ikke legge til orgtilknytning for VIKAFOSSEN hvis du er leder for gammel OT - ny tilgangsvalidering"
+    )
     void test_legg_til_orgtilknytning_for_vikafossen_leder_for_eksisterende_ny_tilgangsvalidering() {
         OrgtilknytningStateRepository orgtilknytningStateRepository = Mockito.mock(OrgtilknytningStateRepository.class);
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
@@ -1914,6 +2050,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgtilknytningType(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
             .gyldigTom(LocalDate.now().plusMonths(1))
+            .primaryFysiskBrukerstedNummer("2700")
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
             .build();
 
         var existingOrgtilknytningAnticipatingDolChange = orgtilknytningState().toBuilder()
@@ -1924,6 +2062,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(false)
             .gyldigFom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusDays(1))
             .gyldigTom(existingOrgtilknytningAnticipatingNewDate.gyldigTom().plusMonths(1))
+            .primaryFysiskBrukerstedNummer("2700")
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
             .build();
 
         saveOrgtilknytninger(List.of(
@@ -1946,6 +2086,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .orgEnhetId("4")
             .sektor(tilknyttetRessurs.sektor())
             .tilknytningtype(Tilknytningtype.KONSULENT)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Collections.emptySet())
             .build();
 
         var opprettetOrgtilknytningFid = UUID.randomUUID().toString();
@@ -2202,7 +2344,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is active and has same orgenhetId with OT1 which is also active")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is active and has same orgenhetId with OT1 which is also active"
+    )
     void test_update_orgtilknytninger_duplikate_for_ressurs2() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
 
@@ -2255,7 +2399,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is added and has same orgenhetId with OT1 which is has no end date")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} should give exception when OT2 is added and has same orgenhetId with OT1 which is has no end date"
+    )
     void test_update_orgtilknytninger_duplikate_for_ressurs3() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
         var tilknyttetRessurs = ressursState().toBuilder()
@@ -2307,7 +2453,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should not exception when OT2 is added and has same orgenhetId with OT1 and both are active, but sektor is different")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} should not exception when OT2 is added and has same orgenhetId with OT1 and both are active, but sektor is different"
+    )
     void test_update_orgtilknytninger_duplikate_for_ressurs4() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
         var tilknyttetRessurs = ressursState().toBuilder()
@@ -2468,7 +2616,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                     EndreTilknytningtypeCommand.builder()
                         .fid(opprettetOrgtilknytningFid)
                         .tilknytningtype(leggTilOrgtilknytningRequest.tilknytningtype())
-                        .build())
+                        .build()
+                )
             );
 
         verify(orgtilknytningCommandService, times(2)).endreOrgtilknytningDato(endreOrgtilknytningDatoCommandArgumentCaptor.capture());
@@ -2569,7 +2718,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} Should forbid update orgtilknytning type if user user has 'MUTATE_RESSURS' but is not authorized for ressurs")
+    @DisplayName(
+        "POST /app/orgtilknytninger/forRessurs/{navident} Should forbid update orgtilknytning type if user user has 'MUTATE_RESSURS' but is not authorized for ressurs"
+    )
     void test_update_orgtilknytninger_for_ressurs_forbidden() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(false);
 
@@ -2595,7 +2746,11 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .nyeOrgtilknytninger(List.of(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest))
             .build();
 
-        postOppdaterOrgtilknytningerForRessursRequest(tilknyttetRessurs.navident(),testToken.nomWriteGroupAndNomUiAzp(),oppdaterOrgtilknytningerForRessursRequest)
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
             .expectStatus().isForbidden();
     }
 
@@ -2620,7 +2775,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                         .navident(tilknyttetRessurs.navident())
                         .orgtilknytningType(Tilknytningtype.KONSULENT)
                         .build()
-        ).toList());
+                ).toList());
 
         postOppdaterOrgtilknytningerForRessursRequest(
             tilknyttetRessurs.navident(),
@@ -2965,7 +3120,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
 
-
     @ParameterizedTest(name = "existing fids: {0} \noppdaterOrgtilknytningerForRessursRequest: {1}")
     @DisplayName("Should return 400 if eksisterendeOrgtilknytninger does not contain exactly all existing orgtilknytninger")
     @MethodSource("test_oppdaterOrgtilknytningerForRessursRequest_contains_exactly_all_existing_orgtilknytninger_input")
@@ -3162,12 +3316,45 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         LocalDate flytteDato = LocalDate.now();
 
-        var orgtilknytningState1 = new OrgtilknytningState("fid1", "navident1", "orgEnhetId1", Sektor.NAV_STATLIG, false, flytteDato.minusMonths(1), null, Tilknytningtype.FAST, null, "S123456");
-        var orgtilknytningState2 = new OrgtilknytningState("fid2", "navident2", "orgEnhetId2", Sektor.NAV_STATLIG, true, flytteDato.plusMonths(1), null, Tilknytningtype.FAST, null, "S123456");
+        var orgtilknytningState1 = new OrgtilknytningState(
+            "fid1",
+            "navident1",
+            "orgEnhetId1",
+            Sektor.NAV_STATLIG,
+            false,
+            flytteDato.minusMonths(1),
+            null,
+            Tilknytningtype.FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            "S123456"
+        );
+        var orgtilknytningState2 = new OrgtilknytningState(
+            "fid2",
+            "navident2",
+            "orgEnhetId2",
+            Sektor.NAV_STATLIG,
+            true,
+            flytteDato.plusMonths(1),
+            null, Tilknytningtype.FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            "S123456"
+        );
         saveOrgtilknytninger(List.of(orgtilknytningState1, orgtilknytningState2));
 
-        when(orgenhetService.getById("orgEnhetId1")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_1").id("orgEnhetId1").navn("Enhet 1").build())));
-        when(orgenhetService.getById("orgEnhetId2")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder().fid("FID_2").id("orgEnhetId2").navn("Enhet 2").build())));
+        when(orgenhetService.getById("orgEnhetId1")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder()
+            .fid("FID_1")
+            .id("orgEnhetId1")
+            .navn("Enhet 1")
+            .build())));
+        when(orgenhetService.getById("orgEnhetId2")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder()
+            .fid("FID_2")
+            .id("orgEnhetId2")
+            .navn("Enhet 2")
+            .build())));
 
         // Ny enhet
         when(orgenhetService.getById("newOrgEnhetId")).thenReturn(Optional.of(new OrgEnhet(
@@ -3230,7 +3417,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .tilknytningtype(Tilknytningtype.KONSULENT)
             .gyldigFom(LocalDate.now())
             .gyldigTom(LocalDate.now().plusMonths(12))
-            .tilknytningtype(null)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Collections.emptySet())
             .build();
     }
 
@@ -3242,6 +3430,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .gyldigTom(LocalDate.now().plusMonths(1))
             .tilknytningtype(Tilknytningtype.KONSULENT)
             .erDagligOppfolging(false)
+            .primaryFysiskBrukerstedNummer("2700")
+            .optionalFysiskBrukersteder(Collections.emptySet())
             .build();
     }
 
@@ -3253,6 +3443,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .erDagligOppfolging(fromOrgtilknytningState.erDagligOppfolging())
             .sektor(fromOrgtilknytningState.sektor())
             .tilknytningtype(fromOrgtilknytningState.orgtilknytningType())
+            .primaryFysiskBrukerstedNummer(fromOrgtilknytningState.primaryFysiskBrukerstedNummer())
+            .optionalFysiskBrukersteder(new HashSet<>(fromOrgtilknytningState.additionalFysiskeBrukerstederNummer()))
             .build();
     }
 

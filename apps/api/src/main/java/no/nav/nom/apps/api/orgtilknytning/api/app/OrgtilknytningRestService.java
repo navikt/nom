@@ -6,6 +6,8 @@ import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.DuplicateFysiskBrukersted;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTilknytningtypeException;
@@ -13,12 +15,13 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTy
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
-import no.nav.nom.apps.api.ressurs.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -38,11 +41,11 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -79,6 +82,7 @@ public class OrgtilknytningRestService {
     private final RessursCommandService ressursCommandService;
     private final AuthResolver authResolver;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
+    private final FysiskBrukerstedService fysiskBrukerstedService;
 
     private String vikafossenOrgEnhetId;
 
@@ -90,6 +94,7 @@ public class OrgtilknytningRestService {
         NomMastered nomMastered,
         AuthResolver authResolver,
         MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
+        FysiskBrukerstedService fysiskBrukerstedService,
         AppProperties appProperties
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -99,6 +104,7 @@ public class OrgtilknytningRestService {
         this.nomMastered = nomMastered;
         this.authResolver = authResolver;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
+        this.fysiskBrukerstedService = fysiskBrukerstedService;
 
         this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
     }
@@ -256,7 +262,7 @@ public class OrgtilknytningRestService {
         RessursState ressursState
     ) {
         validateEndreOrgtilknytningUnderSeksMaaneder(oppdaterOrgtilknytningerForRessursRequest);
-        validateHasFysiskBrukersted(ressursState);
+        //validateFysiskBrukersted(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
 
@@ -269,10 +275,39 @@ public class OrgtilknytningRestService {
         validateOrgtilknytningForVikafossen(oppdaterOrgtilknytningerForRessursRequest, ressursState);
     }
 
-    private void validateHasFysiskBrukersted(RessursState ressursState) {
-        if (isNull(ressursState.primaryFysiskBrukersted()) || ressursState.primaryFysiskBrukersted().isEmpty()) {
-            FysiskBrukerstedNotFoundException.fysiskBrukerstedIsNull(ressursState.visningsnavn().getFormattedVisningsnavn(), ressursState.navident());
-        }
+    private void validateFysiskBrukersted(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(eksisterendeOrgtilknytning -> {
+            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())) return;
+
+            var primaryFysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())
+                .orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer()));
+
+            if (isNull(eksisterendeOrgtilknytning.optionalFysiskBrukersteder()) || eksisterendeOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) return;
+
+            if (eksisterendeOrgtilknytning.optionalFysiskBrukersteder().size() > 5) {
+                throw new IllegalArgumentException("Listen for fysiske brukersteder kan ikke være mer enn fem elementer");
+            }
+            if (eksisterendeOrgtilknytning.optionalFysiskBrukersteder()
+                .stream()
+                .anyMatch(fysiskBrukersted -> fysiskBrukersted.equals(primaryFysiskBrukersted.nr()))) {
+                throw DuplicateFysiskBrukersted.duplicatePrimaryFysiskBrukersted(primaryFysiskBrukersted.nr(), primaryFysiskBrukersted.navn());
+            }
+        });
+
+        oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(nyOrgtilknytning -> {
+            var primaryFysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(nyOrgtilknytning.primaryFysiskBrukerstedNummer())
+                .orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(nyOrgtilknytning.primaryFysiskBrukerstedNummer()));
+
+            if (isNull(nyOrgtilknytning.optionalFysiskBrukersteder()) || nyOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) return;
+
+            if (nyOrgtilknytning.optionalFysiskBrukersteder().size() > 5) {
+                throw new IllegalArgumentException("Listen for fysiske brukersteder kan ikke være emr enn fem elementer");
+            }
+
+            if (nyOrgtilknytning.optionalFysiskBrukersteder().stream().anyMatch(fysiskBrukersted -> fysiskBrukersted.equals(primaryFysiskBrukersted.nr()))) {
+                throw DuplicateFysiskBrukersted.duplicatePrimaryFysiskBrukersted(primaryFysiskBrukersted.nr(), primaryFysiskBrukersted.navn());
+            }
+        });
     }
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
@@ -529,10 +564,36 @@ public class OrgtilknytningRestService {
                 }
             }
         });
+
+        var optionalFysiskBrukerstederAreEqual = optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
+        var optionalFysiskeBrukersteder = optionalFysiskBrukerstederAreEqual ? new ArrayList<String>() : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
+
+        if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
+            || !optionalFysiskBrukerstederAreEqual) {
+            orgtilknytningCommandService.endreFysiskeBrukersted(
+                new EndreFysiskeBrukerstederCommand(
+                    orgtilknytningStateBeforeChanges.fid(),
+                    orgtilknytningStateBeforeChanges.navident(),
+                    orgtilknytningStateBeforeChanges.orgEnhetId(),
+                    endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
+                    optionalFysiskeBrukersteder,
+                    inputMetadata
+                )
+            );
+        }
     }
 
-    // TODO: Det burde det muligens lages et nytt event 'OrgtilknytningOpprettetEventV2' som inneholder felter for erDagligOppfolging og orgtilknytningType
-    //  slik at man kun trenger å sende ett i event i sammenheng med opprettelse av en ny orgtilknytning
+    private static boolean optionalFysiskBrukerstederAreEqual(
+        EndreOrgtilknytningRequest endreOrgtilknytningRequest,
+        OrgtilknytningState orgtilknytningStateBeforeChanges
+    ) {
+        return new HashSet<>(requireNonNullElse(
+            orgtilknytningStateBeforeChanges.additionalFysiskeBrukerstederNummer(),
+            List.of()
+        )).equals(new HashSet<>(
+            requireNonNullElse(endreOrgtilknytningRequest.optionalFysiskBrukersteder(), List.of())));
+    }
+
     private void leggTilOrgtilknytningForRessurs(String navident, LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
 
         var inputMetadata = new InputMetadata(
@@ -608,6 +669,17 @@ public class OrgtilknytningRestService {
                     .build()
             );
         }
+
+        orgtilknytningCommandService.endreFysiskeBrukersted(
+            new EndreFysiskeBrukerstederCommand(
+                opprettetOrgtilknytningFid,
+                navident,
+                leggTilOrgtilknytningRequest.orgEnhetId(),
+                leggTilOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
+                leggTilOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList(),
+                inputMetadata
+            )
+        );
     }
 
     private void oppdaterRessursSluttdato(
@@ -663,7 +735,9 @@ public class OrgtilknytningRestService {
                 && Objects.equals(endreOrgtilknytningRequest.gyldigTom(), currentOrgtilknytningState.gyldigTom())
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Objects.equals(endreOrgtilknytningRequest.tilknytningtype(), currentOrgtilknytningState.orgtilknytningType())
-                && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor()))
+                && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor())
+                && Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), currentOrgtilknytningState.primaryFysiskBrukerstedNummer())
+                && optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, currentOrgtilknytningState))
         );
     }
 
