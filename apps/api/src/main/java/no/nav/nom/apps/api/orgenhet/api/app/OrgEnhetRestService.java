@@ -112,7 +112,7 @@ public class OrgEnhetRestService {
         final var opprettOrgEnhet = new OpprettOrgEnhet(
             orgEnhetIdGenerator.newId(),
             navn,
-            opprettOrgEnhetRequest.gyldigFom().isAfter(LocalDate.now()) ? LocalDate.now() : opprettOrgEnhetRequest.gyldigFom(),
+            opprettOrgEnhetRequest.gyldigFom(),
             overordnetOrgEnhet.getFid(),
             ressursState.fid(),
             inputMetadata
