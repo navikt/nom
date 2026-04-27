@@ -14,6 +14,7 @@ import { RessursMedOTUtenAktivEnhet } from "~/sanitychecks/Ressurs/RessursMedOTU
 import { RessursRoboter } from "~/sanitychecks/Ressurs/RessursRoboter.tsx";
 import { RessursSluttetLederForOrgenhet } from "~/sanitychecks/Ressurs/RessursSluttetLederForOrgenhet.tsx";
 import { RessursSluttetMedAktivOT } from "~/sanitychecks/Ressurs/RessursSluttetMedAktivOT.tsx";
+import { RessursTekniskSlettet } from "~/sanitychecks/Ressurs/RessursTekniskSlettet.tsx";
 import { RessursUlikSluttdatoOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUlikSluttdatoOrgtilknytning.tsx";
 import { RessursUtenOrgtilknytning } from "~/sanitychecks/Ressurs/RessursUtenOrgtilknytning.tsx";
 
@@ -91,6 +92,9 @@ function ListSelector(props: { selected: string }) {
     case "DuplikateRessurshendelser": {
       return <DuplikateRessursHendelser />;
     }
+    case "RessursTekniskSlettet": {
+      return <RessursTekniskSlettet />;
+    }
     default: {
       return <></>;
     }
@@ -138,6 +142,9 @@ function RessursSanityChecks() {
         </option>
         <option value="DuplikateRessurshendelser">
           Duplikate ressurs-hendelser
+        </option>
+        <option value="RessursTekniskSlettet">
+          Ressurser som er teknisk slettet, men i State
         </option>
       </Select>
       <ListSelector selected={selected} />

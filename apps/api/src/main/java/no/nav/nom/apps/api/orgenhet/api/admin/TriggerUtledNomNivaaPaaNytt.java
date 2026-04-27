@@ -4,6 +4,7 @@ package no.nav.nom.apps.api.orgenhet.api.admin;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
@@ -42,12 +43,12 @@ public class TriggerUtledNomNivaaPaaNytt {
     public TriggerUtledNomNivaaPaaNytt(OrgEnhetNomNivaaHandler orgEnhetNomNivaaHandler,
                                        DvhStartupLoadMonitor dvhStartupLoadMonitor,
                                        OrgenhetService orgenhetService,
-                                       @Value("${app.orgenhet.nav}") String nav
+                                       AppProperties appProperties
                                        ) {
         this.orgEnhetNomNivaaHandler = orgEnhetNomNivaaHandler;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.orgenhetService = orgenhetService;
-        this.nav = nav;
+        this.nav = appProperties.orgenhet().navId();
     }
 
     @Operation(
@@ -56,7 +57,7 @@ public class TriggerUtledNomNivaaPaaNytt {
     )
     @GetMapping()
     public ResponseEntity<String> utledNomNivaPaaNytt(@RequestParam(required = false) String orgEnhetId) {
-        var orgenheterToProcess = orgenhetService.getAllEnheterMedOrganisering().stream()
+        var orgenheterToProcess = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
             .filter(orgEnhetState -> orgEnhetId == null || orgEnhetState.getId().equals(orgEnhetId))
             .filter(iOrgenhet -> !iOrgenhet.getId().equals(nav))
             .map(iOrgenhet -> OrgEnhetState.builder()

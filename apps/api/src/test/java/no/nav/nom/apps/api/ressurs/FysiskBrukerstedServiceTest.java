@@ -136,8 +136,8 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted("1234", "Der"),
-                new FysiskBrukersted("9876", "Her")
+                FysiskBrukersted.builder().nr("1234").navn("Der").build(),
+                FysiskBrukersted.builder().nr("9876").navn("Her").build()
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
@@ -174,8 +174,8 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
@@ -214,8 +214,8 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
@@ -274,8 +274,8 @@ class FysiskBrukerstedServiceTest {
         );
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
         when(ressursStateRepositoryMock.findByNavident(navident1)).thenReturn(Optional.of(ressurs1));
@@ -298,8 +298,8 @@ class FysiskBrukerstedServiceTest {
         when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
 
@@ -319,8 +319,8 @@ class FysiskBrukerstedServiceTest {
         when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
 
@@ -341,8 +341,8 @@ class FysiskBrukerstedServiceTest {
         when(ressursStateRepositoryMock.findByNavident(ressurs2.navident())).thenReturn(Optional.of(ressurs2));
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted(fysiskBrukerstedToMatch, "Der"),
-                new FysiskBrukersted(fysiskBrukerstedNotToMatch, "Der")
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Der").build()
             )
         );
         var failed = fysiskBrukerstedService.flyttRessurserTilFysiskBrukersted(List.of("FINNES IKKE", ressurs2.navident()), fysiskBrukerstedToMatch, null);
@@ -355,8 +355,8 @@ class FysiskBrukerstedServiceTest {
     void fysiskBrukerstedExists() {
         when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
             List.of(
-                new FysiskBrukersted("1234", "Der"),
-                new FysiskBrukersted("9876", "Her")
+                FysiskBrukersted.builder().nr("1234").navn("Der").build(),
+                FysiskBrukersted.builder().nr("9876").navn("Her").build()
             )
         );
 

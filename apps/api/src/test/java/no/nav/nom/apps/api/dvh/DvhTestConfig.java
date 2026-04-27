@@ -53,7 +53,7 @@ import tools.jackson.databind.json.JsonMapper;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
 })
-@EnableConfigurationProperties(value = AppProperties.class)
+@EnableConfigurationProperties(AppProperties.class)
 public class DvhTestConfig {
     @Bean
     RessursStateRepository ressursStateRepository() {

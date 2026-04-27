@@ -1,17 +1,19 @@
 package no.nav.nom.apps.admin.sanitycheck.service;
 
 import no.nav.nom.apps.admin.PeriodeUtil;
-import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse;
+import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedEnhet;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursMedFlereDOL;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningKoblingInfo;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursOrgtilknytningUlikSluttdato;
+import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse;
 import no.nav.nom.apps.admin.sanitycheck.dto.ressurs.RobotRessurs;
 import no.nav.nom.apps.admin.webclient.nomapiclient.NomApiClient;
 import no.nav.nom.apps.admin.webclient.nomremedyapiclient.NomRemedyApiClient;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -53,6 +55,7 @@ import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
 public class RessursSanityCheckService {
     private static final Logger log = LoggerFactory.getLogger(RessursSanityCheckService.class);
     private final RessursStateRepository ressursStateRepository;
+    private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
@@ -62,6 +65,7 @@ public class RessursSanityCheckService {
     private final OrgEnhetSanityCheckService  orgEnhetSanityCheckService;
 
     public RessursSanityCheckService(RessursStateRepository ressursStateRepository,
+                                     RessursEvtsrcRepository ressursEvtsrcRepository,
                                      OrgEnhetStateRepository orgEnhetStateRepository,
                                      OrganiseringStateRepository organiseringStateRepository,
                                      OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -71,6 +75,7 @@ public class RessursSanityCheckService {
                                      OrgEnhetSanityCheckService orgEnhetSanityCheckService
     ) {
         this.ressursStateRepository = ressursStateRepository;
+        this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -581,7 +586,7 @@ public class RessursSanityCheckService {
         for(OrgEnhetState orgEnhet : orgEnheterMedOrganisering) {
             validerEnhetsLedereSomHarSluttet(orgEnhet, ressurserMedSluttdatoPassert).ifPresent(ressursState -> {
                 if (!alleOrgEnheterMedLederSomHarSluttet.containsKey(ressursState)) {
-                    alleOrgEnheterMedLederSomHarSluttet.computeIfAbsent(ressursState, org -> new ArrayList<>()).add(orgEnhet);
+                    alleOrgEnheterMedLederSomHarSluttet.computeIfAbsent(ressursState, _ -> new ArrayList<>()).add(orgEnhet);
                 } else {
                     alleOrgEnheterMedLederSomHarSluttet.get(ressursState).add(orgEnhet);
                 }
@@ -594,5 +599,16 @@ public class RessursSanityCheckService {
     private Optional<RessursState> validerEnhetsLedereSomHarSluttet(OrgEnhetState orgEnhet, Map<String, RessursState> alleRessurserWithSluttDatoBeforeToday) {
         return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhet.id())
             .map(leder -> alleRessurserWithSluttDatoBeforeToday.get(leder.navident()));
+    }
+
+    public List<RessursState> ressurserSomErTekniskSlettetSomFortsattFinnes() {
+        var alleTekniskSlettedeRessurser = ressursEvtsrcRepository.getRessursEvtsrc().stream()
+            .filter(ressursEvent -> ressursEvent instanceof RessursTekniskSlettetEventV1)
+            .map(Event::getFid)
+            .toList();
+
+        log.info("Antall teknisk slettede: {}", alleTekniskSlettedeRessurser.size());
+
+        return ressursStateRepository.findByFidBulk(alleTekniskSlettedeRessurser).values().stream().toList();
     }
 }

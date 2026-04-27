@@ -2,12 +2,16 @@ package no.nav.nom.apps.api.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+import java.util.Set;
+
 @ConfigurationProperties("app")
 public record AppProperties(
-        Clients clients,
-        String name,
-        EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring,
-        DollyRessurs dollyRessurs
+    Clients clients,
+    String name,
+    EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring,
+    DollyRessurs dollyRessurs,
+    Orgenhet orgenhet
 ) {
 
     public boolean isSandbox() {
@@ -21,7 +25,16 @@ public record AppProperties(
         MicrosoftGraph microsoftGraph,
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
         DvhOrds dvhOrds,
-        NomPaarorende nomPaarorende
+        NomPaarorende nomPaarorende,
+        MainManager mainManager
+    ) {}
+
+    public record MainManager(
+        String baseUrl,
+        String username,
+        String password,
+        String grantType,
+        String tokenPath
     ) {}
 
     public record NomProxy(
@@ -78,5 +91,14 @@ public record AppProperties(
     public record DollyRessurs(
         String orgenhetId,
         String fysiskBrukerstedNr
+    ) {}
+
+    public record Orgenhet(
+        String navId,
+        String helfoId,
+        String skattId,
+        String riksrevisjonenId,
+        String vikafossenId,
+        Set<String> linjeenhetene
     ) {}
 }

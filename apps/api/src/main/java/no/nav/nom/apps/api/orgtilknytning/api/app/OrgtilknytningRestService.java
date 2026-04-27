@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -84,7 +85,6 @@ public class OrgtilknytningRestService {
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final FysiskBrukerstedService fysiskBrukerstedService;
 
-    @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
 
     public OrgtilknytningRestService(
@@ -96,6 +96,7 @@ public class OrgtilknytningRestService {
         AuthResolver authResolver,
         MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
         FysiskBrukerstedService fysiskBrukerstedService
+        AppProperties appProperties
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -105,6 +106,8 @@ public class OrgtilknytningRestService {
         this.authResolver = authResolver;
         this.masseflyttOrgtilknytningerService = masseflyttOrgtilknytningerService;
         this.fysiskBrukerstedService = fysiskBrukerstedService;
+
+        this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
@@ -310,14 +313,15 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningTypeSektorCombination(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
+            var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid())
+                .orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
             if (!Objects.equals(origOT.orgtilknytningType(), endreOrgtilknytningRequest.tilknytningtype())) {
-                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor());
+                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor(), endreOrgtilknytningRequest.fid());
             }
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(nyeOrgtilknytningRequest ->
-            validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor())
+            validateOrgtilknytningTypeSektorCombination(nyeOrgtilknytningRequest.tilknytningtype(), nyeOrgtilknytningRequest.sektor(), "ny_fid")
         );
     }
 
@@ -809,7 +813,7 @@ public class OrgtilknytningRestService {
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
         if (nonNull(endreTilknytningtypeRequest.tilknytningtype())) {
-            validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor());
+            validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor(), tilknyttetRessurs.navident());
         }
 
         orgtilknytningCommandService.endreTilknytningtype(
@@ -850,7 +854,7 @@ public class OrgtilknytningRestService {
         );
     }
 
-    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
+    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor, String otFidOrNavident) {
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
             Sektor.EKSTERN, List.of(
                 Tilknytningtype.KONSULENT,
@@ -877,10 +881,13 @@ public class OrgtilknytningRestService {
             )
         );
 
-        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
-            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
+        if (sektor == null || !allowedOrgtilknytningTypeForSektorMap.containsKey(sektor))  {
+            throw InvalidOrgtilknytningSektorException.sektorIsNullOrInvalidForFidOrNavident(sektor, otFidOrNavident);
         }
 
+        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
+            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor, otFidOrNavident);
+        }
     }
 
     public boolean kanEndreOrgtilknytning(IdentType identType, String navident) {

@@ -30,15 +30,6 @@ public class DvhService {
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederService orgEnhetLederService;
 
-    Set<String> eksludeAlerts = Set.of(
-        "HELFO-Helfo-ORGNIV0",
-        "NAV-NAV-ORGNIV0",
-        "RIKSREVISJON-Riksrevisjonen-ORGNIV0",
-        "SKATT-Skattedirektoratet-ORGNIV0",
-        "VIKAFOSSEN-VikaFossen-ORGNIV0",
-        "2013003-Alta - Kvanangen - Loppa avdeling Arbeidsinkludering-ORGENHET" // Gammel 'feilentry' i U4 - don't care
-    );
-
     public DvhService(
         RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService, OrgEnhetLederService orgEnhetLederService
@@ -88,53 +79,5 @@ public class DvhService {
         log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
         log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
-    }
-
-    // TODO: Denne burde løses annerledes - via lytting på endringer i organiseringState
-    public void setOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
-        val cachedEnheter =
-            orgenhetService.getAllEnheter().stream()
-                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
-                .values().stream()
-                .map(orgenheter -> orgenheter.stream()
-                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                    .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                )
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
-
-        var organiseringerMedMatchPaaOrgenhet = organiseringer.stream()
-            .distinct()
-            .filter(o -> {
-                final var overEnhet = cachedEnheter.get(o.uniqueAgressoIdOver());
-                final var underEnhet = cachedEnheter.get(o.uniqueAgressoIdUnder());
-                String msg = "Organisering relasjon mislyktes, overenhet: %s, underenhet: %s, "
-                    .formatted(o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
-                if (overEnhet == null && underEnhet == null) {
-                    msg += "Over- og Underenhet mangler";
-                } else if (overEnhet == null) {
-                    msg += "Overenhet mangler";
-                } else if (underEnhet == null) {
-                    msg += "Underenhet mangler";
-                } else {
-                    return true;
-                }
-                if (!eksludeAlerts.contains(o.uniqueAgressoIdUnder())) {
-                    log.warn(msg);
-                }
-                return false;
-            })
-            .toList();
-
-        var overEnheter = organiseringerMedMatchPaaOrgenhet.stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
-        var underEnheter = organiseringerMedMatchPaaOrgenhet.stream().map(o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
-
-        // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
-        var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())
-            .filter(Objects::nonNull)
-            .distinct()
-            .toList();
-        orgenhetService.setOrganiserteEnheter(organiserteEnheter);
     }
 }
