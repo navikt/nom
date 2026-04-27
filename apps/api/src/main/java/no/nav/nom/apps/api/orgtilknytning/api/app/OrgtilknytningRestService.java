@@ -135,8 +135,6 @@ public class OrgtilknytningRestService {
         var tilknyttetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
 
-        log.info("LOGGER OT: {}", oppdaterOrgtilknytningerForRessursRequest);
-
         validateOppdaterOrgtilknytningerForRessursRequest(oppdaterOrgtilknytningerForRessursRequest, tilknyttetRessurs);
 
         var existingOrgtilknytningerForRessurs = orgtilknytningStateRepository.findByNavident(navident).stream()
@@ -262,7 +260,7 @@ public class OrgtilknytningRestService {
         RessursState ressursState
     ) {
         validateEndreOrgtilknytningUnderSeksMaaneder(oppdaterOrgtilknytningerForRessursRequest);
-        validateFysiskBrukersted(oppdaterOrgtilknytningerForRessursRequest);
+        //validateFysiskBrukersted(oppdaterOrgtilknytningerForRessursRequest);
         validateChronologicalDates(oppdaterOrgtilknytningerForRessursRequest);
         validateNoOverlappingDagligeOppfolginger(oppdaterOrgtilknytningerForRessursRequest);
 
