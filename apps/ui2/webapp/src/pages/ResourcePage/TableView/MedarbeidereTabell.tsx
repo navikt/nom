@@ -1,10 +1,14 @@
 import { css } from "@emotion/react";
-import { VStack } from "@navikt/ds-react";
+import { Table, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
-import { getFysiskeBrukersteder } from "~/api/react-query-endpoints";
+import {
+  getFysiskeBrukersteder,
+  getRessurserForFysiskBrukersted,
+} from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 
@@ -37,11 +41,74 @@ function MedarbeiderTabell() {
       `}
       gap="4"
     >
-      <FysiskBrukerstedSelect
-        fysiskeBrukersteder={fysiskeBrukersteder}
-        onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
-        value={fysiskBrukerstedFilter}
-      />
+      <div
+        css={css`
+          width: 50%;
+        `}
+      >
+        <FysiskBrukerstedSelect
+          fysiskeBrukersteder={fysiskeBrukersteder}
+          isClearable
+          onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
+          value={fysiskBrukerstedFilter}
+        />
+      </div>
+
+      <TabellInner fysiskBrukerstedNr={fysiskBrukerstedFilter} />
     </VStack>
+  );
+}
+
+function TabellInner({ fysiskBrukerstedNr }: { fysiskBrukerstedNr: string }) {
+  const getFysiskBrukerstedRessurserQuery = useQuery({
+    queryKey: getRessurserForFysiskBrukersted.queryKey(fysiskBrukerstedNr),
+    queryFn: () => getRessurserForFysiskBrukersted.queryFn(fysiskBrukerstedNr),
+    enabled: !!fysiskBrukerstedNr,
+  });
+
+  const fysiskBrukerstedRessurser = getFysiskBrukerstedRessurserQuery.data;
+
+  console.log(fysiskBrukerstedRessurser);
+
+  return (
+    <Table
+      css={css`
+        background-color: #fff;
+        padding: 6px;
+        border-radius: 5px;
+
+        --ac-table-row-border: #071a3636;
+      `}
+      zebraStripes
+    >
+      <Table.Header
+        css={css`
+          height: 48px;
+          border-bottom: 2px;
+        `}
+      >
+        <Table.Row>
+          <Table.ColumnHeader scope="col">Nav-ident</Table.ColumnHeader>
+
+          <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
+        </Table.Row>
+      </Table.Header>
+
+      <Table.Body>
+        {fysiskBrukerstedRessurser?.map((ressurs) => (
+          <Table.Row
+            css={css`
+              --ac-table-row-border: none;
+              height: 48px;
+              border-width: 0 0 1px;
+            `}
+            key={ressurs.navident}
+          >
+            <Table.DataCell>{ressurs.navident}</Table.DataCell>
+            <Table.DataCell>{ressurs.visningsnavn.fornavn}</Table.DataCell>{" "}
+          </Table.Row>
+        ))}
+      </Table.Body>
+    </Table>
   );
 }
