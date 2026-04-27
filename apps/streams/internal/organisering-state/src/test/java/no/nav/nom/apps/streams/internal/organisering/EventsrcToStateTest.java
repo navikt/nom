@@ -3,6 +3,7 @@ package no.nav.nom.apps.streams.internal.organisering;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEndretNavnEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -146,6 +147,32 @@ public class EventsrcToStateTest {
         Assertions.assertThat(outputTopic.isEmpty()).isTrue();
     }
 
+    @Test
+    @DisplayName("OrganiseringEndretNavn event endrer navn i State")
+    void OrganiseringEndretEvent_endrer_navn_i_state_topic() {
+        final OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData eventDataOpprett = getOpprettetEventData();
+        final OrganiseringEvent eventOpprett = getOpprettetOrganiseringEvent(eventDataOpprett);
+
+        final OrganiseringEndretNavnEventV1.OrganiseringEndretNavnEventData endretNavnEventData = getEndretNavnEventData(eventDataOpprett.id(), "navn 2.0");
+        final OrganiseringEvent navnEndret = getEndretNavnEvent(eventOpprett.getFid(), endretNavnEventData);
+
+        final OrganiseringState expectedNavnEndret = new OrganiseringState(
+            eventOpprett.getFid(),
+            eventDataOpprett.id(),
+            endretNavnEventData.navn(),
+            eventDataOpprett.idOver(),
+            eventDataOpprett.navnOver(),
+            eventDataOpprett.gyldigFom(),
+            eventDataOpprett.gyldigTom()
+        );
+
+        final List<OrganiseringEvent> inputList = Arrays.asList(eventOpprett, navnEndret);
+        inputTopic.pipeValueList(inputList);
+
+        Assertions.assertThat(outputTopic.readValuesToList()).contains(expectedNavnEndret);
+        Assertions.assertThat(outputTopic.isEmpty()).isTrue();
+    }
+
     private void setupKafkaTransformer() {
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
@@ -225,6 +252,21 @@ public class EventsrcToStateTest {
     private OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData getAvsluttEventData(LocalDate gyldigTom) {
         return new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
             gyldigTom
+        );
+    }
+
+    private OrganiseringEvent getEndretNavnEvent(String fid, OrganiseringEndretNavnEventV1.OrganiseringEndretNavnEventData eventData) {
+        return new OrganiseringEndretNavnEventV1(
+            fid,
+            eventData,
+            (Event.Metadata) null
+        );
+    }
+
+    private OrganiseringEndretNavnEventV1.OrganiseringEndretNavnEventData getEndretNavnEventData(String id, String navn) {
+        return new OrganiseringEndretNavnEventV1.OrganiseringEndretNavnEventData(
+            id,
+            navn
         );
     }
 

@@ -3,9 +3,11 @@ package no.nav.nom.apps.api.organisering.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.KorrigerOrganiseringNavn;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEndretNavnEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
 import org.slf4j.Logger;
@@ -29,6 +31,20 @@ public class OrganiseringEventCommandService {
         String fid = PrefixedUlidCreator.createOrganiseringUlid();
         eventProducer.sendMessage(getOpprettEvent(fid, opprettOrganiseringCmd));
         logger.debug("Sendt opprettOrganisering: command={}", opprettOrganiseringCmd);
+    }
+
+    public void korrigerOrganiseringNavn(String fid, KorrigerOrganiseringNavn korrigerOrganiseringNavn) {
+        logger.debug("Sendt endreOrganiseringNavn: fid={} command={}", fid, korrigerOrganiseringNavn);
+        eventProducer.sendMessage(
+            new OrganiseringEndretNavnEventV1(
+                fid,
+                new OrganiseringEndretNavnEventV1.OrganiseringEndretNavnEventData(
+                    korrigerOrganiseringNavn.id(),
+                    korrigerOrganiseringNavn.navn()
+                ),
+                korrigerOrganiseringNavn.inputMetadata()
+            )
+        );
     }
 
     public void endreOrganisering(String fid, EndreOrganiseringCmd endreOrganiseringCmd) {

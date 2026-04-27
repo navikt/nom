@@ -34,10 +34,10 @@ public class EventsrcToState {
         final var eventSerde = objectSerde.copyWithType(OrganiseringEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
-            .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
-                .aggregate(
-                        jsonMapper::createObjectNode,
-                (key, event, state) -> {
+            .groupBy((_, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
+            .aggregate(
+                jsonMapper::createObjectNode,
+                (_, event, state) -> {
                     state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
                     return state;
                 },
@@ -48,18 +48,18 @@ public class EventsrcToState {
     }
 
 
-    public OrganiseringState toOrganiseringState(String fid, JsonNode eventStateAggregate){
+    public OrganiseringState toOrganiseringState(String fid, JsonNode eventStateAggregate) {
         try {
             return new OrganiseringState(
                 fid,
-                    eventStateAggregate.get("id").asString(),
-                    eventStateAggregate.get("navn").asString(),
+                eventStateAggregate.get("id").asString(),
+                eventStateAggregate.get("navn").asString(),
                 eventStateAggregate.get("idOver").asString(),
                 eventStateAggregate.get("navnOver").asString(),
-                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asString()),
+                eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asString()) : null
             );
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error mapping to OrganiseringState", e);
             throw e;
         }

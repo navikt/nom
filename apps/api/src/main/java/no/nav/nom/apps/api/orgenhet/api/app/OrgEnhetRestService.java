@@ -5,19 +5,23 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.KorrigerOrganiseringNavn;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
-import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OppdaterOrgEnhetNavnCmd;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerGyldigFom;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhetNavn;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
@@ -169,61 +173,99 @@ public class OrgEnhetRestService {
         }
     }
 
-    public String oppdaterOrgEnhet(OppdaterOrgEnhetRequest oppdaterOrgEnhetRequest) {
-        List<String> oppdaterteElementer = new ArrayList<>();
-        if (oppdaterOrgEnhetRequest.navn().isBlank()) {
+    public StandardResponse korrigerOrgEnhetNavn(KorrigerOrgEnhetNavnRequest korrigerOrgEnhetNavnRequest) {
+        if (korrigerOrgEnhetNavnRequest.navn().isBlank()) {
             throw new IllegalStateException("Navn kan ikke være blankt");
         }
 
-        var orgEnhetState = orgenhetService.getById(oppdaterOrgEnhetRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(oppdaterOrgEnhetRequest.id()));
+        var orgEnhetState = orgenhetService.getById(korrigerOrgEnhetNavnRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(korrigerOrgEnhetNavnRequest.id()));
         var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
 
-        String navn = WordUtils.capitalize(oppdaterOrgEnhetRequest.navn());
-
-        boolean hasChange = false;
+        String navn = WordUtils.capitalize(korrigerOrgEnhetNavnRequest.navn());
 
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
-            "oppdaterOrgEnhet",
-            oppdaterOrgEnhetRequest,
+            "korrigerOrgEnhetNavn",
+            korrigerOrgEnhetNavnRequest,
             new Origination(
                 getAuthenticatedNavIdent(),
                 SecurityUtil.getAuthenticatedAzpName()
             )
         );
 
-        if (!Objects.equals(oppdaterOrgEnhetRequest.navn(), orgEnhetState.getNavn())) {
-            if (orgenhetService.activeOrFutureWithEqualName(oppdaterOrgEnhetRequest.navn())) {
-                throw DuplicateOrgEnhetNameException.name(oppdaterOrgEnhetRequest.navn());
+        if (!Objects.equals(korrigerOrgEnhetNavnRequest.navn(), orgEnhetState.getNavn())) {
+            if (orgenhetService.activeOrFutureWithEqualName(korrigerOrgEnhetNavnRequest.navn())) {
+                throw DuplicateOrgEnhetNameException.name(korrigerOrgEnhetNavnRequest.navn());
             }
-            hasChange = true;
-            var oppdaterNavn = new OppdaterOrgEnhetNavnCmd(
+            var oppdaterNavn = new KorrigerOrgEnhetNavn(
                 navn,
                 inputMetadata
             );
 
-            orgEnhetCommandService.oppdaterNavnOrgEnhet(orgEnhetState.getFid(), oppdaterNavn);
-            oppdaterteElementer.add(String.format("OrgEnhet har endret navn fra %s til %s", orgEnhetState.getNavn(), navn));
+            orgEnhetCommandService.korrigerNavnOrgEnhet(orgEnhetState.getFid(), oppdaterNavn);
+            organiseringEventCommandService.korrigerOrganiseringNavn(organiseringState.fid(), new KorrigerOrganiseringNavn(organiseringState.id(), navn, inputMetadata));
         }
+        return StandardResponse.builder().message(String.format("Organisasjonsenhet med id %s har byttet navn fra %s til %s", orgEnhetState.getId(), orgEnhetState.getNavn(), navn)).build();
+    }
 
-        if (hasChange) {
+    public String ovrigeEndringerOrgEnhet(OvrigeEndringerOrgEnhetRequest ovrigeEndringerOrgEnhetRequest) {
+        List<String> oppdaterteElementer = new ArrayList<>();
+
+        var orgEnhetState = orgenhetService.getById(ovrigeEndringerOrgEnhetRequest.id())
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(ovrigeEndringerOrgEnhetRequest.id()));
+
+        InputMetadata inputMetadata = new InputMetadata(
+            "REST-API",
+            "overigeEndringerOrgEnhet",
+            ovrigeEndringerOrgEnhetRequest,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.gyldigFom(), orgEnhetState.getGyldigFom())) {
+            var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId())
+                .orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
+
+            orgEnhetCommandService.korrigerGyldigFom(orgEnhetState.getFid(), new KorrigerGyldigFom(
+                ovrigeEndringerOrgEnhetRequest.gyldigFom(),
+                inputMetadata
+            ));
+
             final var opprettOrganisering = new EndreOrganiseringCmd(
                 orgEnhetState.getId(),
-                navn,
+                orgEnhetState.getNavn(),
                 organiseringState.idOver(),
                 organiseringState.navnOver(),
-                orgEnhetState.getGyldigFom(),
+                ovrigeEndringerOrgEnhetRequest.gyldigFom(),
                 orgEnhetState.getGyldigTom(),
                 inputMetadata
             );
 
             organiseringEventCommandService.endreOrganisering(organiseringState.fid(), opprettOrganisering);
+            oppdaterteElementer.add(String.format("OrgEnhet har endret gyldigFom fra %s til %s", orgEnhetState.getGyldigFom(), ovrigeEndringerOrgEnhetRequest.gyldigFom()));
         }
 
-        StringBuilder builder = new StringBuilder();
-        oppdaterteElementer.forEach(result -> builder.append(result).append("\\n"));
+        if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.orgEnhetsType(), orgEnhetState.getOrgEnhetsType())) {
+            orgEnhetCommandService.endreOrgEnhetsType(orgEnhetState.getFid(), new EndreOrgEnhetsType(
+                ovrigeEndringerOrgEnhetRequest.orgEnhetsType(),
+                inputMetadata
+            ));
 
-        return builder.toString();
+            oppdaterteElementer.add(String.format("OrgEnhet har endret Enhets Type fra %s til %s", orgEnhetState.getOrgEnhetsType(), ovrigeEndringerOrgEnhetRequest.orgEnhetsType()));
+        }
+
+        if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.nomNivaa(), orgEnhetState.getNomNivaa())) {
+            orgEnhetCommandService.endreNomNivaa(orgEnhetState.getFid(), new EndreNomNivaa(
+                ovrigeEndringerOrgEnhetRequest.nomNivaa(),
+                inputMetadata
+            ));
+
+            oppdaterteElementer.add(String.format("OrgEnhet har endret NOM Nivå fra %s til %s", orgEnhetState.getNomNivaa(), ovrigeEndringerOrgEnhetRequest.nomNivaa()));
+        }
+
+        return String.join("\\n", oppdaterteElementer);
     }
 
     public StandardResponse avvikleOrgEnhet(String orgEnhetId, AvvikleOrgEnhetRequest avvikleOrgEnhetRequest) {
