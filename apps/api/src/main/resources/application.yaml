@@ -41,6 +41,12 @@ app:
         nom-leder: ${NOM_LEDER_GROUPID:nomLederGroup}
     nom-remedy-integrasjon:
       base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
+    main-manager:
+      base-url: ${MAIN_MANAGER_BASEURL}
+      username: ${MAIN_MANAGER_USERNAME}
+      password: ${MAIN_MANAGER_PASSWORD}
+      grant-type: password
+      token-path: /restapi/token
     dvh-ords:
       client_-id: ${DVH_ORDS_CLIENT_ID:dvh_client_id}
       client-secret: ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}
@@ -464,6 +470,8 @@ NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
 
+MAIN_MANAGER_BASEURL: "https://nav-test.mainmanager.no"
+
 NOM_DELEGERT_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT
 NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
@@ -584,6 +592,8 @@ EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
+
+MAIN_MANAGER_BASEURL: "https://nav.mainmanager.no"
 
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default

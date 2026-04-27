@@ -21,6 +21,8 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class KafkaStreamProcessor {
@@ -89,6 +91,8 @@ class KafkaStreamProcessor {
             log.info("Mapping to OrgtilknytningState: {}", eventStateAggregate.toPrettyString());
 
             var tilknytningType = getTilknytningtype(eventStateAggregate);
+            List<String> fysiskeBrukersteder = new ArrayList<>();
+            eventStateAggregate.withArray("additionalFysiskeBrukerstederNummer").elements().iterator().forEachRemaining(node -> fysiskeBrukersteder.add(node.asString()));
 
             return new OrgtilknytningState(
                 fid,
@@ -99,6 +103,8 @@ class KafkaStreamProcessor {
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asString()),
                 eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asString()) : null,
                 tilknytningType,
+                eventStateAggregate.hasNonNull("primaryFysiskBrukerstedNummer") ? eventStateAggregate.get("primaryFysiskBrukerstedNummer").asString() : null,
+                fysiskeBrukersteder,
                 eventStateAggregate.hasNonNull("masseflyttetFraFid") ? eventStateAggregate.get("masseflyttetFraFid").asString() : null,
                 eventStateAggregate.hasNonNull("sistEndretAv") ? eventStateAggregate.get("sistEndretAv").asString() : null
             );
