@@ -55,7 +55,6 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -660,7 +659,7 @@ public class RessursRestService {
                 ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                     new OppdaterFysiskeBrukerstederCommand(
                         reaktivertRessurs.fid(),
-                        null,
+                        new HashSet<>(),
                         reaktivertRessurs.primaryFysiskBrukersted()
                     ),
                     metadata
