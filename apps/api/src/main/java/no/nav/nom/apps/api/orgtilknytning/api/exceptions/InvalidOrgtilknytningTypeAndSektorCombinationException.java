@@ -10,11 +10,11 @@ public class InvalidOrgtilknytningTypeAndSektorCombinationException extends Runt
     }
 
     public static InvalidOrgtilknytningTypeAndSektorCombinationException forCombination(
-        Tilknytningtype tilknytningtype, Sektor sektor
+        Tilknytningtype tilknytningtype, Sektor sektor, String otFidOrNavident
     ) {
         return new InvalidOrgtilknytningTypeAndSektorCombinationException(
-            "orgtilknytningType %s not allowed for ressurs with sektor %s"
-                .formatted(tilknytningtype, sektor)
+            "orgtilknytningType %s not allowed for ressurs or OT (%s) with sektor %s"
+                .formatted(tilknytningtype, otFidOrNavident ,sektor)
         );
     }
 }

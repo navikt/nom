@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # ratchet:actions/setup-node@v4
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # ratchet:actions/setup-node@v6.3.0
         with:
           node-version: '22'
           registry-url: https://npm.pkg.github.com/
@@ -50,7 +50,7 @@ jobs:
         run: npm run build
 
       - name: Build and push Docker image
-        uses: nais/docker-build-push@078e460885ed0424b60d45ce9220b4be1748be9d # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@45d352fb62fb52ccb5ff6cba22c047fa02b35321 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: org

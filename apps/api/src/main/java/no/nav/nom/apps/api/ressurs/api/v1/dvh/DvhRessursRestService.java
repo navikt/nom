@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
-import jakarta.persistence.metamodel.IdentifiableType;
-
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -62,7 +60,7 @@ public class DvhRessursRestService {
     public List<DvhOrgenhetDTO> orgenheter() {
         logger.debug("Henter orgenheter. Bruke ny organisering");
 
-        return orgenhetService.getAllEnheterMedOrganisering().stream()
+        return orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
             .map(this::toDTO)
             .toList();
     }

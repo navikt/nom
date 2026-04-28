@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.job;
 
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -19,10 +20,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +43,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = {OTUtenforHierarki.class})
+@EnableConfigurationProperties(AppProperties.class)
 class OTUtenforHierarkiTest {
     @MockitoBean
     MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
@@ -77,15 +83,34 @@ class OTUtenforHierarkiTest {
     void test_basic_ok_autoflytt() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
+        var ot1 = new OrgtilknytningState(
+            "FID_1",
+            "A000001",
+            enhet1.getId(),
+            NAV_STATLIG,
+            true,
+            LocalDate.now().minusYears(1),
+            null,
+            FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            null
+        );
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet2, List.of(ot1));
 
         var feilede = otUtenforHierarki.autoflyttOTUtenforHierarki(perAlternativOrgenhet);
 
-        verify(masseflyttOrgtilknytningerService, times(1)).flyttOrgtilknytninger(otFidInputCaptor.capture(),
-            nyOrgenhetIdInputCaptor.capture(), beholdTilgangerInputCaptor.capture(), gyldigFomInputCaptor.capture(), inputMetadataInputCaptor.capture(), eq(true));
+        verify(masseflyttOrgtilknytningerService, times(1)).flyttOrgtilknytninger(
+            otFidInputCaptor.capture(),
+            nyOrgenhetIdInputCaptor.capture(),
+            beholdTilgangerInputCaptor.capture(),
+            gyldigFomInputCaptor.capture(),
+            inputMetadataInputCaptor.capture(),
+            eq(true)
+        );
 
         assertEquals(0, feilede);
         assertEquals(List.of("FID_1"), otFidInputCaptor.getValue());
@@ -99,7 +124,20 @@ class OTUtenforHierarkiTest {
     void test_autoflytt_feil_paa_organisering() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
+        var ot1 = new OrgtilknytningState(
+            "FID_1",
+            "A000001",
+            enhet1.getId(),
+            NAV_STATLIG,
+            true,
+            LocalDate.now().minusYears(1),
+            null,
+            FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            null
+        );
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet3, List.of(ot1));
@@ -114,7 +152,20 @@ class OTUtenforHierarkiTest {
     void test_autoflytt_feil_paa_flyttOrgtilknytninger_kall() {
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
+        var ot1 = new OrgtilknytningState(
+            "FID_1",
+            "A000001",
+            enhet1.getId(),
+            NAV_STATLIG,
+            true,
+            LocalDate.now().minusYears(1),
+            null,
+            FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            null
+        );
 
         HashMap<IOrgenhet, List<OrgtilknytningState>> perAlternativOrgenhet = new HashMap<>();
         perAlternativOrgenhet.put(enhet1, List.of(ot1));
@@ -131,19 +182,50 @@ class OTUtenforHierarkiTest {
     @Test
     @DisplayName("Test på basic ok finn ot utenfor hierarki")
     void test_basic_ok_finn_ot_utenfor_hierarki() {
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(enhet2, enhet3));
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(List.of(enhet2, enhet3));
         when(orgenhetService.getById(enhet1.getId())).thenReturn(Optional.of(enhet1));
         setupOrganisering();
 
-        var ot1 = new OrgtilknytningState("FID_1", "A000001", enhet1.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
-        var ot2 = new OrgtilknytningState("FID_2", "A000002", enhet2.getId(), NAV_STATLIG, true, LocalDate.now().minusYears(1), null, FAST, null, null);
+        var ot1 = new OrgtilknytningState(
+            "FID_1",
+            "A000001",
+            enhet1.getId(),
+            NAV_STATLIG,
+            true,
+            LocalDate.now().minusYears(1),
+            null, FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            null
+        );
+        var ot2 = new OrgtilknytningState(
+            "FID_2",
+            "A000002",
+            enhet2.getId(),
+            NAV_STATLIG,
+            true,
+            LocalDate.now().minusYears(1),
+            null,
+            FAST,
+            "2700",
+            Collections.emptyList(),
+            null,
+            null
+        );
 
         when(orgtilknytningService.getAll()).thenReturn(List.of(ot1, ot2));
 
         otUtenforHierarki.findOTUtenforHierarkiFromDataLast();
 
-        verify(masseflyttOrgtilknytningerService, times(1)).flyttOrgtilknytninger(otFidInputCaptor.capture(),
-            nyOrgenhetIdInputCaptor.capture(), beholdTilgangerInputCaptor.capture(), gyldigFomInputCaptor.capture(), inputMetadataInputCaptor.capture(), eq(true));
+        verify(masseflyttOrgtilknytningerService, times(1)).flyttOrgtilknytninger(
+            otFidInputCaptor.capture(),
+            nyOrgenhetIdInputCaptor.capture(),
+            beholdTilgangerInputCaptor.capture(),
+            gyldigFomInputCaptor.capture(),
+            inputMetadataInputCaptor.capture(),
+            eq(true)
+        );
 
         assertEquals(List.of("FID_1"), otFidInputCaptor.getValue());
         assertEquals(enhet2.getId(), nyOrgenhetIdInputCaptor.getValue());
@@ -155,7 +237,15 @@ class OTUtenforHierarkiTest {
     LocalDate yesterday = today.minusDays(1);
 
     private void setupOrganisering() {
-        var organisering1 = new OrganiseringState("FID_1", enhet1.getId(), enhet1.getNavn(), enhet3.getId(), enhet3.getNavn(), LocalDate.now().minusYears(3), yesterday);
+        var organisering1 = new OrganiseringState(
+            "FID_1",
+            enhet1.getId(),
+            enhet1.getNavn(),
+            enhet3.getId(),
+            enhet3.getNavn(),
+            LocalDate.now().minusYears(3),
+            yesterday
+        );
         var organisering2 = new OrganiseringState("FID_2", enhet2.getId(), enhet2.getNavn(), enhet3.getId(), enhet3.getNavn(), today, null);
 
         when(organiseringStateRepository.findActiveById(enhet1.getId())).thenReturn(Optional.of(organisering1));

@@ -2,8 +2,10 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands;
 
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 
-public record OppdaterOrgEnhetNavnCmd(
-    String navn,
+import java.time.LocalDate;
+
+public record KorrigerGyldigFom(
+    LocalDate gyldigFom,
     InputMetadata inputMetadata
 ) {
 }

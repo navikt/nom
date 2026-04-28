@@ -25,7 +25,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +33,6 @@ import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +59,7 @@ public class StatistikkRestServiceTest {
     @DisplayName("Test hentGlobalStatistikk")
     public void testHentGlobalStatistikk() {
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(mapOfActiveRessurser());
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(getAllOrgEnheter());
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(getAllOrgEnheter());
         when(orgenhetService.getAllOrgEnheterThatCanHaveRessurser()).thenReturn(getAllOrgEnheter());
 
         var expectedGlobalStatistikkResponse = new GlobalStatistikkResponse(

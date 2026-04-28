@@ -49,4 +49,6 @@ public interface OrganiseringStateRepository {
     Set<OrganiseringState> getLovnoderUnder(String id);
 
     Set<String> getLovnoderIderUnder(String id);
+
+    boolean isActive(OrganiseringState organiseringState);
 }

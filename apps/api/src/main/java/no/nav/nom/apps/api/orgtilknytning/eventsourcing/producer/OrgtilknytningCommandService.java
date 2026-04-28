@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
@@ -16,6 +17,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFysiskBrukerstedEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
@@ -170,6 +172,19 @@ public class OrgtilknytningCommandService {
             ),
             endreOrgtilknytningSektorCommand.inputMetadata(),
             endreOrgtilknytningSektorCommand.additionalAgressoData()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreFysiskeBrukersted(EndreFysiskeBrukerstederCommand endreFysiskeBrukerstederCommand) {
+        return eventProducer.sendMessage(new OrgtilknytningFysiskBrukerstedEndretEventV1(
+            endreFysiskeBrukerstederCommand.fid(),
+            new OrgtilknytningFysiskBrukerstedEndretEventV1.OrgtilknytningPrimaryFysiskBrukerstedEventData(
+                endreFysiskeBrukerstederCommand.navident(),
+                endreFysiskeBrukerstederCommand.orgEnhetId(),
+                endreFysiskeBrukerstederCommand.primaryFysiskBrukerstedNummer(),
+                endreFysiskeBrukerstederCommand.additionalFysiskeBrukerstederNummer()
+            ),
+            endreFysiskeBrukerstederCommand.inputMetadata()
         ));
     }
 }

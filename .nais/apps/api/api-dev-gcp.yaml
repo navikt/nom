@@ -24,6 +24,7 @@ spec:
     - secret: nom-api-unleash-api-token
     - secret: dvh-ords-secret
     - secret: nom-epost-varsel-recipient
+    - secret: nom-mainmanager-secret
   image: "{{image}}"
   port: 8080
   ingresses:
@@ -121,20 +122,11 @@ spec:
           namespace: obo
           cluster: dev-gcp
         - application: saas-proxy
-          namespace: teamcrm
-          cluster: dev-gcp
-        - application: saas-proxy
           namespace: platforce
           cluster: dev-gcp
         - application: salesforce
           namespace: teamcrm
           cluster: dev-external
-        - application: saas-proxy-test
-          namespace: teamcrm
-          cluster: dev-gcp
-        - application: itestapp
-          namespace: teamcrm
-          cluster: dev-gcp
         - application: journalforing-frontend-q1
           namespace: isa
           cluster: dev-fss
@@ -341,6 +333,12 @@ spec:
           cluster: dev-gcp
         - application: watson-admin-api
           namespace: holmes
+          cluster: dev-gcp
+        - application: klage-lookup
+          namespace: klage
+          cluster: dev-gcp
+        - application: jira-data-manager-sync
+          namespace: team-service-management
           cluster: dev-gcp
     outbound:
       rules:

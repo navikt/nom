@@ -373,13 +373,12 @@ public class OmadaUttrekk {
         if (!overenhet.isEmpty()) {
             return overenhet;
         } else {
-            // Hvis det ikke er aktiv overenhet, lever overenhet som var gyldig i går, hvis den fantes
-            var dayBeforeYesterday = LocalDate.now().minusDays(2);
+            // Hvis det ikke er aktiv overenhet, lever overenhet som var gyldig i forigårs, hvis den fantes
             var today = LocalDate.now().minusDays(1);
             return organiseringStateRepository.findById(orgenhet.getId()).stream()
                 .filter(org -> // Aktiv i går
                     org.gyldigFom().isBefore(today) &&
-                    (org.gyldigTom() == null || org.gyldigTom().isAfter(dayBeforeYesterday))
+                    (org.gyldigTom() == null || org.gyldigTom().isAfter(LocalDate.now().minusDays(3)))
                 )
                 .map(OrganiseringState::idOver)
                 .findFirst()

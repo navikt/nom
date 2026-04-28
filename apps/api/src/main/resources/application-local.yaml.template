@@ -63,12 +63,12 @@ app:
   google-storage-bucket-name:
     missing-ot: "DUMMY"
   orgenhet:
-    vikafossenId: dummyVikafossenId
+    nav-id: dummyNavId
+    helfo-id: dummyHelfoId
+    skatt-id: dummySkattId
+    riksrevisjonen-id: dummyRiksrevId
+    vikafossen-id: dummyVikafossenId
     linjeenhetene: linje-enhet,en-annen-linjeenhet
-    nav: dummyNavId
-    helfo: dummyHelfoId
-    skatt: dummySkattId
-    riksrev: dummyRiksrevId
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 

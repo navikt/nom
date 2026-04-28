@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.authorize.AuthResolver;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -13,6 +14,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -53,7 +55,6 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -110,7 +111,6 @@ public class RessursRestService {
     private final OrgEnhetLederService orgEnhetLederService;
     private final RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService;
 
-    @Value("${app.orgenhet.vikafossenId}")
     private String vikafossenOrgEnhetId;
 
     public RessursRestService(
@@ -132,7 +132,8 @@ public class RessursRestService {
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgtilknytningService orgtilknytningService,
         OrgEnhetLederService orgEnhetLederService,
-        RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService
+        RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService,
+        AppProperties appProperties
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -153,6 +154,8 @@ public class RessursRestService {
         this.orgtilknytningService = orgtilknytningService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.ressursFyrstikkaleen1EmailService = ressursFyrstikkaleen1EmailService;
+
+        this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -507,6 +510,17 @@ public class RessursRestService {
                 )
             );
 
+            orgtilknytningCommandService.endreFysiskeBrukersted(
+                new EndreFysiskeBrukerstederCommand(
+                    orgTilknytningFid,
+                    navident,
+                    request.orgEnhetId(),
+                    request.fysiskBrukerstedNr(),
+                    null,
+                    metaData
+                )
+            );
+
             // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
             if (request.sluttDato() != null) {
                 ressursCommandService.avsluttRessursEvent(
@@ -588,6 +602,17 @@ public class RessursRestService {
             )
         );
 
+        orgtilknytningCommandService.endreFysiskeBrukersted(
+            new EndreFysiskeBrukerstederCommand(
+                orgTilknytningFid,
+                existingRessurs.navident(),
+                request.orgEnhetId(),
+                request.fysiskBrukerstedNr(),
+                null,
+                metadata
+            )
+        );
+
         // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
         if (request.sluttDato() != null) {
             ressursCommandService.avsluttRessursEvent(
@@ -634,7 +659,7 @@ public class RessursRestService {
                 ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                     new OppdaterFysiskeBrukerstederCommand(
                         reaktivertRessurs.fid(),
-                        new HashSet<>(existingRessurs.fysiskeBrukersteder()),
+                        new HashSet<>(),
                         reaktivertRessurs.primaryFysiskBrukersted()
                     ),
                     metadata
@@ -767,7 +792,7 @@ public class RessursRestService {
         validateChronologicalDates(request.startDato(), request.sluttDato());
         validateIngenMellomromEtternavn(request.visningsetternavn());
         validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
-        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor(), "Ny_ressurs");
         validateOrgenhetForIdenttype(request.identType(), request.orgEnhetId());
     }
 

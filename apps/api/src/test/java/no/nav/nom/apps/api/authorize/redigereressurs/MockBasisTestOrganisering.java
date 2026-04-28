@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import no.nav.nom.apps.api.authorize.email.TilgangDelegertEmailService;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
@@ -69,12 +70,12 @@ abstract public class MockBasisTestOrganisering {
     }
 
     private void setupBasisOrgenheter() {
-        IOrgenhet orgenhet_X = MockOrgenhet.builder()
-            .fid("FID_X")
-            .id("X")
-            .navn("OrgEnhet X")
+        IOrgenhet orgenhet_NAV = MockOrgenhet.builder()
+            .fid("FID_NAV")
+            .id("dummyNavId")
+            .navn("OrgEnhet NAV")
             .nomNivaa(NomNivaa.LINJEENHET)
-            .agressoId("X")
+            .agressoId("NAV")
             .orgNiv("NAV")
             .build();
 
@@ -240,7 +241,7 @@ abstract public class MockBasisTestOrganisering {
             .orgNiv("NAV")
             .build();
 
-        lenient().when(orgenhetService.getById("X")).thenReturn(Optional.of(orgenhet_X));
+        lenient().when(orgenhetService.getById("dummyNavId")).thenReturn(Optional.of(orgenhet_NAV));
         lenient().when(orgenhetService.getById("A")).thenReturn(Optional.of(orgenhet_A));
         lenient().when(orgenhetService.getById("A1")).thenReturn(Optional.of(orgenhet_A1));
         lenient().when(orgenhetService.getById("A11")).thenReturn(Optional.of(orgenhet_A11));
@@ -277,8 +278,8 @@ abstract public class MockBasisTestOrganisering {
             return outMap;
         });
 
-        when(orgenhetService.getAllEnheterMedOrganisering()).thenReturn(List.of(
-            orgenhet_X,
+        when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(List.of(
+            orgenhet_NAV,
             orgenhet_A, orgenhet_A1, orgenhet_A11,
             orgenhet_B, orgenhet_B1, orgenhet_B11,
             orgenhet_C, orgenhet_C1, orgenhet_C11, orgenhet_C2, orgenhet_C22,
@@ -342,12 +343,12 @@ abstract public class MockBasisTestOrganisering {
     }
 
     private void setupBasisOrganisering() {
-        OrganiseringState organisering_A_X = OrganiseringState.builder()
-            .fid("FID_A_X")
+        OrganiseringState organisering_A_NAV = OrganiseringState.builder()
+            .fid("FID_A_NAV")
             .id("A")
             .navn("OrgEnhet A")
-            .idOver("X")
-            .navnOver("OrgEnhet X")
+            .idOver("dummyNavId")
+            .navnOver("OrgEnhet NAV")
             .gyldigFom(LocalDate.now().minusDays(5))
             .gyldigTom(null)
             .build();
@@ -494,7 +495,7 @@ abstract public class MockBasisTestOrganisering {
             .build();
 
         when(organiseringStateRepository.getActiveOrganisering()).thenReturn(Map.ofEntries(
-            Map.entry("FID_A_X", organisering_A_X),
+            Map.entry("FID_A_NAV", organisering_A_NAV),
             Map.entry("FID_A1_A", organisering_A1_A),
             Map.entry("FID_A11_A1", organisering_A11_A1),
             Map.entry("FID_B_A", organisering_B_A),
@@ -511,7 +512,7 @@ abstract public class MockBasisTestOrganisering {
             Map.entry("FID_E1_E", organisering_E1_E)
         ));
 
-        lenient().when(organiseringStateRepository.findActiveById("A")).thenReturn(Optional.of(organisering_A_X));
+        lenient().when(organiseringStateRepository.findActiveById("A")).thenReturn(Optional.of(organisering_A_NAV));
         lenient().when(organiseringStateRepository.findActiveById("A1")).thenReturn(Optional.of(organisering_A1_A));
         lenient().when(organiseringStateRepository.findActiveById("A11")).thenReturn(Optional.of(organisering_A11_A1));
         lenient().when(organiseringStateRepository.findActiveById("B")).thenReturn(Optional.of(organisering_B_A));
