@@ -425,6 +425,9 @@ app:
       - navident: Z994651         # Team Klage / Kristin Jacobsen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
+      - navident: Z991507         # Team Klage / Kristin Jacobsen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
 
       - navident: Z993527         # Team AAP / Tor Idland
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
