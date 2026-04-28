@@ -11,13 +11,14 @@ import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
+import { formatVisningsnavn } from "~/utils";
 
 export function MedarbeidereTabell() {
   return (
     <>
       <PageBanner text={"Medarbeidere i tabell"} />
 
-      <ContentWrapper>
+      <ContentWrapper limitWidth={false}>
         <MedarbeiderTabell />
       </ContentWrapper>
     </>
@@ -33,25 +34,36 @@ function MedarbeiderTabell() {
   console.log(fysiskBrukerstedFilter);
 
   return (
-    <VStack
-      css={css`
-        background-color: #deecef;
-        padding: var(--a-spacing-4) var(--a-spacing-6);
-        border-radius: var(--a-border-radius-large);
-      `}
-      gap="4"
-    >
+    <VStack gap="6">
       <div
         css={css`
-          width: 50%;
+          width: 100%;
+          max-width: 1008px;
+          margin: auto;
         `}
       >
-        <FysiskBrukerstedSelect
-          fysiskeBrukersteder={fysiskeBrukersteder}
-          isClearable
-          onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
-          value={fysiskBrukerstedFilter}
-        />
+        <VStack
+          css={css`
+            background-color: #deecef;
+            padding: var(--a-spacing-4) var(--a-spacing-6);
+            border-radius: var(--a-border-radius-large);
+            width: 100%;
+          `}
+          gap="4"
+        >
+          <div
+            css={css`
+              width: 50%;
+            `}
+          >
+            <FysiskBrukerstedSelect
+              fysiskeBrukersteder={fysiskeBrukersteder}
+              isClearable
+              onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
+              value={fysiskBrukerstedFilter}
+            />
+          </div>
+        </VStack>
       </div>
 
       <TabellInner fysiskBrukerstedNr={fysiskBrukerstedFilter} />
@@ -105,7 +117,9 @@ function TabellInner({ fysiskBrukerstedNr }: { fysiskBrukerstedNr: string }) {
             key={ressurs.navident}
           >
             <Table.DataCell>{ressurs.navident}</Table.DataCell>
-            <Table.DataCell>{ressurs.visningsnavn.fornavn}</Table.DataCell>{" "}
+            <Table.DataCell>
+              {formatVisningsnavn(ressurs.visningsnavn)}
+            </Table.DataCell>
           </Table.Row>
         ))}
       </Table.Body>
