@@ -385,27 +385,46 @@ function OrgtilknytningForm({
   const onValid: SubmitHandler<{
     mappedeOrgtilknytninger?: Partial<OrgtilknytningState>[];
   }> = async (values) => {
-    const validation = dolValidering(
+    const dolValidation = dolValidering(
       values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
     );
 
+    const oppdaterteOrgtilknytninger = values.mappedeOrgtilknytninger?.map(
+      (nyOt) => {
+        const gammelOt = otBeforeEdit(nyOt);
+
+        if (
+          !gammelOt?.sektor &&
+          !gammelOt?.orgtilknytningType &&
+          !nyOt.sektor
+        ) {
+          return {
+            ...nyOt,
+            orgtilknytningType: undefined,
+          };
+        }
+
+        return nyOt;
+      },
+    );
+
     if (
-      validation.dolGaps.length === 0 &&
-      validation.dolOverlaps.length === 0
+      dolValidation.dolGaps.length === 0 &&
+      dolValidation.dolOverlaps.length === 0
     ) {
-      await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
+      await visBekreftelsesmodaler(oppdaterteOrgtilknytninger ?? []).then(
         () => {
-          const test = lagOppdaterOrgtilknytningerRequest(
-            values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+          const request = lagOppdaterOrgtilknytningerRequest(
+            oppdaterteOrgtilknytninger as OrgtilknytningEtterValidering[],
             skalSetteRessursStartdato(
               ressurs,
-              values.mappedeOrgtilknytninger ?? [],
+              oppdaterteOrgtilknytninger ?? [],
               tidligsteOrgDatoPre,
             ),
             ressurs.sektor,
           );
 
-          //oppdaterOrgtilknytningerMutation.mutate(test);
+          oppdaterOrgtilknytningerMutation.mutate(request);
         },
       );
     }
@@ -1277,8 +1296,6 @@ function lagOppdaterOrgtilknytningerRequest(
     orgtilknytninger,
     (orgtilknytning) => orgtilknytning.fid,
   );
-
-  console.log(eksisterendeOrgtilknytninger);
 
   return {
     eksisterendeOrgtilknytninger: eksisterendeOrgtilknytninger.map(
