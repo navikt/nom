@@ -670,13 +670,15 @@ public class OrgtilknytningRestService {
             );
         }
 
+        var optionalFysiskeBrukersteder = isNull(leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : leggTilOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
+
         orgtilknytningCommandService.endreFysiskeBrukersted(
             new EndreFysiskeBrukerstederCommand(
                 opprettetOrgtilknytningFid,
                 navident,
                 leggTilOrgtilknytningRequest.orgEnhetId(),
                 leggTilOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
-                leggTilOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList(),
+                optionalFysiskeBrukersteder,
                 inputMetadata
             )
         );
