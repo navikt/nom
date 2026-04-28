@@ -395,17 +395,17 @@ function OrgtilknytningForm({
     ) {
       await visBekreftelsesmodaler(values.mappedeOrgtilknytninger ?? []).then(
         () => {
-          oppdaterOrgtilknytningerMutation.mutate(
-            lagOppdaterOrgtilknytningerRequest(
-              values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
-              skalSetteRessursStartdato(
-                ressurs,
-                values.mappedeOrgtilknytninger ?? [],
-                tidligsteOrgDatoPre,
-              ),
-              ressurs.sektor,
+          const test = lagOppdaterOrgtilknytningerRequest(
+            values.mappedeOrgtilknytninger as OrgtilknytningEtterValidering[],
+            skalSetteRessursStartdato(
+              ressurs,
+              values.mappedeOrgtilknytninger ?? [],
+              tidligsteOrgDatoPre,
             ),
+            ressurs.sektor,
           );
+
+          //oppdaterOrgtilknytningerMutation.mutate(test);
         },
       );
     }
@@ -1277,6 +1277,8 @@ function lagOppdaterOrgtilknytningerRequest(
     orgtilknytninger,
     (orgtilknytning) => orgtilknytning.fid,
   );
+
+  console.log(eksisterendeOrgtilknytninger);
 
   return {
     eksisterendeOrgtilknytninger: eksisterendeOrgtilknytninger.map(
