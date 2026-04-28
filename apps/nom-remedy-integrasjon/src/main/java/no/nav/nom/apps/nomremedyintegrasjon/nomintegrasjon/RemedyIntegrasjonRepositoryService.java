@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.exceptions.RequiredValueMissingException;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonEntity;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.repository.remedy.NomIntegrasjonRepository;
@@ -15,17 +16,26 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenC
 
 @Service
 public class RemedyIntegrasjonRepositoryService {
+    static final String UNLEASH_SKRU_AV_OVERFORING_TIL_REMEDY = "nom.remedy-integrasjon.skru_av_overforing_til_remedy";
 
     private final Logger logger = LoggerFactory.getLogger(RemedyIntegrasjonRepositoryService.class);
+    private final Unleash unleash;
 
     private final NomIntegrasjonRepository nomIntegrasjonRepository;
 
-    public RemedyIntegrasjonRepositoryService(NomIntegrasjonRepository nomIntegrasjonRepository) {
+    public RemedyIntegrasjonRepositoryService(Unleash unleash, NomIntegrasjonRepository nomIntegrasjonRepository) {
+        this.unleash = unleash;
         this.nomIntegrasjonRepository = nomIntegrasjonRepository;
     }
 
     protected NomIntegrasjonEntity saveNewNomIntegrasjonEntityNew(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident, boolean isAdmin) {
         validateThatRequiredValuesAreSet(newNomIntegrasjonEntity);
+
+        if (unleash.isEnabled(UNLEASH_SKRU_AV_OVERFORING_TIL_REMEDY)) {
+            logger.info("Overfører ikke endring til Remedy for {}", newNomIntegrasjonEntity.getNavId());
+            return null;
+        }
+
         if (isAdmin || nomIntegrasjonEntityProvidesNewDataFromNom(newNomIntegrasjonEntity)) {
             try {
                 NomIntegrasjonEntity nomIntegrasjonEntity = nomIntegrasjonRepository.save(

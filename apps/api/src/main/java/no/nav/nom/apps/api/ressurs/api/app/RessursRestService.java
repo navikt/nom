@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -54,7 +55,6 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -510,6 +510,17 @@ public class RessursRestService {
                 )
             );
 
+            orgtilknytningCommandService.endreFysiskeBrukersted(
+                new EndreFysiskeBrukerstederCommand(
+                    orgTilknytningFid,
+                    navident,
+                    request.orgEnhetId(),
+                    request.fysiskBrukerstedNr(),
+                    null,
+                    metaData
+                )
+            );
+
             // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
             if (request.sluttDato() != null) {
                 ressursCommandService.avsluttRessursEvent(
@@ -591,6 +602,17 @@ public class RessursRestService {
             )
         );
 
+        orgtilknytningCommandService.endreFysiskeBrukersted(
+            new EndreFysiskeBrukerstederCommand(
+                orgTilknytningFid,
+                existingRessurs.navident(),
+                request.orgEnhetId(),
+                request.fysiskBrukerstedNr(),
+                null,
+                metadata
+            )
+        );
+
         // If sluttdato is present we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
         if (request.sluttDato() != null) {
             ressursCommandService.avsluttRessursEvent(
@@ -637,7 +659,7 @@ public class RessursRestService {
                 ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                     new OppdaterFysiskeBrukerstederCommand(
                         reaktivertRessurs.fid(),
-                        new HashSet<>(existingRessurs.fysiskeBrukersteder()),
+                        new HashSet<>(),
                         reaktivertRessurs.primaryFysiskBrukersted()
                     ),
                     metadata

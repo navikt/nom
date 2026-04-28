@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.Tilknytningtype;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Builder(toBuilder = true)
 public record LeggTilOrgtilknytningRequest(
@@ -25,6 +26,10 @@ public record LeggTilOrgtilknytningRequest(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     LocalDate gyldigTom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    Tilknytningtype tilknytningtype
+    Tilknytningtype tilknytningtype,
+    @Schema(example = "2700", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    String primaryFysiskBrukerstedNummer,
+    @Schema(example = "[\"2700\", \"2900\"]")
+    Set<String> optionalFysiskBrukersteder
 ) {
 }

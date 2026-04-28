@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.DuplicateFysiskBrukersted;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningSektorException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException;
@@ -15,7 +17,6 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTi
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
-import no.nav.nom.apps.api.ressurs.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -225,14 +226,15 @@ public class OrgtilknytningController {
     // TODO: Lage global ControllerAdvice
     @ExceptionHandler(
         {
+            DuplicateFysiskBrukersted.class,
             IllegalArgumentException.class,
-            NoSuchElementException.class,
             InvalidSektorException.class,
             InvalidOrgtilknytningSektorException.class,
             InvalidOrgtilknytningTilknytningtypeException.class,
             InvalidOrgtilknytningTypeAndSektorCombinationException.class,
             InvalidOrgtilknytningStartDateWhenNewRemedyEnhetException.class,
-            InvalidOppdaterOrgtilknytningerForRessursRequestException.class
+            InvalidOppdaterOrgtilknytningerForRessursRequestException.class,
+            NoSuchElementException.class
         }
     )
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
@@ -243,6 +245,7 @@ public class OrgtilknytningController {
 
     @ExceptionHandler(
         {
+            FysiskBrukerstedNotFoundException.class,
             RessursNotFoundException.class,
             OrgtilknytningNotFoundException.class
         }
@@ -275,23 +278,12 @@ public class OrgtilknytningController {
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
-    @ExceptionHandler(
-        {
-            FysiskBrukerstedNotFoundException.class,
-        }
-    )
-    public ResponseEntity<StandardResponse> handleMissingFysiskBrukerstedMissing(RuntimeException exception) {
-        return ResponseEntity
-            .status(HttpStatus.UNPROCESSABLE_ENTITY)
-            .body(StandardResponse.builder().message(exception.getMessage()).build());
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<StandardResponse> handleServerError(Exception exception) {
         logger.error("Uforutsett feil", exception);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(StandardResponse.builder().message("Server error").build());
+            .body(StandardResponse.builder().message(String.format("Uforutsett feil: %s", exception.getMessage())).build());
     }
 }

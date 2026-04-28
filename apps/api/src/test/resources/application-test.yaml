@@ -24,6 +24,12 @@ app:
         nom-leder: "e9cd9267-9baf-4078-abb8-7251c4313d32"
     nom-remedy-integrasjon:
       base-url: http://localhost:${wiremock.server.port}
+    main-manager:
+      base-url: http://localhost:${wiremock.server.port}
+      username: testuser
+      password: testpassword
+      grant-type: password
+      token-path: /restapi/token
     dvh-ords:
       base-url: http://localhost:${wiremock.server.port}
   granted-authorities:

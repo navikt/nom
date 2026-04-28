@@ -3,7 +3,12 @@ package no.nav.nom.apps.api.orgenhetleder.api.app;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.api.orgenhetleder.api.app.dto.OpprettOrgEnhetLederRequest;
+import no.nav.nom.apps.api.orgenhetleder.api.app.dto.OrgEnhetLederResponse;
+import no.nav.nom.apps.api.orgenhetleder.api.app.exception.OrgEnhetLederNotFoundException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -49,5 +54,26 @@ public class OrgEnhetLederRestService {
             .startdato(orgEnhetLederState.startdato())
             .sluttdato(orgEnhetLederState.sluttdato())
             .build();
+    }
+
+    public OrgEnhetLederResponse opprettOrgEnhetLeder(OpprettOrgEnhetLederRequest opprettOrgEnhetLederRequest) {
+        var ressurs = ressursStateRepository.findByNavident(opprettOrgEnhetLederRequest.navident())
+            .orElseThrow(() -> RessursNotFoundException.navident(opprettOrgEnhetLederRequest.navident()));
+
+        var orgEnhet = orgenhetService.getById(opprettOrgEnhetLederRequest.orgEnhetId())
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(opprettOrgEnhetLederRequest.orgEnhetId()));
+
+        var newOrgEnhetLederState = orgEnhetLederService.persisterLederForOrgEnhet(opprettOrgEnhetLederRequest)
+            .orElseThrow(() -> OrgEnhetLederNotFoundException.orgEnhetId(opprettOrgEnhetLederRequest.orgEnhetId()));
+
+        return new OrgEnhetLederResponse(
+            newOrgEnhetLederState.fid(),
+            newOrgEnhetLederState.navident(),
+            ressurs.visningsnavn(),
+            newOrgEnhetLederState.orgEnhetId(),
+            orgEnhet.getNavn(),
+            newOrgEnhetLederState.startdato(),
+            newOrgEnhetLederState.sluttdato()
+        );
     }
 }

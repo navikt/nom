@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -335,6 +336,8 @@ class MasseflyttOrgtilknytningerServiceTest {
             gyldigFom,
             gyldigTom,
             tilknytningType,
+            "2700",
+            Collections.emptyList(),
             null,
             "S123456"
         );

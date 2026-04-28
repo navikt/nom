@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhetleder.api.app;
+package no.nav.nom.apps.api.orgenhetleder.api.app.dto;
 
 import lombok.Builder;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;

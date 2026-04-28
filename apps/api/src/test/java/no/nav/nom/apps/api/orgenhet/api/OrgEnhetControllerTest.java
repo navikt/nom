@@ -7,10 +7,11 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
-import no.nav.nom.apps.api.orgenhet.api.app.dto.OppdaterOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
@@ -21,6 +22,7 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Opprett
 import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -348,27 +350,28 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .startdato(LocalDate.now().minusMonths(3))
             .build());
 
-        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+        var korrigerOrgEnhetNavnRequest = KorrigerOrgEnhetNavnRequest.builder()
+            .id(orgEnhet.id())
             .navn("Nav Ny Lokal Kontor")
-            .gyldigFom(orgEnhet.gyldigFom())
-            .gyldigTom(orgEnhet.gyldigTom())
-            .lederRessursNavident(lederRessurs.navident())
-            .firesiffer("1234")
-            .orgEnhetsType(orgEnhet.orgEnhetsType())
             .build();
 
         when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
 
-        var oppdatertOrgEnhet = webTestClient.put().uri("/app/orgenheter/oppdater")
+        var oppdatertOrgEnhet = webTestClient.patch().uri("/app/orgenheter/korrigerNavn")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
-            .bodyValue(oppdaterOrgEnhetRequest)
+            .bodyValue(korrigerOrgEnhetNavnRequest)
             .exchange()
             .expectStatus().isOk()
             .expectBody(StandardResponse.class)
             .returnResult()
             .getResponseBody();
 
-        String standardResponseMessageExpectation = String.format("OrgEnhet har endret navn fra %s til %s\\n", orgEnhet.navn(), oppdaterOrgEnhetRequest.navn());
+        String standardResponseMessageExpectation = String.format(
+            "Organisasjonsenhet med id %s har byttet navn fra %s til %s",
+            orgEnhet.id(),
+            orgEnhet.navn(),
+            korrigerOrgEnhetNavnRequest.navn()
+        );
 
         assertNotNull(oppdatertOrgEnhet);
         assertThat(standardResponseMessageExpectation).isEqualTo(oppdatertOrgEnhet.getMessage());
@@ -398,20 +401,16 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .startdato(LocalDate.now().minusMonths(3))
             .build());
 
-        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+        var korrigerOrgEnhetNavnRequest = KorrigerOrgEnhetNavnRequest.builder()
+            .id(orgEnhet.id())
             .navn("Nav Ny Lokal Kontor")
-            .gyldigFom(orgEnhet.gyldigFom())
-            .gyldigTom(orgEnhet.gyldigTom())
-            .lederRessursNavident(lederRessurs.navident())
-            .firesiffer("1234")
-            .orgEnhetsType(orgEnhet.orgEnhetsType())
             .build();
 
         when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
 
-        var oppdatertOrgEnhet = webTestClient.put().uri("/app/orgenheter/oppdater")
+        var oppdatertOrgEnhet = webTestClient.patch().uri("/app/orgenheter/korrigerNavn")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
-            .bodyValue(oppdaterOrgEnhetRequest)
+            .bodyValue(korrigerOrgEnhetNavnRequest)
             .exchange()
             .expectStatus().isNotFound()
             .expectBody(StandardResponse.class)
@@ -422,6 +421,66 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         assertNotNull(oppdatertOrgEnhet);
         assertThat(standardResponseMessageExpectation).isEqualTo(oppdatertOrgEnhet.getMessage());
+    }
+
+    @Test
+    void test_should_change_ovrige_fields() {
+        String orgEnhetId = "ab123c";
+        String orgEnhetOverId = "de456f";
+
+        OrgEnhetState orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder()
+            .navn("Nav Lokal Kontor")
+            .id(orgEnhetId)
+            .gyldigFom(LocalDate.now().minusMonths(6))
+            .gyldigTom(null)
+            .agressoOrgNivaa("ORGENHET")
+            .build();
+
+        OrganiseringState organisering = organiseringState().toBuilder()
+            .id(orgEnhetId)
+            .idOver(orgEnhetOverId)
+            .build();
+
+        orgEnhetStateRepository.update(orgEnhet);
+        organiseringStateRepository.update(organisering);
+
+        RessursState lederRessurs = ressursState();
+        ressursStateRepository.update(lederRessurs);
+
+        orgEnhetLederStateRepository.update(
+            "FID_1", OrgEnhetLederState.builder()
+                .fid("FID_1")
+                .navident(lederRessurs.navident())
+                .orgEnhetId(orgEnhetId)
+                .startdato(LocalDate.now().minusMonths(3))
+                .build()
+        );
+
+        var ovrigeEndringerRequest = OvrigeEndringerOrgEnhetRequest.builder()
+            .id(orgEnhetId)
+            .gyldigFom(orgEnhet.gyldigFom().minusMonths(1))
+            .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .firesiffer("1234")
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
+            .build();
+
+        when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
+
+        var responseMessage = String.format("OrgEnhet har endret gyldigFom fra %s til %s\\nOrgEnhet har endret Enhets Type fra %s til %s\\nOrgEnhet har endret NOM Nivå fra %s til %s",
+            orgEnhet.gyldigFom(), orgEnhet.gyldigFom().minusMonths(1), null, OrgEnhetsType.DIREKTORAT,  null, NomNivaa.ARBEIDSOMRAADE);
+
+        var result = webTestClient.patch().uri("/app/orgenheter/endreOvrige")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(ovrigeEndringerRequest)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        assertNotNull(result);
+        assertEquals(responseMessage, result.getMessage());
     }
 
     @Test
@@ -437,22 +496,19 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .build();
 
         RessursState lederRessurs = ressursState();
+        ressursStateRepository.update(lederRessurs);
 
-        var oppdaterOrgEnhetRequest = OppdaterOrgEnhetRequest.builder().id(orgEnhet.id())
+        var korrigerOrgEnhetNavnRequest = KorrigerOrgEnhetNavnRequest.builder()
+            .id(orgEnhet.id())
             .navn("Nav Ny Lokal Kontor")
-            .gyldigFom(orgEnhet.gyldigFom())
-            .gyldigTom(orgEnhet.gyldigTom())
-            .lederRessursNavident(lederRessurs.navident())
-            .firesiffer("1234")
-            .orgEnhetsType(orgEnhet.orgEnhetsType())
             .build();
 
 
         when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
 
-        webTestClient.put().uri("/app/orgenheter/oppdater")
+        webTestClient.patch().uri("/app/orgenheter/korrigerNavn")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomWriteGroupAndNomUiAzp()))
-            .bodyValue(oppdaterOrgEnhetRequest)
+            .bodyValue(korrigerOrgEnhetNavnRequest)
             .exchange()
             .expectStatus().isForbidden();
     }

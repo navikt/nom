@@ -3,9 +3,11 @@ package no.nav.nom.apps.api.orgenhetleder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
+import no.nav.nom.apps.api.orgenhetleder.api.app.dto.OpprettOrgEnhetLederRequest;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCommandService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederSluttdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;
@@ -18,7 +20,6 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
-import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,6 +32,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
@@ -163,6 +166,57 @@ public class OrgEnhetLederService {
         } else {
             log.warn("Ingen ledere funnet fra DVH");
         }
+    }
+
+    public Optional<OrgEnhetLederState> persisterLederForOrgEnhet(OpprettOrgEnhetLederRequest opprettOrgEnhetLederRequest) {
+        var eksisterendeOrgEnhetLederState = getAktivLederForOrgEnhet(opprettOrgEnhetLederRequest.orgEnhetId());
+
+        InputMetadata inputMetadata = new InputMetadata(
+            "REST-API",
+            "opprettLeder",
+            opprettOrgEnhetLederRequest,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        eksisterendeOrgEnhetLederState.ifPresent(orgEnhetLederState ->
+            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+                orgEnhetLederState.fid(),
+                new OppdaterOrgEnhetLederSluttdato(
+                    opprettOrgEnhetLederRequest.gyldigTom().minusDays(1),
+                    inputMetadata
+                )
+            ));
+
+        String fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(
+            new OpprettOrgEnhetLeder(
+                opprettOrgEnhetLederRequest.navident(),
+                opprettOrgEnhetLederRequest.orgEnhetId(),
+                inputMetadata
+            )
+        );
+
+        orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
+            fid,
+            new OppdaterOrgEnhetLederStartdato(
+                opprettOrgEnhetLederRequest.gyldigFom(),
+                inputMetadata
+            )
+        );
+
+        if (nonNull(opprettOrgEnhetLederRequest.gyldigTom())) {
+            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+                fid,
+                new OppdaterOrgEnhetLederSluttdato(
+                    opprettOrgEnhetLederRequest.gyldigTom(),
+                    inputMetadata
+                )
+            );
+        }
+
+        return getAktivLederForOrgEnhet(opprettOrgEnhetLederRequest.orgEnhetId());
     }
 
     public List<LederForRessurs> getLedereForRessurs(String navident, boolean kunDOL) {
