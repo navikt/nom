@@ -1298,9 +1298,11 @@ function lagOppdaterOrgtilknytningerRequest(
       gyldigTom: orgtilknytning.gyldigTom,
       orgEnhetId: orgtilknytning.orgEnhetId,
       tilknytningtype:
-        orgtilknytning.sektor === Sektor.NAV_KOMMUNAL
-          ? Tilknytningtype.INGEN
-          : orgtilknytning.orgtilknytningType,
+        !orgtilknytning.sektor && !orgtilknytning.orgtilknytningType
+          ? undefined
+          : orgtilknytning.sektor === Sektor.NAV_KOMMUNAL
+            ? Tilknytningtype.INGEN
+            : orgtilknytning.orgtilknytningType,
       sektor: orgtilknytning.sektor ?? ressursSektor,
     })),
     setRessursSluttdato: true,
