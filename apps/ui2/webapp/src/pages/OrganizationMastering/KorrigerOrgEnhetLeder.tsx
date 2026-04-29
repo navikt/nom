@@ -11,7 +11,6 @@ import * as yup from "yup";
 
 import {
   getOrgEnhet,
-  korrigerOrgEnhetNavn,
   opprettOrgEnhetLeder,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
@@ -32,7 +31,6 @@ import {
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { OpprettOrgEnhetLederRequest, OrgEnhet } from "~/types/api-models";
-import { KorrigerOrgEnhetNavnRequest } from "~/types/api-models";
 
 export const KorrigerOrgEnhetLeder = () => {
   const hasAdminAccess = useHasAdminAccess();

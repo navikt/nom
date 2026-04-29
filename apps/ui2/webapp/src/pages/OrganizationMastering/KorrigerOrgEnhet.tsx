@@ -21,17 +21,13 @@ import * as yup from "yup";
 import {
   endreOrgEnhetInfo,
   getOrgEnhet,
-  opprettOrgEnhetLeder,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import {
-  formatDateWithoutTimezone,
-  todayWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -47,7 +43,6 @@ import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { OpprettOrgEnhetLederRequest } from "~/types/api-models";
 import { NomNivaa } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
