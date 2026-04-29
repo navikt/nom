@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Service
 public class RessursService {
@@ -24,7 +25,7 @@ public class RessursService {
 
     public Map<String, List<RessursState>> findAllGroupedByFysiskBrukersted() {
         return ressursStateRepository.getAll().stream()
-            .filter(Objects::nonNull)
+            .filter(ressursState -> nonNull(ressursState.primaryFysiskBrukersted()) && !ressursState.primaryFysiskBrukersted().isBlank())
             .collect(Collectors.groupingBy(RessursState::primaryFysiskBrukersted));
     }
 }
