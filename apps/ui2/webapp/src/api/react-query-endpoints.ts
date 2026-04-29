@@ -16,11 +16,11 @@ import type {
   ExcelExportRequest,
   GetPersonRequest,
   GlobalStatistikkResponse,
+  KorrigerOrgEnhetNavnRequest,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
   MinimalRessurs,
-  OppdaterOrgEnhetRequest,
   OppdaterOrgtilknytningerForRessursRequest,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
@@ -692,9 +692,11 @@ export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
   );
 };
 
-export const oppdaterOrgEnhet = async (request: OppdaterOrgEnhetRequest) => {
-  return axios.put<unknown, AxiosResponse<unknown>>(
-    `${NOM_API_BASE_PATH}/app/orgenheter/oppdater`,
+export const korrigerOrgEnhetNavn = async (
+  request: KorrigerOrgEnhetNavnRequest,
+) => {
+  return axios.patch<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/korrigerNavn`,
     request,
   );
 };
