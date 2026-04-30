@@ -23,12 +23,10 @@ public class JiraAssetRestService {
     public List<JiraAssetResponse> getFysiskBrukerStedWithRessurser() {
         var jiraAsset = new ArrayList<JiraAssetResponse>();
         var fysiskeBrukersteder = fysiskBrukerstedService.getAllFysiskBrukersted();
-        log.info("Alle fysiskeBrukersteder : {}", fysiskeBrukersteder);
 
         ressursService.findAllGroupedByFysiskBrukersted().forEach((fysiskBrukerstedNr, ressurser) -> {
             var fysiskBrukersted = fysiskeBrukersteder.get(fysiskBrukerstedNr);
             if (isNull(fysiskBrukersted)) {
-                log.info("Dette fysiskeBrukerstedet {} finnes ikke??", fysiskBrukerstedNr);
                 return;
             }
             jiraAsset.add(
