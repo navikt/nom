@@ -36,7 +36,7 @@ public class FysiskBrukerstedCache {
     @Cacheable(cacheNames = FYSISK_BRUKERSTED_CACHE_NAME, cacheManager = "cacheManager")
     public List<FysiskBrukersted> getAll() {
         var brukMainManager = unleash.isEnabled(UNLEASH_USEMAINMANAGER_FOR_FYSISK_BRUKERSTED);
-        return brukMainManager?mainManagerClient.getFysiskeBrukersteder() : nomRemedyIntegrasjonClient.getFysiskeBrukersteder();
+        return brukMainManager ? mainManagerClient.getFysiskeBrukersteder() : nomRemedyIntegrasjonClient.getFysiskeBrukersteder();
     }
 
     @CacheEvict(value = FYSISK_BRUKERSTED_CACHE_NAME, allEntries = true)
