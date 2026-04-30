@@ -24,7 +24,7 @@ public class RessursService {
     }
 
     public Map<String, List<RessursState>> findAllGroupedByFysiskBrukersted() {
-        return ressursStateRepository.getAll().stream()
+        return ressursStateRepository.findAllActiveRessurser().values().stream()
             .filter(ressursState -> nonNull(ressursState.primaryFysiskBrukersted()) && !ressursState.primaryFysiskBrukersted().isBlank())
             .collect(Collectors.groupingBy(RessursState::primaryFysiskBrukersted));
     }
