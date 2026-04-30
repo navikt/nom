@@ -12,6 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -75,6 +76,7 @@ public class MainManagerClient {
                 .headers(headers -> headers.setBearerAuth(token))
                 .retrieve()
                 .toEntity(MainManagerSitesResponse.class)
+                .timeout(Duration.ofMinutes(2))
                 .block();
 
             if (response == null || response.getBody() == null || response.getBody().items() == null) {
