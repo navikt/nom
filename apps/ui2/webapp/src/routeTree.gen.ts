@@ -12,11 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TilgangerRouteImport } from './routes/tilganger'
 import { Route as OrganisasjonsmastringRouteImport } from './routes/organisasjonsmastring'
 import { Route as OpprettOrganisasjonsenhetRouteImport } from './routes/opprett-organisasjonsenhet'
-import { Route as MedarbeidereTabellRouteImport } from './routes/medarbeidere-tabell'
 import { Route as MasseflyttingFysiskBrukerstedRouteImport } from './routes/masseflytting-fysisk-brukersted'
 import { Route as KorrigerOrganisasjonsenhetRouteImport } from './routes/korriger-organisasjonsenhet'
 import { Route as KorrigerNavnOrganisasjonsenhetRouteImport } from './routes/korriger-navn-organisasjonsenhet'
 import { Route as KorrigerLederOrganisasjonsenhetRouteImport } from './routes/korriger-leder-organisasjonsenhet'
+import { Route as FysiskBrukerstedTabellRouteImport } from './routes/fysisk-brukersted-tabell'
 import { Route as AvsluttOrganisasjonsenhetRouteImport } from './routes/avslutt-organisasjonsenhet'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
@@ -48,11 +48,6 @@ const OpprettOrganisasjonsenhetRoute =
     path: '/opprett-organisasjonsenhet',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MedarbeidereTabellRoute = MedarbeidereTabellRouteImport.update({
-  id: '/medarbeidere-tabell',
-  path: '/medarbeidere-tabell',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MasseflyttingFysiskBrukerstedRoute =
   MasseflyttingFysiskBrukerstedRouteImport.update({
     id: '/masseflytting-fysisk-brukersted',
@@ -77,6 +72,11 @@ const KorrigerLederOrganisasjonsenhetRoute =
     path: '/korriger-leder-organisasjonsenhet',
     getParentRoute: () => rootRouteImport,
   } as any)
+const FysiskBrukerstedTabellRoute = FysiskBrukerstedTabellRouteImport.update({
+  id: '/fysisk-brukersted-tabell',
+  path: '/fysisk-brukersted-tabell',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AvsluttOrganisasjonsenhetRoute =
   AvsluttOrganisasjonsenhetRouteImport.update({
     id: '/avslutt-organisasjonsenhet',
@@ -152,11 +152,11 @@ const OrgResourcesTableIdRoute = OrgResourcesTableIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
   '/korriger-organisasjonsenhet': typeof KorrigerOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
-  '/medarbeidere-tabell': typeof MedarbeidereTabellRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
@@ -176,11 +176,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
   '/korriger-organisasjonsenhet': typeof KorrigerOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
-  '/medarbeidere-tabell': typeof MedarbeidereTabellRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
@@ -201,11 +201,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
   '/korriger-organisasjonsenhet': typeof KorrigerOrganisasjonsenhetRoute
   '/masseflytting-fysisk-brukersted': typeof MasseflyttingFysiskBrukerstedRoute
-  '/medarbeidere-tabell': typeof MedarbeidereTabellRoute
   '/opprett-organisasjonsenhet': typeof OpprettOrganisasjonsenhetRoute
   '/organisasjonsmastring': typeof OrganisasjonsmastringRoute
   '/tilganger': typeof TilgangerRoute
@@ -227,11 +227,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
     | '/korriger-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
-    | '/medarbeidere-tabell'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
@@ -251,11 +251,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
     | '/korriger-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
-    | '/medarbeidere-tabell'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
@@ -275,11 +275,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
     | '/korriger-organisasjonsenhet'
     | '/masseflytting-fysisk-brukersted'
-    | '/medarbeidere-tabell'
     | '/opprett-organisasjonsenhet'
     | '/organisasjonsmastring'
     | '/tilganger'
@@ -300,11 +300,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AvsluttOrganisasjonsenhetRoute: typeof AvsluttOrganisasjonsenhetRoute
+  FysiskBrukerstedTabellRoute: typeof FysiskBrukerstedTabellRoute
   KorrigerLederOrganisasjonsenhetRoute: typeof KorrigerLederOrganisasjonsenhetRoute
   KorrigerNavnOrganisasjonsenhetRoute: typeof KorrigerNavnOrganisasjonsenhetRoute
   KorrigerOrganisasjonsenhetRoute: typeof KorrigerOrganisasjonsenhetRoute
   MasseflyttingFysiskBrukerstedRoute: typeof MasseflyttingFysiskBrukerstedRoute
-  MedarbeidereTabellRoute: typeof MedarbeidereTabellRoute
   OpprettOrganisasjonsenhetRoute: typeof OpprettOrganisasjonsenhetRoute
   OrganisasjonsmastringRoute: typeof OrganisasjonsmastringRoute
   TilgangerRoute: typeof TilgangerRoute
@@ -344,13 +344,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpprettOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/medarbeidere-tabell': {
-      id: '/medarbeidere-tabell'
-      path: '/medarbeidere-tabell'
-      fullPath: '/medarbeidere-tabell'
-      preLoaderRoute: typeof MedarbeidereTabellRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/masseflytting-fysisk-brukersted': {
       id: '/masseflytting-fysisk-brukersted'
       path: '/masseflytting-fysisk-brukersted'
@@ -377,6 +370,13 @@ declare module '@tanstack/react-router' {
       path: '/korriger-leder-organisasjonsenhet'
       fullPath: '/korriger-leder-organisasjonsenhet'
       preLoaderRoute: typeof KorrigerLederOrganisasjonsenhetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fysisk-brukersted-tabell': {
+      id: '/fysisk-brukersted-tabell'
+      path: '/fysisk-brukersted-tabell'
+      fullPath: '/fysisk-brukersted-tabell'
+      preLoaderRoute: typeof FysiskBrukerstedTabellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/avslutt-organisasjonsenhet': {
@@ -495,11 +495,11 @@ const OrgTableRouteWithChildren = OrgTableRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvsluttOrganisasjonsenhetRoute: AvsluttOrganisasjonsenhetRoute,
+  FysiskBrukerstedTabellRoute: FysiskBrukerstedTabellRoute,
   KorrigerLederOrganisasjonsenhetRoute: KorrigerLederOrganisasjonsenhetRoute,
   KorrigerNavnOrganisasjonsenhetRoute: KorrigerNavnOrganisasjonsenhetRoute,
   KorrigerOrganisasjonsenhetRoute: KorrigerOrganisasjonsenhetRoute,
   MasseflyttingFysiskBrukerstedRoute: MasseflyttingFysiskBrukerstedRoute,
-  MedarbeidereTabellRoute: MedarbeidereTabellRoute,
   OpprettOrganisasjonsenhetRoute: OpprettOrganisasjonsenhetRoute,
   OrganisasjonsmastringRoute: OrganisasjonsmastringRoute,
   TilgangerRoute: TilgangerRoute,

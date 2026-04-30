@@ -23,7 +23,6 @@ import {
   getOrgEnhet,
   getOrgEnhetList,
   getRessurserByListNavident,
-  updateFysiskBrukerstedForRessurser,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -34,11 +33,7 @@ import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import type {
-  AvvikleOrgEnhetRequest,
-  OrgEnhet,
-  UpdatePrimaryFysiskBrukerstedForRessurserRequest,
-} from "~/types/api-models";
+import type { AvvikleOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const AvsluttOrgEnhet = () => {

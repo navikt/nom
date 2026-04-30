@@ -5,33 +5,33 @@ import React, { useState } from "react";
 
 import {
   getFysiskeBrukersteder,
+  getOrgtilknytningerByNavidentList,
   getRessurserForFysiskBrukersted,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { formatVisningsnavn } from "~/utils";
 
-export function MedarbeidereTabell() {
+export function FysiskBrukerstedTabellPage() {
   return (
     <>
       <PageBanner text={"Medarbeidere i tabell"} />
 
       <ContentWrapper limitWidth={false}>
-        <MedarbeiderTabell />
+        <FysiskBrukerstedTabell />
       </ContentWrapper>
     </>
   );
 }
 
-function MedarbeiderTabell() {
+function FysiskBrukerstedTabell() {
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
   const [fysiskBrukerstedFilter, setFysiskBrukerstedFilter] = useState("");
-
-  console.log(fysiskBrukerstedFilter);
 
   return (
     <VStack gap="6">
@@ -39,6 +39,7 @@ function MedarbeiderTabell() {
         css={css`
           width: 100%;
           max-width: 1008px;
+          padding: 0 var(--a-spacing-6);
           margin: auto;
         `}
       >
@@ -66,12 +67,20 @@ function MedarbeiderTabell() {
         </VStack>
       </div>
 
-      <TabellInner fysiskBrukerstedNr={fysiskBrukerstedFilter} />
+      {!!fysiskBrukerstedFilter && (
+        <FysiskBrukerstedTabellInner
+          fysiskBrukerstedNr={fysiskBrukerstedFilter}
+        />
+      )}
     </VStack>
   );
 }
 
-function TabellInner({ fysiskBrukerstedNr }: { fysiskBrukerstedNr: string }) {
+function FysiskBrukerstedTabellInner({
+  fysiskBrukerstedNr,
+}: {
+  fysiskBrukerstedNr: string;
+}) {
   const getFysiskBrukerstedRessurserQuery = useQuery({
     queryKey: getRessurserForFysiskBrukersted.queryKey(fysiskBrukerstedNr),
     queryFn: () => getRessurserForFysiskBrukersted.queryFn(fysiskBrukerstedNr),
@@ -80,7 +89,25 @@ function TabellInner({ fysiskBrukerstedNr }: { fysiskBrukerstedNr: string }) {
 
   const fysiskBrukerstedRessurser = getFysiskBrukerstedRessurserQuery.data;
 
-  console.log(fysiskBrukerstedRessurser);
+  const navidentListe =
+    fysiskBrukerstedRessurser?.map((ressurs) => ressurs.navident) ?? [];
+
+  const orgtilknytningerQuery = useQuery({
+    queryKey: getOrgtilknytningerByNavidentList.queryKey(navidentListe),
+    queryFn: () => getOrgtilknytningerByNavidentList.queryFn(navidentListe),
+    enabled: navidentListe.length > 0,
+  });
+
+  const orgtilknytninger = orgtilknytningerQuery.data;
+
+  console.log(orgtilknytninger);
+
+  if (
+    getFysiskBrukerstedRessurserQuery.isLoading ||
+    orgtilknytningerQuery.isLoading
+  ) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
 
   return (
     <Table
