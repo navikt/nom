@@ -29,6 +29,7 @@ public class JiraAssetRestService {
             var fysiskBrukersted = fysiskeBrukersteder.get(fysiskBrukerstedNr);
             if (isNull(fysiskBrukersted)) {
                 log.info("Dette fysiskeBrukerstedet {} finnes ikke??", fysiskBrukerstedNr);
+                return;
             }
             jiraAsset.add(
                 new JiraAssetResponse(
