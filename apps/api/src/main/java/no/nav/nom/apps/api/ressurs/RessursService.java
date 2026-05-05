@@ -28,4 +28,8 @@ public class RessursService {
             .filter(ressursState -> nonNull(ressursState.primaryFysiskBrukersted()) && !ressursState.primaryFysiskBrukersted().isBlank())
             .collect(Collectors.groupingBy(RessursState::primaryFysiskBrukersted));
     }
+
+    public Map<String, RessursState> findAllActiveRessurser() {
+        return ressursStateRepository.findAllActiveRessurser();
+    }
 }
