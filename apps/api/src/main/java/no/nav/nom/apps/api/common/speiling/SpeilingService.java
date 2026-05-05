@@ -95,7 +95,6 @@ public class SpeilingService {
                             }
                             if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
                                 primaryFysiskBrukersted.set(orgtilknytningState.primaryFysiskBrukerstedNummer());
-                                alleFysiskeBrukersteder.add(orgtilknytningState.primaryFysiskBrukerstedNummer());
                             }
                         }
                         if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
@@ -196,7 +195,6 @@ public class SpeilingService {
                         if (orgtilknytningState.erDagligOppfolging()) {
                             if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
                                 primaryFysiskBrukersted.set(orgtilknytningState.primaryFysiskBrukerstedNummer());
-                                alleFysiskeBrukersteder.add(orgtilknytningState.primaryFysiskBrukerstedNummer());
                             }
                         }
                         if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
