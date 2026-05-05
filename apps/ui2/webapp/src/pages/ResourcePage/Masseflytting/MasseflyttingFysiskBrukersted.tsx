@@ -517,7 +517,11 @@ function FysiskBrukerstedFlyttingTable() {
                 <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
                   Sektor
                 </Table.ColumnHeader>
-                <Table.ColumnHeader scope="col" sortKey="orgEnhet.id" sortable>
+                <Table.ColumnHeader
+                  scope="col"
+                  sortKey="orgEnhet.name"
+                  sortable
+                >
                   Organisasjonsenhet
                 </Table.ColumnHeader>
                 <Table.ColumnHeader scope="col">

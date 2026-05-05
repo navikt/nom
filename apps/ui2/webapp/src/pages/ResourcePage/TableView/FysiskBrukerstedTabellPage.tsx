@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Table, VStack } from "@navikt/ds-react";
+import { Alert, Heading, Pagination, Table, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
@@ -14,6 +14,7 @@ import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
+import { useTableSort } from "~/hooks/useTableSort";
 import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
@@ -137,7 +138,7 @@ function FysiskBrukerstedTabellInner({
             (orgEnhet) => orgEnhet.id === tilknytning.orgEnhetId,
           ),
         )
-        .filter((orgEnhet): orgEnhet is OrgEnhet => orgEnhet !== undefined);
+        .filter((orgEnhet) => orgEnhet !== undefined);
 
       const dolTilknytning = tilknytningerForRessurs.find(
         (tilknytning) =>
@@ -158,75 +159,145 @@ function FysiskBrukerstedTabellInner({
       };
     }) ?? [];
 
-  console.log(mappedeRessurser);
+  const { data, sort, handleSort } = useTableSort(mappedeRessurser, "navn");
+
+  const sortedRessurser = data;
+
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 300;
+  const pages = Math.ceil(mappedeRessurser.length / rowsPerPage);
+
+  const tableData = sortedRessurser.slice(
+    rowsPerPage * (page - 1),
+    rowsPerPage * page,
+  );
 
   if (
     getFysiskBrukerstedRessurserQuery.isLoading ||
-    orgtilknytningerQuery.isLoading
+    orgtilknytningerQuery.isLoading ||
+    orgEnheterQuery.isLoading
   ) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
+  if (
+    getFysiskBrukerstedRessurserQuery.isError ||
+    orgtilknytningerQuery.isError ||
+    orgEnheterQuery.isError
+  ) {
+    return (
+      <Alert variant="error">
+        <Heading level="3" size="small">
+          Det oppstod en feil ved henting av ansatte
+        </Heading>
+      </Alert>
+    );
+  }
+
   return (
-    <Table
-      css={css`
-        background-color: #fff;
-        padding: 6px;
-        border-radius: 5px;
+    <>
+      {pages > 1 && (
+        <Pagination
+          count={pages}
+          css={css`
+            margin-top: var(--a-spacing-6);
+            display: flex;
+          `}
+          onPageChange={setPage}
+          page={page}
+          prevNextTexts
+        />
+      )}
 
-        --ac-table-row-border: #071a3636;
-      `}
-      zebraStripes
-    >
-      <Table.Header
+      <Table
         css={css`
-          height: 48px;
-          border-bottom: 2px;
+          background-color: #fff;
+          padding: 6px;
+          border-radius: 5px;
+
+          --ac-table-row-border: #071a3636;
         `}
+        onSortChange={handleSort}
+        sort={sort}
+        zebraStripes
       >
-        <Table.Row>
-          <Table.ColumnHeader scope="col">Nav-ident</Table.ColumnHeader>
+        <Table.Header
+          css={css`
+            height: 48px;
+            border-bottom: 2px;
+          `}
+        >
+          <Table.Row>
+            <Table.ColumnHeader scope="col" sortKey="navident" sortable>
+              Nav-ident
+            </Table.ColumnHeader>
 
-          <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="navn" sortable>
+              Navn
+            </Table.ColumnHeader>
 
-          <Table.ColumnHeader scope="col">
-            Organisasjonsenhet
-          </Table.ColumnHeader>
+            <Table.ColumnHeader
+              scope="col"
+              sortKey="orgEnheter[0].navn"
+              sortable
+            >
+              Organisasjonsenhet
+            </Table.ColumnHeader>
 
-          <Table.ColumnHeader scope="col">Firesiffer</Table.ColumnHeader>
-        </Table.Row>
-      </Table.Header>
-
-      <Table.Body>
-        {mappedeRessurser?.map((rad) => (
-          <Table.Row
-            css={css`
-              --ac-table-row-border: none;
-              height: 48px;
-              border-width: 0 0 1px;
-            `}
-            key={rad.navident}
-          >
-            <Table.DataCell>
-              <SmartLink href={`/ressurs/${rad.navident}`}>
-                {rad.navident}
-              </SmartLink>
-            </Table.DataCell>
-            <Table.DataCell>
-              <SmartLink href={`/ressurs/${rad.navident}`}>
-                {rad.navn}
-              </SmartLink>
-            </Table.DataCell>
-            <Table.DataCell>
-              {rad.orgEnheter.map((orgEnhet) => (
-                <span>{orgEnhet.navn}</span>
-              ))}
-            </Table.DataCell>
-            <Table.DataCell>{rad.firesiffer}</Table.DataCell>
+            <Table.ColumnHeader scope="col" sortKey="firesiffer" sortable>
+              Firesiffer
+            </Table.ColumnHeader>
           </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
+        </Table.Header>
+
+        <Table.Body>
+          {tableData?.map((rad) => (
+            <Table.Row
+              css={css`
+                --ac-table-row-border: none;
+                height: 48px;
+                border-width: 0 0 1px;
+              `}
+              key={rad.navident}
+            >
+              <Table.DataCell>
+                <SmartLink href={`/ressurs/${rad.navident}`}>
+                  {rad.navident}
+                </SmartLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <SmartLink href={`/ressurs/${rad.navident}`}>
+                  {rad.navn}
+                </SmartLink>
+              </Table.DataCell>
+              <Table.DataCell>
+                <VStack gap="1">
+                  {rad.orgEnheter.map((orgEnhet) => (
+                    <SmartLink href={`/org/${orgEnhet.id}`} key={orgEnhet.id}>
+                      {`${orgEnhet.navn} (${orgEnhet.id})`}
+                    </SmartLink>
+                  ))}
+                </VStack>
+              </Table.DataCell>
+              <Table.DataCell>{rad.firesiffer}</Table.DataCell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+
+      {pages > 1 && (
+        <Pagination
+          count={pages}
+          css={css`
+            margin-top: var(--a-spacing-6);
+            display: flex;
+          `}
+          onPageChange={setPage}
+          page={page}
+          prevNextTexts
+        />
+      )}
+    </>
   );
 }
 

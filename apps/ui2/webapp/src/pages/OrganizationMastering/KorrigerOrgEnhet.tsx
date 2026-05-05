@@ -18,7 +18,7 @@ import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet, oppdaterOrgEnhet } from "~/api/react-query-endpoints";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -32,7 +32,7 @@ import {
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
+import type { OrgEnhet } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
@@ -110,32 +110,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     resolver: yupResolver(validationSchema),
   });
 
-  const oppdaterOrgEnhetMutation = useMutation<
-    unknown,
-    AxiosError<Error>,
-    OppdaterOrgEnhetRequest
-  >({
-    mutationFn: async (request) => {
-      return oppdaterOrgEnhet(request);
-    },
-    onSuccess: async () => {
-      showToast({ text: "Oppdatert" });
-
-      navigate({
-        to: "/organisasjonsmastring",
-      }).then();
-    },
-  });
-
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
-    const request: OppdaterOrgEnhetRequest = {
-      ...values,
-      id: orgEnhet.id,
-      navn: orgEnhet.navn,
-    };
-
-    oppdaterOrgEnhetMutation.mutate(request);
-  };
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
 
   return (
     <FormProvider {...methods}>
