@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.rest.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
 
+@Tag(name = "Admin for speiling av Fysisk Brukersted fra Ressurs til Orgtilknytning")
 @Slf4j
 @RestController
 @RequestMapping(name = "/api/admin/speilFysiskBrukerstedFraRessursTilOT")
@@ -42,7 +44,7 @@ public class SpeilFysiskBrukerstedFraRessursTilOt {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping
+    @PostMapping()
     public String speilFysiskBrukerstedFraRessursTilOt(@RequestParam boolean dryRun) {
         var alleAktiveRessurser = ressursService.findAllActiveRessurser();
         var alleAktiveOrgtilknytninger = orgtilknytningService.getByNavidenter(
