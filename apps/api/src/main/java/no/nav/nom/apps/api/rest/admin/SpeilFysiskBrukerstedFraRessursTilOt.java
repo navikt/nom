@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
 
 @Slf4j
 @RestController
@@ -65,6 +66,7 @@ public class SpeilFysiskBrukerstedFraRessursTilOt {
             }
 
             alleAktiveOrgtilknytninger.get(navident).forEach(orgtilknytningState -> {
+                if (!isPeriodActiveOrFuture(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom())) return;
                 var additionalFysiskBrukersteder = isNull(orgtilknytningState.additionalFysiskeBrukerstederNummer()) ?
                     new ArrayList<String>() : orgtilknytningState.additionalFysiskeBrukerstederNummer();
                 if (!dryRun) {
