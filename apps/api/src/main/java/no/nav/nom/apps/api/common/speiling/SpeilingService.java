@@ -57,7 +57,7 @@ public class SpeilingService {
     }
 
     private void speilOrgtilknytningDataTilRessursState() {
-        var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
+        var alleAktiveOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
@@ -69,7 +69,7 @@ public class SpeilingService {
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
-        dolOrgtilknytninger.forEach((navident, orgtilknytningStates) ->
+        alleAktiveOrgtilknytninger.forEach((navident, orgtilknytningStates) ->
             ressursStateRepository.findByNavident(navident).ifPresent(ressursState -> {
                     AtomicReference<String> primaryFysiskBrukersted = new AtomicReference<>();
                     Set<String> alleFysiskeBrukersteder = new HashSet<>();
@@ -113,7 +113,7 @@ public class SpeilingService {
                         ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                             new OppdaterFysiskeBrukerstederCommand(
                                 ressursState.fid(),
-                                alleFysiskeBrukerstederErLike ? new HashSet<>() : alleFysiskeBrukersteder,
+                                alleFysiskeBrukersteder,
                                 primaryFysiskBrukersted.get()
                             ),
                             inputMetadata
@@ -174,7 +174,7 @@ public class SpeilingService {
     }
 
     public void speilBrukerstederOrgtilknytning() {
-        var dolOrgtilknytninger = orgtilknytningStateRepository.getAll()
+        var alleAktiveOrgtilknytninger = orgtilknytningStateRepository.getAll()
             .stream()
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
@@ -186,7 +186,7 @@ public class SpeilingService {
             .origination(new Origination("nom-api", "nom-api"))
             .build();
 
-        dolOrgtilknytninger.forEach((navident, orgtilknytningStates) ->
+        alleAktiveOrgtilknytninger.forEach((navident, orgtilknytningStates) ->
             ressursStateRepository.findByNavident(navident).ifPresent(ressursState -> {
                     AtomicReference<String> primaryFysiskBrukersted = new AtomicReference<>();
                     Set<String> alleFysiskeBrukersteder = new HashSet<>();
@@ -213,7 +213,7 @@ public class SpeilingService {
                         ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                             new OppdaterFysiskeBrukerstederCommand(
                                 ressursState.fid(),
-                                alleFysiskeBrukerstederErLike ? new HashSet<>() : alleFysiskeBrukersteder,
+                                alleFysiskeBrukersteder,
                                 primaryFysiskBrukersted.get()
                             ),
                             inputMetadata
