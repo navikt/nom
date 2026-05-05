@@ -69,7 +69,6 @@ public class ApiForSpeileDataFraOrgtilknytningTilRessurs {
         description = "Speil fysisk brukersteder fra orgtilknytning til ressurs",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/speilFysiskBrukersteder")
     public void speilFysiskBrukersteder() {
         speilFysiskBrukerstederAsync();
