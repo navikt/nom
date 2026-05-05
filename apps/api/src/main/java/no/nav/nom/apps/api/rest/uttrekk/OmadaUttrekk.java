@@ -21,6 +21,7 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -318,7 +319,7 @@ public class OmadaUttrekk {
                             nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
                             orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
                                 getOrgenhetOver(orgenhet),
-                            remedyEnhetIdResolver.remedyEnhetId(orgenhet)
+                            getRemedyEnhetId(orgenhet)
                         );
                         writer.close();
                     } catch (IOException e) {
@@ -333,6 +334,15 @@ public class OmadaUttrekk {
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
+    }
+
+    private String getRemedyEnhetId(IOrgenhet orgenhet) {
+        String remedyEnhet = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
+
+        if (unleash.isEnabled(ORGENHET_KUN_HISTORISK_SLUTTDATO) && (remedyEnhet == null || remedyEnhet.isEmpty())) {
+            remedyEnhet = remedyEnhetIdResolver.remedyEnhetId(getGarsdagensOverEnhet(orgenhet));
+        }
+        return remedyEnhet;
     }
 
     private String getLederNavident(IOrgenhet orgenhet) {
@@ -374,16 +384,20 @@ public class OmadaUttrekk {
             return overenhet;
         } else {
             // Hvis det ikke er aktiv overenhet, lever overenhet som var gyldig i forigårs, hvis den fantes
-            var today = LocalDate.now().minusDays(1);
-            return organiseringStateRepository.findById(orgenhet.getId()).stream()
-                .filter(org -> // Aktiv i går
-                    org.gyldigFom().isBefore(today) &&
-                    (org.gyldigTom() == null || org.gyldigTom().isAfter(LocalDate.now().minusDays(3)))
-                )
-                .map(OrganiseringState::idOver)
-                .findFirst()
-                .orElse("");
+            return getGarsdagensOverEnhet(orgenhet);
         }
+    }
+
+    private String getGarsdagensOverEnhet(IOrgenhet orgenhet) {
+        var today = LocalDate.now().minusDays(1);
+        return organiseringStateRepository.findById(orgenhet.getId()).stream()
+            .filter(org -> // Aktiv i går
+                org.gyldigFom().isBefore(today) &&
+                    (org.gyldigTom() == null || org.gyldigTom().isAfter(LocalDate.now().minusDays(3)))
+            )
+            .map(OrganiseringState::idOver)
+            .findFirst()
+            .orElse("");
     }
 
     private CSVFormat getCSVFormat(String... headers) {
