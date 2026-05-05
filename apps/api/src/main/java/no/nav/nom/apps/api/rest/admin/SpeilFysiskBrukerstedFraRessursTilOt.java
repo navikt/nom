@@ -30,7 +30,7 @@ import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
 @Tag(name = "Admin for speiling av Fysisk Brukersted fra Ressurs til Orgtilknytning")
 @Slf4j
 @RestController
-@RequestMapping(name = "/api/admin/speilFysiskBrukerstedFraRessursTilOT")
+@RequestMapping("/api/admin/speilFysiskBrukerstedFraRessursTilOT")
 @PreAuthorize("hasAuthority('ADMIN') || hasAuthority('LOCAL_NOM_API')")
 @RequiredArgsConstructor
 public class SpeilFysiskBrukerstedFraRessursTilOt {
@@ -44,7 +44,7 @@ public class SpeilFysiskBrukerstedFraRessursTilOt {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping()
+    @PostMapping
     public String speilFysiskBrukerstedFraRessursTilOt(@RequestParam boolean dryRun) {
         var alleAktiveRessurser = ressursService.findAllActiveRessurser();
         var alleAktiveOrgtilknytninger = orgtilknytningService.getByNavidenter(
