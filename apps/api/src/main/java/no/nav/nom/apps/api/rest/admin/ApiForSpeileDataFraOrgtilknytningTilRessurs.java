@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.common.speiling.SpeilingService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,5 +63,20 @@ public class ApiForSpeileDataFraOrgtilknytningTilRessurs {
     @Async
     public void speilSektorAsync() {
         speilingService.speilSektorOrgtilknytning();
+    }
+
+    @Operation(
+        description = "Speil fysisk brukersteder fra orgtilknytning til ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/speilFysiskBrukersteder")
+    public void speilFysiskBrukersteder() {
+        speilFysiskBrukerstederAsync();
+    }
+
+    @Async
+    public void speilFysiskBrukerstederAsync() {
+        speilingService.speilBrukerstederOrgtilknytning();
     }
 }
