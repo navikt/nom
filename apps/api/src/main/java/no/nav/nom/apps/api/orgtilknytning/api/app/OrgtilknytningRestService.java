@@ -566,7 +566,7 @@ public class OrgtilknytningRestService {
         });
 
         var optionalFysiskBrukerstederAreEqual = optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
-        var optionalFysiskeBrukersteder = optionalFysiskBrukerstederAreEqual ? new ArrayList<String>() : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
+        var optionalFysiskeBrukersteder = isNull(endreOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
 
         if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
             || !optionalFysiskBrukerstederAreEqual) {

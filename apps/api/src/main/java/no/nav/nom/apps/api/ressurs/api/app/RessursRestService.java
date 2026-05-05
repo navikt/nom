@@ -62,6 +62,7 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -608,7 +609,7 @@ public class RessursRestService {
                 existingRessurs.navident(),
                 request.orgEnhetId(),
                 request.fysiskBrukerstedNr(),
-                null,
+                new ArrayList<>(),
                 metadata
             )
         );
