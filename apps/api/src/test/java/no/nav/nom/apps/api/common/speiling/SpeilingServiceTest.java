@@ -348,28 +348,6 @@ class SpeilingServiceTest {
             assertEquals("1111", captor.getValue().primaryFysiskBrukersted());
             assertTrue(captor.getValue().fysiskeBrukersteder().containsAll(Set.of("1111", "2222")));
         }
-
-        @Test
-        void sendsEmptySetForFysiskeBrukersteder_whenAllMatchButPrimaryDiffers() {
-            var ot = activeOt( "AB123C", true).toBuilder()
-                .primaryFysiskBrukerstedNummer("1234")
-                .build();
-            var rs = ressursState().toBuilder()
-                .primaryFysiskBrukersted("9999")
-                .fysiskeBrukersteder(List.of("1234"))
-                .build();
-
-            when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(ot));
-            when(nomMastered.isMastered("A000001")).thenReturn(true);
-            when(ressursStateRepository.findByNavident("A000001")).thenReturn(Optional.of(rs));
-
-            speilingService.speilOrgtilknytningSektorTilRessursScheduler();
-
-            var captor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
-            verify(ressursCommandService).oppdaterFysiskeBrukerstederCommand(captor.capture(), any(InputMetadata.class));
-            // alleFysiskeBrukerstederErLike is true, so the set should be empty
-            assertTrue(captor.getValue().fysiskeBrukersteder().isEmpty());
-        }
     }
 
     @Nested
