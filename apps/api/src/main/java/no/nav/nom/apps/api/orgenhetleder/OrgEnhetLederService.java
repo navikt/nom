@@ -185,7 +185,7 @@ public class OrgEnhetLederService {
             orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                 orgEnhetLederState.fid(),
                 new OppdaterOrgEnhetLederSluttdato(
-                    opprettOrgEnhetLederRequest.gyldigTom().minusDays(1),
+                    opprettOrgEnhetLederRequest.gyldigFom().minusDays(1),
                     inputMetadata
                 )
             ));

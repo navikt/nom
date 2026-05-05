@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.rest.jira;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.RessursService;
 import org.springframework.stereotype.Service;
@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JiraAssetRestService {
@@ -19,9 +22,13 @@ public class JiraAssetRestService {
 
     public List<JiraAssetResponse> getFysiskBrukerStedWithRessurser() {
         var jiraAsset = new ArrayList<JiraAssetResponse>();
+        var fysiskeBrukersteder = fysiskBrukerstedService.getAllFysiskBrukersted();
 
         ressursService.findAllGroupedByFysiskBrukersted().forEach((fysiskBrukerstedNr, ressurser) -> {
-            var fysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(fysiskBrukerstedNr).orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(fysiskBrukerstedNr));
+            var fysiskBrukersted = fysiskeBrukersteder.get(fysiskBrukerstedNr);
+            if (isNull(fysiskBrukersted)) {
+                return;
+            }
             jiraAsset.add(
                 new JiraAssetResponse(
                     fysiskBrukersted.nr(),

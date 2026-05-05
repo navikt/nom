@@ -12,9 +12,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class OrganiseringStateRepositoryTest {
@@ -396,4 +401,71 @@ public class OrganiseringStateRepositoryTest {
         assertThat(organiseringerReturned).doesNotContain(differentOrg);
     }
 
+    @Test
+    void skal_ikke_beholde_stale_state_i_nedoverkart_for_samme_fid() {
+        // Arrange
+        var repo = new OrganiseringStateRepositoryImpl();
+
+        String overenhetId = "te526v";
+        String overenhetNavn = "Overenhet";
+
+        String underenhetId = "hu850p";
+        String underenhetNavn = "Underenhet";
+
+        String fid = "organisering-01K8TTK2EBP0XB9PXB9QN60EEK";
+
+        // Første event: aktiv (gyldigTom = null)
+        var aktiv = new OrganiseringState(
+            fid,
+            underenhetId,
+            underenhetNavn,
+            overenhetId,
+            overenhetNavn,
+            LocalDate.of(2025, 10, 30),
+            null
+        );
+
+        // Andre event: samme fid, men avsluttet
+        var avsluttet = new OrganiseringState(
+            fid,
+            underenhetId,
+            underenhetNavn,
+            overenhetId,
+            overenhetNavn,
+            LocalDate.of(2025, 10, 30),
+            LocalDate.of(2026, 5, 2)
+        );
+
+        // Act
+        repo.update(aktiv);
+        repo.update(avsluttet);
+
+        var nedover = repo.getEnhetOgOrganiseringerNedover(overenhetId);
+
+        // Assert 1: Kun én state med denne fid finnes i nedover-kartet
+        var statesForFid = nedover.stream()
+            .filter(s -> fid.equals(s.fid()))
+            .toList();
+        assertEquals(1, statesForFid.size(), "Nedover-kartet skal kun inneholde siste state for samme fid");
+
+        // Assert 2: Den som ligger der er siste state (avsluttet), ikke gammel aktiv
+        var current = statesForFid.get(0);
+        assertEquals(LocalDate.of(2026, 5, 2), current.gyldigTom(), "Siste state må ha gyldigTom=2026-05-02");
+        assertFalse(repo.isActive(current), "State skal ikke være aktiv etter gyldigTom");
+
+        // Assert 3: Ingen stale versjon med gyldigTom=null for samme fid
+        boolean hasStaleActiveVersion = nedover.stream()
+            .anyMatch(s -> fid.equals(s.fid()) && s.gyldigTom() == null);
+        assertFalse(hasStaleActiveVersion, "Skal ikke finnes stale aktiv versjon (gyldigTom=null) for samme fid");
+
+        // Ekstra sanity: bare én unik state per fid i hele nedover-settet
+        Set<String> duplicateFids = nedover.stream()
+            .collect(Collectors.groupingBy(OrganiseringState::fid, Collectors.counting()))
+            .entrySet().stream()
+            .filter(e -> e.getValue() > 1)
+            .map(java.util.Map.Entry::getKey)
+            .collect(Collectors.toSet());
+
+        assertTrue(duplicateFids.isEmpty(), "Nedover-kartet skal ikke ha duplikate fider: " + duplicateFids);
+    }
 }

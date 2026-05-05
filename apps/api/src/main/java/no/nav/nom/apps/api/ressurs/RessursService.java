@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 @Service
 public class RessursService {
     private final RessursStateRepository ressursStateRepository;
@@ -22,6 +24,8 @@ public class RessursService {
     }
 
     public Map<String, List<RessursState>> findAllGroupedByFysiskBrukersted() {
-        return ressursStateRepository.getAll().stream().collect(Collectors.groupingBy(RessursState::primaryFysiskBrukersted));
+        return ressursStateRepository.findAllActiveRessurser().values().stream()
+            .filter(ressursState -> nonNull(ressursState.primaryFysiskBrukersted()) && !ressursState.primaryFysiskBrukersted().isBlank())
+            .collect(Collectors.groupingBy(RessursState::primaryFysiskBrukersted));
     }
 }

@@ -126,6 +126,12 @@ public class FysiskBrukerstedService {
             .findFirst();
     }
 
+    public Map<String, FysiskBrukersted> getAllFysiskBrukersted() {
+        return fysiskBrukerstedCache.getAll().stream()
+            .collect(Collectors.toMap(FysiskBrukersted::nr, fysiskBrukersted -> fysiskBrukersted,
+                (fysiskBrukersted, _) -> fysiskBrukersted));
+    }
+
     public void sendMasseflyttFysiskBrukerstedEmail(
         String tilFysiskbrukersted,
         List<String> navidenter,
