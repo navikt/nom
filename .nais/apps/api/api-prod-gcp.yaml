@@ -24,6 +24,7 @@ spec:
     - secret: nom-api-unleash-api-token
     - secret: dvh-ords-secret
     - secret: nom-epost-varsel-recipient
+    - secret: nom-mainmanager-secret
   image: "{{image}}"
   port: 8080
   ingresses:
@@ -288,6 +289,7 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
         - host: dvh.adeo.no
+        - host: nav.mainmanager.no
   gcp:
     sqlInstances:
       - name: nom-api-v2

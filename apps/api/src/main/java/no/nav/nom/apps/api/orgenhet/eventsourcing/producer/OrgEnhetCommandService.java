@@ -5,10 +5,12 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerGyldigFom;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OppdaterOrgEnhetNavnCmd;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhetNavn;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
+import no.nav.nom.contract.nom.eventsource.KorrigerGyldigFomEventV1;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEndretNavnEventV1;
@@ -112,7 +114,7 @@ public class OrgEnhetCommandService {
         );
     }
 
-    public CompletableFuture<SendResult<String, OrgEnhetEvent>> oppdaterNavnOrgEnhet(String fid, OppdaterOrgEnhetNavnCmd oppdaterOrgEnhet) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> korrigerNavnOrgEnhet(String fid, KorrigerOrgEnhetNavn oppdaterOrgEnhet) {
         return eventProducer.sendMessage(new OrgEnhetEndretNavnEventV1(
             fid,
             new OrgEnhetEndretNavnEventV1.OrgEnhetNavnEndretEventData(
@@ -134,7 +136,7 @@ public class OrgEnhetCommandService {
 
     // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
     public CompletableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
-        OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
+        OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = jsonMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             var raw = input.isArray() ? input.get(0): input;
@@ -188,6 +190,16 @@ public class OrgEnhetCommandService {
                 endreNomNivaa.nomNivaa()
             ),
             endreNomNivaa.inputMetadata()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> korrigerGyldigFom(String fid, KorrigerGyldigFom korrigerGyldigFom) {
+        return eventProducer.sendMessage(new KorrigerGyldigFomEventV1(
+            fid,
+            new KorrigerGyldigFomEventV1.KorrigerGyldigFomEventData(
+                korrigerGyldigFom.gyldigFom()
+            ),
+            korrigerGyldigFom.inputMetadata()
         ));
     }
 

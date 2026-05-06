@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -219,7 +220,10 @@ public class RessursCommandService {
             oppdaterFysiskeBrukerstederCommand.fid(),
             RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
                 .primaryFysiskBrukersted(oppdaterFysiskeBrukerstederCommand.primaryFysiskBrukersted())
-                .fysiskeBrukersteder(oppdaterFysiskeBrukerstederCommand.fysiskeBrukersteder().stream().toList())
+                .fysiskeBrukersteder(
+                    Optional.ofNullable(oppdaterFysiskeBrukerstederCommand.fysiskeBrukersteder())
+                        .map(set -> set.stream().toList())
+                        .orElse(Collections.emptyList()))
                 .build(),
             inputMetadata
         ));

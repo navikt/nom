@@ -16,12 +16,13 @@ import type {
   ExcelExportRequest,
   GetPersonRequest,
   GlobalStatistikkResponse,
+  KorrigerOrgEnhetNavnRequest,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
   MinimalRessurs,
-  OppdaterOrgEnhetRequest,
   OppdaterOrgtilknytningerForRessursRequest,
+  OpprettOrgEnhetLederRequest,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
   OpprettRessursRequest,
@@ -30,6 +31,7 @@ import type {
   OrgEnhetLederResponse,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
+  OvrigeEndringerOrgEnhetRequest,
   Person,
   Ressurs,
   RessursKontaktperson,
@@ -692,9 +694,29 @@ export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
   );
 };
 
-export const oppdaterOrgEnhet = async (request: OppdaterOrgEnhetRequest) => {
-  return axios.put<unknown, AxiosResponse<unknown>>(
-    `${NOM_API_BASE_PATH}/app/orgenheter/oppdater`,
+export const korrigerOrgEnhetNavn = async (
+  request: KorrigerOrgEnhetNavnRequest,
+) => {
+  return axios.patch<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/korrigerNavn`,
+    request,
+  );
+};
+
+export const opprettOrgEnhetLeder = async (
+  request: OpprettOrgEnhetLederRequest,
+) => {
+  return axios.post<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenhetleder/opprettLeder`,
+    request,
+  );
+};
+
+export const endreOrgEnhetInfo = async (
+  request: OvrigeEndringerOrgEnhetRequest,
+) => {
+  return axios.patch<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/endreOvrige`,
     request,
   );
 };

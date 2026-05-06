@@ -237,6 +237,13 @@ export interface JsonNode {
   valueNode?: boolean;
 }
 
+export interface KorrigerOrgEnhetNavnRequest {
+  /** @example "ab123c" */
+  id: string;
+  /** @example "Nav Lokal Kontor" */
+  navn: string;
+}
+
 export interface LederTilgangForOrgenhetRequest {
   delegertTilNavident: string;
   /** @format date */
@@ -293,34 +300,20 @@ export interface MinimalRessurs {
   visningsnavn: string;
 }
 
-export interface OppdaterOrgEnhetRequest {
-  /** @example "1234" */
-  firesiffer?: string;
-  /**
-   * @format date
-   * @example "2026-01-31"
-   */
-  gyldigFom?: string;
-  /**
-   * @format date
-   * @example "2026-03-31"
-   */
-  gyldigTom?: string | null;
-  /** @example "ab123c" */
-  id?: string;
-  /** @example "A123456" */
-  lederRessursNavident?: string;
-  /** @example "Nav Lokal Kontor" */
-  navn?: string;
-  /** @example "DIREKTORAT" */
-  orgEnhetsType?: OrgEnhetsType;
-}
-
 export interface OppdaterOrgtilknytningerForRessursRequest {
   eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
   setRessursSluttdato: boolean;
   setRessursStartdato: boolean;
+}
+
+export interface OpprettOrgEnhetLederRequest {
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  navident?: string;
+  orgEnhetId?: string;
 }
 
 export interface OpprettOrgEnhetRequest {
@@ -480,6 +473,22 @@ export interface OrgtilknytningState {
   primaryFysiskBrukerstedNummer?: string;
   sektor?: Sektor;
   sistEndretAv?: string;
+}
+
+export interface OvrigeEndringerOrgEnhetRequest {
+  /** @example "1234" */
+  firesiffer?: string;
+  /**
+   * @format date
+   * @example "2025-01-01"
+   */
+  gyldigFom?: string;
+  /** @example "ab123c" */
+  id: string;
+  /** @example "ARBEIDSOMRAADE" */
+  nomNivaa?: NomNivaa;
+  /** @example "DIREKTORAT" */
+  orgEnhetsType?: OrgEnhetsType;
 }
 
 export interface Person {

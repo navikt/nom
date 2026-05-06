@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
+import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,8 +44,12 @@ public class FysiskBrukerstedService {
     private final MicrosoftGraphClient microsoftGraphClient;
 
     public FysiskBrukerstedService(
-        AdClient adClient, RessursStateRepository ressursStateRepository, OrgtilknytningStateRepository orgtilknytningStateRepository,
-        RessursCommandService ressursCommandService, FysiskBrukerstedCache fysiskBrukerstedCache, Configuration freemarkerConfig,
+        AdClient adClient,
+        RessursStateRepository ressursStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        RessursCommandService ressursCommandService,
+        FysiskBrukerstedCache fysiskBrukerstedCache,
+        Configuration freemarkerConfig,
         MicrosoftGraphClient microsoftGraphClient
     ) {
         this.adClient = adClient;
@@ -114,6 +120,18 @@ public class FysiskBrukerstedService {
             .anyMatch(fysiskBrukersted -> fysiskBrukersted.nr().equals(fysiskBrukerstedNr));
     }
 
+    public Optional<FysiskBrukersted> findFysiskBrukersted(String fysiskBrukerstedNr) {
+        return fysiskBrukerstedCache.getAll().stream()
+            .filter(fysiskBrukersted -> fysiskBrukersted.nr().equals(fysiskBrukerstedNr))
+            .findFirst();
+    }
+
+    public Map<String, FysiskBrukersted> getAllFysiskBrukersted() {
+        return fysiskBrukerstedCache.getAll().stream()
+            .collect(Collectors.toMap(FysiskBrukersted::nr, fysiskBrukersted -> fysiskBrukersted,
+                (fysiskBrukersted, _) -> fysiskBrukersted));
+    }
+
     public void sendMasseflyttFysiskBrukerstedEmail(
         String tilFysiskbrukersted,
         List<String> navidenter,
@@ -168,7 +186,7 @@ public class FysiskBrukerstedService {
             "antallFlyttet", antallFlyttet,
             "feiletAntall", feiletAntall,
             "total", antallFlyttet + feiletAntall,
-            "feiletNavidenter", feiledeNavidenter.stream().collect(Collectors.joining(",\n")),
+            "feiletNavidenter", String.join(",\n", feiledeNavidenter),
             "innsenderVisningsnavn", innsenderVisningsnavn
         );
         freemarkerConfig.getTemplate(MASSEFLYTTING_FYSISK_BRUKERSTED_VARSEL_FTLH).process(model, stringWriter);

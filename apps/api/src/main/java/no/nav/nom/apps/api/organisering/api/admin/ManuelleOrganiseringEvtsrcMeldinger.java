@@ -158,7 +158,6 @@ public class ManuelleOrganiseringEvtsrcMeldinger {
         if (idOver == null) { idOver = eksisterende.get().idOver(); }
         if (navnOver == null) { navnOver = eksisterende.get().navnOver(); }
         if (gyldigFom == null) { gyldigFom = eksisterende.get().gyldigFom(); }
-        if (gyldigTom == null) { gyldigTom = eksisterende.get().gyldigTom(); }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)

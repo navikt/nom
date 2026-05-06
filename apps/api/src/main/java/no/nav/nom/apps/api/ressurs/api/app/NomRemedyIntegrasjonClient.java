@@ -61,7 +61,10 @@ public class NomRemedyIntegrasjonClient {
 
             return nomRemedyIntegrasjonFysiskBrukersteder
                 .stream()
-                .map(fysiskBrukersted -> new FysiskBrukersted(fysiskBrukersted.brukerstedNr(), fysiskBrukersted.brukerstedNavn()))
+                .map(fysiskBrukersted -> FysiskBrukersted.builder()
+                    .nr(fysiskBrukersted.brukerstedNr())
+                    .navn(fysiskBrukersted.brukerstedNavn())
+                    .build())
                 .toList();
         } catch (Exception e) {
             log.error("ALERT: Feil ved henting av fysiske brukersteder fra NomRemedyIntegrasjon", e);

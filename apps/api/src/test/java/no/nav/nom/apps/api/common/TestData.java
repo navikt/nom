@@ -30,6 +30,8 @@ public class TestData {
             .gyldigTom(null)
             .orgtilknytningType(Tilknytningtype.FAST)
             .masseflyttetFraFid(null)
+            .primaryFysiskBrukerstedNummer("2700")
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
             .build();
     }
 

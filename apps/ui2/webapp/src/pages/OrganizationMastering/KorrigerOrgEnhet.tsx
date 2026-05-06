@@ -11,14 +11,18 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type AxiosError } from "axios";
 import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet, oppdaterOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  endreOrgEnhetInfo,
+  getOrgEnhet,
+  orgEnheterKeys,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -26,13 +30,20 @@ import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import {
+  NomNivaaNameMapping,
+  OrgEnhetsTypeNameMapping,
+} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type { OppdaterOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
+import type {
+  OrgEnhet,
+  OvrigeEndringerOrgEnhetRequest,
+} from "~/types/api-models";
+import { NomNivaa } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
@@ -101,25 +112,32 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
 function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const navigate = useNavigate();
 
+  const queryClient = useQueryClient();
+
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
       firesiffer: orgEnhet.remedyEnhetId ?? "",
       orgEnhetsType: orgEnhet.orgEnhetsType,
+      nomNivaa: orgEnhet.nomNivaa ?? undefined,
     },
     resolver: yupResolver(validationSchema),
   });
 
-  const oppdaterOrgEnhetMutation = useMutation<
+  const endreOrgEnhetInformasjonMutation = useMutation<
     unknown,
     AxiosError<Error>,
-    OppdaterOrgEnhetRequest
+    OvrigeEndringerOrgEnhetRequest
   >({
     mutationFn: async (request) => {
-      return oppdaterOrgEnhet(request);
+      return endreOrgEnhetInfo(request);
     },
     onSuccess: async () => {
       showToast({ text: "Oppdatert" });
+
+      await queryClient.invalidateQueries({
+        queryKey: orgEnheterKeys.id(orgEnhet.id),
+      });
 
       navigate({
         to: "/organisasjonsmastring",
@@ -128,13 +146,15 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   });
 
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
-    const request: OppdaterOrgEnhetRequest = {
-      ...values,
+    const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-      navn: orgEnhet.navn,
+      firesiffer: values.firesiffer,
+      gyldigFom: values.gyldigFom,
+      nomNivaa: values.nomNivaa ?? undefined,
+      orgEnhetsType: values.orgEnhetsType,
     };
 
-    oppdaterOrgEnhetMutation.mutate(request);
+    endreOrgEnhetInformasjonMutation.mutate(request);
   };
 
   return (
@@ -160,6 +180,22 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                     {OrgEnhetsTypeNameMapping[orgEnhetsType]}
                   </option>
                 ))}
+            </Select>
+
+            <Select
+              css={css`
+                width: fit-content;
+              `}
+              {...methods.register("nomNivaa")}
+              error={methods.formState.errors.nomNivaa?.message}
+              label="Organisasjonsenhetstype"
+            >
+              {!orgEnhet.nomNivaa && <option value={undefined} />}
+              {Object.values(NomNivaa).map((nomNivaa) => (
+                <option key={nomNivaa} value={nomNivaa}>
+                  {NomNivaaNameMapping[nomNivaa]}
+                </option>
+              ))}
             </Select>
 
             <TextField
@@ -225,8 +261,17 @@ function FormDateWrapper({ name }: { name: string }) {
 
 const validationSchema = yup.object({
   gyldigFom: yup.string().required("Obligatorisk"),
-  firesiffer: yup.string().optional(),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
+  firesiffer: yup.string().optional(),
+  nomNivaa: yup
+    .mixed<NomNivaa>()
+    .nullable()
+    .notRequired()
+    .test(
+      "valid-if-present",
+      "Ugyldig",
+      (value) => !value || Object.values(NomNivaa).includes(value),
+    ),
 });

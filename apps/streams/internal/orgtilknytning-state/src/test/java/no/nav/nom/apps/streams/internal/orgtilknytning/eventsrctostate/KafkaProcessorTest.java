@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFysiskBrukerstedEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
@@ -30,6 +31,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -53,7 +56,7 @@ public class KafkaProcessorTest {
         
         final OrgtilknytningEvent event = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
 
-        final OrgtilknytningState expected = lagStateObjekt(navident, orgEnhetId, sektor,false, gyldigFom, null, "S123456");
+        final OrgtilknytningState expected = lagStateObjekt(navident, orgEnhetId, sektor,false, gyldigFom, null, "X987655");
 
         inputTopic.pipeInput(event.getFid(), event);
 
@@ -82,7 +85,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
@@ -92,7 +95,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             gyldigTom,
-            "S123456"
+            "X987655"
         );
 
 
@@ -127,7 +130,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedDagligOppforingEndret = lagStateObjekt(
@@ -137,7 +140,7 @@ public class KafkaProcessorTest {
             true,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
@@ -147,7 +150,7 @@ public class KafkaProcessorTest {
             true,
             gyldigFom,
             gyldigTom,
-            "S123456"
+            "X987655"
         );
 
 
@@ -186,7 +189,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
@@ -196,7 +199,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             gyldigTom,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedEndret = lagStateObjekt(
@@ -206,7 +209,7 @@ public class KafkaProcessorTest {
             false,
             nyGyldigFom,
             nyGyldigTom,
-            "S123456"
+            "X987655"
         );
 
         inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
@@ -266,7 +269,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         ).toBuilder()
             .orgtilknytningType(orgtilknytningTypeEndretEventV1.getOrgtilknytningTypeEndretEventData().orgtilknytningType())
             .build();
@@ -303,7 +306,7 @@ public class KafkaProcessorTest {
             false,
             gyldigFom,
             null,
-            "S123456"
+            "X987655"
         ).toBuilder()
             .orgtilknytningType(orgtilknytningTilknytningtypeEndretEventV1.getOrgtilknytningTilknytningtypeEndretEventData().orgtilknytningType())
             .build();
@@ -367,7 +370,7 @@ public class KafkaProcessorTest {
             null,
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedOpprettetGammelTo = lagStateObjekt(
@@ -380,7 +383,7 @@ public class KafkaProcessorTest {
             null,
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedDolGammelEn = lagStateObjekt(
@@ -393,7 +396,7 @@ public class KafkaProcessorTest {
             null,
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedDolGammelTo = lagStateObjekt(
@@ -406,7 +409,7 @@ public class KafkaProcessorTest {
             gyldigTom,
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttetGammelEn = lagStateObjekt(
@@ -419,7 +422,7 @@ public class KafkaProcessorTest {
             LocalDate.now().minusDays(1),
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttetGammelTo = lagStateObjekt(
@@ -432,7 +435,7 @@ public class KafkaProcessorTest {
             LocalDate.now().minusDays(1),
             null,
             null,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedOpprettetEn = lagStateObjekt(
@@ -445,7 +448,7 @@ public class KafkaProcessorTest {
             null,
             null,
             otFidEn,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedOpprettetTo = lagStateObjekt(
@@ -458,7 +461,7 @@ public class KafkaProcessorTest {
             null,
             null,
             otFidTo,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
@@ -471,7 +474,7 @@ public class KafkaProcessorTest {
             gyldigTom,
             null,
             otFidTo,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedDagligOppfolgingEn = lagStateObjekt(
@@ -484,7 +487,7 @@ public class KafkaProcessorTest {
             null,
             null,
             otFidEn,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedDagligOppfolgingTo = lagStateObjekt(
@@ -497,7 +500,7 @@ public class KafkaProcessorTest {
             gyldigTom,
             null,
             otFidTo,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedTilknytningEndretEn = lagStateObjekt(
@@ -510,7 +513,7 @@ public class KafkaProcessorTest {
             null,
             Tilknytningtype.INGEN,
             otFidEn,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedTilknytningEndretTo = lagStateObjekt(
@@ -523,7 +526,7 @@ public class KafkaProcessorTest {
             gyldigTom,
             Tilknytningtype.INGEN,
             otFidTo,
-            "S123456"
+            "X987655"
         );
 
         final OrgtilknytningState expectedTilknytningEndretToEtterMasseflytt = lagStateObjekt(
@@ -536,7 +539,7 @@ public class KafkaProcessorTest {
             gyldigTom,
             Tilknytningtype.FAST,
             null,
-            "S123456"
+            "X987655"
         );
 
 
@@ -574,6 +577,94 @@ public class KafkaProcessorTest {
             );
     }
 
+    @Test
+    @DisplayName("Merger OrgtilknytningOpprettet og OrgtilknytningFysiskBrukerstedEndret event sammen inn i state")
+    void lagEndreFysiskBrukerstedEvent() {
+        String navident = "X987654";
+        String orgEnhetId = "a123bc";
+        Sektor sektor = Sektor.NAV_STATLIG;
+        LocalDate gyldigFom = LocalDate.now().minusYears(1);
+        String primaryFysiskBrukerstedNummer = "2700";
+        List<String> additionalFysiskeBrukerstederNummer = List.of("0706");
+
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
+        final OrgtilknytningEvent oppdaterFysiskBrukerstedEvent = lagFysiskBrukerstedEndretEvent(navident, orgEnhetId, primaryFysiskBrukerstedNummer, additionalFysiskeBrukerstederNummer);
+
+        final OrgtilknytningState expectedOpprettet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            sektor,
+            false,
+            gyldigFom,
+            null,
+            "X987655"
+        );
+
+        final OrgtilknytningState expectedFysiskBrukerstedEndring = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            sektor,
+            false,
+            gyldigFom,
+            null,
+            "X987655",
+            primaryFysiskBrukerstedNummer,
+            additionalFysiskeBrukerstederNummer
+        );
+
+        inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), oppdaterFysiskBrukerstedEvent);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
+                KeyValue.pair(opprettEvent.getFid(), expectedFysiskBrukerstedEndring)
+            );
+    }
+
+    @Test
+    @DisplayName("Merger OrgtilknytningOpprettet og OrgtilknytningFysiskBrukerstedEndret event sammen inn i state uten additional")
+    void lagEndreFysiskBrukerstedEventUtenAdditional() {
+        String navident = "X987654";
+        String orgEnhetId = "a123bc";
+        Sektor sektor = Sektor.NAV_STATLIG;
+        LocalDate gyldigFom = LocalDate.now().minusYears(1);
+        String primaryFysiskBrukerstedNummer = "2700";
+
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, sektor, gyldigFom);
+        final OrgtilknytningEvent oppdaterFysiskBrukerstedEvent = lagFysiskBrukerstedEndretEvent(navident, orgEnhetId, primaryFysiskBrukerstedNummer);
+
+        final OrgtilknytningState expectedOpprettet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            sektor,
+            false,
+            gyldigFom,
+            null,
+            "X987655"
+        );
+
+        final OrgtilknytningState expectedFysiskBrukerstedEndring = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            sektor,
+            false,
+            gyldigFom,
+            null,
+            "X987655",
+            primaryFysiskBrukerstedNummer
+        );
+
+        inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), oppdaterFysiskBrukerstedEvent);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
+                KeyValue.pair(opprettEvent.getFid(), expectedFysiskBrukerstedEndring)
+            );
+    }
+
     private OrgtilknytningOpprettetEventV1 lagMasseflyttetOpprettEvent(String fid, String navident, String orgEnhetId, Sektor sektor, LocalDate gyldigFom, String masseflyttetFraFid) {
         return lagOpprettEvent(fid, navident, orgEnhetId, sektor, gyldigFom, masseflyttetFraFid);
     }
@@ -604,7 +695,7 @@ public class KafkaProcessorTest {
                 "test",
                 null,
                 new Origination(
-                    "S123456",
+                    "X987655",
                     "test"
                 )
             ),
@@ -710,6 +801,28 @@ public class KafkaProcessorTest {
         );
     }
 
+    private OrgtilknytningFysiskBrukerstedEndretEventV1 lagFysiskBrukerstedEndretEvent(String navident, String orgEnhetId, String primaryFysiskBrukersted) {
+        return  lagFysiskBrukerstedEndretEvent("FID_1", navident, orgEnhetId, primaryFysiskBrukersted, null);
+    }
+
+    private OrgtilknytningFysiskBrukerstedEndretEventV1 lagFysiskBrukerstedEndretEvent(String navident, String orgEnhetId, String primaryFysiskBrukersted, List<String> additionalFysiskeBrukerstederNummer) {
+        return  lagFysiskBrukerstedEndretEvent("FID_1", navident, orgEnhetId, primaryFysiskBrukersted, additionalFysiskeBrukerstederNummer);
+    }
+
+    private OrgtilknytningFysiskBrukerstedEndretEventV1 lagFysiskBrukerstedEndretEvent(String fid, String navident, String orgEnhetId, String primaryFysiskBrukersted, List<String> additionalFysiskeBrukerstederNummer) {
+        return new OrgtilknytningFysiskBrukerstedEndretEventV1(
+            fid,
+            new OrgtilknytningFysiskBrukerstedEndretEventV1.OrgtilknytningPrimaryFysiskBrukerstedEventData(
+                navident,
+                orgEnhetId,
+                primaryFysiskBrukersted,
+                additionalFysiskeBrukerstederNummer
+            ),
+            lagMetadata(),
+            dummyAdditionalAgressoData
+        );
+    }
+
     private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, Sektor sektor, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
 
         return OrgtilknytningState
@@ -739,6 +852,45 @@ public class KafkaProcessorTest {
             .gyldigFom(gyldigFom)
             .gyldigTom(gyldigTom)
             .orgtilknytningType(null)
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
+            .masseflyttetFraFid(null)
+            .sistEndretAv(sistEndretAv)
+            .build();
+    }
+
+    private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, Sektor sektor, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom, String sistEndretAv, String primaryFysiskBrukersted) {
+
+        return OrgtilknytningState
+            .builder()
+            .fid("FID_1")
+            .navident(navident)
+            .orgEnhetId(orgEnhetId)
+            .sektor(sektor)
+            .erDagligOppfolging(erDagligOppfolging)
+            .gyldigFom(gyldigFom)
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(null)
+            .primaryFysiskBrukerstedNummer(primaryFysiskBrukersted)
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
+            .masseflyttetFraFid(null)
+            .sistEndretAv(sistEndretAv)
+            .build();
+    }
+
+    private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, Sektor sektor, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom, String sistEndretAv, String primaryFysiskBrukersted, List<String> additionalFysiskeBrukersted) {
+
+        return OrgtilknytningState
+            .builder()
+            .fid("FID_1")
+            .navident(navident)
+            .orgEnhetId(orgEnhetId)
+            .sektor(sektor)
+            .erDagligOppfolging(erDagligOppfolging)
+            .gyldigFom(gyldigFom)
+            .gyldigTom(gyldigTom)
+            .orgtilknytningType(null)
+            .primaryFysiskBrukerstedNummer(primaryFysiskBrukersted)
+            .additionalFysiskeBrukerstederNummer(additionalFysiskeBrukersted)
             .masseflyttetFraFid(null)
             .sistEndretAv(sistEndretAv)
             .build();
@@ -767,6 +919,7 @@ public class KafkaProcessorTest {
             .gyldigFom(gyldigFom)
             .gyldigTom(gyldigTom)
             .orgtilknytningType(tilknytningtype)
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
             .masseflyttetFraFid(masseflyttetFraFid)
             .sistEndretAv(sistEndretAv)
             .build();
