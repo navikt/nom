@@ -369,3 +369,6 @@ spec:
       - name: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
         lifecycleCondition:
           age: 14
+      - name: no-nav-nom-dev-ressurs-syntetisering-storage-bucket
+        lifecycleCondition:
+          age: 14

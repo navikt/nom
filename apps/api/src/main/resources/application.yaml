@@ -67,7 +67,7 @@ app:
     fysisk-brukersted-nr: none
     orgenhet-id: none
   google-storage-bucket-name:
-    ressurs-endringer: no-nav-nom-dev-ressurs-endringer-storage-bucket
+    ressurs-endringer: no-nav-nom-dev-ressurs-syntetisering-storage-bucket
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
