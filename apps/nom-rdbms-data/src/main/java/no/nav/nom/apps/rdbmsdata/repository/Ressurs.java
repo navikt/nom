@@ -1,6 +1,5 @@
 package no.nav.nom.apps.rdbmsdata.repository;
 
-import io.hypersistence.utils.hibernate.type.array.StringArrayType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -11,7 +10,8 @@ import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,7 +69,7 @@ public class Ressurs {
     private String primaryFysiskBrukersted;
 
     @Column(name = "fysiske_brukersteder")
-    @Type(StringArrayType.class)
+    @JdbcTypeCode(SqlTypes.ARRAY)
     private String[] fysiskeBrukersteder;
 
     @Enumerated(EnumType.STRING)

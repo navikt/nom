@@ -9,6 +9,8 @@ import lombok.ToString;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,6 +56,13 @@ public class Orgtilknytning {
     @Column(name = "orgtilknytning_type")
     private Tilknytningtype orgtilknytningType;
 
+    @Column(name = "primary_fysisk_brukersted_nummer")
+    private String primaryFysiskBrukerstedNummer;
+
+    @Column(name = "additional_fysiske_brukersteder_nummer")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    String[] additionalFysiskeBrukerstederNummer;
+
     @Column(name = "masseflyttet_fra_fid")
     private String masseflyttetFraFid;
 
@@ -74,6 +83,8 @@ public class Orgtilknytning {
             .gyldigFom(orgtilknytningState.gyldigFom())
             .gyldigTom(orgtilknytningState.gyldigTom())
             .orgtilknytningType(orgtilknytningState.orgtilknytningType())
+            .primaryFysiskBrukerstedNummer(orgtilknytningState.primaryFysiskBrukerstedNummer())
+            .additionalFysiskeBrukerstederNummer(orgtilknytningState.additionalFysiskeBrukerstederNummer().toArray(String[]::new))
             .masseflyttetFraFid(orgtilknytningState.masseflyttetFraFid())
             .sistEndretAv(orgtilknytningState.sistEndretAv())
             .build();
