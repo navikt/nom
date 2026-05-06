@@ -61,7 +61,9 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
-    maxCompactionLagMs: 7200000  # 1000 * 60 * 60 * 2 = 7200000 = 2 hours
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hour
+    minCleanableDirtyRatioPercent: 1 # Sørger for at kompaktering skjer oftere, selv om det ikke er så mye data som skal kompakteres
+    segmentHours: 1 # Sørger for at segmenter rulleres oftere, slik at kompaktering kan skje oftere
   acl:
     - team: org
       application: nom-intern-ressurs-state
