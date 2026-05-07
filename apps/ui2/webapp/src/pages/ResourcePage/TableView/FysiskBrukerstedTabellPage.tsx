@@ -15,7 +15,10 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  isPeriodActive,
+  nomDateIsTodayOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
@@ -93,8 +96,12 @@ function FysiskBrukerstedTabellInner({
 
   const fysiskBrukerstedRessurser = getFysiskBrukerstedRessurserQuery.data;
 
+  const aktiveRessurser = fysiskBrukerstedRessurser?.filter((ressurs) =>
+    nomDateIsTodayOrAfter(ressurs.sluttdato),
+  );
+
   const navidentListe =
-    fysiskBrukerstedRessurser?.map((ressurs) => ressurs.navident) ?? [];
+    aktiveRessurser?.map((ressurs) => ressurs.navident) ?? [];
 
   const orgtilknytningerQuery = useQuery({
     queryKey: getOrgtilknytningerByNavidentList.queryKey(navidentListe),
@@ -120,7 +127,7 @@ function FysiskBrukerstedTabellInner({
   const orgEnheter = orgEnheterQuery.data;
 
   const mappedeRessurser: FysiskBrukerstedTabellRow[] =
-    fysiskBrukerstedRessurser?.map((ressurs) => {
+    aktiveRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
         orgtilknytninger?.[ressurs.navident] ?? [];
 
