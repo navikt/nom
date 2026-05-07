@@ -260,6 +260,8 @@ function defaultNyOrgtilknytning(ressurs: Ressurs) {
         : (ressursSektor === Sektor.NAV_STATLIG
             ? tilknytningstyperStatlige
             : tilknytningstyperEksterne)[0],
+    primaryFysiskBrukerstedNummer: "",
+    additionalFysiskeBrukerstederNummer: [],
   };
 }
 
