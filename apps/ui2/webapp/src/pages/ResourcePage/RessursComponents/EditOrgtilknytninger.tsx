@@ -317,7 +317,14 @@ function OrgtilknytningForm({
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
       ? orgtilknytninger.map((tilknytning) => {
-          return { ...tilknytning, gyldigTom: tilknytning.gyldigTom ?? "" };
+          return {
+            ...tilknytning,
+            gyldigTom: tilknytning.gyldigTom ?? "",
+            additionalFysiskeBrukerstederNummer:
+              tilknytning.additionalFysiskeBrukerstederNummer ?? [],
+            primaryFysiskBrukerstedNummer:
+              tilknytning.primaryFysiskBrukerstedNummer ?? "",
+          };
         })
       : [defaultNyOrgtilknytning(ressurs)];
 
