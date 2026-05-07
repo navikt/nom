@@ -451,6 +451,13 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
+      - navident: Z990434         # Team Yrkesskade / Ingvild Faye-Schjøll
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990729         # Team Yrkesskade / Ingvild Faye-Schjøll
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
