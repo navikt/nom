@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.orgtilknytning.api.app;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
@@ -38,6 +38,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,13 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
-import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.overlapsInterval;
 
 @Service
 public class OrgtilknytningRestService {
@@ -83,6 +84,7 @@ public class OrgtilknytningRestService {
     private final AuthResolver authResolver;
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final FysiskBrukerstedService fysiskBrukerstedService;
+    private final Unleash unleash;
 
     private String vikafossenOrgEnhetId;
 
@@ -95,7 +97,8 @@ public class OrgtilknytningRestService {
         AuthResolver authResolver,
         MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
         FysiskBrukerstedService fysiskBrukerstedService,
-        AppProperties appProperties
+        AppProperties appProperties,
+        Unleash unleash
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -107,6 +110,7 @@ public class OrgtilknytningRestService {
         this.fysiskBrukerstedService = fysiskBrukerstedService;
 
         this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
+        this.unleash = unleash;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
@@ -198,7 +202,8 @@ public class OrgtilknytningRestService {
             .toList();
 
         Map<String, List<OrgtilknytningState>> possibleDuplicates = Stream.concat(nyeOrgtilknytninger.stream(), eksisterendeOrgtilknytninger.stream())
-            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) || orgtilknytningState.gyldigFom().isAfter(LocalDate.now()))
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()) || orgtilknytningState.gyldigFom()
+                .isAfter(LocalDate.now()))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId))
             .entrySet().stream()
             .filter(entry -> entry.getValue().size() > 1)
@@ -277,12 +282,16 @@ public class OrgtilknytningRestService {
 
     private void validateFysiskBrukersted(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(eksisterendeOrgtilknytning -> {
-            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())) return;
+            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())) {
+                return;
+            }
 
             var primaryFysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())
                 .orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer()));
 
-            if (isNull(eksisterendeOrgtilknytning.optionalFysiskBrukersteder()) || eksisterendeOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) return;
+            if (isNull(eksisterendeOrgtilknytning.optionalFysiskBrukersteder()) || eksisterendeOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) {
+                return;
+            }
 
             if (eksisterendeOrgtilknytning.optionalFysiskBrukersteder().size() > 5) {
                 throw new IllegalArgumentException("Listen for fysiske brukersteder kan ikke være mer enn fem elementer");
@@ -298,7 +307,9 @@ public class OrgtilknytningRestService {
             var primaryFysiskBrukersted = fysiskBrukerstedService.findFysiskBrukersted(nyOrgtilknytning.primaryFysiskBrukerstedNummer())
                 .orElseThrow(() -> FysiskBrukerstedNotFoundException.notFound(nyOrgtilknytning.primaryFysiskBrukerstedNummer()));
 
-            if (isNull(nyOrgtilknytning.optionalFysiskBrukersteder()) || nyOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) return;
+            if (isNull(nyOrgtilknytning.optionalFysiskBrukersteder()) || nyOrgtilknytning.optionalFysiskBrukersteder().isEmpty()) {
+                return;
+            }
 
             if (nyOrgtilknytning.optionalFysiskBrukersteder().size() > 5) {
                 throw new IllegalArgumentException("Listen for fysiske brukersteder kan ikke være emr enn fem elementer");
@@ -315,7 +326,11 @@ public class OrgtilknytningRestService {
             var origOT = orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid())
                 .orElseThrow(() -> OrgtilknytningNotFoundException.fid(endreOrgtilknytningRequest.fid()));
             if (!Objects.equals(origOT.orgtilknytningType(), endreOrgtilknytningRequest.tilknytningtype())) {
-                validateOrgtilknytningTypeSektorCombination(endreOrgtilknytningRequest.tilknytningtype(), endreOrgtilknytningRequest.sektor(), endreOrgtilknytningRequest.fid());
+                validateOrgtilknytningTypeSektorCombination(
+                    endreOrgtilknytningRequest.tilknytningtype(),
+                    endreOrgtilknytningRequest.sektor(),
+                    endreOrgtilknytningRequest.fid()
+                );
             }
         });
 
@@ -326,7 +341,9 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningHasSektor(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
+                return;
+            }
             if (isNull(endreOrgtilknytningRequest.sektor())) {
                 orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
                     throw InvalidOrgtilknytningSektorException.sektorIsNull(orgtilknytningState.orgEnhetId());
@@ -336,7 +353,9 @@ public class OrgtilknytningRestService {
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
+                return;
+            }
             if (isNull(endreOrgtilknytningRequest.sektor())) {
                 throw InvalidOrgtilknytningSektorException.sektorIsNull(endreOrgtilknytningRequest.orgEnhetId());
             }
@@ -345,8 +364,12 @@ public class OrgtilknytningRestService {
 
     private void validateOrgtilknytningHasTilknytningtype(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
-            if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
+                return;
+            }
+            if (endreOrgtilknytningRequest.sektor().erKommunal()) {
+                return;
+            }
             if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
                 orgtilknytningStateRepository.findByFid(endreOrgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
                     throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeIsNull(orgtilknytningState.orgEnhetId());
@@ -356,8 +379,12 @@ public class OrgtilknytningRestService {
         });
 
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
-            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) return;
-            if (endreOrgtilknytningRequest.sektor().erKommunal()) return;
+            if (!isActiveOrFuture(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
+                return;
+            }
+            if (endreOrgtilknytningRequest.sektor().erKommunal()) {
+                return;
+            }
             if (isNull(endreOrgtilknytningRequest.tilknytningtype())) {
                 throw InvalidOrgtilknytningTilknytningtypeException.tilknytningtypeIsNull(endreOrgtilknytningRequest.orgEnhetId());
             }
@@ -365,21 +392,28 @@ public class OrgtilknytningRestService {
     }
 
     private void validateEndreOrgtilknytningUnderSeksMaaneder(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
-        if (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) return;
+        if (loggedInUserHasAccessScope(NomApiAccessScope.ADMIN)) {
+            return;
+        }
         log.info("Validerer at nyeOrgtilknytninger ikke er eldre enn to måneder");
         oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().forEach(leggTilOrgtilknytningRequest -> {
             if (nonNull(leggTilOrgtilknytningRequest.gyldigTom()) && leggTilOrgtilknytningRequest.gyldigTom().isBefore(LocalDate.now().minusMonths(6))) {
-                throw new AccessDeniedException("Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + leggTilOrgtilknytningRequest.orgEnhetId());
+                throw new AccessDeniedException(
+                    "Det er ikke lov å legge til en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + leggTilOrgtilknytningRequest.orgEnhetId());
             }
         });
 
         log.info("Validerer at eksisterendeOrgtilknytninger ikke er eldre enn to måneder");
-        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
-            if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) return;
-            if (nonNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(6))) {
-                throw new AccessDeniedException("Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
-            }
-        }));
+        oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger()
+            .forEach(orgtilknytningRequest -> orgtilknytningStateRepository.findByFid(orgtilknytningRequest.fid()).ifPresent(orgtilknytningState -> {
+                if (compareDateForExistingOrgtilknytningWithStateOrgtilknytning(orgtilknytningRequest, orgtilknytningState)) {
+                    return;
+                }
+                if (nonNull(orgtilknytningState.gyldigTom()) && orgtilknytningState.gyldigTom().isBefore(LocalDate.now().minusMonths(6))) {
+                    throw new AccessDeniedException(
+                        "Det er ikke lov å endre en orgtilknytning som er eldre enn to måneder gammelt, gjelder endring for orgenhet " + orgtilknytningState.orgEnhetId());
+                }
+            }));
     }
 
     private boolean compareDateForExistingOrgtilknytningWithStateOrgtilknytning(
@@ -432,7 +466,7 @@ public class OrgtilknytningRestService {
         var overlappendeDagligeOppfolginger = dagligOppfolgingPerioder.stream()
             .filter(periode -> dagligOppfolgingPerioder.stream()
                 .filter(
-                    otherPeriode -> isPerioderOverlapping(periode, otherPeriode)
+                    otherPeriode -> overlapsInterval(periode, otherPeriode)
                 ).toList().size() > 1
             ).toList();
 
@@ -457,11 +491,11 @@ public class OrgtilknytningRestService {
         var isVikafossen = ressurs.identType().equals(IdentType.VIKAFOSSEN);
 
         if (isVikafossen) {
-            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch( nye -> !nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
+            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch(nye -> !nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
                 throw InvalidOppdaterOrgtilknytningerForRessursRequestException.vikafossenIdentPaaFeilEnhet();
             }
         } else {
-            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch( nye -> nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
+            if (oppdaterOrgtilknytningerForRessursRequest.nyeOrgtilknytninger().stream().anyMatch(nye -> nye.orgEnhetId().equals(vikafossenOrgEnhetId))) {
                 throw InvalidOppdaterOrgtilknytningerForRessursRequestException.ikkeVikafossenIdentPaaVikafossenEnhet(ressurs.identType().toString());
             }
         }
@@ -554,32 +588,39 @@ public class OrgtilknytningRestService {
 
             if (endreOrgtilknytningRequest.erDagligOppfolging()
                 && isPeriodActive(endreOrgtilknytningRequest.gyldigFom(), endreOrgtilknytningRequest.gyldigTom())) {
-                if(isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), endreOrgtilknytningRequest.sektor())){
+                if (isNull(ressursState.sektor()) || !Objects.equals(ressursState.sektor(), endreOrgtilknytningRequest.sektor())) {
                     OppdaterSektorCommand oppdaterSektorCommand = new OppdaterSektorCommand(ressursState.fid(), endreOrgtilknytningRequest.sektor());
                     ressursCommandService.oppdaterSektorEvent(oppdaterSektorCommand, inputMetadata);
                 }
                 if (isNull(ressursState.tilknytningtype()) || !Objects.equals(ressursState.tilknytningtype(), endreOrgtilknytningRequest.tilknytningtype())) {
-                    OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(ressursState.fid(), endreOrgtilknytningRequest.tilknytningtype());
+                    OppdaterTilknytningtypeCommand oppdaterTilknytningtypeCommand = new OppdaterTilknytningtypeCommand(
+                        ressursState.fid(),
+                        endreOrgtilknytningRequest.tilknytningtype()
+                    );
                     ressursCommandService.oppdaterTilknytningtypeEvent(oppdaterTilknytningtypeCommand, inputMetadata);
                 }
             }
         });
 
-        var optionalFysiskBrukerstederAreEqual = optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
-        var optionalFysiskeBrukersteder = isNull(endreOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
+        if (unleash.isEnabled("nom.fysiskbrukersted-ot")) {
+            var optionalFysiskBrukerstederAreEqual = optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges);
+            var optionalFysiskeBrukersteder = isNull(endreOrgtilknytningRequest.optionalFysiskBrukersteder()) ?
+                new ArrayList<String>()
+                : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
 
-        if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
-            || !optionalFysiskBrukerstederAreEqual) {
-            orgtilknytningCommandService.endreFysiskeBrukersted(
-                new EndreFysiskeBrukerstederCommand(
-                    orgtilknytningStateBeforeChanges.fid(),
-                    orgtilknytningStateBeforeChanges.navident(),
-                    orgtilknytningStateBeforeChanges.orgEnhetId(),
-                    endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
-                    optionalFysiskeBrukersteder,
-                    inputMetadata
-                )
-            );
+            if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
+                || !optionalFysiskBrukerstederAreEqual) {
+                orgtilknytningCommandService.endreFysiskeBrukersted(
+                    new EndreFysiskeBrukerstederCommand(
+                        orgtilknytningStateBeforeChanges.fid(),
+                        orgtilknytningStateBeforeChanges.navident(),
+                        orgtilknytningStateBeforeChanges.orgEnhetId(),
+                        endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
+                        optionalFysiskeBrukersteder,
+                        inputMetadata
+                    )
+                );
+            }
         }
     }
 
@@ -604,7 +645,9 @@ public class OrgtilknytningRestService {
 
         );
 
-        if (isNull(leggTilOrgtilknytningRequest.sektor())) throw InvalidSektorException.sektorIsNull();
+        if (isNull(leggTilOrgtilknytningRequest.sektor())) {
+            throw InvalidSektorException.sektorIsNull();
+        }
 
         var opprettetOrgtilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
             OpprettOrgtilknytning.builder()
@@ -670,7 +713,9 @@ public class OrgtilknytningRestService {
             );
         }
 
-        var optionalFysiskeBrukersteder = isNull(leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : leggTilOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
+        var optionalFysiskeBrukersteder = isNull(leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()
+                                                                                                                                        .stream()
+                                                                                                                                        .toList();
 
         orgtilknytningCommandService.endreFysiskeBrukersted(
             new EndreFysiskeBrukerstederCommand(
@@ -814,7 +859,11 @@ public class OrgtilknytningRestService {
             .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
 
         if (nonNull(endreTilknytningtypeRequest.tilknytningtype())) {
-            validateOrgtilknytningTypeSektorCombination(endreTilknytningtypeRequest.tilknytningtype(), tilknyttetRessurs.sektor(), tilknyttetRessurs.navident());
+            validateOrgtilknytningTypeSektorCombination(
+                endreTilknytningtypeRequest.tilknytningtype(),
+                tilknyttetRessurs.sektor(),
+                tilknyttetRessurs.navident()
+            );
         }
 
         orgtilknytningCommandService.endreTilknytningtype(
@@ -847,7 +896,14 @@ public class OrgtilknytningRestService {
             origination
         );
 
-        var res = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(request.orgtilknytningerFid(), request.nyOrgenhetId(), request.beholdTilganger(), request.gyldigFomFlyttedato(), inputMetadata, false);
+        var res = masseflyttOrgtilknytningerService.flyttOrgtilknytninger(
+            request.orgtilknytningerFid(),
+            request.nyOrgenhetId(),
+            request.beholdTilganger(),
+            request.gyldigFomFlyttedato(),
+            inputMetadata,
+            false
+        );
 
         return new MasseFlyttingResponse(
             res.entrySet().stream().map(e -> new MasseFlyttingResponse.FeiletFlytting(e.getKey().fid(), e.getValue())).toList(),
@@ -882,7 +938,7 @@ public class OrgtilknytningRestService {
             )
         );
 
-        if (sektor == null || !allowedOrgtilknytningTypeForSektorMap.containsKey(sektor))  {
+        if (sektor == null || !allowedOrgtilknytningTypeForSektorMap.containsKey(sektor)) {
             throw InvalidOrgtilknytningSektorException.sektorIsNullOrInvalidForFidOrNavident(sektor, otFidOrNavident);
         }
 
@@ -894,27 +950,28 @@ public class OrgtilknytningRestService {
     public boolean kanEndreOrgtilknytning(IdentType identType, String navident) {
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
-            case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
+            case UTENLANDSK_KONSULENT ->
+                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);
             case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default -> authResolver.kanRedigereRessurs(navident);
         };
     }
 
-    public boolean kanEndreOrgtilknytninger(IdentType identType, String navident, OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
+    public boolean kanEndreOrgtilknytninger(
+        IdentType identType,
+        String navident,
+        OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
+    ) {
         var orgenhetIdsUnderEndring = orgEnhetIderForOterUnderEndring(oppdaterOrgtilknytningerForRessursRequest);
         return switch (identType) {
-            case ROBOT ->
-                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT,ADMIN)
+            case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN)
                 || authResolver.kanRedigereRessurs(navident)
                 || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
-            case UTENLANDSK_KONSULENT ->
-                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT,ADMIN)
+            case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN)
                 || authResolver.kanRedigereRessurs(navident)
                 || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
-            case VIKAFOSSEN ->
-                SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
-            default ->
-                authResolver.kanRedigereRessurs(navident)
+            case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
+            default -> authResolver.kanRedigereRessurs(navident)
                 || authResolver.kanRedigereNoenAvOrgenhetene(orgenhetIdsUnderEndring);
         };
     }
