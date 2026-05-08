@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
 import static no.nav.nom.apps.api.common.SpringCacheConfig.STATISTIKK_REST_SERVICE_CACHE_NAME;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service

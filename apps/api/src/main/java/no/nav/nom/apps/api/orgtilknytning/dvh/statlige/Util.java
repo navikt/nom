@@ -1,9 +1,9 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh.statlige;
 
-import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StrukturerteStillingPerioderForNavident;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,12 +13,12 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodCoveredByAny;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.dayAfter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerFoer;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodCoveredByAny;
 
 public class Util {
 

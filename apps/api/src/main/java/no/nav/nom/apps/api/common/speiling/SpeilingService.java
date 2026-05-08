@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Service
 public class SpeilingService {

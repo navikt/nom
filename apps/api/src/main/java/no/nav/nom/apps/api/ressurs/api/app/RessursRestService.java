@@ -76,7 +76,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
-import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
@@ -84,6 +83,7 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VI
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
+import static no.nav.nom.libs.utils.common.util.DateUtils.validateChronologicalDates;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Slf4j
