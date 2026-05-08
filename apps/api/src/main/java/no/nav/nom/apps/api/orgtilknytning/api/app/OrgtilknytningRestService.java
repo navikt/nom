@@ -716,17 +716,18 @@ public class OrgtilknytningRestService {
         var optionalFysiskeBrukersteder = isNull(leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()) ? new ArrayList<String>() : leggTilOrgtilknytningRequest.optionalFysiskBrukersteder()
                                                                                                                                         .stream()
                                                                                                                                         .toList();
-
-        orgtilknytningCommandService.endreFysiskeBrukersted(
-            new EndreFysiskeBrukerstederCommand(
-                opprettetOrgtilknytningFid,
-                navident,
-                leggTilOrgtilknytningRequest.orgEnhetId(),
-                leggTilOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
-                optionalFysiskeBrukersteder,
-                inputMetadata
-            )
-        );
+        if (unleash.isEnabled("nom.fysiskbrukersted-ot")) {
+            orgtilknytningCommandService.endreFysiskeBrukersted(
+                new EndreFysiskeBrukerstederCommand(
+                    opprettetOrgtilknytningFid,
+                    navident,
+                    leggTilOrgtilknytningRequest.orgEnhetId(),
+                    leggTilOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
+                    optionalFysiskeBrukersteder,
+                    inputMetadata
+                )
+            );
+        }
     }
 
     private void oppdaterRessursSluttdato(
