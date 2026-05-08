@@ -307,7 +307,9 @@ function OrgtilknytningForm({
   // Hvis det ikke finnes noen orgtilknytninger, legger vi automatisk til en ny
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
-      ? orgtilknytninger
+      ? orgtilknytninger.map((tilknytning) => {
+          return { ...tilknytning, gyldigTom: tilknytning.gyldigTom ?? "" };
+        })
       : [defaultNyOrgtilknytning(ressurs)];
 
   const methods = useForm<{

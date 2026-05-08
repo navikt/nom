@@ -337,6 +337,9 @@ spec:
         - application: klage-lookup
           namespace: klage
           cluster: dev-gcp
+        - application: jira-data-manager-sync
+          namespace: team-service-management
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
@@ -353,6 +356,7 @@ spec:
         - host: pdl-api.dev-fss-pub.nais.io
         - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
         - host: dvh.adeo.no
+        - host: nav-test.mainmanager.no
   gcp:
     sqlInstances:
       - name: nom-api-v2

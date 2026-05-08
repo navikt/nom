@@ -161,9 +161,12 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     private void putOrUpdateEnhetOgOrganiseringerNedover(OrganiseringState organiseringState) {
+        // Vi kan få flere State objekter for samme FID (kafka compacted cleanup har ikke fjernet gamle)
+        // Sjekk om vi har denne staten i dette settet ifra før, isåfall fjern den gamle
+        removeStateWithSameFidFromAllNedoverMaps(organiseringState);
+
         // Denne organiseringen kan peke oppover på meg
         // -> jeg må da legge til alle organiseringer som inneholder idOver i nedover-kartet for id
-
         var meg = organiseringState.idOver();
 
         var alleMineNedoverOrganiseringer = enhetOgOrganiseringerNedover.computeIfAbsent(meg, _ -> new HashSet<>());
@@ -172,6 +175,13 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         mineNedoverOrganiseringerFraDenneStaten.add(organiseringState);
 
         addStateBelowRecursively(mineNedoverOrganiseringerFraDenneStaten, organiseringState.id());
+
+        // Ekstra guard: sikrer at ingen gammel versjon av samme FID blir liggende i dette konkrete settet
+        // Dedupe i målsettet, ikke i kildesettet
+        var fider = mineNedoverOrganiseringerFraDenneStaten.stream()
+            .map(OrganiseringState::fid)
+            .collect(Collectors.toSet());
+        alleMineNedoverOrganiseringer.removeIf(existing -> fider.contains(existing.fid()));
 
         alleMineNedoverOrganiseringer.addAll(mineNedoverOrganiseringerFraDenneStaten);
 
@@ -183,8 +193,17 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         findById(meg).forEach(parentOrganisering -> {
             var minParent = parentOrganisering.idOver();
             // legg mine under-organiseringer hos min parent
-            enhetOgOrganiseringerNedover.computeIfAbsent(minParent, _ -> new HashSet<>())
-                .addAll(mineNedoverOrganiseringerFraDenneStaten);
+
+            var parentSet = enhetOgOrganiseringerNedover.computeIfAbsent(minParent, _ -> new HashSet<>());
+
+            // Fjern stale varianter for samme FID før vi legger inn nyeste versjoner
+            var fider = mineNedoverOrganiseringerFraDenneStaten.stream()
+                .map(OrganiseringState::fid)
+                .collect(Collectors.toSet());
+            parentSet.removeIf(existing -> fider.contains(existing.fid()));
+
+            parentSet.addAll(mineNedoverOrganiseringerFraDenneStaten);
+
             addMineNedoverStatesTilParentsRecursively(minParent, mineNedoverOrganiseringerFraDenneStaten);
         });
     }
@@ -200,6 +219,12 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     private void putOrUpdateEnhetOgOrganiseringerOppover(OrganiseringState organiseringState) {
+        // Vi kan få flere State objekter for samme FID (kafka compacted cleanup har ikke fjernet gamle)
+        // Sjekk om vi har denne staten i dette settet ifra før, isåfall fjern den gamle
+        removeStateWithSameFidFromAllOppoverMaps(organiseringState);
+
+        // Denne organiseringen kan peke nedover på meg
+        // -> jeg må da legge til alle organiseringer som inneholder idOver i oppover-kartet for id
         var meg = organiseringState.id();
 
         var alleMineOppoverOrganiseringer = enhetOgOrganiseringerOppover.computeIfAbsent(meg, k -> new HashSet<>());
@@ -209,9 +234,16 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
 
         addStateAboveRecursively(mineOppoverOrganiseringerFraDenneStaten, organiseringState.idOver());
 
+        // Ekstra guard: sikrer at ingen gammel versjon av samme FID blir liggende i dette konkrete settet
+        // Dedupe i målsettet, ikke i kildesettet
+        var fider = mineOppoverOrganiseringerFraDenneStaten.stream()
+            .map(OrganiseringState::fid)
+            .collect(Collectors.toSet());
+        alleMineOppoverOrganiseringer.removeIf(existing -> fider.contains(existing.fid()));
+
         alleMineOppoverOrganiseringer.addAll(mineOppoverOrganiseringerFraDenneStaten);
 
-        // -> Og de over meg må få mitt nedoverkart
+        // -> Og de over meg må få mitt oppoverkart
         addMineOppoverStatesTilChildrenRecursively(meg, alleMineOppoverOrganiseringer);
     }
 
@@ -220,11 +252,30 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
                 .filter(organisering -> organisering.idOver().equals(meg))
                 .forEach(childOrganisering -> {
                     var minChild = childOrganisering.id();
-                    // legg mine over-organiseringer hos mine children
-                    enhetOgOrganiseringerOppover.computeIfAbsent(minChild, k -> new HashSet<>())
-                            .addAll(mineOppoverOrganiseringerFraDenneStaten);
+
+
+                    var childSet = enhetOgOrganiseringerOppover.computeIfAbsent(minChild, _ -> new HashSet<>());
+
+                    // Fjern stale varianter for samme FID før vi legger inn nyeste versjoner
+                    var fider = mineOppoverOrganiseringerFraDenneStaten.stream()
+                        .map(OrganiseringState::fid)
+                        .collect(Collectors.toSet());
+                    childSet.removeIf(existing -> fider.contains(existing.fid()));
+
+                    childSet.addAll(mineOppoverOrganiseringerFraDenneStaten);
+
                     addMineOppoverStatesTilChildrenRecursively(minChild, mineOppoverOrganiseringerFraDenneStaten);
                 });
+    }
+
+    private void removeStateWithSameFidFromAllNedoverMaps(OrganiseringState newState) {
+        enhetOgOrganiseringerNedover.values()
+            .forEach(states -> states.removeIf(existing -> existing.fid().equals(newState.fid())));
+    }
+
+    private void removeStateWithSameFidFromAllOppoverMaps(OrganiseringState newState) {
+        enhetOgOrganiseringerOppover.values()
+            .forEach(states -> states.removeIf(existing -> existing.fid().equals(newState.fid())));
     }
 
     private void addStateAboveRecursively(Set<OrganiseringState> organiseringer, String idOver) {

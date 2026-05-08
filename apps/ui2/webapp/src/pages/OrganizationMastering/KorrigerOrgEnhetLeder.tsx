@@ -2,17 +2,27 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import { BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
-import { useSearch } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  getOrgEnhet,
+  opprettOrgEnhetLeder,
+  orgEnheterKeys,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import {
+  formatDateWithoutTimezone,
+  todayWithoutTimezone,
+} from "~/dateUtils/dateUtils";
+import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
   FormRessursSearchWrapper,
@@ -20,7 +30,7 @@ import {
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type { OrgEnhet } from "~/types/api-models";
+import type { OpprettOrgEnhetLederRequest, OrgEnhet } from "~/types/api-models";
 
 export const KorrigerOrgEnhetLeder = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -86,11 +96,44 @@ function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
 }
 
 function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const navigate = useNavigate();
+
+  const queryClient = useQueryClient();
+
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const onValid = async (values: yup.InferType<typeof validationSchema>) => {};
+  const opprettOrgEnhetLederMutation = useMutation<
+    unknown,
+    AxiosError<Error>,
+    OpprettOrgEnhetLederRequest
+  >({
+    mutationFn: async (request) => {
+      return opprettOrgEnhetLeder(request);
+    },
+    onSuccess: async () => {
+      showToast({ text: "Oppdatert" });
+
+      await queryClient.invalidateQueries({
+        queryKey: orgEnheterKeys.id(orgEnhet.id),
+      });
+
+      navigate({
+        to: "/organisasjonsmastring",
+      }).then();
+    },
+  });
+
+  const onValid = async (values: yup.InferType<typeof validationSchema>) => {
+    const request: OpprettOrgEnhetLederRequest = {
+      orgEnhetId: orgEnhet.id,
+      navident: values.lederRessursNavident,
+      gyldigFom: formatDateWithoutTimezone(todayWithoutTimezone()),
+    };
+
+    opprettOrgEnhetLederMutation.mutate(request);
+  };
 
   return (
     <FormProvider {...methods}>
