@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -640,7 +639,7 @@ class SpeilingServiceTest {
         void onlyDagligOppfolging_setsPrimaryBrukersted() {
             var otNonDol = activeOt( "AB123C", false).toBuilder()
                 .primaryFysiskBrukerstedNummer("1234").build();
-            var rs = ressursState();
+            var rs = ressursState().toBuilder().primaryFysiskBrukersted("2700").build();
 
             when(orgtilknytningStateRepository.getAll()).thenReturn(List.of(otNonDol));
             when(nomMastered.isMastered("A000001")).thenReturn(true);
@@ -650,7 +649,7 @@ class SpeilingServiceTest {
 
             var captor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
             verify(ressursCommandService).oppdaterFysiskeBrukerstederCommand(captor.capture(), any(InputMetadata.class));
-            assertNull(captor.getValue().primaryFysiskBrukersted());
+            assertEquals("2700", captor.getValue().primaryFysiskBrukersted());
             assertTrue(captor.getValue().fysiskeBrukersteder().contains("1234"));
         }
 

@@ -107,14 +107,14 @@ public class SpeilingService {
 
                     var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
 
-                    if (isNull(ressursState.primaryFysiskBrukersted())
-                        || !Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted.get())
+                    if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted.get()))
+                        || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted.get()) && nonNull(primaryFysiskBrukersted.get()))
                         || !alleFysiskeBrukerstederErLike) {
                         ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                             new OppdaterFysiskeBrukerstederCommand(
                                 ressursState.fid(),
                                 alleFysiskeBrukersteder,
-                                primaryFysiskBrukersted.get()
+                                nonNull(primaryFysiskBrukersted.get()) ? primaryFysiskBrukersted.get() : ressursState.primaryFysiskBrukersted()
                             ),
                             inputMetadata
                         );
@@ -207,14 +207,14 @@ public class SpeilingService {
 
                     var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
 
-                    if (isNull(ressursState.primaryFysiskBrukersted())
-                        || !Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted.get())
+                    if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted.get()))
+                        || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted.get()) && nonNull(primaryFysiskBrukersted.get()))
                         || !alleFysiskeBrukerstederErLike) {
                         ressursCommandService.oppdaterFysiskeBrukerstederCommand(
                             new OppdaterFysiskeBrukerstederCommand(
                                 ressursState.fid(),
                                 alleFysiskeBrukersteder,
-                                primaryFysiskBrukersted.get()
+                                nonNull(primaryFysiskBrukersted.get()) ? primaryFysiskBrukersted.get() : ressursState.primaryFysiskBrukersted()
                             ),
                             inputMetadata
                         );
