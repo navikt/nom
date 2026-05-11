@@ -39,7 +39,8 @@ import {
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
-import type { OrgEnhet,
+import type {
+  OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
 import { NomNivaa } from "~/types/api-models";
