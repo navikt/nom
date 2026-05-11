@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
           CLUSTER: ${{ inputs.dev-cluster }}
@@ -176,7 +176,7 @@ jobs:
           VAR: env=development
           VARS: ${{ inputs.unleash-vars-file-path }}
           TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.dev-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-dev }}
@@ -196,7 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
           CLUSTER: ${{ inputs.prod-cluster }}
@@ -205,7 +205,7 @@ jobs:
           VAR: env=production
           VARS: ${{ inputs.unleash-vars-file-path }}
           TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
-      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@823ec9b7e305ce7cf911d0f9a25f7da9d7486cf2 # ratchet:nais/deploy/actions/deploy@v2
         env:
           CLUSTER: ${{ inputs.prod-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-prod }}
