@@ -34,7 +34,7 @@ import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
-import org.apache.commons.text.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -97,7 +97,7 @@ public class OrgEnhetRestService {
             throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.navn());
         }
 
-        String navn = WordUtils.capitalize(opprettOrgEnhetRequest.navn());
+        String navn = StringUtils.capitalize(opprettOrgEnhetRequest.navn());
 
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
@@ -181,7 +181,7 @@ public class OrgEnhetRestService {
         var orgEnhetState = orgenhetService.getById(korrigerOrgEnhetNavnRequest.id()).orElseThrow(() -> OrgEnhetNotFoundException.id(korrigerOrgEnhetNavnRequest.id()));
         var organiseringState = organiseringStateRepository.findActiveById(orgEnhetState.getId()).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
 
-        String navn = WordUtils.capitalize(korrigerOrgEnhetNavnRequest.navn());
+        String navn = StringUtils.capitalize(korrigerOrgEnhetNavnRequest.navn());
 
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
