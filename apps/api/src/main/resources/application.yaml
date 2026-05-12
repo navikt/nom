@@ -91,7 +91,7 @@ authentication:
     nomWriteRobot: ${NOM_WRITE_ROBOT_GROUPID:nomWriteRobotGroup}                        # 0000-CA-NOM-Write-Robot
     readOnly: ${READONLY_GROUPID:readOnlyGroup}          # 0000-CA-NOM-ADMIN-Lesetilgang
     extendedReadOnly: ${EXTENDED_READONLY_GROUPID:extendedReadOnlyGroup} # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
-    kostnadsstedsAdmin: ${KOSTNADSSTEDSADMIN_GROUPID:kostnadsstedsadminGroup} # 0000-GA-KOSTNADSSTEDSADMIN
+    kostnadsstedsAdmin: ${KOSTNADSSTEDSADMIN_GROUPID:kostnadsstedsadminGroup} # orgenhet-kostnadssted-mapping-admin
 server:
   shutdown: graceful
 
