@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
@@ -39,6 +38,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +62,13 @@ import java.util.stream.Stream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActive;
-import static no.nav.nom.apps.api.common.DateUtils.isPerioderOverlapping;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.overlapsInterval;
 
 @Service
 public class OrgtilknytningRestService {
@@ -466,7 +466,7 @@ public class OrgtilknytningRestService {
         var overlappendeDagligeOppfolginger = dagligOppfolgingPerioder.stream()
             .filter(periode -> dagligOppfolgingPerioder.stream()
                 .filter(
-                    otherPeriode -> isPerioderOverlapping(periode, otherPeriode)
+                    otherPeriode -> overlapsInterval(periode, otherPeriode)
                 ).toList().size() > 1
             ).toList();
 
