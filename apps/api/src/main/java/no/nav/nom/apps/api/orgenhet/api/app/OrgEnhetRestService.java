@@ -48,7 +48,7 @@ import java.util.concurrent.TimeoutException;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
-import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
@@ -90,7 +90,7 @@ public class OrgEnhetRestService {
             .orElseThrow(() -> OrgEnhetNotFoundException.id(opprettOrgEnhetRequest.overordnetOrgEnhetId()));
 
         var ressursState = ressursService.findByNavident(opprettOrgEnhetRequest.lederRessursNavident())
-            .filter(r -> isActive(r.startdato(), r.sluttdato()))
+            .filter(r -> isPeriodActive(r.startdato(), r.sluttdato()))
             .orElseThrow(() -> RessursNotFoundException.navident(opprettOrgEnhetRequest.lederRessursNavident()));
 
         if (orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.navn())) {

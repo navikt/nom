@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActiveOrFuture;
 
 @Tag(name = "Admin for speiling av Fysisk Brukersted fra Ressurs til Orgtilknytning")
 @Slf4j

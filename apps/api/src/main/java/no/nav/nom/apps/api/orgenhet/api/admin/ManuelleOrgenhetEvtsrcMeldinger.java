@@ -34,7 +34,7 @@ import java.time.LocalDate;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNullElse;
-import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
@@ -138,7 +138,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         var orgEnhet = orgenhetService.getByFid(orgEnhetFid).orElseThrow(() -> OrgEnhetNotFoundException.fid(orgEnhetFid));
 
         var ressursState = ressursStateRepository.findByFid(lederRessursFid)
-            .filter(r -> isActive(r.startdato(), r.sluttdato()))
+            .filter(r -> isPeriodActive(r.startdato(), r.sluttdato()))
             .orElseThrow(() -> RessursNotFoundException.fid(lederRessursFid));
 
         orgenhetService.getByFid(orgEnhetOverordnetOrgEnhetFid)

@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.clients.msgraph.EmailSendingUnforeseenException;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
-import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -19,6 +18,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
-import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 @Component
@@ -392,7 +392,7 @@ public class RessursUtloperSnartEmailService {
         }
         ressursStateRepository.findByNavident(sistEndretAv)
             .filter(r -> !r.navident().equals(ressursNavident)) // Ikke ta med hvis det er ressursen selv som har gjort endring
-            .filter(r -> isActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
+            .filter(r -> isPeriodActive(r.startdato(), r.sluttdato())) // Er ressursen som gjorde sist endring aktiv?
             .map(RessursState::navident)
             .ifPresent(mottakere::add);
     }

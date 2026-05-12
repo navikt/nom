@@ -36,7 +36,7 @@ import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.etter;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.foer;
-import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
@@ -76,7 +76,7 @@ public class OrgEnhetLederService {
                         orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata));
                     } else {
                         var aktivLedere = orgEnhetLedere.stream()
-                            .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
+                            .filter(orgEnhetLederState -> isPeriodActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
                             .collect(Collectors.toList());
 
                         log.info("Fant {} ledere for orgenheten {}", aktivLedere.size(), orgEnhetId);
