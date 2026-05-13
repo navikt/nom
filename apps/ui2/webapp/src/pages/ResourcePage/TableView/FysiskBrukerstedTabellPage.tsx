@@ -16,6 +16,10 @@ import {
   getOrgtilknytningerByNavidentList,
   getRessurserForFysiskBrukersted,
 } from "~/api/react-query-endpoints";
+import {
+  useHasAdminAccess,
+  useHasAdminReadOnlyAccess,
+} from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -30,6 +34,13 @@ import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function FysiskBrukerstedTabellPage() {
+  const hasAdminAccess = useHasAdminAccess();
+  const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
+
+  if (!hasAdminReadOnlyAccess && !hasAdminAccess) {
+    return;
+  }
+
   return (
     <>
       <PageBanner text={"Medarbeidere i tabell"} />
