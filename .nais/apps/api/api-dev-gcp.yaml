@@ -340,6 +340,9 @@ spec:
         - application: jira-data-manager-sync
           namespace: team-service-management
           cluster: dev-gcp
+        - application: vaktor-plan
+          namespace: vaktor
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident

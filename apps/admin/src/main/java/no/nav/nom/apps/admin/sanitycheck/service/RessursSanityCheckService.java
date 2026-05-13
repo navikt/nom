@@ -49,7 +49,7 @@ import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.admin.PeriodeUtil.tomorrow;
 import static no.nav.nom.apps.admin.PeriodeUtil.yesterday;
 import static no.nav.nom.apps.admin.sanitycheck.service.OrgEnhetSanityCheckService.aktiveEnheter;
-import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsNotPassed;
+import static no.nav.nom.libs.utils.common.util.DateUtils.sluttdatoIsNotPassed;
 
 @Service
 public class RessursSanityCheckService {

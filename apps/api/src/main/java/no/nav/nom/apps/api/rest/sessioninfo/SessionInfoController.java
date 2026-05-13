@@ -13,29 +13,30 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 @RestController
 @Slf4j
-public class SessioninfoController {
+public class SessionInfoController {
     private final Map<String, UserRoles> claimToRoleMap;
 
     @Autowired
-    public SessioninfoController(Environment env) {
-        this.claimToRoleMap = Map. of(
-            env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_WRITE,
-            env.getRequiredProperty("authentication.groups.nomLeder"), UserRoles.ROLE_WRITE,
-            env.getRequiredProperty("authentication.groups.nomWrite"), UserRoles.ROLE_WRITE,
-            env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_ADMIN,
-            env.getRequiredProperty("authentication.groups.nomPilot"), UserRoles.ROLE_PILOT,
-            env.getRequiredProperty("authentication.groups.nomWriteUtlKonsulent"), UserRoles.ROLE_WRITE_UTL_KONSULENT,
-            env.getRequiredProperty("authentication.groups.nomWriteVikafossen"), UserRoles.ROLE_WRITE_VIKAFOSSEN,
-            env.getRequiredProperty("authentication.groups.nomWriteRobot"), UserRoles.ROLE_WRITE_ROBOT,
-            env.getRequiredProperty("authentication.groups.readOnly"), UserRoles.ROLE_READONLY,
-            env.getRequiredProperty("authentication.groups.extendedReadOnly"), UserRoles.ROLE_EXTENDED_READONLY
-        );
+    public SessionInfoController(Environment env) {
+        this.claimToRoleMap = new HashMap<>();
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomDelegert"), UserRoles.ROLE_WRITE);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomLeder"), UserRoles.ROLE_WRITE);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomWrite"), UserRoles.ROLE_WRITE);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomAdmin"), UserRoles.ROLE_ADMIN);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomPilot"), UserRoles.ROLE_PILOT);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomWriteUtlKonsulent"), UserRoles.ROLE_WRITE_UTL_KONSULENT);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomWriteVikafossen"), UserRoles.ROLE_WRITE_VIKAFOSSEN);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomWriteRobot"), UserRoles.ROLE_WRITE_ROBOT);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.readOnly"), UserRoles.ROLE_READONLY);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.extendedReadOnly"), UserRoles.ROLE_EXTENDED_READONLY);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.kostnadsstedsAdmin"), UserRoles.ROLE_KOSTNADSTED_MAPPING_ADMIN);
         log.debug("authentication.groups Environment (claimToRoleMap): {}", claimToRoleMap);
     }
 
@@ -67,7 +68,8 @@ public class SessioninfoController {
         ROLE_WRITE_VIKAFOSSEN,
         ROLE_WRITE_ROBOT,
         ROLE_READONLY,
-        ROLE_EXTENDED_READONLY
+        ROLE_EXTENDED_READONLY,
+        ROLE_KOSTNADSTED_MAPPING_ADMIN
     }
 
     public record SessionInfoResponse(

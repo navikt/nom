@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActiveOrFuture;
 
 @Tag(name = "Admin for speiling av Fysisk Brukersted fra Ressurs til Orgtilknytning")
 @Slf4j
@@ -73,29 +73,34 @@ public class SpeilFysiskBrukerstedFraRessursTilOt {
                     new ArrayList<String>() : orgtilknytningState.additionalFysiskeBrukerstederNummer();
                 if (!dryRun) {
                     try {
-                        orgtilknytningCommandService.endreFysiskeBrukersted(
-                            new EndreFysiskeBrukerstederCommand(
-                                orgtilknytningState.fid(),
-                                navident,
-                                orgtilknytningState.orgEnhetId(),
-                                ressurserState.primaryFysiskBrukersted(),
-                                additionalFysiskBrukersteder,
-                                inputMetadata.toBuilder()
-                                    .inputInterfaceMethodArguments(
-                                        Map.of(
-                                            "primaryFysiskBrukersted", ressurserState.primaryFysiskBrukersted(),
-                                            "fysiskeBrukersteder", additionalFysiskBrukersteder
+                        if (isNull(orgtilknytningState.primaryFysiskBrukerstedNummer()) || orgtilknytningState.primaryFysiskBrukerstedNummer().isBlank()) {
+                            orgtilknytningCommandService.endreFysiskeBrukersted(
+                                new EndreFysiskeBrukerstederCommand(
+                                    orgtilknytningState.fid(),
+                                    navident,
+                                    orgtilknytningState.orgEnhetId(),
+                                    ressurserState.primaryFysiskBrukersted(),
+                                    additionalFysiskBrukersteder,
+                                    inputMetadata.toBuilder()
+                                        .inputInterfaceMethodArguments(
+                                            Map.of(
+                                                "primaryFysiskBrukersted", ressurserState.primaryFysiskBrukersted(),
+                                                "fysiskeBrukersteder", additionalFysiskBrukersteder
+                                            )
                                         )
-                                    )
-                                    .build()
-                            )
-                        );
+                                        .build()
+                                )
+                            );
+                        }
+
                     } catch (Exception e) {
                         stringBuilder.append(String.format("Navident %s fikk ikke overført fysiskBrukersted til OT\n", navident));
                         log.error("Feilet å sende event for å endre fysisk brukersted {}", e.getMessage(), e);
                     }
                 } else {
-                    counter.getAndIncrement();
+                    if (isNull(orgtilknytningState.primaryFysiskBrukerstedNummer()) || orgtilknytningState.primaryFysiskBrukerstedNummer().isBlank()) {
+                        counter.getAndIncrement();
+                    }
                 }
             });
         });

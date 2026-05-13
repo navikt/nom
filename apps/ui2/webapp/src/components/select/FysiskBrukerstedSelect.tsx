@@ -52,6 +52,7 @@ export function FysiskBrukerstedSelect({
   error,
   value,
   helpText,
+  isClearable = false,
 }: {
   fysiskeBrukersteder: FysiskBrukersted[];
   onChange: (s: string | null) => void;
@@ -59,6 +60,7 @@ export function FysiskBrukerstedSelect({
   description?: string;
   value?: string;
   helpText?: string;
+  isClearable?: boolean;
 }) {
   const options = fysiskeBrukersteder.map((fysiskBrukersted) =>
     fysiskBrukerstedOption(fysiskBrukersted),
@@ -75,6 +77,7 @@ export function FysiskBrukerstedSelect({
     >
       <BasicSelect
         inputId="Fysisk brukersted"
+        isClearable={isClearable}
         onChange={(option) => onChange(option?.value ?? null)}
         options={options}
         placeholder="Søk etter fysisk brukersted"

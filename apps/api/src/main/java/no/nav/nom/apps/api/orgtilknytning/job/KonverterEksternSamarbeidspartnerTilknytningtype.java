@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.apps.api.common.DateUtils.isPeriodActiveOrFuture;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActiveOrFuture;
 
 @Component
 public class KonverterEksternSamarbeidspartnerTilknytningtype {
