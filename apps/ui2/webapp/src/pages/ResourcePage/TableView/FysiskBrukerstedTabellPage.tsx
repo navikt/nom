@@ -1,5 +1,12 @@
 import { css } from "@emotion/react";
-import { Alert, Heading, Pagination, Table, VStack } from "@navikt/ds-react";
+import {
+  Alert,
+  Heading,
+  HStack,
+  Pagination,
+  Table,
+  VStack,
+} from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
@@ -40,6 +47,10 @@ function FysiskBrukerstedTabell() {
 
   const [fysiskBrukerstedFilter, setFysiskBrukerstedFilter] = useState("");
 
+  if (fysiskeBrukerstederQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
   return (
     <VStack gap="6">
       <div
@@ -50,18 +61,18 @@ function FysiskBrukerstedTabell() {
           margin: auto;
         `}
       >
-        <VStack
+        <HStack
           css={css`
-            background-color: #deecef;
+            width: 100%;
             padding: var(--a-spacing-4) var(--a-spacing-6);
             border-radius: var(--a-border-radius-large);
-            width: 100%;
+            background-color: #deecef;
           `}
           gap="4"
         >
           <div
             css={css`
-              width: 50%;
+              flex: 1;
             `}
           >
             <FysiskBrukerstedSelect
@@ -71,7 +82,12 @@ function FysiskBrukerstedTabell() {
               value={fysiskBrukerstedFilter}
             />
           </div>
-        </VStack>
+          <div
+            css={css`
+              flex: 1;
+            `}
+          ></div>
+        </HStack>
       </div>
 
       {!!fysiskBrukerstedFilter && (
@@ -230,7 +246,6 @@ function FysiskBrukerstedTabellInner({
       >
         <Table.Header
           css={css`
-            height: 48px;
             border-bottom: 2px;
           `}
         >
@@ -261,11 +276,11 @@ function FysiskBrukerstedTabellInner({
           {tableData?.map((rad) => (
             <Table.Row
               css={css`
-                --ac-table-row-border: none;
                 height: 48px;
                 border-width: 0 0 1px;
               `}
               key={rad.navident}
+              shadeOnHover={false}
             >
               <Table.DataCell>
                 <SmartLink href={`/ressurs/${rad.navident}`}>
@@ -280,7 +295,13 @@ function FysiskBrukerstedTabellInner({
               <Table.DataCell>
                 <VStack gap="1">
                   {rad.orgEnheter.map((orgEnhet) => (
-                    <SmartLink href={`/org/${orgEnhet.id}`} key={orgEnhet.id}>
+                    <SmartLink
+                      css={css`
+                        width: fit-content;
+                      `}
+                      href={`/org/${orgEnhet.id}`}
+                      key={orgEnhet.id}
+                    >
                       {`${orgEnhet.navn} (${orgEnhet.id})`}
                     </SmartLink>
                   ))}
