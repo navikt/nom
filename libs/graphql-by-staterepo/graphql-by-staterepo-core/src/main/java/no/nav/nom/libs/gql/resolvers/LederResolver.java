@@ -9,7 +9,6 @@ import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.gql.ErrorCode;
 import no.nav.nom.libs.gql.MappingUtils;
@@ -19,7 +18,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
-import no.nav.nom.libs.utils.common.util.DateUtil;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class LederResolver {
@@ -122,8 +120,8 @@ public class LederResolver {
                         overEnhetLederState -> lederForRessursPerOt.add(new LederForRessurs(
                                 overEnhetLederState.navident(),
                                 overEnhetLederState.orgEnhetId(),
-                                DateUtil.foer(overEnhetLederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : overEnhetLederState.startdato(),
-                                DateUtil.etter(overEnhetLederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : overEnhetLederState.sluttdato(),
+                                DateUtils.foer(overEnhetLederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : overEnhetLederState.startdato(),
+                                DateUtils.etter(overEnhetLederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : overEnhetLederState.sluttdato(),
                                 ot.erDagligOppfolging()
                             )
                         ));
@@ -131,8 +129,8 @@ public class LederResolver {
                     lederForRessursPerOt.add(new LederForRessurs(
                         lederState.navident(),
                         ot.orgEnhetId(),
-                        DateUtil.foer(lederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
-                        DateUtil.etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
+                        DateUtils.foer(lederState.startdato(),  ot.gyldigFom()) ? ot.gyldigFom() : lederState.startdato(),
+                        DateUtils.etter(lederState.sluttdato(), ot.gyldigTom()) ? ot.gyldigTom() : lederState.sluttdato(),
                         ot.erDagligOppfolging()
                     ));
                 }
@@ -151,7 +149,7 @@ public class LederResolver {
                         .filter(otherLeder ->
                             !Objects.equals(otherLeder.startdato(), leder.startdato())
                                 && otherLeder.startdato().isAfter(leder.startdato())
-                                && DateUtil.intervalCoversDate(otherLeder.startdato(), otherLeder.sluttdato(), leder.sluttdato())
+                                && DateUtils.intervalCoversDate(otherLeder.startdato(), otherLeder.sluttdato(), leder.sluttdato())
                         )
                         .map(LederForRessurs::startdato)
                         .min(Comparator.naturalOrder());
@@ -177,7 +175,7 @@ public class LederResolver {
 
     private List<OrgEnhetLederState> getLedereForOrgEnhetIPeriode(String orgEnhetId, LocalDate startdato, LocalDate sluttdato) {
         return orgEnhetLederStateRepository.findAllByOrgEnhetId(orgEnhetId).stream()
-            .filter(lederState -> DateUtil.overlapsInterval(startdato, sluttdato, lederState.startdato(), lederState.sluttdato()))
+            .filter(lederState -> DateUtils.overlapsInterval(startdato, sluttdato, lederState.startdato(), lederState.sluttdato()))
             .sorted(orgEnhetLederStateComparator)
             .toList();
     }
@@ -188,21 +186,21 @@ public class LederResolver {
             if (!lederState.navident().equals(navident)) {
                 lederStates.add(
                     lederState.toBuilder()
-                        .startdato(DateUtil.foer(lederState.startdato(), startdato) ? startdato : lederState.startdato())
-                        .sluttdato(DateUtil.etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato())
+                        .startdato(DateUtils.foer(lederState.startdato(), startdato) ? startdato : lederState.startdato())
+                        .sluttdato(DateUtils.etter(lederState.sluttdato(), sluttdato) ? sluttdato : lederState.sluttdato())
                         .build()
                 );
             } else {
                 // Har enheten flere overordnede enheter i perioden (e.g. organiseringen har endret seg)?
                 organiseringStateRepository.findById(orgEnhetId).stream()
                     .filter(organiseringState -> organiseringState.id().equals(orgEnhetId))
-                    .filter(organiseringState -> DateUtil.overlapsInterval(startdato, sluttdato, organiseringState.gyldigFom(), organiseringState.gyldigTom()))
+                    .filter(organiseringState -> DateUtils.overlapsInterval(startdato, sluttdato, organiseringState.gyldigFom(), organiseringState.gyldigTom()))
                     .forEach(organiseringState ->
                         lederStates.addAll(
                             getLedereForOverOrgenheterSomIkkeErAngittNavident(
                                 organiseringState.idOver(),
-                                DateUtil.foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
-                                DateUtil.etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
+                                DateUtils.foer(organiseringState.gyldigFom(), startdato) ? startdato : organiseringState.gyldigFom(),
+                                DateUtils.etter(organiseringState.gyldigTom(), sluttdato) ? sluttdato : organiseringState.gyldigTom(),
                                 navident
                             )
                         )

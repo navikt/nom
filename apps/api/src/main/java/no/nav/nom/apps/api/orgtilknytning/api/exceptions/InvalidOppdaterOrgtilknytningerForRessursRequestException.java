@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.exceptions;
 
-import no.nav.nom.apps.api.common.DateUtils;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 
 import java.time.LocalDate;
 import java.util.Collection;

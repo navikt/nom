@@ -1,19 +1,16 @@
 package no.nav.nom.libs.state.orgenhetleder;
 
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
-import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static no.nav.nom.libs.utils.common.util.DateUtil.isActive;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepository {
     private final Map<String, OrgEnhetLederState> orgEnhetLederByFid = new ConcurrentHashMap<>();
@@ -52,7 +49,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     @Override
     public Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId) {
         return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
-            .filter(orgEnhetLederState -> isActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
+            .filter(orgEnhetLederState -> isPeriodActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
             .findFirst();
     }
 
@@ -61,7 +58,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
         return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap())
             .values()
             .stream()
-            .anyMatch(orgEnhetLederState -> isActive(startdato, sluttdato));
+            .anyMatch(orgEnhetLederState -> isPeriodActive(startdato, sluttdato));
     }
 
     @Override

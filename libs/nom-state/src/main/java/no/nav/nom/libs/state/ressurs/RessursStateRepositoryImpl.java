@@ -17,8 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static no.nav.nom.libs.utils.common.util.DateUtil.sluttdatoIsAfterToday;
-import static no.nav.nom.libs.utils.common.util.DateUtil.startdatoIsAfterToday;
+import static no.nav.nom.libs.utils.common.util.DateUtils.sluttdatoIsAfterToday;
+import static no.nav.nom.libs.utils.common.util.DateUtils.startdatoIsAfterToday;
 
 @Slf4j
 public class RessursStateRepositoryImpl implements RessursStateRepository {

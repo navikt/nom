@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.common;
+package no.nav.nom.libs.utils.common.util;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -16,17 +17,6 @@ public class DateUtils {
             return "";
         }
         return DateTimeFormatter.ofPattern("dd.MM.yyyy").format(localDate);
-    }
-
-    public static boolean isPeriodsOverlapping(LocalDate period1Start, LocalDate period1End, LocalDate period2Start, LocalDate period2End) {
-        return isPerioderOverlapping(
-            new Periode(period1Start, period1End != null ? period1End : LocalDate.MAX),
-            new Periode(period2Start, period2End != null ? period2End : LocalDate.MAX)
-        );
-    }
-
-    public static Boolean isPerioderOverlapping(Periode periode1, Periode periode2) {
-        return periode1.start().isBefore(periode2.end) && periode2.start.isBefore(periode1.end);
     }
 
     public static boolean isPeriodActiveOrFuture(LocalDate periodStart, LocalDate periodEnd) {
@@ -121,6 +111,62 @@ public class DateUtils {
 
     private static LocalDate orNull(LocalDate date) {
         return LocalDate.MIN.equals(date) || LocalDate.MAX.equals(date) ? null : date;
+    }
+
+    public static boolean sluttdatoIsAfterToday(LocalDate sluttdato) {
+        return sluttdato != null ? sluttdato.isAfter(LocalDate.now().plusDays(1)) : LocalDate.MAX.isAfter(LocalDate.now().plusDays(1));
+    }
+
+    public static boolean startdatoIsAfterToday(LocalDate startdato) {
+        return startdato != null ? startdato.isAfter(LocalDate.now()) : LocalDate.MIN.isAfter(LocalDate.now());
+    }
+
+    public static boolean sluttdatoIsNotPassed(LocalDate sluttdato) {
+        return sluttdato != null ? !sluttdato.isBefore(LocalDate.now()) : LocalDate.MAX.isAfter(LocalDate.now());
+    }
+
+    public static boolean overlapsInterval(LocalDate startDateA, LocalDate endDateA, LocalDate startDateB, LocalDate endDateB) {
+        endDateA = endDateA == null ? LocalDate.MAX : endDateA;
+        endDateB = endDateB == null ? LocalDate.MAX : endDateB;
+        startDateA = startDateA == null ? LocalDate.MIN : startDateA;
+        startDateB = startDateB == null ? LocalDate.MIN : startDateB;
+
+        return overlapsInterval(
+            new Periode(startDateA, endDateA),
+            new Periode(startDateB, endDateB)
+        );
+    }
+
+    public static boolean overlapsInterval(Periode period1, Periode period2) {
+        return period1.start.isBefore(dayAfter(period2.end)) && period1.end.isAfter(dayBefore(period2.start));
+    }
+
+    public static boolean intervalCoversDate(LocalDate intervalStart, LocalDate intervalEnd, LocalDate date) {
+        return likEllerFoer(intervalStart, date) && likEllerEtter(intervalEnd, date);
+    }
+
+    public static boolean likEllerFoer(LocalDate dato, LocalDate sjekkMotDato) {
+        dato = dato == null ? LocalDate.MAX : dato;
+        return dato.isBefore(dayAfter(sjekkMotDato == null ? LocalDate.MAX : sjekkMotDato));
+    }
+
+    public static boolean likEllerEtter(LocalDate dato, LocalDate sjekkMotDato) {
+        dato = dato == null ? LocalDate.MAX : dato;
+        return dato.isAfter(dayBefore(sjekkMotDato == null ? LocalDate.MAX : sjekkMotDato));
+    }
+
+    public static LocalDate dayAfter(LocalDate localDate) { return Objects.equals(LocalDate.MAX, localDate) ? LocalDate.MAX : localDate.plusDays(1); }
+
+    public static LocalDate dayBefore(LocalDate localDate) { return localDate.minusDays(1); }
+
+    public static boolean foer(LocalDate dato, LocalDate sjekkMotDato) {
+        dato = dato == null ? LocalDate.MAX : dato;
+        return dato.isBefore(sjekkMotDato == null ? LocalDate.MAX : sjekkMotDato);
+    }
+
+    public static boolean etter(LocalDate dato, LocalDate sjekkMotDato) {
+        dato = dato == null ? LocalDate.MAX : dato;
+        return dato.isAfter(sjekkMotDato == null ? LocalDate.MAX : sjekkMotDato);
     }
 
     public record Periode(
