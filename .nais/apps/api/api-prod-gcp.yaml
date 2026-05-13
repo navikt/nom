@@ -274,6 +274,9 @@ spec:
         - application: klage-lookup
           namespace: klage
           cluster: prod-gcp
+        - application: vaktor-plan
+          namespace: vaktor
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
