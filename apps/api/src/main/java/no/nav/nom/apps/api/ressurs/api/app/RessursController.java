@@ -313,6 +313,22 @@ public class RessursController {
         return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukersted(fysiskBrukerstedNr));
     }
 
+    @GetMapping("/byFysiskbrukerstedIAktivOt/{fysiskBrukerstedNr}")
+    @Operation(
+        description = "Hent alle ressurser som har angitt fysisk brukersted i primaryFysiskBrukerstedNummer eller optionalFysiskBrukersteder på en av sine aktive orgtilknytninger",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "403"),
+    })
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<RessursState>> getRessurserByFysiskbrukerstedIAktivOt(
+        @PathVariable String fysiskBrukerstedNr
+    ) {
+        return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr));
+    }
+
     @GetMapping("/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}")
     @Operation(
         description = "Hent alle ressurser som har aktiv DOl på angitt enhet og angitt fysisk brukersted som primære fysisk brukersted",
