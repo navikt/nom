@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -349,6 +351,83 @@ class FysiskBrukerstedServiceTest {
         assertEquals(1, failed.size());
 
         verify(ressursCommandServiceMock, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
+    }
+
+    @Test
+    void getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning() {
+        var fysiskBrukerstedToMatch = "1234";
+        var navidentPrimary = "A000001";
+        var navidentAdditional = "A000002";
+        var navidentInactive = "A000003";
+        var navidentFuture = "A000004";
+        var navidentNoMatch = "A000005";
+
+        var ressursPrimary = ressursState().toBuilder().navident(navidentPrimary).build();
+        var ressursAdditional = ressursState().toBuilder().navident(navidentAdditional).build();
+
+        var today = LocalDate.now();
+
+        var aktivPrimaryMatch = OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident(navidentPrimary)
+            .orgEnhetId("oe1")
+            .gyldigFom(today.minusDays(5))
+            .gyldigTom(today.plusDays(5))
+            .primaryFysiskBrukerstedNummer(fysiskBrukerstedToMatch)
+            .additionalFysiskeBrukerstederNummer(List.of())
+            .build();
+
+        var aktivAdditionalMatch = OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident(navidentAdditional)
+            .orgEnhetId("oe1")
+            .gyldigFom(today.minusDays(5))
+            .gyldigTom(null)
+            .primaryFysiskBrukerstedNummer("9999")
+            .additionalFysiskeBrukerstederNummer(List.of("1111", fysiskBrukerstedToMatch))
+            .build();
+
+        var inaktivMatch = OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident(navidentInactive)
+            .orgEnhetId("oe1")
+            .gyldigFom(today.minusDays(30))
+            .gyldigTom(today.minusDays(10))
+            .primaryFysiskBrukerstedNummer(fysiskBrukerstedToMatch)
+            .build();
+
+        var fremtidigMatch = OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident(navidentFuture)
+            .orgEnhetId("oe1")
+            .gyldigFom(today.plusDays(5))
+            .gyldigTom(today.plusDays(10))
+            .primaryFysiskBrukerstedNummer(fysiskBrukerstedToMatch)
+            .build();
+
+        var aktivNoMatch = OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident(navidentNoMatch)
+            .orgEnhetId("oe1")
+            .gyldigFom(today.minusDays(5))
+            .gyldigTom(null)
+            .primaryFysiskBrukerstedNummer("9999")
+            .additionalFysiskeBrukerstederNummer(List.of("1111", "2222"))
+            .build();
+
+        when(orgtilknytningStateRepositoryMock.getAll()).thenReturn(
+            List.of(aktivPrimaryMatch, aktivAdditionalMatch, inaktivMatch, fremtidigMatch, aktivNoMatch)
+        );
+
+        when(ressursStateRepositoryMock.findByNavidentBulk(any())).thenReturn(
+            Map.of(navidentPrimary, ressursPrimary, navidentAdditional, ressursAdditional)
+        );
+
+        var result = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedToMatch);
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(r -> r.navident().equals(navidentPrimary)));
+        assertTrue(result.stream().anyMatch(r -> r.navident().equals(navidentAdditional)));
     }
 
     @Test

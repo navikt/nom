@@ -8,12 +8,14 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -65,6 +67,18 @@ public class FysiskBrukerstedService {
         return ressursStateRepository.getAll().stream()
                 .filter(ressurs -> Objects.equals(ressurs.primaryFysiskBrukersted(), fysiskBrukerstedNr))
                 .toList();
+    }
+
+    public List<RessursState> getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(String fysiskBrukerstedNr) {
+        var navidenter = orgtilknytningStateRepository.getAll().stream()
+            .filter(PeriodeUtil::isCurrentPeriod)
+            .filter(ot -> Objects.equals(ot.primaryFysiskBrukerstedNummer(), fysiskBrukerstedNr)
+                || (ot.additionalFysiskeBrukerstederNummer() != null
+                    && ot.additionalFysiskeBrukerstederNummer().contains(fysiskBrukerstedNr)))
+            .map(OrgtilknytningState::navident)
+            .distinct()
+            .toList();
+        return List.copyOf(ressursStateRepository.findByNavidentBulk(navidenter).values());
     }
 
     public List<RessursState> getAlleRessurserPaaEnhetMedFysiskBrukersted(String orgenhetId, String fysiskBrukerstedNr) {

@@ -836,6 +836,17 @@ public class RessursRestService {
             .toList();
     }
 
+    public List<RessursState> getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(String fysiskBrukerstedNr) {
+        var ressursStates = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr);
+
+        return ressursStates.stream()
+            .map(ressursState -> ressursState.toBuilder()
+                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
+                .build()
+            )
+            .toList();
+    }
+
     public List<RessursState> getRessurserPaaEnhetMedFysiskBrukersted(String orgenhetId, String fysiskBrukerstedNr) {
         var ressursStates = fysiskBrukerstedService.getAlleRessurserPaaEnhetMedFysiskBrukersted(orgenhetId, fysiskBrukerstedNr);
 
