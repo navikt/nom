@@ -7,6 +7,7 @@ import {
 } from "@navikt/aksel-icons";
 import {
   BodyLong,
+  BodyShort,
   Button,
   ExpansionCard,
   Heading,
@@ -15,6 +16,7 @@ import {
   Label,
   Link,
   Tag,
+  VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -26,7 +28,9 @@ import { subMonths } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
+import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
+  getFysiskeBrukersteder,
   getOrgEnhet,
   getOrgEnheterRessursKanRedigere,
   getOrgenhetLederByNavIdent,
@@ -37,6 +41,7 @@ import {
 import {
   useGetSession,
   useHasAdminAccess,
+  useHasAdminReadOnlyAccess,
   useHasRobotAccess,
   useHasUtenlandskKonsulentAccess,
   useHasVikafossenAccess,
@@ -64,6 +69,7 @@ import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { IdentType, Tilknytningtype } from "~/types/api-models";
 import {
+  capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
   formatDisplayDate,
   isAfterToday,
@@ -279,6 +285,9 @@ function OrgTilknytningSection({
       isAfterToday(new Date(orgTilknytning.gyldigFom)),
   );
 
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+
   const harSluttet = nomDateIsBeforeToday(ressurs.sluttdato);
 
   const hasAdminAccess = useHasAdminAccess();
@@ -333,17 +342,21 @@ function OrgTilknytningSection({
 
         {activeOrgtilknytninger.map((orgTilknytning) => (
           <OrganisationHierarchyTree
+            fysiskeBrukersteder={fysiskeBrukersteder}
             hasWriteAccessForRessurs={hasWriteAccessForRessurs}
             key={orgTilknytning.fid}
             orgTilknytning={orgTilknytning}
             ressurs={ressurs}
           />
         ))}
+
         <FutureOrgTilknytninger
           futureOrgTilknytninger={futureOrgTilknytninger}
+          fysiskeBrukersteder={fysiskeBrukersteder}
           hasWriteAccessForRessurs={hasWriteAccessForRessurs}
           ressurs={ressurs}
         />
+
         <ExpiredOrgTilknytninger
           expiredOrgTilknytninger={filteredExpiredOrgTilknytninger}
         />
@@ -356,10 +369,12 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger,
   ressurs,
   hasWriteAccessForRessurs,
+  fysiskeBrukersteder,
 }: {
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
+  fysiskeBrukersteder: FysiskBrukersted[];
 }) {
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
@@ -372,6 +387,7 @@ function FutureOrgTilknytninger({
       </Heading>
       {futureOrgTilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
+          fysiskeBrukersteder={fysiskeBrukersteder}
           hasWriteAccessForRessurs={hasWriteAccessForRessurs}
           key={orgTilknytning.fid}
           orgTilknytning={orgTilknytning}
@@ -488,10 +504,12 @@ function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
   hasWriteAccessForRessurs,
+  fysiskeBrukersteder,
 }: {
   orgTilknytning: OrgtilknytningState;
   ressurs: Ressurs;
   hasWriteAccessForRessurs: boolean;
+  fysiskeBrukersteder: FysiskBrukersted[];
 }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
@@ -501,6 +519,7 @@ function OrganisationHierarchyTree({
   const orgEnhet = orgEnhetQuery.data;
 
   const hasAdminAccess = useHasAdminAccess();
+  const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
 
   const hasSelfServiceAccess =
     useGetSession().data?.navident === ressurs.navident;
@@ -531,8 +550,24 @@ function OrganisationHierarchyTree({
 
   const startsInTheFuture = gyldigFom && isAfterToday(new Date(gyldigFom));
 
-  const kanAlltidSeTilknytningstype =
-    hasWriteAccessForRessurs || hasSelfServiceAccess || hasAdminAccess;
+  const kanAlltidSeTilknytningInformasjon =
+    hasWriteAccessForRessurs ||
+    hasSelfServiceAccess ||
+    hasAdminAccess ||
+    hasAdminReadOnlyAccess;
+
+  const primaryFysiskBrukersted = fysiskeBrukersteder?.find(
+    (brukersted) =>
+      brukersted.brukerstedNr === orgTilknytning.primaryFysiskBrukerstedNummer,
+  );
+
+  const ytterligereFysiskeBrukersteder =
+    orgTilknytning.additionalFysiskeBrukerstederNummer?.map(
+      (brukerstedNummer) =>
+        fysiskeBrukersteder.find(
+          (brukersted) => brukersted.brukerstedNr === brukerstedNummer,
+        ),
+    );
 
   return (
     <ExpansionCard
@@ -610,11 +645,47 @@ function OrganisationHierarchyTree({
       </ExpansionCard.Header>
 
       <ExpansionCard.Content>
-        <EnhetKontekstInfo
-          displayKostnadssted
-          displayLeder={false}
-          orgEnhet={orgEnhet}
-        />
+        <VStack>
+          <EnhetKontekstInfo
+            displayKostnadssted
+            displayLeder={false}
+            orgEnhet={orgEnhet}
+          />
+
+          {kanAlltidSeTilknytningInformasjon && (
+            <>
+              {!!primaryFysiskBrukersted && (
+                <BodyShort
+                  css={css`
+                    margin-top: var(--a-spacing-4);
+                    font-size: var(--a-font-size-large);
+                  `}
+                >
+                  Primært fysisk brukersted:{" "}
+                  <b>{`${primaryFysiskBrukersted?.brukerstedNr}: ${capitalizeNameFysiskBrukersted(primaryFysiskBrukersted?.brukerstedNavn)}`}</b>
+                </BodyShort>
+              )}
+
+              {!!ytterligereFysiskeBrukersteder &&
+                ytterligereFysiskeBrukersteder?.length > 0 && (
+                  <VStack
+                    css={css`
+                      margin-top: var(--a-spacing-4);
+                      font-size: var(--a-font-size-large);
+                    `}
+                  >
+                    <span>Ytterligere fysiske brukersteder:</span>
+
+                    {ytterligereFysiskeBrukersteder.map((brukersted) => (
+                      <BodyShort key={brukersted?.brukerstedNr}>
+                        <b>{`${brukersted?.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted?.brukerstedNavn ?? "")}`}</b>
+                      </BodyShort>
+                    ))}
+                  </VStack>
+                )}
+            </>
+          )}
+        </VStack>
 
         <Divider size="small" />
 
@@ -661,7 +732,7 @@ function OrganisationHierarchyTree({
                 tilknytningTyperVisesUtenSektor.includes(orgtilknytningType)) &&
               orgtilknytningType !== Tilknytningtype.INGEN &&
               (orgtilknytningType !== Tilknytningtype.ARBEIDSTRENING ||
-                kanAlltidSeTilknytningstype) && (
+                kanAlltidSeTilknytningInformasjon) && (
                 <span>
                   <b>Tilknytningstype:</b>{" "}
                   {TilknytningtypeNameMapping[orgtilknytningType]}

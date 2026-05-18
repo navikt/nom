@@ -126,7 +126,10 @@ function CreateInternRessurs() {
           erDagligOppfolgingLockedToTrue
           sektor={sektor}
         />
-        <FysiskBrukerstedSelectFormPart />
+        <FysiskBrukerstedSelectFormPart
+          helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
+        />
         <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>
@@ -216,7 +219,10 @@ function CreateEksternRessurs() {
           erDagligOppfolgingLockedToTrue
           sektor={sektor}
         />
-        <FysiskBrukerstedSelectFormPart />
+        <FysiskBrukerstedSelectFormPart
+          helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
+        />
         <NavigationButtons goBackCallback={navigerTilbake} />
       </form>
     </FormProvider>

@@ -21,8 +21,11 @@ import {
   Loader,
   Select,
   Tag,
+  UNSAFE_Combobox as Combobox,
   useDatepicker,
+  VStack,
 } from "@navikt/ds-react";
+import type { ComboboxOption } from "@navikt/ds-react/cjs/form/combobox/types";
 import {
   useMutation,
   useQueries,
@@ -44,7 +47,9 @@ import {
 } from "react-hook-form";
 import * as yup from "yup";
 
+import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
+  getFysiskeBrukersteder,
   getOrgEnhet,
   getOrgEnheterSomKanHaRessurser,
   getOrgTilknytninger,
@@ -60,6 +65,7 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
+import { FysiskBrukerstedSelectFormPartNew } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
@@ -100,6 +106,7 @@ import {
 } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
+  capitalizeNameFysiskBrukersted,
   formatDisplayDate,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
@@ -253,6 +260,8 @@ function defaultNyOrgtilknytning(ressurs: Ressurs) {
         : (ressursSektor === Sektor.NAV_STATLIG
             ? tilknytningstyperStatlige
             : tilknytningstyperEksterne)[0],
+    primaryFysiskBrukerstedNummer: "",
+    additionalFysiskeBrukerstederNummer: [],
   };
 }
 
@@ -308,7 +317,14 @@ function OrgtilknytningForm({
   const defaultOrgtilknytninger =
     orgtilknytninger.length > 0
       ? orgtilknytninger.map((tilknytning) => {
-          return { ...tilknytning, gyldigTom: tilknytning.gyldigTom ?? "" };
+          return {
+            ...tilknytning,
+            gyldigTom: tilknytning.gyldigTom ?? "",
+            additionalFysiskeBrukerstederNummer:
+              tilknytning.additionalFysiskeBrukerstederNummer ?? [],
+            primaryFysiskBrukerstedNummer:
+              tilknytning.primaryFysiskBrukerstedNummer ?? "",
+          };
         })
       : [defaultNyOrgtilknytning(ressurs)];
 
@@ -431,6 +447,13 @@ function OrgtilknytningForm({
       );
     }
   };
+
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) =>
+    fysiskBrukerstedOptionMapping(brukersted),
+  );
 
   if (isLoading) {
     return (
@@ -623,6 +646,25 @@ function OrgtilknytningForm({
                   triggerOthers={[`mappedeOrgtilknytninger.${index}.gyldigTom`]}
                 />
               </div>
+
+              <VStack
+                css={css`
+                  margin-top: var(--a-spacing-4);
+                `}
+                gap="4"
+              >
+                <FysiskBrukerstedSelectFormPartNew
+                  fysiskeBrukersteder={fysiskeBrukersteder}
+                  label="Primært fysisk brukersted"
+                  name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukerstedNummer`}
+                  size="small"
+                />
+
+                <FysiskBrukerstedSelectMultipleWrapper
+                  fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
+                  name={`mappedeOrgtilknytninger.${index}.additionalFysiskeBrukerstederNummer`}
+                />
+              </VStack>
             </div>
           );
         })}
@@ -1125,6 +1167,49 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
+function FysiskBrukerstedSelectMultipleWrapper({
+  name,
+  fysiskeBrukerstederOptions,
+}: {
+  name: string;
+  fysiskeBrukerstederOptions: ComboboxOption[];
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const handleToggleSelected = (option: string, isSelected: boolean) => {
+    if (isSelected) {
+      field.onChange([...(field.value || []), option]);
+    } else {
+      field.onChange((field.value || []).filter((v: string) => v !== option));
+    }
+  };
+
+  const existingValues = field.value;
+  const selectedOptions =
+    existingValues?.length > 0 && fysiskeBrukerstederOptions?.length > 0
+      ? existingValues.map((value: string) =>
+          fysiskeBrukerstederOptions.find(
+            (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === value,
+          ),
+        )
+      : undefined;
+
+  return (
+    <Combobox
+      error={fieldState.error?.message}
+      isMultiSelect
+      label="Ytterligere fysiske brukersteder"
+      onToggleSelected={handleToggleSelected}
+      options={fysiskeBrukerstederOptions}
+      ref={field.ref}
+      selectedOptions={selectedOptions}
+      size="small"
+    />
+  );
+}
+
 function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   const { watch } = useFormContext();
   const field = watch(`mappedeOrgtilknytninger.${index}`);
@@ -1289,6 +1374,15 @@ function InnholdInformasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
   );
 }
 
+function fysiskBrukerstedOptionMapping(
+  fysiskBrukersted: FysiskBrukersted,
+): ComboboxOption {
+  return {
+    value: fysiskBrukersted.brukerstedNr,
+    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
+  };
+}
+
 function lagOppdaterOrgtilknytningerRequest(
   orgtilknytninger: OrgtilknytningEtterValidering[],
   setRessursStartdato: boolean,
@@ -1311,6 +1405,10 @@ function lagOppdaterOrgtilknytningerRequest(
             ? Tilknytningtype.INGEN
             : orgtilknytning.orgtilknytningType,
         sektor: orgtilknytning.sektor,
+        primaryFysiskBrukerstedNummer:
+          orgtilknytning.primaryFysiskBrukerstedNummer,
+        optionalFysiskBrukersteder:
+          orgtilknytning.additionalFysiskeBrukerstederNummer,
       }),
     ),
     nyeOrgtilknytninger: nyeOrgtilknytninger.map((orgtilknytning) => ({
@@ -1325,6 +1423,10 @@ function lagOppdaterOrgtilknytningerRequest(
             ? Tilknytningtype.INGEN
             : orgtilknytning.orgtilknytningType,
       sektor: orgtilknytning.sektor ?? ressursSektor,
+      primaryFysiskBrukerstedNummer:
+        orgtilknytning.primaryFysiskBrukerstedNummer,
+      optionalFysiskBrukersteder:
+        orgtilknytning.additionalFysiskeBrukerstederNummer,
     })),
     setRessursSluttdato: true,
     setRessursStartdato: setRessursStartdato,
@@ -1414,6 +1516,31 @@ const orgtilknytningSchema = yup.object().shape({
         const required = nomDateIsTodayOrAfter(otTom) && !!otSektor;
 
         return required ? !!value : true;
+      },
+    }),
+  primaryFysiskBrukerstedNummer: yup.string().test({
+    name: "primary-fysisk-brukersted-obligatorisk-fremtid-aktiv",
+    message: "Obligatorisk",
+    test: function (value, context) {
+      const otTom = context?.parent?.gyldigTom ?? undefined;
+
+      const required = nomDateIsTodayOrAfter(otTom);
+
+      return required ? !!value : true;
+    },
+  }),
+  additionalFysiskeBrukerstederNummer: yup
+    .array()
+    .of(yup.string().defined())
+    .test({
+      name: "primary-fysisk-brukersted-ikke-i-ytterligere-liste",
+      message:
+        "Fysisk brukersted valgt som primært kan ikke også være valgt som ytterligere fysisk brukersted",
+      test: function (value, context) {
+        const primaryFysiskBrukerstedNummer =
+          context?.parent?.primaryFysiskBrukerstedNummer ?? undefined;
+
+        return !value?.includes(primaryFysiskBrukerstedNummer);
       },
     }),
 });
