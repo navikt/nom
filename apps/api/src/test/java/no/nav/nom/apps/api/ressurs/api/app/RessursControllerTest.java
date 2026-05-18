@@ -1458,6 +1458,31 @@ public class RessursControllerTest extends RestTestBase {
     }
 
     @Test
+    @DisplayName("Get ressurser med fysisk brukersted i aktiv orgtilknytning (primary eller optional)")
+    void test_getRessurserByFysiskbrukerstedIAktivOt() {
+        var fysiskbrukerstedNr = "1234";
+
+        when(fysiskBrukerstedService.getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskbrukerstedNr)).thenReturn(List.of(
+            ressursState().toBuilder().navident("A000001").build(),
+            ressursState().toBuilder().navident("A000002").build()
+        ));
+
+        var ressurser = webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/byFysiskbrukerstedIAktivOt/{fysiskbrukerstedNr}")
+                .build(fysiskbrukerstedNr)
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(RessursState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(ressurser).hasSize(2);
+        assertThat(ressurser).allMatch(r -> r.personident().endsWith("*****"));
+    }
+
+    @Test
     @DisplayName("Get ressurser for specified Enhet and fysisk brukersted")
     void test_getRessurserByEnhetAndFysiskbrukersted() {
         var orgenhetId = "ab123c";

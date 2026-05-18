@@ -332,6 +332,7 @@ export function Epost({ ressurs }: { ressurs: Ressurs }) {
 
 export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
   const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
+
   return (
     <LabelWithValue
       label="Fysisk brukersted"

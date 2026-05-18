@@ -19,7 +19,6 @@ import * as yup from "yup";
 
 import {
   ressurserKeys,
-  updateFysiskeBrukersteder,
   updateNavnForRessurs,
   updateTelefonnummer,
 } from "~/api/react-query-endpoints";
@@ -27,10 +26,8 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
-import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { UserImage } from "~/components/UserImage";
 import { showToast } from "~/hooks/showToast";
-import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import {
   DagligLeder,
   Epost,
@@ -61,7 +58,6 @@ export function EditPersonOpplysninger({
     mellomnavn: ressurs.visningsnavn.mellomnavn ?? "",
     etternavn: ressurs.visningsnavn.etternavn,
     primaryTelefonnummer: ressurs.primaryTelefonnummer ?? "",
-    primaryFysiskBrukersted: ressurs.primaryFysiskBrukersted ?? "",
   };
 
   const methods = useForm({
@@ -69,7 +65,7 @@ export function EditPersonOpplysninger({
     resolver: yupResolver(validationSchema),
   });
 
-  const isUserAdmin = useHasAdminAccess();
+  const hasAdminAccess = useHasAdminAccess();
 
   const { mutate, isPending } = useMutation<
     unknown,
@@ -79,7 +75,7 @@ export function EditPersonOpplysninger({
     mutationFn: async (values) => {
       let promises: Promise<unknown>[] = [];
 
-      if (hasSelfServiceAccess && !isUserAdmin) {
+      if (hasSelfServiceAccess && !hasAdminAccess) {
         if (
           checkIfDirtyField(
             ["primaryTelefonnummer"],
@@ -102,23 +98,6 @@ export function EditPersonOpplysninger({
             nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
           });
           promises = [...promises, updateTelefonPromise];
-        }
-
-        if (
-          checkIfDirtyField(
-            ["primaryFysiskBrukersted"],
-            Object.keys(methods.formState.dirtyFields),
-          )
-        ) {
-          const updateBrukerstedPromise = updateFysiskeBrukersteder(
-            ressurs.fid,
-            {
-              primaryFysiskBrukersted: values.primaryFysiskBrukersted,
-              fysiskeBrukersteder: [values.primaryFysiskBrukersted],
-            },
-          );
-
-          promises = [...promises, updateBrukerstedPromise];
         }
 
         if (
@@ -157,10 +136,6 @@ export function EditPersonOpplysninger({
     },
   });
 
-  const currentPrimaryFysiskBrukersted = useFysiskBrukersted(
-    ressurs.primaryFysiskBrukersted,
-  );
-
   const { showModal } = useModal();
 
   const onValid = async (values: {
@@ -168,7 +143,6 @@ export function EditPersonOpplysninger({
     mellomnavn?: string | undefined;
     etternavn: string;
     fornavn: string;
-    primaryFysiskBrukersted: string;
   }) => {
     const endretNavn =
       values.fornavn !== ressurs.visningsnavn.fornavn ||
@@ -206,7 +180,7 @@ export function EditPersonOpplysninger({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        {hasSelfServiceAccess && !isUserAdmin ? (
+        {hasSelfServiceAccess && !hasAdminAccess ? (
           <>
             <Heading level="1" size="large">
               {formatVisningsnavn(ressurs.visningsnavn)}
@@ -280,6 +254,7 @@ export function EditPersonOpplysninger({
             <Epost ressurs={ressurs} />
             <DagligLeder ressurs={ressurs} />
             <TelefonNummere redigering ressurs={ressurs} />
+            <FysiskBrukersted ressurs={ressurs} />
           </div>
 
           <UserImage
@@ -290,50 +265,35 @@ export function EditPersonOpplysninger({
           />
         </HStack>
 
-        <VStack
+        <TextField
+          {...methods.register("primaryTelefonnummer")}
+          autoComplete="off"
           css={css`
-            margin: var(--a-spacing-6) 0;
+            width: 270px;
+            margin-top: var(--a-spacing-4);
           `}
-          gap="4"
-        >
-          <TextField
-            {...methods.register("primaryTelefonnummer")}
-            autoComplete="off"
-            css={css`
-              width: 270px;
-            `}
-            error={methods.formState.errors.primaryTelefonnummer?.message}
-            label={
-              <div
+          error={methods.formState.errors.primaryTelefonnummer?.message}
+          label={
+            <div
+              css={css`
+                display: flex;
+              `}
+            >
+              <Label>Telefonnummer</Label>
+
+              <HelpText
                 css={css`
-                  display: flex;
+                  margin-left: var(--a-spacing-2);
                 `}
+                title="Regler for telefonnummer"
               >
-                <Label>Telefonnummer</Label>
-
-                <HelpText
-                  css={css`
-                    margin-left: var(--a-spacing-2);
-                  `}
-                  title="Regler for telefonnummer"
-                >
-                  Norsk telefonnummer kan legges inn som 8 siffer. Utenlandsk
-                  nummer må starte med landkode, og ha maks 21 siffer. Nummer
-                  kan fjernes ved å lagre med tomt felt.
-                </HelpText>
-              </div>
-            }
-          />
-
-          {hasSelfServiceAccess && !isUserAdmin ? (
-            <FysiskBrukersted ressurs={ressurs} />
-          ) : (
-            <FysiskBrukerstedSelectFormPart
-              defaultValue={currentPrimaryFysiskBrukersted}
-              name="primaryFysiskBrukersted"
-            />
-          )}
-        </VStack>
+                Norsk telefonnummer kan legges inn som 8 siffer. Utenlandsk
+                nummer må starte med landkode, og ha maks 21 siffer. Nummer kan
+                fjernes ved å lagre med tomt felt.
+              </HelpText>
+            </div>
+          }
+        />
 
         {editPersonopplysninger && (
           <div
@@ -390,5 +350,4 @@ const validationSchema = yup.object({
     .required("Obligatorisk")
     .matches(/^\S+$/, "Etternavn kan ikke inneholde mellomrom"),
   primaryTelefonnummer: yup.string().optionalPhoneNumber(),
-  primaryFysiskBrukersted: yup.string().required("Obligatorisk"),
 });
