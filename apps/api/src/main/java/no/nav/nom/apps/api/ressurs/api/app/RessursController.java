@@ -322,7 +322,6 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "403"),
     })
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<RessursState>> getRessurserByFysiskbrukerstedIAktivOt(
         @PathVariable String fysiskBrukerstedNr
     ) {
