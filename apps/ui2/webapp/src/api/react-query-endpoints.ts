@@ -179,7 +179,7 @@ export const getRessurserForFysiskBrukersted = {
     ).data,
 };
 
-export const getRessurserForFysiskBrukerstedYtterligere = {
+export const getRessurserForFysiskBrukerstedAlle = {
   queryKey: (fysiskBrukerstedNr: string) => [
     "RESSURSER_BY_FYSISK_BRUKERSTED_YTTERLIGERE",
     ...fysiskBrukerstedNr,
