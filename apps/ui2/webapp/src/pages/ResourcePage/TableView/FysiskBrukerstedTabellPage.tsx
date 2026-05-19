@@ -26,10 +26,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import {
-  isPeriodActive,
-  nomDateIsTodayOrAfter,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
