@@ -77,6 +77,7 @@ public class OmadaUttrekk {
     private static final String ORGENHET_KUN_HISTORISK_SLUTTDATO = "nom.omada.kun_historisk_sluttdato";
 
     private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
+    private final AtomicBoolean slackSentForCurrentCycle = new AtomicBoolean(false);
     private final Map<String, Integer> orgEnhetMedRessurserUtenforHierarki = new ConcurrentHashMap<>();
 
     public OmadaUttrekk(
@@ -121,7 +122,7 @@ public class OmadaUttrekk {
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
-            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
@@ -201,7 +202,7 @@ public class OmadaUttrekk {
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
-            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
@@ -296,7 +297,7 @@ public class OmadaUttrekk {
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
-            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
@@ -350,7 +351,7 @@ public class OmadaUttrekk {
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
-            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
@@ -421,6 +422,9 @@ public class OmadaUttrekk {
     }
 
     private void sendSlackMessage() {
+        if (slackSentForCurrentCycle.compareAndExchange(false, true)) {
+            return;
+        }
         try {
             slackService.sendOrgbotErrorOmadaUttrekk(
                 String.format(
@@ -509,6 +513,7 @@ public class OmadaUttrekk {
 
     private void ressurserUtenforHierarki() {
         orgEnhetMedRessurserUtenforHierarki.clear();
+        slackSentForCurrentCycle.set(false);
         var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
 
         // inkluder HELFO, SKATT, RIKSREVISJONEN og VIKAFOSSEN, da disse kan være gyldige
