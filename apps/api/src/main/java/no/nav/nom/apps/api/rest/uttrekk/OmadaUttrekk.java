@@ -428,7 +428,7 @@ public class OmadaUttrekk {
         try {
             slackService.sendOrgbotErrorOmadaUttrekk(
                 String.format(
-                    "@here\n\n Det er nå %d enheter utenfor hierarki, det gjelder enhetene med disse NOM-ID: %s",
+                    "KOI Rest-kallet feilet fordi det er %d enheter utenfor hierarki, det gjelder enhetene med disse NOM-ID: %s",
                     orgEnhetMedRessurserUtenforHierarki.size(),
                     orgEnhetMedRessurserUtenforHierarki.keySet()
                 ));
