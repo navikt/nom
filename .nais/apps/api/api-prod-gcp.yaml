@@ -25,6 +25,7 @@ spec:
     - secret: dvh-ords-secret
     - secret: nom-epost-varsel-recipient
     - secret: nom-mainmanager-secret
+    - secret: nom-slack-orgbot
   image: "{{image}}"
   port: 8080
   ingresses:
