@@ -196,6 +196,14 @@
             </exclusions>
         </dependency>
 
+        <!-- okhttp 5 (with okio) at runtime — replaces okhttp 4 excluded from slack-api-client.
+             Required because Slack SDK uses okhttp/okio internally; without this the deployed
+             JAR fails with NoClassDefFoundError: okio/BufferedSink. Version managed by root pom. -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-jvm</artifactId>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
