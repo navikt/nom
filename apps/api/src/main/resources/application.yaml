@@ -59,6 +59,10 @@ app:
       tlf-path: /dvh_nom/nom_ords_tlf.json
       org-hierarki-path: /dvh_nom/nom_ords_hrorg_hierarki.json
       nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
+    slack:
+      token: ${SLACK_TOKEN}
+      channel-id-primary: "G01F99D2AHX"
+      channel-id-secondary: "C040RV7KCH5"
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
   email:

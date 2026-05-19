@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
 import java.util.Set;
 
 @ConfigurationProperties("app")
@@ -26,7 +25,8 @@ public record AppProperties(
         NomRemedyIntegrasjon nomRemedyIntegrasjon,
         DvhOrds dvhOrds,
         NomPaarorende nomPaarorende,
-        MainManager mainManager
+        MainManager mainManager,
+        Slack slack
     ) {}
 
     public record MainManager(
@@ -38,19 +38,19 @@ public record AppProperties(
     ) {}
 
     public record NomProxy(
-            String baseUrl
-        ) {}
+        String baseUrl
+    ) {}
 
     public record Pdl(
-            String tema,
-            String behandlingsnummer,
-            String baseUrl,
-            String aadScope
+        String tema,
+        String behandlingsnummer,
+        String baseUrl,
+        String aadScope
     ) {}
 
     public record Nik(
-            String baseUrl,
-            String aadScope
+        String baseUrl,
+        String aadScope
     ) {}
 
     public record MicrosoftGraph(
@@ -59,6 +59,12 @@ public record AppProperties(
         Integer maxAttempts,
         Integer backoffDurationMillis,
         Boolean sendEmail
+    ) {}
+
+    public record Slack(
+        String token,
+        String channelIdPrimary,
+        String channelIdSecondary
     ) {}
 
     public record NomRemedyIntegrasjon(
