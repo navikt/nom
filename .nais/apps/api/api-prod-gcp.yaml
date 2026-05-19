@@ -294,6 +294,7 @@ spec:
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
         - host: dvh.adeo.no
         - host: nav.mainmanager.no
+        - host: slack.com
   gcp:
     sqlInstances:
       - name: nom-api-v2

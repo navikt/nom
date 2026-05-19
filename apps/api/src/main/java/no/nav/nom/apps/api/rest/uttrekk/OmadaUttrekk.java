@@ -119,11 +119,14 @@ public class OmadaUttrekk {
         }
 
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
-                orgEnhetMedRessurserUtenforHierarki.size(),
-                orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum()
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
             ));
         }
         StringWriter writer = new StringWriter();
@@ -196,11 +199,14 @@ public class OmadaUttrekk {
         }
 
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
-                orgEnhetMedRessurserUtenforHierarki.size(),
-                orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum()
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
             ));
         }
         StringWriter writer = new StringWriter();
@@ -288,11 +294,14 @@ public class OmadaUttrekk {
         }
 
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
-                orgEnhetMedRessurserUtenforHierarki.size(),
-                orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum()
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
             ));
         }
         StringWriter writer = new StringWriter();
@@ -339,11 +348,14 @@ public class OmadaUttrekk {
         }
 
         if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
                 "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
-                orgEnhetMedRessurserUtenforHierarki.size(),
-                orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum()
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
             ));
         }
 
