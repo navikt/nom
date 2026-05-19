@@ -15,6 +15,7 @@ import {
   getOrgEnhetList,
   getOrgtilknytningerByNavidentList,
   getRessurserForFysiskBrukersted,
+  getRessurserForFysiskBrukerstedYtterligere,
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
@@ -120,6 +121,19 @@ function FysiskBrukerstedTabellInner({
     queryFn: () => getRessurserForFysiskBrukersted.queryFn(fysiskBrukerstedNr),
     enabled: !!fysiskBrukerstedNr,
   });
+
+  const getFysiskBrukerstedRessurserYtterligereQuery = useQuery({
+    queryKey:
+      getRessurserForFysiskBrukerstedYtterligere.queryKey(fysiskBrukerstedNr),
+    queryFn: () =>
+      getRessurserForFysiskBrukerstedYtterligere.queryFn(fysiskBrukerstedNr),
+    enabled: !!fysiskBrukerstedNr,
+  });
+
+  const getFysiskBrukerstedRessurserYtterligere =
+    getFysiskBrukerstedRessurserYtterligereQuery.data;
+
+  console.log(getFysiskBrukerstedRessurserYtterligere);
 
   const fysiskBrukerstedRessurser = getFysiskBrukerstedRessurserQuery.data;
 
