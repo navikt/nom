@@ -285,6 +285,9 @@ spec:
         - application: nom-paarorende
           namespace: org
           cluster: prod-gcp
+        - application: norg2
+          namespace: org
+          cluster: prod-gcp
         - application: logging
           namespace: nais-system
       external:
