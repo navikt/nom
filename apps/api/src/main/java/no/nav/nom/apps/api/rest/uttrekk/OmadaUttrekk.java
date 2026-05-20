@@ -28,6 +28,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -541,6 +542,7 @@ public class OmadaUttrekk {
     public ResponseEntity<StandardResponse> handleConflict(OrgtilknytningUtenforHierarkiException ex) {
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
+            .contentType(MediaType.APPLICATION_JSON)
             .body(StandardResponse.builder().message(ex.getMessage()).build());
     }
 
