@@ -88,3 +88,4 @@ apps/ui/**/build/
 /apps/api/src/main/java/no/nav/nom/apps/api/dvh/CleanUp.java
 /venv/
 __pycache__/
+/.sisyphus/

@@ -6,14 +6,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.clients.slack.SlackService;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
@@ -21,10 +25,12 @@ import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,11 +41,19 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
 
 @Tag(name = "Omada uttrekk")
 @RestController
@@ -56,11 +70,16 @@ public class OmadaUttrekk {
     private final TelefonService telefonService;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     private final Unleash unleash;
+    private final AppProperties.Orgenhet orgenhetProperties;
+    private final SlackService slackService;
+    private volatile LocalDateTime lastCleared = LocalDateTime.now();
 
     public static final String UNLEASH_OMADA_NYTT_FORMAT = "nom.omada.nytt_format";
     private static final String ORGENHET_KUN_HISTORISK_SLUTTDATO = "nom.omada.kun_historisk_sluttdato";
 
     private AtomicBoolean diffDvhVsLederRepo = new AtomicBoolean(false);
+    private final AtomicBoolean slackSentForCurrentCycle = new AtomicBoolean(false);
+    private final Map<String, Integer> orgEnhetMedRessurserUtenforHierarki = new ConcurrentHashMap<>();
 
     public OmadaUttrekk(
         RessursStateRepository ressursStateRepository,
@@ -68,7 +87,11 @@ public class OmadaUttrekk {
         OrgtilknytningService orgtilknytningService,
         RemedyEnhetIdResolver remedyEnhetIdResolver,
         OrganiseringStateRepository organiseringStateRepository,
-        TelefonService telefonService, OrgEnhetLederStateRepository orgEnhetLederStateRepository, Unleash unleash
+        TelefonService telefonService,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
+        Unleash unleash,
+        AppProperties appProperties,
+        SlackService slackService
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -78,6 +101,8 @@ public class OmadaUttrekk {
         this.telefonService = telefonService;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.unleash = unleash;
+        this.orgenhetProperties = appProperties.orgenhet();
+        this.slackService = slackService;
     }
 
     @Operation(
@@ -91,6 +116,21 @@ public class OmadaUttrekk {
     )
     @GetMapping(value = "/ressurs", produces = "text/csv")
     public @ResponseBody byte[] exportRessurs() throws IOException {
+        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            ressurserUtenforHierarki();
+        }
+
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            sendSlackMessage();
+            throw new OrgtilknytningUtenforHierarkiException(String.format(
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
+            ));
+        }
         StringWriter writer = new StringWriter();
 
         var brukNyttFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT);
@@ -156,6 +196,21 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportOrgtilknytning(
         @RequestParam(required = false, defaultValue = "false") boolean includeDagligOppfolging
     ) throws IOException {
+        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            ressurserUtenforHierarki();
+        }
+
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            sendSlackMessage();
+            throw new OrgtilknytningUtenforHierarkiException(String.format(
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
+            ));
+        }
         StringWriter writer = new StringWriter();
 
         var brukNyttFormat = unleash.isEnabled(UNLEASH_OMADA_NYTT_FORMAT);
@@ -236,6 +291,21 @@ public class OmadaUttrekk {
     )
     @GetMapping(value = "/telefon", produces = "text/csv")
     public @ResponseBody byte[] exportTelefon() throws IOException {
+        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            ressurserUtenforHierarki();
+        }
+
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            sendSlackMessage();
+            throw new OrgtilknytningUtenforHierarkiException(String.format(
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
+            ));
+        }
         StringWriter writer = new StringWriter();
 
         final var cSVFormat = getCSVFormat("navident", "nummer", "type", "beskrivelse");
@@ -275,6 +345,22 @@ public class OmadaUttrekk {
     )
     @GetMapping(value = "/orgenhet", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
+        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            ressurserUtenforHierarki();
+        }
+
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            sendSlackMessage();
+            throw new OrgtilknytningUtenforHierarkiException(String.format(
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
+            ));
+        }
+
         StringWriter writer = new StringWriter();
 
         log.debug("Eksporterer orgenheter. Bruker ny organisering");
@@ -334,6 +420,23 @@ public class OmadaUttrekk {
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
+    }
+
+    private void sendSlackMessage() {
+        if (slackSentForCurrentCycle.compareAndExchange(false, true)) {
+            return;
+        }
+        try {
+            slackService.sendOrgbotErrorOmadaUttrekk(
+                String.format(
+                    "<!here>\n\nKOI Rest-kallet feilet fordi det er %d enheter utenfor hierarki, det gjelder enhetene med disse NOM-ID: %s",
+                    orgEnhetMedRessurserUtenforHierarki.size(),
+                    orgEnhetMedRessurserUtenforHierarki.keySet()
+                ));
+        } catch (Exception e) {
+            log.info("Kunne ikke sende slack melding: {}", e.getMessage(), e);
+        }
+
     }
 
     private String getRemedyEnhetId(IOrgenhet orgenhet) {
@@ -407,5 +510,51 @@ public class OmadaUttrekk {
                 .setHeader(headers)
                 .setRecordSeparator("\n")
                 .get();
+    }
+
+    private void ressurserUtenforHierarki() {
+        orgEnhetMedRessurserUtenforHierarki.clear();
+        slackSentForCurrentCycle.set(false);
+        var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
+
+        // inkluder HELFO, SKATT, RIKSREVISJONEN og VIKAFOSSEN, da disse kan være gyldige
+        List<String> aktiveOrgenhetIder = new ArrayList<>(aktiveOrgenheter.stream().map(IOrgenhet::getId).toList());
+        aktiveOrgenhetIder.add(orgenhetProperties.helfoId());
+        aktiveOrgenhetIder.add(orgenhetProperties.skattId());
+        aktiveOrgenhetIder.add(orgenhetProperties.riksrevisjonenId());
+        aktiveOrgenhetIder.add(orgenhetProperties.vikafossenId());
+
+        var oterUtenforHierarki = orgtilknytningService.getAll().stream()
+            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
+            .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))
+            .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
+            .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId));
+
+        oterUtenforHierarki.forEach((nomId, orgtilknytningStates) -> orgEnhetMedRessurserUtenforHierarki.put(nomId, orgtilknytningStates.size()));
+        lastCleared = LocalDateTime.now();
+    }
+
+    @ExceptionHandler(
+        {
+            OrgtilknytningUtenforHierarkiException.class
+        }
+    )
+    public ResponseEntity<StandardResponse> handleConflict(OrgtilknytningUtenforHierarkiException ex) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(StandardResponse.builder().message(ex.getMessage()).build());
+    }
+
+    @ExceptionHandler(
+        {
+            Exception.class
+        }
+    )
+    public ResponseEntity<StandardResponse> handleConflict(Exception ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(StandardResponse.builder().message(String.format("Uforutsett feil: %s", ex.getMessage())).build());
     }
 }
