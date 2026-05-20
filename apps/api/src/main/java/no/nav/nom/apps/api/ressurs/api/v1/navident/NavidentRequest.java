@@ -6,11 +6,4 @@ import lombok.Data;
 public class NavidentRequest {
 
     private String personident;
-    private String fornavn;
-    private String mellomnavn;
-    private String etternavn;
-    private String forbokstav;
-    private String identType;
-    private String sektor;
-    private String submitter;
 }
