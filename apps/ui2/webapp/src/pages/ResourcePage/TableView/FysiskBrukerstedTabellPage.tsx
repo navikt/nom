@@ -26,7 +26,11 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  isPeriodActive,
+  nomDateIsTodayOrAfter,
+  nomDateIsTodayOrBefore,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
@@ -132,9 +136,20 @@ function FysiskBrukerstedTabellInner({
 
   const orgtilknytninger = orgtilknytningerQuery.data;
 
+  const filteredOrgtilknytninger = Object.fromEntries(
+    Object.entries(orgtilknytninger ?? {}).map(([id, tilknytninger]) => [
+      id,
+      tilknytninger.filter(
+        (tilknytning) =>
+          nomDateIsTodayOrBefore(tilknytning.gyldigFom) &&
+          nomDateIsTodayOrAfter(tilknytning.gyldigTom),
+      ),
+    ]),
+  );
+
   const unikeOrgEnhetIder = [
     ...new Set(
-      Object.values(orgtilknytninger ?? {}).flatMap((tilknytninger) =>
+      Object.values(filteredOrgtilknytninger ?? {}).flatMap((tilknytninger) =>
         tilknytninger.map((tilknytning) => tilknytning.orgEnhetId),
       ),
     ),
@@ -150,7 +165,7 @@ function FysiskBrukerstedTabellInner({
   const mappedeRessurser: FysiskBrukerstedTabellRow[] =
     fysiskBrukerstedRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
-        orgtilknytninger?.[ressurs.navident] ?? [];
+        filteredOrgtilknytninger?.[ressurs.navident] ?? [];
 
       const relevanteTilknytninger = tilknytningerForRessurs.filter(
         (tilknytning) =>
