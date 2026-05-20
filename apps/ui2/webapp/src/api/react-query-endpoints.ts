@@ -179,6 +179,19 @@ export const getRessurserForFysiskBrukersted = {
     ).data,
 };
 
+export const getRessurserForFysiskBrukerstedAlle = {
+  queryKey: (fysiskBrukerstedNr: string) => [
+    "RESSURSER_BY_FYSISK_BRUKERSTED_YTTERLIGERE",
+    ...fysiskBrukerstedNr,
+  ],
+  queryFn: async (fysiskBrukerstedNr: string) =>
+    (
+      await axios.get<Ressurs[]>(
+        `${NOM_API_BASE_PATH}/app/ressurser/byFysiskbrukerstedIAktivOt/${fysiskBrukerstedNr}`,
+      )
+    ).data,
+};
+
 export const getRessurserByListNavident = {
   queryKey: (navidenter: string[]) => ["RESSURSER_BY_LIST", ...navidenter],
   queryFn: async (navidenter: string[]) =>

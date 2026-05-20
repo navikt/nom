@@ -14,7 +14,7 @@ import {
   getFysiskeBrukersteder,
   getOrgEnhetList,
   getOrgtilknytningerByNavidentList,
-  getRessurserForFysiskBrukersted,
+  getRessurserForFysiskBrukerstedAlle,
 } from "~/api/react-query-endpoints";
 import {
   useHasAdminAccess,
@@ -26,10 +26,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import {
-  isPeriodActive,
-  nomDateIsTodayOrAfter,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
@@ -115,20 +112,17 @@ function FysiskBrukerstedTabellInner({
 }: {
   fysiskBrukerstedNr: string;
 }) {
-  const getFysiskBrukerstedRessurserQuery = useQuery({
-    queryKey: getRessurserForFysiskBrukersted.queryKey(fysiskBrukerstedNr),
-    queryFn: () => getRessurserForFysiskBrukersted.queryFn(fysiskBrukerstedNr),
+  const fysiskBrukerstedRessurserAlleQuery = useQuery({
+    queryKey: getRessurserForFysiskBrukerstedAlle.queryKey(fysiskBrukerstedNr),
+    queryFn: () =>
+      getRessurserForFysiskBrukerstedAlle.queryFn(fysiskBrukerstedNr),
     enabled: !!fysiskBrukerstedNr,
   });
 
-  const fysiskBrukerstedRessurser = getFysiskBrukerstedRessurserQuery.data;
-
-  const aktiveRessurser = fysiskBrukerstedRessurser?.filter((ressurs) =>
-    nomDateIsTodayOrAfter(ressurs.sluttdato),
-  );
+  const fysiskBrukerstedRessurser = fysiskBrukerstedRessurserAlleQuery.data;
 
   const navidentListe =
-    aktiveRessurser?.map((ressurs) => ressurs.navident) ?? [];
+    fysiskBrukerstedRessurser?.map((ressurs) => ressurs.navident) ?? [];
 
   const orgtilknytningerQuery = useQuery({
     queryKey: getOrgtilknytningerByNavidentList.queryKey(navidentListe),
@@ -141,7 +135,7 @@ function FysiskBrukerstedTabellInner({
   const unikeOrgEnhetIder = [
     ...new Set(
       Object.values(orgtilknytninger ?? {}).flatMap((tilknytninger) =>
-        tilknytninger.map((t) => t.orgEnhetId),
+        tilknytninger.map((tilknytning) => tilknytning.orgEnhetId),
       ),
     ),
   ];
@@ -154,7 +148,7 @@ function FysiskBrukerstedTabellInner({
   const orgEnheter = orgEnheterQuery.data;
 
   const mappedeRessurser: FysiskBrukerstedTabellRow[] =
-    aktiveRessurser?.map((ressurs) => {
+    fysiskBrukerstedRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
         orgtilknytninger?.[ressurs.navident] ?? [];
 
@@ -207,7 +201,7 @@ function FysiskBrukerstedTabellInner({
   );
 
   if (
-    getFysiskBrukerstedRessurserQuery.isLoading ||
+    fysiskBrukerstedRessurserAlleQuery.isLoading ||
     orgtilknytningerQuery.isLoading ||
     orgEnheterQuery.isLoading
   ) {
@@ -215,7 +209,7 @@ function FysiskBrukerstedTabellInner({
   }
 
   if (
-    getFysiskBrukerstedRessurserQuery.isError ||
+    fysiskBrukerstedRessurserAlleQuery.isError ||
     orgtilknytningerQuery.isError ||
     orgEnheterQuery.isError
   ) {
@@ -230,19 +224,6 @@ function FysiskBrukerstedTabellInner({
 
   return (
     <>
-      {pages > 1 && (
-        <Pagination
-          count={pages}
-          css={css`
-            margin-top: var(--a-spacing-6);
-            display: flex;
-          `}
-          onPageChange={setPage}
-          page={page}
-          prevNextTexts
-        />
-      )}
-
       <Table
         css={css`
           background-color: #fff;
@@ -328,7 +309,8 @@ function FysiskBrukerstedTabellInner({
         <Pagination
           count={pages}
           css={css`
-            margin-top: var(--a-spacing-6);
+            margin: var(--a-spacing-6) auto 0;
+
             display: flex;
           `}
           onPageChange={setPage}
