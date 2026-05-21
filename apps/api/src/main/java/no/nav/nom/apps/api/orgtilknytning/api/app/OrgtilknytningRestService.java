@@ -285,7 +285,7 @@ public class OrgtilknytningRestService {
 
     private void validateFysiskBrukersted(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(eksisterendeOrgtilknytning -> {
-            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer())) {
+            if (isNull(eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer()) || eksisterendeOrgtilknytning.primaryFysiskBrukerstedNummer().isBlank()) {
                 return;
             }
 
