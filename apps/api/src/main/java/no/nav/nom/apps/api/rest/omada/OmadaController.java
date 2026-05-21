@@ -12,6 +12,8 @@ import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.telefon.TelefonService;
+import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetMapper;
+import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -35,19 +37,21 @@ public class OmadaController {
     private final OrgEnhetLederService orgEnhetLederService;
     private final OrgenhetService orgenhetService;
     private final TelefonService telefonService;
+    private final TilgangsenhetMapper tilgangsenhetMapper;
 
     public OmadaController(
         OrganiseringStateRepository organiseringStateRepository,
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgEnhetLederService orgEnhetLederService,
         OrgenhetService orgenhetService,
-        TelefonService telefonService
+        TelefonService telefonService, TilgangsenhetMapper tilgangsenhetMapper
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgEnhetLederService = orgEnhetLederService;
         this.orgenhetService = orgenhetService;
         this.telefonService = telefonService;
+        this.tilgangsenhetMapper = tilgangsenhetMapper;
     }
 
     @Operation(
@@ -74,6 +78,20 @@ public class OmadaController {
             }).orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/orgEnhet2/{id}")
+    public ResponseEntity<OmadaOrgEnhetInfoDTO> getOrgEnhetInfo2(@PathVariable String id) {
+        return orgenhetService.getById(id)
+            .map(orgEnhet -> {
+                var orgEnhetInfo = new OmadaOrgEnhetInfoDTO(
+                    id,
+                    getLeder(orgEnhet),
+                    getOrgenhetOver(id),
+                    getTilgangsenhet(id)
+                );
+                return ResponseEntity.ok(orgEnhetInfo);
+            }).orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/telefonnummer/{navIdent}")
     public ResponseEntity<OmadaRessursTelefonDTO> getRessursTelefon(@PathVariable String navIdent) {
         var prioritertTelefon = telefonService.getPrioritertTelefonnummer(navIdent);
@@ -95,6 +113,10 @@ public class OmadaController {
         return remedyEnhetMapperService.findByNomId(id)
             .map(RemedyEnhet::remedyEnhetId)
             .orElse(null);
+    }
+
+    private String getTilgangsenhet(String id) {
+        return tilgangsenhetMapper.byNomId(id);
     }
 
     private String getLeder(IOrgenhet orgEnhet) {

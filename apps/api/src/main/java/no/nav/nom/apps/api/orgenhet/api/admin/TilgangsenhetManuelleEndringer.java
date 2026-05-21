@@ -79,7 +79,7 @@ public class TilgangsenhetManuelleEndringer {
 
         if (dryRun) {
             var dryRunOutcome = new StringBuilder();
-            tilgangsenhetEndringer.forEach(endring -> dryRunOutcome.append(String.format("%s -> %s", endring.nomId(), endring.remedyEnhetId())));
+            tilgangsenhetEndringer.forEach(endring -> dryRunOutcome.append(String.format("%s -> %s\n", endring.nomId(), endring.remedyEnhetId())));
             return dryRunOutcome.toString();
         } else {
             tilgangsenhetEndringer.forEach(
