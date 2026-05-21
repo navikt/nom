@@ -72,7 +72,7 @@ public class TilgangsenhetManuelleEndringer {
     @GetMapping("/populate")
     public String populerTilgangsenheter(@RequestParam boolean dryRun) {
         var tilgangsenhetEndringer = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
-            .map(orgEnhet -> remedyEnhetMapperService.findByNomId(orgEnhet.getTilgangsenhetId()).orElse(null))
+            .map(orgEnhet -> remedyEnhetMapperService.findByNomId(orgEnhet.getId()).orElse(null))
             .filter(Objects::nonNull)
             .toList();
 
