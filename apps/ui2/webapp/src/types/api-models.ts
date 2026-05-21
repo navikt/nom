@@ -477,7 +477,7 @@ export interface OrgtilknytningState {
 
 export interface OvrigeEndringerOrgEnhetRequest {
   /** @example "1234" */
-  firesiffer?: string;
+  tilgangsenhetId: string | null;
   /**
    * @format date
    * @example "2025-01-01"
@@ -486,9 +486,9 @@ export interface OvrigeEndringerOrgEnhetRequest {
   /** @example "ab123c" */
   id: string;
   /** @example "ARBEIDSOMRAADE" */
-  nomNivaa?: NomNivaa;
+  nomNivaa: NomNivaa | null;
   /** @example "DIREKTORAT" */
-  orgEnhetsType?: OrgEnhetsType;
+  orgEnhetsType: OrgEnhetsType | null;
 }
 
 export interface Person {
