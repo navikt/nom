@@ -49,6 +49,7 @@ public class TestData {
             null,
             null,
             null,
+            null,
             null
         );
     }
@@ -59,6 +60,7 @@ public class TestData {
             orgEnhetId,
             "Test enhet",
             LocalDate.now().minusMonths(1),
+            null,
             null,
             null,
             null,

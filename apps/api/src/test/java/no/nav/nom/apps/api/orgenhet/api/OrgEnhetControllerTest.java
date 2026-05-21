@@ -204,7 +204,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
-            .firesiffer("1234")
+            .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
             .build();
 
@@ -263,7 +263,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
                 .gyldigTom(orgEnhetState.gyldigTom())
                 .lederRessursNavident(ressursState.get().navident())
                 .lederRessursNavn(ressursState.get().visningsnavn().getFormattedVisningsnavn())
-                .firesiffer(opprettOrgEnhetRequest.firesiffer())
+                .tilgangsenhetId(opprettOrgEnhetRequest.tilgangsenhetId())
                 .orgEnhetsType(orgEnhetState.orgEnhetsType())
                 .build()
         );
@@ -278,7 +278,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
-            .firesiffer("1234")
+            .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
             .build();
 
@@ -299,7 +299,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .navn("Nav ny orgEnhet")
             .gyldigFom(LocalDate.now())
             .lederRessursNavident(lederNavident)
-            .firesiffer("1234")
+            .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
             .build();
 
@@ -460,14 +460,14 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .id(orgEnhetId)
             .gyldigFom(orgEnhet.gyldigFom().minusMonths(1))
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
-            .firesiffer("1234")
+            .tilgangsenhetId("1234")
             .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .build();
 
         when(unleash.isEnabled("nom-api.orgenhet-mastring")).thenReturn(true);
 
-        var responseMessage = String.format("OrgEnhet har endret gyldigFom fra %s til %s\\nOrgEnhet har endret Enhets Type fra %s til %s\\nOrgEnhet har endret NOM Nivå fra %s til %s",
-            orgEnhet.gyldigFom(), orgEnhet.gyldigFom().minusMonths(1), null, OrgEnhetsType.DIREKTORAT,  null, NomNivaa.ARBEIDSOMRAADE);
+        var responseMessage = String.format("OrgEnhet har endret gyldigFom fra %s til %s\\nOrgEnhet har endret Enhets Type fra %s til %s\\nOrgEnhet har endret NOM Nivå fra %s til %s\\nOrgenhet har endret tilgangsenhet fra %s til %s",
+            orgEnhet.gyldigFom(), orgEnhet.gyldigFom().minusMonths(1), null, OrgEnhetsType.DIREKTORAT,  null, NomNivaa.ARBEIDSOMRAADE, null, "1234");
 
         var result = webTestClient.patch().uri("/app/orgenheter/endreOvrige")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))

@@ -361,6 +361,7 @@ class MasseflyttOrgtilknytningerServiceTest {
             null,
             null,
             null,
+            null,
             null
         ));
     }

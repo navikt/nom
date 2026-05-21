@@ -67,4 +67,9 @@ public class OrgEnhet implements IOrgenhet {
     public String getOverordnetOrgEnhetFid() {
         return orgEnhetState.overordnetOrgEnhetFid();
     }
+
+    @Override
+    public String getTilgangsenhetId() {
+        return orgEnhetState.tilgangsenhetId();
+    }
 }

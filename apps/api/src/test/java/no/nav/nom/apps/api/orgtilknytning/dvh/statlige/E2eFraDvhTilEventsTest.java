@@ -920,7 +920,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_A", "a100xy", "Enhet A",
             DD_10Y, null,
             null, null, null, null, null,
-            "0AA0001", "ORGENHET", null
+            "0AA0001", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
@@ -928,7 +928,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_B", "b100xy", "Enhet B",
             DD_10Y, null,
             null, null, null, null, null,
-            "0BB0001", "ORGENHET", null
+            "0BB0001", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
@@ -936,7 +936,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_C", "c100xy", "Enhet C",
             DD_10Y, null,
             null, null, null, null, null,
-            "0CC0001", "ORGENHET", null
+            "0CC0001", "ORGENHET", null, null
         )
     );
 
@@ -945,7 +945,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_D1", "d100xy", "Enhet D1",
             DD_10Y, DD_1Y_1D,
             null, null, null, null, null,
-            "0DD0001", "ORGENHET", null
+            "0DD0001", "ORGENHET", null, null
         )
     );
 
@@ -954,7 +954,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_D2", "d200xy", "Enhet D2",
             DD_1Y, null,
             null, null, null, null, null,
-            "0DD0001", "ORGENHET", null
+            "0DD0001", "ORGENHET", null, null
         )
     );
     
@@ -963,7 +963,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_E", "e100xy", "Enhet E",
             DD_10Y, null,
             null, null, null, null, null,
-            "0EE0001", "ORGENHET", null
+            "0EE0001", "ORGENHET", null, null
         )
     );
 
@@ -972,7 +972,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_F1", "f100xy", "Enhet F1",
             DD_10Y, LocalDate.of(2022, 10, 31),
             null, null, null, null, null,
-            "0FF0001", "ORGENHET", null
+            "0FF0001", "ORGENHET", null, null
         )
     );
 
@@ -981,7 +981,7 @@ class E2eFraDvhTilEventsTest extends TestBase {
             "FID_F2", "f200xy", "Enhet F2",
             LocalDate.of(2022, 11, 1), null,
             null, null, null, null, null,
-            "0FF0001", "ORGENHET", null
+            "0FF0001", "ORGENHET", null, null
         )
     );
 }

@@ -109,6 +109,7 @@ class RessursStillingStrukturererTest extends TestBase {
             agressoId + "-ORGENHET-" + navn,
             agressoId,
             "ORGENHET",
+            null,
             null
         ));
     }

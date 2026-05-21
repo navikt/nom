@@ -59,6 +59,7 @@ class RessursStillingLoaderTest extends TestBase {
             "8620005-ORGENHET-Data og innsikt gruppe 5",
             "8620005",
             "ORGENHET",
+            null,
             null
         ));
         agr_8552106 = new OrgEnhet(new OrgEnhetState(
@@ -74,6 +75,7 @@ class RessursStillingLoaderTest extends TestBase {
             "8552106-ORGENHET-IT utvikling 6",
             "8552106",
             "ORGENHET",
+            null,
             null
         ));
         agr_0807001 = new OrgEnhet(new OrgEnhetState(
@@ -89,6 +91,7 @@ class RessursStillingLoaderTest extends TestBase {
             "0807001-ORGENHET-Notodden lagene",
             "0807001",
             "ORGENHET",
+            null,
             null
         ));
     }

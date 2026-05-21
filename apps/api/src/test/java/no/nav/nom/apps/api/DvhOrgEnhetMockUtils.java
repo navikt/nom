@@ -80,7 +80,8 @@ public class DvhOrgEnhetMockUtils {
             uniqueAgressoId,
             agressoId,
             agressoNiv,
-            agressoType
+            agressoType,
+            null
         );
     }
 }

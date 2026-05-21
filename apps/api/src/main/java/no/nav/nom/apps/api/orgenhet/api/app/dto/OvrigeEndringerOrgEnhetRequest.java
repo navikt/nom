@@ -12,7 +12,7 @@ public record OvrigeEndringerOrgEnhetRequest(
     @Schema(example = "ab123c", requiredMode = Schema.RequiredMode.REQUIRED) String id,
     @Schema(example = "2025-01-01", requiredMode = Schema.RequiredMode.NOT_REQUIRED) LocalDate gyldigFom,
     @Schema(example = "DIREKTORAT", requiredMode = Schema.RequiredMode.NOT_REQUIRED) OrgEnhetsType orgEnhetsType,
-    @Schema(example = "1234", requiredMode = Schema.RequiredMode.NOT_REQUIRED) String firesiffer,
+    @Schema(example = "1234", requiredMode = Schema.RequiredMode.NOT_REQUIRED) String tilgangsenhetId,
     @Schema(example = "ARBEIDSOMRAADE", requiredMode = Schema.RequiredMode.NOT_REQUIRED) NomNivaa nomNivaa
 ) {
 }

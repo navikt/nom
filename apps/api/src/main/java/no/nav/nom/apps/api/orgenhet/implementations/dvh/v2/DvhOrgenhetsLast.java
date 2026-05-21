@@ -255,6 +255,7 @@ public class DvhOrgenhetsLast {
                 dvhOrgenhetV2.getGyldigFom(),
                 null,
                 null,
+                null,
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
 

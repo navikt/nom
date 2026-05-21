@@ -11,14 +11,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class TilgangsenhetKandidat {
+public class TilgangsenhetRepository {
 
     private final NorgService norgService;
 
     private final Map<String, Tilgangsenhet> cache = new ConcurrentHashMap<>();
     private LocalDateTime lastUpdated;
 
-    public TilgangsenhetKandidat(NorgService norgService) {
+    public TilgangsenhetRepository(NorgService norgService) {
         this.norgService = norgService;
     }
 
@@ -38,7 +38,9 @@ public class TilgangsenhetKandidat {
 
     public void refreshIfStale() {
         if (lastUpdated == null || Duration.between(lastUpdated, LocalDateTime.now()).toMinutes() > 60) {
-            var updatedCache = norgService.fetch().stream().collect(Collectors.toMap(Tilgangsenhet::enhetId, Function.identity()));
+            var updatedCache = norgService.fetch().stream()
+                .map(Tilgangsenhet::fromNorgEnhet)
+                .collect(Collectors.toMap(Tilgangsenhet::enhetId, Function.identity()));
 
             if (!updatedCache.isEmpty()) {
                 cache.clear();

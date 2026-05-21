@@ -363,7 +363,7 @@ public class OrgEnhetController {
                 null,
                 opprettOrgEnhetRequest.lederRessursNavident(),
                 "Nav Navesen",
-                opprettOrgEnhetRequest.firesiffer(),
+                opprettOrgEnhetRequest.tilgangsenhetId(),
                 opprettOrgEnhetRequest.orgEnhetsType()
             ));
 

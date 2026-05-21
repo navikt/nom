@@ -130,6 +130,11 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         return null;
     }
 
+    @Override
+    public String getTilgangsenhetId() {
+        return null;
+    }
+
     public static DvhOrgenhetV2 fromOrds(JsonNode node) {
         var enhet = new DvhOrgenhetV2();
         enhet.setRawData(node);
