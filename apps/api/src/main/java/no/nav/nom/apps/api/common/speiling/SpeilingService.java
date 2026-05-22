@@ -224,48 +224,6 @@ public class SpeilingService {
         );
     }
 
-    public void speilBrukerstederForNavident(String navident, InputMetadata inputMetadata) {
-        ressursStateRepository.findByNavident(navident).ifPresent(ressursState -> {
-            var aktiveOter = orgtilknytningStateRepository.findByNavident(navident).stream()
-                .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-                .filter(orgtilknytningState -> nomMastered.isMastered(orgtilknytningState.navident()))
-                .toList();
-
-            AtomicReference<String> primaryFysiskBrukersted = new AtomicReference<>();
-            Set<String> alleFysiskeBrukersteder = new HashSet<>();
-
-            aktiveOter.forEach(orgtilknytningState -> {
-                if (orgtilknytningState.erDagligOppfolging()) {
-                    if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
-                        primaryFysiskBrukersted.set(orgtilknytningState.primaryFysiskBrukerstedNummer());
-                    }
-                }
-                if (nonNull(orgtilknytningState.primaryFysiskBrukerstedNummer())) {
-                    alleFysiskeBrukersteder.add(orgtilknytningState.primaryFysiskBrukerstedNummer());
-                }
-                if (nonNull(orgtilknytningState.additionalFysiskeBrukerstederNummer())) {
-                    alleFysiskeBrukersteder.addAll(orgtilknytningState.additionalFysiskeBrukerstederNummer());
-                }
-            });
-
-            var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
-
-            if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted.get()))
-                || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted.get()) && nonNull(primaryFysiskBrukersted.get()))
-                || !alleFysiskeBrukerstederErLike) {
-                ressursCommandService.oppdaterFysiskeBrukerstederCommand(
-                    new OppdaterFysiskeBrukerstederCommand(
-                        ressursState.fid(),
-                        alleFysiskeBrukersteder,
-                        nonNull(primaryFysiskBrukersted.get()) ? primaryFysiskBrukersted.get() : ressursState.primaryFysiskBrukersted()
-                    ),
-                    inputMetadata
-                );
-            }
-
-        });
-    }
-
     private static boolean optionalFysiskBrukerstederAreEqual(
         Set<String> kommendeEndringer,
         List<String> orgtilknytningStateFysiskeBrukerstederBeforeChanges
