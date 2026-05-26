@@ -89,3 +89,4 @@ apps/ui/**/build/
 /venv/
 __pycache__/
 /.sisyphus/
+AGENTS.md

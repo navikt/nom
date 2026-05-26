@@ -136,7 +136,7 @@ public class FysiskBrukerstedService {
 
     public Optional<FysiskBrukersted> findFysiskBrukersted(String fysiskBrukerstedNr) {
         return fysiskBrukerstedCache.getAll().stream()
-            .filter(fysiskBrukersted -> fysiskBrukersted.nr().equals(fysiskBrukerstedNr))
+            .filter(fysiskBrukersted -> Objects.equals(fysiskBrukersted.nr(), fysiskBrukerstedNr))
             .findFirst();
     }
 

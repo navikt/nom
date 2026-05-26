@@ -219,7 +219,6 @@ public class SpeilingService {
                             inputMetadata
                         );
                     }
-
                 }
             )
         );
