@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import {
   Alert,
+  BodyShort,
   Heading,
   HStack,
   Pagination,
@@ -65,23 +66,18 @@ function FysiskBrukerstedTabell() {
 
   return (
     <VStack gap="6">
-      <div
+      <VStack
         css={css`
           width: 100%;
           max-width: 1008px;
-          padding: 0 var(--a-spacing-6);
           margin: auto;
+          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--a-border-radius-large);
+          background-color: #deecef;
         `}
+        gap="4"
       >
-        <HStack
-          css={css`
-            width: 100%;
-            padding: var(--a-spacing-4) var(--a-spacing-6);
-            border-radius: var(--a-border-radius-large);
-            background-color: #deecef;
-          `}
-          gap="4"
-        >
+        <HStack gap="4">
           <div
             css={css`
               flex: 1;
@@ -100,7 +96,7 @@ function FysiskBrukerstedTabell() {
             `}
           ></div>
         </HStack>
-      </div>
+      </VStack>
 
       {!!fysiskBrukerstedFilter && (
         <FysiskBrukerstedTabellInner
@@ -162,7 +158,7 @@ function FysiskBrukerstedTabellInner({
 
   const orgEnheter = orgEnheterQuery.data;
 
-  const mappedeRessurser: FysiskBrukerstedTabellRow[] =
+  const ressursRows: FysiskBrukerstedTabellRow[] =
     fysiskBrukerstedRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
         filteredOrgtilknytninger?.[ressurs.navident] ?? [];
@@ -202,13 +198,13 @@ function FysiskBrukerstedTabellInner({
       };
     }) ?? [];
 
-  const { data, sort, handleSort } = useTableSort(mappedeRessurser, "navn");
+  const { data, sort, handleSort } = useTableSort(ressursRows, "navn");
 
   const sortedRessurser = data;
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 300;
-  const pages = Math.ceil(mappedeRessurser.length / rowsPerPage);
+  const pages = Math.ceil(ressursRows.length / rowsPerPage);
 
   const tableData = sortedRessurser.slice(
     rowsPerPage * (page - 1),
@@ -238,7 +234,11 @@ function FysiskBrukerstedTabellInner({
   }
 
   return (
-    <>
+    <VStack gap="2">
+      <BodyShort>
+        Antall medarbeidere: <b>{ressursRows.length}</b>
+      </BodyShort>
+
       <Table
         css={css`
           background-color: #fff;
@@ -333,7 +333,7 @@ function FysiskBrukerstedTabellInner({
           prevNextTexts
         />
       )}
-    </>
+    </VStack>
   );
 }
 
