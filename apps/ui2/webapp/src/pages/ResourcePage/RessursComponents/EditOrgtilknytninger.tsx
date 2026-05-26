@@ -451,9 +451,9 @@ function OrgtilknytningForm({
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
-  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) =>
-    fysiskBrukerstedOptionMapping(brukersted),
-  );
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder
+    .sort((a, b) => a.brukerstedNr.localeCompare(b.brukerstedNr))
+    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted));
 
   if (isLoading) {
     return (

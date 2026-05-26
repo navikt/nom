@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import {
   Alert,
+  BodyShort,
   Heading,
   HStack,
   Pagination,
@@ -26,7 +27,11 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import { isPeriodActive } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  isPeriodActive,
+  nomDateIsTodayOrAfter,
+  nomDateIsTodayOrBefore,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
@@ -61,23 +66,18 @@ function FysiskBrukerstedTabell() {
 
   return (
     <VStack gap="6">
-      <div
+      <VStack
         css={css`
           width: 100%;
           max-width: 1008px;
-          padding: 0 var(--a-spacing-6);
           margin: auto;
+          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--a-border-radius-large);
+          background-color: #deecef;
         `}
+        gap="4"
       >
-        <HStack
-          css={css`
-            width: 100%;
-            padding: var(--a-spacing-4) var(--a-spacing-6);
-            border-radius: var(--a-border-radius-large);
-            background-color: #deecef;
-          `}
-          gap="4"
-        >
+        <HStack gap="4">
           <div
             css={css`
               flex: 1;
@@ -96,7 +96,7 @@ function FysiskBrukerstedTabell() {
             `}
           ></div>
         </HStack>
-      </div>
+      </VStack>
 
       {!!fysiskBrukerstedFilter && (
         <FysiskBrukerstedTabellInner
@@ -132,9 +132,20 @@ function FysiskBrukerstedTabellInner({
 
   const orgtilknytninger = orgtilknytningerQuery.data;
 
+  const filteredOrgtilknytninger = Object.fromEntries(
+    Object.entries(orgtilknytninger ?? {}).map(([id, tilknytninger]) => [
+      id,
+      tilknytninger.filter(
+        (tilknytning) =>
+          nomDateIsTodayOrBefore(tilknytning.gyldigFom) &&
+          nomDateIsTodayOrAfter(tilknytning.gyldigTom),
+      ),
+    ]),
+  );
+
   const unikeOrgEnhetIder = [
     ...new Set(
-      Object.values(orgtilknytninger ?? {}).flatMap((tilknytninger) =>
+      Object.values(filteredOrgtilknytninger ?? {}).flatMap((tilknytninger) =>
         tilknytninger.map((tilknytning) => tilknytning.orgEnhetId),
       ),
     ),
@@ -147,10 +158,10 @@ function FysiskBrukerstedTabellInner({
 
   const orgEnheter = orgEnheterQuery.data;
 
-  const mappedeRessurser: FysiskBrukerstedTabellRow[] =
+  const ressursRows: FysiskBrukerstedTabellRow[] =
     fysiskBrukerstedRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
-        orgtilknytninger?.[ressurs.navident] ?? [];
+        filteredOrgtilknytninger?.[ressurs.navident] ?? [];
 
       const relevanteTilknytninger = tilknytningerForRessurs.filter(
         (tilknytning) =>
@@ -187,13 +198,13 @@ function FysiskBrukerstedTabellInner({
       };
     }) ?? [];
 
-  const { data, sort, handleSort } = useTableSort(mappedeRessurser, "navn");
+  const { data, sort, handleSort } = useTableSort(ressursRows, "navn");
 
   const sortedRessurser = data;
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 300;
-  const pages = Math.ceil(mappedeRessurser.length / rowsPerPage);
+  const pages = Math.ceil(ressursRows.length / rowsPerPage);
 
   const tableData = sortedRessurser.slice(
     rowsPerPage * (page - 1),
@@ -223,7 +234,11 @@ function FysiskBrukerstedTabellInner({
   }
 
   return (
-    <>
+    <VStack gap="2">
+      <BodyShort>
+        Antall medarbeidere: <b>{ressursRows.length}</b>
+      </BodyShort>
+
       <Table
         css={css`
           background-color: #fff;
@@ -318,7 +333,7 @@ function FysiskBrukerstedTabellInner({
           prevNextTexts
         />
       )}
-    </>
+    </VStack>
   );
 }
 
