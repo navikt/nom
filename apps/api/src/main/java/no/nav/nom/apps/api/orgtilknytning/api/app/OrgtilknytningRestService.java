@@ -25,7 +25,6 @@ import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSluttdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
@@ -67,6 +66,7 @@ import static no.nav.nom.apps.api.common.security.NomApiAccessScope.ADMIN;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_ROBOT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_UTL_KONSULENT;
 import static no.nav.nom.apps.api.common.security.NomApiAccessScope.NOM_WRITE_VIKAFOSSEN;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.loggedInUserHasAccessScope;
 import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 import static no.nav.nom.libs.utils.common.util.DateUtils.overlapsInterval;
@@ -177,7 +177,11 @@ public class OrgtilknytningRestService {
             );
         }
 
-        speilBrukerstederFromRequest(tilknyttetRessurs, oppdaterOrgtilknytningerForRessursRequest);
+        speilingService.speilBrukerstederFromRequest(
+            tilknyttetRessurs,
+            oppdaterOrgtilknytningerForRessursRequest,
+            getInputMetadataOppdaterOrgtilknytningerForRessurs(oppdaterOrgtilknytningerForRessursRequest)
+        );
 
         nomMastered.markRessursAsMasteredInNom(navident);
     }
@@ -985,6 +989,20 @@ public class OrgtilknytningRestService {
         };
     }
 
+    public void updateFysiskBrukerstedForRessursByOrgtilknytningFidList(List<String> otFids, String tilFysiskBrukerstedNr) {
+        var metadata = new InputMetadata(
+            "REST",
+            "updateFysiskBrukerstedForRessurserByNavidentList",
+            Map.of("otFids", otFids, "tilFysiskBrukersted", tilFysiskBrukerstedNr),
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(otFids, tilFysiskBrukerstedNr, metadata);
+    }
+
     private Set<String> orgEnhetIderForOterUnderEndring(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         var enheterTilOTerUnderEndring = new HashSet<String>();
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {
@@ -997,54 +1015,6 @@ public class OrgtilknytningRestService {
         );
 
         return enheterTilOTerUnderEndring;
-    }
-
-    private void speilBrukerstederFromRequest(RessursState ressursState, OppdaterOrgtilknytningerForRessursRequest request) {
-        String primaryFysiskBrukersted = null;
-        Set<String> alleFysiskeBrukersteder = new HashSet<>();
-
-        for (var eksisterende : request.eksisterendeOrgtilknytninger()) {
-            if (isPeriodActive(eksisterende.gyldigFom(), eksisterende.gyldigTom())) {
-                if (eksisterende.erDagligOppfolging() && nonNull(eksisterende.primaryFysiskBrukerstedNummer())) {
-                    primaryFysiskBrukersted = eksisterende.primaryFysiskBrukerstedNummer();
-                }
-                if (nonNull(eksisterende.primaryFysiskBrukerstedNummer())) {
-                    alleFysiskeBrukersteder.add(eksisterende.primaryFysiskBrukerstedNummer());
-                }
-                if (nonNull(eksisterende.optionalFysiskBrukersteder())) {
-                    alleFysiskeBrukersteder.addAll(eksisterende.optionalFysiskBrukersteder());
-                }
-            }
-        }
-
-        for (var ny : request.nyeOrgtilknytninger()) {
-            if (isPeriodActive(ny.gyldigFom(), ny.gyldigTom())) {
-                if (ny.erDagligOppfolging() && nonNull(ny.primaryFysiskBrukerstedNummer())) {
-                    primaryFysiskBrukersted = ny.primaryFysiskBrukerstedNummer();
-                }
-                if (nonNull(ny.primaryFysiskBrukerstedNummer())) {
-                    alleFysiskeBrukersteder.add(ny.primaryFysiskBrukerstedNummer());
-                }
-                if (nonNull(ny.optionalFysiskBrukersteder())) {
-                    alleFysiskeBrukersteder.addAll(ny.optionalFysiskBrukersteder());
-                }
-            }
-        }
-
-        var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
-
-        if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted))
-            || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted) && nonNull(primaryFysiskBrukersted))
-            || !alleFysiskeBrukerstederErLike) {
-            ressursCommandService.oppdaterFysiskeBrukerstederCommand(
-                new OppdaterFysiskeBrukerstederCommand(
-                    ressursState.fid(),
-                    alleFysiskeBrukersteder,
-                    nonNull(primaryFysiskBrukersted) ? primaryFysiskBrukersted : ressursState.primaryFysiskBrukersted()
-                ),
-                getInputMetadataOppdaterOrgtilknytningerForRessurs(request)
-            );
-        }
     }
 
     private boolean isActiveOrFuture(LocalDate gyldigFom, LocalDate gyldigTom) {

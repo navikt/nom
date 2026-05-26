@@ -4,6 +4,8 @@ import freemarker.template.Configuration;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.common.speiling.SpeilingService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.IdentType;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,6 +55,10 @@ class FysiskBrukerstedServiceTest {
     Configuration freemarkerConfig;
     @MockitoBean
     MicrosoftGraphClient microsoftGraphClient;
+    @MockitoBean
+    OrgtilknytningCommandService orgtilknytningCommandServiceMock;
+    @MockitoBean
+    SpeilingService speilingServiceMock;
     @MockitoBean
     Unleash unleash;
 
@@ -311,6 +318,29 @@ class FysiskBrukerstedServiceTest {
     }
 
     @Test
+    void flyttOrgtilknytningerTilNyFysiskBrukersted_ok() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+
+        var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
+        var allOts = List.of(orgtilknytning1, orgtilknytning2);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Ikke der").build()
+            )
+        );
+
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, null);
+
+        verify(orgtilknytningCommandServiceMock, times(2)).endreFysiskeBrukersted(any());
+    }
+
+    @Test
     void flyttRessurserTilFysiskBrukersted_fails() {
         var fysiskBrukerstedToMatch = "1234";
         var fysiskBrukerstedNotToMatch = "9876";
@@ -333,6 +363,30 @@ class FysiskBrukerstedServiceTest {
     }
 
     @Test
+    void flyttOrgtilknytningerTilNyFysiskBrukersted_fails() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+
+        var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
+        var allOts = List.of(orgtilknytning1, orgtilknytning2);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Ikke der").build()
+            )
+        );
+
+        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, "FINNES IKKE", null);
+        assertEquals(2, failed.size());
+
+        verify(orgtilknytningCommandServiceMock, times(0)).endreFysiskeBrukersted(any());
+    }
+
+    @Test
     void flyttRessurserTilFysiskBrukersted_fails_2() {
         var fysiskBrukerstedToMatch = "1234";
         var fysiskBrukerstedNotToMatch = "9876";
@@ -351,6 +405,30 @@ class FysiskBrukerstedServiceTest {
         assertEquals(1, failed.size());
 
         verify(ressursCommandServiceMock, times(1)).oppdaterFysiskeBrukerstederCommand(any(), any());
+    }
+
+    @Test
+    void flyttOrgtilknytningerTilNyFysiskBrukersted_fails_2() {
+        var fysiskBrukerstedToMatch = "1234";
+        var fysiskBrukerstedNotToMatch = "9876";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().fid("FINNES_IKKE").navident("A000001").build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+
+        var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
+        var allOts = List.of(orgtilknytning2);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build(),
+                FysiskBrukersted.builder().nr(fysiskBrukerstedNotToMatch).navn("Ikke der").build()
+            )
+        );
+
+        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, null);
+        assertEquals(1, failed.size());
+
+        verify(orgtilknytningCommandServiceMock, times(1)).endreFysiskeBrukersted(any());
     }
 
     @Test

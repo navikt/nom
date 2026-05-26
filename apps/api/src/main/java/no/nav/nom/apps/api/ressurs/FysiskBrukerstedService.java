@@ -7,8 +7,13 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.common.speiling.SpeilingService;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
@@ -31,6 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Slf4j
 @Service
 public class FysiskBrukerstedService {
@@ -44,6 +51,8 @@ public class FysiskBrukerstedService {
     private final AdClient adClient;
     private final Configuration freemarkerConfig;
     private final MicrosoftGraphClient microsoftGraphClient;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final SpeilingService speilingService;
 
     public FysiskBrukerstedService(
         AdClient adClient,
@@ -52,7 +61,9 @@ public class FysiskBrukerstedService {
         RessursCommandService ressursCommandService,
         FysiskBrukerstedCache fysiskBrukerstedCache,
         Configuration freemarkerConfig,
-        MicrosoftGraphClient microsoftGraphClient
+        MicrosoftGraphClient microsoftGraphClient,
+        OrgtilknytningCommandService orgtilknytningCommandService,
+        SpeilingService speilingService
     ) {
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
@@ -61,6 +72,8 @@ public class FysiskBrukerstedService {
         this.fysiskBrukerstedCache = fysiskBrukerstedCache;
         this.freemarkerConfig = freemarkerConfig;
         this.microsoftGraphClient = microsoftGraphClient;
+        this.orgtilknytningCommandService = orgtilknytningCommandService;
+        this.speilingService = speilingService;
     }
 
     public List<RessursState> getAlleRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
@@ -112,6 +125,29 @@ public class FysiskBrukerstedService {
         return feiledeNavidenter;
     }
 
+    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+        HashMap<String, String> feiledeNavidenter = new HashMap<>();
+        var orgtilknytningerGruppertPaaFid = orgtilknytningStateRepository.findByFidIn(otFids)
+            .stream()
+            .collect(Collectors.toMap(OrgtilknytningState::fid, orgtilknytningState -> orgtilknytningState, (ot1, _) -> ot1));
+        var alleNavidenterSomBleFlyttet = orgtilknytningerGruppertPaaFid.values().stream().map(OrgtilknytningState::navident).toList();
+        otFids.forEach(otFid -> {
+            try {
+                var orgtilknytning = orgtilknytningerGruppertPaaFid.get(otFid);
+                if (isNull(orgtilknytning)) {
+                    throw OrgtilknytningNotFoundException.fid(otFid);
+                }
+                oppdaterOrgtilknytningFysiskBrukersted(orgtilknytningerGruppertPaaFid.get(otFid), tilFysiskBrukerstedNr, inputMetaData);
+            } catch (FysiskBrukerstedNotFoundException | OrgtilknytningNotFoundException e) {
+                feiledeNavidenter.put(otFid, e.getMessage());
+                log.error("Feil ved oppdatering av orgtilknytning {} til fysisk brukersted {}", otFid, tilFysiskBrukerstedNr, e);
+            }
+        });
+        sendMasseflyttFysiskBrukerstedEmail(tilFysiskBrukerstedNr, alleNavidenterSomBleFlyttet, feiledeNavidenter);
+        alleNavidenterSomBleFlyttet.forEach(navident -> speilingService.speilBrukerstederFromMasseflytting(navident, inputMetaData));
+        return feiledeNavidenter;
+    }
+
     private void oppdaterRessursFysiskBrukersted(String navident, String fysiskBrukerstedNr, InputMetadata inputMetaData) {
         if (!fysiskBrukerstedExists(fysiskBrukerstedNr)) {
             throw new IllegalArgumentException("Ugyldig fysisk brukersted " + fysiskBrukerstedNr);
@@ -127,6 +163,22 @@ public class FysiskBrukerstedService {
             fysiskBrukerstedNr
         );
         ressursCommandService.oppdaterFysiskeBrukerstederCommand(ressursCmd, inputMetaData);
+    }
+
+    private void oppdaterOrgtilknytningFysiskBrukersted(OrgtilknytningState orgtilknytningState, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+        if (!fysiskBrukerstedExists(tilFysiskBrukerstedNr)) {
+            throw FysiskBrukerstedNotFoundException.notFound(tilFysiskBrukerstedNr);
+        }
+
+        var orgtilknytningCmd = new EndreFysiskeBrukerstederCommand(
+            orgtilknytningState.fid(),
+            orgtilknytningState.navident(),
+            orgtilknytningState.orgEnhetId(),
+            tilFysiskBrukerstedNr,
+            orgtilknytningState.additionalFysiskeBrukerstederNummer(),
+            inputMetaData
+        );
+        orgtilknytningCommandService.endreFysiskeBrukersted(orgtilknytningCmd);
     }
 
     public boolean fysiskBrukerstedExists(String fysiskBrukerstedNr) {
