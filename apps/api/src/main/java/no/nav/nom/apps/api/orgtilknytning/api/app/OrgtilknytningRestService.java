@@ -1003,6 +1003,17 @@ public class OrgtilknytningRestService {
         fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(otFids, tilFysiskBrukerstedNr, metadata);
     }
 
+    public List<OrgtilknytningState> getActiveOrgtilknytningerByFysiskBrukerstedNr(String fysiskBrukerstedNr) {
+        if (isNull(fysiskBrukerstedNr) || !fysiskBrukerstedService.fysiskBrukerstedExists(fysiskBrukerstedNr)) {
+            throw FysiskBrukerstedNotFoundException.notFound(fysiskBrukerstedNr);
+        }
+
+        return orgtilknytningStateRepository.getAll().stream()
+            .filter(orgtilknytningState -> isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> Objects.equals(fysiskBrukerstedNr, orgtilknytningState.primaryFysiskBrukerstedNummer()))
+            .toList();
+    }
+
     private Set<String> orgEnhetIderForOterUnderEndring(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
         var enheterTilOTerUnderEndring = new HashSet<String>();
         oppdaterOrgtilknytningerForRessursRequest.eksisterendeOrgtilknytninger().forEach(endreOrgtilknytningRequest -> {

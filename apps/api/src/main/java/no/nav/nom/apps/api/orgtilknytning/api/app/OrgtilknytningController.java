@@ -188,7 +188,7 @@ public class OrgtilknytningController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("updateFysiskBrukerstedForOrgtilknytningByOrgtilknytningList")
+    @PostMapping("/updateFysiskBrukerstedForOrgtilknytningByOrgtilknytningList")
     @Operation(
         description = "Flytt angitte ressursers orgtilknytning fysisk brukersted",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -213,6 +213,22 @@ public class OrgtilknytningController {
                 .message("Successfully changed fysisk brukersted for orgtilknytninger")
                 .build()
         );
+    }
+
+    @GetMapping("/getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr/{fysiskBrukerstedNr}")
+    @Operation(
+        description = "Hent alle OT basert på angitt fysiske brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403")
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<OrgtilknytningState>> getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr(@PathVariable String fysiskBrukerstedNr) {
+        return ResponseEntity.ok(orgtilknytningRestService.getActiveOrgtilknytningerByFysiskBrukerstedNr(fysiskBrukerstedNr));
     }
 
     private void validateKanEndreOrgtilknytningByFid(String fid) {
