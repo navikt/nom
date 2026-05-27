@@ -6,7 +6,7 @@ import React from "react";
 import { getKostnadssted, getOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
-import type { OrgEnhet } from "~/types/api-models";
+import type { OrgEnhet, RessursState } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function EnhetKontekstInfo({
@@ -28,7 +28,9 @@ export function EnhetKontekstInfo({
 
   const ledere =
     Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
-      ? orgEnhet.ledere.map((leder) => formatVisningsnavn(leder.visningsnavn))
+      ? orgEnhet.ledere
+          .filter((leder): leder is RessursState => leder !== null)
+          .map((leder) => formatVisningsnavn(leder.visningsnavn))
       : [];
 
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
