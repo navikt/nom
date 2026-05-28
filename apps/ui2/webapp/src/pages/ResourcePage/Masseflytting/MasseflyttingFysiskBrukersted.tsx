@@ -88,7 +88,11 @@ function FysiskBrukerstedFlyttingTable() {
     getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNrQuery.data ?? [];
 
   const navidentListe = [
-    ...new Set(orgtilknytningerForBrukersted.map((ot) => ot.navident)),
+    ...new Set(
+      orgtilknytningerForBrukersted.map(
+        (orgtilknytning) => orgtilknytning.navident,
+      ),
+    ),
   ];
 
   const ressurserQuery = useQuery({
@@ -102,7 +106,11 @@ function FysiskBrukerstedFlyttingTable() {
   );
 
   const orgEnhetIder = [
-    ...new Set(orgtilknytningerForBrukersted.map((ot) => ot.orgEnhetId)),
+    ...new Set(
+      orgtilknytningerForBrukersted.map(
+        (orgtilknytning) => orgtilknytning.orgEnhetId,
+      ),
+    ),
   ];
 
   const orgEnheterQuery = useQuery({
@@ -141,23 +149,25 @@ function FysiskBrukerstedFlyttingTable() {
         };
       });
 
-  const filtrerteOrgtilknytninger = orgtilknytningerForTabell.filter((ot) => {
-    if (!ot.sektor) {
-      return true;
-    }
+  const filtrerteOrgtilknytninger = orgtilknytningerForTabell.filter(
+    (orgtilknytning) => {
+      if (!orgtilknytning.sektor) {
+        return true;
+      }
 
-    switch (ot.sektor) {
-      case Sektor.NAV_STATLIG: {
-        return sektorFilter.statlig;
+      switch (orgtilknytning.sektor) {
+        case Sektor.NAV_STATLIG: {
+          return sektorFilter.statlig;
+        }
+        case Sektor.NAV_KOMMUNAL: {
+          return sektorFilter.kommunal;
+        }
+        case Sektor.EKSTERN: {
+          return sektorFilter.ekstern;
+        }
       }
-      case Sektor.NAV_KOMMUNAL: {
-        return sektorFilter.kommunal;
-      }
-      case Sektor.EKSTERN: {
-        return sektorFilter.ekstern;
-      }
-    }
-  });
+    },
+  );
 
   const { data, sort, handleSort } = useTableSort(
     filtrerteOrgtilknytninger,
@@ -199,7 +209,9 @@ function FysiskBrukerstedFlyttingTable() {
         valgteListe.filter(
           (fid) =>
             !orgtilknytningerForTabell.some(
-              (ot) => ot.fid === fid && ot.sektor === filterSektor,
+              (orgtilknytning) =>
+                orgtilknytning.fid === fid &&
+                orgtilknytning.sektor === filterSektor,
             ),
         ),
       );
@@ -511,7 +523,9 @@ function FysiskBrukerstedFlyttingTable() {
                       setValgteOrgtilknytninger(
                         valgteOrgtilknytninger.length > 0
                           ? []
-                          : sorterteOrgtilknytninger.map((ot) => ot.fid),
+                          : sorterteOrgtilknytninger.map(
+                              (orgtilknytning) => orgtilknytning.fid,
+                            ),
                       )
                     }
                   >
@@ -522,44 +536,55 @@ function FysiskBrukerstedFlyttingTable() {
             </Table.Header>
 
             <Table.Body>
-              {sorterteOrgtilknytninger.map((ot) => (
+              {sorterteOrgtilknytninger.map((orgtilknytning) => (
                 <Table.Row
                   css={css`
                     --ac-table-row-border: none;
                     height: 48px;
                     border-width: 0 0 1px;
                   `}
-                  key={ot.fid}
+                  key={orgtilknytning.fid}
                 >
                   <Table.DataCell>
-                    <SmartLink href={`/ressurs/${ot.navident}`} target="_blank">
-                      {ot.navident}
+                    <SmartLink
+                      href={`/ressurs/${orgtilknytning.navident}`}
+                      target="_blank"
+                    >
+                      {orgtilknytning.navident}
                     </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <SmartLink href={`/ressurs/${ot.navident}`} target="_blank">
-                      {formatVisningsnavn(ot.visningsnavn)}
+                    <SmartLink
+                      href={`/ressurs/${orgtilknytning.navident}`}
+                      target="_blank"
+                    >
+                      {formatVisningsnavn(orgtilknytning.visningsnavn)}
                     </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
-                    {SektorNameMapping[ot.sektor]}
+                    {SektorNameMapping[orgtilknytning.sektor]}
                   </Table.DataCell>
                   <Table.DataCell>
-                    {ot.orgEnhet && (
+                    {orgtilknytning.orgEnhet && (
                       <SmartLink
-                        href={`/org/${ot.orgEnhet.id}`}
+                        href={`/org/${orgtilknytning.orgEnhet.id}`}
                         target="_blank"
                       >
-                        {`${ot.orgEnhet.name} (${ot.orgEnhet.id})`}
+                        {`${orgtilknytning.orgEnhet.name} (${orgtilknytning.orgEnhet.id})`}
                       </SmartLink>
                     )}
                   </Table.DataCell>
                   <Table.DataCell>
                     <Checkbox
-                      checked={valgteOrgtilknytninger.includes(ot.fid)}
+                      checked={valgteOrgtilknytninger.includes(
+                        orgtilknytning.fid,
+                      )}
                       hideLabel
                       onChange={(event) =>
-                        toggleValgtOrgtilknytning(ot.fid, event.target.checked)
+                        toggleValgtOrgtilknytning(
+                          orgtilknytning.fid,
+                          event.target.checked,
+                        )
                       }
                     >
                       Velg
@@ -642,7 +667,9 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
           overflow="auto"
         >
           {valgteOrgtilknytninger.map((fid) => {
-            const ot = orgtilknytninger.find((ot) => ot.fid === fid);
+            const orgtilknytning = orgtilknytninger.find(
+              (orgtilknytning) => orgtilknytning.fid === fid,
+            );
 
             return (
               <div
@@ -653,9 +680,11 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
                 `}
                 key={fid}
               >
-                <BodyShort>{formatVisningsnavn(ot?.visningsnavn)}</BodyShort>
+                <BodyShort>
+                  {formatVisningsnavn(orgtilknytning?.visningsnavn)}
+                </BodyShort>
 
-                <BodyShort>({ot?.navident})</BodyShort>
+                <BodyShort>({orgtilknytning?.navident})</BodyShort>
               </div>
             );
           })}
