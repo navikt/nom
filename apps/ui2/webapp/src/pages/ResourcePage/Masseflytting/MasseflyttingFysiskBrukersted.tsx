@@ -120,18 +120,21 @@ function FysiskBrukerstedFlyttingTable() {
 
   const orgtilknytningerForTabell: CustomOrgtilknytning[] = isLoading
     ? []
-    : orgtilknytningerForBrukersted.map((ot) => {
-        const ressurs = ressurserMap.get(ot.navident);
-        const orgEnhet = orgEnheter?.find((o) => o.id === ot.orgEnhetId);
+    : orgtilknytningerForBrukersted.map((orgtilknytning) => {
+        const ressurs = ressurserMap.get(orgtilknytning.navident);
+        const orgEnhet = orgEnheter?.find(
+          (orgEnhet) => orgEnhet.id === orgtilknytning.orgEnhetId,
+        );
 
         return {
-          fid: ot.fid,
-          navident: ot.navident,
+          fid: orgtilknytning.fid,
+          navident: orgtilknytning.navident,
           visningsnavn: ressurs?.visningsnavn ?? {
             fornavn: "",
             etternavn: "",
           },
-          sektor: ot.sektor ?? ressurs?.sektor ?? Sektor.NAV_STATLIG,
+          sektor:
+            orgtilknytning.sektor ?? ressurs?.sektor ?? Sektor.NAV_STATLIG,
           ...(orgEnhet && {
             orgEnhet: { id: orgEnhet.id, name: orgEnhet.navn },
           }),

@@ -6,7 +6,7 @@ import React from "react";
 import { getKostnadssted, getOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
-import type { OrgEnhet, RessursState } from "~/types/api-models";
+import type { OrgEnhet } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function EnhetKontekstInfo({
@@ -29,7 +29,7 @@ export function EnhetKontekstInfo({
   const ledere =
     Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
       ? orgEnhet.ledere
-          .filter((leder): leder is RessursState => leder !== null)
+          .filter(Boolean)
           .map((leder) => formatVisningsnavn(leder.visningsnavn))
       : [];
 
