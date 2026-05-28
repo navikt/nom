@@ -63,5 +63,5 @@ spring:
 
 app:
   kafka:
-    skip-producing-state-events-until-ressurs-evtsrc-offset: 0
-    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 868058
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 1788287
