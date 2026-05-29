@@ -13,6 +13,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,8 @@ class FysiskBrukerstedServiceTest {
     OrgtilknytningCommandService orgtilknytningCommandServiceMock;
     @MockitoBean
     SpeilingService speilingServiceMock;
+    @MockitoBean
+    NomStateOrgtilknytningListener nomStateOrgtilknytningListenerMock;
     @MockitoBean
     Unleash unleash;
 
