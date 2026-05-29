@@ -1,5 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.api.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
@@ -10,7 +13,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +45,14 @@ public class TilgangsenhetManuelleEndringer {
         this.remedyEnhetMapperService = remedyEnhetMapperService;
     }
 
-    @PostMapping
+    @Operation(
+        description = "Endre ",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PatchMapping
     public void setTilgangsenhet(@RequestBody TilgangsenhetEndring tilgangsenhetEndring) {
-        if (tilgangsenhetEndring.tilgangsenhetId == null || !tilgangsenhetRepository.isValid(tilgangsenhetEndring.tilgangsenhetId)) {
-            throw new InvalidTilgangsenhetException(String.format("Invalid tilgangsenhet: ‰s", "tilgangsenhetEndring.tilgangsenhetId"));
+        if (tilgangsenhetEndring.tilgangsenhetId == null || !tilgangsenhetRepository.isValid(tilgangsenhetEndring.tilgangsenhetId())) {
+            throw new InvalidTilgangsenhetException(String.format("Invalid tilgangsenhet: %s", tilgangsenhetEndring.tilgangsenhetId()));
         }
 
         var inputMetadata = new InputMetadata(
@@ -58,8 +65,8 @@ public class TilgangsenhetManuelleEndringer {
             )
         );
 
-        var orgenhetState = orgenhetService.getById(tilgangsenhetEndring.id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", tilgangsenhetEndring.id)));
+        var orgenhetState = orgenhetService.getById(tilgangsenhetEndring.orgEnhetId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", tilgangsenhetEndring.orgEnhetId())));
 
         orgEnhetCommandService.endreTilgangsenhet(
             orgenhetState.getFid(), new EndreTilgangsenhet(
@@ -69,7 +76,11 @@ public class TilgangsenhetManuelleEndringer {
         );
     }
 
-    @GetMapping("/populate")
+    @Operation(
+        description = "Skript for å mappe remedyEnhetsId til tilgangsenhetId i OrgEnhetState",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PostMapping("/populate")
     public String populerTilgangsenheter(@RequestParam boolean dryRun) {
         var tilgangsenhetEndringer = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
             .map(orgEnhet -> remedyEnhetMapperService.findByNomId(orgEnhet.getId()).orElse(null))
@@ -105,7 +116,7 @@ public class TilgangsenhetManuelleEndringer {
     }
 
     public record TilgangsenhetEndring(
-        String id,
+        String orgEnhetId,
         String tilgangsenhetId
     ) {}
 }
