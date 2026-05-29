@@ -18,11 +18,11 @@ import React, { useState } from "react";
 
 import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
+  getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr,
   getFysiskeBrukersteder,
   getOrgEnhetList,
-  getOrgtilknytningerByNavidentList,
-  getRessurserForFysiskBrukersted,
-  updateFysiskBrukerstedForRessurser,
+  getRessurserByListNavident,
+  updateFysiskBrukerstedForOrgtilknytninger,
 } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -35,13 +35,8 @@ import { PageBanner } from "~/components/PageBanner";
 import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
-import {
-  isPeriodActive,
-  nomDateIsTodayOrAfter,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
-  OrgtilknytningState,
-  UpdatePrimaryFysiskBrukerstedForRessurserRequest,
+  UpdateFysiskBrukerstedForOrgtilknytningRequest,
   Visningsnavn,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
@@ -79,51 +74,43 @@ function FysiskBrukerstedFlyttingTable() {
     ekstern: true,
   });
 
-  const [valgteRessurser, setValgteRessurser] = useState<string[]>([]);
+  const [valgteOrgtilknytninger, setValgteOrgtilknytninger] = useState<
+    string[]
+  >([]);
 
-  const getFysiskBrukerstedRessurserQuery = useQuery({
-    queryKey: getRessurserForFysiskBrukersted.queryKey(fysiskBrukerstedFra),
-    queryFn: () => getRessurserForFysiskBrukersted.queryFn(fysiskBrukerstedFra),
-    enabled: !!fysiskBrukerstedFra,
-  });
+  const getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNrQuery = useQuery(
+    getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr(
+      fysiskBrukerstedFra,
+    ),
+  );
 
-  const hentedeRessurser = getFysiskBrukerstedRessurserQuery.data;
+  const orgtilknytningerForBrukersted =
+    getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNrQuery.data ?? [];
 
-  const ressurser =
-    hentedeRessurser?.filter((ressurs) =>
-      ressurs.startdato
-        ? isPeriodActive(ressurs.startdato, ressurs.sluttdato)
-        : nomDateIsTodayOrAfter(ressurs.sluttdato),
-    ) ?? [];
+  const navidentListe = [
+    ...new Set(
+      orgtilknytningerForBrukersted.map(
+        (orgtilknytning) => orgtilknytning.navident,
+      ),
+    ),
+  ];
 
-  const navidentListe = ressurser.map((ressurs) => ressurs.navident);
-
-  const orgtilknytningerQuery = useQuery({
-    queryKey: getOrgtilknytningerByNavidentList.queryKey(navidentListe),
-    queryFn: () => getOrgtilknytningerByNavidentList.queryFn(navidentListe),
+  const ressurserQuery = useQuery({
+    queryKey: getRessurserByListNavident.queryKey(navidentListe),
+    queryFn: () => getRessurserByListNavident.queryFn(navidentListe),
     enabled: navidentListe.length > 0,
   });
 
-  const hentedeOrgtilknytninger = orgtilknytningerQuery.data;
-
-  const orgtilknytninger: OrgtilknytningState[] = hentedeOrgtilknytninger
-    ? navidentListe
-        .map(
-          (navident) =>
-            hentedeOrgtilknytninger[navident]?.find(
-              (tilknytning: OrgtilknytningState) =>
-                tilknytning.erDagligOppfolging &&
-                isPeriodActive(tilknytning.gyldigFom, tilknytning.gyldigTom),
-            ) ?? null,
-        )
-        .filter(
-          (tilknytning): tilknytning is OrgtilknytningState =>
-            tilknytning !== null,
-        )
-    : [];
+  const ressurserMap = new Map(
+    (ressurserQuery.data ?? []).map((r) => [r.navident, r]),
+  );
 
   const orgEnhetIder = [
-    ...new Set(orgtilknytninger.map((tilknytning) => tilknytning.orgEnhetId)),
+    ...new Set(
+      orgtilknytningerForBrukersted.map(
+        (orgtilknytning) => orgtilknytning.orgEnhetId,
+      ),
+    ),
   ];
 
   const orgEnheterQuery = useQuery({
@@ -132,68 +119,67 @@ function FysiskBrukerstedFlyttingTable() {
     enabled: orgEnhetIder.length > 0,
   });
 
-  const orgEnheter = orgEnheterQuery?.data;
+  const orgEnheter = orgEnheterQuery.data;
 
   const isLoading =
-    getFysiskBrukerstedRessurserQuery.isLoading ||
-    orgtilknytningerQuery.isLoading ||
+    getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNrQuery.isLoading ||
+    ressurserQuery.isLoading ||
     orgEnheterQuery.isLoading;
 
-  const customRessurser: CustomRessurs[] = isLoading
+  const orgtilknytningerForTabell: CustomOrgtilknytning[] = isLoading
     ? []
-    : ressurser.map((ressurs) => {
-        const ressursOrgtilknytning = orgtilknytninger.find(
-          (tilknytning) => tilknytning?.navident === ressurs.navident,
+    : orgtilknytningerForBrukersted.map((orgtilknytning) => {
+        const ressurs = ressurserMap.get(orgtilknytning.navident);
+        const orgEnhet = orgEnheter?.find(
+          (orgEnhet) => orgEnhet.id === orgtilknytning.orgEnhetId,
         );
 
-        const customOrgEnhet = ressursOrgtilknytning
-          ? {
-              id: ressursOrgtilknytning.orgEnhetId,
-              name:
-                orgEnheter?.find(
-                  (orgEnhet) =>
-                    orgEnhet.id === ressursOrgtilknytning.orgEnhetId,
-                )?.navn ?? "",
-            }
-          : null;
-
         return {
-          navident: ressurs.navident,
-          visningsnavn: ressurs.visningsnavn,
-          sektor: ressurs.sektor,
-          ...(customOrgEnhet && { orgEnhet: customOrgEnhet }),
+          fid: orgtilknytning.fid,
+          navident: orgtilknytning.navident,
+          visningsnavn: ressurs?.visningsnavn ?? {
+            fornavn: "",
+            etternavn: "",
+          },
+          sektor:
+            orgtilknytning.sektor ?? ressurs?.sektor ?? Sektor.NAV_STATLIG,
+          ...(orgEnhet && {
+            orgEnhet: { id: orgEnhet.id, name: orgEnhet.navn },
+          }),
         };
       });
 
-  const filteredRessurser = customRessurser.filter((ressurs) => {
-    if (!ressurs.sektor) {
-      return true;
-    }
+  const filtrerteOrgtilknytninger = orgtilknytningerForTabell.filter(
+    (orgtilknytning) => {
+      if (!orgtilknytning.sektor) {
+        return true;
+      }
 
-    switch (ressurs.sektor) {
-      case Sektor.NAV_STATLIG: {
-        return sektorFilter.statlig;
+      switch (orgtilknytning.sektor) {
+        case Sektor.NAV_STATLIG: {
+          return sektorFilter.statlig;
+        }
+        case Sektor.NAV_KOMMUNAL: {
+          return sektorFilter.kommunal;
+        }
+        case Sektor.EKSTERN: {
+          return sektorFilter.ekstern;
+        }
       }
-      case Sektor.NAV_KOMMUNAL: {
-        return sektorFilter.kommunal;
-      }
-      case Sektor.EKSTERN: {
-        return sektorFilter.ekstern;
-      }
-    }
-  });
+    },
+  );
 
   const { data, sort, handleSort } = useTableSort(
-    filteredRessurser,
+    filtrerteOrgtilknytninger,
     "visningsnavn.fornavn",
   );
 
-  const sortedRessurser = data;
+  const sorterteOrgtilknytninger = data;
 
   function handleFysiskBrukerstedFraChange(value: string | null) {
     setFysiskBrukerstedFra(value ?? "");
 
-    setValgteRessurser([]);
+    setValgteOrgtilknytninger([]);
   }
 
   function toggleSektorFilter(filterSektor: Sektor, state: boolean) {
@@ -219,13 +205,13 @@ function FysiskBrukerstedFlyttingTable() {
     }
 
     if (!state) {
-      setValgteRessurser((valgteRessurserListe) =>
-        valgteRessurserListe.filter(
-          (navident) =>
-            !ressurser.some(
-              (ressurs) =>
-                ressurs.navident === navident &&
-                ressurs.sektor === filterSektor,
+      setValgteOrgtilknytninger((valgteListe) =>
+        valgteListe.filter(
+          (fid) =>
+            !orgtilknytningerForTabell.some(
+              (orgtilknytning) =>
+                orgtilknytning.fid === fid &&
+                orgtilknytning.sektor === filterSektor,
             ),
         ),
       );
@@ -237,10 +223,10 @@ function FysiskBrukerstedFlyttingTable() {
   const masseflyttingFysiskBrukerstedMutation = useMutation<
     unknown,
     AxiosError<Error>,
-    UpdatePrimaryFysiskBrukerstedForRessurserRequest
+    UpdateFysiskBrukerstedForOrgtilknytningRequest
   >({
     mutationFn: async (request) => {
-      return updateFysiskBrukerstedForRessurser(request);
+      return updateFysiskBrukerstedForOrgtilknytninger(request);
     },
     onSuccess: async () => {
       navigate({
@@ -252,34 +238,30 @@ function FysiskBrukerstedFlyttingTable() {
   const { showModal } = useModal();
 
   async function handleClick() {
-    if (valgteRessurser.length > 0 && !!fysiskBrukerstedTil) {
+    if (valgteOrgtilknytninger.length > 0 && !!fysiskBrukerstedTil) {
       await showModal(
         <MasseflyttingFysiskBrukerstedBekreftModal
-          ressurser={sortedRessurser}
+          orgtilknytninger={sorterteOrgtilknytninger}
           tilFysiskBrukersted={fysiskeBrukersteder.find(
             (fysiskBrukersted) =>
               fysiskBrukersted.brukerstedNr === fysiskBrukerstedTil,
           )}
-          valgteRessurser={valgteRessurser}
+          valgteOrgtilknytninger={valgteOrgtilknytninger}
         />,
       )
         .then(() => {
-          masseflyttingFysiskBrukerstedMutation.mutate(
-            lagFysiskBrukerstedMasseFlyttingRequest(
-              valgteRessurser,
-              fysiskBrukerstedTil,
-            ),
-          );
+          masseflyttingFysiskBrukerstedMutation.mutate({
+            orgtilknytningerFid: valgteOrgtilknytninger,
+            tilFysiskBrukerstedNr: fysiskBrukerstedTil,
+          });
         })
         .catch(() => {});
     }
   }
 
-  function toggleValgtRessurs(value: string, state: boolean) {
-    setValgteRessurser((liste) =>
-      state
-        ? [...liste, value]
-        : liste.filter((navident) => navident !== value),
+  function toggleValgtOrgtilknytning(fid: string, state: boolean) {
+    setValgteOrgtilknytninger((liste) =>
+      state ? [...liste, fid] : liste.filter((id) => id !== fid),
     );
   }
 
@@ -401,7 +383,7 @@ function FysiskBrukerstedFlyttingTable() {
               `}
             >
               <BodyShort>
-                <b>{valgteRessurser.length}</b> medarbeidere valgt
+                <b>{valgteOrgtilknytninger.length}</b> medarbeidere valgt
               </BodyShort>
 
               <Button
@@ -409,7 +391,7 @@ function FysiskBrukerstedFlyttingTable() {
                   margin-left: var(--a-spacing-4);
                 `}
                 disabled={
-                  valgteRessurser.length === 0 ||
+                  valgteOrgtilknytninger.length === 0 ||
                   !fysiskBrukerstedTil ||
                   fysiskBrukerstedTil === fysiskBrukerstedFra
                 }
@@ -527,19 +509,23 @@ function FysiskBrukerstedFlyttingTable() {
                 <Table.ColumnHeader scope="col">
                   <Checkbox
                     checked={
-                      valgteRessurser.length === sortedRessurser.length &&
-                      sortedRessurser.length > 0
+                      valgteOrgtilknytninger.length ===
+                        sorterteOrgtilknytninger.length &&
+                      sorterteOrgtilknytninger.length > 0
                     }
-                    disabled={sortedRessurser.length === 0}
+                    disabled={sorterteOrgtilknytninger.length === 0}
                     indeterminate={
-                      valgteRessurser.length > 0 &&
-                      valgteRessurser.length < sortedRessurser.length
+                      valgteOrgtilknytninger.length > 0 &&
+                      valgteOrgtilknytninger.length <
+                        sorterteOrgtilknytninger.length
                     }
                     onChange={() =>
-                      setValgteRessurser(
-                        valgteRessurser.length > 0
+                      setValgteOrgtilknytninger(
+                        valgteOrgtilknytninger.length > 0
                           ? []
-                          : sortedRessurser.map((ressurs) => ressurs.navident),
+                          : sorterteOrgtilknytninger.map(
+                              (orgtilknytning) => orgtilknytning.fid,
+                            ),
                       )
                     }
                   >
@@ -550,51 +536,53 @@ function FysiskBrukerstedFlyttingTable() {
             </Table.Header>
 
             <Table.Body>
-              {sortedRessurser.map((ressurs) => (
+              {sorterteOrgtilknytninger.map((orgtilknytning) => (
                 <Table.Row
                   css={css`
                     --ac-table-row-border: none;
                     height: 48px;
                     border-width: 0 0 1px;
                   `}
-                  key={ressurs.navident}
+                  key={orgtilknytning.fid}
                 >
                   <Table.DataCell>
                     <SmartLink
-                      href={`/ressurs/${ressurs.navident}`}
+                      href={`/ressurs/${orgtilknytning.navident}`}
                       target="_blank"
                     >
-                      {ressurs.navident}
+                      {orgtilknytning.navident}
                     </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
                     <SmartLink
-                      href={`/ressurs/${ressurs.navident}`}
+                      href={`/ressurs/${orgtilknytning.navident}`}
                       target="_blank"
                     >
-                      {formatVisningsnavn(ressurs.visningsnavn)}
+                      {formatVisningsnavn(orgtilknytning.visningsnavn)}
                     </SmartLink>
                   </Table.DataCell>
                   <Table.DataCell>
-                    {SektorNameMapping[ressurs.sektor]}
+                    {SektorNameMapping[orgtilknytning.sektor]}
                   </Table.DataCell>
                   <Table.DataCell>
-                    {ressurs.orgEnhet && (
+                    {orgtilknytning.orgEnhet && (
                       <SmartLink
-                        href={`/org/${ressurs.orgEnhet.id}`}
+                        href={`/org/${orgtilknytning.orgEnhet.id}`}
                         target="_blank"
                       >
-                        {`${ressurs.orgEnhet.name} (${ressurs.orgEnhet.id})`}
+                        {`${orgtilknytning.orgEnhet.name} (${orgtilknytning.orgEnhet.id})`}
                       </SmartLink>
                     )}
                   </Table.DataCell>
                   <Table.DataCell>
                     <Checkbox
-                      checked={valgteRessurser.includes(ressurs.navident)}
+                      checked={valgteOrgtilknytninger.includes(
+                        orgtilknytning.fid,
+                      )}
                       hideLabel
                       onChange={(event) =>
-                        toggleValgtRessurs(
-                          ressurs.navident,
+                        toggleValgtOrgtilknytning(
+                          orgtilknytning.fid,
                           event.target.checked,
                         )
                       }
@@ -623,27 +611,17 @@ function FysiskBrukerstedFlyttingTable() {
   );
 }
 
-function lagFysiskBrukerstedMasseFlyttingRequest(
-  valgteRessurser: string[],
-  tilFysiskBrukersted: string,
-): UpdatePrimaryFysiskBrukerstedForRessurserRequest {
-  return {
-    navidenter: valgteRessurser,
-    newPrimaryFysiskBrukersted: tilFysiskBrukersted,
-  };
-}
-
 function MasseflyttingFysiskBrukerstedBekreftModal({
   onCancel,
   onConfirm,
-  valgteRessurser,
-  ressurser,
+  valgteOrgtilknytninger,
+  orgtilknytninger,
   tilFysiskBrukersted,
 }: {
   onCancel?: () => void;
   onConfirm?: () => void;
-  valgteRessurser: string[];
-  ressurser: CustomRessurs[];
+  valgteOrgtilknytninger: string[];
+  orgtilknytninger: CustomOrgtilknytning[];
   tilFysiskBrukersted: FysiskBrukersted | undefined;
 }) {
   return (
@@ -658,9 +636,9 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
       width="548px"
     >
       <Modal.Body>
-        {valgteRessurser.length > 1 ? (
+        {valgteOrgtilknytninger.length > 1 ? (
           <>
-            <b>{valgteRessurser.length}</b> medarbeidere
+            <b>{valgteOrgtilknytninger.length}</b> medarbeidere
           </>
         ) : (
           "Én medarbeider"
@@ -688,9 +666,9 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
           gap="1"
           overflow="auto"
         >
-          {valgteRessurser.map((navident) => {
-            const ressurs = ressurser.find(
-              (ressurs) => ressurs.navident === navident,
+          {valgteOrgtilknytninger.map((fid) => {
+            const orgtilknytning = orgtilknytninger.find(
+              (orgtilknytning) => orgtilknytning.fid === fid,
             );
 
             return (
@@ -700,13 +678,13 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
                   justify-content: space-between;
                   background: #fff;
                 `}
-                key={navident}
+                key={fid}
               >
                 <BodyShort>
-                  {formatVisningsnavn(ressurs?.visningsnavn)}
+                  {formatVisningsnavn(orgtilknytning?.visningsnavn)}
                 </BodyShort>
 
-                <BodyShort>({ressurs?.navident})</BodyShort>
+                <BodyShort>({orgtilknytning?.navident})</BodyShort>
               </div>
             );
           })}
@@ -730,7 +708,8 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
   );
 }
 
-interface CustomRessurs {
+interface CustomOrgtilknytning {
+  fid: string;
   navident: string;
   visningsnavn: Visningsnavn;
   sektor: Sektor;

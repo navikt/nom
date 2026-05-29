@@ -1,13 +1,6 @@
+import { queryOptions } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
 import axios from "axios";
-
-export const CACHE_FOR = {
-  aMinute: 1000 * 60,
-  anHour: 1000 * 60 * 60,
-  aDay: 1000 * 60 * 60 * 24,
-};
-
-import { queryOptions } from "@tanstack/react-query";
 
 import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type {
@@ -37,10 +30,17 @@ import type {
   RessursKontaktperson,
   RessursLeder,
   SessionInfoResponse,
+  UpdateFysiskBrukerstedForOrgtilknytningRequest,
   UpdateFysiskeBrukerstederRequest,
   UpdatePrimaryFysiskBrukerstedForRessurserRequest,
   UpdatePrimarytelefonnummer,
 } from "~/types/api-models";
+
+export const CACHE_FOR = {
+  aMinute: 1000 * 60,
+  anHour: 1000 * 60 * 60,
+  aDay: 1000 * 60 * 60 * 24,
+};
 
 const NOM_API_BASE_PATH = "/frackend/nom-api";
 const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
@@ -108,6 +108,8 @@ export const orgtilknytningerKeys = {
   all: ["ORGTILKNYTNINGER"] as const,
   navident: (navident: string) =>
     [...orgtilknytningerKeys.all, navident] as const,
+  fysiskBrukersted: (fysiskBrukerstedNr: string) =>
+    [...orgtilknytningerKeys.all, fysiskBrukerstedNr] as const,
 };
 
 export const personKeys = {
@@ -692,6 +694,33 @@ export const updateFysiskBrukerstedForRessurser = async (
   );
   await hopeForKafkaStateToUpdate();
 };
+
+export const updateFysiskBrukerstedForOrgtilknytninger = async (
+  request: UpdateFysiskBrukerstedForOrgtilknytningRequest,
+) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `${NOM_API_BASE_PATH}/app/orgtilknytninger/updateFysiskBrukerstedForOrgtilknytningByOrgtilknytningList`,
+    request,
+  );
+  await hopeForKafkaStateToUpdate();
+};
+
+export function getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr(
+  fysiskBrukerstedNr: string,
+) {
+  return queryOptions({
+    queryKey: orgtilknytningerKeys.fysiskBrukersted(fysiskBrukerstedNr),
+    queryFn: async () =>
+      (
+        await axios.get<OrgtilknytningState[]>(
+          `${NOM_API_BASE_PATH}/app/orgtilknytninger/getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr/${fysiskBrukerstedNr}`,
+        )
+      ).data,
+    staleTime: CACHE_FOR.aMinute * 5,
+    gcTime: CACHE_FOR.anHour,
+    enabled: !!fysiskBrukerstedNr,
+  });
+}
 
 export const createRessurs = async (request: OpprettRessursRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettRessursResponse>>(

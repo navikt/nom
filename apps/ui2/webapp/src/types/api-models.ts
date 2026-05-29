@@ -19,6 +19,7 @@ export enum UserRoles {
   ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
   ROLE_READONLY = "ROLE_READONLY",
   ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+  ROLE_KOSTNADSTED_MAPPING_ADMIN = "ROLE_KOSTNADSTED_MAPPING_ADMIN",
 }
 
 export enum Tilknytningtype {
@@ -602,6 +603,11 @@ export interface SetOrgEnhetsTypeRequest {
 
 export interface StandardResponse {
   message: string;
+}
+
+export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  orgtilknytningerFid: string[];
+  tilFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
