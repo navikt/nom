@@ -61,6 +61,10 @@ spring:
     activate:
       on-profile: dev && !prod
 
+  kafka:
+    streams:
+      application-id: ${KAFKA_STREAMS_APPLICATION_ID}-5 # Versjonert app id for å få nye consumer grupper
+
 app:
   kafka:
     skip-producing-state-events-until-ressurs-evtsrc-offset: 868058
