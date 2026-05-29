@@ -28,7 +28,9 @@ export function EnhetKontekstInfo({
 
   const ledere =
     Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
-      ? orgEnhet.ledere.map((leder) => formatVisningsnavn(leder.visningsnavn))
+      ? orgEnhet.ledere
+          .filter(Boolean)
+          .map((leder) => formatVisningsnavn(leder.visningsnavn))
       : [];
 
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);

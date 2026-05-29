@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.common;
 
+import com.github.f4b6a3.ulid.Ulid;
+import com.github.f4b6a3.ulid.UlidCreator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -89,5 +91,11 @@ class DateUtilsTest {
         Assertions.assertEquals(periode2.end(), merged.getFirst().end());
         Assertions.assertEquals(periode6.start(), merged.getLast().start());
         Assertions.assertEquals(periode6.end(), merged.getLast().end());
+    }
+
+    @Test
+    @DisplayName("Just sysout ULID time instance")
+    void test_just_ulid_time_instance() {
+        System.out.println(Ulid.from("01JT3JW9SP28RY3X6S60RX5Z73").getInstant());
     }
 }

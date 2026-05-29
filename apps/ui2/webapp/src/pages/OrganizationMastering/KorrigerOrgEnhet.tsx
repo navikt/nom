@@ -117,9 +117,9 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
-      firesiffer: orgEnhet.remedyEnhetId ?? "",
+      tilgangsenhetId: orgEnhet.remedyEnhetId ?? null,
       orgEnhetsType: orgEnhet.orgEnhetsType,
-      nomNivaa: orgEnhet.nomNivaa ?? undefined,
+      nomNivaa: orgEnhet.nomNivaa ?? null,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -148,10 +148,10 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-      firesiffer: values.firesiffer,
+      tilgangsenhetId: values.tilgangsenhetId ?? null,
       gyldigFom: values.gyldigFom,
-      nomNivaa: values.nomNivaa ?? undefined,
-      orgEnhetsType: values.orgEnhetsType,
+      nomNivaa: values.nomNivaa ?? null,
+      orgEnhetsType: values.orgEnhetsType ?? null,
     };
 
     endreOrgEnhetInformasjonMutation.mutate(request);
@@ -202,8 +202,8 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               css={css`
                 width: 20%;
               `}
-              {...methods.register("firesiffer")}
-              error={methods.formState.errors.firesiffer?.message}
+              {...methods.register("tilgangsenhetId")}
+              error={methods.formState.errors.tilgangsenhetId?.message}
               label="Firesiffer"
             />
           </VStack>
@@ -264,7 +264,7 @@ const validationSchema = yup.object({
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
-  firesiffer: yup.string().optional(),
+  tilgangsenhetId: yup.string().nullable(),
   nomNivaa: yup
     .mixed<NomNivaa>()
     .nullable()

@@ -19,6 +19,7 @@ export enum UserRoles {
   ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
   ROLE_READONLY = "ROLE_READONLY",
   ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+  ROLE_KOSTNADSTED_MAPPING_ADMIN = "ROLE_KOSTNADSTED_MAPPING_ADMIN",
 }
 
 export enum Tilknytningtype {
@@ -477,7 +478,7 @@ export interface OrgtilknytningState {
 
 export interface OvrigeEndringerOrgEnhetRequest {
   /** @example "1234" */
-  firesiffer?: string;
+  tilgangsenhetId: string | null;
   /**
    * @format date
    * @example "2025-01-01"
@@ -486,9 +487,9 @@ export interface OvrigeEndringerOrgEnhetRequest {
   /** @example "ab123c" */
   id: string;
   /** @example "ARBEIDSOMRAADE" */
-  nomNivaa?: NomNivaa;
+  nomNivaa: NomNivaa | null;
   /** @example "DIREKTORAT" */
-  orgEnhetsType?: OrgEnhetsType;
+  orgEnhetsType: OrgEnhetsType | null;
 }
 
 export interface Person {
@@ -602,6 +603,11 @@ export interface SetOrgEnhetsTypeRequest {
 
 export interface StandardResponse {
   message: string;
+}
+
+export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  orgtilknytningerFid: string[];
+  tilFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

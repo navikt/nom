@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.common.speiling;
 
+import no.nav.nom.apps.api.orgtilknytning.api.app.OppdaterOrgtilknytningerForRessursRequest;
 import no.nav.nom.apps.api.ressurs.NomMastered;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
@@ -8,6 +10,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterTilkn
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -219,10 +222,97 @@ public class SpeilingService {
                             inputMetadata
                         );
                     }
-
                 }
             )
         );
+    }
+
+    public void speilBrukerstederFromRequest(RessursState ressursState, OppdaterOrgtilknytningerForRessursRequest request, InputMetadata inputMetadata) {
+        String primaryFysiskBrukersted = null;
+        Set<String> alleFysiskeBrukersteder = new HashSet<>();
+
+        for (var eksisterende : request.eksisterendeOrgtilknytninger()) {
+            if (isPeriodActive(eksisterende.gyldigFom(), eksisterende.gyldigTom())) {
+                if (eksisterende.erDagligOppfolging() && nonNull(eksisterende.primaryFysiskBrukerstedNummer())) {
+                    primaryFysiskBrukersted = eksisterende.primaryFysiskBrukerstedNummer();
+                }
+                if (nonNull(eksisterende.primaryFysiskBrukerstedNummer())) {
+                    alleFysiskeBrukersteder.add(eksisterende.primaryFysiskBrukerstedNummer());
+                }
+                if (nonNull(eksisterende.optionalFysiskBrukersteder())) {
+                    alleFysiskeBrukersteder.addAll(eksisterende.optionalFysiskBrukersteder());
+                }
+            }
+        }
+
+        for (var ny : request.nyeOrgtilknytninger()) {
+            if (isPeriodActive(ny.gyldigFom(), ny.gyldigTom())) {
+                if (ny.erDagligOppfolging() && nonNull(ny.primaryFysiskBrukerstedNummer())) {
+                    primaryFysiskBrukersted = ny.primaryFysiskBrukerstedNummer();
+                }
+                if (nonNull(ny.primaryFysiskBrukerstedNummer())) {
+                    alleFysiskeBrukersteder.add(ny.primaryFysiskBrukerstedNummer());
+                }
+                if (nonNull(ny.optionalFysiskBrukersteder())) {
+                    alleFysiskeBrukersteder.addAll(ny.optionalFysiskBrukersteder());
+                }
+            }
+        }
+
+        var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
+
+        if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted))
+            || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted) && nonNull(primaryFysiskBrukersted))
+            || !alleFysiskeBrukerstederErLike) {
+            ressursCommandService.oppdaterFysiskeBrukerstederCommand(
+                new OppdaterFysiskeBrukerstederCommand(
+                    ressursState.fid(),
+                    alleFysiskeBrukersteder,
+                    nonNull(primaryFysiskBrukersted) ? primaryFysiskBrukersted : ressursState.primaryFysiskBrukersted()
+                ),
+                inputMetadata
+            );
+        }
+    }
+
+    public void speilBrukerstederFromMasseflytting(String navident, InputMetadata inputMetadata) {
+        String primaryFysiskBrukersted = null;
+        Set<String> alleFysiskeBrukersteder = new HashSet<>();
+
+        var ressursState = ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
+
+        var alleAktiveOtByNavident = orgtilknytningStateRepository.findByNavident(navident).stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .toList();
+
+        for (var ot : alleAktiveOtByNavident) {
+            if (isPeriodActive(ot.gyldigFom(), ot.gyldigTom())) {
+                if (ot.erDagligOppfolging() && nonNull(ot.primaryFysiskBrukerstedNummer())) {
+                    primaryFysiskBrukersted = ot.primaryFysiskBrukerstedNummer();
+                }
+                if (nonNull(ot.primaryFysiskBrukerstedNummer())) {
+                    alleFysiskeBrukersteder.add(ot.primaryFysiskBrukerstedNummer());
+                }
+                if (nonNull(ot.additionalFysiskeBrukerstederNummer())) {
+                    alleFysiskeBrukersteder.addAll(ot.additionalFysiskeBrukerstederNummer());
+                }
+            }
+        }
+
+        var alleFysiskeBrukerstederErLike = optionalFysiskBrukerstederAreEqual(alleFysiskeBrukersteder, ressursState.fysiskeBrukersteder());
+
+        if ((isNull(ressursState.primaryFysiskBrukersted()) && nonNull(primaryFysiskBrukersted))
+            || (!Objects.equals(ressursState.primaryFysiskBrukersted(), primaryFysiskBrukersted) && nonNull(primaryFysiskBrukersted))
+            || !alleFysiskeBrukerstederErLike) {
+            ressursCommandService.oppdaterFysiskeBrukerstederCommand(
+                new OppdaterFysiskeBrukerstederCommand(
+                    ressursState.fid(),
+                    alleFysiskeBrukersteder,
+                    nonNull(primaryFysiskBrukersted) ? primaryFysiskBrukersted : ressursState.primaryFysiskBrukersted()
+                ),
+                inputMetadata
+            );
+        }
     }
 
     private static boolean optionalFysiskBrukerstederAreEqual(
