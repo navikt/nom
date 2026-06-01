@@ -389,7 +389,7 @@ public class OmadaUttrekk {
             ressurserUtenforHierarki();
         }
 
-        /*if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
@@ -399,7 +399,7 @@ public class OmadaUttrekk {
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
-        }*/
+        }
 
         StringWriter writer = new StringWriter();
 
@@ -482,7 +482,7 @@ public class OmadaUttrekk {
             ressurserUtenforHierarki();
         }
 
-        /*if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
@@ -492,7 +492,7 @@ public class OmadaUttrekk {
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
-        }*/
+        }
 
         StringWriter writer = new StringWriter();
 
