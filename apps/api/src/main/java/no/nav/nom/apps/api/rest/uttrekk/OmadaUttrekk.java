@@ -363,7 +363,7 @@ public class OmadaUttrekk {
             ressurserUtenforHierarki();
         }
 
-        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+        /*if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
@@ -373,7 +373,7 @@ public class OmadaUttrekk {
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
-        }
+        }*/
 
         StringWriter writer = new StringWriter();
 
@@ -436,13 +436,22 @@ public class OmadaUttrekk {
         }
     }
 
+    @Operation(
+        description = "Returnerer csv med alle orgenheter, og deres leder og organisering",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
     @GetMapping(value = "/orgenhet2", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet2() throws IOException {
         if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             ressurserUtenforHierarki();
         }
 
-        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+        /*if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
             var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
@@ -452,7 +461,7 @@ public class OmadaUttrekk {
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
-        }
+        }*/
 
         StringWriter writer = new StringWriter();
 
