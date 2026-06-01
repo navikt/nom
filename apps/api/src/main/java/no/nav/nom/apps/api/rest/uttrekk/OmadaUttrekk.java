@@ -106,7 +106,15 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-        description = "Returnerer csv med alle ressurser",
+        description = """
+        Returnerer csv med alle ressurser.
+        
+        Kolonner (semikolonseparert):
+        `nomId;navident;fornavn;mellomnavn;etternavn;visningsnavn;sektor;sluttdato;startdato`
+        
+        Med feature toggle `nom.omada.nytt_format`:
+        `nomId;navident;fornavn;mellomnavn;etternavn;visningsnavn;sektor;sluttdato;startdato;personident;identtype;tilknytningtype;primaryTelefonnummer`
+        """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -198,7 +206,15 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-        description = "Returnerer csv med alle orgtilknytninger for ressurser",
+        description = """
+        Returnerer csv med alle orgtilknytninger for ressurser.
+        
+        Kolonner (semikolonseparert):
+        `navident;org_enhet_id;fid;erDagligOppfolging;gyldig_fom;gyldig_tom;masseflyttet_fra_org_enhet_id`
+        
+        Med feature toggle `nom.omada.nytt_format`:
+        `navident;org_enhet_id;fid;erDagligOppfolging;gyldig_fom;gyldig_tom;masseflyttet_fra_org_enhet_id;sektor;tilknytningtype`
+        """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -295,7 +311,12 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-        description = "Returnerer csv med alle telefonnumre for ressurser",
+        description = """
+        Returnerer csv med alle orgenheter, og deres leder og organisering.
+        
+        Kolonner (semikolonseparert):
+        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;remedyEnhetId`
+        """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -349,7 +370,12 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-        description = "Returnerer csv med alle orgenheter, og deres leder og organisering",
+        description = """
+        Returnerer csv med alle orgenheter, og deres leder og organisering.
+        
+        Kolonner (semikolonseparert):
+        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;remedyEnhetId`
+        """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -437,7 +463,12 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-        description = "Returnerer csv med alle orgenheter, og deres leder og organisering",
+        description = """
+        Returnerer csv med alle orgenheter, og deres leder og organisering.
+        
+        Kolonner (semikolonseparert):
+        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;tilgangsenhetId`
+        """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(

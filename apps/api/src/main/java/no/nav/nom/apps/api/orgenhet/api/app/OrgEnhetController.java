@@ -291,6 +291,7 @@ public class OrgEnhetController {
             map.put("Org Enhet Type", nonNull(orgEnhet.orgEnhetsType()) ? orgEnhet.orgEnhetsType() : "");
             map.put("Org Enhet ID Over", orgEnhet.overordnetEnhetId());
             map.put("Remedy Enhet ID", orgEnhet.remedyEnhetId());
+            map.put("Tilgangsenhet ID", orgEnhet.tilgangsenhetId());
             result.add(map);
         }
 

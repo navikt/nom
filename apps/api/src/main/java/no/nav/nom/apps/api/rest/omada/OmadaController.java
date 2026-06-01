@@ -13,7 +13,6 @@ import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetMapper;
-import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
