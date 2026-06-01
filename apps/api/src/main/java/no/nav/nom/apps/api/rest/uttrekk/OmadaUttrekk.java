@@ -137,15 +137,29 @@ public class OmadaUttrekk {
 
         final var cSVFormat =
             brukNyttFormat
-             ? getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato", "personident", "identtype", "tilknytningtype", "primaryTelefonnummer")
-             : getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
+                ? getCSVFormat(
+                "nomId",
+                "navident",
+                "fornavn",
+                "mellomnavn",
+                "etternavn",
+                "visningsnavn",
+                "sektor",
+                "sluttdato",
+                "startdato",
+                "personident",
+                "identtype",
+                "tilknytningtype",
+                "primaryTelefonnummer"
+            )
+                : getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato", "startdato");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             ressursStateRepository.getAll().forEach(ressurs -> {
                 try {
                     if (brukNyttFormat) {
                         printer.printRecord(
-                            ressurs.fid(),  
+                            ressurs.fid(),
                             ressurs.navident(),
                             ressurs.visningsnavn().fornavn().trim(),
                             ressurs.visningsnavn().mellomnavn().filter(s -> !s.isBlank()).orElse(""),
@@ -228,14 +242,14 @@ public class OmadaUttrekk {
                 "tilknytningtype"
             )
             : getCSVFormat(
-                "navident",
-                "org_enhet_id",
-                "fid",
-                "erDagligOppfolging",
-                "gyldig_fom",
-                "gyldig_tom",
-                "masseflyttet_fra_org_enhet_id"
-            );
+            "navident",
+            "org_enhet_id",
+            "fid",
+            "erDagligOppfolging",
+            "gyldig_fom",
+            "gyldig_tom",
+            "masseflyttet_fra_org_enhet_id"
+        );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgtilknytningService.getAll()
@@ -281,13 +295,13 @@ public class OmadaUttrekk {
     }
 
     @Operation(
-            description = "Returnerer csv med alle telefonnumre for ressurser",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "Returnerer csv med alle telefonnumre for ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success")
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
     )
     @GetMapping(value = "/telefon", produces = "text/csv")
     public @ResponseBody byte[] exportTelefon() throws IOException {
@@ -389,8 +403,8 @@ public class OmadaUttrekk {
                 .forEach(orgenhet -> {
                     var sluttdato =
                         nonNull(orgenhet.getGyldigTom()) && (!kunHistoriskSluttdato || orgenhet.getGyldigTom().minusDays(1).isBefore(LocalDate.now()))
-                        ? orgenhet.getGyldigTom().format(dateTimeFormatter)
-                        : "";
+                            ? orgenhet.getGyldigTom().format(dateTimeFormatter)
+                            : "";
                     try {
                         printer.printRecord(
                             orgenhet.getId(),
@@ -406,6 +420,85 @@ public class OmadaUttrekk {
                             orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
                                 getOrgenhetOver(orgenhet),
                             getRemedyEnhetId(orgenhet)
+                        );
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
+
+            if (diffDvhVsLederRepo.get()) {
+                log.warn("Det var forskjell mellom DVH leder og OrgEnhetLederState for en eller flere orgenheter");
+            }
+
+            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
+        }
+    }
+
+    @GetMapping(value = "/orgenhet2", produces = "text/csv")
+    public @ResponseBody byte[] exportOrgenhet2() throws IOException {
+        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            ressurserUtenforHierarki();
+        }
+
+        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
+            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
+            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
+            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
+            sendSlackMessage();
+            throw new OrgtilknytningUtenforHierarkiException(String.format(
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                antallUtenforHierarki,
+                antallRessurserUtenforHierarki
+            ));
+        }
+
+        StringWriter writer = new StringWriter();
+
+        log.debug("Eksporterer orgenheter. Bruker ny organisering");
+
+        var kunHistoriskSluttdato = unleash.isEnabled(ORGENHET_KUN_HISTORISK_SLUTTDATO);
+
+        final var cSVFormat =
+            getCSVFormat(
+                "org_enhet_id",
+                "agresso_id",
+                "agresso_org_niv",
+                "agresso_orgenhet_type",
+                "navn",
+                "gyldig_fom",
+                "gyldig_tom",
+                "leder_navident",
+                "org_enhets_nivaa",
+                "org_enhet_type",
+                "org_enhet_over",
+                "tilgangsenhetId"
+            );
+
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+            orgenhetService.getAllEnheter()
+                .stream().filter(oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
+                .forEach(orgenhet -> {
+                    var sluttdato =
+                        nonNull(orgenhet.getGyldigTom()) && (!kunHistoriskSluttdato || orgenhet.getGyldigTom().minusDays(1).isBefore(LocalDate.now()))
+                            ? orgenhet.getGyldigTom().format(dateTimeFormatter)
+                            : "";
+                    try {
+                        printer.printRecord(
+                            orgenhet.getId(),
+                            orgenhet.getAgressoId(),
+                            orgenhet.getOrgNiv(),
+                            orgenhet.getAgressoOrgenhetType(),
+                            orgenhet.getNavn(),
+                            orgenhet.getGyldigFom().format(dateTimeFormatter),
+                            sluttdato,
+                            getLederNavident(orgenhet),
+                            nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : "",
+                            nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
+                            orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
+                                getOrgenhetOver(orgenhet),
+                            orgenhet.getTilgangsenhetId()
                         );
                         writer.close();
                     } catch (IOException e) {
@@ -505,11 +598,11 @@ public class OmadaUttrekk {
 
     private CSVFormat getCSVFormat(String... headers) {
         return CSVFormat.Builder.create()
-                .setDelimiter(';')
-                .setQuoteMode(CSVFormat.DEFAULT.getQuoteMode())
-                .setHeader(headers)
-                .setRecordSeparator("\n")
-                .get();
+            .setDelimiter(';')
+            .setQuoteMode(CSVFormat.DEFAULT.getQuoteMode())
+            .setHeader(headers)
+            .setRecordSeparator("\n")
+            .get();
     }
 
     private void ressurserUtenforHierarki() {
