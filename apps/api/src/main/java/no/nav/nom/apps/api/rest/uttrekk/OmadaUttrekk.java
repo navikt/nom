@@ -374,99 +374,6 @@ public class OmadaUttrekk {
         Returnerer csv med alle orgenheter, og deres leder og organisering.
         
         Kolonner (semikolonseparert):
-        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;remedyEnhetId`
-        """,
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success")
-        }
-    )
-    @GetMapping(value = "/orgenhet", produces = "text/csv")
-    public @ResponseBody byte[] exportOrgenhet() throws IOException {
-        if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
-            ressurserUtenforHierarki();
-        }
-
-        if (!orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
-            var antallUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.size();
-            var antallRessurserUtenforHierarki = orgEnhetMedRessurserUtenforHierarki.values().stream().mapToInt(Integer::intValue).sum();
-            log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
-            sendSlackMessage();
-            throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
-                antallUtenforHierarki,
-                antallRessurserUtenforHierarki
-            ));
-        }
-
-        StringWriter writer = new StringWriter();
-
-        log.debug("Eksporterer orgenheter. Bruker ny organisering");
-
-        var kunHistoriskSluttdato = unleash.isEnabled(ORGENHET_KUN_HISTORISK_SLUTTDATO);
-
-        final var cSVFormat =
-            getCSVFormat(
-                "org_enhet_id",
-                "agresso_id",
-                "agresso_org_niv",
-                "agresso_orgenhet_type",
-                "navn",
-                "gyldig_fom",
-                "gyldig_tom",
-                "leder_navident",
-                "org_enhets_nivaa",
-                "org_enhet_type",
-                "org_enhet_over",
-                "remedyEnhetId"
-            );
-
-        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            orgenhetService.getAllEnheter()
-                .stream().filter(oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
-                .forEach(orgenhet -> {
-                    var sluttdato =
-                        nonNull(orgenhet.getGyldigTom()) && (!kunHistoriskSluttdato || orgenhet.getGyldigTom().minusDays(1).isBefore(LocalDate.now()))
-                            ? orgenhet.getGyldigTom().format(dateTimeFormatter)
-                            : "";
-                    try {
-                        printer.printRecord(
-                            orgenhet.getId(),
-                            orgenhet.getAgressoId(),
-                            orgenhet.getOrgNiv(),
-                            orgenhet.getAgressoOrgenhetType(),
-                            orgenhet.getNavn(),
-                            orgenhet.getGyldigFom().format(dateTimeFormatter),
-                            sluttdato,
-                            getLederNavident(orgenhet),
-                            nonNull(orgenhet.getNomNivaa()) ? orgenhet.getNomNivaa().name() : "",
-                            nonNull(orgenhet.getOrgEnhetsType()) ? orgenhet.getOrgEnhetsType().name() : "",
-                            orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
-                                getOrgenhetOver(orgenhet),
-                            getRemedyEnhetId(orgenhet)
-                        );
-                        writer.close();
-                    } catch (IOException e) {
-                        log.error("Error writing to CSV", e);
-                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                    }
-                });
-
-            if (diffDvhVsLederRepo.get()) {
-                log.warn("Det var forskjell mellom DVH leder og OrgEnhetLederState for en eller flere orgenheter");
-            }
-
-            return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
-        }
-    }
-
-    @Operation(
-        description = """
-        Returnerer csv med alle orgenheter, og deres leder og organisering.
-        
-        Kolonner (semikolonseparert):
         `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;tilgangsenhet_id`
         """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -476,7 +383,7 @@ public class OmadaUttrekk {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/orgenhet2", produces = "text/csv")
+    @GetMapping(value = "/orgenhet", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet2() throws IOException {
         if (lastCleared.isBefore(LocalDateTime.now().minusMinutes(45L)) || orgEnhetMedRessurserUtenforHierarki.isEmpty()) {
             ressurserUtenforHierarki();
