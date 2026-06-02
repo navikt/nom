@@ -19,7 +19,7 @@ import type {
 } from "~/types/api-models";
 import { IdentType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import { formatDisplayDate } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
