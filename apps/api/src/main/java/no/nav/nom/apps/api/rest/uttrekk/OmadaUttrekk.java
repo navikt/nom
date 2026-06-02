@@ -374,7 +374,7 @@ public class OmadaUttrekk {
         Returnerer csv med alle orgenheter, og deres leder og organisering.
         
         Kolonner (semikolonseparert):
-        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;remedyEnhetId`
+        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;tilgangsenhet_id`
         """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -420,7 +420,7 @@ public class OmadaUttrekk {
                 "org_enhets_nivaa",
                 "org_enhet_type",
                 "org_enhet_over",
-                "remedyEnhetId"
+                "tilgangsenhet_id"
             );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
