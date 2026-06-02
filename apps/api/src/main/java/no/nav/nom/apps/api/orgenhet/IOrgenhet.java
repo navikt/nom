@@ -36,6 +36,8 @@ public interface IOrgenhet {
 
     String getOverordnetOrgEnhetFid();
 
+    String getTilgangsenhetId();
+
     record AgressoIdCombo(
             String agressoId,
             String orgNiv

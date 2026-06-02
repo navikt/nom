@@ -40,7 +40,8 @@ public class HendelserTestUtils {
                 "TestName",
                 LocalDate.of(2022, 12, 1),
                 "orgEnhet_123",
-                "ressurs_123"
+                "ressurs_123",
+                "1234"
             ),
             eventMetadata,
             new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(

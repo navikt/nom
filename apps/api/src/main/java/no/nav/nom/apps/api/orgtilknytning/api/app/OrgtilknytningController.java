@@ -58,8 +58,9 @@ public class OrgtilknytningController {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
 
-    public OrgtilknytningController(OrgtilknytningRestService orgtilknytningRestService, RessursStateRepository ressursStateRepository,
-                                    OrgtilknytningService orgtilknytningService
+    public OrgtilknytningController(
+        OrgtilknytningRestService orgtilknytningRestService, RessursStateRepository ressursStateRepository,
+        OrgtilknytningService orgtilknytningService
     ) {
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.ressursStateRepository = ressursStateRepository;
@@ -167,10 +168,12 @@ public class OrgtilknytningController {
         description = "Masseflytting av ressurs fra en enhet til en annen",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Flyttingen ble utført"),
-        @ApiResponse(responseCode = "400", description = "Feil i input"),
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Flyttingen ble utført"),
+            @ApiResponse(responseCode = "400", description = "Feil i input"),
+        }
+    )
     @PreAuthorize(
         // Hvis/når denne åpnes for andre, legg til tester som sjekker at
         // vanlig leder/delegert ikke kan flytte robot/vikafossen/utlKonsulent
@@ -185,14 +188,59 @@ public class OrgtilknytningController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/updateFysiskBrukerstedForOrgtilknytningByOrgtilknytningList")
+    @Operation(
+        description = "Flytt angitte ressursers orgtilknytning fysisk brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403")
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<StandardResponse> updateFysiskBrukerstedForOrgtilknytning(
+        @RequestBody UpdateFysiskBrukerstedForOrgtilknytningRequest updateFysiskBrukerstedForOrgtilknytningRequest
+    ) {
+        orgtilknytningRestService.updateFysiskBrukerstedForRessursByOrgtilknytningFidList(
+            updateFysiskBrukerstedForOrgtilknytningRequest.orgtilknytningerFid(),
+            updateFysiskBrukerstedForOrgtilknytningRequest.tilFysiskBrukerstedNr()
+        );
+
+        return ResponseEntity.ok(
+            StandardResponse.builder()
+                .message("Successfully changed fysisk brukersted for orgtilknytninger")
+                .build()
+        );
+    }
+
+    @GetMapping("/getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr/{fysiskBrukerstedNr}")
+    @Operation(
+        description = "Hent alle OT basert på angitt fysiske brukersted",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403")
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<OrgtilknytningState>> getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr(@PathVariable String fysiskBrukerstedNr) {
+        return ResponseEntity.ok(orgtilknytningRestService.getActiveOrgtilknytningerByFysiskBrukerstedNr(fysiskBrukerstedNr));
+    }
+
     private void validateKanEndreOrgtilknytningByFid(String fid) {
         OrgtilknytningState ot = orgtilknytningRestService.getOrgtilknytning(fid);
         RessursState ressurs = ressursStateRepository.findByNavident(ot.navident())
             .orElseThrow(() -> RessursNotFoundException.navident(ot.navident()));
 
         if (!orgtilknytningRestService.kanEndreOrgtilknytning(ressurs.identType(), ressurs.navident())) {
-            log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytning {} for ressurs - {} - {}, ",
-                getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.fid(), ot.navident(), ressurs.identType());
+            log.warn(
+                "{} med roller {} har ikke tilgang til å redigere orgtilknytning {} for ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.fid(), ot.navident(), ressurs.identType()
+            );
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
     }
@@ -202,8 +250,10 @@ public class OrgtilknytningController {
             .orElseThrow(() -> RessursNotFoundException.navident(navident));
 
         if (!orgtilknytningRestService.kanEndreOrgtilknytninger(ressurs.identType(), navident, oppdaterOrgtilknytningerForRessursRequest)) {
-            log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
-                getAuthenticatedNavIdent(), getAuthenticatedRoller(), navident, ressurs.identType());
+            log.warn(
+                "{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
+                getAuthenticatedNavIdent(), getAuthenticatedRoller(), navident, ressurs.identType()
+            );
             throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
         }
     }
@@ -216,8 +266,10 @@ public class OrgtilknytningController {
                 .orElseThrow(() -> RessursNotFoundException.navident(ot.navident()));
 
             if (!orgtilknytningRestService.kanEndreOrgtilknytning(ressurs.identType(), ot.navident())) {
-                log.warn("{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
-                    getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.navident(), ressurs.identType());
+                log.warn(
+                    "{} med roller {} har ikke tilgang til å redigere orgtilknytninger for ressurs - {} - {}, ",
+                    getAuthenticatedNavIdent(), getAuthenticatedRoller(), ot.navident(), ressurs.identType()
+                );
                 throw new AccessDeniedException("Ikke tilgang til å redigere ressurs");
             }
         });

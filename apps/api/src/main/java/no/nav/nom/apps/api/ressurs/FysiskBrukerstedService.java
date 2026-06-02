@@ -7,8 +7,13 @@ import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
+import no.nav.nom.apps.api.common.speiling.SpeilingService;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
@@ -17,6 +22,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +35,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
@@ -44,6 +55,9 @@ public class FysiskBrukerstedService {
     private final AdClient adClient;
     private final Configuration freemarkerConfig;
     private final MicrosoftGraphClient microsoftGraphClient;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final SpeilingService speilingService;
+    private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
 
     public FysiskBrukerstedService(
         AdClient adClient,
@@ -52,7 +66,10 @@ public class FysiskBrukerstedService {
         RessursCommandService ressursCommandService,
         FysiskBrukerstedCache fysiskBrukerstedCache,
         Configuration freemarkerConfig,
-        MicrosoftGraphClient microsoftGraphClient
+        MicrosoftGraphClient microsoftGraphClient,
+        OrgtilknytningCommandService orgtilknytningCommandService,
+        SpeilingService speilingService,
+        NomStateOrgtilknytningListener nomStateOrgtilknytningListener
     ) {
         this.adClient = adClient;
         this.ressursStateRepository = ressursStateRepository;
@@ -61,6 +78,9 @@ public class FysiskBrukerstedService {
         this.fysiskBrukerstedCache = fysiskBrukerstedCache;
         this.freemarkerConfig = freemarkerConfig;
         this.microsoftGraphClient = microsoftGraphClient;
+        this.orgtilknytningCommandService = orgtilknytningCommandService;
+        this.speilingService = speilingService;
+        this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
     }
 
     public List<RessursState> getAlleRessurserMedFysiskBrukersted(String fysiskBrukerstedNr) {
@@ -112,6 +132,47 @@ public class FysiskBrukerstedService {
         return feiledeNavidenter;
     }
 
+    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+        HashMap<String, String> feiledeEventer = new HashMap<>();
+        var orgtilknytningerGruppertPaaFid = orgtilknytningStateRepository.findByFidIn(otFids)
+            .stream()
+            .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .collect(Collectors.toMap(OrgtilknytningState::fid, orgtilknytningState -> orgtilknytningState, (ot1, _) -> ot1));
+        var alleNavidenterSomBleFlyttet = orgtilknytningerGruppertPaaFid.values().stream().map(OrgtilknytningState::navident).collect(Collectors.toList());
+
+        // Registrer state-waits for alle gyldige OT-FIDs FØR vi sender Kafka-kommandoer
+        var stateWaits = new HashMap<String, CompletableFuture<?>>();
+        orgtilknytningerGruppertPaaFid.keySet().forEach(otFid ->
+            stateWaits.put(otFid, nomStateOrgtilknytningListener.waitForStateAfterEventCreation(otFid))
+        );
+
+        otFids.forEach(otFid -> {
+            try {
+                var orgtilknytning = orgtilknytningerGruppertPaaFid.get(otFid);
+                if (isNull(orgtilknytning)) {
+                    throw OrgtilknytningNotFoundException.fid(otFid);
+                }
+                oppdaterOrgtilknytningFysiskBrukersted(orgtilknytningerGruppertPaaFid.get(otFid), tilFysiskBrukerstedNr, inputMetaData);
+            } catch (OrgtilknytningNotFoundException e) {
+                feiledeEventer.put(otFid, e.getMessage());
+                stateWaits.remove(otFid);
+                log.error("Feil ved oppdatering av orgtilknytning {} til fysisk brukersted {}", otFid, tilFysiskBrukerstedNr, e);
+            } catch (FysiskBrukerstedNotFoundException e) {
+                var navident = orgtilknytningerGruppertPaaFid.get(otFid).navident();
+                feiledeEventer.merge(navident, e.getMessage(), (existing, newMessage) -> existing + "; " + newMessage);
+                stateWaits.remove(otFid);
+                alleNavidenterSomBleFlyttet.remove(navident);
+            }
+        });
+
+        // Vent på at OT-state er oppdatert fra Kafka før speiling
+        ventPaaStateOppdateringer(stateWaits);
+
+        sendMasseflyttFysiskBrukerstedEmail(tilFysiskBrukerstedNr, alleNavidenterSomBleFlyttet, feiledeEventer);
+        alleNavidenterSomBleFlyttet.forEach(navident -> speilingService.speilBrukerstederFromMasseflytting(navident, inputMetaData));
+        return feiledeEventer;
+    }
+
     private void oppdaterRessursFysiskBrukersted(String navident, String fysiskBrukerstedNr, InputMetadata inputMetaData) {
         if (!fysiskBrukerstedExists(fysiskBrukerstedNr)) {
             throw new IllegalArgumentException("Ugyldig fysisk brukersted " + fysiskBrukerstedNr);
@@ -127,6 +188,22 @@ public class FysiskBrukerstedService {
             fysiskBrukerstedNr
         );
         ressursCommandService.oppdaterFysiskeBrukerstederCommand(ressursCmd, inputMetaData);
+    }
+
+    private void oppdaterOrgtilknytningFysiskBrukersted(OrgtilknytningState orgtilknytningState, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+        if (!fysiskBrukerstedExists(tilFysiskBrukerstedNr)) {
+            throw FysiskBrukerstedNotFoundException.notFound(tilFysiskBrukerstedNr);
+        }
+
+        var orgtilknytningCmd = new EndreFysiskeBrukerstederCommand(
+            orgtilknytningState.fid(),
+            orgtilknytningState.navident(),
+            orgtilknytningState.orgEnhetId(),
+            tilFysiskBrukerstedNr,
+            orgtilknytningState.additionalFysiskeBrukerstederNummer(),
+            inputMetaData
+        );
+        orgtilknytningCommandService.endreFysiskeBrukersted(orgtilknytningCmd);
     }
 
     public boolean fysiskBrukerstedExists(String fysiskBrukerstedNr) {
@@ -205,6 +282,19 @@ public class FysiskBrukerstedService {
         );
         freemarkerConfig.getTemplate(MASSEFLYTTING_FYSISK_BRUKERSTED_VARSEL_FTLH).process(model, stringWriter);
         return stringWriter.getBuffer().toString();
+    }
+
+    private void ventPaaStateOppdateringer(Map<String, CompletableFuture<?>> stateWaits) {
+        if (stateWaits.isEmpty()) {
+            return;
+        }
+        try {
+            CompletableFuture.allOf(stateWaits.values().toArray(CompletableFuture[]::new))
+                .get(30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Timeout eller feil ved venting på OT state-oppdatering for masseflytting fysisk brukersted - fortsetter med speiling", e);
+            stateWaits.keySet().forEach(nomStateOrgtilknytningListener::removeWait);
+        }
     }
 }
 

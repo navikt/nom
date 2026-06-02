@@ -26,6 +26,7 @@ public record OrgEnhet(
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) NomNivaa nomNivaa,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) OrgEnhetsType orgEnhetsType,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String remedyEnhetId,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String tilgangsenhetId,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) String overordnetEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> underordnedeOrgEnhetId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<RessursState> ledere,
