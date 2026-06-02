@@ -58,7 +58,7 @@ export function EnhetKontekstInfo({
         valueHref={nomIdLink ? `/org/${orgEnhet.id}` : undefined}
       />
       {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
-      <LabelWithValue label="Enhet i Remedy" value={orgEnhet.remedyEnhetId} />
+      <LabelWithValue label="Tilgangsenhet" value={orgEnhet.tilgangsenhetId} />
       <LabelWithValue label="Unit4-ID" value={extraAgressoInfo?.agressoId} />
       {displayUni4Niv && (
         <LabelWithValue label="Unit4-nivå" value={orgEnhet.orgNiv} />

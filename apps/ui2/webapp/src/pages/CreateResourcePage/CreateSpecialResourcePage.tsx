@@ -79,9 +79,9 @@ import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { IdentType, type Person } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
-  capitalizeNameFysiskBrukersted,
   formatDateWithoutTimezone,
   formatDisplayDate,
+  formatDisplayFysiskBrukersted,
   formatVisningsnavn,
   isInDevelopment,
 } from "~/utils";
@@ -673,13 +673,13 @@ function CreateSpecialConfirmModal({
             split
             value={
               selectedFysiskBrukersted &&
-              `${capitalizeNameFysiskBrukersted(selectedFysiskBrukersted.brukerstedNavn)} (${selectedFysiskBrukersted.brukerstedNr})`
+              formatDisplayFysiskBrukersted(selectedFysiskBrukersted)
             }
           />
           <LabelWithValue
-            label="Remedy-enhet"
+            label="Tilgangsenhet"
             split
-            value={selectOrgEnhet?.remedyEnhetId}
+            value={selectOrgEnhet?.tilgangsenhetId}
           />
           <LabelWithValue
             label="Startdato (første arbeidsdag)"
@@ -1032,7 +1032,7 @@ function OrgEnhetSelectFormSection() {
             `}
           >
             <span>
-              Enhet i Remedy: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
+              Tilgangsenhet: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
             </span>
             <HelpText>
               Brukes blant annet til å opprette trygdeident og er nødvendig for
