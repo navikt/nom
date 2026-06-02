@@ -204,7 +204,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               `}
               {...methods.register("tilgangsenhetId")}
               error={methods.formState.errors.tilgangsenhetId?.message}
-              label="Firesiffer"
+              label="Tilgangsenhet"
             />
           </VStack>
 

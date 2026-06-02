@@ -174,7 +174,7 @@ function FysiskBrukerstedTabellInner({
           tilknytning.erDagligOppfolging,
       );
 
-      const dolFiresiffer =
+      const dolTilgangsenhetId =
         orgEnheter?.find(
           (orgEnhet) => orgEnhet.id === dolTilknytning?.orgEnhetId,
         )?.tilgangsenhetId ?? "";
@@ -183,7 +183,7 @@ function FysiskBrukerstedTabellInner({
         navident: ressurs.navident,
         navn: formatVisningsnavn(ressurs.visningsnavn),
         orgEnheter: relevanteOrgEnheter,
-        firesiffer: dolFiresiffer,
+        tilgangsenhetId: dolTilgangsenhetId,
       };
     }) ?? [];
 
@@ -258,8 +258,8 @@ function FysiskBrukerstedTabellInner({
               Organisasjonsenhet
             </Table.ColumnHeader>
 
-            <Table.ColumnHeader scope="col" sortKey="firesiffer" sortable>
-              Firesiffer
+            <Table.ColumnHeader scope="col" sortKey="tilgangsenhetId" sortable>
+              Tilgangsenhet
             </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -299,7 +299,7 @@ function FysiskBrukerstedTabellInner({
                   ))}
                 </VStack>
               </Table.DataCell>
-              <Table.DataCell>{rad.firesiffer}</Table.DataCell>
+              <Table.DataCell>{rad.tilgangsenhetId}</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>
@@ -326,5 +326,5 @@ type FysiskBrukerstedTabellRow = {
   navident: string;
   navn: string;
   orgEnheter: OrgEnhet[];
-  firesiffer: string;
+  tilgangsenhetId: string;
 };
