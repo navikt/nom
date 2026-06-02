@@ -229,9 +229,9 @@ function OrgEnhetInfoForm({
               css={css`
                 width: 20%;
               `}
-              {...methods.register("firesiffer")}
-              error={methods.formState.errors.firesiffer?.message}
-              label="Firesiffer"
+              {...methods.register("tilgangsenhetId")}
+              error={methods.formState.errors.tilgangsenhetId?.message}
+              label="Tilgangsenhet"
             />
           </VStack>
 
@@ -591,7 +591,7 @@ const validationSchema = yup.object({
   navn: yup.string().required("Obligatorisk"),
   gyldigFom: yup.string().required("Obligatorisk"),
   lederRessursNavident: yup.string().required("Obligatorisk"),
-  firesiffer: yup.string().required("Obligatorisk"),
+  tilgangsenhetId: yup.string().required("Obligatorisk"),
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")

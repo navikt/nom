@@ -117,7 +117,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
-      tilgangsenhetId: orgEnhet.remedyEnhetId ?? null,
+      tilgangsenhetId: orgEnhet.tilgangsenhetId ?? null,
       orgEnhetsType: orgEnhet.orgEnhetsType,
       nomNivaa: orgEnhet.nomNivaa ?? null,
     },
@@ -148,10 +148,10 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-      tilgangsenhetId: values.tilgangsenhetId ?? null,
+      tilgangsenhetId: values.tilgangsenhetId ?? undefined,
       gyldigFom: values.gyldigFom,
-      nomNivaa: values.nomNivaa ?? null,
-      orgEnhetsType: values.orgEnhetsType ?? null,
+      nomNivaa: values.nomNivaa ?? undefined,
+      orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 
     endreOrgEnhetInformasjonMutation.mutate(request);
@@ -188,7 +188,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               `}
               {...methods.register("nomNivaa")}
               error={methods.formState.errors.nomNivaa?.message}
-              label="Organisasjonsenhetstype"
+              label="NOM-nivå"
             >
               {!orgEnhet.nomNivaa && <option value={undefined} />}
               {Object.values(NomNivaa).map((nomNivaa) => (
@@ -204,7 +204,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               `}
               {...methods.register("tilgangsenhetId")}
               error={methods.formState.errors.tilgangsenhetId?.message}
-              label="Firesiffer"
+              label="Tilgangsenhet"
             />
           </VStack>
 

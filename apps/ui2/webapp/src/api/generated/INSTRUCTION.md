@@ -2,7 +2,7 @@
 
 - Make sure you have previously run `npm ci`
 
-- Set your terminal working directory to the folder containing this markdown file (`$apps/frontend/src/api/nom/generated`)
+- Set your terminal working directory to the folder containing this markdown file (`$apps/ui2/webapp/src/api/generated`)
 
 - Run `npx graphql-codegen`
 
