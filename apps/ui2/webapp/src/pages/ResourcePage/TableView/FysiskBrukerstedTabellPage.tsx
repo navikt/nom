@@ -177,7 +177,7 @@ function FysiskBrukerstedTabellInner({
       const dolFiresiffer =
         orgEnheter?.find(
           (orgEnhet) => orgEnhet.id === dolTilknytning?.orgEnhetId,
-        )?.remedyEnhetId ?? "";
+        )?.tilgangsenhetId ?? "";
 
       return {
         navident: ressurs.navident,

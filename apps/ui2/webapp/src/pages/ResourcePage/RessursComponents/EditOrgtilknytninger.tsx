@@ -169,7 +169,7 @@ export function EditOrgtilknytninger({
     (orgEnhet) => orgEnhet.id === dagensDolOrgtilknytning?.orgEnhetId,
   );
 
-  const dagensRemedyEnhetId = dagensDolOrgEnhet?.remedyEnhetId;
+  const dagensTilgangsenhetId = dagensDolOrgEnhet?.tilgangsenhetId;
 
   const eksisterendeStatligeOrgEnhetIder = orgtilknytninger
     .filter(
@@ -227,7 +227,7 @@ export function EditOrgtilknytninger({
 
       <OrgtilknytningForm
         dagensDolOrgEnhet={dagensDolOrgEnhet}
-        dagensRemedyEnhetId={dagensRemedyEnhetId}
+        dagensTilgangsenhetId={dagensTilgangsenhetId}
         eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         isLoading={ressursOrgtilknytningerQuery.isLoading}
         orgtilknytninger={orgtilknytninger}
@@ -268,14 +268,14 @@ function defaultNyOrgtilknytning(ressurs: Ressurs) {
 function OrgtilknytningForm({
   orgtilknytninger,
   ressurs,
-  dagensRemedyEnhetId,
+  dagensTilgangsenhetId,
   dagensDolOrgEnhet,
   isLoading,
   eksisterendeStatligeAgressoIder,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
-  dagensRemedyEnhetId: string | undefined;
+  dagensTilgangsenhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
   isLoading: boolean;
   eksisterendeStatligeAgressoIder: string[];
@@ -399,7 +399,7 @@ function OrgtilknytningForm({
     await showModal(
       <EndreOtBekreftelsesmodal
         dagensDolOrgEnhet={dagensDolOrgEnhet}
-        dagensRemedyEnhetId={dagensRemedyEnhetId}
+        dagensTilgangsenhetId={dagensTilgangsenhetId}
         eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         navn={formatVisningsnavn(ressurs.visningsnavn)}
         orgtilknytninger={orgtilknytninger}
@@ -786,7 +786,7 @@ function OrgEnhetFormPart({
 
           {!selectOrgEnhet && (
             <BodyShort>
-              Tilgangsenhet: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+              Tilgangsenhet: <b>{orgEnhetQuery.data?.tilgangsenhetId}</b>
             </BodyShort>
           )}
         </div>
@@ -850,7 +850,7 @@ function OrgEnhetFormPart({
               margin-top: var(--a-spacing-2);
             `}
           >
-            Tilgangsenhet: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+            Tilgangsenhet: <b>{orgEnhetQuery.data?.tilgangsenhetId}</b>
           </BodyShort>
         </div>
       )}

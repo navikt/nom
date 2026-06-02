@@ -161,7 +161,7 @@ export const ValgtOrgEnhet = ({
               <LabelWithValue copyButton label="ID" value={orgEnhet.id} />
               <LabelWithValue
                 label="Tilgangsenhet"
-                value={orgEnhet.remedyEnhetId}
+                value={orgEnhet.tilgangsenhetId}
               />
               {orgEnhet.navn.toLowerCase() !== "nav" && (
                 <LabelWithValue

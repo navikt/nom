@@ -19,6 +19,7 @@ export enum UserRoles {
   ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
   ROLE_READONLY = "ROLE_READONLY",
   ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
+  ROLE_KOSTNADSTED_MAPPING_ADMIN = "ROLE_KOSTNADSTED_MAPPING_ADMIN",
 }
 
 export enum Tilknytningtype {
@@ -192,6 +193,7 @@ export interface IOrgenhet {
   orgEnhetsType?: OrgEnhetsType;
   orgNiv?: string;
   overordnetOrgEnhetFid?: string;
+  tilgangsenhetId?: string;
   uniqueAgressoId?: string;
 }
 
@@ -318,11 +320,6 @@ export interface OpprettOrgEnhetLederRequest {
 
 export interface OpprettOrgEnhetRequest {
   /**
-   * @minLength 1
-   * @example "1234"
-   */
-  firesiffer: string;
-  /**
    * @format date
    * @example "2026-01-31"
    */
@@ -344,11 +341,15 @@ export interface OpprettOrgEnhetRequest {
    * @example "de456f"
    */
   overordnetOrgEnhetId: string;
+  /**
+   * @minLength 1
+   * @example "1234"
+   */
+  tilgangsenhetId: string;
 }
 
 export interface OpprettOrgEnhetResponse {
   fid?: string;
-  firesiffer?: string;
   /** @format date */
   gyldigFom?: string;
   /** @format date */
@@ -360,6 +361,7 @@ export interface OpprettOrgEnhetResponse {
   orgEnhetsType?: OrgEnhetsType;
   overordnetOrgEnhetId?: string;
   overordnetOrgEnhetNavn?: string;
+  tilgangsenhetId?: string;
 }
 
 export interface OpprettRessursRequest {
@@ -406,6 +408,7 @@ export interface OrgEnhet {
   overordnetEnhetId?: string;
   remedyEnhetId?: string;
   ressursKoblinger: OrgtilknytningState[];
+  tilgangsenhetId?: string;
   underordnedeOrgEnhetId: string[];
 }
 
@@ -476,8 +479,6 @@ export interface OrgtilknytningState {
 }
 
 export interface OvrigeEndringerOrgEnhetRequest {
-  /** @example "1234" */
-  tilgangsenhetId: string | null;
   /**
    * @format date
    * @example "2025-01-01"
@@ -486,9 +487,11 @@ export interface OvrigeEndringerOrgEnhetRequest {
   /** @example "ab123c" */
   id: string;
   /** @example "ARBEIDSOMRAADE" */
-  nomNivaa: NomNivaa | null;
+  nomNivaa?: NomNivaa;
   /** @example "DIREKTORAT" */
-  orgEnhetsType: OrgEnhetsType | null;
+  orgEnhetsType?: OrgEnhetsType;
+  /** @example "1234" */
+  tilgangsenhetId?: string;
 }
 
 export interface Person {
@@ -602,6 +605,11 @@ export interface SetOrgEnhetsTypeRequest {
 
 export interface StandardResponse {
   message: string;
+}
+
+export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  orgtilknytningerFid: string[];
+  tilFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

@@ -65,7 +65,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
           <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} />
           <LabelWithValue
             label="Enhetsnummer"
-            value={orgEnhet?.remedyEnhetId}
+            value={orgEnhet?.tilgangsenhetId}
           />
           {leder && (
             <span>

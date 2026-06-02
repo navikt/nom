@@ -93,7 +93,7 @@ function OrgEnhetTabell({
           <Table.ColumnHeader sortKey="orgEnhetsType" sortable>
             Type
           </Table.ColumnHeader>
-          <Table.ColumnHeader sortKey="remedyEnhetId" sortable>
+          <Table.ColumnHeader sortKey="tilgangsenhetId" sortable>
             Tilgangsenhet
           </Table.ColumnHeader>
         </Table.Row>
@@ -135,7 +135,7 @@ function OrgEnhetTabell({
                 ? OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]
                 : ""}
             </Table.DataCell>
-            <Table.DataCell>{orgEnhet.remedyEnhetId}</Table.DataCell>
+            <Table.DataCell>{orgEnhet.tilgangsenhetId}</Table.DataCell>
           </Table.Row>
         ))}
       </Table.Body>

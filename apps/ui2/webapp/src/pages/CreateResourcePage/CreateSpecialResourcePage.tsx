@@ -679,7 +679,7 @@ function CreateSpecialConfirmModal({
           <LabelWithValue
             label="Tilgangsenhet"
             split
-            value={selectOrgEnhet?.remedyEnhetId}
+            value={selectOrgEnhet?.tilgangsenhetId}
           />
           <LabelWithValue
             label="Startdato (første arbeidsdag)"
