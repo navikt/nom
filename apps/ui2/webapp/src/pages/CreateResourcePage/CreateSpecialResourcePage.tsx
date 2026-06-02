@@ -79,9 +79,9 @@ import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { IdentType, type Person } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
-  capitalizeNameFysiskBrukersted,
   formatDateWithoutTimezone,
   formatDisplayDate,
+  formatDisplayFysiskBrukersted,
   formatVisningsnavn,
   isInDevelopment,
 } from "~/utils";
@@ -673,7 +673,7 @@ function CreateSpecialConfirmModal({
             split
             value={
               selectedFysiskBrukersted &&
-              `${capitalizeNameFysiskBrukersted(selectedFysiskBrukersted.brukerstedNavn)} (${selectedFysiskBrukersted.brukerstedNr})`
+              formatDisplayFysiskBrukersted(selectedFysiskBrukersted)
             }
           />
           <LabelWithValue

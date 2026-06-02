@@ -19,7 +19,7 @@ import type {
 } from "~/types/api-models";
 import { IdentType } from "~/types/api-models";
 import { Tilknytningtype } from "~/types/api-models";
-import { formatDisplayDate } from "~/utils";
+import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
@@ -172,7 +172,7 @@ export function ConfirmStep() {
             split
             value={
               selectedFysiskBrukersted &&
-              `${selectedFysiskBrukersted.brukerstedNavn} (${selectedFysiskBrukersted.brukerstedNr})`
+              formatDisplayFysiskBrukersted(selectedFysiskBrukersted)
             }
           />
           <LabelWithValue

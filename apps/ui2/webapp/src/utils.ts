@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
+import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import type { OrgEnhet, Visningsnavn } from "~/types/api-models";
 
 /**
@@ -39,8 +40,20 @@ export function capitalizeName(name: string) {
   return nameInProgress;
 }
 
+export function formatDisplayFysiskBrukersted(
+  fysiskBrukersted: FysiskBrukersted,
+) {
+  return `${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)} (${fysiskBrukersted.brukerstedNr})`;
+}
+
+export function formatDropdownFysiskBrukersted(
+  fysiskBrukersted: FysiskBrukersted,
+) {
+  return `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`;
+}
+
 /**
- * Best effort made to capitalize the name of a fysiskBrukersted.
+ * Best effort made to capitalize the name of a FysiskBrukersted.
  * The same as capitalizeName() but not capitalizing words like "vei" and "gate".
  */
 export function capitalizeNameFysiskBrukersted(name: string) {
@@ -63,6 +76,7 @@ export function capitalizeNameFysiskBrukersted(name: string) {
     "bygg",
     "etg",
     "etasje",
+    "kommune",
   ];
 
   let storeForbokstaver = capitalizeName(
@@ -73,7 +87,7 @@ export function capitalizeNameFysiskBrukersted(name: string) {
   // som står alene og bytter dem ut med samme ord med liten forbokstav
   for (const word of litenForbokstavOrd) {
     const wordRegex = new RegExp(
-      `(^|[\\s-])${capitalizeName(word)}(?=\\s|$|-)`,
+      `(^|[\\s-])${capitalizeName(word)}(?=[\\s,.;:!?)]|$|-)`,
       "g",
     );
 

@@ -11,7 +11,7 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import { capitalizeNameFysiskBrukersted } from "~/utils";
+import { formatDropdownFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
   name = "fysiskBrukerstedNr",
@@ -163,7 +163,9 @@ export function FysiskBrukerstedSelectNew({
         <option
           key={fysiskBrukersted.brukerstedNr}
           value={fysiskBrukersted.brukerstedNr}
-        >{`${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`}</option>
+        >
+          {formatDropdownFysiskBrukersted(fysiskBrukersted)}
+        </option>
       ))}
     </Select>
   );
@@ -198,7 +200,7 @@ function SelectLabelWithHelpText({
 
 function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
   return {
-    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
+    label: formatDropdownFysiskBrukersted(fysiskBrukersted),
     value: fysiskBrukersted.brukerstedNr,
   };
 }
