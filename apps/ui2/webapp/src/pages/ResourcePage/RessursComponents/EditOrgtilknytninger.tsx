@@ -65,7 +65,6 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
-import { FysiskBrukerstedSelectFormPartNew } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
