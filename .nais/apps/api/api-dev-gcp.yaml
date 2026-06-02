@@ -344,6 +344,9 @@ spec:
         - application: vaktor-plan
           namespace: vaktor
           cluster: dev-gcp
+        - application: puzzel-widgets-api-db
+          namespace: navdig
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
