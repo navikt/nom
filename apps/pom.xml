@@ -21,6 +21,7 @@
         <module>nav-ident</module>
         <module>streams</module>
         <module>nom-remedy-integrasjon</module>
+        <module>nom-sf-integrasjon</module>
         <module>admin</module>
         <module>nom-rdbms-data</module>
         <module>paarorende</module>
