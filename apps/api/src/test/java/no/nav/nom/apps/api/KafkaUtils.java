@@ -174,7 +174,9 @@ public class KafkaUtils {
             null,
             "0000000".substring(0, 7 - suffix.length()) + suffix,
             "ORGENHET",
+            null,
             null
+
         );
 
         createOrgenhetHendelseEventSource(orgEnhetState);

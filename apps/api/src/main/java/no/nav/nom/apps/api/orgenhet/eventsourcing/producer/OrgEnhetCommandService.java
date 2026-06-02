@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerGyldigFom;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhetNavn;
@@ -18,6 +19,7 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.TilgangsenhetEndretEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import org.springframework.kafka.support.SendResult;
@@ -107,7 +109,8 @@ public class OrgEnhetCommandService {
                         opprettOrgEnhet.navn(),
                         opprettOrgEnhet.gyldigFom(),
                         opprettOrgEnhet.overordnetOrgEnhetFid(),
-                        opprettOrgEnhet.lederRessursFid()
+                        opprettOrgEnhet.lederRessursFid(),
+                        opprettOrgEnhet.tilgangsenhetId()
                 ),
                 opprettOrgEnhet.inputMetadata(),
                 additionalAgressoData
@@ -200,6 +203,14 @@ public class OrgEnhetCommandService {
                 korrigerGyldigFom.gyldigFom()
             ),
             korrigerGyldigFom.inputMetadata()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> endreTilgangsenhet(String fid, EndreTilgangsenhet endreTilgangsenhet) {
+        return eventProducer.sendMessage(new TilgangsenhetEndretEventV1(
+            fid,
+            new TilgangsenhetEndretEventV1.TilgangsenhetEndretEventData(endreTilgangsenhet.tilgangsenhetId()),
+            endreTilgangsenhet.inputMetadata()
         ));
     }
 

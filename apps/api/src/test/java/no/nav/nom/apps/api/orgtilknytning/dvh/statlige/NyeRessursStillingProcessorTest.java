@@ -531,7 +531,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
             "FID_A", "a100xy", "Enhet A",
             LocalDate.now().minusYears(10), null,
             null, null, null, null, null,
-            "Enhet_A", "ORGENHET", null
+            "Enhet_A", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
@@ -539,7 +539,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
             "FID_B", "b100xy", "Enhet B",
             LocalDate.now().minusYears(10), null,
             null, null, null, null, null,
-            "Enhet_B", "ORGENHET", null
+            "Enhet_B", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
@@ -547,7 +547,7 @@ class NyeRessursStillingProcessorTest extends TestBase {
             "FID_C", "c100xy", "Enhet C",
             LocalDate.now().minusYears(10), null,
             null, null, null, null, null,
-            "Enhet_C", "ORGENHET", null
+            "Enhet_C", "ORGENHET", null, null
         )
     );
 }

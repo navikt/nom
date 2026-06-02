@@ -1393,7 +1393,7 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
             "FID_A", "a100xy", "Enhet A",
             LocalDate.of(2015, 1, 1), null,
             null, null, null, null, null,
-            "Enhet_A", "ORGENHET", null
+            "Enhet_A", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_B = new OrgEnhet(
@@ -1401,7 +1401,7 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
             "FID_B", "b100xy", "Enhet B",
             LocalDate.of(2015, 1, 1), null,
             null, null, null, null, null,
-            "Enhet_B", "ORGENHET", null
+            "Enhet_B", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_C = new OrgEnhet(
@@ -1409,7 +1409,7 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
             "FID_C", "c100xy", "Enhet C",
             LocalDate.of(2015, 1, 1), null,
             null, null, null, null, null,
-            "Enhet_C", "ORGENHET", null
+            "Enhet_C", "ORGENHET", null, null
         )
     );
 
@@ -1418,7 +1418,7 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
             "FID_A", "a100xy", "Enhet A",
             LocalDate.of(2015, 1, 1), null,
             null, null, null, null, null,
-            "0110021", "ORGENHET", null
+            "0110021", "ORGENHET", null, null
         )
     );
     IOrgenhet ENHET_B_0110010 = new OrgEnhet(
@@ -1426,7 +1426,7 @@ class SettDOLPerioderPaaStrukturerteStillingerTest extends TestBase {
             "FID_B", "b100xy", "Enhet B",
             LocalDate.of(2015, 1, 1), null,
             null, null, null, null, null,
-            "0110010", "ORGENHET", null
+            "0110010", "ORGENHET", null, null
         )
     );
 }

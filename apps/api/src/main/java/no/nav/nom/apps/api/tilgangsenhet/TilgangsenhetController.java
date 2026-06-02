@@ -10,16 +10,16 @@ import java.util.List;
 @RequestMapping(path = TilgangsenhetController.BASE_URL)
 public class TilgangsenhetController {
 
-    private final TilgangsenhetKandidat tilgangsenhetKandidat;
+    private final TilgangsenhetRepository tilgangsenhetRepository;
 
     public static final String BASE_URL = "/tilgangsenhet";
 
-    public TilgangsenhetController(TilgangsenhetKandidat tilgangsenhetKandidat) {
-        this.tilgangsenhetKandidat = tilgangsenhetKandidat;
+    public TilgangsenhetController(TilgangsenhetRepository tilgangsenhetRepository) {
+        this.tilgangsenhetRepository = tilgangsenhetRepository;
     }
 
     @GetMapping
     public List<Tilgangsenhet> getAll() {
-        return tilgangsenhetKandidat.getAll();
+        return tilgangsenhetRepository.getAll();
     }
 }

@@ -743,5 +743,6 @@ abstract public class MockBasisTestOrganisering {
         OrgEnhetsType orgEnhetsType;
         String uniqueAgressoId;
         String overordnetOrgEnhetFid;
+        String tilgangsenhetId;
     }
 }

@@ -31,7 +31,7 @@ public class NorgService {
         KO
     }
 
-    public List<Tilgangsenhet> fetch() {
+    public List<NorgEnhet> fetch() {
         try {
             var requestStartTime = System.currentTimeMillis();
             var exclusions = Arrays.stream(ENHETSTYPE_EXCLUSIONS.values()).map(ENHETSTYPE_EXCLUSIONS::name).toList();
@@ -52,7 +52,6 @@ public class NorgService {
 
             return Optional.ofNullable(enheter).orElse(Collections.emptyList()).stream()
                 .filter(enhet -> enhet.enhetNr.equals("2103") || !exclusions.contains(enhet.type))
-                .map(NorgEnhet::toTilgangsenhet)
                 .toList();
         } catch (Exception e) {
             log.warn("Failed on fetching enheter from Norg", e);

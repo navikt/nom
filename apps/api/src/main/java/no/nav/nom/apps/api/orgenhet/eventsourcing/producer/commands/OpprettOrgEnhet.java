@@ -10,5 +10,6 @@ public record OpprettOrgEnhet(
         LocalDate gyldigFom,
         String overordnetOrgEnhetFid,
         String lederRessursFid,
+        String tilgangsenhetId,
         InputMetadata inputMetadata
 ) {}

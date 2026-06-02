@@ -23,7 +23,8 @@ public record OrgEnhetState (
     String uniqueAgressoId,
     String agressoId,
     String agressoOrgNivaa,
-    String agressoOrgenhetType
+    String agressoOrgenhetType,
+    String tilgangsenhetId
 
 
 ) {

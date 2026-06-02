@@ -45,7 +45,8 @@ public class EventsrcToStateTest {
                 "TestName",
                 LocalDate.of(2022, 12, 01),
                 "orgEnhet_123",
-                "ressurs_123"
+                "ressurs_123",
+                "1234"
         );
 
 
@@ -77,7 +78,8 @@ public class EventsrcToStateTest {
                 additionalData.uniqueAgressoId(),
                 additionalData.agressoId(),
                 additionalData.agressoOrgNivaa(),
-                additionalData.agressoOrgenhetType()
+                additionalData.agressoOrgenhetType(),
+                "1234"
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);
@@ -97,7 +99,8 @@ public class EventsrcToStateTest {
             "TestName",
             LocalDate.of(2022, 12, 01),
             "orgEnhet_123",
-            "ressurs_123"
+            "ressurs_123",
+            "1234"
         );
 
         final OrgEnhetEvent createEvent = new OrgEnhetOpprettetEventV1(
@@ -122,7 +125,8 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            null
+            null,
+            "1234"
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -151,7 +155,8 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            null
+            null,
+            "1234"
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
@@ -180,7 +185,8 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            null
+            null,
+            "1234"
         );
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
