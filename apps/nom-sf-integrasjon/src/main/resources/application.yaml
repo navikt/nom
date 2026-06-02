@@ -1,0 +1,83 @@
+app:
+  name: ${NAIS_APP_NAME:nom-sf-integrasjon}
+
+nom.libs.state.ressurs.enabled: true
+nom.libs.state.orgenhet.enabled: true
+nom.libs.state.orgtilknytning.enabled: true
+nom.libs.state.organisering.enabled: true
+nom.libs.state.mastered-ressurs.enabled: true
+nom.libs.state.delegert-leder.enabled: true
+nom.libs.state.orgenhet-leder.enabled: true
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus, info, health, metrics, loggers, mappings
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+spring:
+  main:
+    banner-mode: "log"
+    cloud-platform: kubernetes
+
+  datasource:
+    url: ${DATABASE_JDBC_URL}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  flyway:
+    enabled: true
+    schemas: public
+    table: schema_version
+    baselineOnMigrate: true
+
+  kafka:
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    admin:
+      client-id: ${app.name}
+    consumer:
+      max-poll-records: 1000
+      auto-offset-reset: earliest
+      group-id: ${app.name}
+    listener:
+      missing-topics-fatal: true
+    client-id: ${app.name}
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+    mapper:
+      sort-properties-alphabetically: false
+
+  # TODO: Legg til Azure AD resource-server-konfig når auth settes opp
+  # security:
+  #   oauth2:
+  #     resourceserver:
+  #       jwt:
+  #         issuer-uri: ${azure.issuer-uri}
+  #         audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}
