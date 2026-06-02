@@ -926,6 +926,9 @@ public class RessursRestService {
     }
 
     public boolean kanOppretteAngittRessurs(IdentType identType, String orgenhet) {
+        if (isNull(identType)) {
+            throw new IllegalArgumentException("Requesten for opprettelse av Ressurs mangler IdentType");
+        }
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN);
@@ -935,6 +938,9 @@ public class RessursRestService {
     }
 
     public boolean innloggetBrukerKanEndreEllerAvvikleAngittRessurs(IdentType identType, String navident) {
+        if (isNull(identType)) {
+            throw new IllegalStateException(String.format("Navident %s mangler IdentType", navident));
+        }
         return switch (identType) {
             case ROBOT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_ROBOT, ADMIN) || authResolver.kanRedigereRessurs(navident);
             case UTENLANDSK_KONSULENT -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_UTL_KONSULENT, ADMIN) || authResolver.kanRedigereRessurs(navident);

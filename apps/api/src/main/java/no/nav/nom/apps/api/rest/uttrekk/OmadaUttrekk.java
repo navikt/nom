@@ -312,10 +312,10 @@ public class OmadaUttrekk {
 
     @Operation(
         description = """
-        Returnerer csv med alle orgenheter, og deres leder og organisering.
+        Returnerer csv med alle telefonnumre for ressurser.
         
         Kolonner (semikolonseparert):
-        `org_enhet_id;agresso_id;agresso_org_niv;agresso_orgenhet_type;navn;gyldig_fom;gyldig_tom;leder_navident;org_enhets_nivaa;org_enhet_type;org_enhet_over;remedyEnhetId`
+        `navident;nummer;type;beskrivelse`
         """,
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )

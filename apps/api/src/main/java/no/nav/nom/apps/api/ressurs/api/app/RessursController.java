@@ -539,6 +539,15 @@ public class RessursController {
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 
+    @ExceptionHandler({
+        IllegalStateException.class
+    })
+    public ResponseEntity<StandardResponse> handleServerError(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
     @ExceptionHandler(Exception.class)
     private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
         log.error("Intern feil i ressurs api", exception);
