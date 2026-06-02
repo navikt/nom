@@ -176,7 +176,7 @@ export function ConfirmStep() {
             }
           />
           <LabelWithValue
-            label="Remedy-enhet"
+            label="Tilgangsenhet"
             split
             value={selectOrgEnhet?.remedyEnhetId}
           />

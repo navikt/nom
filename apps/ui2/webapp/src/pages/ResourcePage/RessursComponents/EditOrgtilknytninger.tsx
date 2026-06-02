@@ -36,7 +36,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { subMonths } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -357,12 +357,16 @@ function OrgtilknytningForm({
 
   const queryClient = useQueryClient();
 
+  const [saving, setSaving] = useState(false);
+
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
     OppdaterOrgtilknytningerForRessursRequest
   >({
     mutationFn: async (request) => {
+      setSaving(true);
+
       return oppdaterOrgtilknytningerForRessurs(ressurs.navident, request);
     },
     onSuccess: async () => {
@@ -381,6 +385,9 @@ function OrgtilknytningForm({
         params: { id: ressurs.navident },
         search: { editOrgtilknytninger: undefined },
       }).then();
+    },
+    onError: () => {
+      setSaving(false);
     },
   });
 
@@ -451,9 +458,9 @@ function OrgtilknytningForm({
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
-  const fysiskeBrukerstederOptions = fysiskeBrukersteder.map((brukersted) =>
-    fysiskBrukerstedOptionMapping(brukersted),
-  );
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder
+    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   if (isLoading) {
     return (
@@ -653,11 +660,9 @@ function OrgtilknytningForm({
                 `}
                 gap="4"
               >
-                <FysiskBrukerstedSelectFormPartNew
-                  fysiskeBrukersteder={fysiskeBrukersteder}
-                  label="Primært fysisk brukersted"
+                <FysiskBrukerstedSelectWrapper
+                  fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
                   name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukerstedNummer`}
-                  size="small"
                 />
 
                 <FysiskBrukerstedSelectMultipleWrapper
@@ -714,6 +719,7 @@ function OrgtilknytningForm({
 
           <Button
             icon={<FloppydiskIcon aria-hidden />}
+            loading={saving}
             size="small"
             type="submit"
           >
@@ -780,7 +786,7 @@ function OrgEnhetFormPart({
 
           {!selectOrgEnhet && (
             <BodyShort>
-              Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+              Tilgangsenhet: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
             </BodyShort>
           )}
         </div>
@@ -844,7 +850,7 @@ function OrgEnhetFormPart({
               margin-top: var(--a-spacing-2);
             `}
           >
-            Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+            Tilgangsenhet: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
           </BodyShort>
         </div>
       )}
@@ -1164,6 +1170,41 @@ function FormTilknytningstypeSelectWrapper({
         </Select>
       )}
     </div>
+  );
+}
+
+function FysiskBrukerstedSelectWrapper({
+  name,
+  fysiskeBrukerstederOptions,
+}: {
+  name: string;
+  fysiskeBrukerstederOptions: ComboboxOption[];
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const handleToggleSelected = (option: string, isSelected: boolean) => {
+    field.onChange(isSelected ? option : undefined);
+  };
+
+  const existingValue = field.value;
+  const selectedOption = fysiskeBrukerstederOptions.find(
+    (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === existingValue,
+  );
+
+  const selectedOptions = !!selectedOption ? [selectedOption] : [];
+
+  return (
+    <Combobox
+      error={fieldState.error?.message}
+      label="Primært fysisk brukersted"
+      onToggleSelected={handleToggleSelected}
+      options={fysiskeBrukerstederOptions}
+      ref={field.ref}
+      selectedOptions={selectedOptions}
+      size="small"
+    />
   );
 }
 

@@ -677,7 +677,7 @@ function CreateSpecialConfirmModal({
             }
           />
           <LabelWithValue
-            label="Remedy-enhet"
+            label="Tilgangsenhet"
             split
             value={selectOrgEnhet?.remedyEnhetId}
           />
@@ -1032,7 +1032,7 @@ function OrgEnhetSelectFormSection() {
             `}
           >
             <span>
-              Enhet i Remedy: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
+              Tilgangsenhet: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
             </span>
             <HelpText>
               Brukes blant annet til å opprette trygdeident og er nødvendig for

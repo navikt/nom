@@ -94,7 +94,7 @@ function OrgEnhetTabell({
             Type
           </Table.ColumnHeader>
           <Table.ColumnHeader sortKey="remedyEnhetId" sortable>
-            Remedy-enhet
+            Tilgangsenhet
           </Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
