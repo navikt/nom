@@ -463,6 +463,10 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
+      - navident: Z993141         # https://ferielisten.intern.dev.nav.no / Erlend Wiklem
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
