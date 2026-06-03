@@ -219,14 +219,15 @@ export function EndreOtBekreftelsesmodal({
               Du registrerer nå at medarbeideren på dagens dato eller tidligere
               bytter organisasjonstilknytning fra{" "}
               <b>
-                {dagensDolOrgEnhet
+                {!!dagensDolOrgEnhet
                   ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.tilgangsenhetId})`
                   : "ukjent enhet"}
               </b>{" "}
               til{" "}
               <b>
-                {nyTilgangsenhetOrgEnhet?.navn} (
-                {nyTilgangsenhetOrgEnhet?.tilgangsenhetId})
+                {!!nyTilgangsenhetOrgEnhet
+                  ? `${nyTilgangsenhetOrgEnhet?.navn} (${nyTilgangsenhetOrgEnhet?.tilgangsenhetId})`
+                  : "ukjent enhet"}
               </b>
               .
             </BodyLong>
@@ -251,14 +252,15 @@ export function EndreOtBekreftelsesmodal({
             {formatDisplayDate(nyTilgangsenhetTilknytning.gyldigFom)} bytter
             organisasjonstilknytning fra{" "}
             <b>
-              {dagensDolOrgEnhet
+              {!!dagensDolOrgEnhet
                 ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.tilgangsenhetId})`
                 : "ukjent enhet"}
             </b>{" "}
             til{" "}
             <b>
-              {nyTilgangsenhetOrgEnhet?.navn} (
-              {nyTilgangsenhetOrgEnhet?.tilgangsenhetId})
+              {!!nyTilgangsenhetOrgEnhet
+                ? `${nyTilgangsenhetOrgEnhet?.navn} (${nyTilgangsenhetOrgEnhet?.tilgangsenhetId})`
+                : "ukjent enhet"}
             </b>
             .
           </BodyLong>

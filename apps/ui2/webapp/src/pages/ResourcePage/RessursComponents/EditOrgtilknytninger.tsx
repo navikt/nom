@@ -105,8 +105,8 @@ import {
 } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
-  capitalizeNameFysiskBrukersted,
   formatDisplayDate,
+  formatDropdownFysiskBrukersted,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
   isInDevelopment,
@@ -1226,16 +1226,6 @@ function FysiskBrukerstedSelectMultipleWrapper({
     }
   };
 
-  const existingValues = field.value;
-  const selectedOptions =
-    existingValues?.length > 0 && fysiskeBrukerstederOptions?.length > 0
-      ? existingValues.map((value: string) =>
-          fysiskeBrukerstederOptions.find(
-            (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === value,
-          ),
-        )
-      : undefined;
-
   return (
     <Combobox
       error={fieldState.error?.message}
@@ -1244,7 +1234,16 @@ function FysiskBrukerstedSelectMultipleWrapper({
       onToggleSelected={handleToggleSelected}
       options={fysiskeBrukerstederOptions}
       ref={field.ref}
-      selectedOptions={selectedOptions}
+      selectedOptions={
+        fysiskeBrukerstederOptions?.length > 0
+          ? field.value.map((value: string) =>
+              fysiskeBrukerstederOptions.find(
+                (fysiskBrukerstedOption) =>
+                  fysiskBrukerstedOption.value === value,
+              ),
+            )
+          : []
+      }
       size="small"
     />
   );
@@ -1419,7 +1418,7 @@ function fysiskBrukerstedOptionMapping(
 ): ComboboxOption {
   return {
     value: fysiskBrukersted.brukerstedNr,
-    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
+    label: formatDropdownFysiskBrukersted(fysiskBrukersted),
   };
 }
 
