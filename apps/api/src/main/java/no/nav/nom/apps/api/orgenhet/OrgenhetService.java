@@ -296,4 +296,13 @@ public class OrgenhetService {
     public List<JsonNode> getOrgEnhetEvents(ReadTopicRequest readTopicRequest) {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
+
+    public String getTilgangsenhetId(String nomId) {
+        var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId).map(OrganiseringState::idOver).orElse("");
+        var orgEnhetOver = getById(organiseringOrgEnhetId);
+        if (orgEnhetOver.isPresent() && (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank())) {
+            return getTilgangsenhetId(orgEnhetOver.get().getId());
+        }
+        return orgEnhetOver.map(IOrgenhet::getTilgangsenhetId).orElse(null);
+    }
 }
