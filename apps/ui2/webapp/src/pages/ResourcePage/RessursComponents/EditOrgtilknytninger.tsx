@@ -1219,27 +1219,12 @@ function FysiskBrukerstedSelectMultipleWrapper({
   });
 
   const handleToggleSelected = (option: string, isSelected: boolean) => {
-    console.log(option);
-    console.log(isSelected);
-
     if (isSelected) {
       field.onChange([...(field.value || []), option]);
     } else {
       field.onChange((field.value || []).filter((v: string) => v !== option));
     }
   };
-
-  const existingValues = field.value;
-  const selectedOptions =
-    existingValues?.length > 0 && fysiskeBrukerstederOptions?.length > 0
-      ? existingValues.map((value: string) =>
-          fysiskeBrukerstederOptions.find(
-            (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === value,
-          ),
-        )
-      : undefined;
-
-  console.log(field.value);
 
   return (
     <Combobox
