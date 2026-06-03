@@ -144,6 +144,7 @@ public class RemedyEnhetMapperServiceTest {
             null,
             agressoId,
             orgnivaa,
+            null,
             null
         );
     }

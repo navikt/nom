@@ -438,7 +438,7 @@ function InnerOrgEnhetSelect() {
             `}
           >
             <span>
-              Enhet i Remedy: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
+              Tilgangsenhet: <b>{selectedOrgEnhet.remedyEnhetId ?? "-"}</b>
             </span>
             <HelpText>
               Brukes blant annet til å opprette trygdeident og er nødvendig for

@@ -1,0 +1,86 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-sf-integrasjon
+  namespace: org
+  annotations:
+    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  port: 8080
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback.xml'
+    - name: OTEL_JAVAAGENT_LOGGING
+      value: none
+  envFrom:
+    - secret: nom-sf-integrasjon-unleash-api-token
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 99%
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 15
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 15
+    periodSeconds: 3
+    timeout: 4
+    failureThreshold: 2
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+  leaderElection: true
+  kafka:
+    pool: nav-dev
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_17
+        databases:
+          - name: nom-sf-integrasjon-db
+            envVarPrefix: DATABASE
+        tier: db-custom-1-3840
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no # TODO: Avklar Azure AD group-regler når auth settes opp
+      allowAllUsers: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-admin
+          namespace: org
+          cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+        - application: azure-token-generator
+          namespace: nais
+          cluster: dev-gcp
+    outbound:
+      external:
+        - host: org-unleash-api.nav.cloud.nais.io
+        # TODO: Legg til SAP SuccessFactors host når auth og URL er avklart
+        # - host: <sap-sf-host>

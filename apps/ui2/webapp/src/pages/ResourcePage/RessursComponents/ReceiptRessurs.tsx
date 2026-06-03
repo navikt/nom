@@ -11,7 +11,7 @@ import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { blueTopBorder } from "~/resources/NomStyles";
 import type { Ressurs } from "~/types/api-models";
-import { capitalizeNameFysiskBrukersted, formatVisningsnavn } from "~/utils";
+import { formatDisplayFysiskBrukersted, formatVisningsnavn } from "~/utils";
 
 export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
   // Presently there will only be one orgTilknytning after creation.
@@ -65,7 +65,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
           <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} />
           <LabelWithValue
             label="Enhetsnummer"
-            value={orgEnhet?.remedyEnhetId}
+            value={orgEnhet?.tilgangsenhetId}
           />
           {leder && (
             <span>
@@ -83,9 +83,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
             label="Fysisk brukersted"
             value={
               fysiskBrukersted
-                ? capitalizeNameFysiskBrukersted(
-                    fysiskBrukersted.brukerstedNavn,
-                  )
+                ? formatDisplayFysiskBrukersted(fysiskBrukersted)
                 : "-"
             }
           />

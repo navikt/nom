@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerGyldigFom;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhetNavn;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
@@ -31,6 +32,8 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Opprett
 import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
+import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -62,6 +65,7 @@ public class OrgEnhetRestService {
     private final OrganiseringEventCommandService organiseringEventCommandService;
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
     private final OrganiseringStateRepository organiseringStateRepository;
+    private final TilgangsenhetRepository tilgangsenhetRepository;
 
     public OrgEnhetRestService(
         OrgEnhetIdGenerator orgEnhetIdGenerator,
@@ -71,7 +75,7 @@ public class OrgEnhetRestService {
         OrgEnhetCommandService orgEnhetCommandService,
         OrganiseringEventCommandService organiseringEventCommandService,
         OrgEnhetLederCommandService orgEnhetLederCommandService,
-        OrganiseringStateRepository organiseringStateRepository
+        OrganiseringStateRepository organiseringStateRepository, TilgangsenhetRepository tilgangsenhetRepository
     ) {
         this.orgEnhetIdGenerator = orgEnhetIdGenerator;
         this.orgenhetService = orgenhetService;
@@ -81,6 +85,7 @@ public class OrgEnhetRestService {
         this.organiseringEventCommandService = organiseringEventCommandService;
         this.orgEnhetLederCommandService = orgEnhetLederCommandService;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.tilgangsenhetRepository = tilgangsenhetRepository;
     }
 
 
@@ -95,6 +100,10 @@ public class OrgEnhetRestService {
 
         if (orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.navn())) {
             throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.navn());
+        }
+
+        if (opprettOrgEnhetRequest.tilgangsenhetId() == null || !tilgangsenhetRepository.isValid(opprettOrgEnhetRequest.tilgangsenhetId())) {
+            throw new InvalidTilgangsenhetException(String.format("Invalid tilgangsenhet: %s", opprettOrgEnhetRequest.tilgangsenhetId()));
         }
 
         String navn = StringUtils.capitalize(opprettOrgEnhetRequest.navn());
@@ -115,6 +124,7 @@ public class OrgEnhetRestService {
             opprettOrgEnhetRequest.gyldigFom(),
             overordnetOrgEnhet.getFid(),
             ressursState.fid(),
+            opprettOrgEnhetRequest.tilgangsenhetId(),
             inputMetadata
         );
 
@@ -165,7 +175,7 @@ public class OrgEnhetRestService {
                 orgEnhetState.gyldigTom(),
                 ressursState.navident(),
                 ressursState.visningsnavn().getFormattedVisningsnavn(),
-                opprettOrgEnhetRequest.firesiffer(),
+                opprettOrgEnhetRequest.tilgangsenhetId(),
                 orgEnhetState.orgEnhetsType()
             );
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
@@ -263,6 +273,15 @@ public class OrgEnhetRestService {
             ));
 
             oppdaterteElementer.add(String.format("OrgEnhet har endret NOM Nivå fra %s til %s", orgEnhetState.getNomNivaa(), ovrigeEndringerOrgEnhetRequest.nomNivaa()));
+        }
+
+        if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.tilgangsenhetId(), orgEnhetState.getTilgangsenhetId())) {
+            orgEnhetCommandService.endreTilgangsenhet(orgEnhetState.getFid(), new EndreTilgangsenhet(
+                ovrigeEndringerOrgEnhetRequest.tilgangsenhetId(),
+                inputMetadata
+            ));
+
+            oppdaterteElementer.add(String.format("Orgenhet har endret tilgangsenhet fra %s til %s", orgEnhetState.getTilgangsenhetId(), ovrigeEndringerOrgEnhetRequest.tilgangsenhetId()));
         }
 
         return String.join("\\n", oppdaterteElementer);

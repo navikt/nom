@@ -16,7 +16,7 @@ public record OpprettOrgEnhetResponse(
     LocalDate gyldigTom,
     String lederRessursNavident,
     String lederRessursNavn,
-    String firesiffer,
+    String tilgangsenhetId,
     OrgEnhetsType orgEnhetsType
 ) {
 }

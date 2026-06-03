@@ -31,7 +31,8 @@ public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
         String navn,
         LocalDate gyldigFom,
         String overordnetOrgEnhetFid,
-        String lederRessursFid
+        String lederRessursFid,
+        String tilgangsenhetId
     ) implements Data {}
 
     public record OrgEnhetOpprettetAdditionalAgressoData(

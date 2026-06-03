@@ -50,6 +50,9 @@ public class EventSourceService {
         } catch (IllegalSourceEventException e) {
             log.error("Could not handle SourceEvent. Reason: {}", e.getMessage());
             log.debug("Callstack:", e);
+        } catch (DuplicateCreateSourceEventException e) {
+            log.warn("Duplicate create event detected. Reason: {}", e.getMessage());
+            log.debug("Callstack:", e);
         }
     }
 
@@ -64,7 +67,7 @@ public class EventSourceService {
         String personid = event.payload.personid;
         if (eksisterendePersonider.containsKey(personid)) {
             if (!navid.equals(eksisterendePersonider.get(personid))) {
-                throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes allerede på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
+                throw new DuplicateCreateSourceEventException("Personid id i OPPRETT event for navident %s finnes allerede på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
             } else {
                 log.debug("Ren duplikat for NavIdent - behandler ikke denne"); // Har dessverre mange slike duplikater.
             }

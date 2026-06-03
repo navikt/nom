@@ -36,7 +36,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { subMonths } from "date-fns";
 import partition from "lodash/partition";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import {
   FormProvider,
@@ -65,7 +65,6 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
-import { FysiskBrukerstedSelectFormPartNew } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
@@ -106,8 +105,8 @@ import {
 } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
-  capitalizeNameFysiskBrukersted,
   formatDisplayDate,
+  formatDropdownFysiskBrukersted,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
   isInDevelopment,
@@ -169,7 +168,7 @@ export function EditOrgtilknytninger({
     (orgEnhet) => orgEnhet.id === dagensDolOrgtilknytning?.orgEnhetId,
   );
 
-  const dagensRemedyEnhetId = dagensDolOrgEnhet?.remedyEnhetId;
+  const dagensTilgangsenhetId = dagensDolOrgEnhet?.tilgangsenhetId;
 
   const eksisterendeStatligeOrgEnhetIder = orgtilknytninger
     .filter(
@@ -227,7 +226,7 @@ export function EditOrgtilknytninger({
 
       <OrgtilknytningForm
         dagensDolOrgEnhet={dagensDolOrgEnhet}
-        dagensRemedyEnhetId={dagensRemedyEnhetId}
+        dagensTilgangsenhetId={dagensTilgangsenhetId}
         eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         isLoading={ressursOrgtilknytningerQuery.isLoading}
         orgtilknytninger={orgtilknytninger}
@@ -268,14 +267,14 @@ function defaultNyOrgtilknytning(ressurs: Ressurs) {
 function OrgtilknytningForm({
   orgtilknytninger,
   ressurs,
-  dagensRemedyEnhetId,
+  dagensTilgangsenhetId,
   dagensDolOrgEnhet,
   isLoading,
   eksisterendeStatligeAgressoIder,
 }: {
   orgtilknytninger: Partial<OrgtilknytningState>[];
   ressurs: Ressurs;
-  dagensRemedyEnhetId: string | undefined;
+  dagensTilgangsenhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
   isLoading: boolean;
   eksisterendeStatligeAgressoIder: string[];
@@ -357,12 +356,16 @@ function OrgtilknytningForm({
 
   const queryClient = useQueryClient();
 
+  const [saving, setSaving] = useState(false);
+
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
     OppdaterOrgtilknytningerForRessursRequest
   >({
     mutationFn: async (request) => {
+      setSaving(true);
+
       return oppdaterOrgtilknytningerForRessurs(ressurs.navident, request);
     },
     onSuccess: async () => {
@@ -382,6 +385,9 @@ function OrgtilknytningForm({
         search: { editOrgtilknytninger: undefined },
       }).then();
     },
+    onError: () => {
+      setSaving(false);
+    },
   });
 
   const { showModal } = useModal();
@@ -392,7 +398,7 @@ function OrgtilknytningForm({
     await showModal(
       <EndreOtBekreftelsesmodal
         dagensDolOrgEnhet={dagensDolOrgEnhet}
-        dagensRemedyEnhetId={dagensRemedyEnhetId}
+        dagensTilgangsenhetId={dagensTilgangsenhetId}
         eksisterendeStatligeAgressoIder={eksisterendeStatligeAgressoIder}
         navn={formatVisningsnavn(ressurs.visningsnavn)}
         orgtilknytninger={orgtilknytninger}
@@ -452,8 +458,8 @@ function OrgtilknytningForm({
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
   const fysiskeBrukerstederOptions = fysiskeBrukersteder
-    .sort((a, b) => a.brukerstedNr.localeCompare(b.brukerstedNr))
-    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted));
+    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   if (isLoading) {
     return (
@@ -653,11 +659,9 @@ function OrgtilknytningForm({
                 `}
                 gap="4"
               >
-                <FysiskBrukerstedSelectFormPartNew
-                  fysiskeBrukersteder={fysiskeBrukersteder}
-                  label="Primært fysisk brukersted"
+                <FysiskBrukerstedSelectWrapper
+                  fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
                   name={`mappedeOrgtilknytninger.${index}.primaryFysiskBrukerstedNummer`}
-                  size="small"
                 />
 
                 <FysiskBrukerstedSelectMultipleWrapper
@@ -714,6 +718,7 @@ function OrgtilknytningForm({
 
           <Button
             icon={<FloppydiskIcon aria-hidden />}
+            loading={saving}
             size="small"
             type="submit"
           >
@@ -780,7 +785,7 @@ function OrgEnhetFormPart({
 
           {!selectOrgEnhet && (
             <BodyShort>
-              Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+              Tilgangsenhet: <b>{orgEnhetQuery.data?.tilgangsenhetId}</b>
             </BodyShort>
           )}
         </div>
@@ -844,7 +849,7 @@ function OrgEnhetFormPart({
               margin-top: var(--a-spacing-2);
             `}
           >
-            Enhet i Remedy: <b>{orgEnhetQuery.data?.remedyEnhetId}</b>
+            Tilgangsenhet: <b>{orgEnhetQuery.data?.tilgangsenhetId}</b>
           </BodyShort>
         </div>
       )}
@@ -1167,6 +1172,41 @@ function FormTilknytningstypeSelectWrapper({
   );
 }
 
+function FysiskBrukerstedSelectWrapper({
+  name,
+  fysiskeBrukerstederOptions,
+}: {
+  name: string;
+  fysiskeBrukerstederOptions: ComboboxOption[];
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const handleToggleSelected = (option: string, isSelected: boolean) => {
+    field.onChange(isSelected ? option : undefined);
+  };
+
+  const existingValue = field.value;
+  const selectedOption = fysiskeBrukerstederOptions.find(
+    (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === existingValue,
+  );
+
+  const selectedOptions = !!selectedOption ? [selectedOption] : [];
+
+  return (
+    <Combobox
+      error={fieldState.error?.message}
+      label="Primært fysisk brukersted"
+      onToggleSelected={handleToggleSelected}
+      options={fysiskeBrukerstederOptions}
+      ref={field.ref}
+      selectedOptions={selectedOptions}
+      size="small"
+    />
+  );
+}
+
 function FysiskBrukerstedSelectMultipleWrapper({
   name,
   fysiskeBrukerstederOptions,
@@ -1186,16 +1226,6 @@ function FysiskBrukerstedSelectMultipleWrapper({
     }
   };
 
-  const existingValues = field.value;
-  const selectedOptions =
-    existingValues?.length > 0 && fysiskeBrukerstederOptions?.length > 0
-      ? existingValues.map((value: string) =>
-          fysiskeBrukerstederOptions.find(
-            (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === value,
-          ),
-        )
-      : undefined;
-
   return (
     <Combobox
       error={fieldState.error?.message}
@@ -1204,7 +1234,16 @@ function FysiskBrukerstedSelectMultipleWrapper({
       onToggleSelected={handleToggleSelected}
       options={fysiskeBrukerstederOptions}
       ref={field.ref}
-      selectedOptions={selectedOptions}
+      selectedOptions={
+        fysiskeBrukerstederOptions?.length > 0
+          ? field.value.map((value: string) =>
+              fysiskeBrukerstederOptions.find(
+                (fysiskBrukerstedOption) =>
+                  fysiskBrukerstedOption.value === value,
+              ),
+            )
+          : []
+      }
       size="small"
     />
   );
@@ -1379,7 +1418,7 @@ function fysiskBrukerstedOptionMapping(
 ): ComboboxOption {
   return {
     value: fysiskBrukersted.brukerstedNr,
-    label: `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`,
+    label: formatDropdownFysiskBrukersted(fysiskBrukersted),
   };
 }
 

@@ -40,7 +40,11 @@ import type {
   Visningsnavn,
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
-import { capitalizeNameFysiskBrukersted, formatVisningsnavn } from "~/utils";
+import {
+  formatDisplayFysiskBrukersted,
+  formatDropdownFysiskBrukersted,
+  formatVisningsnavn,
+} from "~/utils";
 
 export function MasseflyttingFysiskBrukersted() {
   return (
@@ -333,9 +337,9 @@ function FysiskBrukerstedFlyttingTable() {
                 font-size: var(--a-font-size-large);
               `}
             >
-              {brukersted
-                ? `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}`
-                : ""}
+              <b>
+                {brukersted ? formatDropdownFysiskBrukersted(brukersted) : ""}
+              </b>
             </BodyShort>
 
             <Button
@@ -417,11 +421,11 @@ function FysiskBrukerstedFlyttingTable() {
                 `}
                 size="small"
               >
-                {`Medarbeidere i ${
-                  brukersted
-                    ? `${brukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted.brukerstedNavn)}:`
-                    : ""
-                }`}
+                {brukersted
+                  ? `Medarbeidere i ${formatDisplayFysiskBrukersted(
+                      brukersted,
+                    )}:`
+                  : ""}
               </Heading>
 
               <Label>Vis sektorer:</Label>
@@ -652,7 +656,7 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
         >
           <b>
             {tilFysiskBrukersted
-              ? `${capitalizeNameFysiskBrukersted(tilFysiskBrukersted.brukerstedNavn)} (${tilFysiskBrukersted.brukerstedNr})`
+              ? formatDisplayFysiskBrukersted(tilFysiskBrukersted)
               : ""}
           </b>
           :

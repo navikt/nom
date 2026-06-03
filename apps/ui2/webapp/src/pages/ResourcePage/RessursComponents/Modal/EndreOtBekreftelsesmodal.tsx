@@ -36,7 +36,7 @@ export function EndreOtBekreftelsesmodal({
   onConfirm,
   orgtilknytninger,
   navn,
-  dagensRemedyEnhetId,
+  dagensTilgangsenhetId,
   dagensDolOrgEnhet,
   eksisterendeStatligeAgressoIder,
 }: {
@@ -44,7 +44,7 @@ export function EndreOtBekreftelsesmodal({
   onConfirm?: () => void;
   orgtilknytninger: Partial<OrgtilknytningState>[];
   navn: string;
-  dagensRemedyEnhetId: string | undefined;
+  dagensTilgangsenhetId: string | undefined;
   dagensDolOrgEnhet: OrgEnhet | undefined;
   eksisterendeStatligeAgressoIder: string[];
 }) {
@@ -80,17 +80,17 @@ export function EndreOtBekreftelsesmodal({
     "gyldigFom",
   );
 
-  const nyRemedyTilknytning = relevanteDolOrgtilknytninger.find(
+  const nyTilgangsenhetTilknytning = relevanteDolOrgtilknytninger.find(
     (tilknytning) => {
       return (
         orgEnheter.find((orgEnhet) => orgEnhet.id === tilknytning.orgEnhetId)
-          ?.remedyEnhetId !== dagensRemedyEnhetId
+          ?.tilgangsenhetId !== dagensTilgangsenhetId
       );
     },
   );
 
-  const nyRemedyOrgEnhet = orgEnheter.find(
-    (orgEnhet) => orgEnhet.id === nyRemedyTilknytning?.orgEnhetId,
+  const nyTilgangsenhetOrgEnhet = orgEnheter.find(
+    (orgEnhet) => orgEnhet.id === nyTilgangsenhetTilknytning?.orgEnhetId,
   );
 
   const oppdaterteStatligeOrgEnhetIder = orgtilknytninger
@@ -120,14 +120,17 @@ export function EndreOtBekreftelsesmodal({
     ? isTodayOrBefore(dateWithoutTimezone(senesteTomDato))
     : false;
 
-  const isNyRemedyTilknytningTodayOrBefore = nyRemedyTilknytning?.gyldigFom
-    ? isTodayOrBefore(dateWithoutTimezone(nyRemedyTilknytning.gyldigFom))
-    : false;
+  const isNyTilgangsenhetTilknytningTodayOrBefore =
+    nyTilgangsenhetTilknytning?.gyldigFom
+      ? isTodayOrBefore(
+          dateWithoutTimezone(nyTilgangsenhetTilknytning.gyldigFom),
+        )
+      : false;
 
   useEffect(() => {
     if (
       !senesteTomDato &&
-      (!nyRemedyTilknytning || !nyRemedyOrgEnhet) &&
+      (!nyTilgangsenhetTilknytning || !nyTilgangsenhetOrgEnhet) &&
       !endringAgressoIder &&
       onConfirm
     ) {
@@ -135,15 +138,15 @@ export function EndreOtBekreftelsesmodal({
     }
   }, [
     senesteTomDato,
-    nyRemedyTilknytning,
-    nyRemedyOrgEnhet,
+    nyTilgangsenhetTilknytning,
+    nyTilgangsenhetOrgEnhet,
     onConfirm,
     !endringAgressoIder,
   ]);
 
   if (
     !senesteTomDato &&
-    (!nyRemedyTilknytning || !nyRemedyOrgEnhet) &&
+    (!nyTilgangsenhetTilknytning || !nyTilgangsenhetOrgEnhet) &&
     !endringAgressoIder &&
     onConfirm
   ) {
@@ -205,22 +208,26 @@ export function EndreOtBekreftelsesmodal({
     )
   ) : null;
 
-  const remedyMessage =
-    nyRemedyTilknytning && nyRemedyOrgEnhet && dagensRemedyEnhetId ? (
-      isNyRemedyTilknytningTodayOrBefore ? (
+  const tilgangsenhetMessage =
+    nyTilgangsenhetTilknytning &&
+    nyTilgangsenhetOrgEnhet &&
+    dagensTilgangsenhetId ? (
+      isNyTilgangsenhetTilknytningTodayOrBefore ? (
         <Alert variant="warning">
           <HStack gap="6">
             <BodyLong>
               Du registrerer nå at medarbeideren på dagens dato eller tidligere
               bytter organisasjonstilknytning fra{" "}
               <b>
-                {dagensDolOrgEnhet
-                  ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`
+                {!!dagensDolOrgEnhet
+                  ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.tilgangsenhetId})`
                   : "ukjent enhet"}
               </b>{" "}
               til{" "}
               <b>
-                {nyRemedyOrgEnhet?.navn} ({nyRemedyOrgEnhet?.remedyEnhetId})
+                {!!nyTilgangsenhetOrgEnhet
+                  ? `${nyTilgangsenhetOrgEnhet?.navn} (${nyTilgangsenhetOrgEnhet?.tilgangsenhetId})`
+                  : "ukjent enhet"}
               </b>
               .
             </BodyLong>
@@ -242,16 +249,18 @@ export function EndreOtBekreftelsesmodal({
         <HStack gap="6">
           <BodyLong>
             Du registrerer nå at medarbeideren fra{" "}
-            {formatDisplayDate(nyRemedyTilknytning.gyldigFom)} bytter
+            {formatDisplayDate(nyTilgangsenhetTilknytning.gyldigFom)} bytter
             organisasjonstilknytning fra{" "}
             <b>
-              {dagensDolOrgEnhet
-                ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.remedyEnhetId})`
+              {!!dagensDolOrgEnhet
+                ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.tilgangsenhetId})`
                 : "ukjent enhet"}
             </b>{" "}
             til{" "}
             <b>
-              {nyRemedyOrgEnhet?.navn} ({nyRemedyOrgEnhet?.remedyEnhetId})
+              {!!nyTilgangsenhetOrgEnhet
+                ? `${nyTilgangsenhetOrgEnhet?.navn} (${nyTilgangsenhetOrgEnhet?.tilgangsenhetId})`
+                : "ukjent enhet"}
             </b>
             .
           </BodyLong>
@@ -259,7 +268,7 @@ export function EndreOtBekreftelsesmodal({
             <b>
               Dette innebærer en endring i innstillinger for tilganger
               (4-siffer-enhet), slik at fra og med{" "}
-              {formatDisplayDate(nyRemedyTilknytning.gyldigFom)} vil alle
+              {formatDisplayDate(nyTilgangsenhetTilknytning.gyldigFom)} vil alle
               tilganger for {navn} fjernes. Nye tilganger må tildeles i
               Identrutina og/eller Mine tilganger.
             </b>
@@ -301,20 +310,24 @@ export function EndreOtBekreftelsesmodal({
             padding-bottom: 1px;
           `}
         >
-          {remedyMessage && (
+          {tilgangsenhetMessage && (
             <ModalReadMore
-              content={remedyMessage}
+              content={tilgangsenhetMessage}
               header={
-                isNyRemedyTilknytningTodayOrBefore || !nyRemedyTilknytning
+                isNyTilgangsenhetTilknytningTodayOrBefore ||
+                !nyTilgangsenhetTilknytning
                   ? "Tilganger fjernes fra i dag"
                   : `Tilganger fjernes fra ${
-                      nyRemedyTilknytning
-                        ? formatDisplayDate(nyRemedyTilknytning.gyldigFom)
+                      nyTilgangsenhetTilknytning
+                        ? formatDisplayDate(
+                            nyTilgangsenhetTilknytning.gyldigFom,
+                          )
                         : "angitt dato"
                     }`
               }
               icon={
-                isNyRemedyTilknytningTodayOrBefore || !nyRemedyTilknytning
+                isNyTilgangsenhetTilknytningTodayOrBefore ||
+                !nyTilgangsenhetTilknytning
                   ? "warning"
                   : "info"
               }

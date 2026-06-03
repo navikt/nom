@@ -69,9 +69,9 @@ import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { IdentType, Tilknytningtype } from "~/types/api-models";
 import {
-  capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
   formatDisplayDate,
+  formatDisplayFysiskBrukersted,
   isAfterToday,
   isBeforeToday,
   isGyldighetsPeriodeActive,
@@ -562,12 +562,13 @@ function OrganisationHierarchyTree({
   );
 
   const ytterligereFysiskeBrukersteder =
-    orgTilknytning.additionalFysiskeBrukerstederNummer?.map(
-      (brukerstedNummer) =>
+    orgTilknytning.additionalFysiskeBrukerstederNummer
+      ?.map((brukerstedNummer) =>
         fysiskeBrukersteder.find(
           (brukersted) => brukersted.brukerstedNr === brukerstedNummer,
         ),
-    );
+      )
+      .filter((brukersted) => brukersted !== undefined);
 
   return (
     <ExpansionCard
@@ -662,7 +663,9 @@ function OrganisationHierarchyTree({
                   `}
                 >
                   Primært fysisk brukersted:{" "}
-                  <b>{`${primaryFysiskBrukersted?.brukerstedNr}: ${capitalizeNameFysiskBrukersted(primaryFysiskBrukersted?.brukerstedNavn)}`}</b>
+                  <b>
+                    {formatDisplayFysiskBrukersted(primaryFysiskBrukersted)}
+                  </b>
                 </BodyShort>
               )}
 
@@ -678,7 +681,7 @@ function OrganisationHierarchyTree({
 
                     {ytterligereFysiskeBrukersteder.map((brukersted) => (
                       <BodyShort key={brukersted?.brukerstedNr}>
-                        <b>{`${brukersted?.brukerstedNr}: ${capitalizeNameFysiskBrukersted(brukersted?.brukerstedNavn ?? "")}`}</b>
+                        <b>{formatDisplayFysiskBrukersted(brukersted)}</b>
                       </BodyShort>
                     ))}
                   </VStack>

@@ -20,6 +20,7 @@ public class OrgEnhetStateBuilder {
     String agressoId;
     String agressoOrgNivaa;
     String agressoOrgenhetType;
+    String tilgangsenhetId;
 
     public OrgEnhetStateBuilder fid(String fid) {
         this.fid = fid;
@@ -86,6 +87,11 @@ public class OrgEnhetStateBuilder {
         return this;
     }
 
+    public OrgEnhetStateBuilder tilgangsenhetId(String tilgangsenhetId) {
+        this.tilgangsenhetId = tilgangsenhetId;
+        return this;
+    }
+
     public OrgEnhetStateBuilder(int i) {
         this.fid = String.valueOf(i);
         this.id = String.valueOf(i);
@@ -116,7 +122,8 @@ public class OrgEnhetStateBuilder {
             this.uniqueAgressoId,
             this.agressoId,
             this.agressoOrgNivaa,
-            this.agressoOrgenhetType
+            this.agressoOrgenhetType,
+            this.tilgangsenhetId
         );
     }
 }

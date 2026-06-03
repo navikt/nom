@@ -1,0 +1,40 @@
+name: 'deploy: nom-sf-integrasjon'
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/nom-sf-integrasjon/**'
+      - 'libs/**'
+      - '.nais/apps/nom-sf-integrasjon/nom-sf-integrasjon*.yaml'
+      - '.github/workflows/deploy-nom-sf-integrasjon.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+      - 'Dockerfile_chainguard'
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: nom-sf-integrasjon
+      jar-path: apps/nom-sf-integrasjon/target/app.jar
+      image-suffix: nom-sf-integrasjon
+      nais-config-file-path-dev: .nais/apps/nom-sf-integrasjon/nom-sf-integrasjon-dev-gcp.yaml
+      nais-config-file-path-prod: .nais/apps/nom-sf-integrasjon/nom-sf-integrasjon-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/nom-sf-integrasjon/unleash-vars.yaml
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
+      dockerfile: Dockerfile_chainguard
+    secrets:
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

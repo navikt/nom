@@ -409,7 +409,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         new OrgEnhetState(
             "FID_ENHET_A", "ORGENHET_A", "ENHET A", LocalDate.of(2022, 1, 1),
             null, null, null, null, null,
-            "8000100-ENHET A-ORGENHET", "8000100", "ORGENHET", null
+            "8000100-ENHET A-ORGENHET", "8000100", "ORGENHET", null, null
         )
     );
 
@@ -417,7 +417,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         new OrgEnhetState(
             "FID_ENHET_VIKAFOSSEN", "ORGENHET_VIKAFOSSEN", "ENHET VIKAFOSSEN", LocalDate.of(2022, 1, 1),
             null, null, null, null, null,
-            "8000100-ENHET VIKAFOSSEN-ORGENHET", "EV00001", "ORGENHET", null
+            "8000100-ENHET VIKAFOSSEN-ORGENHET", "EV00001", "ORGENHET", null, null
         )
     );
 
