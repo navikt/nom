@@ -37,9 +37,9 @@ import { nomDateIsBefore } from "~/pages/ResourcePage/RessursComponents/dolUtils
 import type { Ressurs } from "~/types/api-models";
 import { IdentType, Sektor, TelefonType } from "~/types/api-models";
 import {
-  capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
   formatDisplayDate,
+  formatDisplayFysiskBrukersted,
   formatTlf,
   formatVisningsnavn,
   isBeforeToday,
@@ -338,9 +338,7 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
       label="Fysisk brukersted"
       split
       value={
-        fysiskBrukersted
-          ? `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`
-          : "-"
+        fysiskBrukersted ? formatDisplayFysiskBrukersted(fysiskBrukersted) : "-"
       }
     />
   );

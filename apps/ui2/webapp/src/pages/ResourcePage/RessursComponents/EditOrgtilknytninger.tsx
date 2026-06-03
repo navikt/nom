@@ -105,7 +105,6 @@ import {
 } from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
-  capitalizeNameFysiskBrukersted,
   formatDisplayDate,
   formatDropdownFysiskBrukersted,
   formatVisningsnavn,

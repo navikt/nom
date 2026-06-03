@@ -69,7 +69,6 @@ import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { IdentType, Tilknytningtype } from "~/types/api-models";
 import {
-  capitalizeNameFysiskBrukersted,
   dateWithoutTimezone,
   formatDisplayDate,
   formatDisplayFysiskBrukersted,
