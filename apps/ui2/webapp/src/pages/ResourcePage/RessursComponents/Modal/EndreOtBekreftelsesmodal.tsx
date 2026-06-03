@@ -252,13 +252,13 @@ export function EndreOtBekreftelsesmodal({
             {formatDisplayDate(nyTilgangsenhetTilknytning.gyldigFom)} bytter
             organisasjonstilknytning fra{" "}
             <b>
-              {dagensDolOrgEnhet
+              {!!dagensDolOrgEnhet
                 ? `${dagensDolOrgEnhet?.navn} (${dagensDolOrgEnhet?.tilgangsenhetId})`
                 : "ukjent enhet"}
             </b>{" "}
             til{" "}
             <b>
-              {nyTilgangsenhetOrgEnhet
+              {!!nyTilgangsenhetOrgEnhet
                 ? `${nyTilgangsenhetOrgEnhet?.navn} (${nyTilgangsenhetOrgEnhet?.tilgangsenhetId})`
                 : "ukjent enhet"}
             </b>
