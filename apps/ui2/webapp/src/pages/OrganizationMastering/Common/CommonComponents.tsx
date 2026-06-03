@@ -33,17 +33,19 @@ export function IkkeTilgangRedigering() {
   );
 }
 
-export function FormRessursSearchWrapper({ name }: { name: string }) {
+export function FormRessursSearchWrapper({
+  name,
+  label,
+}: {
+  name: string;
+  label: string;
+}) {
   const { field, fieldState } = useController({
     name,
   });
 
   return (
-    <SelectLayoutWrapper
-      error={fieldState.error}
-      htmlFor="Leder"
-      label="Ny leder på organisasjonsenhet"
-    >
+    <SelectLayoutWrapper error={fieldState.error} htmlFor="Leder" label={label}>
       <AsyncSearch
         loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
         noOptionsMessage={({ inputValue }: { inputValue: string }) =>

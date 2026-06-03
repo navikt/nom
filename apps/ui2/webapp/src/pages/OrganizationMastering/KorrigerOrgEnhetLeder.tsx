@@ -139,7 +139,10 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
         <VStack gap="9">
-          <FormRessursSearchWrapper name="lederRessursNavident" />
+          <FormRessursSearchWrapper
+            label="Ny leder på organisasjonsenhet"
+            name="lederRessursNavident"
+          />
 
           <div
             css={css`
