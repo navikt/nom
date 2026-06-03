@@ -22,7 +22,7 @@ import {
   updateNavnForRessurs,
   updateTelefonnummer,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { useGetSession, useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import { useModal } from "~/components/modalProvider/ModalProvider";
@@ -42,13 +42,7 @@ import {
 import { type Ressurs } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
-export function EditPersonOpplysninger({
-  ressurs,
-  hasSelfServiceAccess,
-}: {
-  ressurs: Ressurs;
-  hasSelfServiceAccess: boolean;
-}) {
+export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { editPersonopplysninger } = useSearch({ from: "/ressurs/$id" });
@@ -67,54 +61,44 @@ export function EditPersonOpplysninger({
 
   const hasAdminAccess = useHasAdminAccess();
 
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
+  const canOnlyEditPhone = hasSelfServiceAccess && !hasAdminAccess;
+
   const { mutate, isPending } = useMutation<
     unknown,
     unknown,
     yup.InferType<typeof validationSchema>
   >({
     mutationFn: async (values) => {
-      let promises: Promise<unknown>[] = [];
+      const { dirtyFields } = methods.formState;
 
-      if (hasSelfServiceAccess && !hasAdminAccess) {
-        if (
-          checkIfDirtyField(
-            ["primaryTelefonnummer"],
-            Object.keys(methods.formState.dirtyFields),
-          )
-        ) {
-          const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
-            nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
-          });
-          promises = [...promises, updateTelefonPromise];
-        }
-      } else {
-        if (
-          checkIfDirtyField(
-            ["primaryTelefonnummer"],
-            Object.keys(methods.formState.dirtyFields),
-          )
-        ) {
-          const updateTelefonPromise = updateTelefonnummer(ressurs.navident, {
-            nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
-          });
-          promises = [...promises, updateTelefonPromise];
-        }
+      const phoneDirty = dirtyFields.primaryTelefonnummer;
 
-        if (
-          checkIfDirtyField(
-            ["fornavn", "mellomnavn", "etternavn"],
-            Object.keys(methods.formState.dirtyFields),
-          )
-        ) {
-          const { fornavn, mellomnavn, etternavn } = values;
-          const updateNamePromise = updateNavnForRessurs(ressurs.navident, {
+      const nameDirty =
+        dirtyFields.fornavn || dirtyFields.mellomnavn || dirtyFields.etternavn;
+
+      const promises: Promise<unknown>[] = [];
+
+      if (phoneDirty) {
+        promises.push(
+          updateTelefonnummer(ressurs.navident, {
+            nummer: values.primaryTelefonnummer?.replaceAll(" ", "") ?? "",
+          }),
+        );
+      }
+
+      if (!canOnlyEditPhone && nameDirty) {
+        const { fornavn, mellomnavn, etternavn } = values;
+
+        promises.push(
+          updateNavnForRessurs(ressurs.navident, {
             fornavn,
             mellomnavn,
             etternavn,
-          });
-
-          promises = [...promises, updateNamePromise];
-        }
+          }),
+        );
       }
 
       await Promise.allSettled(promises);
@@ -180,7 +164,7 @@ export function EditPersonOpplysninger({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        {hasSelfServiceAccess && !hasAdminAccess ? (
+        {canOnlyEditPhone ? (
           <>
             <Heading level="1" size="large">
               {formatVisningsnavn(ressurs.visningsnavn)}
@@ -336,10 +320,6 @@ export function EditPersonOpplysninger({
       </form>
     </FormProvider>
   );
-}
-
-function checkIfDirtyField(fieldNames: string[], dirtyFieldNames: string[]) {
-  return intersection(fieldNames, dirtyFieldNames).length > 0;
 }
 
 const validationSchema = yup.object({
