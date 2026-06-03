@@ -79,6 +79,9 @@ spec:
       application: nom-remedy-integrasjon
       access: read
     - team: org
+      application: nom-sf-integrasjon
+      access: read
+    - team: org
       application: nom-rdbms-data
       access: read     
     - team: nom
@@ -114,6 +117,9 @@ spec:
       access: read
     - team: org
       application: nom-remedy-integrasjon
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
       access: read
     - team: org
       application: nom-rdbms-data
@@ -188,6 +194,9 @@ spec:
       access: read
     - team: org
       application: nom-remedy-integrasjon
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
       access: read
     - team: org
       application: nom-rdbms-data
@@ -276,6 +285,9 @@ spec:
       application: nom-remedy-integrasjon
       access: read
     - team: org
+      application: nom-sf-integrasjon
+      access: read
+    - team: org
       application: nom-rdbms-data
       access: read
 
@@ -346,6 +358,9 @@ spec:
     - team: org
       application: nom-rdbms-data
       access: read
+    - team: org
+      application: nom-sf-integrasjon
+      access: read
     - team: team-nof
       application: orgenhet-kostnadssted-mapping-api
       access: read    
@@ -376,6 +391,9 @@ spec:
       access: read
     - team: org
       application: nom-admin
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
       access: read
     - team: org
       application: nom-rdbms-data
@@ -561,6 +579,9 @@ spec:
       access: read
     - team: org
       application: nom-admin
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
       access: read
     - team: org
       application: nom-rdbms-data

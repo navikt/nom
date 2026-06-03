@@ -1011,7 +1011,7 @@ public class OrgtilknytningRestService {
         return orgtilknytningStateRepository.getAll().stream()
             .filter(orgtilknytningState -> isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .filter(orgtilknytningState -> Objects.equals(fysiskBrukerstedNr, orgtilknytningState.primaryFysiskBrukerstedNummer())
-                || orgtilknytningState.additionalFysiskeBrukerstederNummer().contains(fysiskBrukerstedNr))
+                || (nonNull(orgtilknytningState.additionalFysiskeBrukerstederNummer()) && orgtilknytningState.additionalFysiskeBrukerstederNummer().contains(fysiskBrukerstedNr)))
             .toList();
     }
 
