@@ -4,6 +4,7 @@ type OrgEnhet {
     gyldigFom: Date!
     gyldigTom: Date
     remedyEnhetId: String
+    tilgangsenhetId: String
     nomNivaa: NomNivaa
     organiseringer (retning: Retning, utvalg: PeriodiskUtvalgArg = AKTIVE) : [Organisering!]!
     leder: [OrgEnhetsLeder!]! @deprecated(reason: "leder er erstattet med ledere")  # Deprekert Nov.2025
