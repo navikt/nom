@@ -217,7 +217,9 @@ public class AuthorizedNavidentController {
         var kunToppNoder = kuntoppnoder != null && List.of("true", "True", "TRUE").contains(kuntoppnoder);
         var isProvidedNavident = navident != null && !navident.isBlank();
         // if navident is provided, check for that user, otherwise use the authenticated user
-        log.info("getOrgEnheterLederCanEdit, navident: {}, kunToppNoder: {}, isProvidedNavident: {}", navident, kunToppNoder, isProvidedNavident);
+        log.info("getOrgEnheterLederCanEdit, " +
+            "navident: {}, kunToppNoder: {}, isProvidedNavident: {}, getAuthenticatedNavIdent(): {}",
+            navident, kunToppNoder, isProvidedNavident, getAuthenticatedNavIdent());
         return authorizedNavident.orgenheterLederKanRedigere(isProvidedNavident ? navident : getAuthenticatedNavIdent(), kunToppNoder);
     }
 
