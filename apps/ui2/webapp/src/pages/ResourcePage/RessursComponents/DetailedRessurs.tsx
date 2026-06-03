@@ -12,18 +12,12 @@ import {
   ExpansionCard,
   Heading,
   HelpText,
-  HStack,
   Label,
-  Link,
   Tag,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Link as ReactRouterLink,
-  useNavigate,
-  useSearch,
-} from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { subMonths } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
@@ -89,6 +83,9 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
 
   const { editOrgtilknytninger } = useSearch({ from: "/ressurs/$id" });
 
@@ -176,7 +173,9 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
 
       default: {
         return (
-          (!harSluttet && hasWriteAccess) || tidligereLeder || hasAdminAccess
+          (((!harSluttet && hasWriteAccess) || tidligereLeder) &&
+            !hasSelfServiceAccess) ||
+          hasAdminAccess
         );
       }
     }
@@ -799,6 +798,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   return (
     <>
       <Divider noMargins />
+
       <Heading level="2" size="small">
         <PersonSuitIcon />
         Leder for
@@ -812,14 +812,12 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         {unikeOrgEnheter.map((orgEnhet) => (
-          <ReactRouterLink
+          <SmartLink
+            href={`/org/${orgEnhet.orgEnhetId}`}
             key={orgEnhet.orgEnhetId}
-            params={{ id: orgEnhet?.orgEnhetId ?? "" }}
-            search={{}}
-            to="/org/$id"
           >
-            <Link as="span">{orgEnhet.orgEnhetNavn}</Link>
-          </ReactRouterLink>
+            {orgEnhet.orgEnhetNavn}
+          </SmartLink>
         ))}
       </div>
     </>
@@ -894,10 +892,7 @@ function SummarySection({
   if (editPersonopplysninger && canEditPersonopplysninger) {
     return (
       <ModalProvider>
-        <EditPersonOpplysninger
-          hasSelfServiceAccess={hasSelfServiceAccess}
-          ressurs={ressurs}
-        />
+        <EditPersonOpplysninger ressurs={ressurs} />
       </ModalProvider>
     );
   }
@@ -975,7 +970,8 @@ function EditOrgtilknytningerButton({
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
-  const hasMissingFysiskBrukersted = !ressurs?.primaryFysiskBrukersted;
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
 
   const navigate = useNavigate();
 
@@ -994,36 +990,27 @@ function EditOrgtilknytningerButton({
       }
 
       default: {
-        return hasWriteAccess || hasAdminAccess;
+        return (hasWriteAccess && !hasSelfServiceAccess) || hasAdminAccess;
       }
     }
   })();
 
   if (!editPersonopplysninger && canEditOrgtilknytninger) {
     return (
-      <HStack align="center" gap="space-8">
-        {hasMissingFysiskBrukersted && (
-          <HelpText title="Knappen er deaktivert">
-            Denne knappen er deaktivert fordi ressursen mangler fysisk
-            brukersted
-          </HelpText>
-        )}
-        <Button
-          //disabled={hasMissingFysiskBrukersted}
-          icon={<PencilIcon aria-hidden />}
-          onClick={() =>
-            navigate({
-              to: "/ressurs/$id",
-              search: { editOrgtilknytninger: true },
-              params: (previous) => ({ id: previous.id ?? "" }),
-            })
-          }
-          size="small"
-          variant="secondary"
-        >
-          Endre
-        </Button>
-      </HStack>
+      <Button
+        icon={<PencilIcon aria-hidden />}
+        onClick={() =>
+          navigate({
+            to: "/ressurs/$id",
+            search: { editOrgtilknytninger: true },
+            params: (previous) => ({ id: previous.id ?? "" }),
+          })
+        }
+        size="small"
+        variant="secondary"
+      >
+        Endre
+      </Button>
     );
   }
 
@@ -1061,6 +1048,9 @@ function BottomSection({
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
 
+  const hasSelfServiceAccess =
+    useGetSession().data?.navident === ressurs.navident;
+
   const canTerminateRessurs = (() => {
     switch (ressurs.identType) {
       case IdentType.ROBOT: {
@@ -1084,7 +1074,12 @@ function BottomSection({
       }
 
       default: {
-        return (hasWriteAccess && hasWriteAccessForRessurs) || hasAdminAccess;
+        return (
+          (hasWriteAccess &&
+            hasWriteAccessForRessurs &&
+            !hasSelfServiceAccess) ||
+          hasAdminAccess
+        );
       }
     }
   })();
@@ -1109,13 +1104,11 @@ function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
 
   if (!editPersonopplysninger) {
     return (
-      <ReactRouterLink
+      <SmartLink
         css={css`
           align-self: flex-end;
         `}
-        params={{ id: ressursNavIdent }}
-        search={{}}
-        to="/ressurs-terminate/$id"
+        href={`/ressurs-terminate/${ressursNavIdent}`}
       >
         <Button
           icon={<PencilIcon aria-hidden />}
@@ -1125,7 +1118,7 @@ function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
         >
           Medarbeider slutter i Nav
         </Button>
-      </ReactRouterLink>
+      </SmartLink>
     );
   }
 
