@@ -13,16 +13,11 @@ import {
   Heading,
   HelpText,
   Label,
-  Link,
   Tag,
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Link as ReactRouterLink,
-  useNavigate,
-  useSearch,
-} from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { subMonths } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
@@ -803,6 +798,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   return (
     <>
       <Divider noMargins />
+
       <Heading level="2" size="small">
         <PersonSuitIcon />
         Leder for
@@ -816,14 +812,12 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         {unikeOrgEnheter.map((orgEnhet) => (
-          <ReactRouterLink
+          <SmartLink
+            href={`/org/${orgEnhet.orgEnhetId}`}
             key={orgEnhet.orgEnhetId}
-            params={{ id: orgEnhet?.orgEnhetId ?? "" }}
-            search={{}}
-            to="/org/$id"
           >
-            <Link as="span">{orgEnhet.orgEnhetNavn}</Link>
-          </ReactRouterLink>
+            {orgEnhet.orgEnhetNavn}
+          </SmartLink>
         ))}
       </div>
     </>
