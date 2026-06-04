@@ -26,22 +26,20 @@ import {dynamicChooseActionMatrix} from "~/components/ExpiryNotifier";
 import {SmartLink} from "~/components/navigation/SmartLink";
 
 export function CreateExternalFundsRecipientPage() {
-
   return (
     <>
       <PageBanner text="Opprett ekstern lønnsmottaker" />
 
       <ContentWrapper>
         <ContainerWithHighlightedTop icon={opprettRessursIconRoundedBackground}>
-            <InputPersonIdent />
-
+          <InputPersonIdent />
         </ContainerWithHighlightedTop>
       </ContentWrapper>
     </>
   );
 }
 
-function validateFnrFormat(fnr: string): undefined | {errorMessage: string} {
+function validateFnrFormat(fnr: string): undefined | { errorMessage: string } {
   fnr = fnr || "";
   if (fnr.length !== 11) {
     return {
@@ -96,7 +94,12 @@ function InputPersonIdent() {
         name={"fnr"}
       />
       <Box paddingBlock={"8"}>
-        {personQuery.isLoading && <Loader />}
+        {personQuery.isLoading && (
+          <Box>
+            <Loader />
+            Henter person...
+          </Box>
+        )}
         {personQuery.error && (
           <LocalAlert status={"error"}>
             <LocalAlert.Header>
@@ -105,7 +108,7 @@ function InputPersonIdent() {
               </LocalAlert.Title>
             </LocalAlert.Header>
             <LocalAlert.Content>
-              HTTP statuskode fra PDl: {personQuery.failureReason?.status}
+              HTTP statuskode fra PDL: {personQuery.failureReason?.status}
             </LocalAlert.Content>
           </LocalAlert>
         )}
@@ -149,27 +152,31 @@ function MaybeCreatedNavIdent(props: {navIdent: string | undefined}){
 }
 
 function MaybeCreateNavidentButton(props: {hasNavIdentFromEarlier: boolean, maybeVisningsNavn: string | undefined, maybeFnr: string | undefined, onSuccess: (fnr: string) => void }) {
-  const [error, setError] = React.useState<string | undefined>(undefined);
   const createNavidentMutation = useMutation<string,DefaultError,{fnr: string},string>({
-    mutationFn: async (x) =>{
+    mutationFn: async (data) =>{
       const res = await fetch("/frackend/nom-api/api/v1/navident", {
         method: "POST",
         body: JSON.stringify({
-          personident: x.fnr,
+          personident: data.fnr,
+          identType: IdentType.STANDARD
         }),
         headers:{
           "Content-Type": "application/json",
         }
       });
-      const json = await res.json();
-
-      return json && typeof json === "object" && json["navident"];
+      if(res.status === 200 || res.status === 201){
+        const json = await res.json();
+        return json && typeof json === "object" && json["navident"];
+      }
+      throw new Error("Opprettelse av navident: Mottok respons med HTTP status " + res.status);
     },
     onSuccess: (data) => {
-      props.onSuccess(data);
+      if(data){
+        props.onSuccess(data);
+      }
     },
-    onError: (error) => {
-      setError(error.message);
+    onError: (err) =>{
+      console.error(err);
     }
   })
 
@@ -177,14 +184,27 @@ function MaybeCreateNavidentButton(props: {hasNavIdentFromEarlier: boolean, mayb
     return;
   }
 
-  if(error){
+  if(createNavidentMutation.status === "pending"){
+    return (
+      <Box>
+        <Loader />
+        Oppretter navident...
+      </Box>
+    );
+  }
+
+  if(createNavidentMutation.error){
     return (
       <LocalAlert status={"error"}>
         <LocalAlert.Header>
-          <LocalAlert.Title>Kunne ikke hente info om person</LocalAlert.Title>
+          <LocalAlert.Title>Kunne ikke opprette navident</LocalAlert.Title>
         </LocalAlert.Header>
         <LocalAlert.Content>
-          HTTP statuskode fra PDl: {error}
+          <Box>{createNavidentMutation.error.message}
+          </Box>
+          <Box paddingBlock={"4"}>
+            <Button variant={"secondary"} onClick={createNavidentMutation.reset}>Forkast feilmelding</Button>
+          </Box>
         </LocalAlert.Content>
       </LocalAlert>
     );
@@ -195,7 +215,7 @@ function MaybeCreateNavidentButton(props: {hasNavIdentFromEarlier: boolean, mayb
       <Button
         onClick={() =>
           dynamicChooseActionMatrix(
-            "Opprett navident for '" + props.maybeVisningsNavn + "'?",
+            "Bekreft opprett navident for '" + props.maybeVisningsNavn + "'?",
             [
               {
                 buttonText: "OK",
@@ -211,7 +231,7 @@ function MaybeCreateNavidentButton(props: {hasNavIdentFromEarlier: boolean, mayb
             ],
           )
         }
-      >Opprett navident</Button>
+      >Opprett navident ... </Button>
     );
   }
 }

@@ -10,8 +10,6 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.pdl.PdlClient;
-import no.nav.nom.apps.api.ressurs.api.v1.remedy.OpprettRessursRequest;
-import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
 import no.nav.nom.contract.nom.IdentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,9 +61,8 @@ public class NavidentController {
         @ApiResponse(responseCode = "404", description = "Failure, body == null"),
         @ApiResponse(responseCode = "500", description = "Failure, body == null")
     })
-    @PreAuthorize("hasAuthority('QUERY_PERSON')")
-    public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
-        var x = SecurityContextHolder.getContext().getAuthentication();
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<NavidentResponse> opprettStandardNavident(@RequestBody NavidentRequest request) {
 
         log.info(TEAM_LOGS, "opprettNavident kalt for personIdent {}", request.getPersonident());
 
@@ -80,14 +77,15 @@ public class NavidentController {
         var opprettNavidentRequest = OpprettNavidentRequest.builder()
             .personid(request.getPersonident())
             .identPrefix(etternavnPrefixBokstav)
-            .identType(IdentType.UKJENT.name())
+            .identType(request.getPersonident())
             .build();
 
         var nikResponse = nikClient.opprettNavident(opprettNavidentRequest);
         var successfulResponse = nikResponse.getStatusCode().is2xxSuccessful();
         var nikResponseBody = nikResponse.getBody();
         if (successfulResponse || nikResponseBody == null) {
-            log.info(TEAM_LOGS, "opprettNavident feilet for personIdent {}", request.getPersonident());
+            log.info(TEAM_LOGS, "opprettNavident feilet for personIdent {} med http-status {}", request.getPersonident(), nikResponse.getStatusCode());
+            log.info("opprettNavident feilet med http-status {}", nikResponse.getStatusCode());
             return ResponseEntity.internalServerError().build();
         }
 
