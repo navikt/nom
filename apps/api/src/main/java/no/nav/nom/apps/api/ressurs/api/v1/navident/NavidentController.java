@@ -77,13 +77,13 @@ public class NavidentController {
         var opprettNavidentRequest = OpprettNavidentRequest.builder()
             .personid(request.getPersonident())
             .identPrefix(etternavnPrefixBokstav)
-            .identType(request.getPersonident())
+            .identType(request.getIdentType().name())
             .build();
 
         var nikResponse = nikClient.opprettNavident(opprettNavidentRequest);
         var successfulResponse = nikResponse.getStatusCode().is2xxSuccessful();
         var nikResponseBody = nikResponse.getBody();
-        if (successfulResponse || nikResponseBody == null) {
+        if (!successfulResponse || nikResponseBody == null) {
             log.info(TEAM_LOGS, "opprettNavident feilet for personIdent {} med http-status {}", request.getPersonident(), nikResponse.getStatusCode());
             log.info("opprettNavident feilet med http-status {}", nikResponse.getStatusCode());
             return ResponseEntity.internalServerError().build();
