@@ -1,12 +1,19 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
+import {
+  BodyShort,
+  Button,
+  DatePicker,
+  Loader,
+  useDatepicker,
+  VStack,
+} from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import {
@@ -144,6 +151,8 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             name="lederRessursNavident"
           />
 
+          <FormDateWrapper label="Leder fra" name="gyldigFom" />
+
           <div
             css={css`
               display: flex;
@@ -171,6 +180,32 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
+function FormDateWrapper({ name, label }: { name: string; label: string }) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const datePickerProperties = useDatepicker({
+    onDateChange: async (date) => {
+      field.onChange(date ? formatDateWithoutTimezone(date) : undefined);
+    },
+    defaultSelected: field.value ? new Date(field.value) : undefined,
+  });
+
+  return (
+    <DatePicker {...datePickerProperties.datepickerProps}>
+      <DatePicker.Input
+        error={fieldState.error?.message}
+        ref={field.ref}
+        {...datePickerProperties.inputProps}
+        label={label}
+        size="medium"
+      />
+    </DatePicker>
+  );
+}
+
 const validationSchema = yup.object({
   lederRessursNavident: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
 });
