@@ -15,11 +15,12 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
     - name: LOGGING_CONFIG
-      value: 'classpath:logback.xml'
+      value: 'classpath:logback-nais.xml'
     - name: OTEL_JAVAAGENT_LOGGING
       value: none
   envFrom:
     - secret: nom-sf-integrasjon-unleash-api-token
+    - secret: sap-sf-credentials
   replicas:
     min: 2
     max: 2
@@ -65,8 +66,14 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: nav.no # TODO: Avklar Azure AD group-regler når auth settes opp
-      allowAllUsers: true
+      tenant: nav.no
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: "2d91b26c-d412-440b-9122-0fafc594db89" # NOM_ADMIN_GROUPID prod
+        extra:
+          - NAVident
+          - azp_name
   accessPolicy:
     inbound:
       rules:
@@ -79,5 +86,4 @@ spec:
     outbound:
       external:
         - host: org-unleash-api.nav.cloud.nais.io
-        # TODO: Legg til SAP SuccessFactors host når auth og URL er avklart
-        # - host: <sap-sf-host>
+        - host: api55.sapsf.eu
