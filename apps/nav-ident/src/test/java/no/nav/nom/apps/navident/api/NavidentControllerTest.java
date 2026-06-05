@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NavidentControllerTest {
 
-    NavidentController navidentController = new NavidentController(null, null, null);
+    NavidentController navidentController = new NavidentController(null, null);
 
     @Test
     @DisplayName("Test konvertering av identprefiks med aksent/diacritic og nasjonale bokstaver til A-Z")

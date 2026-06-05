@@ -11,24 +11,21 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.val;
 import no.nav.nom.apps.navident.IdentService;
+import no.nav.nom.apps.navident.api.dto.NavidentLookupRequestDto;
+import no.nav.nom.apps.navident.api.dto.NavidentLookupResponseDTO;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
 import no.nav.nom.apps.navident.api.dto.NavidentResponseDTO;
 import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.SwaggerConfig;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.eventsource.EventSourceProducer;
-import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.libs.utils.common.mdc.MdcConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.HtmlUtils;
 
 import java.text.Normalizer;
 import java.util.Map;
@@ -42,12 +39,10 @@ public class NavidentController {
     public final static String BASE_URL = "/navident";
     private final static Logger logger = LoggerFactory.getLogger(NavidentController.class);
     private final IdentService identService;
-    private final EventSourceProducer eventSourceProducer;
 
-    public NavidentController(Map<String, Navident> navidenter, IdentService identService, EventSourceProducer eventSourceProducer) {
+    public NavidentController(Map<String, Navident> navidenter, IdentService identService) {
         this.navidenter = navidenter;
         this.identService = identService;
-        this.eventSourceProducer = eventSourceProducer;
     }
 
     @Operation(
@@ -85,6 +80,22 @@ public class NavidentController {
             .build();
 
         return ResponseEntity.status(bestilling.getHttpStatus()).body(response);
+    }
+
+    @PostMapping(value = "/lookup")
+    public ResponseEntity<NavidentLookupResponseDTO> lookupNavident(@RequestBody NavidentLookupRequestDto request) {
+        logger.info(LogConfig.TEAM_LOGS, "Lookup navident for: {}", request);
+        var maybePersonIdentMatch = navidenter.values()
+            .stream()
+            .filter(navidentEntry -> navidentEntry.getGjeldendePersonid().equals(request.getPersonid()))
+            .findFirst();
+
+        return maybePersonIdentMatch.map(personIdentMatch -> ResponseEntity.ok(
+            NavidentLookupResponseDTO.builder()
+                    .identType(personIdentMatch.getIdentType())
+                    .navident(personIdentMatch.getNavident())
+                .build()
+            )).orElse(ResponseEntity.notFound().build());
     }
 
     char prefixValidator(String identPrefix) {

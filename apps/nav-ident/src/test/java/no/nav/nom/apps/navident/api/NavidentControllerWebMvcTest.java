@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident.api;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
+import no.nav.nom.apps.navident.api.dto.NavidentLookupRequestDto;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
 import no.nav.nom.apps.navident.eventsource.EventSourceProducer;
 import no.nav.nom.apps.navident.rnrservices.Respons;
@@ -90,7 +91,7 @@ class NavidentControllerWebMvcTest {
         when(identService.bestillIdent(personId, type, prefix)).thenReturn(rnrResponse);
 
         mvc.perform(
-                        getValidRequest(personId, type, String.valueOf(prefix))
+                        getValidCreateRequest(personId, type, String.valueOf(prefix))
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.navident", is(generertNavIdent)))
@@ -99,7 +100,47 @@ class NavidentControllerWebMvcTest {
         ;
     }
 
-    private MockHttpServletRequestBuilder getValidRequest(String personId, IdentType type, String prefix) {
+    @Test
+    public void lookupNavident() throws Exception {
+        String personId = "01019012345";
+
+
+        mvc.perform(
+                getValidLookupRequest(personId)
+            )
+            .andExpect(status().isNotFound())
+            .andDo(MockMvcResultHandlers.print())
+        ;
+
+
+        // todo, uncomment lines below, after refactoring the `navidenter` bean so that mocking becomes easier
+
+            //        String generertNavIdent = "X123456";
+            //
+            //        mvc.perform(
+            //                getValidLookupRequest(personId)
+            //            )
+            //            .andExpect(status().isOk())
+            //            .andExpect(jsonPath("$.navident", is(generertNavIdent)))
+            //            .andDo(result -> log.debug("Response body: %s".formatted(result.getResponse().getContentAsString())))
+            //            .andDo(MockMvcResultHandlers.print());
+    }
+
+    private MockHttpServletRequestBuilder getValidLookupRequest(String personId) {
+        var req = NavidentLookupRequestDto.builder()
+            .personid(personId)
+            .build();
+        Gson gson = new Gson();
+        String reqJson = gson.toJson(req);
+        log.debug("Request body: %s".formatted(reqJson));
+
+        return post(NavidentController.BASE_URL + "/lookup")
+            .with(jwt()) // Lager en JWT som will passere alle SecurityFilters
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(reqJson);
+    }
+
+    private MockHttpServletRequestBuilder getValidCreateRequest(String personId, IdentType type, String prefix) {
         NavidentRequestDTO req = NavidentRequestDTO.builder()
                 .personid(personId)
                 .identType(type)
