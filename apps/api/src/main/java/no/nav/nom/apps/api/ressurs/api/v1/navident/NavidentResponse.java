@@ -12,24 +12,6 @@ import org.springframework.http.HttpStatusCode;
 @Slf4j
 public class NavidentResponse {
 
-    private String status;
-    private String personident;
     private String navident;
-    private String fornavn;
-    private String mellomnavn;
-    private String etternavn;
-    private String feilmelding;
 
-
-    public static NavidentResponse medFeilmelding(HttpStatusCode httpStatusCode, String feilmelding) {
-        return medFeilmelding(Integer.toString(httpStatusCode.value()), feilmelding);
-    }
-
-    public static NavidentResponse medFeilmelding(String status, String feilmelding) {
-        log.error("Feil ved opprettNavident: {} - {}", status, feilmelding);
-        return NavidentResponse.builder()
-                .status(status)
-                .feilmelding(feilmelding)
-                .build();
-    }
 }
