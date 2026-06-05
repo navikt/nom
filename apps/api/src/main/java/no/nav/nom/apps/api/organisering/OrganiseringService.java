@@ -7,8 +7,6 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrg
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -26,8 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Objects.isNull;
-
 @Service
 public class OrganiseringService {
 
@@ -40,19 +36,16 @@ public class OrganiseringService {
     private final JsonMapper jsonMapper;
 
     private final OrganiseringEventCommandService organiseringEventCommandService;
-    private final OrgEnhetCommandService orgEnhetCommandService;
 
     public OrganiseringService(
         OrganiseringStateRepository organiseringStateRepository, OrgenhetService orgenhetService,
         OrganiseringEventCommandService organiseringEventCommandService,
-        JsonMapper jsonMapper,
-        OrgEnhetCommandService orgEnhetCommandService
+        JsonMapper jsonMapper
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgenhetService = orgenhetService;
         this.organiseringEventCommandService = organiseringEventCommandService;
         this.jsonMapper = jsonMapper;
-        this.orgEnhetCommandService = orgEnhetCommandService;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> dvhOrganiseringer) {
@@ -94,20 +87,10 @@ public class OrganiseringService {
                         organiseringerTerminatedByUpdate.add(organiseringState.get().fid());
 
                         organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
-                        String tilgangsenhetId = "";
-                        if (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank()) {
-                            tilgangsenhetId = orgenhetService.getTilgangsenhetId(orgEnhetOver.get().getId());
-                        }
-                        orgEnhetCommandService.endreTilgangsenhet(orgEnhet.get().getFid(), new EndreTilgangsenhet(tilgangsenhetId, createInputMetadata(dvhOrganisering)));
                         numberOfNew++;
                     }
                 } else {
                     organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
-                    String tilgangsenhetId = "";
-                    if (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank()) {
-                        tilgangsenhetId = orgenhetService.getTilgangsenhetId(orgEnhetOver.get().getId());
-                    }
-                    orgEnhetCommandService.endreTilgangsenhet(orgEnhet.get().getFid(), new EndreTilgangsenhet(tilgangsenhetId, createInputMetadata(dvhOrganisering)));
                     numberOfNew++;
                 }
                 organiseringIdsFromDvh.add(new OrganiseringIdTuple(orgEnhet.get().getId(), orgEnhetOver.get().getId()));

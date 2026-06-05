@@ -5,6 +5,8 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -17,10 +19,12 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
@@ -34,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
@@ -297,12 +302,58 @@ public class OrgenhetService {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 
-    public String getTilgangsenhetId(String nomId) {
+    public String getTilgangsenhetIdOver(String nomId) {
         var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId).map(OrganiseringState::idOver).orElse("");
         var orgEnhetOver = getById(organiseringOrgEnhetId);
         if (orgEnhetOver.isPresent() && (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank())) {
-            return getTilgangsenhetId(orgEnhetOver.get().getId());
+            return getTilgangsenhetIdOver(orgEnhetOver.get().getId());
         }
         return orgEnhetOver.map(IOrgenhet::getTilgangsenhetId).orElse(null);
+    }
+
+    public String getTilgangsenhetIdUnder(String nomId) {
+        return getAllUnderliggendeOrgEnhetById(nomId).stream()
+            .filter(orgEnhet -> nonNull(orgEnhet.getTilgangsenhetId()))
+            .findFirst().map(IOrgenhet::getTilgangsenhetId).orElse(null);
+    }
+
+
+    @KafkaListener(
+        id = "nomApi_organiseringState_listener_for_tilgangsenhet_resolve",
+        containerFactory = "nomStateOrganiseringKafkaListenerContainerFactory",
+        topics = "${app.kafka.organisering.stateTopic}"
+    )
+    public void onMessage(ConsumerRecords<String, OrganiseringState> records) {
+        InputMetadata inputMetadata = new InputMetadata(
+            "nom-api BatchJob",
+            "oppdaterTilgansenhet - OrgenhetService",
+            null,
+            new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName())
+        );
+        StreamSupport.stream(records.spliterator(), false).forEach(record -> {
+            var organiseringState = record.value();
+            var orgEnhetState = orgEnhetStateRepository.findById(organiseringState.id())
+                .orElseThrow(() -> OrgEnhetNotFoundException.id(organiseringState.id()));
+
+            if (isNull(orgEnhetState.tilgangsenhetId()) || orgEnhetState.tilgangsenhetId().isBlank()) {
+                var orgEnhetOver = orgEnhetStateRepository.findById(organiseringState.idOver())
+                    .orElseThrow(() -> new OrgEnhetNotFoundException(organiseringState.idOver()));
+
+                String tilgansenhetId = orgEnhetOver.tilgangsenhetId();
+
+                if (isNull(tilgansenhetId) || tilgansenhetId.isBlank()) {
+                    tilgansenhetId = getTilgangsenhetIdOver(orgEnhetOver.id());
+                }
+
+                if (isNull(tilgansenhetId) || tilgansenhetId.isBlank()) {
+                    tilgansenhetId = getTilgangsenhetIdUnder(orgEnhetState.id());
+                }
+
+                orgEnhetCommandService.endreTilgangsenhet(
+                    orgEnhetState.fid(),
+                    new EndreTilgangsenhet(tilgansenhetId, inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhetOver).build())
+                );
+            }
+        });
     }
 }
