@@ -120,7 +120,7 @@ function InputPersonIdent() {
           <MaybeExistingNavIdent navIdent={maybeEksisterendeNavIdent} />
           <MaybeCreateNavidentButton
             maybeFnr={queryFnr}
-            hasNavIdentFromEarlier={!!maybeEksisterendeNavIdent}
+            hasNavIdentFromEarlier={!!maybeEksisterendeNavIdent || !!createdNavIdent}
             maybeVisningsNavn={maybeFormattedVisningsNavn}
             onSuccess={(createdNavIdent) => {
               setCreatedNavIdent(createdNavIdent);
