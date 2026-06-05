@@ -1,5 +1,11 @@
 app:
   name: ${NAIS_APP_NAME:nom-sf-integrasjon}
+  sf:
+    api-url: ${SF_API_URL:https://sf.api.exacmple.com}
+    client-id: ${SF_CLIENT_ID:sf-client-id}
+    private-key: ${SF_PRIVATE_KEY:sf-private-key}
+    tenant: ${SF_TENANT:sf-tenant}
+    user-id: ${SF_USER_ID:sf-user-id}
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -69,15 +75,19 @@ spring:
     mapper:
       sort-properties-alphabetically: false
 
-  # TODO: Legg til Azure AD resource-server-konfig når auth settes opp
-  # security:
-  #   oauth2:
-  #     resourceserver:
-  #       jwt:
-  #         issuer-uri: ${azure.issuer-uri}
-  #         audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-
 unleash:
   endpoint:
     url: ${UNLEASH_SERVER_API_URL}/api
   api-key: ${UNLEASH_SERVER_API_TOKEN}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "!local"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}

@@ -38,6 +38,13 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-paarorende'
+  postgres-sf-integrasjon:
+    image: postgres
+    ports:
+      - '5437:5432'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'postgres-sf-integrasjon'
   zookeeper:
     image: confluentinc/cp-zookeeper:7.7.4
     environment:
@@ -45,6 +52,9 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 32181:2181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
   kafka:
     image: confluentinc/cp-kafka:7.7.4
     depends_on:
@@ -80,3 +90,5 @@ services:
 
 volumes:
   pgadmin-data:
+  zookeeper-data:
+  zookeeper-log:
