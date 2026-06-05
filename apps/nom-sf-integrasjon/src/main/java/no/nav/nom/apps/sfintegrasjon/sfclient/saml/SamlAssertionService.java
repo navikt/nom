@@ -98,27 +98,53 @@ public class SamlAssertionService {
 
     /**
      * Loads an RSA private key from a PKCS#8 PEM-encoded string (standard PEM format with header/footer). // gitleaks:allow
+     *
+     * <p>Supports two formats:
+     * <ol>
+     *   <li><b>Standard PEM</b> (single base64 layer — normal PKCS#8 key file):
+     *       PEM-headers wrap a single base64-encoded DER byte sequence.</li>
+     *   <li><b>SAP double-encoded format</b>: PEM-headers wrap a base64 string that,
+     *       when decoded, gives another base64 string optionally suffixed with {@code ###<tenant>}.
+     *       This is the format produced by SAP's key-generation tools.</li>
+     * </ol>
+     * The format is detected automatically: if the outer-decoded bytes are all printable ASCII
+     * (which base64 characters are), it is treated as SAP double-encoded; otherwise as plain DER.
      */
     private PrivateKey loadPrivateKey(String encodedKey) throws Exception {
-        // The env var is PEM-wrapped outer base64:
-        //   <PEM-header> // gitleaks:allow
-        //   <Base64( base64_key + optional_"###<tenant>" )>
-        //   <PEM-footer>
-
         // Step 1: strip PEM headers and whitespace
         String b64Outer = encodedKey
                 .replaceAll("-----[^\\n]*-----", "")
                 .replaceAll("\\s+", "");
 
-        // Step 2: outer decode → UTF-8 string: base64_key + optional_"###<tenant>"
-        String inner = new String(Base64.getDecoder().decode(b64Outer), StandardCharsets.UTF_8);
+        // Step 2: outer base64 decode
+        byte[] outerDecoded = Base64.getDecoder().decode(b64Outer);
 
-        // Step 3: strip "###<tenant>" suffix if present
-        String keyB64 = inner.split("###")[0];
+        byte[] keyBytes;
+        if (isPrintableAscii(outerDecoded)) {
+            // SAP double-encoded format:
+            //   PEM( Base64( Base64(DER) + optional_"###<tenant>" ) )
+            // Outer-decoded bytes are base64 text → decode again to get DER.
+            String inner = new String(outerDecoded, StandardCharsets.US_ASCII);
+            String keyB64 = inner.split("###")[0].replaceAll("\\s+", "");
+            keyBytes = Base64.getDecoder().decode(keyB64);
+        } else {
+            // Standard PKCS#8 PEM: outer-decoded bytes are already the raw DER key.
+            keyBytes = outerDecoded;
+        }
 
-        // Step 4: inner decode → DER bytes
-        byte[] keyBytes = Base64.getDecoder().decode(keyB64.replaceAll("\\s+", ""));
         return KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
+    }
+
+    /**
+     * Returns true if all bytes are printable ASCII (0x20–0x7E).
+     * DER key bytes will contain many non-printable values; base64 text will not.
+     */
+    private boolean isPrintableAscii(byte[] bytes) {
+        for (byte b : bytes) {
+            int unsigned = b & 0xFF;
+            if (unsigned < 0x20 || unsigned > 0x7E) return false;
+        }
+        return true;
     }
 
     /**
