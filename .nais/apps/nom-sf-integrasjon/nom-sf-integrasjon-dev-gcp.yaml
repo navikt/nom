@@ -11,6 +11,8 @@ metadata:
 spec:
   image: "{{image}}"
   port: 8080
+  ingresses:
+    - https://nom-sf-integrasjon.intern.dev.nav.no
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
