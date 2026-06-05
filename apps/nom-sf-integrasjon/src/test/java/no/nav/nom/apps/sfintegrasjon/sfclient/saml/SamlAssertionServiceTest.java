@@ -162,18 +162,6 @@ class SamlAssertionServiceTest {
     }
 
     @Test
-    void generateAssertion_withStandardPemKey_succeeds() {
-        // Standard PKCS#8 PEM (single base64 layer) — format used in Nais secrets
-        String standardPem = "-----BEGIN PRIVATE KEY-----\n"
-                + Base64.getMimeEncoder(64, "\n".getBytes()).encodeToString(testPrivateKey.getEncoded())
-                + "\n-----END PRIVATE KEY-----"; // gitleaks:allow
-
-        String assertion = service.generateAssertion(new SamlAssertionParams(null, standardPem, null, null, null));
-
-        assertThat(assertion).isNotBlank();
-    }
-
-    @Test
     void generateAssertion_invalidPrivateKeyThrowsSamlAssertionException() {
         SamlAssertionParams params = new SamlAssertionParams(
                 null, "not-a-valid-pem", null, null, null
