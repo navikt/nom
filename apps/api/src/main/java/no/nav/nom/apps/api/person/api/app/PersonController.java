@@ -88,13 +88,7 @@ public class PersonController {
     }
 
     private String lookupMaybeNikNavIdent(String personident) {
-        var navIdentResponse = nIKClient.lookupNavident(new LookupNavidentRequest(personident));
-        var okStatus = navIdentResponse.getStatusCode().is2xxSuccessful();
-        if (okStatus) {
-            var responseBody = navIdentResponse.getBody();
-            return responseBody != null ? navIdentResponse.getBody().getNavident() : null;
-        }
-        return null;
+        return nIKClient.lookupNavident(new LookupNavidentRequest(personident));
     }
 
     private Optional<FolkeregisterPerson> getPerson(String personident) {
