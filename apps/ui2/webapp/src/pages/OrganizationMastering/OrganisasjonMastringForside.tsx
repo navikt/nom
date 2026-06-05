@@ -81,7 +81,7 @@ export const OrganisasjonMastringForside = () => {
         <VStack gap="12">
           <AdministreringAvOrgEnheterSeksjon />
 
-          <MineOrgEnheterSeksjon ledetAvMeg={ledetAvMeg} />
+          <MineOrgEnheterSeksjon />
         </VStack>
       </ContentWrapper>
     </>
@@ -217,7 +217,7 @@ function ExternalLinkCard({
   );
 }
 
-function MineOrgEnheterSeksjon({ ledetAvMeg }: { ledetAvMeg: OrgEnhet[] }) {
+function MineOrgEnheterSeksjon() {
   const hasAdminAccess = useHasAdminAccess();
   const hasAdminReadOnlyAccess = useHasAdminReadOnlyAccess();
 
@@ -234,7 +234,8 @@ function MineOrgEnheterSeksjon({ ledetAvMeg }: { ledetAvMeg: OrgEnhet[] }) {
 
   const handlePerpectiveSelect = (input: string) =>
     setPerspectiveSelected(input);
-  useQuery({
+
+  const redigerbareToppnoderQuery = useQuery({
     queryKey: getOrgEnheterRessursKanRedigere.queryKey(
       visPerspektivSearch ? perspectiveSelected : undefined,
       true,
@@ -245,6 +246,7 @@ function MineOrgEnheterSeksjon({ ledetAvMeg }: { ledetAvMeg: OrgEnhet[] }) {
         true,
       ),
   });
+
   const valgtRessursQuery = useQuery({
     queryKey: getRessurs.queryKey(perspectiveSelected),
     queryFn: () => getRessurs.queryFn(perspectiveSelected),
@@ -252,7 +254,11 @@ function MineOrgEnheterSeksjon({ ledetAvMeg }: { ledetAvMeg: OrgEnhet[] }) {
   });
 
   const valgtRessurs = valgtRessursQuery.data;
-  const toppnodeIder = ledetAvMeg?.map((orgEnhet) => orgEnhet.id) ?? [];
+
+  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
+
+  const toppnodeIder =
+    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
 
   const delegerbareRessurserQuery = useQuery({
     queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,

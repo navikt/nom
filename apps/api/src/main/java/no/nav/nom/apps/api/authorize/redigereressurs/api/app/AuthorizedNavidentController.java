@@ -217,14 +217,7 @@ public class AuthorizedNavidentController {
         var kunToppNoder = kuntoppnoder != null && List.of("true", "True", "TRUE").contains(kuntoppnoder);
         var isProvidedNavident = navident != null && !navident.isBlank();
         // if navident is provided, check for that user, otherwise use the authenticated user
-
-        List<IOrgenhet> result = authorizedNavident.orgenheterLederKanRedigere(isProvidedNavident ? navident : getAuthenticatedNavIdent(), kunToppNoder);
-
-        log.info("getOrgEnheterLederCanEdit, " +
-            "navident: {}, getAuthenticatedNavIdent(): {}, result: result: {}",
-            navident, getAuthenticatedNavIdent(), result.stream().map(IOrgenhet::getId).toList());
-
-        return result;
+        return authorizedNavident.orgenheterLederKanRedigere(isProvidedNavident ? navident : getAuthenticatedNavIdent(), kunToppNoder);
     }
 
     @PostMapping("getLedereForOrgenheter")
