@@ -66,4 +66,28 @@ public class NIKClient {
             .toEntity(OpprettNavidentResponse.class)
             .block();
     }
+
+    public ResponseEntity<LookupNavidentResponse> lookupNavident(LookupNavidentRequest lookupNavidentRequest) {
+        return lookupNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, lookupNavidentRequest);
+    }
+
+    public ResponseEntity<LookupNavidentResponse> lookupNavidentOnBehalfOfUser(LookupNavidentRequest lookupNavidentRequest) {
+        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(nikScope);
+
+        var onBehalfOfAuthorizedWebClient = nikWebClientBuilder
+            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+            .build();
+
+        return lookupNavidentWithSuppliedWebClient(onBehalfOfAuthorizedWebClient, lookupNavidentRequest);
+    }
+
+    private ResponseEntity<LookupNavidentResponse> lookupNavidentWithSuppliedWebClient(WebClient suppliedWebClient, LookupNavidentRequest lookupNavidentRequest) {
+        return suppliedWebClient.post()
+            .uri("/navident/lookup")
+            .bodyValue(lookupNavidentRequest)
+            .retrieve()
+            .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.
+            .toEntity(LookupNavidentResponse.class)
+            .block();
+    }
 }
