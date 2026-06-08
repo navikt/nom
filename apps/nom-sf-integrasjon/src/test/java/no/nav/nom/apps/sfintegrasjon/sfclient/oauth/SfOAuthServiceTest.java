@@ -6,6 +6,7 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.SfProperties;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.net.URLEncoder;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,6 +63,30 @@ class SfOAuthServiceTest {
         verify(postRequestedFor(urlEqualTo("/oauth/token"))
             .withRequestBody(containing("client_id=override-client"))
             .withRequestBody(containing("company_id=override-tenant")));
+    }
+
+    @Test
+    void validateToken_shouldSendBearerHeaderAndReturnValidationResult(WireMockRuntimeInfo wm) {
+        String rawBody = "{\"access_token\":\"sf-access-token\",\"token_type\":\"Bearer\",\"expires_in\":86312}";
+        stubFor(get("/oauth/validate").willReturn(okJson(rawBody)));
+
+        SfOAuthService service = buildService(wm.getHttpPort());
+        String result = service.validateToken("sf-access-token");
+
+        assertThat(result).isEqualTo(rawBody);
+        verify(getRequestedFor(urlEqualTo("/oauth/validate"))
+            .withHeader("Authorization", equalTo("Bearer sf-access-token")));
+    }
+
+    @Test
+    void validateToken_shouldThrowWhenSapReturns401(WireMockRuntimeInfo wm) {
+        stubFor(get("/oauth/validate")
+            .willReturn(unauthorized()));
+
+        SfOAuthService service = buildService(wm.getHttpPort());
+
+        assertThatThrownBy(() -> service.validateToken("invalid-token"))
+            .isInstanceOf(HttpClientErrorException.class);
     }
 
     private SfOAuthService buildService(int port) {

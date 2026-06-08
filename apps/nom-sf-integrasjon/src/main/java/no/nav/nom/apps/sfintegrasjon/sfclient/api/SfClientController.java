@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Base64;
 
@@ -76,5 +77,26 @@ public class SfClientController {
         return ResponseEntity.ok(token);
     }
 
+    @PostMapping(value = "/validate-token", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Validate OAuth access token",
+        description = "Validates an SF OAuth 2.0 access token via the SAP SuccessFactors /oauth/validate endpoint. " +
+            "Returns the raw response body from SAP. Returns the upstream HTTP status if SAP rejects the token."
+    )
+    public ResponseEntity<String> validateToken(@RequestBody ValidateTokenRequest request) {
+        if (request.token() == null || request.token().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            String rawBody = sfOAuthService.validateToken(request.token());
+            return ResponseEntity.ok(rawBody);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
     public record SamlAssertionResponse(String assertion) {}
+
+    public record ValidateTokenRequest(String token) {}
 }

@@ -35,6 +35,21 @@ public class SfOAuthService {
     }
 
     /**
+     * Validates an existing SAP SuccessFactors OAuth access token.
+     *
+     * @param token Raw Bearer token value (without the "Bearer " prefix)
+     * @return Raw response body from SAP SuccessFactors
+     */
+    public String validateToken(String token) {
+        return restClient.get()
+            .uri("/oauth/validate")
+            .header("Authorization", "Bearer " + token)
+            .retrieve()
+            .toEntity(String.class)
+            .getBody();
+    }
+
+    /**
      * Generates a SAML assertion and exchanges it for an SF OAuth access token.
      *
      * @param params Override parameters for assertion generation; null fields fall back to {@link SfProperties}

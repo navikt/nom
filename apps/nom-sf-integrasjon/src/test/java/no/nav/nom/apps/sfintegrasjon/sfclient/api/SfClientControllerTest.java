@@ -16,10 +16,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.web.client.HttpClientErrorException;
 
 @WebMvcTest(SfClientController.class)
 @Import(SecurityConfig.class)
@@ -115,5 +118,61 @@ class SfClientControllerTest {
             .andExpect(jsonPath("$.access_token").value("sf-access-token"))
             .andExpect(jsonPath("$.token_type").value("Bearer"))
             .andExpect(jsonPath("$.expires_in").value(86400));
+    }
+
+    // --- /api/sf/client/validate-token ---
+
+    @Test
+    void validateToken_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/sf/client/validate-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"some-token\"}"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void validateToken_shouldReturn403WhenNotAdmin() throws Exception {
+        mockMvc.perform(post("/api/sf/client/validate-token")
+                .with(jwt())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"some-token\"}"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void validateToken_shouldReturn200WithValidationResultWhenAdmin() throws Exception {
+        String rawBody = "{\"access_token\":\"sf-access-token\",\"token_type\":\"Bearer\",\"expires_in\":86312}";
+        when(sfOAuthService.validateToken(eq("sf-access-token"))).thenReturn(rawBody);
+
+        mockMvc.perform(post("/api/sf/client/validate-token")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"sf-access-token\"}"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(rawBody));
+    }
+
+    @Test
+    void validateToken_shouldReturn400WhenTokenIsBlank() throws Exception {
+        mockMvc.perform(post("/api/sf/client/validate-token")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"\"}"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void validateToken_shouldReturn401WhenSapRejectsToken() throws Exception {
+        when(sfOAuthService.validateToken(any()))
+            .thenThrow(HttpClientErrorException.create(
+                org.springframework.http.HttpStatus.UNAUTHORIZED, "Unauthorized",
+                org.springframework.http.HttpHeaders.EMPTY, new byte[0], null));
+
+        mockMvc.perform(post("/api/sf/client/validate-token")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"invalid-token\"}"))
+            .andExpect(status().isUnauthorized());
     }
 }
