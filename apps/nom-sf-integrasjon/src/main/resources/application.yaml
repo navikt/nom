@@ -1,7 +1,7 @@
 app:
   name: ${NAIS_APP_NAME:nom-sf-integrasjon}
   sf:
-    api-url: ${SF_API_URL:https://sf.api.exacmple.com}
+    api-url: ${SF_API_URL:https://sf.api.example.com}
     client-id: ${SF_CLIENT_ID:sf-client-id}
     private-key: ${SF_PRIVATE_KEY:sf-private-key}
     tenant: ${SF_TENANT:sf-tenant}
