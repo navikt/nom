@@ -2,9 +2,12 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
+  BodyLong,
   BodyShort,
   Button,
+  Checkbox,
   DatePicker,
+  HStack,
   Loader,
   useDatepicker,
   VStack,
@@ -25,10 +28,7 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import {
-  formatDateWithoutTimezone,
-  todayWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -109,6 +109,10 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
+    defaultValues: {
+      fungerendeLeder: false,
+    },
+    shouldUnregister: true,
   });
 
   const opprettOrgEnhetLederMutation = useMutation<
@@ -136,22 +140,75 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const request: OpprettOrgEnhetLederRequest = {
       orgEnhetId: orgEnhet.id,
       navident: values.lederRessursNavident,
-      gyldigFom: formatDateWithoutTimezone(todayWithoutTimezone()),
+      gyldigFom: values.gyldigFom,
+      gyldigTom: values.fungerendeLeder ? values.gyldigTom : undefined,
     };
 
     opprettOrgEnhetLederMutation.mutate(request);
   };
 
+  const fungerendeLeder = methods.watch("fungerendeLeder");
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="9">
-          <FormRessursSearchWrapper
-            label="Ny leder på organisasjonsenhet"
-            name="lederRessursNavident"
-          />
+        <VStack gap="8">
+          <VStack gap="6">
+            <FormRessursSearchWrapper
+              label="Ny leder på organisasjonsenhet"
+              name="lederRessursNavident"
+            />
 
-          <FormDateWrapper label="Leder fra" name="gyldigFom" />
+            <div
+              css={css`
+                display: flex;
+                justify-content: space-between;
+              `}
+            >
+              <VStack
+                css={css`
+                  min-width: 450px;
+                `}
+                gap="2"
+              >
+                <Checkbox {...methods.register("fungerendeLeder")}>
+                  Midlertidig fungerende leder
+                </Checkbox>
+
+                <HStack gap="6">
+                  <FormDateWrapper label="Leder fra" name="gyldigFom" />
+
+                  {fungerendeLeder && (
+                    <FormDateWrapper label="Leder til" name="gyldigTom" />
+                  )}
+                </HStack>
+              </VStack>
+
+              <BodyLong
+                css={css`
+                  width: fit-content;
+                  background-color: var(--nom-secondary-hover);
+                  border-radius: 8px;
+                  padding: var(--a-spacing-4);
+                  height: fit-content;
+                `}
+              >
+                <VStack gap="2">
+                  <span>
+                    <b>Lederplan:</b>
+                  </span>
+                  <span>
+                    <b>Hans Petter Sørensen Grønsveen Lang</b>:<br /> 01.01.2026
+                    - 30.06.2026
+                  </span>
+                  <span>
+                    <b>Hans Petter Sørensen Grønsveen Lang</b>:<br /> 01.07.2026
+                    - ubestemt tid
+                  </span>
+                </VStack>
+              </BodyLong>
+            </div>
+          </VStack>
 
           <div
             css={css`
@@ -207,5 +264,11 @@ function FormDateWrapper({ name, label }: { name: string; label: string }) {
 
 const validationSchema = yup.object({
   lederRessursNavident: yup.string().required("Obligatorisk"),
+  fungerendeLeder: yup.boolean().default(false),
   gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigTom: yup.string().when("fungerendeLeder", {
+    is: true,
+    then: (schema) => schema.required("Obligatorisk"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
