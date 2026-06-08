@@ -46,6 +46,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
@@ -333,6 +334,9 @@ public class OrgenhetService {
         StreamSupport.stream(records.spliterator(), false).forEach(record -> {
             log.info("TEST: {}", record.value());
             var organiseringState = record.value();
+            if (!isPeriodActive(organiseringState.gyldigFom(), organiseringState.gyldigTom())) {
+                return;
+            }
             var orgEnhetState = orgEnhetStateRepository.findById(organiseringState.id())
                 .orElseThrow(() -> OrgEnhetNotFoundException.id(organiseringState.id()));
 

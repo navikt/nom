@@ -18,7 +18,7 @@ public record OpprettOrgEnhetRequest(
     @Schema(example = "2026-01-31") LocalDate gyldigFom,
     @NotBlank(message = "Leder må være satt for OrgEnheten")
     @Schema(example = "A123456") String lederRessursNavident,
-    @NotBlank(message = "Organisasjonsenheten må tilhøre en RemedyEnhet")
+    //@NotBlank(message = "Organisasjonsenheten må tilhøre en RemedyEnhet")
     @Schema(example = "1234") String tilgangsenhetId,
     @NotNull(message = "OrgEnhet må ha en OrgEnhetsType satt")
     @Schema(example = "DIREKTORAT") OrgEnhetsType orgEnhetsType
