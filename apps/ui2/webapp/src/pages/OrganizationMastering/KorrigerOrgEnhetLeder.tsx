@@ -2,11 +2,11 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
-  BodyLong,
   BodyShort,
   Button,
   Checkbox,
   DatePicker,
+  Heading,
   HStack,
   Loader,
   useDatepicker,
@@ -21,6 +21,7 @@ import * as yup from "yup";
 
 import {
   getOrgEnhet,
+  getPeriodiserteLedereOrgEnhet,
   opprettOrgEnhetLeder,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
@@ -37,7 +38,12 @@ import {
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
+import {
+  nomDateIsAfter,
+  nomDateIsTodayOrAfter,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OpprettOrgEnhetLederRequest, OrgEnhet } from "~/types/api-models";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const KorrigerOrgEnhetLeder = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -184,29 +190,7 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                 </HStack>
               </VStack>
 
-              <BodyLong
-                css={css`
-                  width: fit-content;
-                  background-color: var(--nom-secondary-hover);
-                  border-radius: 8px;
-                  padding: var(--a-spacing-4);
-                  height: fit-content;
-                `}
-              >
-                <VStack gap="2">
-                  <span>
-                    <b>Lederplan:</b>
-                  </span>
-                  <span>
-                    <b>Hans Petter Sørensen Grønsveen Lang</b>:<br /> 01.01.2026
-                    - 30.06.2026
-                  </span>
-                  <span>
-                    <b>Hans Petter Sørensen Grønsveen Lang</b>:<br /> 01.07.2026
-                    - ubestemt tid
-                  </span>
-                </VStack>
-              </BodyLong>
+              <Lederplan orgEnhetId={orgEnhet.id} />
             </div>
           </VStack>
 
@@ -234,6 +218,51 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         </VStack>
       </form>
     </FormProvider>
+  );
+}
+
+function Lederplan({ orgEnhetId }: { orgEnhetId: string }) {
+  const periodiserteLedereQuery = useQuery({
+    queryKey: getPeriodiserteLedereOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getPeriodiserteLedereOrgEnhet.queryFn(orgEnhetId),
+  });
+
+  const periodiserteLedere = periodiserteLedereQuery.data;
+
+  const formaterteLedere = periodiserteLedere
+    ?.filter((leder) => nomDateIsTodayOrAfter(leder.sluttdato))
+    .sort((a, b) => (nomDateIsAfter(a.startdato, b.startdato) ? 1 : -1));
+
+  return (
+    <div
+      css={css`
+        width: fit-content;
+        background-color: var(--nom-secondary-hover);
+        border-radius: 8px;
+        padding: var(--a-spacing-4);
+        height: fit-content;
+      `}
+    >
+      <VStack gap="2">
+        <Heading level="2" size="small">
+          Lederplan:
+        </Heading>
+
+        {formaterteLedere?.map((lederperiode) => (
+          <VStack key={lederperiode.fid}>
+            <b>{formatVisningsnavn(lederperiode.visningsnavn)}:</b>
+
+            <span>
+              {`${formatDisplayDate(lederperiode.startdato)} - ${
+                lederperiode.sluttdato
+                  ? formatDisplayDate(lederperiode.sluttdato)
+                  : "ubestemt tid"
+              }`}
+            </span>
+          </VStack>
+        ))}
+      </VStack>
+    </div>
   );
 }
 

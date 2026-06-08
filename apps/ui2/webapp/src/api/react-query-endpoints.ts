@@ -729,6 +729,16 @@ export const createRessurs = async (request: OpprettRessursRequest) => {
   );
 };
 
+export const getPeriodiserteLedereOrgEnhet = {
+  queryKey: (id: string) => ["LEDERE_ORGENHET", id],
+  queryFn: async (id: string): Promise<OrgEnhetLederResponse[]> =>
+    (
+      await axios.get<OrgEnhetLederResponse[]>(
+        `${NOM_API_BASE_PATH}/app/orgenhetleder/byOrgEnhetId/${id}`,
+      )
+    ).data,
+};
+
 export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {
   return axios.post<unknown, AxiosResponse<OpprettOrgEnhetResponse>>(
     `${NOM_API_BASE_PATH}/app/orgenheter/opprett`,
