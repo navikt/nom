@@ -32,6 +32,7 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.Opprett
 import no.nav.nom.apps.api.ressurs.RessursService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -101,9 +102,9 @@ public class OrgEnhetRestService {
             throw DuplicateOrgEnhetNameException.name(opprettOrgEnhetRequest.navn());
         }
 
-        /*if (opprettOrgEnhetRequest.tilgangsenhetId() == null || !tilgangsenhetRepository.isValid(opprettOrgEnhetRequest.tilgangsenhetId())) {
+        if (opprettOrgEnhetRequest.tilgangsenhetId() == null || !tilgangsenhetRepository.isValid(opprettOrgEnhetRequest.tilgangsenhetId())) {
             throw new InvalidTilgangsenhetException(String.format("Invalid tilgangsenhet: %s", opprettOrgEnhetRequest.tilgangsenhetId()));
-        }*/
+        }
 
         String navn = StringUtils.capitalize(opprettOrgEnhetRequest.navn());
 

@@ -25,6 +25,7 @@ import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
 import org.springframework.http.HttpHeaders;
@@ -422,7 +423,8 @@ public class OrgEnhetController {
     @ExceptionHandler({
         OrgEnhetNotFoundException.class,
         RessursNotFoundException.class,
-        OrganiseringNotFoundException.class
+        OrganiseringNotFoundException.class,
+        InvalidTilgangsenhetException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {
         return ResponseEntity
