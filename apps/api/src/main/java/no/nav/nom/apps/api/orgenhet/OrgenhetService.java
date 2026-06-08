@@ -328,7 +328,7 @@ public class OrgenhetService {
             "nom-api BatchJob",
             "oppdaterTilgansenhet - OrgenhetService",
             null,
-            new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName())
+            new Origination("nom-api", "nom-api")
         );
         StreamSupport.stream(records.spliterator(), false).forEach(record -> {
             log.info("TEST: {}", record.value());
