@@ -331,6 +331,7 @@ public class OrgenhetService {
             new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName())
         );
         StreamSupport.stream(records.spliterator(), false).forEach(record -> {
+            log.info("TEST: {}", record.value());
             var organiseringState = record.value();
             var orgEnhetState = orgEnhetStateRepository.findById(organiseringState.id())
                 .orElseThrow(() -> OrgEnhetNotFoundException.id(organiseringState.id()));
