@@ -332,7 +332,6 @@ public class OrgenhetService {
             new Origination("nom-api", "nom-api")
         );
         StreamSupport.stream(records.spliterator(), false).forEach(record -> {
-            log.info("TEST: {}", record.value());
             var organiseringState = record.value();
             if (!isPeriodActive(organiseringState.gyldigFom(), organiseringState.gyldigTom())) {
                 return;
