@@ -23,6 +23,7 @@ public class OrgEnhet {
 
     OrgEnhetsType orgEnhetsType;
     String remedyEnhetId;
+    String tilgangsenhetId;
 
     AgressoInfo agressoInfo;
 

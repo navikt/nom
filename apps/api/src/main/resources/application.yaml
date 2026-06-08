@@ -15,6 +15,7 @@ app:
       dvhLastResultTopic: org.nom.intern-dvh-last-result
     organisering:
       eventsourceTopic: org.nom.organisering-eventsource
+      stateTopic: org.nom.intern-organisering-state
   clients:
     nom-paarorende:
       base-url: ${PAARORENDE_BASEURL}

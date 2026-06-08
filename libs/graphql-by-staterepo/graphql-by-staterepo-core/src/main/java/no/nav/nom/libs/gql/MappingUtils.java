@@ -65,6 +65,7 @@ public class MappingUtils {
             .agressoId(orgEnhetState.agressoId())
             .agressoOrgenhetType(orgEnhetState.agressoOrgenhetType())
             .orgNiv(orgEnhetState.agressoOrgNivaa())
+            .tilgangsenhetId(orgEnhetState.tilgangsenhetId())
             .build();
     }
 

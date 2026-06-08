@@ -1,12 +1,5 @@
 package no.nav.nom.apps.rdbmsdata.repository;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -17,6 +10,12 @@ import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
@@ -64,6 +63,9 @@ public class Orgenhet {
     @Column(name = "agresso_orgenhet_type")
     private String agressoOrgenhetType;
 
+    @Column(name = "tilgangsenhet_id")
+    private String tilgangsenhetId;
+
     public Orgenhet(String fid) {
         this.fid = fid;
     }
@@ -81,6 +83,7 @@ public class Orgenhet {
             .agressoId(orgenhetState.agressoId())
             .agressoOrgNivaa(orgenhetState.agressoOrgNivaa())
             .agressoOrgenhetType(orgenhetState.agressoOrgenhetType())
+            .tilgangsenhetId(orgenhetState.tilgangsenhetId())
             .build();
     }
 }
