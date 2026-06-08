@@ -22,11 +22,19 @@ import * as yup from "yup";
 import {
   getOrgEnhet,
   getPeriodiserteLedereOrgEnhet,
+  getRessurs,
   opprettOrgEnhetLeder,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
@@ -40,9 +48,15 @@ import {
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import {
   nomDateIsAfter,
+  nomDateIsSameOrAfter,
+  nomDateIsSameOrBefore,
   nomDateIsTodayOrAfter,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import type { OpprettOrgEnhetLederRequest, OrgEnhet } from "~/types/api-models";
+import type {
+  OpprettOrgEnhetLederRequest,
+  OrgEnhet,
+  OrgEnhetLederResponse,
+} from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const KorrigerOrgEnhetLeder = () => {
@@ -57,7 +71,11 @@ export const KorrigerOrgEnhetLeder = () => {
       <ContentWrapper>
         <ContainerWithHighlightedTop padding={6}>
           {hasAdminAccess ? (
-            <KorrigeringOrgEnhetLeder orgEnhetId={id} />
+            <ModalProvider>
+              <KorrigeringOrgEnhetLeder orgEnhetId={id} />
+
+              <ModalComponent />
+            </ModalProvider>
           ) : (
             <IkkeTilgangRedigering />
           )}
@@ -109,9 +127,20 @@ function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
 }
 
 function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const navigate = useNavigate();
+  const periodiserteLedereQuery = useQuery({
+    queryKey: getPeriodiserteLedereOrgEnhet.queryKey(orgEnhet.id),
+    queryFn: () => getPeriodiserteLedereOrgEnhet.queryFn(orgEnhet.id),
+  });
 
-  const queryClient = useQueryClient();
+  const periodiserteLedere = periodiserteLedereQuery.data;
+
+  const formaterteLedere =
+    periodiserteLedere
+      ?.filter((leder) => nomDateIsTodayOrAfter(leder.sluttdato))
+      .sort((a, b) => (nomDateIsAfter(a.startdato, b.startdato) ? 1 : -1)) ??
+    [];
+
+  const navigate = useNavigate();
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
@@ -120,6 +149,10 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     },
     shouldUnregister: true,
   });
+
+  const queryClient = useQueryClient();
+
+  const { showModal } = useModal();
 
   const opprettOrgEnhetLederMutation = useMutation<
     unknown,
@@ -150,7 +183,20 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       gyldigTom: values.fungerendeLeder ? values.gyldigTom : undefined,
     };
 
-    opprettOrgEnhetLederMutation.mutate(request);
+    await showModal(
+      <BekreftModal
+        content={
+          <LeggTilLederModalContent
+            fungerendeLeder={values.fungerendeLeder}
+            lederplan={formaterteLedere}
+            request={request}
+          />
+        }
+        heading="Bekreft lederendring"
+      />,
+    ).then(() => {
+      opprettOrgEnhetLederMutation.mutate(request);
+    });
   };
 
   const fungerendeLeder = methods.watch("fungerendeLeder");
@@ -190,7 +236,7 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                 </HStack>
               </VStack>
 
-              <Lederplan orgEnhetId={orgEnhet.id} />
+              <Lederplan lederplan={formaterteLedere} />
             </div>
           </VStack>
 
@@ -221,18 +267,54 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
-function Lederplan({ orgEnhetId }: { orgEnhetId: string }) {
-  const periodiserteLedereQuery = useQuery({
-    queryKey: getPeriodiserteLedereOrgEnhet.queryKey(orgEnhetId),
-    queryFn: () => getPeriodiserteLedereOrgEnhet.queryFn(orgEnhetId),
+function LeggTilLederModalContent({
+  request,
+  lederplan,
+  fungerendeLeder,
+}: {
+  request: OpprettOrgEnhetLederRequest;
+  lederplan: OrgEnhetLederResponse[];
+  fungerendeLeder: boolean;
+}) {
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(request?.navident ?? ""),
+    queryFn: () => getRessurs.queryFn(request?.navident ?? ""),
+    enabled: !!request.navident,
   });
 
-  const periodiserteLedere = periodiserteLedereQuery.data;
+  const ressurs = ressursQuery.data;
 
-  const formaterteLedere = periodiserteLedere
-    ?.filter((leder) => nomDateIsTodayOrAfter(leder.sluttdato))
-    .sort((a, b) => (nomDateIsAfter(a.startdato, b.startdato) ? 1 : -1));
+  const aktueltLederskap = lederplan.find(
+    (lederskap) =>
+      nomDateIsSameOrBefore(lederskap.startdato, request.gyldigFom) &&
+      nomDateIsSameOrAfter(lederskap.sluttdato, request.gyldigFom),
+  );
 
+  if (ressursQuery.isLoading) {
+    return <LoaderWithText />;
+  }
+
+  return (
+    <VStack gap="4">
+      <span>
+        Endringen innebærer at{" "}
+        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> blir leder på
+        organisasjonsenheten fra <b>{formatDisplayDate(request.gyldigFom)}</b>.
+      </span>
+      <span>
+        Dette betyr at{" "}
+        <b>
+          {!!aktueltLederskap
+            ? formatVisningsnavn(aktueltLederskap.visningsnavn)
+            : "den tidligere lederen"}
+        </b>{" "}
+        vil være leder på organisasjonsenheten til og med dagen før dette.
+      </span>
+    </VStack>
+  );
+}
+
+function Lederplan({ lederplan }: { lederplan: OrgEnhetLederResponse[] }) {
   return (
     <div
       css={css`
@@ -248,7 +330,7 @@ function Lederplan({ orgEnhetId }: { orgEnhetId: string }) {
           Lederplan:
         </Heading>
 
-        {formaterteLedere?.map((lederperiode) => (
+        {lederplan?.map((lederperiode) => (
           <VStack key={lederperiode.fid}>
             <b>{formatVisningsnavn(lederperiode.visningsnavn)}:</b>
 
