@@ -6,7 +6,6 @@ import {
   Button,
   DatePicker,
   Heading,
-  HStack,
   Loader,
   useDatepicker,
   VStack,
@@ -14,6 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { subDays } from "date-fns";
 import React from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -47,9 +47,9 @@ import {
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import {
   nomDateIsAfter,
-  nomDateIsSameOrAfter,
-  nomDateIsSameOrBefore,
+  nomDateIsAfterToday,
   nomDateIsTodayOrAfter,
+  nomDateIsTodayOrBefore,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OpprettOrgEnhetLederRequest,
@@ -133,6 +133,16 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const periodiserteLedere = periodiserteLedereQuery.data;
 
+  const aktivtLederskap = periodiserteLedere?.find(
+    (lederskap) =>
+      nomDateIsTodayOrBefore(lederskap.startdato) &&
+      nomDateIsTodayOrAfter(lederskap.sluttdato),
+  );
+
+  const planlagtLederskap = periodiserteLedere?.find((lederskap) =>
+    nomDateIsAfterToday(lederskap.startdato),
+  );
+
   const formaterteLedere =
     periodiserteLedere
       ?.filter((leder) => nomDateIsTodayOrAfter(leder.sluttdato))
@@ -143,7 +153,6 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
-    shouldUnregister: true,
   });
 
   const queryClient = useQueryClient();
@@ -182,7 +191,8 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       <BekreftModal
         content={
           <LeggTilLederModalContent
-            lederplan={formaterteLedere}
+            aktivtLederskap={aktivtLederskap}
+            planlagtLederskap={planlagtLederskap}
             request={request}
           />
         }
@@ -203,25 +213,9 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               name="lederRessursNavident"
             />
 
-            <div
-              css={css`
-                display: flex;
-                justify-content: space-between;
-              `}
-            >
-              <VStack
-                css={css`
-                  min-width: 450px;
-                `}
-                gap="2"
-              >
-                <HStack gap="6">
-                  <FormDateWrapper label="Leder fra" name="gyldigFom" />
-                </HStack>
-              </VStack>
+            <FormDateWrapper label="Leder fra og med" name="gyldigFom" />
 
-              <Lederplan lederplan={formaterteLedere} />
-            </div>
+            <FremtidigLeder planlagtLederskap={planlagtLederskap} />
           </VStack>
 
           <div
@@ -251,12 +245,44 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
+function FremtidigLeder({
+  planlagtLederskap,
+}: {
+  planlagtLederskap: OrgEnhetLederResponse | undefined;
+}) {
+  if (!planlagtLederskap) {
+    return;
+  }
+
+  return (
+    <VStack gap="2">
+      <Heading level="2" size="small">
+        Fremtidig leder:
+      </Heading>
+
+      <span>
+        Det er registrert at{" "}
+        <b>{formatVisningsnavn(planlagtLederskap.visningsnavn)}</b> blir leder
+        for organisasjonsenheten fra og med{" "}
+        <b>{formatDisplayDate(planlagtLederskap.startdato)}</b>.
+      </span>
+
+      <span>
+        En registrering av ny leder overskriver den registrerte fremtidige
+        lederen.
+      </span>
+    </VStack>
+  );
+}
+
 function LeggTilLederModalContent({
   request,
-  lederplan,
+  aktivtLederskap,
+  planlagtLederskap,
 }: {
   request: OpprettOrgEnhetLederRequest;
-  lederplan: OrgEnhetLederResponse[];
+  aktivtLederskap: OrgEnhetLederResponse | undefined;
+  planlagtLederskap: OrgEnhetLederResponse | undefined;
 }) {
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(request?.navident ?? ""),
@@ -266,12 +292,6 @@ function LeggTilLederModalContent({
 
   const ressurs = ressursQuery.data;
 
-  const aktueltLederskap = lederplan.find(
-    (lederskap) =>
-      nomDateIsSameOrBefore(lederskap.startdato, request.gyldigFom) &&
-      nomDateIsSameOrAfter(lederskap.sluttdato, request.gyldigFom),
-  );
-
   if (ressursQuery.isLoading) {
     return <LoaderWithText />;
   }
@@ -280,53 +300,29 @@ function LeggTilLederModalContent({
     <VStack gap="4">
       <span>
         Endringen innebærer at{" "}
-        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> blir leder på
-        organisasjonsenheten fra <b>{formatDisplayDate(request.gyldigFom)}</b>.
+        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> blir leder for
+        enheten fra og med <b>{formatDisplayDate(request.gyldigFom)}</b>.
       </span>
       <span>
         Dette betyr at{" "}
+        <b>{formatVisningsnavn(aktivtLederskap?.visningsnavn)}</b> er leder for
+        enheten til og med{" "}
         <b>
-          {!!aktueltLederskap
-            ? formatVisningsnavn(aktueltLederskap.visningsnavn)
-            : "den tidligere lederen"}
-        </b>{" "}
-        vil være leder på organisasjonsenheten til og med dagen før dette.
+          {!!request.gyldigFom
+            ? formatDisplayDate(subDays(new Date(request.gyldigFom), 1))
+            : "dagen før dette"}
+        </b>
+        .
       </span>
+      {!!planlagtLederskap && (
+        <span>
+          Det planlagte lederskapet til{" "}
+          <b>{formatVisningsnavn(planlagtLederskap.visningsnavn)}</b> fra og med{" "}
+          <b>{formatDisplayDate(planlagtLederskap.startdato)}</b> blir
+          overskrevet.
+        </span>
+      )}
     </VStack>
-  );
-}
-
-function Lederplan({ lederplan }: { lederplan: OrgEnhetLederResponse[] }) {
-  return (
-    <div
-      css={css`
-        width: fit-content;
-        background-color: var(--nom-secondary-hover);
-        border-radius: 8px;
-        padding: var(--a-spacing-4);
-        height: fit-content;
-      `}
-    >
-      <VStack gap="2">
-        <Heading level="2" size="small">
-          Lederplan:
-        </Heading>
-
-        {lederplan?.map((lederperiode) => (
-          <VStack key={lederperiode.fid}>
-            <b>{formatVisningsnavn(lederperiode.visningsnavn)}:</b>
-
-            <span>
-              {`${formatDisplayDate(lederperiode.startdato)} - ${
-                lederperiode.sluttdato
-                  ? formatDisplayDate(lederperiode.sluttdato)
-                  : "ubestemt tid"
-              }`}
-            </span>
-          </VStack>
-        ))}
-      </VStack>
-    </div>
   );
 }
 
