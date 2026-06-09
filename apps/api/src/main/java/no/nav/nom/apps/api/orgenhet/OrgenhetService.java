@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -17,7 +18,9 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
@@ -59,13 +62,17 @@ public class OrgenhetService {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final AppProperties.Orgenhet orgenhetProperties;
     private final AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache;
+    private final NomStateOrganiseringListener nomStateOrganiseringListener;
+    private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository,
                            OrgEnhetCommandService orgEnhetCommandService,
                            KafkaTopicReader kafkaTopicReader,
                            OrganiseringStateRepository organiseringStateRepository,
                            AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache,
-                           AppProperties appProperties
+                           AppProperties appProperties,
+                           NomStateOrganiseringListener nomStateOrganiseringListener,
+                           NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
@@ -73,6 +80,8 @@ public class OrgenhetService {
         this.organiseringStateRepository = organiseringStateRepository;
         this.aktiveOrgenheterIHierarkiCache = aktiveOrgenheterIHierarkiCache;
         this.orgenhetProperties = appProperties.orgenhet();
+        this.nomStateOrganiseringListener = nomStateOrganiseringListener;
+        this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
     }
 
 
@@ -303,19 +312,20 @@ public class OrgenhetService {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 
-    public String getTilgangsenhetIdOver(String nomId) {
-        var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId).map(OrganiseringState::idOver).orElse("");
+    public Optional<IOrgenhet> getEnhetOverSomHarTilgangsenhetId(String nomId) {
+        var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId).map(OrganiseringState::idOver).orElseThrow(() -> new OrganiseringNotFoundException(nomId));
         var orgEnhetOver = getById(organiseringOrgEnhetId);
         if (orgEnhetOver.isPresent() && (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank())) {
-            return getTilgangsenhetIdOver(orgEnhetOver.get().getId());
+            return getEnhetOverSomHarTilgangsenhetId(orgEnhetOver.get().getId());
         }
-        return orgEnhetOver.map(IOrgenhet::getTilgangsenhetId).orElse(null);
+        return orgEnhetOver.filter(o -> nonNull(o.getTilgangsenhetId()) && !o.getTilgangsenhetId().isBlank());
     }
 
-    public String getTilgangsenhetIdUnder(String nomId) {
+    public Optional<IOrgenhet> getEnhetUnderSomHarTilgangsenhetId(String nomId) {
         return getAllUnderliggendeOrgEnhetById(nomId).stream()
-            .filter(orgEnhet -> nonNull(orgEnhet.getTilgangsenhetId()))
-            .findFirst().map(IOrgenhet::getTilgangsenhetId).orElse(null);
+            .filter(iOrgenhet -> isPeriodActive(iOrgenhet.getGyldigFom(), iOrgenhet.getGyldigTom()))
+            .filter(orgEnhet -> nonNull(orgEnhet.getTilgangsenhetId()) && !orgEnhet.getTilgangsenhetId().isBlank())
+            .findFirst();
     }
 
 
@@ -331,6 +341,9 @@ public class OrgenhetService {
             null,
             new Origination("nom-api", "nom-api")
         );
+
+        waitForNomStates();
+
         StreamSupport.stream(records.spliterator(), false).forEach(record -> {
             var organiseringState = record.value();
             if (!isPeriodActive(organiseringState.gyldigFom(), organiseringState.gyldigTom())) {
@@ -343,21 +356,57 @@ public class OrgenhetService {
                 var orgEnhetOver = orgEnhetStateRepository.findById(organiseringState.idOver())
                     .orElseThrow(() -> new OrgEnhetNotFoundException(organiseringState.idOver()));
 
-                String tilgansenhetId = orgEnhetOver.tilgangsenhetId();
+                Optional<IOrgenhet> resolvedEnhet = Optional.empty();
 
-                if (isNull(tilgansenhetId) || tilgansenhetId.isBlank()) {
-                    tilgansenhetId = getTilgangsenhetIdOver(orgEnhetOver.id());
+                if (nonNull(orgEnhetOver.tilgangsenhetId()) && !orgEnhetOver.tilgangsenhetId().isBlank()) {
+                    resolvedEnhet = getById(orgEnhetOver.id());
                 }
 
-                if (isNull(tilgansenhetId) || tilgansenhetId.isBlank()) {
-                    tilgansenhetId = getTilgangsenhetIdUnder(orgEnhetState.id());
+                if (resolvedEnhet.isEmpty()) {
+                    resolvedEnhet = getEnhetOverSomHarTilgangsenhetId(orgEnhetOver.id());
                 }
 
-                orgEnhetCommandService.endreTilgangsenhet(
-                    orgEnhetState.fid(),
-                    new EndreTilgangsenhet(tilgansenhetId, inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhetOver).build())
-                );
+                if (resolvedEnhet.isEmpty()) {
+                    resolvedEnhet = getEnhetUnderSomHarTilgangsenhetId(orgEnhetState.id());
+                }
+
+                resolvedEnhet.ifPresentOrElse(orgEnhet -> {
+                    var tilgangsEnhetId = orgEnhet.getTilgangsenhetId();
+                    orgEnhetCommandService.endreTilgangsenhet(
+                        orgEnhetState.fid(),
+                        new EndreTilgangsenhet(
+                            tilgangsEnhetId,
+                            inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
+                        )
+                    );
+                    getAllUnderliggendeOrgEnhetById(orgEnhetState.id()).forEach(iOrgenhet -> {
+                        if (isNull(iOrgenhet.getTilgangsenhetId()) || iOrgenhet.getTilgangsenhetId().isBlank()) {
+                            orgEnhetCommandService.endreTilgangsenhet(
+                                iOrgenhet.getFid(),
+                                new EndreTilgangsenhet(
+                                    tilgangsEnhetId,
+                                    inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
+                                )
+                            );
+                        }
+                    });
+                }, () -> log.warn("Kunne ikke resolve tilgangsenhetId for enhet {} ({})", orgEnhetState.id(), orgEnhetState.navn()));
             }
         });
+    }
+
+    private void waitForNomStates() {
+        while (!isInitialStateReady()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                log.error("Thread interrupted while waiting for NomStateMasteredRessursListener/NomStateRessursListener to read to end on startup", e);
+            }
+        }
+    }
+
+    private boolean isInitialStateReady() {
+        return nomStateOrganiseringListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetListener.hasReadToEndOnStartup();
     }
 }

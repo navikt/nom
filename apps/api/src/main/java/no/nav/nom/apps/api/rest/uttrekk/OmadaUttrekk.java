@@ -19,6 +19,8 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.common.AbstractNomStateListener;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
@@ -91,7 +93,8 @@ public class OmadaUttrekk {
         OrgEnhetLederStateRepository orgEnhetLederStateRepository,
         Unleash unleash,
         AppProperties appProperties,
-        SlackService slackService
+        SlackService slackService,
+        NomStateOrganiseringListener nomStateOrganiseringListener
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -103,6 +106,17 @@ public class OmadaUttrekk {
         this.unleash = unleash;
         this.orgenhetProperties = appProperties.orgenhet();
         this.slackService = slackService;
+
+        nomStateOrganiseringListener.register(new AbstractNomStateListener.Visitor<>() {
+            @Override
+            public String visitorName() {
+                return "OmadaUttrekk_InvalidateRessurserUtenforHierarkiCache";
+            }
+            @Override
+            public void visit(String key, OrganiseringState stateObject) {
+                lastCleared = LocalDateTime.MIN;
+            }
+        });
     }
 
     @Operation(
@@ -562,7 +576,7 @@ public class OmadaUttrekk {
         try {
             slackService.sendOrgbotErrorOmadaUttrekk(
                 String.format(
-                    "<!here>\n\nKOI Rest-kallet feilet fordi det er %d enheter utenfor hierarki, det gjelder enhetene med disse NOM-ID: %s",
+                    "<!here>\n\nKOI Rest-kallet feilet fordi det er %d enheter utenfor hierarki ELLER mangler tilgangsenhetId, det gjelder enhetene med disse NOM-ID: %s",
                     orgEnhetMedRessurserUtenforHierarki.size(),
                     orgEnhetMedRessurserUtenforHierarki.keySet()
                 ));
@@ -657,13 +671,18 @@ public class OmadaUttrekk {
         aktiveOrgenhetIder.add(orgenhetProperties.riksrevisjonenId());
         aktiveOrgenhetIder.add(orgenhetProperties.vikafossenId());
 
-        var oterUtenforHierarki = orgtilknytningService.getAll().stream()
-            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()))
+        /*var aktiveOrgenheterUtenTilgangsenhet = aktiveOrgenheter.stream()
+            .filter(orgEnhet -> orgEnhet.getTilgangsenhetId() == null || orgEnhet.getTilgangsenhetId().isBlank())
+            .map(IOrgenhet::getId)
+            .collect(Collectors.toSet());*/
+
+        var oterUtenforHierarkiEllerUtenTilgangsenhet = orgtilknytningService.getAll().stream()
+            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) /*|| aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId())*/)
             .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))
             .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId));
 
-        oterUtenforHierarki.forEach((nomId, orgtilknytningStates) -> orgEnhetMedRessurserUtenforHierarki.put(nomId, orgtilknytningStates.size()));
+        oterUtenforHierarkiEllerUtenTilgangsenhet.forEach((nomId, orgtilknytningStates) -> orgEnhetMedRessurserUtenforHierarki.put(nomId, orgtilknytningStates.size()));
         lastCleared = LocalDateTime.now();
     }
 

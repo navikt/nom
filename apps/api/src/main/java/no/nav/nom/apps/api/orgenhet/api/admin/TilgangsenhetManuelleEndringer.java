@@ -89,7 +89,7 @@ public class TilgangsenhetManuelleEndringer {
     @PostMapping("/populate")
     public String populerTilgangsenheter(@RequestParam boolean dryRun) {
         var tilgangsenhetEndringer = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
-                .filter(orgEnhet -> isNull(orgEnhet.getTilgangsenhetId()) || orgEnhet.getTilgangsenhetId().isBlank())
+            .filter(orgEnhet -> isNull(orgEnhet.getTilgangsenhetId()) || orgEnhet.getTilgangsenhetId().isBlank())
             .map(orgEnhet -> remedyEnhetMapperService.findByNomId(orgEnhet.getId()).orElse(null))
             .filter(Objects::nonNull)
             .toList();
@@ -132,7 +132,7 @@ public class TilgangsenhetManuelleEndringer {
         log.error(exception.getMessage(), exception);
 
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(StandardResponse.builder().message(exception.getMessage()).build());
+            .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 }
