@@ -4,7 +4,6 @@ import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
-  Checkbox,
   DatePicker,
   Heading,
   HStack,
@@ -144,9 +143,6 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
-    defaultValues: {
-      fungerendeLeder: false,
-    },
     shouldUnregister: true,
   });
 
@@ -180,14 +176,12 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       orgEnhetId: orgEnhet.id,
       navident: values.lederRessursNavident,
       gyldigFom: values.gyldigFom,
-      gyldigTom: values.fungerendeLeder ? values.gyldigTom : undefined,
     };
 
     await showModal(
       <BekreftModal
         content={
           <LeggTilLederModalContent
-            fungerendeLeder={values.fungerendeLeder}
             lederplan={formaterteLedere}
             request={request}
           />
@@ -198,8 +192,6 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       opprettOrgEnhetLederMutation.mutate(request);
     });
   };
-
-  const fungerendeLeder = methods.watch("fungerendeLeder");
 
   return (
     <FormProvider {...methods}>
@@ -223,16 +215,8 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
                 `}
                 gap="2"
               >
-                <Checkbox {...methods.register("fungerendeLeder")}>
-                  Midlertidig fungerende leder
-                </Checkbox>
-
                 <HStack gap="6">
                   <FormDateWrapper label="Leder fra" name="gyldigFom" />
-
-                  {fungerendeLeder && (
-                    <FormDateWrapper label="Leder til" name="gyldigTom" />
-                  )}
                 </HStack>
               </VStack>
 
@@ -270,11 +254,9 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 function LeggTilLederModalContent({
   request,
   lederplan,
-  fungerendeLeder,
 }: {
   request: OpprettOrgEnhetLederRequest;
   lederplan: OrgEnhetLederResponse[];
-  fungerendeLeder: boolean;
 }) {
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(request?.navident ?? ""),
@@ -375,11 +357,5 @@ function FormDateWrapper({ name, label }: { name: string; label: string }) {
 
 const validationSchema = yup.object({
   lederRessursNavident: yup.string().required("Obligatorisk"),
-  fungerendeLeder: yup.boolean().default(false),
   gyldigFom: yup.string().required("Obligatorisk"),
-  gyldigTom: yup.string().when("fungerendeLeder", {
-    is: true,
-    then: (schema) => schema.required("Obligatorisk"),
-    otherwise: (schema) => schema.notRequired(),
-  }),
 });
