@@ -15,6 +15,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,9 @@ public class StatistikkRestServiceTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     AppProperties appProperties;
 
+    @Mock
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
+
     @InjectMocks
     StatistikkRestService statistikkRestService;
 
@@ -65,6 +69,10 @@ public class StatistikkRestServiceTest {
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(mapOfActiveRessurser());
         when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(getAllOrgEnheter());
         when(orgenhetService.getAllOrgEnheterThatCanHaveRessurser()).thenReturn(getAllOrgEnheter());
+        when(appProperties.orgenhet().helfoId()).thenReturn("helfo123");
+        when(appProperties.orgenhet().riksrevisjonenId()).thenReturn("riksrevisjonen123");
+        when(appProperties.orgenhet().vikafossenId()).thenReturn("vikafossen123");
+        when(appProperties.orgenhet().skattId()).thenReturn("skatt123");
 
         var expectedGlobalStatistikkResponse = new GlobalStatistikkResponse(
             new RessursStatistikk(6, 2, 2, 2),
