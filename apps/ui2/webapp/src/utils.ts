@@ -112,7 +112,7 @@ export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
 }
 
 export function orgEnhetLederNavn(orgEnhet: OrgEnhet) {
-  return formatVisningsnavn(orgEnhet.ledere[0].visningsnavn);
+  return orgEnhet.leder.visningsnavn;
 }
 
 export function formatTlf(nummer: string) {

@@ -7,7 +7,6 @@ import { getKostnadssted, getOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import type { OrgEnhet } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
 
 export function EnhetKontekstInfo({
   orgEnhet,
@@ -25,13 +24,6 @@ export function EnhetKontekstInfo({
   displayKostnadssted?: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
-
-  const ledere =
-    Array.isArray(orgEnhet?.ledere) && orgEnhet.ledere.length > 0
-      ? orgEnhet.ledere
-          .filter(Boolean)
-          .map((leder) => formatVisningsnavn(leder.visningsnavn))
-      : [];
 
   const extraAgressoInfo = useExtraAgressoInfo(orgEnhet?.id);
 
@@ -57,7 +49,9 @@ export function EnhetKontekstInfo({
         value={orgEnhet.id}
         valueHref={nomIdLink ? `/org/${orgEnhet.id}` : undefined}
       />
-      {displayLeder && <LabelWithValue label="Leder" value={ledere[0]} />}
+      {displayLeder && (
+        <LabelWithValue label="Leder" value={orgEnhet?.leder?.visningsnavn} />
+      )}
       <LabelWithValue label="Tilgangsenhet" value={orgEnhet.tilgangsenhetId} />
       <LabelWithValue label="Unit4-ID" value={extraAgressoInfo?.agressoId} />
       {displayUni4Niv && (
