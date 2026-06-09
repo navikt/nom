@@ -2,6 +2,7 @@ package no.nav.nom.apps.sfintegrasjon.sfclient.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.sfintegrasjon.sfclient.SfODataClient;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
@@ -9,6 +10,8 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,10 +31,12 @@ public class SfClientController {
 
     private final SamlAssertionService samlAssertionService;
     private final SfOAuthService sfOAuthService;
+    private final SfODataClient sfODataClient;
 
-    public SfClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService) {
+    public SfClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService, SfODataClient sfODataClient) {
         this.samlAssertionService = samlAssertionService;
         this.sfOAuthService = sfOAuthService;
+        this.sfODataClient = sfODataClient;
     }
 
     @PostMapping("/saml-assertion")
@@ -91,6 +96,25 @@ public class SfClientController {
         try {
             String rawBody = sfOAuthService.validateToken(request.token());
             return ResponseEntity.ok(rawBody);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-metadata/{entity}", produces = MediaType.APPLICATION_XML_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch OData $metadata for an SF entity",
+        description = "Fetches the OData v2 $metadata document for the given entity from SAP SuccessFactors. " +
+            "Entity name must contain only letters (a-z, A-Z). Authenticates with a fresh OAuth token."
+    )
+    public ResponseEntity<String> getODataMetadata(@PathVariable String entity) {
+        if (!entity.matches("[a-zA-Z]+")) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            String metadata = sfODataClient.getEntityMetadata(entity);
+            return ResponseEntity.ok(metadata);
         } catch (RestClientResponseException e) {
             return ResponseEntity.status(e.getStatusCode()).build();
         }

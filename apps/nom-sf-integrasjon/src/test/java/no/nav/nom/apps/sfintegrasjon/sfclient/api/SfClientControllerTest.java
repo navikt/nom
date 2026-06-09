@@ -1,6 +1,7 @@
 package no.nav.nom.apps.sfintegrasjon.sfclient.api;
 
 import no.nav.nom.apps.sfintegrasjon.config.SecurityConfig;
+import no.nav.nom.apps.sfintegrasjon.sfclient.SfODataClient;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
@@ -19,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,6 +46,9 @@ class SfClientControllerTest {
 
     @MockitoBean
     SfOAuthService sfOAuthService;
+
+    @MockitoBean
+    SfODataClient sfODataClient;
 
     // --- /api/sf/debug/saml-assertion ---
 
@@ -174,5 +179,58 @@ class SfClientControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"token\":\"invalid-token\"}"))
             .andExpect(status().isUnauthorized());
+    }
+
+    // --- /api/sf/client/odata-metadata/{entity} ---
+
+    @Test
+    void odataMetadata_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata/User"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void odataMetadata_shouldReturn403WhenNotAdmin() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata/User")
+                .with(jwt()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void odataMetadata_shouldReturn200WithXmlWhenAdmin() throws Exception {
+        String xml = "<edmx:Edmx Version=\"1.0\"><edmx:DataServices><Schema Namespace=\"User\"/></edmx:DataServices></edmx:Edmx>";
+        when(sfODataClient.getEntityMetadata(eq("User"))).thenReturn(xml);
+
+        mockMvc.perform(get("/api/sf/client/odata-metadata/User")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+            .andExpect(content().string(xml));
+    }
+
+    @Test
+    void odataMetadata_shouldReturn400WhenEntityContainsNonLetters() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata/User123")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void odataMetadata_shouldReturn400WhenEntityContainsSpecialChars() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata/User%2FEntity")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void odataMetadata_shouldPropagateUpstreamErrorStatus() throws Exception {
+        when(sfODataClient.getEntityMetadata(any()))
+            .thenThrow(HttpClientErrorException.create(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Not Found",
+                org.springframework.http.HttpHeaders.EMPTY, new byte[0], null));
+
+        mockMvc.perform(get("/api/sf/client/odata-metadata/Unknown")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isNotFound());
     }
 }

@@ -30,6 +30,20 @@ public class SfODataClient {
         this.restClientBuilder = restClientBuilder;
     }
 
+    /**
+     * Fetches the OData $metadata document for the given SF entity.
+     *
+     * @param entity Entity name (letters only, validated by caller)
+     * @return Raw XML metadata response from SAP SuccessFactors
+     */
+    public String getEntityMetadata(String entity) {
+        return authenticatedClient()
+            .get()
+            .uri(entity + "/$metadata")
+            .retrieve()
+            .body(String.class);
+    }
+
     private RestClient authenticatedClient() {
         SfAccessToken token = sfOAuthService.generateToken(SamlAssertionParams.defaults());
         return restClientBuilder
