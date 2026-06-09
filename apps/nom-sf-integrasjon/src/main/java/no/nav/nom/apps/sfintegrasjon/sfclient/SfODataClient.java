@@ -1,32 +1,30 @@
 package no.nav.nom.apps.sfintegrasjon.sfclient;
 
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
-import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
-import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
+import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfTokenCache;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 /**
  * Client for SAP SuccessFactors OData v2 API.
- * Obtains a fresh OAuth token before each request.
+ * Reuses a cached OAuth token; the cache proactively refreshes when fewer than 10 minutes remain before expiry.
  *
  * <p>TODO: Add OData query methods as integration needs grow.
- * TODO: Consider token caching (reuse tokens until near expiry) to reduce assertion overhead.
  */
 @Component
 public class SfODataClient {
 
     private final SfProperties sfProperties;
-    private final SfOAuthService sfOAuthService;
+    private final SfTokenCache sfTokenCache;
     private final RestClient.Builder restClientBuilder;
 
     public SfODataClient(
         SfProperties sfProperties,
-        SfOAuthService sfOAuthService,
+        SfTokenCache sfTokenCache,
         RestClient.Builder restClientBuilder
     ) {
         this.sfProperties = sfProperties;
-        this.sfOAuthService = sfOAuthService;
+        this.sfTokenCache = sfTokenCache;
         this.restClientBuilder = restClientBuilder;
     }
 
@@ -58,7 +56,7 @@ public class SfODataClient {
     }
 
     private RestClient authenticatedClient() {
-        SfAccessToken token = sfOAuthService.generateToken(SamlAssertionParams.defaults());
+        SfAccessToken token = sfTokenCache.getToken();
         return restClientBuilder
             .baseUrl(sfProperties.apiUrl().replaceAll("/$", "") + "/odata/v2/")
             .defaultHeader("Authorization", "Bearer " + token.accessToken())
