@@ -101,6 +101,21 @@ public class SfClientController {
         }
     }
 
+    @GetMapping(value = "/odata-metadata", produces = MediaType.APPLICATION_XML_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch complete OData $metadata",
+        description = "Fetches the complete OData v2 $metadata document for all entities from SAP SuccessFactors. Authenticates with a fresh OAuth token."
+    )
+    public ResponseEntity<String> getAllODataMetadata() {
+        try {
+            String metadata = sfODataClient.getAllMetadata();
+            return ResponseEntity.ok(metadata);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
     @GetMapping(value = "/odata-metadata/{entity}", produces = MediaType.APPLICATION_XML_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(

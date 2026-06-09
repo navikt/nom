@@ -31,6 +31,19 @@ public class SfODataClient {
     }
 
     /**
+     * Fetches the complete OData $metadata document for all SF entities.
+     *
+     * @return Raw XML metadata response from SAP SuccessFactors
+     */
+    public String getAllMetadata() {
+        return authenticatedClient()
+            .get()
+            .uri("$metadata")
+            .retrieve()
+            .body(String.class);
+    }
+
+    /**
      * Fetches the OData $metadata document for the given SF entity.
      *
      * @param entity Entity name (letters only, validated by caller)

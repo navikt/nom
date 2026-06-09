@@ -181,6 +181,45 @@ class SfClientControllerTest {
             .andExpect(status().isUnauthorized());
     }
 
+    // --- /api/sf/client/odata-metadata ---
+
+    @Test
+    void allOdataMetadata_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void allOdataMetadata_shouldReturn403WhenNotAdmin() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-metadata")
+                .with(jwt()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void allOdataMetadata_shouldReturn200WithXmlWhenAdmin() throws Exception {
+        String xml = "<edmx:Edmx Version=\"1.0\"><edmx:DataServices><Schema Namespace=\"SFOData\"/></edmx:DataServices></edmx:Edmx>";
+        when(sfODataClient.getAllMetadata()).thenReturn(xml);
+
+        mockMvc.perform(get("/api/sf/client/odata-metadata")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+            .andExpect(content().string(xml));
+    }
+
+    @Test
+    void allOdataMetadata_shouldPropagateUpstreamErrorStatus() throws Exception {
+        when(sfODataClient.getAllMetadata())
+            .thenThrow(HttpClientErrorException.create(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable",
+                org.springframework.http.HttpHeaders.EMPTY, new byte[0], null));
+
+        mockMvc.perform(get("/api/sf/client/odata-metadata")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isServiceUnavailable());
+    }
+
     // --- /api/sf/client/odata-metadata/{entity} ---
 
     @Test
