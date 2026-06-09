@@ -91,11 +91,21 @@ public class StatistikkRestService {
             .filter(ressursState -> ressursState.startdato() != null && !ressursState.startdato().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
+
+        var ikkeNavOrgEnheter = List.of(orgenhetProperties.helfoId(), orgenhetProperties.riksrevisjonenId(), orgenhetProperties.vikafossenId(), orgenhetProperties.skattId());
+
+        var orgtilknytningerMedAnsattSomIkkeJobberINav = orgtilknytningStateRepository.findByNavidentIn(alleRessurser.stream().map(RessursState::navident).toList()).stream()
+            .filter(orgtilknytningState -> ikkeNavOrgEnheter.contains(orgtilknytningState.orgEnhetId()))
+            .map(OrgtilknytningState::navident)
+            .toList();
+
+        var filtrerteRessurs = alleRessurser.stream().filter(ressurs -> !orgtilknytningerMedAnsattSomIkkeJobberINav.contains(ressurs.navident())).toList();
+
         var ressursStatistikk = new RessursStatistikk(
-            alleRessurser.size(),
-            alleRessurser.stream().filter(RessursState::isStatlig).count(),
-            alleRessurser.stream().filter(RessursState::isKommunal).count(),
-            alleRessurser.stream().filter(RessursState::isEkstern).count()
+            filtrerteRessurs.size(),
+            filtrerteRessurs.stream().filter(RessursState::isStatlig).count(),
+            filtrerteRessurs.stream().filter(RessursState::isKommunal).count(),
+            filtrerteRessurs.stream().filter(RessursState::isEkstern).count()
         );
 
         var alleOrgEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen().stream().toList();
