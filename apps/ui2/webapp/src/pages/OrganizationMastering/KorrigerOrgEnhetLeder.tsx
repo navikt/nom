@@ -46,7 +46,6 @@ import {
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import {
-  nomDateIsAfter,
   nomDateIsAfterToday,
   nomDateIsTodayOrAfter,
   nomDateIsTodayOrBefore,
@@ -142,12 +141,6 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const planlagtLederskap = periodiserteLedere?.find((lederskap) =>
     nomDateIsAfterToday(lederskap.startdato),
   );
-
-  const formaterteLedere =
-    periodiserteLedere
-      ?.filter((leder) => nomDateIsTodayOrAfter(leder.sluttdato))
-      .sort((a, b) => (nomDateIsAfter(a.startdato, b.startdato) ? 1 : -1)) ??
-    [];
 
   const navigate = useNavigate();
 
