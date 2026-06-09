@@ -364,8 +364,8 @@ export function getOrgEnheterLedetAvOptions(navident: string) {
   });
 }
 
-export const getOrgenhetLederByNavIdent = {
-  queryKey: (navident: string) => ["getOrgenhetLederByNavIdent", navident],
+export const getOrgEnheterLedetAvNavIdent = {
+  queryKey: (navident: string) => ["getOrgEnheterLedetAvNavIdent", navident],
   queryFn: async (navident: string) =>
     (
       await axios.get<OrgEnhetLederResponse[]>(
