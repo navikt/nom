@@ -662,23 +662,24 @@ public class OmadaUttrekk {
     private void ressurserUtenforHierarki() {
         orgEnhetMedRessurserUtenforHierarki.clear();
         slackSentForCurrentCycle.set(false);
-        var aktiveOrgenheter = orgenhetService.getAktiveEnheterIOrganisasjonen();
 
         // inkluder HELFO, SKATT, RIKSREVISJONEN og VIKAFOSSEN, da disse kan være gyldige
-        List<String> aktiveOrgenhetIder = new ArrayList<>(aktiveOrgenheter.stream().map(IOrgenhet::getId).toList());
-        aktiveOrgenhetIder.add(orgenhetProperties.helfoId());
-        aktiveOrgenhetIder.add(orgenhetProperties.skattId());
-        aktiveOrgenhetIder.add(orgenhetProperties.riksrevisjonenId());
-        aktiveOrgenhetIder.add(orgenhetProperties.vikafossenId());
+        List<IOrgenhet> aktiveOrgenheter = new ArrayList<>(orgenhetService.getAktiveEnheterIOrganisasjonen());
+        orgenhetService.getById(orgenhetProperties.helfoId()).ifPresent(aktiveOrgenheter::add);
+        orgenhetService.getById(orgenhetProperties.skattId()).ifPresent(aktiveOrgenheter::add);
+        orgenhetService.getById(orgenhetProperties.riksrevisjonenId()).ifPresent(aktiveOrgenheter::add);
+        orgenhetService.getById(orgenhetProperties.vikafossenId()).ifPresent(aktiveOrgenheter::add);
 
-        /*var aktiveOrgenheterUtenTilgangsenhet = aktiveOrgenheter.stream()
+        List<String> aktiveOrgenhetIder = aktiveOrgenheter.stream().map(IOrgenhet::getId).toList();
+
+        var aktiveOrgenheterUtenTilgangsenhet = aktiveOrgenheter.stream()
             .filter(orgEnhet -> orgEnhet.getTilgangsenhetId() == null || orgEnhet.getTilgangsenhetId().isBlank())
             .map(IOrgenhet::getId)
-            .collect(Collectors.toSet());*/
+            .collect(Collectors.toSet());
 
         var oterUtenforHierarkiEllerUtenTilgangsenhet = orgtilknytningService.getAll().stream()
-            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) /*|| aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId())*/)
             .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))
+            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) || aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId()))
             .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId));
 
