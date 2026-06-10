@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.telefon.TelefonService;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
@@ -34,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,8 +56,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.likEllerEtter;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.today;
 
 @Tag(name = "Omada uttrekk")
 @RestController
@@ -148,7 +148,7 @@ public class OmadaUttrekk {
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki eller mangler tilgangsenhetId.",
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
@@ -250,7 +250,7 @@ public class OmadaUttrekk {
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki eller mangler tilgangsenhetId.",
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
@@ -350,7 +350,7 @@ public class OmadaUttrekk {
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki eller mangler tilgangsenhetId.",
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
@@ -409,7 +409,7 @@ public class OmadaUttrekk {
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki eller mangler tilgangsenhetId.",
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
@@ -502,7 +502,7 @@ public class OmadaUttrekk {
             log.error("Kunne ikke generere uttrekk, det er {} enheter med {} ansatte utenfor hierarki.", antallUtenforHierarki, antallRessurserUtenforHierarki);
             sendSlackMessage();
             throw new OrgtilknytningUtenforHierarkiException(String.format(
-                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki.",
+                "Kunne ikke generere uttrekk, det er %s enheter med %s ansatte utenfor hierarki eller mangler tilgangsenhetId.",
                 antallUtenforHierarki,
                 antallRessurserUtenforHierarki
             ));
@@ -567,6 +567,17 @@ public class OmadaUttrekk {
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }
+    }
+
+    @Operation(
+        description = "Resetter cache for ressurser utenfor hierarki, slik at neste kall kjører sjekken på nytt.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PostMapping("/reset-hierarki-cache")
+    public ResponseEntity<StandardResponse> resetHierarkiCache() {
+        lastCleared = LocalDateTime.MIN;
+        orgEnhetMedRessurserUtenforHierarki.clear();
+        return ResponseEntity.ok(StandardResponse.builder().message("Cache resatt, neste kall vil kjøre sjekken på nytt.").build());
     }
 
     private void sendSlackMessage() {
@@ -678,7 +689,8 @@ public class OmadaUttrekk {
             .collect(Collectors.toSet());
 
         var oterUtenforHierarkiEllerUtenTilgangsenhet = orgtilknytningService.getAll().stream()
-            .filter(ot -> likEllerEtter(ot.gyldigTom(), today()))
+            .filter(PeriodeUtil::isCurrentOrFuturePeriod)
+            .filter(OrgtilknytningState::erDagligOppfolging)
             .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) || aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId()))
             .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId));
