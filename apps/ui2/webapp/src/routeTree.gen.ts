@@ -21,6 +21,7 @@ import { Route as AvsluttOrganisasjonsenhetRouteImport } from './routes/avslutt-
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
 import { Route as RessursCreatespecialRouteImport } from './routes/ressurs.createspecial'
+import { Route as RessursCreateExternalFundsRecipientRouteImport } from './routes/ressurs.create-external-funds-recipient'
 import { Route as RessursIdRouteImport } from './routes/ressurs.$id'
 import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-terminate.$id'
 import { Route as OrgTableRouteImport } from './routes/org.table'
@@ -98,6 +99,12 @@ const RessursCreatespecialRoute = RessursCreatespecialRouteImport.update({
   path: '/ressurs/createspecial',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RessursCreateExternalFundsRecipientRoute =
+  RessursCreateExternalFundsRecipientRouteImport.update({
+    id: '/ressurs/create-external-funds-recipient',
+    path: '/ressurs/create-external-funds-recipient',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RessursIdRoute = RessursIdRouteImport.update({
   id: '/ressurs/$id',
   path: '/ressurs/$id',
@@ -167,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
+  '/ressurs/create-external-funds-recipient': typeof RessursCreateExternalFundsRecipientRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
   '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
@@ -191,6 +199,7 @@ export interface FileRoutesByTo {
   '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
+  '/ressurs/create-external-funds-recipient': typeof RessursCreateExternalFundsRecipientRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
   '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
@@ -216,6 +225,7 @@ export interface FileRoutesById {
   '/org/table': typeof OrgTableRouteWithChildren
   '/ressurs-terminate/$id': typeof RessursTerminateIdRoute
   '/ressurs/$id': typeof RessursIdRoute
+  '/ressurs/create-external-funds-recipient': typeof RessursCreateExternalFundsRecipientRoute
   '/ressurs/createspecial': typeof RessursCreatespecialRoute
   '/ressurs/specialreceipt': typeof RessursSpecialreceiptRoute
   '/org/resources-table/$id': typeof OrgResourcesTableIdRoute
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
+    | '/ressurs/create-external-funds-recipient'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
     | '/org/resources-table/$id'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
+    | '/ressurs/create-external-funds-recipient'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
     | '/org/resources-table/$id'
@@ -290,6 +302,7 @@ export interface FileRouteTypes {
     | '/org/table'
     | '/ressurs-terminate/$id'
     | '/ressurs/$id'
+    | '/ressurs/create-external-funds-recipient'
     | '/ressurs/createspecial'
     | '/ressurs/specialreceipt'
     | '/org/resources-table/$id'
@@ -315,6 +328,7 @@ export interface RootRouteChildren {
   OrgTableRoute: typeof OrgTableRouteWithChildren
   RessursTerminateIdRoute: typeof RessursTerminateIdRoute
   RessursIdRoute: typeof RessursIdRoute
+  RessursCreateExternalFundsRecipientRoute: typeof RessursCreateExternalFundsRecipientRoute
   RessursCreatespecialRoute: typeof RessursCreatespecialRoute
   RessursSpecialreceiptRoute: typeof RessursSpecialreceiptRoute
   OrgResourcesTableIdRoute: typeof OrgResourcesTableIdRoute
@@ -405,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/ressurs/createspecial'
       fullPath: '/ressurs/createspecial'
       preLoaderRoute: typeof RessursCreatespecialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs/create-external-funds-recipient': {
+      id: '/ressurs/create-external-funds-recipient'
+      path: '/ressurs/create-external-funds-recipient'
+      fullPath: '/ressurs/create-external-funds-recipient'
+      preLoaderRoute: typeof RessursCreateExternalFundsRecipientRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ressurs/$id': {
@@ -510,6 +531,8 @@ const rootRouteChildren: RootRouteChildren = {
   OrgTableRoute: OrgTableRouteWithChildren,
   RessursTerminateIdRoute: RessursTerminateIdRoute,
   RessursIdRoute: RessursIdRoute,
+  RessursCreateExternalFundsRecipientRoute:
+    RessursCreateExternalFundsRecipientRoute,
   RessursCreatespecialRoute: RessursCreatespecialRoute,
   RessursSpecialreceiptRoute: RessursSpecialreceiptRoute,
   OrgResourcesTableIdRoute: OrgResourcesTableIdRoute,
