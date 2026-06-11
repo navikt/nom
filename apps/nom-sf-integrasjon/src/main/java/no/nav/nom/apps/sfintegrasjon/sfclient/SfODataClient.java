@@ -2,8 +2,19 @@ package no.nav.nom.apps.sfintegrasjon.sfclient;
 
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfTokenCache;
+import no.nav.nom.sf.odata.vdm.namespaces.empemployment.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.perperson.PerPerson;
+import no.nav.nom.sf.odata.vdm.namespaces.user.User;
+import no.nav.nom.sf.odata.vdm.services.DefaultEmpEmploymentService;
+import no.nav.nom.sf.odata.vdm.services.DefaultPerPersonService;
+import no.nav.nom.sf.odata.vdm.services.DefaultUserService;
+import com.sap.cloud.sdk.cloudplatform.connectivity.DefaultHttpDestination;
+import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * Client for SAP SuccessFactors OData v2 API.
@@ -13,6 +24,8 @@ import org.springframework.web.client.RestClient;
  */
 @Component
 public class SfODataClient {
+
+    private static final String ODATA2_SERVICE_PATH = "odata/v2";
 
     private final SfProperties sfProperties;
     private final SfTokenCache sfTokenCache;
@@ -55,11 +68,48 @@ public class SfODataClient {
             .body(String.class);
     }
 
+    public List<User> getFirst10Users(String accessToken) throws ODataException {
+        return new DefaultUserService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .top(10)
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<EmpEmployment> getFirst10EmpEmployments(String accessToken) throws ODataException {
+        return new DefaultEmpEmploymentService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllEmpEmployment()
+            .top(10)
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<PerPerson> getFirst10PerPersons(String accessToken) throws ODataException {
+        return new DefaultPerPersonService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllPerPerson()
+            .top(10)
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
     private RestClient authenticatedClient() {
         SfAccessToken token = sfTokenCache.getToken();
         return restClientBuilder
             .baseUrl(sfProperties.apiUrl().replaceAll("/$", "") + "/odata/v2/")
             .defaultHeader("Authorization", "Bearer " + token.accessToken())
             .build();
+    }
+
+    private String resolveAccessToken(String accessToken) {
+        if (StringUtils.hasText(accessToken)) {
+            return accessToken.startsWith("Bearer ") ? accessToken.substring("Bearer ".length()) : accessToken;
+        }
+        return sfTokenCache.getToken().accessToken();
     }
 }

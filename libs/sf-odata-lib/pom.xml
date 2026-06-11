@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>no.nav.nom</groupId>
+        <artifactId>libs</artifactId>
+        <version>1.1.0</version>
+    </parent>
+
+    <artifactId>sf-odata-lib</artifactId>
+    <name>NOM :: Libs :: SF OData</name>
+
+    <properties>
+        <sap.cloud.sdk.version>5.20.0</sap.cloud.sdk.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sap.cloud.sdk.datamodel</groupId>
+            <artifactId>odata-core</artifactId>
+            <version>${sap.cloud.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.sap.cloud.sdk.datamodel</groupId>
+                <artifactId>odata-generator-maven-plugin</artifactId>
+                <version>${sap.cloud.sdk.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-vdm-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputDirectory>${project.basedir}/edmx-source-input</inputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/vdm</outputDirectory>
+                            <deleteOutputDirectory>true</deleteOutputDirectory>
+                            <packageName>no.nav.nom.sf.odata.vdm</packageName>
+                            <defaultBasePath>odata/v2/</defaultBasePath>
+                            <compileScope>COMPILE</compileScope>
+                            <serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
+                            <nameSource>NAME</nameSource>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
