@@ -31,6 +31,7 @@ import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -190,7 +191,9 @@ public class DvhRestConsumer {
         // Velger å kun kjøre i timene 10 - dette for å ha begrenset tidsrom hvor Omada kan brekke på uønskede endringer
         // Kan kjøres manuelt fra Swagger/admin - men pass på hva
         List<Integer> runHours = Arrays.asList(10);
-        var safe = runHours.contains(LocalDateTime.now().getHour());
+        var dateTime = LocalDateTime.now();
+        var weekDay = dateTime.getDayOfWeek().getValue();
+        var safe = runHours.contains(dateTime.getHour()) && weekDay <= DayOfWeek.FRIDAY.getValue();
         log.info("Vi er {} safe tidsrom for oppdatering fra DVH da timen {} er i runHours {}", safe ? "i" : "ikke i", LocalDateTime.now().getHour(), runHours);
         return safe;
     }
