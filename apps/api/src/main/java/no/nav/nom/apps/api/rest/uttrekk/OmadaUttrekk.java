@@ -690,8 +690,7 @@ public class OmadaUttrekk {
 
         var oterUtenforHierarkiEllerUtenTilgangsenhet = orgtilknytningService.getAll().stream()
             .filter(PeriodeUtil::isCurrentOrFuturePeriod)
-            .filter(OrgtilknytningState::erDagligOppfolging)
-            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) || aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId()))
+            .filter(ot -> !aktiveOrgenhetIder.contains(ot.orgEnhetId()) || (aktiveOrgenheterUtenTilgangsenhet.contains(ot.orgEnhetId()) && ot.erDagligOppfolging()))
             .filter(ot -> !ot.fid().startsWith("FID_MANUELL"))
             .collect(Collectors.groupingBy(OrgtilknytningState::orgEnhetId));
 

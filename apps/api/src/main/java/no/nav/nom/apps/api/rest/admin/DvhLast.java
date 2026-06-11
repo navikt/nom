@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -115,7 +116,7 @@ public class DvhLast {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success")
     })
-    @GetMapping(value = "/findOTUtenforHierarki")
+    @PostMapping(value = "/findOTUtenforHierarki")
     public void findOTUtenforHierarki() {
         triggerFindOTUtenforHierarki();
     }
