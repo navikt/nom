@@ -12,6 +12,7 @@
 
     <artifactId>sf-odata-lib</artifactId>
     <name>NOM :: Libs :: SF OData</name>
+    <version>1.2.0</version>
 
     <properties>
         <sap.cloud.sdk.version>5.20.0</sap.cloud.sdk.version>
@@ -53,6 +54,7 @@
                             <compileScope>COMPILE</compileScope>
                             <serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
                             <nameSource>NAME</nameSource>
+                            <serviceNameMappingFile>${project.basedir}/serviceNameMappings.properties</serviceNameMappingFile>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,18 +1,16 @@
 package no.nav.nom.apps.sfintegrasjon.sfclient;
 
-import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
-import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfTokenCache;
-import no.nav.nom.sf.odata.vdm.namespaces.empemployment.EmpEmployment;
-import no.nav.nom.sf.odata.vdm.namespaces.perperson.PerPerson;
-import no.nav.nom.sf.odata.vdm.namespaces.user.User;
-import no.nav.nom.sf.odata.vdm.services.DefaultEmpEmploymentService;
-import no.nav.nom.sf.odata.vdm.services.DefaultPerPersonService;
-import no.nav.nom.sf.odata.vdm.services.DefaultUserService;
 import com.sap.cloud.sdk.cloudplatform.connectivity.DefaultHttpDestination;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
+import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
+import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfTokenCache;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
+import no.nav.nom.sf.odata.vdm.services.DefaultSuccessfactorsService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
@@ -69,7 +67,7 @@ public class SfODataClient {
     }
 
     public List<User> getFirst10Users(String accessToken) throws ODataException {
-        return new DefaultUserService()
+        return new DefaultSuccessfactorsService()
             .withServicePath(ODATA2_SERVICE_PATH)
             .getAllUser()
             .top(10)
@@ -79,7 +77,7 @@ public class SfODataClient {
     }
 
     public List<EmpEmployment> getFirst10EmpEmployments(String accessToken) throws ODataException {
-        return new DefaultEmpEmploymentService()
+        return new DefaultSuccessfactorsService()
             .withServicePath(ODATA2_SERVICE_PATH)
             .getAllEmpEmployment()
             .top(10)
@@ -89,7 +87,7 @@ public class SfODataClient {
     }
 
     public List<PerPerson> getFirst10PerPersons(String accessToken) throws ODataException {
-        return new DefaultPerPersonService()
+        return new DefaultSuccessfactorsService()
             .withServicePath(ODATA2_SERVICE_PATH)
             .getAllPerPerson()
             .top(10)
