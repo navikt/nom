@@ -9,8 +9,8 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
-import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
+import no.nav.nom.apps.api.tilgangsenhet.exception.InvalidTilgangsenhetException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;

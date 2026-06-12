@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.tilgangsenhet;
+package no.nav.nom.apps.api.tilgangsenhet.exception;
 
 public class InvalidTilgangsenhetException extends RuntimeException {
 
