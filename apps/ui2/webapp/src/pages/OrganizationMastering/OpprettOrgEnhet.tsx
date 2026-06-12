@@ -39,6 +39,7 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
+import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
@@ -118,6 +119,10 @@ export const OpprettOrgEnhet = () => {
             </ContainerWithHighlightedTop>
           </>
         )}
+      </ContentWrapper>
+
+      <ContentWrapper limitWidth={false}>
+        <DynamiskOrgKart opprettKnapp toppOrgEnhetId="je104d" />
       </ContentWrapper>
     </>
   );
@@ -416,6 +421,7 @@ function OrgHierarkiStack({
         name={orgEnhet?.navn ?? ""}
         onClick={() => {
           onClick?.(orgEnhet?.id);
+
           if (!!selectedId) {
             setSelectedId(null);
           }
