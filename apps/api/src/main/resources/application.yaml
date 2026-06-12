@@ -345,7 +345,7 @@ app:
     riksrevisjonen-id: ge146b
     vikafossen-id: ru151s
     linjeenhetene: me177r,ju219d,tu734a,sy471r
-    nasjonaloppfolgning-id: pa473v,sa676g,hy812b
+    nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
@@ -590,7 +590,7 @@ app:
     riksrevisjonen-id: ke602d
     vikafossen-id: ru664y
     linjeenhetene: ry630r,te464t,se232x,ne994m
-    nasjonaloppfolgning-id: ba677w,fu549z,nu155v
+    nasjonaloppfolgning-ids: ba677w,fu549z,nu155v
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
