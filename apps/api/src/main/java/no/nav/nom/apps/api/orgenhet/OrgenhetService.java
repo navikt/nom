@@ -65,14 +65,15 @@ public class OrgenhetService {
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository,
-                           OrgEnhetCommandService orgEnhetCommandService,
-                           KafkaTopicReader kafkaTopicReader,
-                           OrganiseringStateRepository organiseringStateRepository,
-                           AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache,
-                           AppProperties appProperties,
-                           NomStateOrganiseringListener nomStateOrganiseringListener,
-                           NomStateOrgEnhetListener nomStateOrgEnhetListener
+    public OrgenhetService(
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        OrgEnhetCommandService orgEnhetCommandService,
+        KafkaTopicReader kafkaTopicReader,
+        OrganiseringStateRepository organiseringStateRepository,
+        AktiveOrgenheterIHierarkiCache aktiveOrgenheterIHierarkiCache,
+        AppProperties appProperties,
+        NomStateOrganiseringListener nomStateOrganiseringListener,
+        NomStateOrgEnhetListener nomStateOrgEnhetListener
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
@@ -96,9 +97,9 @@ public class OrgenhetService {
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
             return orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
-                    .stream()
-                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                    .max(comparing(OrgEnhetState::gyldigFom))
+                .stream()
+                .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                .max(comparing(OrgEnhetState::gyldigFom))
                 .map(OrgEnhet::new);
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
@@ -151,7 +152,6 @@ public class OrgenhetService {
             .map(Optional::get)
             .allMatch(organiseringState -> organiseringState.idOver().equals(orgEnhetId));
     }
-
 
 
     public boolean activeOrFutureWithEqualName(String name) {
@@ -302,7 +302,8 @@ public class OrgenhetService {
                         "nom-api REST",
                         "setOrgEnhetsType",
                         null,
-                        new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName()))
+                        new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName())
+                    )
                 )
             );
         }
@@ -312,19 +313,39 @@ public class OrgenhetService {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 
-    public Optional<IOrgenhet> getEnhetOverSomHarTilgangsenhetId(String nomId) {
-        var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId).map(OrganiseringState::idOver).orElseThrow(() -> new OrganiseringNotFoundException(nomId));
-        var orgEnhetOver = getById(organiseringOrgEnhetId);
-        if (orgEnhetOver.isPresent() && (isNull(orgEnhetOver.get().getTilgangsenhetId()) || orgEnhetOver.get().getTilgangsenhetId().isBlank())) {
-            return getEnhetOverSomHarTilgangsenhetId(orgEnhetOver.get().getId());
+    public Optional<OrgEnhetState> getEnhetOverSomHarTilgangsenhetId(String nomId) {
+        var organiseringOrgEnhetId = organiseringStateRepository.findActiveById(nomId)
+            .map(OrganiseringState::idOver)
+            .orElseThrow(() -> new OrganiseringNotFoundException(nomId));
+        var orgEnhetOver = orgEnhetStateRepository.findById(organiseringOrgEnhetId);
+        if (orgEnhetOver.isPresent() && (isNull(orgEnhetOver.get().tilgangsenhetId()) || orgEnhetOver.get().tilgangsenhetId().isBlank())) {
+            log.info("Enhet {} som er overnode for {} hadde ingen tilgangsenhet, går opp til neste", orgEnhetOver.get().id(), nomId);
+            return getEnhetOverSomHarTilgangsenhetId(orgEnhetOver.get().id());
         }
-        return orgEnhetOver.filter(o -> nonNull(o.getTilgangsenhetId()) && !o.getTilgangsenhetId().isBlank());
+        log.info("Returnerer dette objektet til slutt: {}", orgEnhetOver);
+        return orgEnhetOver.filter(o -> !o.tilgangsenhetId().isBlank());
     }
 
-    public Optional<IOrgenhet> getEnhetUnderSomHarTilgangsenhetId(String nomId) {
+    public Optional<OrgEnhetState> getEnhetUnderSomHarTilgangsenhetId(String nomId) {
         return getAllUnderliggendeOrgEnhetById(nomId).stream()
             .filter(iOrgenhet -> isPeriodActive(iOrgenhet.getGyldigFom(), iOrgenhet.getGyldigTom()))
             .filter(orgEnhet -> nonNull(orgEnhet.getTilgangsenhetId()) && !orgEnhet.getTilgangsenhetId().isBlank())
+            .map(orgEnhet -> new OrgEnhetState(
+                orgEnhet.getFid(),
+                orgEnhet.getId(),
+                orgEnhet.getNavn(),
+                orgEnhet.getGyldigFom(),
+                orgEnhet.getGyldigTom(),
+                orgEnhet.getOverordnetOrgEnhetFid(),
+                null,
+                orgEnhet.getOrgEnhetsType(),
+                orgEnhet.getNomNivaa(),
+                orgEnhet.getUniqueAgressoId(),
+                orgEnhet.getAgressoId(),
+                orgEnhet.getOrgNiv(),
+                orgEnhet.getAgressoOrgenhetType(),
+                orgEnhet.getTilgangsenhetId()
+            ))
             .findFirst();
     }
 
@@ -356,10 +377,16 @@ public class OrgenhetService {
                 var orgEnhetOver = orgEnhetStateRepository.findById(organiseringState.idOver())
                     .orElseThrow(() -> new OrgEnhetNotFoundException(organiseringState.idOver()));
 
-                Optional<IOrgenhet> resolvedEnhet = Optional.empty();
+                Optional<OrgEnhetState> resolvedEnhet = Optional.empty();
 
                 if (nonNull(orgEnhetOver.tilgangsenhetId()) && !orgEnhetOver.tilgangsenhetId().isBlank()) {
-                    resolvedEnhet = getById(orgEnhetOver.id());
+                    log.info(
+                        "Fant direkte overEnhet {} med tilgangsenhetId {} for enhet {}",
+                        orgEnhetOver.id(),
+                        orgEnhetOver.tilgangsenhetId(),
+                        orgEnhetState.id()
+                    );
+                    resolvedEnhet = Optional.of(orgEnhetOver);
                 }
 
                 if (resolvedEnhet.isEmpty()) {
@@ -367,30 +394,34 @@ public class OrgenhetService {
                 }
 
                 if (resolvedEnhet.isEmpty()) {
+                    log.info("Fant ingen overEnhet med tilgangsEnhetId, prøver med underenheter");
                     resolvedEnhet = getEnhetUnderSomHarTilgangsenhetId(orgEnhetState.id());
+                    log.info("Fikk tilbake dette resultatet i underenhet {}", resolvedEnhet);
                 }
 
-                resolvedEnhet.ifPresentOrElse(orgEnhet -> {
-                    var tilgangsEnhetId = orgEnhet.getTilgangsenhetId();
-                    orgEnhetCommandService.endreTilgangsenhet(
-                        orgEnhetState.fid(),
-                        new EndreTilgangsenhet(
-                            tilgangsEnhetId,
-                            inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
-                        )
-                    );
-                    getAllUnderliggendeOrgEnhetById(orgEnhetState.id()).forEach(iOrgenhet -> {
-                        if (isNull(iOrgenhet.getTilgangsenhetId()) || iOrgenhet.getTilgangsenhetId().isBlank()) {
-                            orgEnhetCommandService.endreTilgangsenhet(
-                                iOrgenhet.getFid(),
-                                new EndreTilgangsenhet(
-                                    tilgangsEnhetId,
-                                    inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
-                                )
-                            );
-                        }
-                    });
-                }, () -> log.warn("Kunne ikke resolve tilgangsenhetId for enhet {} ({})", orgEnhetState.id(), orgEnhetState.navn()));
+                resolvedEnhet.ifPresentOrElse(
+                    orgEnhet -> {
+                        var tilgangsEnhetId = orgEnhet.tilgangsenhetId();
+                        orgEnhetCommandService.endreTilgangsenhet(
+                            orgEnhetState.fid(),
+                            new EndreTilgangsenhet(
+                                tilgangsEnhetId,
+                                inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
+                            )
+                        );
+                        getAllUnderliggendeOrgEnhetById(orgEnhetState.id()).forEach(iOrgenhet -> {
+                            if (isNull(iOrgenhet.getTilgangsenhetId()) || iOrgenhet.getTilgangsenhetId().isBlank()) {
+                                orgEnhetCommandService.endreTilgangsenhet(
+                                    iOrgenhet.getFid(),
+                                    new EndreTilgangsenhet(
+                                        tilgangsEnhetId,
+                                        inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
+                                    )
+                                );
+                            }
+                        });
+                    }, () -> log.warn("Kunne ikke resolve tilgangsenhetId for enhet {} ({})", orgEnhetState.id(), orgEnhetState.navn())
+                );
             }
         });
     }

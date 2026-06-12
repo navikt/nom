@@ -1,5 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class OrgEnhetNotFoundException extends RuntimeException {
 
     public OrgEnhetNotFoundException(String message) {
@@ -7,6 +10,7 @@ public class OrgEnhetNotFoundException extends RuntimeException {
     }
 
     public static OrgEnhetNotFoundException id(String id) {
+        log.error("Fant ikke orgenhet id {}", id);
         return new OrgEnhetNotFoundException(
             String.format("Fant ingen orgenhet med id %s", id)
         );
