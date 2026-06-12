@@ -1,10 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  CheckmarkCircleFillIcon,
-  FloppydiskIcon,
-  PlusCircleIcon,
-} from "@navikt/aksel-icons";
+import { FloppydiskIcon, PlusCircleIcon } from "@navikt/aksel-icons";
 import {
   BodyLong,
   BodyShort,
@@ -35,13 +31,11 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
-import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
@@ -69,60 +63,64 @@ export const OpprettOrgEnhet = () => {
     <>
       <PageBanner text="Opprett ny organisasjonsenhet" />
 
-      <ContentWrapper>
-        {!!opprettResponse ? (
-          <ContainerWithHighlightedTop
-            icon={opprettRessursIconRoundedBackground}
-            padding={6}
-            title={
-              <HStack gap="4">
-                <CheckmarkCircleFillIcon
-                  css={css`
-                    color: var(--a-surface-success-hover);
-                    font-size: var(--a-font-size-heading-xlarge);
-                  `}
-                />
-                Organisasjonsenheten er nå registrert i NOM
-              </HStack>
-            }
-          >
-            <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />
-          </ContainerWithHighlightedTop>
-        ) : (
-          <>
-            <ContainerWithHighlightedTop padding={6}>
-              <VelgOrgEnhetPlassering
-                handleOpprettHerClick={handleOpprettHerClick}
-                selectedOrgEnhetId={selectedOrgEnhetId}
-              />
+      {/*<ContentWrapper>*/}
+      {/*  {!!opprettResponse ? (*/}
+      {/*    <ContainerWithHighlightedTop*/}
+      {/*      icon={opprettRessursIconRoundedBackground}*/}
+      {/*      padding={6}*/}
+      {/*      title={*/}
+      {/*        <HStack gap="4">*/}
+      {/*          <CheckmarkCircleFillIcon*/}
+      {/*            css={css`*/}
+      {/*              color: var(--a-surface-success-hover);*/}
+      {/*              font-size: var(--a-font-size-heading-xlarge);*/}
+      {/*            `}*/}
+      {/*          />*/}
+      {/*          Organisasjonsenheten er nå registrert i NOM*/}
+      {/*        </HStack>*/}
+      {/*      }*/}
+      {/*    >*/}
+      {/*      <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />*/}
+      {/*    </ContainerWithHighlightedTop>*/}
+      {/*  ) : (*/}
+      {/*    <>*/}
+      {/*      <ContainerWithHighlightedTop padding={6}>*/}
+      {/*        <VelgOrgEnhetPlassering*/}
+      {/*          handleOpprettHerClick={handleOpprettHerClick}*/}
+      {/*          selectedOrgEnhetId={selectedOrgEnhetId}*/}
+      {/*        />*/}
 
-              <OrgEnhetInfoForm
-                orgEnhetId={selectedOrgEnhetId}
-                setOpprettResponse={setOpprettResponse}
-              />
+      {/*        <OrgEnhetInfoForm*/}
+      {/*          orgEnhetId={selectedOrgEnhetId}*/}
+      {/*          setOpprettResponse={setOpprettResponse}*/}
+      {/*        />*/}
 
-              {!selectedOrgEnhetId && (
-                <div
-                  css={css`
-                    display: flex;
-                    justify-content: end;
-                    gap: var(--a-spacing-4);
-                  `}
-                >
-                  <SmartLink href="/organisasjonsmastring">
-                    <Button size="small" variant="secondary">
-                      Avbryt
-                    </Button>
-                  </SmartLink>
-                </div>
-              )}
-            </ContainerWithHighlightedTop>
-          </>
-        )}
-      </ContentWrapper>
+      {/*        {!selectedOrgEnhetId && (*/}
+      {/*          <div*/}
+      {/*            css={css`*/}
+      {/*              display: flex;*/}
+      {/*              justify-content: end;*/}
+      {/*              gap: var(--a-spacing-4);*/}
+      {/*            `}*/}
+      {/*          >*/}
+      {/*            <SmartLink href="/organisasjonsmastring">*/}
+      {/*              <Button size="small" variant="secondary">*/}
+      {/*                Avbryt*/}
+      {/*              </Button>*/}
+      {/*            </SmartLink>*/}
+      {/*          </div>*/}
+      {/*        )}*/}
+      {/*      </ContainerWithHighlightedTop>*/}
+      {/*    </>*/}
+      {/*  )}*/}
+      {/*</ContentWrapper>*/}
 
       <ContentWrapper limitWidth={false}>
-        <DynamiskOrgKart opprettKnapp toppOrgEnhetId="je104d" />
+        <DynamiskOrgKart
+          opprettKnapp
+          title="Plassering"
+          toppOrgEnhetId="sa312u"
+        />
       </ContentWrapper>
     </>
   );

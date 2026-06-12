@@ -352,22 +352,28 @@ function OrgKartOpprettButton({ orgEnhetId }: { orgEnhetId: string }) {
         size="small"
         variant="tertiary"
       >
-        <span
+        <div
           css={css`
-            display: inline-block;
-            white-space: nowrap;
+            margin-right: 8px;
           `}
         >
-          Opprett ny
-        </span>{" "}
-        <span
-          css={css`
-            display: inline-block;
-            white-space: nowrap;
-          `}
-        >
-          enhet her
-        </span>
+          <span
+            css={css`
+              display: inline-block;
+              white-space: nowrap;
+            `}
+          >
+            Opprett ny
+          </span>{" "}
+          <span
+            css={css`
+              display: inline-block;
+              white-space: nowrap;
+            `}
+          >
+            enhet her
+          </span>
+        </div>
       </Button>
     </SmartLink>
   );
