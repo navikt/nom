@@ -151,11 +151,11 @@ public class SfClientController {
         description = "Fetches the first 10 User entities from SAP SuccessFactors using the generated VDM client. " +
             "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
     )
-    public ResponseEntity<List<User>> getODataUsers(
+    public ResponseEntity<List<String>> getODataUsers(
         @RequestParam(required = false) String accessToken
     ) {
         try {
-            return ResponseEntity.ok(sfODataClient.getFirst10Users(accessToken));
+            return ResponseEntity.ok(sfODataClient.getFirst10Users(accessToken).stream().map(User::toString).toList());
         } catch (ODataException e) {
             log.error("Failed to fetch users from SAP SuccessFactors OData API", e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
@@ -169,11 +169,11 @@ public class SfClientController {
         description = "Fetches the first 10 EmpEmployment entities from SAP SuccessFactors using the generated VDM client. " +
             "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
     )
-    public ResponseEntity<List<EmpEmployment>> getODataEmpEmployments(
+    public ResponseEntity<List<String>> getODataEmpEmployments(
         @RequestParam(required = false) String accessToken
     ) {
         try {
-            return ResponseEntity.ok(sfODataClient.getFirst10EmpEmployments(accessToken));
+            return ResponseEntity.ok(sfODataClient.getFirst10EmpEmployments(accessToken).stream().map(EmpEmployment::toString).toList());
         } catch (ODataException e) {
             log.error("Failed to fetch EmpEmployment objects from SAP SuccessFactors OData API", e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
@@ -187,11 +187,11 @@ public class SfClientController {
         description = "Fetches the first 10 PerPerson entities from SAP SuccessFactors using the generated VDM client. " +
             "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
     )
-    public ResponseEntity<List<PerPerson>> getODataPerPersons(
+    public ResponseEntity<List<String>> getODataPerPersons(
         @RequestParam(required = false) String accessToken
     ) {
         try {
-            return ResponseEntity.ok(sfODataClient.getFirst10PerPersons(accessToken));
+            return ResponseEntity.ok(sfODataClient.getFirst10PerPersons(accessToken).stream().map(PerPerson::toString).toList());
         } catch (ODataException e) {
             log.error("Failed to fetch PerPerson objects from SAP SuccessFactors OData API", e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
