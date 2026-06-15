@@ -126,6 +126,9 @@ public class GenericApiKafkaConfig {
     public String evtsrcOrgenhetUniqueListenerId(@Value("${app.kafka.orgenhet.eventsource-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean
+    public String evtsrcOrganiseringUniqueListenerId(@Value("${app.kafka.organisering.eventsource-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
+
+    @Bean
     public String evtsrcOrgenhetLederUniqueListenerId(@Value("${app.kafka.orgEnhetLeder.eventsource-listener-id}") String listenerId) { return getUniqueListenerIdString(listenerId); }
 
     @Bean

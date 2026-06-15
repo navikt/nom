@@ -8,6 +8,7 @@ import no.nav.nom.apps.admin.dto.orgenhet.OrgEnhetStateDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursHendelseKafkaDTO;
 import no.nav.nom.apps.admin.dto.ressurs.RessursStateKafkaDTO;
 import no.nav.nom.apps.admin.events.hendelser.HendelserApiStateRepository;
+import no.nav.nom.apps.admin.events.organisering.eventsource.OrganiseringEvtsrcRepository;
 import no.nav.nom.apps.admin.events.orgenhet.api.OrgEnhetStateApiRepository;
 import no.nav.nom.apps.admin.events.orgenhet.eventsource.OrgenhetEvtsrcRepository;
 import no.nav.nom.apps.admin.events.orgenhetleder.eventsource.OrgenhetLederEvtsrcRepository;
@@ -19,6 +20,7 @@ import no.nav.nom.apps.admin.events.ressurs.eventsource.RessursEvtsrcRepository;
 import no.nav.nom.apps.admin.events.tilgang.TilgangEvtsrcRepository;
 import no.nav.nom.contract.nom.eventsource.AuthorizationEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
@@ -49,6 +51,7 @@ public class SinkController {
 
     private final RessursEvtsrcRepository ressursEvtsrcRepository;
     private final OrgenhetEvtsrcRepository orgenhetEvtsrcRepository;
+    private final OrganiseringEvtsrcRepository organiseringEvtsrcRepository;
     private final TilgangEvtsrcRepository tilgangEvtsrcRepository;
     private final RessursApiStateRepository ressursApiStateRepository;
     private final OrgEnhetStateApiRepository orgEnhetStateApiRepository;
@@ -62,6 +65,7 @@ public class SinkController {
     public SinkController(
         RessursEvtsrcRepository ressursEvtsrcRepository,
         OrgenhetEvtsrcRepository orgenhetEvtsrcRepository,
+        OrganiseringEvtsrcRepository organiseringEvtsrcRepository,
         TilgangEvtsrcRepository tilgangEvtsrcRepository,
         RessursApiStateRepository ressursApiStateRepository,
         OrgEnhetStateApiRepository orgEnhetStateApiRepository,
@@ -74,6 +78,7 @@ public class SinkController {
     ) {
         this.ressursEvtsrcRepository = ressursEvtsrcRepository;
         this.orgenhetEvtsrcRepository = orgenhetEvtsrcRepository;
+        this.organiseringEvtsrcRepository = organiseringEvtsrcRepository;
         this.tilgangEvtsrcRepository = tilgangEvtsrcRepository;
         this.ressursApiStateRepository = ressursApiStateRepository;
         this.orgEnhetStateApiRepository = orgEnhetStateApiRepository;
@@ -103,6 +108,15 @@ public class SinkController {
         return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
     }
 
+    @GetMapping(value = "/organiseringEvents")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
+    public List<OrganiseringEvent> getOrganiseringEvents(@Valid EventSearchParams eventSearchParams) {
+        int fromOffset = eventSearchParams.getFromOffset();
+        List<OrganiseringEvent> events = organiseringEvtsrcRepository.getOrganiseringEvtsrc().stream().filter(eventFilter(eventSearchParams)).toList();
+
+        return safeSubList(events.reversed(), fromOffset, fromOffset + NUMBER_OF_EVENTS);
+    }
+
     @GetMapping(value = "/orgenhetLederEvents")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('READONLY')")
     public List<OrgEnhetLederEventWithNavidentDTO> getOrgEnhetLederEvents(@Valid EventSearchParams eventSearchParams) {
@@ -116,21 +130,18 @@ public class SinkController {
             .collect(Collectors.toMap(
                 OrgEnhetLederState::fid,
                 OrgEnhetLederState::navident,
-                (existing, replacement) -> existing
+                (existing, _) -> existing
             ));
 
-
-        List<OrgEnhetLederEventWithNavidentDTO> orgEnhetLederEventsWithNavident = orgEnhetLederEvents.stream()
+        //orgEnhetLederStateRepository
+        return orgEnhetLederEvents.stream()
             .map(e -> new OrgEnhetLederEventWithNavidentDTO(
                 e.getFid(),
                 (OrgEnhetLederEvent.Data) e.getData(),
                 e.getMetadata(),
                 fidsWithNonNullNavident.get(e.getFid())
             ))
-            .toList(); // Java 16+
-
-        //orgEnhetLederStateRepository
-        return orgEnhetLederEventsWithNavident;
+            .toList();
     }
 
     @GetMapping(value = "/orgtilknytningEvents")
