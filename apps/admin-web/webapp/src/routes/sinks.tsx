@@ -9,6 +9,7 @@ import {
 import {
   getApiRessursEventsOptions,
   getDeadLetterEventsOptions,
+  getOrganiseringEventOptions,
   getOrgenhetEventsOptions,
   getOrgtilknytningEventsOptions,
   getRessursEventsOptions,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/sinks")({
   loader: ({ context, deps }) => {
     // prefetch as much as possible
     context.queryClient.prefetchQuery(getOrgenhetEventsOptions(deps));
+    context.queryClient.prefetchQuery(getOrganiseringEventOptions(deps));
     context.queryClient.prefetchQuery(getTilgangEventsOptions(deps));
     context.queryClient.prefetchQuery(getRessursEventsOptions(deps));
     context.queryClient.prefetchQuery(getApiRessursEventsOptions(deps));
@@ -43,6 +45,11 @@ export const Route = createFileRoute("/sinks")({
             label="Historikk orgenheter"
             onClick={() => navigate({ to: "/sinks/orgenhet", search })}
             value="/sinks/orgenhet"
+          />
+          <Tabs.Tab
+            label="Historikk organiseringer"
+            onClick={() => navigate({ to: "/sinks/organisering", search })}
+            value="/sinks/organisering"
           />
           <Tabs.Tab
             label="Historikk tilganger"

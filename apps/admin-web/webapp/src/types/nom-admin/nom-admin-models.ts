@@ -10,25 +10,27 @@
  * ---------------------------------------------------------------
  */
 
-import {MetaData} from "~/types.ts";
-
+/** @default null */
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_READONLY = "ROLE_READONLY",
   ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
 }
 
+/** @default null */
 export enum HendelseType {
   NY = "NY",
   ENDRET = "ENDRET",
   FJERNET = "FJERNET",
 }
 
+/** @default null */
 export enum EntityType {
   ORGENHET = "ORGENHET",
   RESSURS = "RESSURS",
 }
 
+/** @default null */
 export enum OrgEnhetsType {
   ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
   NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
@@ -46,12 +48,14 @@ export enum OrgEnhetsType {
   NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
 }
 
+/** @default null */
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
   ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
 }
 
+/** @default null */
 export enum Tilknytningtype {
   ANNET = "ANNET",
   ARBEIDSTRENING = "ARBEIDSTRENING",
@@ -74,18 +78,21 @@ export enum Tilknytningtype {
   VIKAR = "VIKAR",
 }
 
+/** @default null */
 export enum TelefonType {
   NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
   NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
   PRIVAT_TELEFON = "PRIVAT_TELEFON",
 }
 
+/** @default null */
 export enum Sektor {
   NAV_STATLIG = "NAV_STATLIG",
   NAV_KOMMUNAL = "NAV_KOMMUNAL",
   EKSTERN = "EKSTERN",
 }
 
+/** @default null */
 export enum IdentType {
   ROBOT = "ROBOT",
   STANDARD = "STANDARD",
@@ -94,11 +101,28 @@ export enum IdentType {
   UKJENT = "UKJENT",
 }
 
+export interface OrganiseringEvent {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  type: string;
+}
+
 export interface OrgEnhetEvent {
   fid?: string;
   data?: Data;
   metadata?: Metadata;
   additionalData?: Data;
+  type: string;
+}
+
+export interface OrgEnhetLederEventWithNavidentDTO {
+  fid?: string;
+  data?: Data;
+  metadata?: Metadata;
+  additionalData?: Data;
+  navident?: string;
   type: string;
 }
 
@@ -145,28 +169,48 @@ export interface Jobbtelefon {
 }
 
 export interface RessursState {
+  /** @default "" */
   fid: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   visningsnavn: Visningsnavn;
+  /** @default "" */
   jobbtelefon?: Jobbtelefon;
+  /** @default "" */
   primaryTelefonnummer?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startdato?: string;
+  /** @default "" */
   primaryFysiskBrukersted?: string;
+  /** @default "" */
   fysiskeBrukersteder: string[];
   /** @default "STANDARD" */
   identType: IdentType;
+  /** @default "" */
   sistEndretAv?: string;
+  /** @default "" */
   tilknytningtype?: Tilknytningtype;
 }
 
 export interface Visningsnavn {
+  /** @default "" */
   fornavn: string;
+  /** @default "" */
   mellomnavn?: string;
+  /** @default "" */
   etternavn: string;
 }
 
@@ -180,17 +224,35 @@ export interface OrgtilknytningStateSearchParams {
 }
 
 export interface OrgtilknytningState {
+  /** @default "" */
   fid: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   orgEnhetId: string;
+  /** @default "" */
   sektor?: Sektor;
+  /** @default false */
   erDagligOppfolging: boolean;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   orgtilknytningType?: Tilknytningtype;
+  /** @default "" */
+  primaryFysiskBrukerstedNummer?: string;
+  /** @default "" */
+  additionalFysiskeBrukerstederNummer?: string[];
+  /** @default "" */
   masseflyttetFraFid?: string;
+  /** @default "" */
   sistEndretAv?: string;
 }
 
@@ -219,26 +281,27 @@ export interface OrgEnhetState {
   agressoId?: string;
   agressoOrgNivaa?: string;
   agressoOrgenhetType?: string;
+  tilgangsenhetId?: string;
+}
+
+export interface OrgenhetLederStateSearchParams {
+  /**
+   * @format int32
+   * @min 0
+   */
+  fromOffset?: number;
+  filterText?: string;
 }
 
 export interface OrgEnhetLederState {
-  fid: string;
-  navident: string;
+  fid?: string;
+  navident?: string;
   orgEnhetId?: string;
   /** @format date */
   startdato?: string;
   /** @format date */
   sluttdato?: string;
   sistEndretAv?: string;
-}
-
-export interface OrgEnhetLederEventWithNavident {
-  fid?: string;
-  data?: Data;
-  metadata?: Metadata;
-  additionalData?: Data;
-  type: string;
-  navident: string;
 }
 
 export interface OrganiseringStateSearchParams {
@@ -323,6 +386,8 @@ export type RessursStartDatoOppdatertV1 = RessursEvent;
 
 export type RessursTekniskSlettetEventV1 = RessursEvent;
 
+export type RessursTilknytningtypeOppdatertV1 = RessursEvent;
+
 export interface DeadLetterDTO {
   fid?: string;
   /** @format date-time */
@@ -341,6 +406,8 @@ export type OrgtilknytningDatoEndretEventV2 = OrgtilknytningEvent;
 
 export type OrgtilknytningFjernetEventV1 = OrgtilknytningEvent;
 
+export type OrgtilknytningFysiskBrukerstedEndretEventV1 = OrgtilknytningEvent;
+
 export type OrgtilknytningOpprettetEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningSektorEndretEventV1 = OrgtilknytningEvent;
@@ -349,9 +416,13 @@ export type OrgtilknytningTilknytningtypeEndretEventV1 = OrgtilknytningEvent;
 
 export type OrgtilknytningTypeEndretEventV1 = OrgtilknytningEvent;
 
+export type KorrigerGyldigFomEventV1 = OrgEnhetEvent;
+
 export type NomNivaaEndretEventV1 = OrgEnhetEvent;
 
 export type OrgEnhetAvvikletEventV1 = OrgEnhetEvent;
+
+export type OrgEnhetEndretNavnEventV1 = OrgEnhetEvent;
 
 export type OrgEnhetKorrigertEventV1 = OrgEnhetEvent;
 
@@ -365,73 +436,157 @@ export type OrgEnhetTypeEndretEventV1 = OrgEnhetEvent & {
   data?: OrgEnhetTypeEndretEventData;
 };
 
+export interface TilgangsenhetEndretEventData {
+  tilgangsenhetId?: string;
+}
+
+export type TilgangsenhetEndretEventV1 = OrgEnhetEvent & {
+  data?: TilgangsenhetEndretEventData;
+};
+
+export type OrganiseringAvsluttetEventV1 = OrganiseringEvent;
+
+export type OrganiseringEndretEventV1 = OrganiseringEvent;
+
+export type OrganiseringEndretNavnEventV1 = OrganiseringEvent;
+
+export type OrganiseringOpprettetEventV1 = OrganiseringEvent;
+
 export interface RessursHendelseKafkaDTO {
+  /** @default "" */
   key: string;
-  /** @format date-time */
+  /**
+   * @format date-time
+   * @default ""
+   */
   timestamp: string;
+  /** @default "" */
   fid: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   visningsnavn: Visningsnavn;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startdato: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   orgtilknytning: RessursHendelseOrgtilknytningKafkaDTO;
+  /** @default "" */
   eventtype: string;
 }
 
 export interface RessursHendelseOrgtilknytningKafkaDTO {
+  /** @default "" */
   fid: string;
+  /** @default "" */
   orgEnhetId: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default false */
   dagligOppfolging: boolean;
 }
 
 export interface OrgtilknytningKafkaDTO {
+  /** @default "" */
   fid: string;
+  /** @default "" */
   orgenhetId: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default false */
   dagligOppfolging: boolean;
+  /** @default "" */
   sektor?: Sektor;
+  /** @default "" */
   tilknytningType?: Tilknytningtype;
 }
 
 export interface RessursStateKafkaDTO {
+  /** @default "" */
   key: string;
-  /** @format date-time */
+  /**
+   * @format date-time
+   * @default ""
+   */
   timestamp: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   visningsnavn: Visningsnavn;
+  /** @default "" */
   identType?: IdentType;
+  /** @default "" */
   primaryTelefonnummer?: string;
+  /** @default "" */
   primaryFysiskBrukersted?: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   orgtilknytninger?: OrgtilknytningKafkaDTO[];
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startdato?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
 }
 
 export interface OrgEnhetStateDTO {
+  /** @default "" */
   key: string;
-  /** @format date-time */
+  /**
+   * @format date-time
+   * @default ""
+   */
   timestamp: string;
+  /** @default "" */
   id: string;
+  /** @default "" */
   navn: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   nomNivaa?: NomNivaa;
+  /** @default "" */
   orgEnhetsType?: OrgEnhetsType;
 }
 
@@ -444,42 +599,63 @@ export interface HendelseDTO {
 }
 
 export interface SessionInfoResponse {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   name: string;
+  /** @default "" */
   roles: UserRoles[];
 }
 
 export interface EnhetSanityCheckResponse {
+  /** @default "" */
   navn: string;
+  /** @default "" */
   id: string;
+  /** @default "" */
   agressoId: string;
 }
 
 export interface RessursSomHarSluttetOgErLederForEnhetSanityCheckResponse {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   visningsnavn: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato: string;
+  /** @default "" */
   enheter: EnhetSanityCheckResponse[];
 }
 
 export interface RobotOrgtilknytning {
+  /** @default "" */
   orgenhetId: string;
+  /** @default "" */
   orgenhetNavn: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
   /** @format date */
   gyldigTom?: string;
 }
 
 export interface RobotRessurs {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   visningsnavn: string;
+  /** @default "" */
   sektor: Sektor;
   /** @format date */
   startdato?: string;
   /** @format date */
   sluttdato?: string;
+  /** @default "" */
   orgtilknytninger: RobotOrgtilknytning[];
 }
 
@@ -499,17 +675,28 @@ export interface RessursOrgtilknytningKoblingInfo {
 }
 
 export interface RessursOrgtilknytningUlikSluttdato {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   orgEnhetId: string;
+  /** @default "" */
   remedyEnhetId: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   ressursSluttdato: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   orgtilknytningSluttdato: string;
 }
 
 export interface RessursMedFlereDOL {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   otErMedOverlapp: string;
 }
 
@@ -532,21 +719,41 @@ export interface RessursMedEnhet {
 }
 
 export interface OverlappendeOrgtilknytning {
+  /** @default "" */
   navident1: string;
+  /** @default "" */
   orgEnhetId1: string;
+  /** @default "" */
   fid1: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom1: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom1?: string;
+  /** @default false */
   erDagligOppfolging1: boolean;
+  /** @default "" */
   navident2: string;
+  /** @default "" */
   orgEnhetId2: string;
+  /** @default "" */
   fid2: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom2: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom2?: string;
+  /** @default false */
   erDagligOppfolging2: boolean;
 }
 
@@ -561,27 +768,46 @@ export interface OrgtilknytningMedOrgEnhet {
 }
 
 export interface DuplikatOrgtilknytning {
+  /** @default "" */
   fid1: string;
+  /** @default "" */
   fid2: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   orgEnhetId: string;
+  /** @default "" */
   sektor?: Sektor;
+  /** @default false */
   erDagligOppfolging: boolean;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
+  /** @default "" */
   orgtilknytningType?: Tilknytningtype;
 }
 
 export interface LoevnodeMedFeilAntallArbOmr {
+  /** @default "" */
   orgenhetId: string;
+  /** @default "" */
   orgenhetNavn: string;
-  /** @format int32 */
+  /**
+   * @format int32
+   * @default ""
+   */
   antallArbOmr: number;
 }
 
 export interface OrgEnhetArbeidsomraadeInfo {
-  /** @format int32 */
+  /**
+   * @format int32
+   * @default ""
+   */
   antallLoevnoder: number;
+  /** @default "" */
   loevnoderMedFeil: LoevnodeMedFeilAntallArbOmr[];
 }
 
