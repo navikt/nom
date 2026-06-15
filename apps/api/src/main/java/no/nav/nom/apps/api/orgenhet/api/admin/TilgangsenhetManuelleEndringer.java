@@ -9,8 +9,8 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
-import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
+import no.nav.nom.apps.api.tilgangsenhet.exception.InvalidTilgangsenhetException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;
@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,8 +63,8 @@ public class TilgangsenhetManuelleEndringer {
         }
 
         var inputMetadata = new InputMetadata(
-            "tilgangsenhet-endring-admin",
-            "endreTilgangsenhet",
+            "TilgangsenhetManuelleEndringer",
+            "setTilgangsenhet",
             tilgangsenhetEndring,
             new Origination(
                 getAuthenticatedNavIdent(),
@@ -77,6 +78,34 @@ public class TilgangsenhetManuelleEndringer {
         orgEnhetCommandService.endreTilgangsenhet(
             orgenhetState.getFid(), new EndreTilgangsenhet(
                 tilgangsenhetEndring.tilgangsenhetId(),
+                inputMetadata
+            )
+        );
+    }
+
+    @Operation(
+        description = "Fjern",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PatchMapping("/remove/{orgEnhetId}")
+    public void removeTilgangsenhet(@PathVariable String orgEnhetId) {
+
+        var inputMetadata = new InputMetadata(
+            "TilgangsenhetManuelleEndringer",
+            "removeTilgangsenhet",
+            orgEnhetId,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "ADMIN-API"
+            )
+        );
+
+        var orgenhetState = orgenhetService.getById(orgEnhetId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", orgEnhetId)));
+
+        orgEnhetCommandService.endreTilgangsenhet(
+            orgenhetState.getFid(), new EndreTilgangsenhet(
+                null,
                 inputMetadata
             )
         );

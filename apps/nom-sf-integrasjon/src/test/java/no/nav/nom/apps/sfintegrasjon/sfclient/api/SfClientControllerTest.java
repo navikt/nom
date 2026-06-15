@@ -5,6 +5,8 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.SfODataClient;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -16,8 +18,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -271,5 +276,79 @@ class SfClientControllerTest {
         mockMvc.perform(get("/api/sf/client/odata-metadata/Unknown")
                 .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
             .andExpect(status().isNotFound());
+    }
+
+    // --- /api/sf/client/odata-emp-employment ---
+
+    @Test
+    void odataEmpEmployment_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-emp-employment"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void odataEmpEmployment_shouldReturn403WhenNotAdmin() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-emp-employment")
+                .with(jwt()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void odataEmpEmployment_shouldReturn200WithObjectsWhenAdmin() throws Exception {
+        when(sfODataClient.getFirst10EmpEmployments(isNull())).thenReturn(List.of(new EmpEmployment()));
+
+        mockMvc.perform(get("/api/sf/client/odata-emp-employment")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataEmpEmployment_shouldPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getFirst10EmpEmployments(eq("local-token"))).thenReturn(List.of(new EmpEmployment()));
+
+        mockMvc.perform(get("/api/sf/client/odata-emp-employment")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    // --- /api/sf/client/odata-per-person ---
+
+    @Test
+    void odataPerPerson_shouldReturn401WhenNotAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-per-person"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void odataPerPerson_shouldReturn403WhenNotAdmin() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-per-person")
+                .with(jwt()))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void odataPerPerson_shouldReturn200WithObjectsWhenAdmin() throws Exception {
+        when(sfODataClient.getFirst10PerPersons(isNull())).thenReturn(List.of(new PerPerson()));
+
+        mockMvc.perform(get("/api/sf/client/odata-per-person")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataPerPerson_shouldPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getFirst10PerPersons(eq("local-token"))).thenReturn(List.of(new PerPerson()));
+
+        mockMvc.perform(get("/api/sf/client/odata-per-person")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
     }
 }

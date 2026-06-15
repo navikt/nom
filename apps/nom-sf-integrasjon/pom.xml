@@ -10,6 +10,9 @@
     </parent>
 
     <name>NOM :: Apps :: Nom-sf-integrasjon</name>
+    <properties>
+        <sf-odata-lib.version>1.2.0</sf-odata-lib.version>
+    </properties>
     <artifactId>nom-sf-integrasjon</artifactId>
     <version>1.1.0</version>
 
@@ -92,6 +95,12 @@
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>sf-odata-lib</artifactId>
+            <version>${sf-odata-lib.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getunleash</groupId>

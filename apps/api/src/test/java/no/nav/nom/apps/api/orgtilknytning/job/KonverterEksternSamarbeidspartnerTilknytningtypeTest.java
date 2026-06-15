@@ -10,9 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
     private KonverterEksternSamarbeidspartnerTilknytningtype konverterEksternSamarbeidspartnerTilknytningtype;
 
-    AppProperties appProperties = new AppProperties(null, null, null, null, new AppProperties.Orgenhet("dummyNavId", "dummyHelfoId", "dummySkattId", "dummyRiksrevisjonId", "dummyVikafossenId", Set.of("linje-enhet","en-annen-linjeenhet")));
+    AppProperties appProperties = new AppProperties(null, null, null, null, new AppProperties.Orgenhet("dummyNavId", "dummyHelfoId", "dummySkattId", "dummyRiksrevisjonId", "dummyVikafossenId", Set.of("linje-enhet","en-annen-linjeenhet"), Set.of("nasjonal", "nasjonal2")));
 
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;

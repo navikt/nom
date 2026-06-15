@@ -7,11 +7,11 @@ import { JsonView } from "react-json-view-lite";
 import { JsonModal } from "~/components/JsonModal.tsx";
 import { copyToClipboard } from "~/components/quickdialog.tsx";
 import { useTableSort } from "~/hooks/useTableSort.ts";
-import type { OrgEnhetLederEventWithNavident } from "~/types/nom-admin/nom-admin-models.ts";
+import type { OrgEnhetLederEventWithNavidentDTO } from "~/types/nom-admin/nom-admin-models.ts";
 import { formatDisplayDatetime } from "~/utils.ts";
 
 export function KafkaEventTableForOrgenhetLeder(props: {
-  kafkaEvents: OrgEnhetLederEventWithNavident[];
+  kafkaEvents: OrgEnhetLederEventWithNavidentDTO[];
   linkPrefix: string;
 }) {
   const kafkaEvents = props.kafkaEvents;
@@ -121,7 +121,7 @@ export function EmbeddedJsonView(props: { jsonData: object | any[] }) {
 export function OrgenhetLederEventDateRange({
   events,
 }: {
-  events: OrgEnhetLederEventWithNavident[];
+  events: OrgEnhetLederEventWithNavidentDTO[];
 }) {
   const latestEvent = events[0];
   const firstEvent = events[events.length - 1];

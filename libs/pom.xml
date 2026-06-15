@@ -21,6 +21,7 @@
         <module>utils-common</module>
         <module>nom-state</module>
         <module>graphql-by-staterepo</module>
+        <module>sf-odata-lib</module>
     </modules>
 
 

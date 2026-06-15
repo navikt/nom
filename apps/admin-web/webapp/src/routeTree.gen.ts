@@ -27,6 +27,7 @@ import { Route as SinksRessursRouteImport } from './routes/sinks.ressurs'
 import { Route as SinksOrgtilknytningRouteImport } from './routes/sinks.orgtilknytning'
 import { Route as SinksOrgenhetLederRouteImport } from './routes/sinks.orgenhet-leder'
 import { Route as SinksOrgenhetRouteImport } from './routes/sinks.orgenhet'
+import { Route as SinksOrganiseringRouteImport } from './routes/sinks.organisering'
 import { Route as SinksNomMasteredRouteImport } from './routes/sinks.nom-mastered'
 import { Route as SinksDeadLetterRouteImport } from './routes/sinks.dead-letter'
 import { Route as SinksApiRessursHendelserRouteImport } from './routes/sinks.api-ressurs-hendelser'
@@ -129,6 +130,11 @@ const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
   path: '/orgenhet',
   getParentRoute: () => SinksRoute,
 } as any)
+const SinksOrganiseringRoute = SinksOrganiseringRouteImport.update({
+  id: '/organisering',
+  path: '/organisering',
+  getParentRoute: () => SinksRoute,
+} as any)
 const SinksNomMasteredRoute = SinksNomMasteredRouteImport.update({
   id: '/nom-mastered',
   path: '/nom-mastered',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/sinks/api-ressurs-hendelser': typeof SinksApiRessursHendelserRoute
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
+  '/sinks/organisering': typeof SinksOrganiseringRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
   '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/sinks/api-ressurs-hendelser': typeof SinksApiRessursHendelserRoute
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
+  '/sinks/organisering': typeof SinksOrganiseringRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
   '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/sinks/api-ressurs-hendelser': typeof SinksApiRessursHendelserRoute
   '/sinks/dead-letter': typeof SinksDeadLetterRoute
   '/sinks/nom-mastered': typeof SinksNomMasteredRoute
+  '/sinks/organisering': typeof SinksOrganiseringRoute
   '/sinks/orgenhet': typeof SinksOrgenhetRoute
   '/sinks/orgenhet-leder': typeof SinksOrgenhetLederRoute
   '/sinks/orgtilknytning': typeof SinksOrgtilknytningRoute
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/sinks/api-ressurs-hendelser'
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
+    | '/sinks/organisering'
     | '/sinks/orgenhet'
     | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/sinks/api-ressurs-hendelser'
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
+    | '/sinks/organisering'
     | '/sinks/orgenhet'
     | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/sinks/api-ressurs-hendelser'
     | '/sinks/dead-letter'
     | '/sinks/nom-mastered'
+    | '/sinks/organisering'
     | '/sinks/orgenhet'
     | '/sinks/orgenhet-leder'
     | '/sinks/orgtilknytning'
@@ -510,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SinksOrgenhetRouteImport
       parentRoute: typeof SinksRoute
     }
+    '/sinks/organisering': {
+      id: '/sinks/organisering'
+      path: '/organisering'
+      fullPath: '/sinks/organisering'
+      preLoaderRoute: typeof SinksOrganiseringRouteImport
+      parentRoute: typeof SinksRoute
+    }
     '/sinks/nom-mastered': {
       id: '/sinks/nom-mastered'
       path: '/nom-mastered'
@@ -617,6 +636,7 @@ interface SinksRouteChildren {
   SinksApiRessursHendelserRoute: typeof SinksApiRessursHendelserRoute
   SinksDeadLetterRoute: typeof SinksDeadLetterRoute
   SinksNomMasteredRoute: typeof SinksNomMasteredRoute
+  SinksOrganiseringRoute: typeof SinksOrganiseringRoute
   SinksOrgenhetRoute: typeof SinksOrgenhetRoute
   SinksOrgenhetLederRoute: typeof SinksOrgenhetLederRoute
   SinksOrgtilknytningRoute: typeof SinksOrgtilknytningRoute
@@ -632,6 +652,7 @@ const SinksRouteChildren: SinksRouteChildren = {
   SinksApiRessursHendelserRoute: SinksApiRessursHendelserRoute,
   SinksDeadLetterRoute: SinksDeadLetterRoute,
   SinksNomMasteredRoute: SinksNomMasteredRoute,
+  SinksOrganiseringRoute: SinksOrganiseringRoute,
   SinksOrgenhetRoute: SinksOrgenhetRoute,
   SinksOrgenhetLederRoute: SinksOrgenhetLederRoute,
   SinksOrgtilknytningRoute: SinksOrgtilknytningRoute,
