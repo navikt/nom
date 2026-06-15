@@ -67,7 +67,7 @@ public class NomRemedyIntegrasjonClient {
                     .build())
                 .toList();
         } catch (Exception e) {
-            log.error("ALERT: Feil ved henting av fysiske brukersteder fra NomRemedyIntegrasjon", e);
+            log.error("Feil ved henting av fysiske brukersteder fra NomRemedyIntegrasjon", e);
             throw e;
         }
     }
