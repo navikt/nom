@@ -62,8 +62,8 @@ public class TilgangsenhetManuelleEndringer {
         }
 
         var inputMetadata = new InputMetadata(
-            "tilgangsenhet-endring-admin",
-            "endreTilgangsenhet",
+            "TilgangsenhetManuelleEndringer",
+            "setTilgangsenhet",
             tilgangsenhetEndring,
             new Origination(
                 getAuthenticatedNavIdent(),
@@ -77,6 +77,34 @@ public class TilgangsenhetManuelleEndringer {
         orgEnhetCommandService.endreTilgangsenhet(
             orgenhetState.getFid(), new EndreTilgangsenhet(
                 tilgangsenhetEndring.tilgangsenhetId(),
+                inputMetadata
+            )
+        );
+    }
+
+    @Operation(
+        description = "Fjern",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PatchMapping("/remove")
+    public void removeTilgangsenhet(@RequestBody String orgEnhetId) {
+
+        var inputMetadata = new InputMetadata(
+            "TilgangsenhetManuelleEndringer",
+            "removeTilgangsenhet",
+            orgEnhetId,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "ADMIN-API"
+            )
+        );
+
+        var orgenhetState = orgenhetService.getById(orgEnhetId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", orgEnhetId)));
+
+        orgEnhetCommandService.endreTilgangsenhet(
+            orgenhetState.getFid(), new EndreTilgangsenhet(
+                null,
                 inputMetadata
             )
         );

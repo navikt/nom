@@ -370,6 +370,11 @@ public class OrgenhetService {
             if (!isPeriodActive(organiseringState.gyldigFom(), organiseringState.gyldigTom())) {
                 return;
             }
+
+            if (orgenhetProperties.nasjonaloppfolgningIds().contains(organiseringState.id())) {
+                return;
+            }
+
             var orgEnhetState = orgEnhetStateRepository.findById(organiseringState.id())
                 .orElseThrow(() -> OrgEnhetNotFoundException.id(organiseringState.id()));
 
