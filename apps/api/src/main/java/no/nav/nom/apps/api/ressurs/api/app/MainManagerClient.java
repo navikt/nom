@@ -94,7 +94,7 @@ public class MainManagerClient {
                     .build())
                 .toList();
         } catch (Exception e) {
-            log.error("ALERT: Feil ved henting av sites fra MainManager", e);
+            log.error("Feil ved henting av sites fra MainManager", e);
             throw e;
         }
     }
