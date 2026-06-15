@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FloppydiskIcon, PlusCircleIcon } from "@navikt/aksel-icons";
+import { CheckmarkCircleFillIcon, FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   BodyLong,
   BodyShort,
@@ -15,36 +15,37 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import {
-  getOrgEnhet,
-  getOrgEnhetList,
-  opprettOrgEnhet,
-} from "~/api/react-query-endpoints";
+import { getOrgEnhet, opprettOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
+import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
+import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
-  OrgEnhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
+  const { id } = useSearch({
+    from: "/opprett-organisasjonsenhet",
+  });
+
   const hasAdminAccess = useHasAdminAccess();
 
   if (!hasAdminAccess) {
@@ -53,103 +54,75 @@ export const OpprettOrgEnhet = () => {
 
   const [opprettResponse, setOpprettResponse] = useState<any>();
 
-  const [selectedOrgEnhetId, setSelectedOrgEnhet] = useState<string | null>(
-    null,
-  );
-
-  const handleOpprettHerClick = (id: string) => setSelectedOrgEnhet(id);
-
   return (
     <>
       <PageBanner text="Opprett ny organisasjonsenhet" />
 
-      {/*<ContentWrapper>*/}
-      {/*  {!!opprettResponse ? (*/}
-      {/*    <ContainerWithHighlightedTop*/}
-      {/*      icon={opprettRessursIconRoundedBackground}*/}
-      {/*      padding={6}*/}
-      {/*      title={*/}
-      {/*        <HStack gap="4">*/}
-      {/*          <CheckmarkCircleFillIcon*/}
-      {/*            css={css`*/}
-      {/*              color: var(--a-surface-success-hover);*/}
-      {/*              font-size: var(--a-font-size-heading-xlarge);*/}
-      {/*            `}*/}
-      {/*          />*/}
-      {/*          Organisasjonsenheten er nå registrert i NOM*/}
-      {/*        </HStack>*/}
-      {/*      }*/}
-      {/*    >*/}
-      {/*      <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />*/}
-      {/*    </ContainerWithHighlightedTop>*/}
-      {/*  ) : (*/}
-      {/*    <>*/}
-      {/*      <ContainerWithHighlightedTop padding={6}>*/}
-      {/*        <VelgOrgEnhetPlassering*/}
-      {/*          handleOpprettHerClick={handleOpprettHerClick}*/}
-      {/*          selectedOrgEnhetId={selectedOrgEnhetId}*/}
-      {/*        />*/}
+      {!!opprettResponse ? (
+        <ContentWrapper>
+          <ContainerWithHighlightedTop
+            icon={opprettRessursIconRoundedBackground}
+            padding={6}
+            title={
+              <HStack gap="4">
+                <CheckmarkCircleFillIcon
+                  css={css`
+                    color: var(--a-surface-success-hover);
+                    font-size: var(--a-font-size-heading-xlarge);
+                  `}
+                />
+                Organisasjonsenheten er nå registrert i NOM
+              </HStack>
+            }
+          >
+            <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />
+          </ContainerWithHighlightedTop>
+        </ContentWrapper>
+      ) : (
+        <ContentWrapper limitWidth={!!id}>
+          {!id ? (
+            <ContainerWithHighlightedTop padding={6}>
+              <DynamiskOrgKart
+                opprettKnapp
+                title="Velg plassering"
+                toppOrgEnhetId="je104d"
+                // "je104d"
+              />
 
-      {/*        <OrgEnhetInfoForm*/}
-      {/*          orgEnhetId={selectedOrgEnhetId}*/}
-      {/*          setOpprettResponse={setOpprettResponse}*/}
-      {/*        />*/}
+              {!id && (
+                <div
+                  css={css`
+                    display: flex;
+                    justify-content: end;
+                    gap: var(--a-spacing-4);
+                  `}
+                >
+                  <SmartLink href="/organisasjonsmastring">
+                    <Button size="small" variant="secondary">
+                      Avbryt
+                    </Button>
+                  </SmartLink>
+                </div>
+              )}
+            </ContainerWithHighlightedTop>
+          ) : (
+            <ContainerWithHighlightedTop padding={6}>
+              <OrgEnhetInfoWrapper
+                heading="Enheten blir opprettet under"
+                orgEnhetId={id}
+              />
 
-      {/*        {!selectedOrgEnhetId && (*/}
-      {/*          <div*/}
-      {/*            css={css`*/}
-      {/*              display: flex;*/}
-      {/*              justify-content: end;*/}
-      {/*              gap: var(--a-spacing-4);*/}
-      {/*            `}*/}
-      {/*          >*/}
-      {/*            <SmartLink href="/organisasjonsmastring">*/}
-      {/*              <Button size="small" variant="secondary">*/}
-      {/*                Avbryt*/}
-      {/*              </Button>*/}
-      {/*            </SmartLink>*/}
-      {/*          </div>*/}
-      {/*        )}*/}
-      {/*      </ContainerWithHighlightedTop>*/}
-      {/*    </>*/}
-      {/*  )}*/}
-      {/*</ContentWrapper>*/}
-
-      <ContentWrapper limitWidth={false}>
-        <DynamiskOrgKart
-          opprettKnapp
-          title="Plassering"
-          toppOrgEnhetId="sa312u"
-        />
-      </ContentWrapper>
-    </>
-  );
-};
-
-function VelgOrgEnhetPlassering({
-  handleOpprettHerClick,
-  selectedOrgEnhetId,
-}: {
-  handleOpprettHerClick: (id: string) => void;
-  selectedOrgEnhetId: string | null;
-}) {
-  return (
-    <>
-      <Heading level="2" size="medium">
-        Plassering
-      </Heading>
-
-      <OrgHierarki handleOpprettHerClick={handleOpprettHerClick} />
-
-      {!!selectedOrgEnhetId && (
-        <OrgEnhetInfoWrapper
-          heading="Enheten blir opprettet under"
-          orgEnhetId={selectedOrgEnhetId}
-        />
+              <OrgEnhetInfoForm
+                orgEnhetId={id}
+                setOpprettResponse={setOpprettResponse}
+              />
+            </ContainerWithHighlightedTop>
+          )}
+        </ContentWrapper>
       )}
     </>
   );
-}
+};
 
 function OrgEnhetInfoForm({
   orgEnhetId,
@@ -245,9 +218,9 @@ function OrgEnhetInfoForm({
               gap: var(--a-spacing-4);
             `}
           >
-            <SmartLink href="/organisasjonsmastring">
+            <SmartLink href="/opprett-organisasjonsenhet">
               <Button size="small" variant="secondary">
-                Avbryt
+                Tilbake
               </Button>
             </SmartLink>
 
@@ -322,220 +295,6 @@ function OrgEnhetOpprettetKvittering({
     </>
   );
 }
-
-function OrgHierarki({
-  handleOpprettHerClick,
-}: {
-  handleOpprettHerClick?: any;
-}) {
-  const inDevelopment = isInDevelopment();
-
-  const developmentLenker = ["fa965e", "me177r", "sy471r", "hu797w", "tu734a"];
-  const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];
-
-  const topOrgEnhetIder = inDevelopment ? developmentLenker : productionLenker;
-
-  const topOrgEnhetQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(topOrgEnhetIder),
-    queryFn: () => getOrgEnhetList.queryFn(topOrgEnhetIder),
-    enabled: topOrgEnhetIder.length > 0,
-  });
-
-  const topOrgEnheter = (topOrgEnhetQuery.data ?? []).sort(
-    (a, b) => topOrgEnhetIder.indexOf(a.id) - topOrgEnhetIder.indexOf(b.id),
-  );
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const handleClick = (id: string) => setSelectedId(id);
-
-  return (
-    <div
-      css={css`
-        width: 100%;
-      `}
-    >
-      <div
-        css={css`
-          width: 20%;
-          margin: auto auto var(--a-spacing-8);
-          padding: 0 var(--a-spacing-2) 0;
-        `}
-      >
-        <OrgHierarkiCard name="Nav" onClick={handleClick} selected />
-      </div>
-
-      <HStack gap="4" wrap={false}>
-        {topOrgEnheter.map((orgEnhet) => (
-          <OrgHierarkiStack
-            handleOpprettHerClick={handleOpprettHerClick}
-            key={orgEnhet.id}
-            onClick={handleClick}
-            orgEnhet={orgEnhet}
-            selected={orgEnhet.id === selectedId}
-          />
-        ))}
-      </HStack>
-    </div>
-  );
-}
-
-function OrgHierarkiStack({
-  orgEnhet,
-  onClick,
-  selected = false,
-  handleOpprettHerClick,
-}: {
-  orgEnhet?: OrgEnhet;
-  onClick?: any;
-  selected?: boolean;
-  handleOpprettHerClick?: any;
-}) {
-  const underliggendeOrgEnhetIder = orgEnhet?.underordnedeOrgEnhetId;
-
-  const underliggendeOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(underliggendeOrgEnhetIder ?? []),
-    queryFn: () => getOrgEnhetList.queryFn(underliggendeOrgEnhetIder ?? []),
-    enabled:
-      !!underliggendeOrgEnhetIder && underliggendeOrgEnhetIder.length > 0,
-  });
-
-  const underliggendeOrgEnheter = (
-    underliggendeOrgEnheterQuery.data ?? []
-  ).sort((a, b) => a.navn.localeCompare(b.navn));
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const handleClick = (id: string) => setSelectedId(id);
-
-  return (
-    <VStack
-      css={css`
-        width: 100%;
-      `}
-      gap="0"
-    >
-      <OrgHierarkiCard
-        name={orgEnhet?.navn ?? ""}
-        onClick={() => {
-          onClick?.(orgEnhet?.id);
-
-          if (!!selectedId) {
-            setSelectedId(null);
-          }
-        }}
-        selected={selected}
-      />
-
-      {selected && !selectedId && (
-        <VStack
-          css={css`
-            width: 100%;
-            margin-top: var(--a-spacing-4);
-          `}
-          gap="4"
-        >
-          {underliggendeOrgEnheter.map((underliggendeOrgEnhet) => (
-            <OrgHierarkiStack
-              key={underliggendeOrgEnhet.id}
-              onClick={handleClick}
-              orgEnhet={underliggendeOrgEnhet}
-            />
-          ))}
-
-          <OpprettEnhetHerButton
-            onClick={handleOpprettHerClick}
-            plassering={orgEnhet?.id ?? ""}
-          />
-        </VStack>
-      )}
-
-      {selected && !!selectedId && (
-        <>
-          <OrgHierarkiLine />
-
-          <OrgHierarkiStack
-            handleOpprettHerClick={handleOpprettHerClick}
-            onClick={handleClick}
-            orgEnhet={underliggendeOrgEnheter.find(
-              (underliggendeOrgEnhet) =>
-                underliggendeOrgEnhet.id === selectedId,
-            )}
-            selected
-          />
-        </>
-      )}
-    </VStack>
-  );
-}
-
-function OrgHierarkiCard({
-  name,
-  onClick,
-  selected = false,
-}: {
-  name: string;
-  onClick?: any;
-  selected?: boolean;
-}) {
-  return (
-    <Button
-      css={css`
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        padding: ${selected ? "20px 10px 20px" : "10px"};
-        background: #cce2f0;
-        border-radius: 5px;
-        border-top: ${selected ? "7px solid #236b7d" : "none"};
-        font-size: var(--a-font-size-medium) !important;
-      `}
-      onClick={onClick}
-      size="small"
-      variant="tertiary"
-    >
-      {name}
-    </Button>
-  );
-}
-
-function OpprettEnhetHerButton({
-  plassering,
-  onClick,
-}: {
-  plassering: string;
-  onClick?: any;
-}) {
-  return (
-    <Button
-      css={css`
-        justify-content: space-between;
-      `}
-      icon={<PlusCircleIcon fontSize="36" title="Opprett ny enhet her" />}
-      iconPosition="right"
-      onClick={() => onClick?.(plassering)}
-      variant="secondary"
-    >
-      Opprett ny
-      <br />
-      enhet her
-    </Button>
-  );
-}
-
-function OrgHierarkiLine() {
-  return (
-    <div
-      css={css`
-        margin: auto;
-        width: 4px;
-        height: var(--a-spacing-4);
-        background: #236b7d;
-      `}
-    />
-  );
-}
-
 export function OrgEnhetInfoWrapper({
   orgEnhetId,
   heading,

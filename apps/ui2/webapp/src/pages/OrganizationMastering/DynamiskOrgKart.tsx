@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { getOrgEnhet, getOrgEnhetList } from "~/api/react-query-endpoints";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import type { OrgEnhet } from "~/types/api-models";
 
 export function DynamiskOrgKart({
@@ -41,14 +40,14 @@ export function DynamiskOrgKart({
 
   if (toppOrgEnhetQuery.isLoading || underliggendeOrgEnheterQuery.isLoading) {
     return (
-      <ContainerWithHighlightedTop padding={6}>
+      <>
         <LoaderWithText>Laster...</LoaderWithText>
-      </ContainerWithHighlightedTop>
+      </>
     );
   }
 
   return (
-    <ContainerWithHighlightedTop padding={6}>
+    <>
       {!!title && (
         <Heading level="2" size="medium">
           {title}
@@ -62,7 +61,7 @@ export function DynamiskOrgKart({
           toppUnderliggendeOrgenheter={underliggendeOrgEnheter}
         />
       </div>
-    </ContainerWithHighlightedTop>
+    </>
   );
 }
 
@@ -337,7 +336,7 @@ function OrgKartSmallCard({ name, onClick }: { name: string; onClick?: any }) {
 
 function OrgKartOpprettButton({ orgEnhetId }: { orgEnhetId: string }) {
   return (
-    <SmartLink href={`/opprett-orgenhet?id=${orgEnhetId}`}>
+    <SmartLink href={`/opprett-organisasjonsenhet?id=${orgEnhetId}`}>
       <Button
         css={css`
           color: #0067c5;
