@@ -38,6 +38,22 @@ export function DynamiskOrgKart({
     underliggendeOrgEnheterQuery.data ?? []
   ).sort((a, b) => a.navn.localeCompare(b.navn));
 
+  const underUnderOrgEnhetIder = [
+    ...new Set(
+      underliggendeOrgEnheter.flatMap(
+        (orgEnhet) => orgEnhet.underordnedeOrgEnhetId,
+      ),
+    ),
+  ];
+
+  const underUnderOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder ?? []),
+    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder ?? []),
+    enabled: underUnderOrgEnhetIder.length > 0,
+  });
+
+  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
+
   if (toppOrgEnhetQuery.isLoading || underliggendeOrgEnheterQuery.isLoading) {
     return (
       <>
@@ -74,6 +90,22 @@ function OrgKart({
   toppUnderliggendeOrgenheter: OrgEnhet[];
   opprettKnapp?: boolean;
 }) {
+  const underUnderOrgEnhetIder = [
+    ...new Set(
+      toppUnderliggendeOrgenheter.flatMap(
+        (orgEnhet) => orgEnhet.underordnedeOrgEnhetId,
+      ),
+    ),
+  ];
+
+  const underUnderOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder ?? []),
+    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder ?? []),
+    enabled: underUnderOrgEnhetIder.length > 0,
+  });
+
+  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
+
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   return (
@@ -96,19 +128,26 @@ function OrgKart({
         />
 
         <HStack gap="4" wrap={false}>
-          {toppUnderliggendeOrgenheter?.map((orgEnhet) => (
+          {toppUnderliggendeOrgenheter?.map((underliggendeOrgEnhet) => (
             <div
               css={css`
                 flex: 1;
               `}
-              key={orgEnhet.id}
+              key={underliggendeOrgEnhet.id}
             >
               <OrgKartStack
-                onClick={() => setSelectedId(orgEnhet.id)}
+                onClick={() => setSelectedId(underliggendeOrgEnhet.id)}
                 opprettKnapp={opprettKnapp}
-                orgEnhet={orgEnhet}
-                selected={orgEnhet.id === selectedId}
+                orgEnhet={underliggendeOrgEnhet}
+                selected={underliggendeOrgEnhet.id === selectedId}
                 topmost
+                underOrgEnheter={(
+                  underUnderOrgEnheter?.filter((orgEnhet) =>
+                    underliggendeOrgEnhet.underordnedeOrgEnhetId.includes(
+                      orgEnhet.id,
+                    ),
+                  ) ?? []
+                ).sort((a, b) => a.navn.localeCompare(b.navn))}
               />
             </div>
           ))}
@@ -124,29 +163,44 @@ function OrgKartStack({
   onClick,
   topmost,
   opprettKnapp,
+  underOrgEnheter,
 }: {
-  orgEnhet?: OrgEnhet;
+  orgEnhet: OrgEnhet;
   selected?: boolean;
   onClick?: any;
   topmost?: boolean;
   opprettKnapp?: boolean;
+  underOrgEnheter: OrgEnhet[];
 }) {
-  const underliggendeOrgEnhetIder = orgEnhet?.underordnedeOrgEnhetId;
+  const underUnderOrgEnhetIder = [
+    ...new Set(
+      underOrgEnheter.flatMap((orgEnhet) => orgEnhet.underordnedeOrgEnhetId),
+    ),
+  ];
 
-  const underliggendeOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(underliggendeOrgEnhetIder ?? []),
-    queryFn: () => getOrgEnhetList.queryFn(underliggendeOrgEnhetIder ?? []),
-    enabled:
-      !!underliggendeOrgEnhetIder && underliggendeOrgEnhetIder.length > 0,
+  const underUnderOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder ?? []),
+    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder ?? []),
+    enabled: underUnderOrgEnhetIder.length > 0,
   });
 
-  const underliggendeOrgEnheter = (
-    underliggendeOrgEnheterQuery.data ?? []
-  ).sort((a, b) => a.navn.localeCompare(b.navn));
+  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleSelect = (id: string) => setSelectedId(id);
+
+  const selectedOrgEnhet = underOrgEnheter.find(
+    (underliggendeOrgEnhet) => underliggendeOrgEnhet.id === selectedId,
+  );
+
+  const selectedUnderOrgEnheter = selectedOrgEnhet
+    ? (
+        underUnderOrgEnheter?.filter((orgEnhet) =>
+          selectedOrgEnhet.underordnedeOrgEnhetId.includes(orgEnhet.id),
+        ) ?? []
+      ).sort((a, b) => a.navn.localeCompare(b.navn))
+    : [];
 
   return (
     <>
@@ -166,22 +220,21 @@ function OrgKartStack({
 
       {selected &&
         !selectedId &&
-        (underliggendeOrgEnheter.length > 0 || opprettKnapp) && (
+        (underOrgEnheter.length > 0 || opprettKnapp) && (
           <UnderliggendeOrgEnheterSelect
             handleSelect={handleSelect}
             opprettKnapp={opprettKnapp}
             orgEnhetId={orgEnhet?.id ?? ""}
-            underliggendeOrgEnheter={underliggendeOrgEnheter}
+            underliggendeOrgEnheter={underOrgEnheter}
           />
         )}
 
-      {selected && !!selectedId && (
+      {selected && !!selectedId && !!selectedOrgEnhet && (
         <OrgKartStack
           opprettKnapp={opprettKnapp}
-          orgEnhet={underliggendeOrgEnheter.find(
-            (underliggendeOrgEnhet) => underliggendeOrgEnhet.id === selectedId,
-          )}
+          orgEnhet={selectedOrgEnhet}
           selected
+          underOrgEnheter={selectedUnderOrgEnheter}
         />
       )}
     </>
