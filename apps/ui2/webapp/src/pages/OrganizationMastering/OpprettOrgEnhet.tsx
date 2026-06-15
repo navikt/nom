@@ -3,12 +3,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { CheckmarkCircleFillIcon, FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   BodyLong,
-  BodyShort,
   Button,
   DatePicker,
   Heading,
   HStack,
-  Loader,
   Select,
   TextField,
   useDatepicker,
@@ -24,6 +22,7 @@ import * as yup from "yup";
 import { getOrgEnhet, opprettOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
@@ -85,8 +84,7 @@ export const OpprettOrgEnhet = () => {
               <DynamiskOrgKart
                 opprettKnapp
                 title="Velg plassering"
-                toppOrgEnhetId="je104d"
-                // "je104d"
+                toppOrgEnhetId="sa312u"
               />
 
               {!id && (
@@ -311,19 +309,7 @@ export function OrgEnhetInfoWrapper({
   const orgEnhet = orgEnhetQuery.data;
 
   if (orgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Loader size="3xlarge" />
-        <BodyShort size="large">Laster...</BodyShort>
-      </div>
-    );
+    return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
   return (

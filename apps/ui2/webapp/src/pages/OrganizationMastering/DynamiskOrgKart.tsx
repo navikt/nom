@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { PlusCircleIcon } from "@navikt/aksel-icons";
-import { Button, Heading, HStack, VStack } from "@navikt/ds-react";
+import { Alert, Button, Heading, HStack, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
@@ -25,13 +25,12 @@ export function DynamiskOrgKart({
 
   const toppOrgEnhet = toppOrgEnhetQuery.data;
 
-  const underliggendeOrgEnhetIder = toppOrgEnhet?.underordnedeOrgEnhetId;
+  const underliggendeOrgEnhetIder = toppOrgEnhet?.underordnedeOrgEnhetId ?? [];
 
   const underliggendeOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(underliggendeOrgEnhetIder ?? []),
-    queryFn: () => getOrgEnhetList.queryFn(underliggendeOrgEnhetIder ?? []),
-    enabled:
-      !!underliggendeOrgEnhetIder && underliggendeOrgEnhetIder.length > 0,
+    queryKey: getOrgEnhetList.queryKey(underliggendeOrgEnhetIder),
+    queryFn: () => getOrgEnhetList.queryFn(underliggendeOrgEnhetIder),
+    enabled: underliggendeOrgEnhetIder.length > 0,
   });
 
   const underliggendeOrgEnheter = (
@@ -52,14 +51,24 @@ export function DynamiskOrgKart({
     enabled: underUnderOrgEnhetIder.length > 0,
   });
 
-  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
+  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data ?? [];
 
-  if (toppOrgEnhetQuery.isLoading || underliggendeOrgEnheterQuery.isLoading) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  if (
+    toppOrgEnhetQuery.isLoading ||
+    underliggendeOrgEnheterQuery.isLoading ||
+    underUnderOrgEnheterQuery.isLoading
+  ) {
     return (
       <>
         <LoaderWithText>Laster...</LoaderWithText>
       </>
     );
+  }
+
+  if (toppOrgEnhetQuery.isError || !toppOrgEnhet) {
+    return <Alert variant="error">Noe gikk galt</Alert>;
   }
 
   return (
@@ -71,89 +80,53 @@ export function DynamiskOrgKart({
       )}
 
       <div>
-        <OrgKart
-          opprettKnapp={opprettKnapp}
-          toppOrgEnhet={toppOrgEnhet}
-          toppUnderliggendeOrgenheter={underliggendeOrgEnheter}
-        />
+        <div
+          css={css`
+            overflow-x: auto;
+            padding-bottom: var(--a-spacing-10);
+          `}
+        >
+          <div
+            css={css`
+              width: max-content;
+              min-width: 100%;
+            `}
+          >
+            <OrgKartLargeCard
+              name={toppOrgEnhet.navn}
+              onClick={() => setSelectedId(null)}
+              selected
+            />
+
+            <HStack gap="4" wrap={false}>
+              {underliggendeOrgEnheter.map((underliggendeOrgEnhet) => (
+                <div
+                  css={css`
+                    flex: 1;
+                  `}
+                  key={underliggendeOrgEnhet.id}
+                >
+                  <OrgKartStack
+                    onClick={() => setSelectedId(underliggendeOrgEnhet.id)}
+                    opprettKnapp={opprettKnapp}
+                    orgEnhet={underliggendeOrgEnhet}
+                    selected={underliggendeOrgEnhet.id === selectedId}
+                    topmost
+                    underOrgEnheter={underUnderOrgEnheter
+                      .filter((orgEnhet) =>
+                        underliggendeOrgEnhet.underordnedeOrgEnhetId.includes(
+                          orgEnhet.id,
+                        ),
+                      )
+                      .sort((a, b) => a.navn.localeCompare(b.navn))}
+                  />
+                </div>
+              ))}
+            </HStack>
+          </div>
+        </div>
       </div>
     </>
-  );
-}
-
-function OrgKart({
-  toppOrgEnhet,
-  toppUnderliggendeOrgenheter,
-  opprettKnapp,
-}: {
-  toppOrgEnhet: OrgEnhet | undefined;
-  toppUnderliggendeOrgenheter: OrgEnhet[];
-  opprettKnapp?: boolean;
-}) {
-  const underUnderOrgEnhetIder = [
-    ...new Set(
-      toppUnderliggendeOrgenheter.flatMap(
-        (orgEnhet) => orgEnhet.underordnedeOrgEnhetId,
-      ),
-    ),
-  ];
-
-  const underUnderOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder ?? []),
-    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder ?? []),
-    enabled: underUnderOrgEnhetIder.length > 0,
-  });
-
-  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
-
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  return (
-    <div
-      css={css`
-        overflow-x: auto;
-        padding-bottom: var(--a-spacing-10);
-      `}
-    >
-      <div
-        css={css`
-          width: max-content;
-          min-width: 100%;
-        `}
-      >
-        <OrgKartLargeCard
-          name={toppOrgEnhet?.navn ?? ""}
-          onClick={() => setSelectedId(null)}
-          selected
-        />
-
-        <HStack gap="4" wrap={false}>
-          {toppUnderliggendeOrgenheter?.map((underliggendeOrgEnhet) => (
-            <div
-              css={css`
-                flex: 1;
-              `}
-              key={underliggendeOrgEnhet.id}
-            >
-              <OrgKartStack
-                onClick={() => setSelectedId(underliggendeOrgEnhet.id)}
-                opprettKnapp={opprettKnapp}
-                orgEnhet={underliggendeOrgEnhet}
-                selected={underliggendeOrgEnhet.id === selectedId}
-                topmost
-                underOrgEnheter={(
-                  underUnderOrgEnheter?.filter((orgEnhet) =>
-                    underliggendeOrgEnhet.underordnedeOrgEnhetId.includes(
-                      orgEnhet.id,
-                    ),
-                  ) ?? []
-                ).sort((a, b) => a.navn.localeCompare(b.navn))}
-              />
-            </div>
-          ))}
-        </HStack>
-      </div>
-    </div>
   );
 }
 
@@ -179,12 +152,12 @@ function OrgKartStack({
   ];
 
   const underUnderOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder ?? []),
-    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder ?? []),
+    queryKey: getOrgEnhetList.queryKey(underUnderOrgEnhetIder),
+    queryFn: () => getOrgEnhetList.queryFn(underUnderOrgEnhetIder),
     enabled: underUnderOrgEnhetIder.length > 0,
   });
 
-  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data;
+  const underUnderOrgEnheter = underUnderOrgEnheterQuery.data ?? [];
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -195,11 +168,11 @@ function OrgKartStack({
   );
 
   const selectedUnderOrgEnheter = selectedOrgEnhet
-    ? (
-        underUnderOrgEnheter?.filter((orgEnhet) =>
+    ? underUnderOrgEnheter
+        .filter((orgEnhet) =>
           selectedOrgEnhet.underordnedeOrgEnhetId.includes(orgEnhet.id),
-        ) ?? []
-      ).sort((a, b) => a.navn.localeCompare(b.navn))
+        )
+        .sort((a, b) => a.navn.localeCompare(b.navn))
     : [];
 
   return (
@@ -224,7 +197,7 @@ function OrgKartStack({
           <UnderliggendeOrgEnheterSelect
             handleSelect={handleSelect}
             opprettKnapp={opprettKnapp}
-            orgEnhetId={orgEnhet?.id ?? ""}
+            orgEnhetId={orgEnhet.id}
             underliggendeOrgEnheter={underOrgEnheter}
           />
         )}
