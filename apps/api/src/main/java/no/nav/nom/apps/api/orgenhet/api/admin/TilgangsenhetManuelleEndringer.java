@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,8 +87,8 @@ public class TilgangsenhetManuelleEndringer {
         description = "Fjern",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PatchMapping("/remove")
-    public void removeTilgangsenhet(@RequestBody String orgEnhetId) {
+    @PatchMapping("/remove/{orgEnhetId}")
+    public void removeTilgangsenhet(@PathVariable String orgEnhetId) {
 
         var inputMetadata = new InputMetadata(
             "TilgangsenhetManuelleEndringer",

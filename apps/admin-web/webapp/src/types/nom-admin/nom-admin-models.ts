@@ -294,14 +294,14 @@ export interface OrgenhetLederStateSearchParams {
 }
 
 export interface OrgEnhetLederState {
-  fid?: string;
-  navident?: string;
-  orgEnhetId?: string;
+  fid: string;
+  navident: string;
+  orgEnhetId: string;
   /** @format date */
-  startdato?: string;
+  startdato: string;
   /** @format date */
   sluttdato?: string;
-  sistEndretAv?: string;
+  sistEndretAv: string;
 }
 
 export interface OrganiseringStateSearchParams {
