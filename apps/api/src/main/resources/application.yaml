@@ -585,6 +585,9 @@ app:
       extended-readonly:
         group-id: "${EXTENDED_READONLY_GROUPID}"
         scopes: ["READONLY", "EXTENDED_READONLY"]
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
   manuelle-ressurser-og-ledere:
     enabled: false
   orgenhet:
