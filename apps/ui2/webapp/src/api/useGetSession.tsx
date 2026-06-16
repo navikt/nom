@@ -54,3 +54,10 @@ export function useHasUtenlandskKonsulentAccess() {
   const session = useGetSession();
   return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_UTL_KONSULENT);
 }
+
+export function useHasExternalFundsRecipientAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(
+    UserRoles.ROLE_EXTERNAL_FUNDS_RECIPIENT,
+  );
+}
