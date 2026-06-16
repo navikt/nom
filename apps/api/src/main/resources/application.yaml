@@ -97,6 +97,7 @@ authentication:
     readOnly: ${READONLY_GROUPID:readOnlyGroup}          # 0000-CA-NOM-ADMIN-Lesetilgang
     extendedReadOnly: ${EXTENDED_READONLY_GROUPID:extendedReadOnlyGroup} # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
     kostnadsstedsAdmin: ${KOSTNADSSTEDSADMIN_GROUPID:kostnadsstedsadminGroup} # orgenhet-kostnadssted-mapping-admin
+    nomWriteExternalFundsRecipient: ${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:nomWriteExternalFundsRecipient}
 server:
   shutdown: graceful
 
@@ -338,6 +339,9 @@ app:
         scopes:
           - READONLY
           - EXTENDED_READONLY
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
   orgenhet:
     nav-id: sa312u
     helfo-id: mu405g
@@ -504,7 +508,7 @@ NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-
 READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
 EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 # FINNES IKKE I DEV KOSTNADSSTEDSADMIN_GROUPID: "" # orgenhet-kostnadssted-mapping-admin
-
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:  "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
 
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
@@ -614,6 +618,7 @@ NOM_WRITE_ROBOT_GROUPID:          "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-
 READONLY_GROUPID:           "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
 EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 KOSTNADSSTEDSADMIN_GROUPID: "818ec344-1c3b-48e5-8a62-68bb9eeb2a09" # orgenhet-kostnadssted-mapping-admin
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID: "deae8838-59fd-4c27-9ccc-f0ed844bf091" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
