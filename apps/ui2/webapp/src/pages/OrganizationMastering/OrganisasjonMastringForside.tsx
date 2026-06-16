@@ -580,7 +580,6 @@ function UtvidOrgEnhetKort({
       {!!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
         <div
           css={css`
-            margin-top: var(--a-spacing-2);
             margin-left: var(--a-spacing-10);
             display: flex;
           `}
@@ -602,51 +601,91 @@ function UtvidOrgEnhetKort({
           ) : (
             <div
               css={css`
-                margin-top: 14px;
-                margin-left: auto;
-                position: relative;
-                width: 85%;
+                width: 100%;
+                margin-left: var(--a-spacing-10);
               `}
             >
               <div
                 css={css`
-                  position: absolute;
-                  inset: 0;
-                  top: -14px;
-                  left: 28px;
-                  background: white;
-                  border: 2px solid #457c9d;
-                  border-radius: var(--a-border-radius-large);
-                  z-index: 1;
+                  height: 22px;
+                  border-left: 4px solid #457c9d;
                 `}
               />
 
               <div
                 css={css`
-                  position: absolute;
-                  inset: 0;
-                  top: -7px;
-                  left: 14px;
-                  background: white;
-                  border: 2px solid #457c9d;
-                  border-radius: var(--a-border-radius-large);
-                  z-index: 2;
-                `}
-              />
-
-              <div
-                css={css`
+                  margin-left: auto;
                   position: relative;
-                  padding: var(--a-spacing-1) var(--a-spacing-4);
-                  background: white;
-                  border: 2px solid #457c9d;
-                  border-radius: var(--a-border-radius-large);
-                  z-index: 3;
-                  font-size: var(--a-font-size-heading-medium);
-                  font-weight: var(--a-font-weight-bold);
+                  display: flex;
                 `}
               >
-                {`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}
+                <div
+                  css={css`
+                    width: 16px;
+                  `}
+                >
+                  <div
+                    css={css`
+                      height: 50%;
+                      border-left: 4px solid #457c9d;
+                      border-bottom: 2px solid #457c9d;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      height: 50%;
+                      border-top: 2px solid #457c9d;
+                    `}
+                  />
+                </div>
+
+                <div
+                  css={css`
+                    width: 100%;
+                  `}
+                >
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      top: -14px;
+                      left: 44px;
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      z-index: 1;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      top: -7px;
+                      left: 30px;
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      z-index: 2;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      position: relative;
+                      padding: var(--a-spacing-1) var(--a-spacing-4);
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      font-size: var(--a-font-size-heading-medium);
+                      font-weight: var(--a-font-weight-bold);
+                      z-index: 3;
+                    `}
+                  >
+                    {`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}
+                  </div>
+                </div>
               </div>
             </div>
           )}
