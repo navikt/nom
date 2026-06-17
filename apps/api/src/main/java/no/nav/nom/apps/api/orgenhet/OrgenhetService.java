@@ -371,6 +371,14 @@ public class OrgenhetService {
                 return;
             }
 
+            if (orgenhetProperties.linjeenhetene().contains(organiseringState.id())) {
+                return;
+            }
+
+            if (orgenhetProperties.navId().equals(organiseringState.id())) {
+                return;
+            }
+
             if (orgenhetProperties.nasjonaloppfolgningIds().contains(organiseringState.id())) {
                 return;
             }
