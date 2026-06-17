@@ -1,11 +1,18 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { BodyShort, Button, Loader, TextField, VStack } from "@navikt/ds-react";
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Loader,
+  TextField,
+  VStack,
+} from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -24,6 +31,7 @@ import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
+import { OrgEnhetKorrigeringKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKorrigeringKvittering";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { KorrigerOrgEnhetNavnRequest, OrgEnhet } from "~/types/api-models";
 
@@ -32,24 +40,44 @@ export const KorrigerOrgEnhetNavn = () => {
 
   const { id } = useSearch({ from: "/korriger-navn-organisasjonsenhet" });
 
+  const [opprettRequest, setOpprettRequest] = useState<any>();
+
   return (
     <>
       <PageBanner text="Korrigér organisasjonsenhetsnavn" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop padding={6}>
-          {hasAdminAccess ? (
-            <KorrigeringOrgEnhetNavn orgEnhetId={id} />
-          ) : (
-            <IkkeTilgangRedigering />
-          )}
-        </ContainerWithHighlightedTop>
+        {!!opprettRequest ? (
+          <OrgEnhetKorrigeringKvittering title="Navn oppdatert">
+            <KvitteringContent
+              nyttNavn={opprettRequest.nyttNavn}
+              opprinneligNavn={opprettRequest.opprinneligNavn}
+            />
+          </OrgEnhetKorrigeringKvittering>
+        ) : (
+          <ContainerWithHighlightedTop padding={6}>
+            {hasAdminAccess ? (
+              <KorrigeringOrgEnhetNavn
+                orgEnhetId={id}
+                setOpprettRequest={setOpprettRequest}
+              />
+            ) : (
+              <IkkeTilgangRedigering />
+            )}
+          </ContainerWithHighlightedTop>
+        )}
       </ContentWrapper>
     </>
   );
 };
 
-function KorrigeringOrgEnhetNavn({ orgEnhetId }: { orgEnhetId?: string }) {
+function KorrigeringOrgEnhetNavn({
+  orgEnhetId,
+  setOpprettRequest,
+}: {
+  orgEnhetId?: string;
+  setOpprettRequest: (response: any) => void;
+}) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
     queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
@@ -85,19 +113,28 @@ function KorrigeringOrgEnhetNavn({ orgEnhetId }: { orgEnhetId?: string }) {
         orgEnhetId={orgEnhetId}
       />
 
-      <KorrigeringOrgEnhetNavnForm orgEnhet={orgEnhet} />
+      <KorrigeringOrgEnhetNavnForm
+        orgEnhet={orgEnhet}
+        setOpprettRequest={setOpprettRequest}
+      />
     </>
   );
 }
 
-function KorrigeringOrgEnhetNavnForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const navigate = useNavigate();
-
+function KorrigeringOrgEnhetNavnForm({
+  orgEnhet,
+  setOpprettRequest,
+}: {
+  orgEnhet: OrgEnhet;
+  setOpprettRequest: (response: any) => void;
+}) {
   const queryClient = useQueryClient();
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
+
+  const opprinneligNavn = orgEnhet.navn;
 
   const korrigerOrgEnhetNavnMutation = useMutation<
     unknown,
@@ -108,15 +145,15 @@ function KorrigeringOrgEnhetNavnForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       return korrigerOrgEnhetNavn(request);
     },
     onSuccess: async () => {
-      showToast({ text: "Oppdatert" });
+      const nyttNavn = methods.getValues("navn");
+
+      setOpprettRequest({ opprinneligNavn, nyttNavn });
+
+      showToast({ text: "Navn oppdatert" });
 
       await queryClient.invalidateQueries({
         queryKey: orgEnheterKeys.id(orgEnhet.id),
       });
-
-      navigate({
-        to: "/organisasjonsmastring",
-      }).then();
     },
   });
 
@@ -161,6 +198,12 @@ function KorrigeringOrgEnhetNavnForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               Lagre
             </Button>
           </div>
+
+          {!!korrigerOrgEnhetNavnMutation?.error?.response?.data?.message && (
+            <Alert variant="error">
+              {korrigerOrgEnhetNavnMutation?.error?.response?.data?.message}
+            </Alert>
+          )}
         </VStack>
       </form>
     </FormProvider>
@@ -170,3 +213,18 @@ function KorrigeringOrgEnhetNavnForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 const validationSchema = yup.object({
   navn: yup.string().required("Obligatorisk"),
 });
+
+function KvitteringContent({
+  opprinneligNavn,
+  nyttNavn,
+}: {
+  opprinneligNavn: string;
+  nyttNavn: string;
+}) {
+  return (
+    <span>
+      Organisasjonsenheten har byttet navn fra <b>{opprinneligNavn}</b> til{" "}
+      <b>{nyttNavn}</b>.
+    </span>
+  );
+}

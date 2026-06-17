@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
+  Alert,
   BodyShort,
   Button,
   DatePicker,
@@ -43,8 +44,7 @@ import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { NomNivaa } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -228,6 +228,16 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             >
               Lagre
             </Button>
+
+            {!!endreOrgEnhetInformasjonMutation?.error?.response?.data
+              ?.message && (
+              <Alert variant="error">
+                {
+                  endreOrgEnhetInformasjonMutation?.error?.response?.data
+                    ?.message
+                }
+              </Alert>
+            )}
           </div>
         </VStack>
       </form>
