@@ -580,7 +580,7 @@ function UtvidOrgEnhetKort({
       {!!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
         <div
           css={css`
-            margin-left: var(--a-spacing-10);
+            margin-left: var(--a-spacing-8);
             display: flex;
           `}
         >
@@ -589,20 +589,42 @@ function UtvidOrgEnhetKort({
               css={css`
                 width: 100%;
               `}
-              gap="4"
+              gap="0"
             >
+              <div
+                css={css`
+                  height: var(--a-spacing-2);
+                  border-left: 4px solid #457c9d;
+                `}
+              />
+
               {sorterteOrgEnheter.map((underliggendeOrgEnhet, index) => (
-                <UtvidOrgEnhetKort
+                <div
+                  css={css`
+                    display: flex;
+                  `}
                   key={`${orgEnhet.id}${index}`}
-                  orgEnhet={underliggendeOrgEnhet}
-                />
+                >
+                  <TreeStructure
+                    downward={index < sorterteOrgEnheter.length - 1}
+                  />
+
+                  <div
+                    css={css`
+                      width: 100%;
+                      margin-top: var(--a-spacing-2);
+                      margin-bottom: var(--a-spacing-2);
+                    `}
+                  >
+                    <UtvidOrgEnhetKort orgEnhet={underliggendeOrgEnhet} />
+                  </div>
+                </div>
               ))}
             </VStack>
           ) : (
             <div
               css={css`
                 width: 100%;
-                margin-left: var(--a-spacing-10);
               `}
             >
               <div
@@ -740,6 +762,36 @@ function HvemKanRedigereSection({
       ) : (
         <BodyShort>Ingen registrert</BodyShort>
       )}
+    </div>
+  );
+}
+
+function TreeStructure({ downward }: { downward: boolean }) {
+  return (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 32px;
+      `}
+    >
+      <div
+        css={css`
+          flex-shrink: 0;
+          height: 54px;
+          border-left: 4px solid #457c9d;
+          border-bottom: 2px solid #457c9d;
+        `}
+      />
+
+      <div
+        css={css`
+          flex: 1;
+          border-top: 2px solid #457c9d;
+          border-left: ${downward ? "solid 4px #457c9d" : ""};
+        `}
+      />
     </div>
   );
 }
