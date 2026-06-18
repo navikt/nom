@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { ArrowLeftIcon } from "@navikt/aksel-icons";
 import {
+  Alert,
   BodyLong,
   BodyShort,
   Box,
@@ -33,6 +34,8 @@ import {
   type Person,
 } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
+import {FolkeregisterPersonInfo} from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
+import {PanelLink} from "~/pages/CreateResourcePage/SummaryStep";
 
 export function CreateExternalFundsRecipientPage() {
   return (
@@ -64,6 +67,7 @@ function ExternalFundsRecipientForm() {
     queryFn: () => getPerson.queryFn(personRequest),
     enabled: !!fnr,
     retry: false,
+    staleTime: Infinity,
   });
 
   const createNavidentMutation = useMutation<
@@ -74,7 +78,7 @@ function ExternalFundsRecipientForm() {
   >({
     mutationKey: ["opprett-navident", fnr],
     mutationFn: async (data) => {
-      const res = await fetch("/frackend/nom-api/api/v1/navident", {
+      const res = await fetch("/frackend/nom-api/api/v1/navident_123", {
         method: "POST",
         body: JSON.stringify({
           personident: data.fnr,
@@ -107,48 +111,63 @@ function ExternalFundsRecipientForm() {
   const maybeOpprettNavidentError =
     createNavidentMutation.error?.message ?? undefined;
 
+
+  const formStuff = (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+      }}
+    >
+      <Search
+        autoComplete="off"
+        description={
+          <strong
+            css={css`
+              color: var(--a-text-default);
+            `}
+          >
+            Fyll inn fødselsnummer/D-nummer, så finner vi personen i
+            Folkeregisteret
+          </strong>
+        }
+        error={maybeFnrFormatError}
+        hideLabel={false}
+        label={<div hidden={true}>Personsøk</div>}
+        name={"fnr"}
+        onSearchClick={(v) => setFnr(v)}
+        variant={"secondary"}
+      />
+      {personQuery.isFetching && (
+        <LoaderWithText>Henter fra PDL</LoaderWithText>
+      )}
+    </form>
+  );
+
+
   if (!person || !fnr) {
     return (
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-        }}
-      >
-        <Search
-          autoComplete="off"
-          description={
-            <strong
-              css={css`
-                color: var(--a-text-default);
-              `}
-            >
-              Fyll inn fødselsnummer/D-nummer, så finner vi personen i
-              Folkeregisteret
-            </strong>
-          }
-          error={maybeFnrFormatError || maybePdlFetchError}
-          hideLabel={false}
-          label={<div hidden={true}>Personsøk</div>}
-          name={"fnr"}
-          onSearchClick={(v) => setFnr(v)}
-          pattern={"\d{11}"}
-          variant={"secondary"}
-        />
-        {personQuery.isFetching && (
-          <LoaderWithText>Henter fra PDL</LoaderWithText>
+      <>
+        {formStuff}
+        {maybePdlFetchError && (
+          <Alert variant="error">
+            {maybePdlFetchError
+              ? "Fødselsnummeret ble ikke funnet i Folkeregisteret. Kontroller at du har lagt inn riktig fødselsnummer."
+              : "En teknisk feil forhindret søket"}
+          </Alert>
         )}
-      </form>
+      </>
     );
   }
 
   if (!maybeNavident) {
     return (
       <>
-        <ShowPerson
-          backToFnrForm={() => setFnr(undefined)}
-          fnr={fnr}
-          ressursNavn={person}
-        />
+        {!createNavidentMutation.isSuccess && (
+          <>
+            {formStuff}
+            <ShowPerson ressursNavn={person} />
+          </>
+        )}
         {createNavidentMutation.isIdle && (
           <Button
             onClick={() => createNavidentMutation.mutateAsync({ fnr: fnr })}
@@ -159,8 +178,10 @@ function ExternalFundsRecipientForm() {
         {createNavidentMutation.isPending && (
           <LoaderWithText>Oppretter navident...</LoaderWithText>
         )}
-        {createNavidentMutation.data && (
+        {createNavidentMutation.data && (<>
           <ShowCreatedNavIdent navIdent={createNavidentMutation.data} />
+    <PanelLink label={"Gå tilbake til forsiden"} href={"/"} />
+        </>
         )}
         {maybeOpprettNavidentError && (
           <ShowError
@@ -176,11 +197,8 @@ function ExternalFundsRecipientForm() {
 
   return (
     <>
-      <ShowPerson
-        backToFnrForm={() => setFnr(undefined)}
-        fnr={fnr}
-        ressursNavn={person}
-      />
+      {createNavidentMutation.isSuccess && formStuff}
+      <PanelLink label={"Gå tilbake til forsiden"} href={"/"} />
       <ShowNavident navIdent={maybeNavident} />
     </>
   );
@@ -188,39 +206,9 @@ function ExternalFundsRecipientForm() {
 
 function ShowPerson(props: {
   ressursNavn: RessursNavn;
-  fnr: string;
-  backToFnrForm: () => void;
 }) {
-  const visningsNavn = formatVisningsnavn(props.ressursNavn);
   return (
-    <Box
-      css={css`
-        display: grid;
-        row-gap: 1rem;
-      `}
-      paddingBlock={"4"}
-    >
-      <Heading size={"medium"}>Om valgt person</Heading>
-      <HGrid align={"center"} columns={"1fr 15rem"}>
-        <Box>
-          <Box>
-            <Label>Personnummer</Label>
-            <BodyShort>{props.fnr}</BodyShort>
-          </Box>
-          <Box>
-            <Label>Navn</Label>
-            <BodyShort>{visningsNavn}</BodyShort>
-          </Box>
-        </Box>
-        <Button
-          icon={<ArrowLeftIcon />}
-          onClick={() => props.backToFnrForm()}
-          variant={"secondary"}
-        >
-          Bruk annen person
-        </Button>
-      </HGrid>
-    </Box>
+      <FolkeregisterPersonInfo folkeregisterPerson={{navn: props.ressursNavn}} />
   );
 }
 
@@ -322,6 +310,7 @@ function MaybeExistingResourceLink(props: { navIdent: string }) {
           Personen er en medarbeider i Nav
         </SmartLink>
       )}
+      {checkIsRessursQry.isFetched && <BodyShort>Personen har ikke tidligere tilknytning til Nav</BodyShort>}
     </>
   );
 }
