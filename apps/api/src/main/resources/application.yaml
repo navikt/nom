@@ -439,6 +439,9 @@ app:
       - navident: Z991507         # Team Klage / Kristin Jacobsen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
+      - navident: Z994863         # Team Klage / Øyvind Norsted Wedøe
+        orgtilknytning: ra365v    # 7210300-Klageinstans Oslo-ORGENHET
+        sektor: NAV_STATLIG
 
       - navident: Z993527         # Team AAP / Tor Idland
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
