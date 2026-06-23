@@ -17,8 +17,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type { Ressurs } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
+import { IdentType, Sektor } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function SummaryStep() {
@@ -56,7 +55,7 @@ export function ReceiptWrapper({ navident }: { navident: string | undefined }) {
     return <Alert variant="error">{ressursQuery.error.message}</Alert>;
   }
 
-  return <></>;
+  return;
 }
 
 export function Receipt({ ressurs }: { ressurs: Ressurs }) {

@@ -31,7 +31,7 @@ import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
-import { OrgEnhetKorrigeringKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKorrigeringKvittering";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { KorrigerOrgEnhetNavnRequest, OrgEnhet } from "~/types/api-models";
 
@@ -40,26 +40,26 @@ export const KorrigerOrgEnhetNavn = () => {
 
   const { id } = useSearch({ from: "/korriger-navn-organisasjonsenhet" });
 
-  const [opprettRequest, setOpprettRequest] = useState<any>();
+  const [requestInfo, setRequestInfo] = useState<any>();
 
   return (
     <>
       <PageBanner text="Korrigér organisasjonsenhetsnavn" />
 
       <ContentWrapper>
-        {!!opprettRequest ? (
-          <OrgEnhetKorrigeringKvittering title="Navn oppdatert">
+        {!!requestInfo ? (
+          <OrgEnhetKvittering orgEnhetId={id ?? ""} title="Navn oppdatert">
             <KvitteringContent
-              nyttNavn={opprettRequest.nyttNavn}
-              opprinneligNavn={opprettRequest.opprinneligNavn}
+              nyttNavn={requestInfo.nyttNavn}
+              opprinneligNavn={requestInfo.opprinneligNavn}
             />
-          </OrgEnhetKorrigeringKvittering>
+          </OrgEnhetKvittering>
         ) : (
           <ContainerWithHighlightedTop padding={6}>
             {hasAdminAccess ? (
               <KorrigeringOrgEnhetNavn
                 orgEnhetId={id}
-                setOpprettRequest={setOpprettRequest}
+                setRequestInfo={setRequestInfo}
               />
             ) : (
               <IkkeTilgangRedigering />
@@ -73,10 +73,10 @@ export const KorrigerOrgEnhetNavn = () => {
 
 function KorrigeringOrgEnhetNavn({
   orgEnhetId,
-  setOpprettRequest,
+  setRequestInfo,
 }: {
   orgEnhetId?: string;
-  setOpprettRequest: (response: any) => void;
+  setRequestInfo: (response: any) => void;
 }) {
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
@@ -115,7 +115,7 @@ function KorrigeringOrgEnhetNavn({
 
       <KorrigeringOrgEnhetNavnForm
         orgEnhet={orgEnhet}
-        setOpprettRequest={setOpprettRequest}
+        setRequestInfo={setRequestInfo}
       />
     </>
   );
@@ -123,10 +123,10 @@ function KorrigeringOrgEnhetNavn({
 
 function KorrigeringOrgEnhetNavnForm({
   orgEnhet,
-  setOpprettRequest,
+  setRequestInfo,
 }: {
   orgEnhet: OrgEnhet;
-  setOpprettRequest: (response: any) => void;
+  setRequestInfo: (response: any) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -147,7 +147,7 @@ function KorrigeringOrgEnhetNavnForm({
     onSuccess: async () => {
       const nyttNavn = methods.getValues("navn");
 
-      setOpprettRequest({ opprinneligNavn, nyttNavn });
+      setRequestInfo({ opprinneligNavn, nyttNavn });
 
       showToast({ text: "Navn oppdatert" });
 

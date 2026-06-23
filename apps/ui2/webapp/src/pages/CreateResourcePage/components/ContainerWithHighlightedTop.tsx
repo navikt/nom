@@ -42,7 +42,6 @@ export function ContainerWithHighlightedTop({
           css={css`
             display: flex;
             flex-direction: column;
-            gap: var(--a-spacing-4);
           `}
         >
           {icon && typeof icon === "string" && (
