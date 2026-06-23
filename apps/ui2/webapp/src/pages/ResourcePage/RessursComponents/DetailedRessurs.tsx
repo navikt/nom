@@ -52,6 +52,7 @@ import {
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditPersonOpplysninger } from "~/pages/ResourcePage/EditForms/EditPersonOpplysninger";
 import {
+  isPeriodActive,
   nomDateIsBefore,
   nomDateIsBeforeToday,
   nomDateIsSameOrAfter,
@@ -776,10 +777,14 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     ? ["fa520s", "fe857w", "hy255y", "ja464g", "py733e", "ru151s"]
     : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
 
-  const lederForOrgenheterFiltrert = lederForOrgenheter.filter(
-    (orgEnhet) =>
-      !skjulteEksterneOrgEnheter.includes(orgEnhet?.orgEnhetId ?? ""),
-  );
+  const lederForOrgenheterFiltrert = lederForOrgenheter
+    .filter(
+      (orgEnhet) =>
+        !skjulteEksterneOrgEnheter.includes(orgEnhet?.orgEnhetId ?? ""),
+    )
+    .filter((orgEnhet) =>
+      isPeriodActive(orgEnhet?.startdato ?? "", orgEnhet.sluttdato),
+    );
 
   if (lederForOrgenheterFiltrert.length === 0) {
     return;
@@ -793,7 +798,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const unikeOrgEnheter = uniqBy(
     lederForOrgenheterFiltrert,
     (orgEnhet) => orgEnhet.orgEnhetNavn,
-  );
+  ).sort((a, b) => (a.orgEnhetNavn ?? "").localeCompare(b.orgEnhetNavn ?? ""));
 
   return (
     <>
