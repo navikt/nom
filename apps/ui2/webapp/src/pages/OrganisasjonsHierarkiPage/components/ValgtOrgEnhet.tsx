@@ -636,13 +636,3 @@ export const NomNivaaNameMapping = {
   [NomNivaa.DRIFTSENHET]: "Driftsenhet",
   [NomNivaa.ARBEIDSOMRAADE]: "Arbeidsområde",
 };
-
-const dropdownLinkCss = css`
-  color: var(--a-text-action);
-  text-decoration: underline;
-  width: 100%;
-
-  :hover {
-    width: 100%;
-  }
-`;
