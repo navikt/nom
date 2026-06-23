@@ -39,8 +39,11 @@ import type {
   OpprettOrgEnhetResponse,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
+import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
+  const inDevelopment = isInDevelopment();
+
   const { id } = useSearch({
     from: "/opprett-organisasjonsenhet",
   });
@@ -84,7 +87,7 @@ export const OpprettOrgEnhet = () => {
               <DynamiskOrgKart
                 opprettKnapp
                 title="Velg plassering"
-                toppOrgEnhetId="sa312u"
+                toppOrgEnhetId={inDevelopment ? "sa312u" : "py437s"}
               />
 
               {!id && (
