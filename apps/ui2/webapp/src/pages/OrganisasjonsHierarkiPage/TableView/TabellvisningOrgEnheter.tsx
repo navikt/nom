@@ -22,9 +22,13 @@ export const TabellvisningOrgEnheter = () => {
 
   const parentOgUnderenheter = parentOgUnderenheterQuery.data ?? [];
 
+  const parent = parentOgUnderenheter.find((orgEnhet) => orgEnhet.id === id);
+
   return (
     <>
-      <PageBanner text="Tabellvisning av organisasjonsenheter" />
+      <PageBanner
+        text={`Organisasjonsenheter under ${parent?.navn ?? "enheten"}`}
+      />
 
       <ContentWrapper limitWidth={false}>
         <OrgEnhetTabell
