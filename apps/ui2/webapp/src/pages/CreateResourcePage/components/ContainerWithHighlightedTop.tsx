@@ -79,6 +79,7 @@ export function ContainerWithHighlightedTop({
           )}
         </div>
       )}
+
       {children}
     </div>
   );

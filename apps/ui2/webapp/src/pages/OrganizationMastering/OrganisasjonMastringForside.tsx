@@ -419,9 +419,9 @@ function UtvidOrgEnhetKort({
       <div
         css={css`
           background: white;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border: 2px solid #457c9d;
           border-radius: var(--a-border-radius-large);
-          border: 1px solid var(--a-border-default);
+          padding: var(--a-spacing-4) var(--a-spacing-6);
           display: block;
         `}
       >
@@ -577,21 +577,141 @@ function UtvidOrgEnhetKort({
         )}
       </div>
 
-      {expanded && !!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
-        <VStack
+      {!!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
+        <div
           css={css`
-            margin-top: var(--a-spacing-4);
-            margin-left: var(--a-spacing-10);
+            margin-left: var(--a-spacing-8);
+            display: flex;
           `}
-          gap="4"
         >
-          {sorterteOrgEnheter.map((underliggendeOrgEnhet, index) => (
-            <UtvidOrgEnhetKort
-              key={`${orgEnhet.id}${index}`}
-              orgEnhet={underliggendeOrgEnhet}
-            />
-          ))}
-        </VStack>
+          {expanded ? (
+            <VStack
+              css={css`
+                width: 100%;
+              `}
+              gap="0"
+            >
+              <div
+                css={css`
+                  height: var(--a-spacing-2);
+                  border-left: 4px solid #457c9d;
+                `}
+              />
+
+              {sorterteOrgEnheter.map((underliggendeOrgEnhet, index) => (
+                <div
+                  css={css`
+                    display: flex;
+                  `}
+                  key={`${orgEnhet.id}${index}`}
+                >
+                  <TreeStructure
+                    downward={index < sorterteOrgEnheter.length - 1}
+                  />
+
+                  <div
+                    css={css`
+                      width: 100%;
+                      margin-top: var(--a-spacing-2);
+                      margin-bottom: var(--a-spacing-2);
+                    `}
+                  >
+                    <UtvidOrgEnhetKort orgEnhet={underliggendeOrgEnhet} />
+                  </div>
+                </div>
+              ))}
+            </VStack>
+          ) : (
+            <div
+              css={css`
+                width: 100%;
+              `}
+            >
+              <div
+                css={css`
+                  height: 22px;
+                  border-left: 4px solid #457c9d;
+                `}
+              />
+
+              <div
+                css={css`
+                  margin-left: auto;
+                  position: relative;
+                  display: flex;
+                `}
+              >
+                <div
+                  css={css`
+                    width: 16px;
+                  `}
+                >
+                  <div
+                    css={css`
+                      height: 50%;
+                      border-left: 4px solid #457c9d;
+                      border-bottom: 2px solid #457c9d;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      height: 50%;
+                      border-top: 2px solid #457c9d;
+                    `}
+                  />
+                </div>
+
+                <div
+                  css={css`
+                    width: 100%;
+                  `}
+                >
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      top: -14px;
+                      left: 44px;
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      z-index: 1;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      top: -7px;
+                      left: 30px;
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      z-index: 2;
+                    `}
+                  />
+
+                  <div
+                    css={css`
+                      position: relative;
+                      padding: var(--a-spacing-1) var(--a-spacing-4);
+                      background: white;
+                      border: 2px solid #457c9d;
+                      border-radius: var(--a-border-radius-large);
+                      font-size: var(--a-font-size-heading-medium);
+                      font-weight: var(--a-font-weight-bold);
+                      z-index: 3;
+                    `}
+                  >
+                    {`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -642,6 +762,36 @@ function HvemKanRedigereSection({
       ) : (
         <BodyShort>Ingen registrert</BodyShort>
       )}
+    </div>
+  );
+}
+
+function TreeStructure({ downward }: { downward: boolean }) {
+  return (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 32px;
+      `}
+    >
+      <div
+        css={css`
+          flex-shrink: 0;
+          height: 54px;
+          border-left: 4px solid #457c9d;
+          border-bottom: 2px solid #457c9d;
+        `}
+      />
+
+      <div
+        css={css`
+          flex: 1;
+          border-top: 2px solid #457c9d;
+          border-left: ${downward ? "solid 4px #457c9d" : ""};
+        `}
+      />
     </div>
   );
 }

@@ -10,12 +10,10 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.pdl.PdlClient;
-import no.nav.nom.contract.nom.IdentType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +28,7 @@ import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 @Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
+@PreAuthorize("hasAuthority('ADMIN') || hasAuthority('NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT')")
 public class NavidentController {
 
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
@@ -61,7 +60,6 @@ public class NavidentController {
         @ApiResponse(responseCode = "404", description = "Failure, body == null"),
         @ApiResponse(responseCode = "500", description = "Failure, body == null")
     })
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<NavidentResponse> opprettStandardNavident(@RequestBody NavidentRequest request) {
 
         log.info(TEAM_LOGS, "opprettNavident kalt for personIdent {}", request.getPersonident());
