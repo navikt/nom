@@ -18,6 +18,7 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminReadOnlyAccess,
+  useHasExternalFundsRecipientAccess,
   useHasRobotAccess,
   useHasUtenlandskKonsulentAccess,
   useHasVikafossenAccess,
@@ -36,6 +37,8 @@ export function BurgerMenu() {
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasWriteExternalFundsRecipientAccess =
+    useHasExternalFundsRecipientAccess();
 
   const session = useGetSession();
 
@@ -70,7 +73,8 @@ export function BurgerMenu() {
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
 
-  const showOpprettExternalFundsRecipient = hasAdminAccess;
+  const showOpprettExternalFundsRecipient =
+    hasAdminAccess || hasWriteExternalFundsRecipientAccess;
 
   const showOpprettDivider =
     showOpprettLink ||

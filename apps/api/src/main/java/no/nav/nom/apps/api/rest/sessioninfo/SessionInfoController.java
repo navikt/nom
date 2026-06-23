@@ -37,6 +37,7 @@ public class SessionInfoController {
         claimToRoleMap.put(env.getRequiredProperty("authentication.groups.readOnly"), UserRoles.ROLE_READONLY);
         claimToRoleMap.put(env.getRequiredProperty("authentication.groups.extendedReadOnly"), UserRoles.ROLE_EXTENDED_READONLY);
         claimToRoleMap.put(env.getRequiredProperty("authentication.groups.kostnadsstedsAdmin"), UserRoles.ROLE_KOSTNADSTED_MAPPING_ADMIN);
+        claimToRoleMap.put(env.getRequiredProperty("authentication.groups.nomWriteExternalFundsRecipient"), UserRoles.ROLE_EXTERNAL_FUNDS_RECIPIENT);
         log.debug("authentication.groups Environment (claimToRoleMap): {}", claimToRoleMap);
     }
 
@@ -69,6 +70,7 @@ public class SessionInfoController {
         ROLE_WRITE_ROBOT,
         ROLE_READONLY,
         ROLE_EXTENDED_READONLY,
+        ROLE_EXTERNAL_FUNDS_RECIPIENT,
         ROLE_KOSTNADSTED_MAPPING_ADMIN
     }
 
