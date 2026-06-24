@@ -142,7 +142,11 @@ public class ApiTest extends ApiTestBase {
     @DisplayName("Unit4-endpoint kan sende POST-request")
     void unit4_successful_post() {
         stubFor(post(unit4EmployeesPath)
-            .willReturn(created()));
+            .willReturn((aResponse()
+                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
+                .withHeader("Content-Type", "application/json")
+                .withStatus(HttpStatus.CREATED.value())
+                .withBody("{\"status\":\"created\"}"))));
 
         webTestClient
             .post()
@@ -181,7 +185,10 @@ public class ApiTest extends ApiTestBase {
     @DisplayName("Unit4-endpoint kan sende PATCH-request")
     void unit4_successful_patch() {
         stubFor(patch(urlMatching(unit4EmployeesPath + "/123456"))
-            .willReturn(ok()));
+            .willReturn((aResponse()
+                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"status\":\"ok\"}"))));
 
         webTestClient
             .patch()
@@ -197,7 +204,10 @@ public class ApiTest extends ApiTestBase {
     @DisplayName("Unit4-endpoint kan sende DELETE-request")
     void unit4_successful_delete() {
         stubFor(delete(unit4EmployeesPath + "/123456")
-            .willReturn(ok()));
+            .willReturn((aResponse()
+                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\"status\":\"ok\"}"))));
 
         webTestClient
             .delete()
