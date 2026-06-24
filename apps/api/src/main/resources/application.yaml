@@ -476,6 +476,10 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
+      - navident: Z991561         # Team Dokumentløsninger / Joakim Bjørnstad
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
