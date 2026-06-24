@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
@@ -17,6 +18,7 @@ import org.wiremock.spring.EnableWireMock;
     @ConfigureWireMock(
         filesUnderDirectory = "src/test/resources")
 })
+@TestPropertySource(properties = "wiremock.server.disable-chunked-encoding=true")
 @AutoConfigureWebTestClient
 public class TestBase {
 
