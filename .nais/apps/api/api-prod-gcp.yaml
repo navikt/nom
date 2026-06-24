@@ -91,6 +91,7 @@ spec:
           - id: "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
           - id: "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
           - id: "818ec344-1c3b-48e5-8a62-68bb9eeb2a09" # orgenhet-kostnadssted-mapping-admin
+          - id: "deae8838-59fd-4c27-9ccc-f0ed844bf091" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
         extra:
           - azp_name
           - NAVident

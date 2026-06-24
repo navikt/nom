@@ -91,6 +91,7 @@ spec:
           - id: "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
           - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
           - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+          - id: "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
         extra:
           - azp_name
           - NAVident
