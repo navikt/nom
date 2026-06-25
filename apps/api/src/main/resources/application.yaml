@@ -480,6 +480,19 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
+      - navident: Z993376         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993741         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993471         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: gu300t    # Kontroll Vest 02 (gu300t)
+        sektor: NAV_STATLIG
+      - navident: Z990474         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: sa352n    # Kontroll Nord avd Trondheim (sa352n)
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
