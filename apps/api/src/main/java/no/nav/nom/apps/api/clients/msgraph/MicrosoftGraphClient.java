@@ -40,7 +40,7 @@ public class MicrosoftGraphClient {
         oAuth2Filter.setDefaultClientRegistrationId("email");
 
         this.webClient = builder.clone()
-                .filter(oAuth2Filter)
+                .apply(oAuth2Filter.oauth2Configuration())
                 .baseUrl(msGraphClientProperties.baseUrl())
                 .build();
     }
