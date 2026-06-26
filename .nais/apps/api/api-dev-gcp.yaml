@@ -135,12 +135,6 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
-        - application: opprett-oppgave-frontend-q2
-          namespace: isa
-          cluster: dev-gcp
-        - application: opprett-oppgave-frontend-q1
-          namespace: isa
-          cluster: dev-gcp
         - application: amt-person-service
           namespace: amt
           cluster: dev-gcp
