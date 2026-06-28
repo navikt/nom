@@ -21,7 +21,7 @@ public class NomProxyClient {
             .exchangeStrategies(
                 ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
             )
-            .filter(oAuth2Filter)
+            .apply(oAuth2Filter.oauth2Configuration())
             .baseUrl(appProperties.clients().nomProxy().baseUrl())
             .build();
     }

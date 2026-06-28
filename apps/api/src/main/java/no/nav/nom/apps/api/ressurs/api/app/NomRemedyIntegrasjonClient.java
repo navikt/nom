@@ -24,7 +24,7 @@ public class NomRemedyIntegrasjonClient {
         oAuth2Filter.setDefaultClientRegistrationId("nom-remedy-integrasjon");
 
         this.webClient = builder.clone()
-            .filter(oAuth2Filter)
+            .apply(oAuth2Filter.oauth2Configuration())
             .baseUrl(appProperties.clients().nomRemedyIntegrasjon().baseUrl())
             .build();
     }
