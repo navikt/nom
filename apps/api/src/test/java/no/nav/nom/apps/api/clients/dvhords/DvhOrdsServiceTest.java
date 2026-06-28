@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
+import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @ActiveProfiles("test")
 @SpringBootTest
-@ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class, WebClientAutoConfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
+@ContextConfiguration(classes= {DvhOrdsClientImpl.class, DvhOrdsService.class, RestClientAutoConfiguration.class}, initializers = MockOAuth2ServerInitializer.class)
 @EnableConfigurationProperties(AppProperties.class)
 @EnableWireMock({
     @ConfigureWireMock(
