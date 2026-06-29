@@ -45,7 +45,7 @@ public class PdlWebClientConfig {
         oAuth2Filter.setDefaultClientRegistrationId("pdl");
 
         return builder.clone()
-                .filter(oAuth2Filter)
+                .apply(oAuth2Filter.oauth2Configuration())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HEADER_CONSUMER_ID_KEY, pdlConfig.getAppName())
                 .defaultHeader("Tema", pdlConfig.getTema())
