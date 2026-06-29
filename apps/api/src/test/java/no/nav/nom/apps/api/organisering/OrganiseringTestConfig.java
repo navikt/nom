@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration;
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -43,6 +44,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , DvhService.class
     , DvhOrgenhetsLast.class
     , DvhOrdsService.class
+    , RestClientAutoConfiguration.class
     , WebClientAutoConfiguration.class
     , ValidationService.class
     , NomProxyClient.class
