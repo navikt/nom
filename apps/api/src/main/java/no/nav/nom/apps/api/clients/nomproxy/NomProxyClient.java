@@ -2,31 +2,26 @@ package no.nav.nom.apps.api.clients.nomproxy;
 
 import no.nav.nom.apps.api.common.AppProperties;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @Component
 public class NomProxyClient {
 
-    private static final int MAX_IN_MEMORY_MB = 300;
-    private final WebClient webClient;
+    private final RestClient restClient;
 
-    public NomProxyClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties, WebClient.Builder builder) {
+    public NomProxyClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties, RestClient.Builder builder) {
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(oAuth2AuthorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "nom-proxy");
 
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nom-proxy");
-        this.webClient = builder.clone()
-            .exchangeStrategies(
-                ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
-            )
-            .apply(oAuth2Filter.oauth2Configuration())
+        this.restClient = builder
             .baseUrl(appProperties.clients().nomProxy().baseUrl())
+            .requestInterceptor(oauth2Interceptor)
             .build();
     }
 
-    public WebClient getWebClient() {
-        return webClient;
+    public RestClient getRestClient() {
+        return restClient;
     }
 }

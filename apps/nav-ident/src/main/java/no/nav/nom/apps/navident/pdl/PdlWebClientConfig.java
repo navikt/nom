@@ -5,10 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestClient;
 
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 
@@ -35,17 +40,21 @@ public class PdlWebClientConfig {
     }
 
     @Bean
-    public WebClient pdlWebClient(
-            PdlConfig pdlConfig, 
+    public RestClient pdlRestClient(
+            PdlConfig pdlConfig,
             @Qualifier("pdlAuthorizedClientManager") OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
-            WebClient.Builder builder
+            RestClient.Builder builder
     ) {
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(oAuth2AuthorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "pdl");
 
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("pdl");
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setReadTimeout(pdlConfig.getTimeoutInMillis());
+        requestFactory.setConnectTimeout(pdlConfig.getTimeoutInMillis());
 
-        return builder.clone()
-                .filter(oAuth2Filter)
+        return builder
+                .requestFactory(requestFactory)
+                .requestInterceptor(oauth2Interceptor)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HEADER_CONSUMER_ID_KEY, pdlConfig.getAppName())
                 .defaultHeader("Tema", pdlConfig.getTema())
