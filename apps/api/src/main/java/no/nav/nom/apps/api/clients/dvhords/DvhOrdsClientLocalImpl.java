@@ -4,11 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriUtils;
 import tools.jackson.databind.JsonNode;
@@ -19,83 +17,70 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Profile("local")
 public class DvhOrdsClientLocalImpl implements DvhOrdsClient {
-    private AppProperties.DvhOrds dvhOrdsProperties;
-    private static final int MAX_IN_MEMORY_MB = 400;
-    private final WebClient webClient;
 
-    public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties, WebClient.Builder builder) {
-        dvhOrdsProperties = appProperties.clients().dvhOrds();
+    private final RestClient restClient;
 
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nom-api");
+    public DvhOrdsClientLocalImpl(OAuth2AuthorizedClientManager authorizedClientManager, AppProperties appProperties, RestClient.Builder builder) {
+        AppProperties.DvhOrds dvhOrdsProperties = appProperties.clients().dvhOrds();
 
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(dvhOrdsProperties.baseUrl());
-        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "nom-api");
 
-        this.webClient = builder.clone()
-            .uriBuilderFactory(factory)
-            .exchangeStrategies(
-                ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
-            )
-            .filter(oAuth2Filter)
-            .filter(logRequest())
+        DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(dvhOrdsProperties.baseUrl());
+        uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+
+        this.restClient = builder
+            .uriBuilderFactory(uriBuilderFactory)
+            .requestInterceptor(oauth2Interceptor)
+            .requestInterceptor((request, body, execution) -> {
+                log.info("Request: {} {}", request.getMethod(), request.getURI());
+                return execution.execute(request, body);
+            })
             .build();
     }
 
     @Override
     public JsonNode dvhGetJsonData(String urlPath) {
-        return webClient
-            .get()
+        return restClient.get()
             .uri(urlPath)
             .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+            .body(JsonNode.class);
     }
 
     @Override
     public JsonNode dvhGetJsonDataLimitRows(String urlPath, int numRowsToFetch) {
-        return webClient
-            .get()
-            .uri(urlPath, uriBuilder -> uriBuilder
-                    .queryParam("numRows", numRowsToFetch)
-                    .build()
+        return restClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(urlPath)
+                .queryParam("numRows", numRowsToFetch)
+                .build()
             )
             .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+            .body(JsonNode.class);
     }
 
     @Override
     public JsonNode dvhGetJsonDataOrdsFilter(String urlPath, String ordsFilter) {
-        return webClient
-            .get()
-            .uri(urlPath, uriBuilder -> uriBuilder
+        return restClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(urlPath)
                 .queryParam("ordsFilter", UriUtils.encodeQueryParam(ordsFilter, StandardCharsets.UTF_8))
                 .build()
             )
             .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+            .body(JsonNode.class);
     }
 
     @Override
     public JsonNode dvhGetJsonDataOrdsPaginated(String urlPath, int offset, int limit) {
-        return webClient
-            .get()
-            .uri(urlPath.replace("?numRows=0", "Paginated"), uriBuilder -> uriBuilder
+        return restClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(urlPath.replace("?numRows=0", "Paginated"))
                 .queryParam("offset", UriUtils.encodeQueryParam(Integer.toString(offset), StandardCharsets.UTF_8))
                 .queryParam("limit", UriUtils.encodeQueryParam(Integer.toString(limit), StandardCharsets.UTF_8))
                 .build()
             )
             .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
-    }
-
-    private ExchangeFilterFunction logRequest() {
-        return (clientRequest, next) -> {
-            log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
-            return next.exchange(clientRequest);
-        };
+            .body(JsonNode.class);
     }
 }
