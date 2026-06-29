@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.newtestbase.WireMockTestBase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
+import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Collections;
@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = {MicrosoftGraphClient.class, JsonMapper.class, WebClientAutoConfiguration.class})
+@SpringBootTest(classes = {MicrosoftGraphClient.class, JsonMapper.class, RestClientAutoConfiguration.class})
 class MicrosoftGraphClientTest extends WireMockTestBase {
 
     private static final String ENTRA_ID_GROUP = "e152f131-2d26-4834-b6a0-30b2415f0385";
