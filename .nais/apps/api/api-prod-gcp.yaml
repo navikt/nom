@@ -279,6 +279,9 @@ spec:
         - application: puzzel-widgets-api-db
           namespace: navdig
           cluster: prod-gcp
+        - application: jira-data-manager-sync
+          namespace: team-service-management
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
