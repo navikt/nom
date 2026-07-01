@@ -429,7 +429,7 @@ public class NyeRessursStillingProcessor {
                 originalOrgtilknytning.navident(),
                 originalOrgtilknytning.orgEnhetId(),
                 stillingPeriode.gyldigFom(),
-                gyldigTom.equals(NO_END_DATE) ? null : gyldigTom,
+                gyldigTom == null || gyldigTom.equals(NO_END_DATE) ? null : gyldigTom,
                 metadata,
                 additionalData
             );
