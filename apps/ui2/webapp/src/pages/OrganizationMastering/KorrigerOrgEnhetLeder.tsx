@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, Loader, VStack } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
@@ -161,6 +161,12 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             >
               Lagre
             </Button>
+
+            {!!opprettOrgEnhetLederMutation?.error?.response?.data?.message && (
+              <Alert variant="error">
+                {opprettOrgEnhetLederMutation?.error?.response?.data?.message}
+              </Alert>
+            )}
           </div>
         </VStack>
       </form>

@@ -13,6 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import partition from "lodash/partition";
+import type { ReactNode } from "react";
 import React from "react";
 
 import {
@@ -503,41 +504,23 @@ function DropdownMeny({
             Administrering av medarbeidere
           </Dropdown.Menu.GroupedList.Heading>
 
-          <SmartLink href={`/org/resources-table/${orgEnhet.id}`}>
-            <Dropdown.Menu.GroupedList.Item
-              css={css`
-                color: var(--a-text-action);
-              `}
-            >
-              Tabellvisning av ansatte i denne enheten og underliggende enheter
-            </Dropdown.Menu.GroupedList.Item>
-          </SmartLink>
+          <DropdownLink href={`/org/resources-table/${orgEnhet.id}`}>
+            Tabellvisning av ansatte i denne enheten og underliggende enheter
+          </DropdownLink>
 
           <Dropdown.Menu.Divider />
 
-          <SmartLink href={`/org/table?id=${orgEnhet.id}`}>
-            <Dropdown.Menu.GroupedList.Item
-              css={css`
-                color: var(--a-text-action);
-              `}
-            >
-              Tabellvisning av organisasjonsenheter
-            </Dropdown.Menu.GroupedList.Item>
-          </SmartLink>
+          <DropdownLink href={`/org/table?id=${orgEnhet.id}`}>
+            Tabellvisning av organisasjonsenheter
+          </DropdownLink>
 
           {visOpprettMedarbeidere && (
             <>
               <Dropdown.Menu.Divider />
 
-              <SmartLink href="/ressurs/create/1">
-                <Dropdown.Menu.GroupedList.Item
-                  css={css`
-                    color: var(--a-text-action);
-                  `}
-                >
-                  Opprett medarbeider
-                </Dropdown.Menu.GroupedList.Item>
-              </SmartLink>
+              <DropdownLink href="/ressurs/create/1">
+                Opprett medarbeider
+              </DropdownLink>
             </>
           )}
 
@@ -545,15 +528,9 @@ function DropdownMeny({
             <>
               <Dropdown.Menu.Divider />
 
-              <SmartLink href={`/masseflytting/${orgEnhet.id}`}>
-                <Dropdown.Menu.GroupedList.Item
-                  css={css`
-                    color: var(--a-text-action);
-                  `}
-                >
-                  Flytt én eller flere medarbeidere
-                </Dropdown.Menu.GroupedList.Item>
-              </SmartLink>
+              <DropdownLink href={`/masseflytting/${orgEnhet.id}`}>
+                Flytt én eller flere medarbeidere
+              </DropdownLink>
             </>
           )}
 
@@ -561,16 +538,58 @@ function DropdownMeny({
             <>
               <Dropdown.Menu.Divider />
 
-              <SmartLink href={`/kontaktpersoner-tabell/${orgEnhet.id}`}>
-                <Dropdown.Menu.GroupedList.Item as={Link}>
-                  Tabellvisning av kontaktpersoner
-                </Dropdown.Menu.GroupedList.Item>
-              </SmartLink>
+              <DropdownLink href={`/kontaktpersoner-tabell/${orgEnhet.id}`}>
+                Tabellvisning av kontaktpersoner
+              </DropdownLink>
             </>
           )}
         </Dropdown.Menu.GroupedList>
       </Dropdown.Menu>
     </Dropdown>
+  );
+}
+
+function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const firstLeder = orgEnhet.leder;
+  const { navident, visningsnavn } = firstLeder ?? {};
+
+  if (!navident) {
+    return <span>Ingen leder</span>;
+  }
+
+  return (
+    <span>
+      Leder:{" "}
+      <ReactRouterLink params={{ id: navident }} search={{}} to="/ressurs/$id">
+        <Link as="span">{visningsnavn}</Link>
+      </ReactRouterLink>
+    </span>
+  );
+}
+
+function DropdownLink({
+  children,
+  href,
+}: {
+  children: ReactNode;
+  href: string;
+}) {
+  return (
+    <Dropdown.Menu.GroupedList.Item
+      as={SmartLink}
+      css={css`
+        color: var(--a-text-action);
+        text-decoration: underline;
+        width: 100%;
+
+        :hover {
+          width: 100%;
+        }
+      `}
+      href={href}
+    >
+      {children}
+    </Dropdown.Menu.GroupedList.Item>
   );
 }
 
@@ -591,24 +610,6 @@ function TopBorder() {
       <img alt="" src={building} />
       Organisasjonsenhet
     </div>
-  );
-}
-
-function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const firstLeder = orgEnhet.leder;
-  const { navident, visningsnavn } = firstLeder ?? {};
-
-  if (!navident) {
-    return <span>Ingen leder</span>;
-  }
-
-  return (
-    <span>
-      Leder:{" "}
-      <ReactRouterLink params={{ id: navident }} search={{}} to="/ressurs/$id">
-        <Link as="span">{visningsnavn}</Link>
-      </ReactRouterLink>
-    </span>
   );
 }
 

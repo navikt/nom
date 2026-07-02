@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
+  Alert,
   BodyShort,
   Button,
   DatePicker,
@@ -43,8 +44,7 @@ import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { NomNivaa } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -157,6 +157,9 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     endreOrgEnhetInformasjonMutation.mutate(request);
   };
 
+  const mutateError =
+    endreOrgEnhetInformasjonMutation?.error?.response?.data?.message;
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
@@ -228,6 +231,8 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             >
               Lagre
             </Button>
+
+            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
         </VStack>
       </form>
@@ -256,6 +261,21 @@ function FormDateWrapper({ name }: { name: string }) {
         label="Gyldig fra og med"
       />
     </DatePicker>
+  );
+}
+
+function KvitteringContent({
+  opprinneligNavn,
+  nyttNavn,
+}: {
+  opprinneligNavn: string;
+  nyttNavn: string;
+}) {
+  return (
+    <span>
+      Organisasjonsenheten har byttet navn fra <b>{opprinneligNavn}</b> til{" "}
+      <b>{nyttNavn}</b>.
+    </span>
   );
 }
 

@@ -15,7 +15,7 @@ export function ContainerWithHighlightedTop({
 }: {
   children: ReactNode;
   title?: string | ReactNode;
-  icon?: string;
+  icon?: any;
   padding?: number;
   verticalPadding?: number;
   horizontalPadding?: number;
@@ -42,10 +42,9 @@ export function ContainerWithHighlightedTop({
           css={css`
             display: flex;
             flex-direction: column;
-            gap: var(--a-spacing-4);
           `}
         >
-          {icon && (
+          {icon && typeof icon === "string" && (
             <img
               alt=""
               css={css`
@@ -55,6 +54,17 @@ export function ContainerWithHighlightedTop({
               `}
               src={icon}
             />
+          )}
+
+          {icon && typeof icon !== "string" && (
+            <div
+              css={css`
+                align-self: center;
+                font-size: 65px;
+              `}
+            >
+              {icon}
+            </div>
           )}
 
           {title && (

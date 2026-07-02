@@ -1,12 +1,11 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { CheckmarkCircleFillIcon, FloppydiskIcon } from "@navikt/aksel-icons";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   BodyLong,
   Button,
   DatePicker,
   Heading,
-  HStack,
   Select,
   TextField,
   useDatepicker,
@@ -28,12 +27,11 @@ import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { PanelLink } from "~/pages/CreateResourcePage/SummaryStep";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconRoundedBakground.svg";
 import type {
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
@@ -62,23 +60,12 @@ export const OpprettOrgEnhet = () => {
 
       {!!opprettResponse ? (
         <ContentWrapper>
-          <ContainerWithHighlightedTop
-            icon={opprettRessursIconRoundedBackground}
-            padding={6}
-            title={
-              <HStack gap="4">
-                <CheckmarkCircleFillIcon
-                  css={css`
-                    color: var(--a-surface-success-hover);
-                    font-size: var(--a-font-size-heading-xlarge);
-                  `}
-                />
-                Organisasjonsenheten er nå registrert i NOM
-              </HStack>
-            }
+          <OrgEnhetKvittering
+            orgEnhetId={opprettResponse.data.id}
+            title="Organisasjonsenheten er nå registrert i NOM"
           >
             <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />
-          </ContainerWithHighlightedTop>
+          </OrgEnhetKvittering>
         </ContentWrapper>
       ) : (
         <ContentWrapper limitWidth={!!id}>
@@ -275,24 +262,6 @@ function OrgEnhetOpprettetKvittering({
         Organisasjonsenheten <b>{opprettetOrgEnhet.navn}</b> er nå registrert i
         NOM med ID <b>{opprettetOrgEnhet.id}</b>.
       </BodyLong>
-
-      <VStack
-        css={css`
-          width: 70%;
-          margin: auto;
-        `}
-        gap="4"
-      >
-        <PanelLink
-          href={`/org/${opprettetOrgEnhet.id}`}
-          label="Gå til organisasjonsenhet"
-        />
-
-        <PanelLink
-          href="/organisasjonsmastring"
-          label="Gå tilbake til forsiden"
-        />
-      </VStack>
     </>
   );
 }
