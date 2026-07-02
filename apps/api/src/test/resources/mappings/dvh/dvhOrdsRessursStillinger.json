@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/dvh_nom/nom_ords_ressurs_stillinger.json"
+    "url": "/dvh_nom/nom_ords_ressurs_stillinger.json?offset=0&limit=250000"
   },
   "response": {
     "status": 200,

@@ -10,10 +10,8 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Configuration
@@ -40,42 +38,30 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nom-api");
+    public RestClient nomApiAuthorizedRestClient(@Value("${app.clients.nom-api.url}") String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager, RestClient.Builder builder) {
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "nom-api");
 
-        return builder.clone()
+        return builder
             .baseUrl(baseUrl)
-            .filter(oAuth2Filter)
+            .requestInterceptor(oauth2Interceptor)
             .build();
     }
 
     @Bean
-    public WebClient nomRemedyApiAuthorizedWebClient(@Value("${app.clients.nom-remedy-integrasjon.url}") String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager, WebClient.Builder builder) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nom-remedy-integrasjon");
+    public RestClient nomRemedyApiAuthorizedRestClient(@Value("${app.clients.nom-remedy-integrasjon.url}") String baseUrl, OAuth2AuthorizedClientManager authorizedClientManager, RestClient.Builder builder) {
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "nom-remedy-integrasjon");
 
-        return builder.clone()
+        return builder
             .baseUrl(baseUrl)
-            .filters(exchangeFilterFunctions -> {
-                exchangeFilterFunctions.add(oAuth2Filter);
-                exchangeFilterFunctions.add(logResponse());
-                exchangeFilterFunctions.add(logRequest());
+            .requestInterceptor(oauth2Interceptor)
+            .requestInterceptor((request, body, execution) -> {
+                log.info("Request: {} {}", request.getMethod(), request.getURI());
+                var response = execution.execute(request, body);
+                log.info("Response: {} {}", request.getURI(), response.getStatusCode());
+                return response;
             })
             .build();
-    }
-
-    private ExchangeFilterFunction logRequest() {
-        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
-            return Mono.just(clientRequest);
-        });
-    }
-
-    private ExchangeFilterFunction logResponse() {
-        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            log.info("Response: {} {}", clientResponse.request(), clientResponse.headers());
-            return Mono.just(clientResponse);
-        });
     }
 }

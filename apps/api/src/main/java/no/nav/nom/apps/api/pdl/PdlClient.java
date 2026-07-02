@@ -74,7 +74,7 @@ public class PdlClient {
         this.graphQlClient = HttpGraphQlClient.builder(
             builder.clone()
             .clientConnector(new ReactorClientHttpConnector(httpClient))
-            .filter(oAuth2Filter))
+            .apply(oAuth2Filter.oauth2Configuration()))
             .url(pdlProperties.baseUrl() + "/graphql")
             .headers(headers -> {
                 headers.setContentType(MediaType.APPLICATION_JSON);

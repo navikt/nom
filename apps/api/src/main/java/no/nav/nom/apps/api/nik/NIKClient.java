@@ -36,7 +36,7 @@ public class NIKClient {
             });
 
         this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
-            .filter(oAuth2Filter)
+            .apply(oAuth2Filter.oauth2Configuration())
             .build();
 
         this.nikWebClientBuilder = baseWebClientBuilder;

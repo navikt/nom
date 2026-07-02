@@ -131,7 +131,8 @@ public class DvhOrdsService {
         int page = 1;
         log.info("Henter statlige tilknytninger fra ORDS DVH - page {}", page++);
         List<DvhRessursStilling> ressursStillinger = new ArrayList<>();
-        var pagedJson = getStatligeTilknytningerJson();
+//        var pagedJson = getStatligeTilknytningerJson();
+        var pagedJson = getStatligeTilknytningerJsonPaginated(0, 250_000);
         ressursStillinger.addAll(StreamSupport.stream(pagedJson.get("items").spliterator(), false)
             .map(DvhRessursStilling::fromOrdsRessursStilling)
             .toList());

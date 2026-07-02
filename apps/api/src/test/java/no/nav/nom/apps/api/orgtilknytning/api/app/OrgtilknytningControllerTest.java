@@ -67,6 +67,7 @@ import static no.nav.nom.contract.nom.IdentType.UTENLANDSK_KONSULENT;
 import static no.nav.nom.contract.nom.IdentType.VIKAFOSSEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -2715,6 +2716,70 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .tilknytningtype(leggTilDagligOppfolgingOrgtilknytningWithTilknytningtypeRequest.tilknytningtype())
                 .build()
             );
+    }
+
+    @Test
+    @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} should not update orgtilknytninger where primaryFysiskBrukersted only differs between empty and null")
+    void test_update_orgtilknytninger_for_ressurs_treat_empty_as_null_for_primary_fysisk_brukersted() {
+        when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
+
+        var tilknyttetRessurs = ressursState().toBuilder()
+            .sektor(Sektor.NAV_STATLIG).build();
+        when(ressursStateRepository.findByNavident(tilknyttetRessurs.navident())).thenReturn(Optional.of(tilknyttetRessurs));
+        saveRessurser(List.of(tilknyttetRessurs));
+
+        var existingOrgtilknytningEmptyPF = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("1")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .erDagligOppfolging(false)
+            .gyldigTom(LocalDate.now().plusMonths(1))
+            .primaryFysiskBrukerstedNummer("")
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
+            .build();
+
+        var existingOrgtilknytningNullPF = orgtilknytningState().toBuilder()
+            .navident(tilknyttetRessurs.navident())
+            .orgEnhetId("2")
+            .sektor(tilknyttetRessurs.sektor())
+            .orgtilknytningType(Tilknytningtype.FAST)
+            .erDagligOppfolging(false)
+            .gyldigFom(existingOrgtilknytningEmptyPF.gyldigTom().plusDays(1))
+            .gyldigTom(existingOrgtilknytningEmptyPF.gyldigTom().plusMonths(1))
+            .primaryFysiskBrukerstedNummer(null)
+            .additionalFysiskeBrukerstederNummer(Collections.emptyList())
+            .build();
+
+        saveOrgtilknytninger(List.of(
+            existingOrgtilknytningEmptyPF,
+            existingOrgtilknytningNullPF
+        ));
+
+        var endreOrgtilknytningEmptyPFgRequest = endreOrgtilknytningRequest(existingOrgtilknytningEmptyPF).toBuilder()
+            .primaryFysiskBrukerstedNummer(null)
+            .build();
+
+        var endreOrgtilknytningNullPF = endreOrgtilknytningRequest(existingOrgtilknytningNullPF).toBuilder()
+            .primaryFysiskBrukerstedNummer("")
+            .build();
+
+        var oppdaterOrgtilknytningerForRessursRequest = oppdaterOrgtilknytningerForRessursRequest().toBuilder()
+            .nyeOrgtilknytninger(List.of())
+            .eksisterendeOrgtilknytninger(List.of(
+                endreOrgtilknytningEmptyPFgRequest,
+                endreOrgtilknytningNullPF
+            ))
+            .build();
+
+        postOppdaterOrgtilknytningerForRessursRequest(
+            tilknyttetRessurs.navident(),
+            testToken.nomWriteGroupAndNomUiAzp(),
+            oppdaterOrgtilknytningerForRessursRequest
+        )
+            .expectStatus().is2xxSuccessful();
+
+        verify(orgtilknytningCommandService, never()).endreFysiskeBrukersted(any());
     }
 
     @Test

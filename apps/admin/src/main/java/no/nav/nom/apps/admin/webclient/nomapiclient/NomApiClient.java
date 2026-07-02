@@ -2,53 +2,45 @@ package no.nav.nom.apps.admin.webclient.nomapiclient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import static no.nav.nom.apps.admin.webclient.WebClientUtils.defaultRetry;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Service
 public class NomApiClient {
 
-    private final WebClient nomApiAuthorizedWebClient;
+    private final RestClient nomApiAuthorizedRestClient;
 
-    public NomApiClient(WebClient nomApiAuthorizedWebClient) {
-        this.nomApiAuthorizedWebClient = nomApiAuthorizedWebClient;
+    public NomApiClient(RestClient nomApiAuthorizedRestClient) {
+        this.nomApiAuthorizedRestClient = nomApiAuthorizedRestClient;
     }
 
     public String getRessursRemedyEnhet(String navident) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
-                        .path("/app/ressurser/{navident}/remedyEnhet")
-                        .build(navident)
+                .path("/app/ressurser/{navident}/remedyEnhet")
+                .build(navident)
             )
             .retrieve()
-            .bodyToMono(String.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(String.class);
     }
 
     public String getEpost(String navident) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
-                        .path("/app/ressurser/{navident}/epost")
-                        .build(navident)
+                .path("/app/ressurser/{navident}/epost")
+                .build(navident)
             )
             .retrieve()
-            .bodyToMono(String.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(String.class);
     }
 
     public String getOrgEnhetRemedyEnhet(String orgEnhetId) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/orgenheter/getRemedyEnhetId/{orgenhetId}")
                 .build(orgEnhetId)
             )
             .retrieve()
-            .bodyToMono(String.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(String.class);
     }
 }
