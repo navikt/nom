@@ -157,6 +157,9 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     endreOrgEnhetInformasjonMutation.mutate(request);
   };
 
+  const mutateError =
+    endreOrgEnhetInformasjonMutation?.error?.response?.data?.message;
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
@@ -229,15 +232,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               Lagre
             </Button>
 
-            {!!endreOrgEnhetInformasjonMutation?.error?.response?.data
-              ?.message && (
-              <Alert variant="error">
-                {
-                  endreOrgEnhetInformasjonMutation?.error?.response?.data
-                    ?.message
-                }
-              </Alert>
-            )}
+            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
         </VStack>
       </form>
@@ -266,6 +261,21 @@ function FormDateWrapper({ name }: { name: string }) {
         label="Gyldig fra og med"
       />
     </DatePicker>
+  );
+}
+
+function KvitteringContent({
+  opprinneligNavn,
+  nyttNavn,
+}: {
+  opprinneligNavn: string;
+  nyttNavn: string;
+}) {
+  return (
+    <span>
+      Organisasjonsenheten har byttet navn fra <b>{opprinneligNavn}</b> til{" "}
+      <b>{nyttNavn}</b>.
+    </span>
   );
 }
 

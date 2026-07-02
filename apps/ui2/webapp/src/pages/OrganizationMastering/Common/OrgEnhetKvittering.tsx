@@ -37,13 +37,13 @@ export function OrgEnhetKvittering({
         gap="4"
       >
         <PanelLink
-          href={`/org/${orgEnhetId}`}
-          label="Gå til organisasjonsenhet"
+          href="/organisasjonsmastring"
+          label="Tilbake til Mine organisasjonsenheter"
         />
 
         <PanelLink
-          href="/organisasjonsmastring"
-          label="Gå tilbake til forsiden"
+          href={`/org/${orgEnhetId}`}
+          label="Se organisasjonsenheten"
         />
       </VStack>
     </ContainerWithHighlightedTop>

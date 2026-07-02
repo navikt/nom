@@ -22,7 +22,14 @@ import {
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LabelWithValue } from "~/components/LabelWithValue";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { showToast } from "~/hooks/showToast";
@@ -48,23 +55,30 @@ export const KorrigerOrgEnhetNavn = () => {
 
       <ContentWrapper>
         {!!requestInfo ? (
-          <OrgEnhetKvittering orgEnhetId={id ?? ""} title="Navn oppdatert">
+          <OrgEnhetKvittering
+            orgEnhetId={id ?? ""}
+            title="Navn på organisasjonsenhet oppdatert"
+          >
             <KvitteringContent
               nyttNavn={requestInfo.nyttNavn}
               opprinneligNavn={requestInfo.opprinneligNavn}
             />
           </OrgEnhetKvittering>
         ) : (
-          <ContainerWithHighlightedTop padding={6}>
-            {hasAdminAccess ? (
-              <KorrigeringOrgEnhetNavn
-                orgEnhetId={id}
-                setRequestInfo={setRequestInfo}
-              />
-            ) : (
-              <IkkeTilgangRedigering />
-            )}
-          </ContainerWithHighlightedTop>
+          <ModalProvider>
+            <ContainerWithHighlightedTop padding={6}>
+              {hasAdminAccess ? (
+                <KorrigeringOrgEnhetNavn
+                  orgEnhetId={id}
+                  setRequestInfo={setRequestInfo}
+                />
+              ) : (
+                <IkkeTilgangRedigering />
+              )}
+            </ContainerWithHighlightedTop>
+
+            <ModalComponent />
+          </ModalProvider>
         )}
       </ContentWrapper>
     </>
@@ -157,14 +171,31 @@ function KorrigeringOrgEnhetNavnForm({
     },
   });
 
+  const { showModal } = useModal();
+
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: KorrigerOrgEnhetNavnRequest = {
       id: orgEnhet.id,
       navn: values.navn,
     };
 
-    korrigerOrgEnhetNavnMutation.mutate(request);
+    await showModal(
+      <BekreftModal
+        content={
+          <ModalContent
+            nyttNavn={values.navn}
+            opprinneligNavn={opprinneligNavn}
+          />
+        }
+        heading="Bekreft navneendring på organisasjonsenhet"
+      />,
+    ).then(() => {
+      korrigerOrgEnhetNavnMutation.mutate(request);
+    });
   };
+
+  const mutateError =
+    korrigerOrgEnhetNavnMutation?.error?.response?.data?.message;
 
   return (
     <FormProvider {...methods}>
@@ -199,20 +230,36 @@ function KorrigeringOrgEnhetNavnForm({
             </Button>
           </div>
 
-          {!!korrigerOrgEnhetNavnMutation?.error?.response?.data?.message && (
-            <Alert variant="error">
-              {korrigerOrgEnhetNavnMutation?.error?.response?.data?.message}
-            </Alert>
-          )}
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>
   );
 }
 
-const validationSchema = yup.object({
-  navn: yup.string().required("Obligatorisk"),
-});
+function ModalContent({
+  opprinneligNavn,
+  nyttNavn,
+}: {
+  opprinneligNavn: string;
+  nyttNavn: string;
+}) {
+  return (
+    <VStack gap="4">
+      <div>
+        <LabelWithValue
+          label={"Opprinnelig navn"}
+          split
+          value={opprinneligNavn}
+        />
+      </div>
+
+      <div>
+        <LabelWithValue label={"Nytt navn"} split value={nyttNavn} />
+      </div>
+    </VStack>
+  );
+}
 
 function KvitteringContent({
   opprinneligNavn,
@@ -228,3 +275,7 @@ function KvitteringContent({
     </span>
   );
 }
+
+const validationSchema = yup.object({
+  navn: yup.string().required("Obligatorisk"),
+});
