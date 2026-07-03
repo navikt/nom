@@ -1,5 +1,16 @@
 app:
   name: ${NAIS_APP_NAME:nom-sf-integrasjon}
+  kafka:
+    evtsrc:
+      group-id: nom-sf-integrasjon-evtsrc
+      auto-startup: true
+      retry-delay-ms: 2000
+      orgenhet:
+        topic: org.nom.orgenhet-eventsource
+      orgenhet-leder:
+        topic: org.nom.orgenhet-leder-eventsource
+      organisering:
+        topic: org.nom.organisering-eventsource
   sf:
     api-url: ${SF_API_URL:https://sf.api.example.com}
     client-id: ${SF_CLIENT_ID:sf-client-id}

@@ -1,0 +1,45 @@
+{
+  "type": "OrgEnhetOpprettetEventV1",
+  "fid": "orgEnhet-01KWEB5N7VYGXFDJJVJ6VCGG3C",
+  "data": {
+    "type": "OrgEnhetOpprettetEventV1$OrgEnhetOpprettetEventData",
+    "id": "re847d",
+    "navn": "Vest-Viken Virksomhetsstøtte",
+    "gyldigFom": "2026-06-01",
+    "overordnetOrgEnhetFid": null,
+    "lederRessursFid": null,
+    "tilgangsenhetId": null
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": {
+        "orgenhet_kode": "068700",
+        "orgenhet_navn": "Vest-Viken Virksomhetsstøtte",
+        "orgnode_niv": "ORGNIV4",
+        "enhettype_kode": null,
+        "enhettype_navn": null,
+        "orgenhet_status": "N",
+        "orgenhet_fra_dato": 202606,
+        "orgenhet_til_dato": 209912,
+        "lastet_dato": "2011-05-10T00:00:00Z",
+        "stilling_maks_gyldig_til_dato": null,
+        "leder_ressursnr": "123734"
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-07-01T10:01:49.82167675"
+  },
+  "additionalData": {
+    "type": "OrgEnhetOpprettetEventV1$OrgEnhetOpprettetAdditionalAgressoData",
+    "agressoId": "068700",
+    "agressoNavn": "Vest-Viken Virksomhetsstøtte",
+    "agressoOrgNivaa": "ORGNIV4",
+    "agressoOrgenhetType": null,
+    "uniqueAgressoId": "068700-Vest-Viken Virksomhetsstøtte-ORGNIV4"
+  }
+}

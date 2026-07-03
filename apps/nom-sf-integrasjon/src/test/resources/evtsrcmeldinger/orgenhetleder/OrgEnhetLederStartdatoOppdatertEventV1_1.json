@@ -1,0 +1,21 @@
+{
+  "type": "OrgEnhetLederStartdatoOppdatertEventV1",
+  "fid": "leder-01KWEB5PCVFHQ3YK0K8ED70PJD",
+  "data": {
+    "type": "OrgEnhetLederStartdatoOppdatertEventV1$OrgEnhetLederStartdatoOppdatertData",
+    "startdato": "2026-07-01"
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "persisterLedereForOrgenheter",
+      "inputInterfaceMethodArguments": null,
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-07-01T10:01:51.007802301"
+  },
+  "additionalData": null
+}
