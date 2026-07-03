@@ -1,0 +1,45 @@
+{
+  "type": "OrgEnhetKorrigertEventV1",
+  "fid": "orgEnhet-01GPJGTJERYRJ9GBZ6CAXRY335",
+  "data": {
+    "type": "OrgEnhetKorrigertEventV1$OrgEnhetKorrigertEventData",
+    "id": "na946b",
+    "navn": "Vest-Viken Forvaltningstjenester Leder",
+    "gyldigFom": "2021-12-01",
+    "gyldigTom": "2026-05-31",
+    "overordnetOrgEnhetFid": null,
+    "lederRessursFid": null
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": {
+        "orgenhet_kode": "0687000",
+        "orgenhet_navn": "Vest-Viken Forvaltningstjenester Leder",
+        "orgnode_niv": "ORGENHET",
+        "enhettype_kode": "34",
+        "enhettype_navn": "Tiltak",
+        "orgenhet_status": "P",
+        "orgenhet_fra_dato": 202112,
+        "orgenhet_til_dato": 202605,
+        "lastet_dato": "2015-03-18T00:00:00Z",
+        "stilling_maks_gyldig_til_dato": "2099-12-31T00:00:00Z",
+        "leder_ressursnr": "123734"
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-07-01T10:01:49.799157601"
+  },
+  "additionalData": {
+    "type": "OrgEnhetKorrigertEventV1$OrgEnhetKorrigertAdditionalAgressoData",
+    "agressoId": "0687000",
+    "agressoNavn": "Vest-Viken Forvaltningstjenester Leder",
+    "agressoOrgNivaa": "ORGENHET",
+    "agressoOrgenhetType": "Tiltak",
+    "uniqueAgressoId": "0687000-Vest-Viken Forvaltningstjenester Leder-ORGENHET"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "type": "NomNivaaEndretEventV1",
+  "fid": "orgEnhet-01GPJGSWAPYE5RMNDPR1YB6KXH",
+  "data": {
+    "type": "NomNivaaEndretEventV1$NomNivaaEndretEventData",
+    "nomNivaa": "ARBEIDSOMRAADE"
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api",
+      "inputInterfaceMethodName": "nom-api",
+      "inputInterfaceMethodArguments": {
+        "orgEnhetId": "ja706s",
+        "levelWithinOrgenhetstype": "MISSING_ARBEIDSOMRAADE_ADDED",
+        "orgenheterOver": [
+          {
+            "ordEnhetId": "fa401u",
+            "orgEnhetsType": "FYLKE"
+          },
+          {
+            "ordEnhetId": "jy293v",
+            "orgEnhetsType": "FYLKE"
+          },
+          {
+            "ordEnhetId": "ry630r",
+            "orgEnhetsType": null
+          },
+          {
+            "ordEnhetId": "py437s",
+            "orgEnhetsType": null
+          }
+        ],
+        "oldValue": null,
+        "orgEnhetsType": "FYLKE",
+        "newValue": "ARBEIDSOMRAADE"
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-06-25T09:25:20.55999238"
+  },
+  "additionalData": null
+}

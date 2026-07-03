@@ -1,0 +1,33 @@
+{
+  "type": "OrgEnhetAvvikletEventV1",
+  "fid": "orgEnhet-01GPJGVPA1XRK83JD2179N2RXS",
+  "data": {
+    "type": "OrgEnhetAvvikletEventV1$OrgEnhetAvvikletEventData",
+    "gyldigTom": "2026-05-31"
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": {
+        "orgenhet_kode": "0403006",
+        "orgenhet_navn": "Hamar egenregi",
+        "orgnode_niv": "ORGENHET",
+        "enhettype_kode": "31",
+        "enhettype_navn": "Lokal",
+        "orgenhet_status": "P",
+        "orgenhet_fra_dato": 202212,
+        "orgenhet_til_dato": 202605,
+        "lastet_dato": "2016-02-19T00:00:00Z",
+        "stilling_maks_gyldig_til_dato": "2099-12-31T00:00:00Z",
+        "leder_ressursnr": "161683"
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-06-26T10:23:49.381275233"
+  },
+  "additionalData": null
+}
