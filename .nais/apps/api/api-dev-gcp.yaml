@@ -342,6 +342,9 @@ spec:
         - application: puzzel-widgets-api-db
           namespace: navdig
           cluster: dev-gcp
+        - application: sokos-up-kontoregister-api
+          namespace: okonomi
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
