@@ -2,6 +2,8 @@ package no.nav.nom.apps.sfintegrasjon.nikclient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -9,25 +11,25 @@ import org.springframework.web.client.RestClient;
 @Component
 public class NIKClient {
 
-    private final NikProperties nikProperties;
-    private final RestClient nikRestClient;
+    private static final String NIK_CLIENT_REGISTRATION_ID = "nik";
 
-    private final String nikScope;
+    private final RestClient nikRestClient;
 
     public NIKClient(
         NikProperties nikProperties,
-        RestClient.Builder nikRestClientBuilder
+        OAuth2AuthorizedClientManager authorizedClientManager
     ) {
-        this.nikProperties = nikProperties;
+        var oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(_ -> NIK_CLIENT_REGISTRATION_ID);
+
         this.nikRestClient = RestClient.builder()
             .baseUrl(nikProperties.baseUrl())
             .defaultHeaders(headers -> {
                 headers.add("Nav-Consumer-Id", "Zalaris");
                 headers.add("Nav-Call-Id", "nom-sf-integrasjon");
             })
+            .requestInterceptor(oauth2Interceptor)
             .build();
-
-        this.nikScope = nikProperties.aadScope();
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
