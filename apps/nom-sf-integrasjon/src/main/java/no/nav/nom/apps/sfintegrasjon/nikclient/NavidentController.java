@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.sfintegrasjon.common.SwaggerConfig;
+import no.nav.nom.apps.sfintegrasjon.config.OpenApiConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +33,7 @@ public class NavidentController {
 
     @Operation(
         description = "Create a navident in NIK, ",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        security = @SecurityRequirement(name = OpenApiConfig.BEARER_TOKEN)
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Created")

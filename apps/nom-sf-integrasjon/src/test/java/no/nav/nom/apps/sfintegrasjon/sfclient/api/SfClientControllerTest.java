@@ -9,6 +9,7 @@ import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -27,14 +29,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.springframework.web.client.HttpClientErrorException;
-
-@WebMvcTest(SfClientController.class)
+@WebMvcTest(controllers = SfClientController.class, excludeAutoConfiguration = OAuth2ClientAutoConfiguration.class)
 @Import(SecurityConfig.class)
 @TestPropertySource(properties = {
     "NOM_ADMIN_GROUP_ID=test-admin-group",
+    "ZALARIS_CLIENT_ID=test-zalaris-client",
     "AZURE_APP_TENANT_ID=test-tenant-id",
     "AZURE_APP_CLIENT_ID=test-client-id"
 })
