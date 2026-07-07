@@ -315,8 +315,13 @@ export function SluttDato({ ressurs }: { ressurs: Ressurs }) {
 export function SektorView({ ressurs }: { ressurs: Ressurs }) {
   return (
     <LabelWithValue
-      helpText="Medarbeiders sektor hentes fra sektoren som er registrert på organisasjonstilknytningen.
-      Dersom sektor er feil, må det opprettes en ny organisasjonstilknytning med korrekt sektor."
+      helpText={
+        <>
+          Medarbeiders sektor hentes fra sektoren som er registrert på
+          organisasjonstilknytningen. Dersom sektor er feil, må det opprettes en
+          ny organisasjonstilknytning med korrekt sektor.
+        </>
+      }
       label="Sektor"
       split
       value={SektorNameMapping[ressurs.sektor]}
@@ -335,6 +340,13 @@ export function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <LabelWithValue
+      helpText={
+        <>
+          Medarbeiderens primære fysiske brukersted hentes fra aktiv
+          organisasjonstilknytning. Dersom primært fysisk brukersted er feil, må
+          dette endres på den aktive organisasjonstilknytningen.
+        </>
+      }
       label="Fysisk brukersted"
       split
       value={
