@@ -76,7 +76,8 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # NOM_ADMIN_GROUPID dev
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # NOM_ADMIN_GROUP_ID dev
+          - id: "301f612f-eab6-47b5-84d0-8e517a8b48fc" # Zalaris-SAP-IntegrationSuite-Client-Test
         extra:
           - NAVident
           - azp_name
@@ -92,7 +93,14 @@ spec:
         - application: azure-token-generator
           namespace: nais
           cluster: dev-gcp
+        - application: org-ekstern-proxy
+          namespace: org
+          cluster: dev-gcp
     outbound:
+      rules:
+        - application: nav-ident
+          namespace: org
+          cluster: dev-gcp
       external:
         - host: org-unleash-api.nav.cloud.nais.io
         - host: api55.sapsf.eu

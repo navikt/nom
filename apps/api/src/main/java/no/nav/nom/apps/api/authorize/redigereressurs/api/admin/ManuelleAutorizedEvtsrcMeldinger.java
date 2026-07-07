@@ -20,7 +20,6 @@ import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.state.authorize.DelegertLederStateRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -146,10 +145,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEscape(orgenhetId));
         }
 
-        //TODO (hamkel): Fjern dette når ORG-2848 er ferdig implementert
-        if (!orgenhetId.equals(helfoOrgenhetId) && !orgenhetId.equals(skattOrgenhetId)) {
-            authorizedNavident.sjekkParametereDelegertLeder(lederNavident, delegertNavident, orgenhetId, gyldigTom);
-        }
+        authorizedNavident.sjekkParametereDelegertLeder(lederNavident, delegertNavident, orgenhetId, gyldigTom);
         authorizedNavident.sjekkOmOrgenhetAlleredeDelegertTilNavident(orgenhetId, delegertNavident);
 
         if (!"CONFIRM".equals(confirm)) {
@@ -209,7 +205,7 @@ public class ManuelleAutorizedEvtsrcMeldinger {
         if (!validFid(fid)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
         }
-        
+
         String finalFid = fid;
         var delegering = delegertLederStateRepository.findByFid(fid)
             .orElseThrow(() -> new RuntimeException("Finner ingen authorization/delegering med FID: " +  HtmlUtils.htmlEscape(finalFid)));
