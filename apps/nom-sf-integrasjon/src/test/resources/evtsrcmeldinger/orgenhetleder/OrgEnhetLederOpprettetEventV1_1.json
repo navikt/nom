@@ -1,0 +1,22 @@
+{
+  "type": "OrgEnhetLederOpprettetEventV1",
+  "fid": "leder-01KWBSX108VS6TTZ170D8XQMPE",
+  "data": {
+    "type": "OrgEnhetLederOpprettetEventV1$OrgEnhetLederOpprettetEventData",
+    "navident": "X000000",
+    "orgEnhetId": "ka609r"
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "persisterLedereForOrgenheter",
+      "inputInterfaceMethodArguments": null,
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-06-30T10:21:32.296321338"
+  },
+  "additionalData": null
+}

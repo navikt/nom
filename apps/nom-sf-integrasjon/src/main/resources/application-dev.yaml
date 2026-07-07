@@ -1,1 +1,12 @@
 NOM_ADMIN_GROUP_ID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+
+app:
+  kafka:
+    evtsrc:
+      # Startoffset ved første oppstart. Sett til ønsket offset i prod ved første deploy.
+      orgenhet:
+        start-offset: 815631
+      orgenhet-leder:
+        start-offset: 1105710
+      organisering:
+        start-offset: 15081
