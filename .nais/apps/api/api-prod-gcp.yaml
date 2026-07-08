@@ -282,6 +282,9 @@ spec:
         - application: jira-data-manager-sync
           namespace: team-service-management
           cluster: prod-gcp
+        - application: sokos-up-kontoregister-api
+          namespace: okonomi
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
