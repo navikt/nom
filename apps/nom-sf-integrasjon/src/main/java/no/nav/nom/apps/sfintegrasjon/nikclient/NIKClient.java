@@ -33,10 +33,11 @@ public class NIKClient {
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
-        return nikRestClient.post()
+        var response = nikRestClient.post()
             .uri("/navident/create")
             .body(opprettNavidentRequest)
             .retrieve()
             .toEntity(OpprettNavidentResponse.class);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 }
