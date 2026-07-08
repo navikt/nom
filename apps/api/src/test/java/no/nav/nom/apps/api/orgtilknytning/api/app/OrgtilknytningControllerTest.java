@@ -12,7 +12,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -612,7 +611,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .expectStatus().is2xxSuccessful();
     }
 
-    //@Test
+    @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding more than five optional fysiskbrukersted")
     void test_update_orgtilknytninger_for_ressurs_handle_over_fem_optionalFysisk_brukersted() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
@@ -662,7 +661,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build());
     }
 
-    //@Test
+    @Test
     @DisplayName("POST /app/orgtilknytninger/forRessurs/{navident} stop user from adding primary brukersted as optional too")
     void test_update_orgtilknytninger_for_ressurs_handle_ikke_kunne_ha_primaer_fysisk_brukersted_i_optional_liste() {
         when(authorizedNavident.kanBrukerRedigereRessurs(any(), any())).thenReturn(true);
@@ -3414,7 +3413,9 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .fid("FID_1")
             .id("orgEnhetId1")
             .navn("Enhet 1")
+            .tilgangsenhetId("1234")
             .build())));
+        // Enhet uten tilgangsenhetId – dekker null-grenen i getOrgEnhetNavn (Optional.ofNullable)
         when(orgenhetService.getById("orgEnhetId2")).thenReturn(Optional.of(new OrgEnhet(OrgEnhetState.builder()
             .fid("FID_2")
             .id("orgEnhetId2")
@@ -3427,6 +3428,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .fid("FID_3")
                 .id("newOrgEnhetId")
                 .navn("Ny enhet")
+                .tilgangsenhetId("5678")
                 .gyldigFom(LocalDate.now().minusYears(1))
                 .gyldigTom(null)
                 .build())
@@ -3438,10 +3440,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByNavident("navident1")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("Jane", Optional.empty(), "Doe")).build()));
         when(ressursStateRepository.findByNavident("navident2")).thenReturn(Optional.of(ressursState().toBuilder().visningsnavn(new Visningsnavn("Ola", Optional.empty(), "Normann")).build()));
-
-        when(remedyEnhetMapperService.findByNomId("orgEnhetId1")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
-        when(remedyEnhetMapperService.findByNomId("orgEnhetId2")).thenReturn(Optional.of(new RemedyEnhet("remedyEnhetId1", null, null, null)));
-        when(remedyEnhetMapperService.findByNomId("newOrgEnhetId")).thenReturn(Optional.of(new RemedyEnhet("newRemedyEnhetId", null, null, null)));
 
         postMasseflyttingRequest(
             testToken.nomAdminUser(),

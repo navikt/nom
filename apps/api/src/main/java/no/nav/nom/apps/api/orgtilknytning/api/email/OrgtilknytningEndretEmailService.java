@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -249,8 +250,8 @@ public class OrgtilknytningEndretEmailService {
 
         if (orgenhet.isPresent()) {
             var oe = orgenhet.get();
-            var remedyEnhet = remedyEnhetMapperService.findByNomId(oe.getId());
-            return oe.getNavn() + " (" + oe.getId() + remedyEnhet.map(enhet -> "/" + enhet.remedyEnhetId()).orElse("") + ")";
+            var tilgangsenhetId = Optional.ofNullable(oe.getTilgangsenhetId());
+            return oe.getNavn() + " (" + oe.getId() + tilgangsenhetId.map(enhet -> "/" + enhet).orElse("") + ")";
         } else {
             return "Ukjent";
         }
