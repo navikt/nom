@@ -14,13 +14,11 @@ public class NIKClient {
     private static final String NIK_CLIENT_REGISTRATION_ID = "nik";
 
     private final RestClient nikRestClient;
-    private final NikProperties nikProperties;
 
     public NIKClient(
         NikProperties nikProperties,
         OAuth2AuthorizedClientManager authorizedClientManager
     ) {
-        this.nikProperties = nikProperties;
         var oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
         oauth2Interceptor.setClientRegistrationIdResolver(_ -> NIK_CLIENT_REGISTRATION_ID);
 
@@ -35,8 +33,6 @@ public class NIKClient {
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
-        log.info("opprettNavidentRequest: {}", opprettNavidentRequest);
-        log.info("baseUrl: {}", nikProperties.baseUrl());
         return nikRestClient.post()
             .uri("/navident/create")
             .body(opprettNavidentRequest)
