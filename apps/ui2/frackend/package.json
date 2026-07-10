@@ -20,7 +20,7 @@
     "cookie-parser": "1.4.7",
     "express": "5.2.1",
     "http-proxy-middleware": "3.0.5",
-    "morgan": "1.10.1",
+    "morgan": "1.11.0",
     "node-cache": "5.1.2",
     "node-jose": "2.2.0",
     "unleash-client": "6.10.1",
