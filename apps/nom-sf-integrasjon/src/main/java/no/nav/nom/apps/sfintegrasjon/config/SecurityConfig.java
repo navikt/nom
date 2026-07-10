@@ -80,7 +80,8 @@ public class SecurityConfig {
                 if (jwtGroups.contains(adminGroupId)) {
                     grantedAuthorities.add(new SimpleGrantedAuthority("ADMIN"));
                 }
-                if (jwtGroups.contains(zalarisClientId)) {
+                var callerAppId = jwt.hasClaim("azp") ? jwt.getClaimAsString("azp") : jwt.getClaimAsString("appid");
+                if (zalarisClientId.equals(callerAppId)) {
                     grantedAuthorities.add(new SimpleGrantedAuthority("ZALARIS"));
                 }
                 return grantedAuthorities;

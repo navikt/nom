@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.sfintegrasjon.common.StandardResponse;
 import no.nav.nom.apps.sfintegrasjon.config.OpenApiConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +48,15 @@ public class NavidentController {
         } else {
             return new ResponseEntity<>(new OpprettNavidentResponse("A000001", "Unleash toggle er av"), HttpStatus.OK);
         }
+    }
+
+    @ExceptionHandler({
+        Exception.class
+    })
+    public ResponseEntity<StandardResponse> handleException(Exception e) {
+        log.error(e.getMessage(), e);
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(StandardResponse.builder().message(String.format("Unhandled server error: %s", e.getMessage())).build());
     }
 }

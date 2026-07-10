@@ -77,7 +77,6 @@ spec:
       claims:
         groups:
           - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # NOM_ADMIN_GROUP_ID dev
-          - id: "301f612f-eab6-47b5-84d0-8e517a8b48fc" # Zalaris-SAP-IntegrationSuite-Client-Test
         extra:
           - NAVident
           - azp_name
