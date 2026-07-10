@@ -41,6 +41,7 @@ public class NavidentController {
     @PostMapping("/create")
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(@RequestBody OpprettNavidentRequest request) {
         if (unleash.isEnabled("nom-sf-integrasjon.navident-create")) {
+            log.info("Forsøker å opprette navident fra SF {}", request);
             return nikClient.opprettNavident(request);
         } else {
             return new ResponseEntity<>(new OpprettNavidentResponse("A000001", "Unleash toggle er av"), HttpStatus.OK);
