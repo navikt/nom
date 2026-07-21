@@ -345,6 +345,9 @@ spec:
         - application: sokos-up-kontoregister-api
           namespace: okonomi
           cluster: dev-gcp
+        - application: eien-tilganger-poc
+          namespace: eien
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
