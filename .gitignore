@@ -90,3 +90,7 @@ apps/ui/**/build/
 __pycache__/
 /.sisyphus/
 AGENTS.md
+/.github/agents/aksel.agent.md
+/.github/.nav-pilot-state.json
+/.github/copilot-instructions.md
+/.cplt.toml
