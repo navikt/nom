@@ -2,7 +2,8 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
- Alert, BodyShort,
+  Alert,
+  BodyShort,
   Button,
   DatePicker,
   Heading,
