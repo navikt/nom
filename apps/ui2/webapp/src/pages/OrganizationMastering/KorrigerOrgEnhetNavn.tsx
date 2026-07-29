@@ -124,7 +124,7 @@ function KorrigeringOrgEnhetNavn({
     <>
       <OrgEnhetInfoWrapper
         heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
+        orgEnhet={orgEnhet}
       />
 
       <KorrigeringOrgEnhetNavnForm
