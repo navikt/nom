@@ -8,3 +8,8 @@ spring:
       cleanup:
         on-shutdown: true
         on-startup: true
+
+unleash:
+  endpoint:
+    url: http://localhost:43223/api/unleashapi
+  api-key: some-unleash-token
