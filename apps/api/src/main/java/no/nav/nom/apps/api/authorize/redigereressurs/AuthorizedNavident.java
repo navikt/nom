@@ -121,7 +121,8 @@ public class AuthorizedNavident {
         }
 
         orgenhetIder.addAll(delegertLederStateRepository.aktiveDelegeringerForOrgenheterTilNavident(bruker)); // ADD alle enheter bruker er delegert til
-        return orgenhetIder.stream().anyMatch(orgenhetId -> erRessursInnunderOrgenhet(ressursNavident, orgenhetId));
+        return orgenhetIder.stream().anyMatch(orgenhetId ->
+            erRessursInnunderOrgenhet(ressursNavident, orgenhetId) && !bruker.equalsIgnoreCase(ressursNavident));
     }
 
     public boolean kanBrukerOppretteRessurs(String navident, String opprettesIOrgenhetId) {

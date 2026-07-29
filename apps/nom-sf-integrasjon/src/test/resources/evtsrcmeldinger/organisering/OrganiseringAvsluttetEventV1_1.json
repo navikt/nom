@@ -1,0 +1,29 @@
+{
+  "type": "OrganiseringAvsluttetEventV1",
+  "fid": "organisering-01K8RBQHEZ20Y3C0DTXVZ9MA7D",
+  "data": {
+    "type": "OrganiseringAvsluttetEventV1$OrganiseringAvsluttetEventData",
+    "gyldigTom": "2026-06-09"
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": {
+        "fid": "organisering-01K8RBQHEZ20Y3C0DTXVZ9MA7D",
+        "id": "ja284m",
+        "navn": "Avdeling for brukeropplevelse",
+        "idOver": "bu694m",
+        "navnOver": "Avdeling for brukeropplevelser",
+        "gyldigFom": "2025-10-29",
+        "gyldigTom": null
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-06-10T22:13:50.238553031"
+  },
+  "additionalData": null
+}

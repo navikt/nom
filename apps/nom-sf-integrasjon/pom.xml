@@ -10,6 +10,9 @@
     </parent>
 
     <name>NOM :: Apps :: Nom-sf-integrasjon</name>
+    <properties>
+        <sf-odata-lib.version>1.2.0</sf-odata-lib.version>
+    </properties>
     <artifactId>nom-sf-integrasjon</artifactId>
     <version>1.1.0</version>
 
@@ -93,6 +96,12 @@
             <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>sf-odata-lib</artifactId>
+            <version>${sf-odata-lib.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
@@ -101,6 +110,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -136,6 +149,16 @@
         <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-data-jpa-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

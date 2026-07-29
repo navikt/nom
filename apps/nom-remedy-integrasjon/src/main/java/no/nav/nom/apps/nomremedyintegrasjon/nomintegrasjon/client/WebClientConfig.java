@@ -9,8 +9,8 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestClient;
 
 
 @Configuration
@@ -37,14 +37,13 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient nomApiAuthorizedWebClient(@Value("${app.clients.nom-api.url}") String baseUrl , OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, WebClient.Builder builder) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nom-api");
+    public RestClient nomApiAuthorizedRestClient(@Value("${app.clients.nom-api.url}") String baseUrl, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, RestClient.Builder builder) {
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(oAuth2AuthorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "nom-api");
 
-        return builder.clone()
+        return builder
             .baseUrl(baseUrl)
-            .filter(oAuth2Filter)
+            .requestInterceptor(oauth2Interceptor)
             .build();
     }
-
 }

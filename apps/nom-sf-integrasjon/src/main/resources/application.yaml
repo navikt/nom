@@ -1,11 +1,26 @@
 app:
   name: ${NAIS_APP_NAME:nom-sf-integrasjon}
+  kafka:
+    evtsrc:
+      group-id: nom-sf-integrasjon-evtsrc
+      auto-startup: true
+      retry-delay-ms: 2000
+      orgenhet:
+        topic: org.nom.orgenhet-eventsource
+      orgenhet-leder:
+        topic: org.nom.orgenhet-leder-eventsource
+      organisering:
+        topic: org.nom.organisering-eventsource
   sf:
-    api-url: ${SF_API_URL:https://sf.api.exacmple.com}
+    api-url: ${SF_API_URL:https://sf.api.example.com}
     client-id: ${SF_CLIENT_ID:sf-client-id}
     private-key: ${SF_PRIVATE_KEY:sf-private-key}
     tenant: ${SF_TENANT:sf-tenant}
     user-id: ${SF_USER_ID:sf-user-id}
+  nik:
+    base-url: ${NIK_BASEURL}
+    aad-scope: ${NIK_API_SCOPE}
+
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -91,3 +106,16 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          nik:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NIK_API_SCOPE}
+        provider:
+          azure:
+            issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}
+

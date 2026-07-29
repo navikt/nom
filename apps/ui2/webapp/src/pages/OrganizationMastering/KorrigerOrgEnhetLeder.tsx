@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
-  BodyShort,
+ Alert, BodyShort,
   Button,
   DatePicker,
   Heading,
@@ -231,6 +231,12 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             >
               Lagre
             </Button>
+
+            {!!opprettOrgEnhetLederMutation?.error?.response?.data?.message && (
+              <Alert variant="error">
+                {opprettOrgEnhetLederMutation?.error?.response?.data?.message}
+              </Alert>
+            )}
           </div>
         </VStack>
       </form>

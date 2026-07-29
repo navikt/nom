@@ -6,51 +6,45 @@ import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import no.nav.nom.generated.model.RessursState;
 import no.nav.nom.generated.model.Sektor;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.WebClientUtils.defaultRetry;
-
 @Service
 public class NomApiClient {
 
-    private final WebClient nomApiAuthorizedWebClient;
+    private final RestClient nomApiAuthorizedRestClient;
 
-    public NomApiClient(WebClient nomApiAuthorizedWebClient) {
-        this.nomApiAuthorizedWebClient = nomApiAuthorizedWebClient;
+    public NomApiClient(RestClient nomApiAuthorizedRestClient) {
+        this.nomApiAuthorizedRestClient = nomApiAuthorizedRestClient;
     }
 
     public Ressurs getRessursByNavident(String navident) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byNavident/{navident}")
                 .build(navident)
             )
             .retrieve()
-            .bodyToMono(Ressurs.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(Ressurs.class);
     }
 
     public Ressurs getRessursByFid(String fid) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byFid/{fid}")
                 .build(fid)
             )
             .retrieve()
-            .bodyToMono(Ressurs.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(Ressurs.class);
     }
 
     public List<RessursState> getRessurser(Sektor sektor, LocalDate sluttdato) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser")
                 .queryParam("sektor", sektor)
@@ -58,73 +52,61 @@ public class NomApiClient {
                 .build()
             )
             .retrieve()
-            .toEntityList(RessursState.class)
-            .retryWhen(defaultRetry)
-            .block().getBody();
+            .body(new ParameterizedTypeReference<>() {});
     }
 
     public OrgEnhet getOrgEnhet(String orgenhetId) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/orgenheter/{orgenhetId}")
                 .build(orgenhetId)
             )
             .retrieve()
-            .bodyToMono(OrgEnhet.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(OrgEnhet.class);
     }
 
     public String getRemedyEnhetId(String orgenhetId) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/orgenheter/getRemedyEnhetId/{orgenhetId}")
                 .build(orgenhetId)
             )
             .retrieve()
-            .bodyToMono(String.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(String.class);
     }
 
     public List<OrgtilknytningState> getOrgtilknytningerForNavident(String navident) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/orgtilknytninger")
                 .queryParam("navident", navident)
                 .build()
             )
             .retrieve()
-            .toEntityList(OrgtilknytningState.class)
-            .retryWhen(defaultRetry)
-            .block().getBody();
+            .body(new ParameterizedTypeReference<>() {});
     }
 
     public OrgtilknytningState getOrgtilknytning(String fid) {
-        return nomApiAuthorizedWebClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}")
-                .build(fid)
-            )
-            .retrieve()
-            .onStatus(
-                status -> status.equals(HttpStatus.NOT_FOUND),
-                _ -> Mono.error(new OrgtilknytningNotFoundException(String.format("Orgtilknytning with fid %s not found", fid)))
-            )
-            .bodyToMono(OrgtilknytningState.class)
-            .retryWhen(defaultRetry)
-            .block();
+        try {
+            return nomApiAuthorizedRestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                    .path("/app/orgtilknytninger/{fid}")
+                    .build(fid)
+                )
+                .retrieve()
+                .body(OrgtilknytningState.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new OrgtilknytningNotFoundException(String.format("Orgtilknytning with fid %s not found", fid));
+        }
     }
 
     public String getTelefonnummer(String navident) {
-        return nomApiAuthorizedWebClient.get()
+        return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/{navident}/telefonnummer")
                 .build(navident)
             )
             .retrieve()
-            .bodyToMono(String.class)
-            .retryWhen(defaultRetry)
-            .block();
+            .body(String.class);
     }
 }

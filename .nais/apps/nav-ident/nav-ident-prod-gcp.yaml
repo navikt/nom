@@ -101,6 +101,9 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
+        - application: nom-sf-integrasjon
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident-redis

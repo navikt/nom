@@ -1,6 +1,9 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
+import no.nav.nom.libs.state.orgenhet.NomStateOrgEnhetListener;
+import no.nav.nom.libs.state.orgtilknytning.NomStateOrgtilknytningListener;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -9,20 +12,23 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class OmadaUttrekkTest {
 
     private final OmadaUttrekk omadaUttrekk;
 
     OmadaUttrekkTest() {
-        var orgenhet = new AppProperties.Orgenhet(null, null, null, null, null, null);
+        var orgenhet = new AppProperties.Orgenhet(null, null, null, null, null, null, null);
         var appProperties = new AppProperties(null, null, null, null, orgenhet);
         omadaUttrekk = new OmadaUttrekk(
             null, null,
             null, null, null,
             null, null,
             null, appProperties,
-            null
+            null, mock(NomStateOrganiseringListener.class),
+            mock(NomStateOrgtilknytningListener.class),
+            mock(NomStateOrgEnhetListener.class)
         );
     }
 

@@ -15,6 +15,7 @@ app:
       dvhLastResultTopic: org.nom.intern-dvh-last-result
     organisering:
       eventsourceTopic: org.nom.organisering-eventsource
+      stateTopic: org.nom.intern-organisering-state
   clients:
     nom-paarorende:
       base-url: ${PAARORENDE_BASEURL}
@@ -96,6 +97,7 @@ authentication:
     readOnly: ${READONLY_GROUPID:readOnlyGroup}          # 0000-CA-NOM-ADMIN-Lesetilgang
     extendedReadOnly: ${EXTENDED_READONLY_GROUPID:extendedReadOnlyGroup} # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
     kostnadsstedsAdmin: ${KOSTNADSSTEDSADMIN_GROUPID:kostnadsstedsadminGroup} # orgenhet-kostnadssted-mapping-admin
+    nomWriteExternalFundsRecipient: ${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:nomWriteExternalFundsRecipient}
 server:
   shutdown: graceful
 
@@ -337,6 +339,9 @@ app:
         scopes:
           - READONLY
           - EXTENDED_READONLY
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
   orgenhet:
     nav-id: sa312u
     helfo-id: mu405g
@@ -344,6 +349,7 @@ app:
     riksrevisjonen-id: ge146b
     vikafossen-id: ru151s
     linjeenhetene: me177r,ju219d,tu734a,sy471r
+    nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
@@ -433,6 +439,9 @@ app:
       - navident: Z991507         # Team Klage / Kristin Jacobsen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
+      - navident: Z994863         # Team Klage / Øyvind Norsted Wedøe
+        orgtilknytning: ra365v    # 7210300-Klageinstans Oslo-ORGENHET
+        sektor: NAV_STATLIG
 
       - navident: Z993527         # Team AAP / Tor Idland
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
@@ -465,6 +474,30 @@ app:
 
       - navident: Z993141         # https://ferielisten.intern.dev.nav.no / Erlend Wiklem
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z991561         # Team Dokumentløsninger / Joakim Bjørnstad
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z993376         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993741         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993471         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: gu300t    # Kontroll Vest 02 (gu300t)
+        sektor: NAV_STATLIG
+      - navident: Z990474         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: sa352n    # Kontroll Nord avd Trondheim (sa352n)
+        sektor: NAV_STATLIG
+
+      - navident: Z993795         # Funksjonell Brukerstøtte / Lina Mohammad
+        orgtilknytning: by959t    # Arbeid og ytelser Sarpsborg (by959t)
+        sektor: NAV_STATLIG
+      - navident: Z993635         # Funksjonell Brukerstøtte / Lina Mohammad
+        orgtilknytning: se198m    #  FP Oslo 1 Barnetrygd/Kontantstøtte 1 (se198m)
         sektor: NAV_STATLIG
 
     ledere:
@@ -502,7 +535,7 @@ NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-
 READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
 EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 # FINNES IKKE I DEV KOSTNADSSTEDSADMIN_GROUPID: "" # orgenhet-kostnadssted-mapping-admin
-
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:  "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
 
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
@@ -579,6 +612,9 @@ app:
       extended-readonly:
         group-id: "${EXTENDED_READONLY_GROUPID}"
         scopes: ["READONLY", "EXTENDED_READONLY"]
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
   manuelle-ressurser-og-ledere:
     enabled: false
   orgenhet:
@@ -588,6 +624,7 @@ app:
     riksrevisjonen-id: ke602d
     vikafossen-id: ru664y
     linjeenhetene: ry630r,te464t,se232x,ne994m
+    nasjonaloppfolgning-ids: fu549z,nu155v
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
@@ -611,6 +648,7 @@ NOM_WRITE_ROBOT_GROUPID:          "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-
 READONLY_GROUPID:           "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
 EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
 KOSTNADSSTEDSADMIN_GROUPID: "818ec344-1c3b-48e5-8a62-68bb9eeb2a09" # orgenhet-kostnadssted-mapping-admin
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID: "deae8838-59fd-4c27-9ccc-f0ed844bf091" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
 
 NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
 NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default

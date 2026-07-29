@@ -160,7 +160,10 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read     
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
+      access: read
 
 ---
 
@@ -323,7 +326,10 @@ spec:
       access: read
     - team: org
       application: nom-admin
-      access: read    
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
+      access: read
 
 ---
 
@@ -545,6 +551,9 @@ spec:
       access: read
     - team: org
       application: nom-admin
+      access: read
+    - team: org
+      application: nom-sf-integrasjon
       access: read
 
 ---

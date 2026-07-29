@@ -117,9 +117,11 @@ function CreateResourceForm({ personident }: { personident: string }) {
             tidligere Nav-ident <b>{person.navident}</b>.
           </Alert>
         )}
+
         <FolkeregisterPersonInfo
           folkeregisterPerson={person.folkeregisterPerson}
         />
+
         <VisningsnavnForm person={person} />
       </>
     );

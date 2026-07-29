@@ -16,7 +16,7 @@ import type {
   ImportedRemedyUser,
   MasteredRessursDTO,
   OrgEnhetArbeidsomraadeInfo,
-  OrgEnhetLederEventWithNavident,
+  OrgEnhetLederEventWithNavidentDTO,
   OrgEnhetLederState,
   OrgEnhetOrganisering,
   OrgEnhetStartOgSluttdato,
@@ -103,6 +103,18 @@ export function getOrgenhetEventsOptions(search: searchType) {
   });
 }
 
+export function getOrganiseringEventOptions(search: searchType) {
+  return queryOptions({
+    queryKey: ["EVENTS", "ORGANISERING", search],
+    queryFn: async () =>
+      (
+        await ky.get(
+          `${API_BASE_URL}/sinks/organiseringEvents?${queryString.stringify(search, { skipNull: true })}`,
+        )
+      ).json<KafkaEvent[]>(),
+  });
+}
+
 export function getOrgenhetLederEventsOptions(search: searchType) {
   return queryOptions({
     queryKey: ["EVENTS", "ORGENHETLEDER", search],
@@ -111,7 +123,7 @@ export function getOrgenhetLederEventsOptions(search: searchType) {
         await ky.get(
           `${API_BASE_URL}/sinks/orgenhetLederEvents?${queryString.stringify(search, { skipNull: true })}`,
         )
-      ).json<OrgEnhetLederEventWithNavident[]>(),
+      ).json<OrgEnhetLederEventWithNavidentDTO[]>(),
   });
 }
 

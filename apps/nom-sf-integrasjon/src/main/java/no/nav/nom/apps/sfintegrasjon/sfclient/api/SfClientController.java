@@ -2,24 +2,37 @@ package no.nav.nom.apps.sfintegrasjon.sfclient.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.sfintegrasjon.sfclient.SfODataClient;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
+import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.util.Base64;
+import java.util.List;
 
 /**
  * Debug endpoints for inspecting SAP SuccessFactors authentication artifacts.
  * Accessible locally without auth; requires ADMIN group membership in dev/prod.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/sf/client")
 @Tag(name = "SF Client", description = "Endpoints for SAP SuccessFactors authentication. Admin only in dev/prod.")
@@ -27,10 +40,12 @@ public class SfClientController {
 
     private final SamlAssertionService samlAssertionService;
     private final SfOAuthService sfOAuthService;
+    private final SfODataClient sfODataClient;
 
-    public SfClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService) {
+    public SfClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService, SfODataClient sfODataClient) {
         this.samlAssertionService = samlAssertionService;
         this.sfOAuthService = sfOAuthService;
+        this.sfODataClient = sfODataClient;
     }
 
     @PostMapping("/saml-assertion")
@@ -76,5 +91,114 @@ public class SfClientController {
         return ResponseEntity.ok(token);
     }
 
+    @PostMapping(value = "/validate-token", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Validate OAuth access token",
+        description = "Validates an SF OAuth 2.0 access token via the SAP SuccessFactors /oauth/validate endpoint. " +
+            "Returns the raw response body from SAP. Returns the upstream HTTP status if SAP rejects the token."
+    )
+    public ResponseEntity<String> validateToken(@RequestBody ValidateTokenRequest request) {
+        if (request.token() == null || request.token().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            String rawBody = sfOAuthService.validateToken(request.token());
+            return ResponseEntity.ok(rawBody);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-metadata", produces = MediaType.APPLICATION_XML_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch complete OData $metadata",
+        description = "Fetches the complete OData v2 $metadata document for all entities from SAP SuccessFactors. Authenticates with a fresh OAuth token."
+    )
+    public ResponseEntity<String> getAllODataMetadata() {
+        try {
+            String metadata = sfODataClient.getAllMetadata();
+            return ResponseEntity.ok(metadata);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-metadata/{entity}", produces = MediaType.APPLICATION_XML_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch OData $metadata for an SF entity",
+        description = "Fetches the OData v2 $metadata document for the given entity from SAP SuccessFactors. " +
+            "Entity name must contain only letters (a-z, A-Z). Authenticates with a fresh OAuth token."
+    )
+    public ResponseEntity<String> getODataMetadata(@PathVariable String entity) {
+        if (!entity.matches("[a-zA-Z]+")) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            String metadata = sfODataClient.getEntityMetadata(entity);
+            return ResponseEntity.ok(metadata);
+        } catch (RestClientResponseException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch first 10 SF User objects",
+        description = "Fetches the first 10 User entities from SAP SuccessFactors using the generated VDM client. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsers(
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(sfODataClient.getFirst10Users(accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-emp-employment", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch first 10 SF EmpEmployment objects",
+        description = "Fetches the first 10 EmpEmployment entities from SAP SuccessFactors using the generated VDM client. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataEmpEmployments(
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(sfODataClient.getFirst10EmpEmployments(accessToken).stream().map(EmpEmployment::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch EmpEmployment objects from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-per-person", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch first 10 SF PerPerson objects",
+        description = "Fetches the first 10 PerPerson entities from SAP SuccessFactors using the generated VDM client. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataPerPersons(
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(sfODataClient.getFirst10PerPersons(accessToken).stream().map(PerPerson::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch PerPerson objects from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
     public record SamlAssertionResponse(String assertion) {}
+
+    public record ValidateTokenRequest(String token) {}
 }

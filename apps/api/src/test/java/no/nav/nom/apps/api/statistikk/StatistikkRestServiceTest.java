@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.statistikk;
 
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
@@ -14,11 +15,13 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -32,7 +35,6 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +48,12 @@ public class StatistikkRestServiceTest {
 
     @Mock
     OrgEnhetMapper orgEnhetMapper;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    AppProperties appProperties;
+
+    @Mock
+    OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @InjectMocks
     StatistikkRestService statistikkRestService;
@@ -61,6 +69,10 @@ public class StatistikkRestServiceTest {
         when(ressursStateRepository.findAllActiveRessurser()).thenReturn(mapOfActiveRessurser());
         when(orgenhetService.getAktiveEnheterIOrganisasjonen()).thenReturn(getAllOrgEnheter());
         when(orgenhetService.getAllOrgEnheterThatCanHaveRessurser()).thenReturn(getAllOrgEnheter());
+        when(appProperties.orgenhet().helfoId()).thenReturn("helfo123");
+        when(appProperties.orgenhet().riksrevisjonenId()).thenReturn("riksrevisjonen123");
+        when(appProperties.orgenhet().vikafossenId()).thenReturn("vikafossen123");
+        when(appProperties.orgenhet().skattId()).thenReturn("skatt123");
 
         var expectedGlobalStatistikkResponse = new GlobalStatistikkResponse(
             new RessursStatistikk(6, 2, 2, 2),
@@ -113,6 +125,11 @@ public class StatistikkRestServiceTest {
         when(ressursStateRepository.findByNavident(Mockito.argThat(x -> List.of("a", "b", "c").contains(x)))).thenReturn(Optional.of(RessursState.builder().identType(IdentType.STANDARD).build())
         );
 
+        when(appProperties.orgenhet().helfoId()).thenReturn("helfo123");
+        when(appProperties.orgenhet().riksrevisjonenId()).thenReturn("riksrevisjonen123");
+        when(appProperties.orgenhet().vikafossenId()).thenReturn("vikafossen123");
+        when(appProperties.orgenhet().skattId()).thenReturn("skatt123");
+
 
         when(ressursStateRepository.findByNavident("r")).thenReturn(
             Optional.of(RessursState.builder().identType(IdentType.ROBOT).build())
@@ -121,6 +138,7 @@ public class StatistikkRestServiceTest {
         var exectedStatistikk = new RessursStatistikk(3, 2, 1, 0);
 
         var responseBody = statistikkRestService.getStatistikkForOrgEnhetCache("orgEnhet123");
+
         assertThat(responseBody.ressursStatistikk()).isEqualTo(exectedStatistikk);
     }
 

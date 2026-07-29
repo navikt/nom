@@ -38,6 +38,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
+import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration;
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -70,6 +71,7 @@ import org.springframework.test.context.bean.override.mockito.MockReset;
     , OTUtenforHierarki.class
     , OrgtilknytningService.class
     , DvhOrdsClientImpl.class
+    , RestClientAutoConfiguration.class
     , WebClientAutoConfiguration.class
     , AktiveOrgenheterIHierarkiCache.class
 })

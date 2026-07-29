@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.statistikk.api;
 
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
@@ -48,19 +49,21 @@ import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 public class StatistikkRestService {
 
     private final RessursStateRepository ressursStateRepository;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgEnhetMapper orgEnhetMapper;
+    private final AppProperties.Orgenhet orgenhetProperties;
 
     private final NomStateRessursListener nomStateRessursListener;
     private final NomStateOrgtilknytningListener nomStateOrgtilknytningListener;
     private final NomStateOrganiseringListener nomStateOrganiseringListener;
     private final NomStateOrgEnhetListener nomStateOrgEnhetListener;
-    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     public StatistikkRestService(
         RessursStateRepository ressursStateRepository,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrgenhetService orgenhetService,
         RemedyEnhetMapperService remedyEnhetMapperService,
         OrgEnhetMapper orgEnhetMapper,
@@ -68,9 +71,10 @@ public class StatistikkRestService {
         NomStateOrgtilknytningListener nomStateOrgtilknytningListener,
         NomStateOrganiseringListener nomStateOrganiseringListener,
         NomStateOrgEnhetListener nomStateOrgEnhetListener,
-        OrgtilknytningStateRepository orgtilknytningStateRepository
+        AppProperties appProperties
     ) {
         this.ressursStateRepository = ressursStateRepository;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgEnhetMapper = orgEnhetMapper;
@@ -78,7 +82,7 @@ public class StatistikkRestService {
         this.nomStateOrgtilknytningListener = nomStateOrgtilknytningListener;
         this.nomStateOrganiseringListener = nomStateOrganiseringListener;
         this.nomStateOrgEnhetListener = nomStateOrgEnhetListener;
-        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
+        this.orgenhetProperties = appProperties.orgenhet();
     }
 
     public GlobalStatistikkResponse hentGlobalStatistikk() {
@@ -87,11 +91,21 @@ public class StatistikkRestService {
             .filter(ressursState -> ressursState.startdato() != null && !ressursState.startdato().isAfter(LocalDate.now()))
             .filter(this::filterGyldigeRessurs)
             .toList();
+
+        var ikkeNavOrgEnheter = List.of(orgenhetProperties.helfoId(), orgenhetProperties.riksrevisjonenId(), orgenhetProperties.vikafossenId(), orgenhetProperties.skattId());
+
+        var orgtilknytningerMedAnsattSomIkkeJobberINav = orgtilknytningStateRepository.findByNavidentIn(alleRessurser.stream().map(RessursState::navident).toList()).stream()
+            .filter(orgtilknytningState -> ikkeNavOrgEnheter.contains(orgtilknytningState.orgEnhetId()))
+            .map(OrgtilknytningState::navident)
+            .toList();
+
+        var filtrerteRessurs = alleRessurser.stream().filter(ressurs -> !orgtilknytningerMedAnsattSomIkkeJobberINav.contains(ressurs.navident())).toList();
+
         var ressursStatistikk = new RessursStatistikk(
-            alleRessurser.size(),
-            alleRessurser.stream().filter(RessursState::isStatlig).count(),
-            alleRessurser.stream().filter(RessursState::isKommunal).count(),
-            alleRessurser.stream().filter(RessursState::isEkstern).count()
+            filtrerteRessurs.size(),
+            filtrerteRessurs.stream().filter(RessursState::isStatlig).count(),
+            filtrerteRessurs.stream().filter(RessursState::isKommunal).count(),
+            filtrerteRessurs.stream().filter(RessursState::isEkstern).count()
         );
 
         var alleOrgEnheter = orgenhetService.getAktiveEnheterIOrganisasjonen().stream().toList();
@@ -148,11 +162,14 @@ public class StatistikkRestService {
             throw new OrgEnhetNotFoundException("Fant ikke orgenhet med id " + orgEnhetId);
         }
 
+        var ikkeNavOrgEnheter = List.of(orgenhetProperties.helfoId(), orgenhetProperties.riksrevisjonenId(), orgenhetProperties.vikafossenId(), orgenhetProperties.skattId());
+
         var orgEnheter = new ArrayList<>(orgenhetService.getAllUnderliggendeOrgEnhetById(optionalOrgEnhet.get().getId()));
         orgEnheter.add(optionalOrgEnhet.get());
 
         var alleRelevanteOrgtilknytningerByNavident = orgEnheter.stream()
             .map(orgEnhetMapper::mapToOrgEnhet)
+            .filter(orgEnhet -> !ikkeNavOrgEnheter.contains(orgEnhet.id()))
             .map(OrgEnhet::ressursKoblinger)
             .flatMap(Collection::stream)
             .filter(this::erRelevantOt)

@@ -1,0 +1,26 @@
+{
+  "type": "OrganiseringOpprettetEventV1",
+  "fid": "organisering-01KTSJPX8MCP0VNK988MH1CJ2A",
+  "data": {
+    "type": "OrganiseringOpprettetEventV1$OrganiseringOpprettetEventData",
+    "id": "fy872h",
+    "navn": "Avdeling for brukeropplevelse",
+    "idOver": "pa948m",
+    "navnOver": "Avdeling for brukeropplevelse",
+    "gyldigFom": "2026-06-10",
+    "gyldigTom": null
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": null,
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2026-06-10T22:13:50.229011931"
+  },
+  "additionalData": null
+}

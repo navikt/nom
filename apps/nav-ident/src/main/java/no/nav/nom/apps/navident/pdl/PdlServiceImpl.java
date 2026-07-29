@@ -5,8 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.LogConfig;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestClient;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -33,7 +32,7 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
 public class PdlServiceImpl implements PdlService {
 
     private final String pdlHentIdentQry;
-    private final WebClient pdlWebClient;
+    private final RestClient pdlWebClient;
     private final PdlConfig pdlConfig;
 
     private final JsonMapper mapper = new JsonMapper();
@@ -100,10 +99,9 @@ public class PdlServiceImpl implements PdlService {
                     headers.add(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));
                     headers.add(HEADER_X_REQUEST_ID_KEY, MDC.get(HEADER_X_REQUEST_ID_KEY));
                 })
-                .body(Mono.just(qryBody), String.class)
+                .body(qryBody)
                 .retrieve()
-                .bodyToMono(String.class)
-                .block(Duration.ofMillis(pdlConfig.getTimeoutInMillis()));
+                .body(String.class);
     }
 
     private JsonNode getQuery(String qry, String varialbleName, String variableValue) {

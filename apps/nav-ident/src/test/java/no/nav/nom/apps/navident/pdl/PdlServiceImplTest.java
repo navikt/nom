@@ -55,6 +55,6 @@ class PdlServiceImplTest extends SpringBootTestBase {
 
         List<String> pldIdenter = pdlService.getKnownPersonider(ident); // 4 returnert, hvorav en aktorid, og 01019000003 er gjeldende
         assertEquals(0, pldIdenter.size());
-        assertTrue(output.getOut().contains("Timeout on blocking read"));
+        assertTrue(output.getOut().contains("Read timed out"));
     }
 }

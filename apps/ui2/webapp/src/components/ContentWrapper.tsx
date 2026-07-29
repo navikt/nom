@@ -17,7 +17,7 @@ const ContentWrapper = ({
       css`
         margin-top: var(--a-spacing-8);
         margin-bottom: var(--a-spacing-20);
-        ${limitWidth ? "" : "max-width: unset !important;"}
+        ${limitWidth ? "" : "max-width: 1800px !important;"}
       `,
       defaultWidth,
     ]}

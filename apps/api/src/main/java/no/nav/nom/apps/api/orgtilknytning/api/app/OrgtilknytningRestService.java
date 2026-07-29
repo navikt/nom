@@ -615,7 +615,7 @@ public class OrgtilknytningRestService {
             new ArrayList<String>()
             : endreOrgtilknytningRequest.optionalFysiskBrukersteder().stream().toList();
 
-        if (!Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer())
+        if (!primaryFysiskBrukerstedAreEqualTreatEmptyAsNull(endreOrgtilknytningRequest, orgtilknytningStateBeforeChanges)
             || !optionalFysiskBrukerstederAreEqual) {
             orgtilknytningCommandService.endreFysiskeBrukersted(
                 new EndreFysiskeBrukerstederCommand(
@@ -628,6 +628,15 @@ public class OrgtilknytningRestService {
                 )
             );
         }
+    }
+
+    private boolean primaryFysiskBrukerstedAreEqualTreatEmptyAsNull(
+       EndreOrgtilknytningRequest endreOrgtilknytningRequest,
+       OrgtilknytningState orgtilknytningStateBeforeChanges
+    ) {
+        return Objects.equals(
+            requireNonNullElse(orgtilknytningStateBeforeChanges.primaryFysiskBrukerstedNummer(), ""),
+            requireNonNullElse(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), ""));
     }
 
     private boolean optionalFysiskBrukerstederAreEqual(Set<String> optionalFysiskBrukersteder, List<String> fysiskeBrukersteder) {
@@ -796,7 +805,7 @@ public class OrgtilknytningRestService {
                 && endreOrgtilknytningRequest.erDagligOppfolging() == currentOrgtilknytningState.erDagligOppfolging()
                 && Objects.equals(endreOrgtilknytningRequest.tilknytningtype(), currentOrgtilknytningState.orgtilknytningType())
                 && (nonNull(endreOrgtilknytningRequest.sektor()) && Objects.equals(endreOrgtilknytningRequest.sektor(), currentOrgtilknytningState.sektor())
-                && Objects.equals(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), currentOrgtilknytningState.primaryFysiskBrukerstedNummer())
+                && primaryFysiskBrukerstedAreEqualTreatEmptyAsNull(endreOrgtilknytningRequest, currentOrgtilknytningState)
                 && optionalFysiskBrukerstederAreEqual(endreOrgtilknytningRequest, currentOrgtilknytningState))
         );
     }

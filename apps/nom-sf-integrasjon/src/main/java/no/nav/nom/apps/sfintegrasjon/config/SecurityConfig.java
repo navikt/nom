@@ -34,6 +34,9 @@ public class SecurityConfig {
     @Value("${NOM_ADMIN_GROUP_ID}")
     private String adminGroupId;
 
+    @Value("${ZALARIS_CLIENT_ID}")
+    private String zalarisClientId;
+
     private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();
 
     @Bean
@@ -76,6 +79,10 @@ public class SecurityConfig {
                     .orElse(new ArrayList<>());
                 if (jwtGroups.contains(adminGroupId)) {
                     grantedAuthorities.add(new SimpleGrantedAuthority("ADMIN"));
+                }
+                var callerAppId = jwt.hasClaim("azp") ? jwt.getClaimAsString("azp") : jwt.getClaimAsString("appid");
+                if (zalarisClientId.equals(callerAppId)) {
+                    grantedAuthorities.add(new SimpleGrantedAuthority("ZALARIS"));
                 }
                 return grantedAuthorities;
             }

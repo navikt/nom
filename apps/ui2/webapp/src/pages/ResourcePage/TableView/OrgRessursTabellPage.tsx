@@ -90,10 +90,12 @@ export const OrgRessursTabellPage = () => {
       topOrgEnhetId: orgEnhetQuery.data?.id,
     };
     setIsDownloading(true);
+
     await downloadExcelByListNavident(
       excelExportRequest as ExcelExportRequest,
       excelFilNavn(),
     );
+
     setIsDownloading(false);
   };
 

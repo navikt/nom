@@ -2,18 +2,23 @@ package no.nav.nom.apps.api.orgenhet.api.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
-import no.nav.nom.apps.api.tilgangsenhet.InvalidTilgangsenhetException;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.tilgangsenhet.TilgangsenhetRepository;
+import no.nav.nom.apps.api.tilgangsenhet.exception.InvalidTilgangsenhetException;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +28,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin/tilgangsenhetednringer")
 @PreAuthorize("hasAuthority('ADMIN')")
@@ -56,8 +63,8 @@ public class TilgangsenhetManuelleEndringer {
         }
 
         var inputMetadata = new InputMetadata(
-            "tilgangsenhet-endring-admin",
-            "endreTilgangsenhet",
+            "TilgangsenhetManuelleEndringer",
+            "setTilgangsenhet",
             tilgangsenhetEndring,
             new Origination(
                 getAuthenticatedNavIdent(),
@@ -77,12 +84,41 @@ public class TilgangsenhetManuelleEndringer {
     }
 
     @Operation(
+        description = "Fjern",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PatchMapping("/remove/{orgEnhetId}")
+    public void removeTilgangsenhet(@PathVariable String orgEnhetId) {
+
+        var inputMetadata = new InputMetadata(
+            "TilgangsenhetManuelleEndringer",
+            "removeTilgangsenhet",
+            orgEnhetId,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                "ADMIN-API"
+            )
+        );
+
+        var orgenhetState = orgenhetService.getById(orgEnhetId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", orgEnhetId)));
+
+        orgEnhetCommandService.endreTilgangsenhet(
+            orgenhetState.getFid(), new EndreTilgangsenhet(
+                null,
+                inputMetadata
+            )
+        );
+    }
+
+    @Operation(
         description = "Skript for å mappe remedyEnhetsId til tilgangsenhetId i OrgEnhetState",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PostMapping("/populate")
     public String populerTilgangsenheter(@RequestParam boolean dryRun) {
         var tilgangsenhetEndringer = orgenhetService.getAktiveEnheterIOrganisasjonen().stream()
+            .filter(orgEnhet -> isNull(orgEnhet.getTilgangsenhetId()) || orgEnhet.getTilgangsenhetId().isBlank())
             .map(orgEnhet -> remedyEnhetMapperService.findByNomId(orgEnhet.getId()).orElse(null))
             .filter(Objects::nonNull)
             .toList();
@@ -119,4 +155,13 @@ public class TilgangsenhetManuelleEndringer {
         String orgEnhetId,
         String tilgangsenhetId
     ) {}
+
+    @ExceptionHandler({InvalidTilgangsenhetException.class, ResponseStatusException.class})
+    private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
+        log.error(exception.getMessage(), exception);
+
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
 }

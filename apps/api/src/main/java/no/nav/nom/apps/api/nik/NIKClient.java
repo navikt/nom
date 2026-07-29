@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.nik;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
 import org.springframework.http.HttpStatus;
@@ -7,9 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 public class NIKClient {
     private final WebClient clientCredentialsAuthorizedWebClient;
@@ -32,7 +36,7 @@ public class NIKClient {
             });
 
         this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
-            .filter(oAuth2Filter)
+            .apply(oAuth2Filter.oauth2Configuration())
             .build();
 
         this.nikWebClientBuilder = baseWebClientBuilder;
@@ -65,5 +69,37 @@ public class NIKClient {
             .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.
             .toEntity(OpprettNavidentResponse.class)
             .block();
+    }
+
+    public String lookupNavident(LookupNavidentRequest lookupNavidentRequest) {
+        return lookupNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, lookupNavidentRequest);
+    }
+
+    public String lookupNavidentOnBehalfOfUser(LookupNavidentRequest lookupNavidentRequest) {
+        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(nikScope);
+
+        var onBehalfOfAuthorizedWebClient = nikWebClientBuilder
+            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+            .build();
+
+        return lookupNavidentWithSuppliedWebClient(onBehalfOfAuthorizedWebClient, lookupNavidentRequest);
+    }
+
+    private String lookupNavidentWithSuppliedWebClient(WebClient suppliedWebClient, LookupNavidentRequest lookupNavidentRequest) {
+        try {
+            return suppliedWebClient.post()
+                .uri("/navident/lookup")
+                .bodyValue(lookupNavidentRequest)
+                .retrieve()
+                .onStatus(httpStatusCode -> !httpStatusCode.is2xxSuccessful(), ClientResponse::createException)
+                .bodyToMono(LookupNavidentResponse.class)
+                .map(LookupNavidentResponse::getNavident)
+                .block();
+        } catch (WebClientResponseException e) {
+            log.info("Failed lookup of navident. Got status code " + e.getStatusCode());
+        } catch (Exception ex) {
+            log.info(NIKClient.class.getSimpleName() + ": Failed lookup of navident. Error type: " + ex.getClass());
+        }
+        return null;
     }
 }

@@ -64,7 +64,7 @@ spring:
     consumer:
       max-poll-records: 1000
       auto-offset-reset: earliest
-      group-id: ${app.name}
+      group-id: ${app.name}-v2
     listener:
       missing-topics-fatal: true
     client-id: ${app.name}

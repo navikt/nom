@@ -5,12 +5,24 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration(proxyBeanMethods = false)
 public class OpenApiConfig {
+
+    public static final String BEARER_TOKEN = "BearerAuth";
+
+    @Bean
+    public GroupedOpenApi zalarisApi() {
+        return GroupedOpenApi.builder()
+            .group("Zalaris API")
+            .displayName("Zalaris SuccessFactors API v1")
+            .pathsToMatch("/api/v1/zalaris/**")
+            .build();
+    }
 
     /**
      * In dev/prod: Swagger UI shows the "Authorize" button with Bearer token input.
@@ -23,10 +35,10 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("nom-sf-integrasjon API")
                         .version("v1"))
-                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_TOKEN))
                 .components(new Components()
-                        .addSecuritySchemes("BearerAuth", new SecurityScheme()
-                                .name("BearerAuth")
+                        .addSecuritySchemes(BEARER_TOKEN, new SecurityScheme()
+                                .name(BEARER_TOKEN)
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")

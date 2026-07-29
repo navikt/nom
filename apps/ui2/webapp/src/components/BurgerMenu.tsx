@@ -18,6 +18,7 @@ import {
   useGetSession,
   useHasAdminAccess,
   useHasAdminReadOnlyAccess,
+  useHasExternalFundsRecipientAccess,
   useHasRobotAccess,
   useHasUtenlandskKonsulentAccess,
   useHasVikafossenAccess,
@@ -36,6 +37,8 @@ export function BurgerMenu() {
   const hasRobotAccess = useHasRobotAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
+  const hasWriteExternalFundsRecipientAccess =
+    useHasExternalFundsRecipientAccess();
 
   const session = useGetSession();
 
@@ -69,6 +72,14 @@ export function BurgerMenu() {
     hasVikafossenAccess ||
     hasUtenlandskKonsulentAccess ||
     hasAdminAccess;
+
+  const showOpprettExternalFundsRecipient =
+    hasAdminAccess || hasWriteExternalFundsRecipientAccess;
+
+  const showOpprettDivider =
+    showOpprettLink ||
+    showOpprettSpecialLink ||
+    showOpprettExternalFundsRecipient;
 
   const showOrgMastringLink =
     harRedigeringstilgang || hasAdminReadOnlyAccess || hasAdminAccess;
@@ -125,31 +136,32 @@ export function BurgerMenu() {
                 <span>Min profil</span>
               </Dropdown.Menu.List.Item>
             </SmartLink>
-
+            {showOpprettDivider && <Dropdown.Menu.Divider />}
             {showOpprettLink && (
-              <>
-                <Dropdown.Menu.Divider />
-
-                <SmartLink href="/ressurs/create/1">
-                  <Dropdown.Menu.List.Item>
-                    <PersonPlusFillIcon color="black" fontSize="24px" />
-                    <span>Opprett medarbeider</span>
-                  </Dropdown.Menu.List.Item>
-                </SmartLink>
-              </>
+              <SmartLink href="/ressurs/create/1">
+                <Dropdown.Menu.List.Item>
+                  <PersonPlusFillIcon color="black" fontSize="24px" />
+                  <span>Opprett medarbeider</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             )}
 
             {showOpprettSpecialLink && (
-              <>
-                {!showOpprettLink && <Dropdown.Menu.Divider />}
+              <SmartLink href="/ressurs/createspecial">
+                <Dropdown.Menu.List.Item>
+                  <PersonPlusFillIcon color="black" fontSize="24px" />
+                  <span>Opprett annen medarbeider</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
+            )}
 
-                <SmartLink href="/ressurs/createspecial">
-                  <Dropdown.Menu.List.Item>
-                    <PersonPlusFillIcon color="black" fontSize="24px" />
-                    <span>Opprett annen medarbeider</span>
-                  </Dropdown.Menu.List.Item>
-                </SmartLink>
-              </>
+            {showOpprettExternalFundsRecipient && (
+              <SmartLink href="/ressurs/create-external-funds-recipient">
+                <Dropdown.Menu.List.Item>
+                  <PersonPlusFillIcon color="black" fontSize="24px" />
+                  <span>Opprett ekstern utbetalingsmottaker</span>
+                </Dropdown.Menu.List.Item>
+              </SmartLink>
             )}
 
             {hasAdminAccess && (

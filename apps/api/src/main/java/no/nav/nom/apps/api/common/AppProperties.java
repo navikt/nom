@@ -105,6 +105,7 @@ public record AppProperties(
         String skattId,
         String riksrevisjonenId,
         String vikafossenId,
-        Set<String> linjeenhetene
+        Set<String> linjeenhetene,
+        Set<String> nasjonaloppfolgningIds
     ) {}
 }

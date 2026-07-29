@@ -94,7 +94,7 @@ export function TerminateResourcePage() {
   const { showModal } = useModal();
 
   if (!ressurs) {
-    return <></>;
+    return;
   }
 
   const onValid = async (values: { sluttDato: string }) => {

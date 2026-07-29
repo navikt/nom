@@ -1,5 +1,6 @@
 import { css } from "@emotion/react";
 import { CopyButton, HelpText, HStack } from "@navikt/ds-react";
+import type { ReactNode } from "react";
 import React from "react";
 
 import { SmartLink } from "~/components/navigation/SmartLink";
@@ -15,7 +16,7 @@ export function LabelWithValue({
 }: {
   label: string;
   value: string | null | undefined;
-  helpText?: string;
+  helpText?: string | ReactNode;
   split?: boolean;
   displayEmpty?: boolean;
   copyButton?: boolean;
@@ -65,7 +66,7 @@ function InformationView({
 }: {
   label?: string;
   value: string | null | undefined;
-  helpText?: string;
+  helpText?: string | ReactNode;
   copyButton: boolean;
   valueHref?: string;
 }) {

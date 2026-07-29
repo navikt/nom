@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    # Overrides av spring.datasource.url, username og password settes av @DynamicPropertySource i tester
+    url: dummy-overridden-by-dynamic-property-source
+  flyway:
+    enabled: true
+    schemas: public
+    table: schema_version
+    baselineOnMigrate: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+app:
+  name: nom-sf-integrasjon-test
+  kafka:
+    evtsrc:
+      group-id: nom-sf-integrasjon-evtsrc-test
+      auto-startup: false
+      retry-delay-ms: 10
+      orgenhet:
+        topic: org.nom.orgenhet-eventsource
+        start-offset: 0
+      orgenhet-leder:
+        topic: org.nom.orgenhet-leder-eventsource
+        start-offset: 0
+      organisering:
+        topic: org.nom.organisering-eventsource
+        start-offset: 0
+
+UNLEASH_SERVER_API_URL: https://dummy
+UNLEASH_SERVER_API_TOKEN: dummy-token
+NOM_ADMIN_GROUP_ID: dummy-group

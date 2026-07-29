@@ -6,10 +6,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -27,20 +27,21 @@ public class MicrosoftGraphClient {
 
     private static final String EMAIL_URI_PATH = "/users/ikke.svar.nom@nav.no/sendMail";
 
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final AppProperties.MicrosoftGraph msGraphClientProperties;
 
     public MicrosoftGraphClient(
             @Qualifier("authorizedClientManager") OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
             AppProperties appProperties,
-            WebClient.Builder builder
+            RestClient.Builder builder
     ) {
         this.msGraphClientProperties = appProperties.clients().microsoftGraph();
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("email");
 
-        this.webClient = builder.clone()
-                .filter(oAuth2Filter)
+        OAuth2ClientHttpRequestInterceptor oauth2Interceptor = new OAuth2ClientHttpRequestInterceptor(oAuth2AuthorizedClientManager);
+        oauth2Interceptor.setClientRegistrationIdResolver(_ -> "email");
+
+        this.restClient = builder
+                .requestInterceptor(oauth2Interceptor)
                 .baseUrl(msGraphClientProperties.baseUrl())
                 .build();
     }
@@ -52,26 +53,29 @@ public class MicrosoftGraphClient {
                     emailMessage.message().ccRecipients(),
                     emailMessage.message().bccRecipients(),
                     msGraphClientProperties.baseUrl() + EMAIL_URI_PATH);
-            return webClient.post()
-                    .uri(EMAIL_URI_PATH)
-                    .body(Mono.just(emailMessage), EmailMessage.class)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
-                    .doOnError(Exception.class, (Exception exception) -> {
-                        String errorMsg = exception.getMessage();
-                        if (exception instanceof WebClientResponseException) {
-                            errorMsg = String.format(
-                                    "POST %s resulted in status %s with body %s",
-                                    ((WebClientResponseException) exception).getRequest() != null ?
-                                            ((WebClientResponseException) exception).getRequest().getURI() : "n/a",
-                                    ((WebClientResponseException) exception).getStatusCode().value(),
-                                    ((WebClientResponseException) exception).getResponseBodyAsString()
-                            );
-                        }
-                        logger.error("Sending email failed: {}", errorMsg);
-                        throw new EmailSendingUnforeseenException(errorMsg);
-                    });
+        return Mono.<ODataResponse<EntraIdUser>>fromCallable(() -> {
+                restClient.post()
+                        .uri(EMAIL_URI_PATH)
+                        .body(emailMessage)
+                        .retrieve()
+                        .toBodilessEntity();
+                return null;
+            })
+            .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
+            .doOnError(Exception.class, (Exception exception) -> {
+                String errorMsg = exception.getMessage();
+                if (exception instanceof RestClientResponseException e) {
+                    errorMsg = String.format(
+                            "POST %s resulted in status %s with body %s",
+                            EMAIL_URI_PATH,
+                            e.getStatusCode().value(),
+                            e.getResponseBodyAsString()
+                    );
+                }
+                logger.error("Sending email failed: {}", errorMsg);
+                throw new EmailSendingUnforeseenException(errorMsg);
+            })
+            .then();
         } else {
             logger.info("Email which would have been sent: {}", emailMessage);
             return Mono.empty();
@@ -89,7 +93,6 @@ public class MicrosoftGraphClient {
 
         while (nextLink != null) {
             response = getUsersFromUri(nextLink);
-
             if (response != null) {
                 users.addAll(response.value());
                 nextLink = response.nextLink();
@@ -106,31 +109,41 @@ public class MicrosoftGraphClient {
         logger.debug("Getting users from URI: {}", uri);
         String decodedUri = decodeUri(uri);
         logger.debug("Decoded URI: {}", decodedUri);
-        return webClient.get()
-                .uri(decodedUri)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), clientResponse ->
-                        clientResponse.bodyToMono(ODataError.class)
-                                .flatMap(oDataError -> {
-                                    logger.warn("GET failed for URI '{}': Response code: '{}' Error code: '{}' Error message: '{}'",
-                                            uri, clientResponse.statusCode(), oDataError.error().code(), oDataError.error().message());
-                                    return Mono.empty();
-                                })
-                )
-                .bodyToMono(new ParameterizedTypeReference<ODataResponse<EntraIdUser>>() {
-                })
-                .defaultIfEmpty(emptyODataResponse())
-                .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
-                .doOnError(Exception.class, exception ->
-                        logger.warn("GET failed for URI '{}': {}", uri, exception.getMessage(), exception))
-                .onErrorReturn(emptyODataResponse())
-                .block();
+
+        final ODataResponse<EntraIdUser> empty = ODataResponse.<EntraIdUser>builder().value(Collections.emptyList()).build();
+
+        return Mono.fromCallable(() -> {
+            try {
+                ODataResponse<EntraIdUser> response = restClient.get()
+                        .uri(decodedUri)
+                        .retrieve()
+                        .body(new ParameterizedTypeReference<>() {});
+                return response != null ? response : empty;
+            } catch (RestClientResponseException e) {
+                if (e.getStatusCode().is4xxClientError() || e.getStatusCode().is5xxServerError()) {
+                    ODataError oDataError = e.getResponseBodyAs(ODataError.class);
+                    if (oDataError != null && oDataError.error() != null) {
+                        logger.warn("GET failed for URI '{}': Response code: '{}' Error code: '{}' Error message: '{}'",
+                                uri, e.getStatusCode(), oDataError.error().code(), oDataError.error().message());
+                    } else {
+                        logger.warn("GET failed for URI '{}': Response code: '{}'", uri, e.getStatusCode());
+                    }
+                    return empty;
+                }
+                throw e;
+            }
+        })
+        .retryWhen(defaultRetry(msGraphClientProperties.maxAttempts(), msGraphClientProperties.backoffDurationMillis()))
+        .doOnError(Exception.class, exception ->
+                logger.warn("GET failed for URI '{}': {}", uri, exception.getMessage(), exception))
+        .onErrorReturn(empty)
+        .block();
     }
 
     private <T> ODataResponse<T> emptyODataResponse() {
         return ODataResponse.<T>builder().value(Collections.emptyList()).build();
     }
-    
+
     private String decodeUri(String url) {
         return URLDecoder.decode(url, StandardCharsets.UTF_8);
     }
@@ -141,34 +154,34 @@ public class MicrosoftGraphClient {
             .doBeforeRetryAsync(signal -> Mono.delay(calculateDelay(signal.failure())).then())
             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                 Throwable throwable = retrySignal.failure();
-                if (throwable instanceof WebClientResponseException) {
-                    throw (WebClientResponseException) throwable;
+                if (throwable instanceof RestClientResponseException) {
+                    throw (RestClientResponseException) throwable;
                 }
                 throw new RuntimeException(throwable);
             });
     }
 
     private static Duration calculateDelay(Throwable failure) {
-        if (!(failure instanceof WebClientResponseException.TooManyRequests)) {
+        if (!(failure instanceof RestClientResponseException e) || e.getStatusCode().value() != 429) {
             logger.info("Failure is not a TooManyRequests exception, defaulting to 0 seconds delay");
-            return Duration.ofSeconds(0); // Default delay if not a ServiceUnavailable exception
+            return Duration.ofSeconds(0);
         }
 
         logger.info("Calculating delay based on Retry-After header for TooManyRequests exception");
 
-        var retryAfterHeader = ((WebClientResponseException.TooManyRequests) failure).getHeaders().get("Retry-After");
+        var retryAfterHeader = e.getResponseHeaders() != null ? e.getResponseHeaders().get("Retry-After") : null;
         if (retryAfterHeader == null || retryAfterHeader.isEmpty()) {
             logger.warn("No Retry-After header found in response, defaulting to 0 seconds delay");
-            return Duration.ofSeconds(0); // Default delay if no header is present
+            return Duration.ofSeconds(0);
         }
         String headerValue = retryAfterHeader.getFirst();
         try {
             var durationInSeconds = Integer.parseInt(headerValue);
             logger.info("Got Retry-After header value: {} seconds", durationInSeconds);
             return Duration.ofSeconds(durationInSeconds);
-        } catch (NumberFormatException e) {
-            logger.warn("Failed to parse Retry-After header value as Int: {}", headerValue, e);
+        } catch (NumberFormatException nfe) {
+            logger.warn("Failed to parse Retry-After header value as Int: {}", headerValue, nfe);
         }
-        return Duration.ofSeconds(0); // Default delay if parsing fails
+        return Duration.ofSeconds(0);
     }
 }
