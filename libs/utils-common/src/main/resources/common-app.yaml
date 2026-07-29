@@ -5,6 +5,10 @@ management:
       show-details: always
       probes:
         enabled: true
+      group:
+        readiness:
+          include:
+            - "unleashHealthCheckSubscriber"
   endpoints.web:
     base-path: /internal
     exposure.include: prometheus,health,scheduledtasks
