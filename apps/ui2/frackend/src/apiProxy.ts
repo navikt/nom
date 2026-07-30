@@ -1,13 +1,20 @@
-import { getToken, requestOboToken } from "@navikt/oasis";
+import {
+  getToken,
+  requestAzureClientCredentialsToken,
+  requestOboToken,
+} from "@navikt/oasis";
 import { Express, NextFunction, Request, Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
 import config from "./config.js";
 
+type TokenExchange = "obo" | "m2m";
+
 type ProxyOptions = {
   ingoingUrl: string;
   outgoingUrl: string;
   scope: string;
+  tokenExchange?: TokenExchange;
 };
 
 export const setupNomApiProxy = (app: Express) =>
@@ -50,11 +57,12 @@ export const setupOgEnhetKostnadsstedMappingProxy = (app: Express) =>
     ingoingUrl: "/frackend/org-koststed-mapping",
     outgoingUrl: config.proxy.orgEnhetKostnadsstedMappingApiUrl,
     scope: config.proxy.orgEnhetKostnadsstedMappingApiScope,
+    tokenExchange: "m2m",
   });
 
 export function addProxyHandler(
   server: Express,
-  { ingoingUrl, outgoingUrl, scope }: ProxyOptions,
+  { ingoingUrl, outgoingUrl, scope, tokenExchange = "obo" }: ProxyOptions,
 ) {
   server.use(
     ingoingUrl,
@@ -64,14 +72,23 @@ export function addProxyHandler(
         response.status(401).send();
         return;
       }
-      const obo = await requestOboToken(token, scope);
-      if (obo.ok) {
-        request.headers["obo-token"] = obo.token;
+      const downstreamToken =
+        tokenExchange === "m2m"
+          ? await requestAzureClientCredentialsToken(scope)
+          : await requestOboToken(token, scope);
+      if (downstreamToken.ok) {
+        request.headers["obo-token"] = downstreamToken.token;
         return next();
-      } else {
-        response.status(403).send();
+      }
+      if (tokenExchange === "m2m") {
+        console.error(
+          `Client credentials token request failed for scope ${scope}: ${downstreamToken.error}`,
+        );
+        response.status(500).send();
         return;
       }
+      response.status(403).send();
+      return;
     },
     createProxyMiddleware({
       target: outgoingUrl,
