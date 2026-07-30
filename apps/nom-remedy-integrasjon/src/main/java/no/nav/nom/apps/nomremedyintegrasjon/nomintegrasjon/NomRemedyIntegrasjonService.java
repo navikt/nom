@@ -35,6 +35,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.formatFornavnWithMellomnavn;
@@ -355,7 +356,7 @@ public class NomRemedyIntegrasjonService {
             .fodselsnummer(ressursState.personident())
             .sektor(sektor)
             .enhetsId(getRemedyEnhetId(dolOrgtilknytning.orgEnhetId()))
-            .fysiskBrukerstedId(ressursState.primaryFysiskBrukersted())
+            .fysiskBrukerstedId(nonNull(dolOrgtilknytning.primaryFysiskBrukerstedNummer()) ? dolOrgtilknytning.primaryFysiskBrukerstedNummer() : ressursState.primaryFysiskBrukersted())
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
             .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
             .mobil(jobbtelefon != null ? mapAndTrimNumber(jobbtelefon.nummer()) : mapAndTrimNumber(mobil))
