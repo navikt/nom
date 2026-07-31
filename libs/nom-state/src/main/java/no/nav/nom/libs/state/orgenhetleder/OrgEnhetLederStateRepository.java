@@ -19,6 +19,8 @@ public interface OrgEnhetLederStateRepository {
 
     List<OrgEnhetLederState> findAllByOrgEnhetId(String orgEnhetId);
 
+    List<OrgEnhetLederState> findAllFutureByOrgEnhetId(String orgEnhetId);
+
     Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId);
 
     boolean hasActiveInPeriodByOrgEnhetId(String orgEnhetId, LocalDate startdato, LocalDate sluttdato);

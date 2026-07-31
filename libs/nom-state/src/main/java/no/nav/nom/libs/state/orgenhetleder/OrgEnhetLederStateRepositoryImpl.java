@@ -47,6 +47,16 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     @Override
+    public List<OrgEnhetLederState> findAllFutureByOrgEnhetId(String orgEnhetId) {
+        return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
+            .filter(orgEnhetLederState -> orgEnhetLederState.startdato() != null && orgEnhetLederState.startdato().isAfter(LocalDate.now()))
+            .sorted(Comparator
+                .comparing(OrgEnhetLederState::startdato, Comparator.nullsLast(LocalDate::compareTo))
+                .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo)))
+            .toList();
+    }
+
+    @Override
     public Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId) {
         return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
             .filter(orgEnhetLederState -> isPeriodActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
@@ -58,7 +68,7 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
         return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap())
             .values()
             .stream()
-            .anyMatch(orgEnhetLederState -> isPeriodActive(startdato, sluttdato));
+            .anyMatch(_ -> isPeriodActive(startdato, sluttdato));
     }
 
     @Override
@@ -99,12 +109,12 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
     }
 
     private void addToByNavident(OrgEnhetLederState newState) {
-        var navidentOrgEnheterLeder = orgEnhetLederByNavidentMap.computeIfAbsent(newState.navident(), k -> new ConcurrentHashMap<>());
+        var navidentOrgEnheterLeder = orgEnhetLederByNavidentMap.computeIfAbsent(newState.navident(), _ -> new ConcurrentHashMap<>());
         navidentOrgEnheterLeder.put(newState.fid(), newState);
     }
 
     private void addToByOrgEnhetId(OrgEnhetLederState newState) {
-        var orgEnhetIdOrgEnhetLedere = orgEnhetLederByOrgEnhetIdMap.computeIfAbsent(newState.orgEnhetId(), k -> new ConcurrentHashMap<>());
+        var orgEnhetIdOrgEnhetLedere = orgEnhetLederByOrgEnhetIdMap.computeIfAbsent(newState.orgEnhetId(), _ -> new ConcurrentHashMap<>());
         orgEnhetIdOrgEnhetLedere.put(newState.fid(), newState);
     }
 

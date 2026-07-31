@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCom
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederSluttdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OpprettOrgEnhetLeder;
+import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.SlettOrgEnhetLeder;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -169,7 +170,8 @@ public class OrgEnhetLederService {
     }
 
     public Optional<OrgEnhetLederState> persisterLederForOrgEnhet(OpprettOrgEnhetLederRequest opprettOrgEnhetLederRequest) {
-        var eksisterendeOrgEnhetLederState = getAktivLederForOrgEnhet(opprettOrgEnhetLederRequest.orgEnhetId());
+        var aktivLederForOrgEnhet = getAktivLederForOrgEnhet(opprettOrgEnhetLederRequest.orgEnhetId());
+        var alleFremtidigeLedereForOrgEnhet = getFremtidigeLedereForOrgEnhet(opprettOrgEnhetLederRequest.orgEnhetId());
 
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
@@ -181,14 +183,19 @@ public class OrgEnhetLederService {
             )
         );
 
-        eksisterendeOrgEnhetLederState.ifPresent(orgEnhetLederState ->
-            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
-                orgEnhetLederState.fid(),
-                new OppdaterOrgEnhetLederSluttdato(
-                    opprettOrgEnhetLederRequest.gyldigFom().minusDays(1),
-                    inputMetadata
-                )
-            ));
+
+        aktivLederForOrgEnhet.ifPresent(orgEnhetLederState -> orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
+            orgEnhetLederState.fid(),
+            new OppdaterOrgEnhetLederSluttdato(
+                opprettOrgEnhetLederRequest.gyldigFom().minusDays(1),
+                inputMetadata
+            )
+        ));
+
+        alleFremtidigeLedereForOrgEnhet.forEach(orgEnhetLederState -> orgEnhetLederCommandService.slettOrgEnhetLederState(new SlettOrgEnhetLeder(
+            orgEnhetLederState.fid(),
+            inputMetadata
+        )));
 
         String fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(
             new OpprettOrgEnhetLeder(
@@ -327,6 +334,11 @@ public class OrgEnhetLederService {
             .toList();
     }
 
+    public List<OrgEnhetLederState> getFremtidigeLedereForOrgEnhet(String orgEnhetId) {
+        return orgEnhetLederStateRepository.findAllFutureByOrgEnhetId(orgEnhetId).stream()
+            .toList();
+    }
+
     public Optional<OrgEnhetLederState> getAktivLederForOrgEnhet(String orgEnhetId) {
         return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhetId);
     }
@@ -334,9 +346,9 @@ public class OrgEnhetLederService {
     public Map<String, Map<String, OrgEnhetLederState>> getAktiveOrgEnhetLederStateMappedByNavidentAndOrgEnhetId() {
         Map<String, Map<String, OrgEnhetLederState>> orgEnhetLederStates = new HashMap<>();
         orgEnhetLederStateRepository.getOrgEnhetLederByNavidentMap().forEach((navident, orgEnhetLederStateMap) -> {
-            var navidentMap = orgEnhetLederStates.computeIfAbsent(navident, k -> new HashMap<>());
+            var navidentMap = orgEnhetLederStates.computeIfAbsent(navident, _ -> new HashMap<>());
             orgEnhetLederStateMap
-                .forEach((fid, orgEnhetLederState) -> {
+                .forEach((_, orgEnhetLederState) -> {
                     if (orgEnhetLederState.isActive()) {
                         navidentMap.put(orgEnhetLederState.orgEnhetId(), orgEnhetLederState);
                     }

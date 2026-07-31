@@ -1035,4 +1035,39 @@ public class OrgEnhetLederServiceTest {
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederStartdato(anyString(), any(OppdaterOrgEnhetLederStartdato.class));
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(anyString(), any());
     }
+
+    @Test
+    @DisplayName("getFremtidigeLedereForOrgEnhet - returnerer fremtidige ledere fra state repository")
+    void getFremtidigeLedereForOrgEnhet_returnererFremtidigeLedere() {
+        // Given
+        var orgEnhetId = "ab123c";
+        var fremtidigLeder = OrgEnhetLederState.builder().fid("FID-001").navident("A000001").orgEnhetId(orgEnhetId).startdato(LocalDate.now().plusMonths(1)).build();
+
+        // And
+        doReturn(List.of(fremtidigLeder)).when(orgEnhetLederStateRepository).findAllFutureByOrgEnhetId(orgEnhetId);
+
+        // When
+        var result = orgEnhetLederService.getFremtidigeLedereForOrgEnhet(orgEnhetId);
+
+        // Then
+        assertEquals(1, result.size());
+        assertEquals("FID-001", result.getFirst().fid());
+        verify(orgEnhetLederStateRepository, times(1)).findAllFutureByOrgEnhetId(orgEnhetId);
+    }
+
+    @Test
+    @DisplayName("getFremtidigeLedereForOrgEnhet - returnerer tom liste naar ingen fremtidige ledere finnes")
+    void getFremtidigeLedereForOrgEnhet_returnererTomListeNaarIngenFremtidige() {
+        // Given
+        var orgEnhetId = "ab123c";
+
+        // And
+        doReturn(Collections.emptyList()).when(orgEnhetLederStateRepository).findAllFutureByOrgEnhetId(orgEnhetId);
+
+        // When
+        var result = orgEnhetLederService.getFremtidigeLedereForOrgEnhet(orgEnhetId);
+
+        // Then
+        assertTrue(result.isEmpty());
+    }
 }

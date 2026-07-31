@@ -90,14 +90,14 @@ authentication:
     nomLeder: ${NOM_LEDER_GROUPID:nomLederGroup}          # Den nye 0000-GA-NOM-WRITE-LEDER
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}      # Gamle nom-write gruppen
     nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}      #gamle nom-admin gruppen
-    nomPilot: ${NOM_PILOT_GROUPID:nomPilotGroup}      #gamle nom-admin gruppen
+    nomPilot: ${NOM_PILOT_GROUPID:nomPilotGroup}      #gamle nom-pilot gruppen
     nomWriteUtlKonsulent: ${NOM_WRITE_UTL_KONSULENT_GROUPID:nomWriteUtlKonsulentGroup}  # 0000-CA-NOM-Write-Utl-Konsulent
     nomWriteVikafossen: ${NOM_WRITE_VIKAFOSSEN_GROUPID:nomWriteVikafossenGroup}         # 0000-CA-NOM-Write-Vikafossen
     nomWriteRobot: ${NOM_WRITE_ROBOT_GROUPID:nomWriteRobotGroup}                        # 0000-CA-NOM-Write-Robot
     readOnly: ${READONLY_GROUPID:readOnlyGroup}          # 0000-CA-NOM-ADMIN-Lesetilgang
     extendedReadOnly: ${EXTENDED_READONLY_GROUPID:extendedReadOnlyGroup} # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
     kostnadsstedsAdmin: ${KOSTNADSSTEDSADMIN_GROUPID:kostnadsstedsadminGroup} # orgenhet-kostnadssted-mapping-admin
-    nomWriteExternalFundsRecipient: ${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:nomWriteExternalFundsRecipient}
+    nomWriteExternalFundsRecipient: ${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:nomWriteExternalFundsRecipient} # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
 server:
   shutdown: graceful
 
