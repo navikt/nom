@@ -39,7 +39,7 @@
     "react-hook-form": "7.72.1",
     "react-hot-toast": "^2.6.0",
     "react-json-view-lite": "2.5.0",
-    "swagger-typescript-api": "^13.2.16",
+    "swagger-typescript-api": "^13.12.2",
     "zod": "4.3.6"
   },
   "devDependencies": {
