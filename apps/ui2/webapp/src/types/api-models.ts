@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------
  */
 
+/** @default null */
 export enum UserRoles {
   ROLE_WRITE = "ROLE_WRITE",
   ROLE_ADMIN = "ROLE_ADMIN",
@@ -23,6 +24,7 @@ export enum UserRoles {
   ROLE_EXTERNAL_FUNDS_RECIPIENT = "ROLE_EXTERNAL_FUNDS_RECIPIENT",
 }
 
+/** @default null */
 export enum Tilknytningtype {
   ANNET = "ANNET",
   ARBEIDSTRENING = "ARBEIDSTRENING",
@@ -45,18 +47,21 @@ export enum Tilknytningtype {
   VIKAR = "VIKAR",
 }
 
+/** @default null */
 export enum TelefonType {
   NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
   NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
   PRIVAT_TELEFON = "PRIVAT_TELEFON",
 }
 
+/** @default null */
 export enum Sektor {
   NAV_STATLIG = "NAV_STATLIG",
   NAV_KOMMUNAL = "NAV_KOMMUNAL",
   EKSTERN = "EKSTERN",
 }
 
+/** @default null */
 export enum OrgEnhetsType {
   ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
   NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",
@@ -74,12 +79,14 @@ export enum OrgEnhetsType {
   NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
 }
 
+/** @default null */
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
   ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
 }
 
+/** @default null */
 export enum IdentType {
   ROBOT = "ROBOT",
   STANDARD = "STANDARD",
@@ -88,6 +95,7 @@ export enum IdentType {
   UKJENT = "UKJENT",
 }
 
+/** @default null */
 export enum AnsettelsesType {
   FAST = "FAST",
   MIDLERTIDIG = "MIDLERTIDIG",
@@ -96,42 +104,66 @@ export enum AnsettelsesType {
 export interface AvvikleOrgEnhetRequest {
   /**
    * @format date
+   * @default ""
    * @example "2026-12-31"
    */
   gyldigTom: string;
 }
 
 export interface AvvikleRessursRequest {
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttDato: string;
 }
 
 export interface BrukerSkrivetilgangRessursRequest {
+  /** @default "" */
   bruker: string;
+  /** @default "" */
   ressurs: string;
 }
 
 export interface BrukerSkrivetilgangRessurserRequest {
+  /** @default "" */
   bruker: string;
+  /** @default "" */
   ressurser: string[];
 }
 
 export interface EndreOrgtilknytningRequest {
+  /** @default false */
   erDagligOppfolging: boolean;
-  /** @minLength 1 */
+  /**
+   * @minLength 1
+   * @default ""
+   */
   fid: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
   /**
    * @uniqueItems true
+   * @default ""
    * @example ["2700","2900"]
    */
   optionalFysiskBrukersteder?: string[];
-  /** @example "2700" */
+  /**
+   * @default ""
+   * @example "2700"
+   */
   primaryFysiskBrukerstedNummer?: string;
+  /** @default "" */
   sektor?: Sektor;
+  /** @default "" */
   tilknytningtype?: Tilknytningtype;
 }
 
@@ -145,16 +177,21 @@ export interface ExcelExportRequest {
 }
 
 export interface FeiletFlytting {
+  /** @default "" */
   feilmelding: string;
+  /** @default "" */
   orgtilknytningFid: string;
 }
 
 export interface FolkeregisterPerson {
+  /** @default "" */
   navn: RessursNavn;
 }
 
 export interface GetPersonRequest {
+  /** @default "" */
   identType?: IdentType;
+  /** @default "" */
   personident: string;
 }
 
@@ -241,72 +278,123 @@ export interface JsonNode {
 }
 
 export interface KorrigerOrgEnhetNavnRequest {
-  /** @example "ab123c" */
+  /**
+   * @default ""
+   * @example "ab123c"
+   */
   id: string;
-  /** @example "Nav Lokal Kontor" */
+  /**
+   * @default ""
+   * @example "Nav Lokal Kontor"
+   */
   navn: string;
 }
 
 export interface LederTilgangForOrgenhetRequest {
+  /** @default "" */
   delegertTilNavident: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   orgenhetId: string;
 }
 
 export interface LederTilgangState {
   active?: boolean;
+  /** @default "" */
   av: string;
+  /** @default "" */
   fid: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   orgenhetId: string;
+  /** @default "" */
   til: string;
 }
 
 export interface LeggTilOrgtilknytningRequest {
+  /** @default false */
   erDagligOppfolging: boolean;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
   /**
    * @uniqueItems true
+   * @default ""
    * @example ["2700","2900"]
    */
   optionalFysiskBrukersteder?: string[];
+  /** @default "" */
   orgEnhetId: string;
-  /** @example "2700" */
+  /**
+   * @default ""
+   * @example "2700"
+   */
   primaryFysiskBrukerstedNummer?: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   tilknytningtype?: Tilknytningtype;
 }
 
 export interface MasseFlyttingRequest {
+  /** @default false */
   beholdTilganger: boolean;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFomFlyttedato?: string;
+  /** @default "" */
   nyOrgenhetId: string;
+  /** @default "" */
   orgtilknytningerFid: string[];
 }
 
 export interface MasseFlyttingResponse {
-  /** @format int32 */
+  /**
+   * @format int32
+   * @default ""
+   */
   antallFlyttet: number;
+  /** @default "" */
   feiledeFlyttinger: FeiletFlytting[];
 }
 
 export interface MinimalRessurs {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   visningsnavn: string;
 }
 
 export interface OppdaterOrgtilknytningerForRessursRequest {
+  /** @default "" */
   eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
+  /** @default "" */
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
+  /** @default false */
   setRessursSluttdato: boolean;
+  /** @default false */
   setRessursStartdato: boolean;
 }
 
@@ -322,28 +410,36 @@ export interface OpprettOrgEnhetLederRequest {
 export interface OpprettOrgEnhetRequest {
   /**
    * @format date
+   * @default ""
    * @example "2026-01-31"
    */
   gyldigFom: string;
   /**
    * @minLength 1
+   * @default ""
    * @example "A123456"
    */
   lederRessursNavident: string;
   /**
    * @minLength 1
+   * @default ""
    * @example "Nav Lokal kontor"
    */
   navn: string;
-  /** @example "DIREKTORAT" */
+  /**
+   * @default ""
+   * @example "DIREKTORAT"
+   */
   orgEnhetsType: OrgEnhetsType;
   /**
    * @minLength 1
+   * @default ""
    * @example "de456f"
    */
   overordnetOrgEnhetId: string;
   /**
    * @minLength 1
+   * @default ""
    * @example "1234"
    */
   tilgangsenhetId: string;
@@ -366,50 +462,93 @@ export interface OpprettOrgEnhetResponse {
 }
 
 export interface OpprettRessursRequest {
+  /** @default "" */
   ansettelsesType: AnsettelsesType;
+  /** @default "" */
   fysiskBrukerstedNr: string;
+  /** @default "" */
   identType?: IdentType;
+  /** @default "" */
   orgEnhetId: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   primaryTelefonnummer?: string;
+  /** @default "" */
   sektor: Sektor;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttDato?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startDato: string;
+  /** @default "" */
   tilknytningtype: Tilknytningtype;
+  /** @default "" */
   visningsetternavn: string;
+  /** @default "" */
   visningsfornavn: string;
+  /** @default "" */
   visningsmellomnavn?: string;
 }
 
 export interface OpprettRessursResponse {
+  /** @default "" */
   navident: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   visningsetternavn: string;
+  /** @default "" */
   visningsfornavn: string;
 }
 
 export interface OrgEnhet {
+  /** @default "" */
   agressoId: string;
+  /** @default "" */
   agressoOrgenhetType: string;
+  /** @default "" */
   fid: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   id: string;
+  /** @default "" */
   leder: MinimalRessurs;
+  /** @default "" */
   ledere: RessursState[];
+  /** @default "" */
   navn: string;
+  /** @default "" */
   nomNivaa?: NomNivaa;
+  /** @default "" */
   orgEnhetsType?: OrgEnhetsType;
+  /** @default "" */
   orgNiv: string;
+  /** @default "" */
   overordnetEnhetId?: string;
+  /** @default "" */
   remedyEnhetId?: string;
+  /** @default "" */
   ressursKoblinger: OrgtilknytningState[];
+  /** @default "" */
   tilgangsenhetId?: string;
+  /** @default "" */
   underordnedeOrgEnhetId: string[];
 }
 
@@ -426,11 +565,18 @@ export interface OrgEnhetLederResponse {
 }
 
 export interface OrgEnhetMedLedernavn {
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
+  /** @default "" */
   id: string;
+  /** @default "" */
   ledere: string[];
+  /** @default "" */
   navn: string;
+  /** @default "" */
   remedyEnhetId?: string;
 }
 
@@ -463,78 +609,141 @@ export interface OrgEnhetStatistikkResponse {
 }
 
 export interface OrgtilknytningState {
+  /** @default "" */
   additionalFysiskeBrukerstederNummer?: string[];
+  /** @default false */
   erDagligOppfolging: boolean;
+  /** @default "" */
   fid: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigFom: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   gyldigTom?: string;
+  /** @default "" */
   masseflyttetFraFid?: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   orgEnhetId: string;
+  /** @default "" */
   orgtilknytningType?: Tilknytningtype;
+  /** @default "" */
   primaryFysiskBrukerstedNummer?: string;
+  /** @default "" */
   sektor?: Sektor;
+  /** @default "" */
   sistEndretAv?: string;
 }
 
 export interface OvrigeEndringerOrgEnhetRequest {
   /**
    * @format date
+   * @default ""
    * @example "2025-01-01"
    */
   gyldigFom?: string;
-  /** @example "ab123c" */
+  /**
+   * @default ""
+   * @example "ab123c"
+   */
   id: string;
-  /** @example "ARBEIDSOMRAADE" */
+  /**
+   * @default ""
+   * @example "ARBEIDSOMRAADE"
+   */
   nomNivaa?: NomNivaa;
-  /** @example "DIREKTORAT" */
+  /**
+   * @default ""
+   * @example "DIREKTORAT"
+   */
   orgEnhetsType?: OrgEnhetsType;
-  /** @example "1234" */
+  /**
+   * @default ""
+   * @example "1234"
+   */
   tilgangsenhetId?: string;
 }
 
 export interface Person {
+  /** @default "" */
   folkeregisterPerson: FolkeregisterPerson;
+  /** @default "" */
   navident?: string;
+  /** @default "" */
   personident: string;
 }
 
 export interface ReadTopicRequest {
-  /** @format int64 */
+  /**
+   * @format int64
+   * @default ""
+   */
   fromOffset: number;
-  /** @format int32 */
+  /**
+   * @format int32
+   * @default ""
+   */
   maxRecords: number;
-  /** @format int32 */
+  /**
+   * @format int32
+   * @default ""
+   */
   partition?: number;
 }
 
 export interface Ressurs {
   epost?: string;
+  /** @default "" */
   fid: string;
+  /** @default "" */
   fysiskeBrukersteder: string[];
   /** @default "STANDARD" */
   identType: IdentType;
+  /** @default false */
   isNomMastered: boolean;
+  /** @default "" */
   jobbtelefon?: Jobbtelefon;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   primaryFysiskBrukersted?: string;
+  /** @default "" */
   primaryTelefonnummer?: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   sistEndretAv?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startdato?: string;
+  /** @default "" */
   tilknytningtype?: Tilknytningtype;
+  /** @default "" */
   visningsnavn: Visningsnavn;
 }
 
 export interface RessursFilter {
+  /** @default "" */
   sektor?: Sektor;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
 }
 
@@ -551,34 +760,57 @@ export interface RessursKontaktperson {
 }
 
 export interface RessursLeder {
+  /** @default false */
   erDagligOppfolging: boolean;
+  /** @default "" */
   leder: RessursState;
+  /** @default "" */
   lederForNavident: string;
 }
 
 export interface RessursNavn {
+  /** @default "" */
   etternavn: string;
+  /** @default "" */
   fornavn: string;
+  /** @default "" */
   mellomnavn?: string;
 }
 
 export interface RessursState {
+  /** @default "" */
   fid: string;
+  /** @default "" */
   fysiskeBrukersteder: string[];
   /** @default "STANDARD" */
   identType: IdentType;
+  /** @default "" */
   jobbtelefon?: Jobbtelefon;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   personident: string;
+  /** @default "" */
   primaryFysiskBrukersted?: string;
+  /** @default "" */
   primaryTelefonnummer?: string;
+  /** @default "" */
   sektor: Sektor;
+  /** @default "" */
   sistEndretAv?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   sluttdato?: string;
-  /** @format date */
+  /**
+   * @format date
+   * @default ""
+   */
   startdato?: string;
+  /** @default "" */
   tilknytningtype?: Tilknytningtype;
+  /** @default "" */
   visningsnavn: Visningsnavn;
 }
 
@@ -594,41 +826,57 @@ export interface RessursStatistikk {
 }
 
 export interface SessionInfoResponse {
+  /** @default "" */
   name: string;
+  /** @default "" */
   navident: string;
+  /** @default "" */
   roles: UserRoles[];
 }
 
 export interface SetOrgEnhetsTypeRequest {
+  /** @default "" */
   nomId: string;
+  /** @default "" */
   orgEnhetsType?: OrgEnhetsType;
 }
 
 export interface StandardResponse {
+  /** @default "" */
   message: string;
 }
 
 export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  /** @default "" */
   orgtilknytningerFid: string[];
+  /** @default "" */
   tilFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
-  /** @uniqueItems true */
+  /**
+   * @uniqueItems true
+   * @default ""
+   */
   fysiskeBrukersteder: string[];
+  /** @default "" */
   primaryFysiskBrukersted: string;
 }
 
 export interface UpdatePrimaryFysiskBrukerstedForRessurserRequest {
+  /** @default "" */
   navidenter: string[];
+  /** @default "" */
   newPrimaryFysiskBrukersted: string;
 }
 
 export interface UpdatePrimaryFysiskBrukerstedRequest {
+  /** @default "" */
   newPrimaryFysiskBrukersted: string;
 }
 
 export interface UpdatePrimarytelefonnummer {
+  /** @default "" */
   nummer: string;
 }
 
@@ -639,7 +887,10 @@ export interface UpdateVisningsnavnRequest {
 }
 
 export interface Visningsnavn {
+  /** @default "" */
   etternavn: string;
+  /** @default "" */
   fornavn: string;
+  /** @default "" */
   mellomnavn?: string;
 }

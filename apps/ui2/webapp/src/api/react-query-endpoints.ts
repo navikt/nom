@@ -364,8 +364,8 @@ export function getOrgEnheterLedetAvOptions(navident: string) {
   });
 }
 
-export const getOrgenhetLederByNavIdent = {
-  queryKey: (navident: string) => ["getOrgenhetLederByNavIdent", navident],
+export const getOrgEnheterLedetAvNavIdent = {
+  queryKey: (navident: string) => ["getOrgEnheterLedetAvNavIdent", navident],
   queryFn: async (navident: string) =>
     (
       await axios.get<OrgEnhetLederResponse[]>(
@@ -727,6 +727,16 @@ export const createRessurs = async (request: OpprettRessursRequest) => {
     `${NOM_API_BASE_PATH}/app/ressurser`,
     request,
   );
+};
+
+export const getPeriodiserteLedereOrgEnhet = {
+  queryKey: (id: string) => ["LEDERE_ORGENHET", id],
+  queryFn: async (id: string): Promise<OrgEnhetLederResponse[]> =>
+    (
+      await axios.get<OrgEnhetLederResponse[]>(
+        `${NOM_API_BASE_PATH}/app/orgenhetleder/byOrgEnhetId/${id}`,
+      )
+    ).data,
 };
 
 export const opprettOrgEnhet = async (request: OpprettOrgEnhetRequest) => {

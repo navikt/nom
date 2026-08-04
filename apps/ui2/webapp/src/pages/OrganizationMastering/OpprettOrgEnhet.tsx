@@ -167,7 +167,10 @@ function OrgEnhetInfoForm({
               label="Navn på den nye organisasjonsenhet"
             />
 
-            <FormRessursSearchWrapper name="lederRessursNavident" />
+            <FormRessursSearchWrapper
+              label="Leder på organisasjonsenhet"
+              name="lederRessursNavident"
+            />
 
             <FormDateWrapper name="gyldigFom" />
 

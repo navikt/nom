@@ -26,8 +26,8 @@ import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
   getFysiskeBrukersteder,
   getOrgEnhet,
+  getOrgEnheterLedetAvNavIdent,
   getOrgEnheterRessursKanRedigere,
-  getOrgenhetLederByNavIdent,
   getOrgTilknytninger,
   getTeamcatMemberships,
   harLederTilgangForNavidentOptions,
@@ -755,10 +755,10 @@ function OrganisationHierarchyTree({
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const inDevelopment = isInDevelopment();
 
-  const lederForOrgenheter =
+  const orgEnheterLedetAvRessurs =
     useQuery({
-      queryKey: getOrgenhetLederByNavIdent.queryKey(ressurs.navident),
-      queryFn: () => getOrgenhetLederByNavIdent.queryFn(ressurs.navident),
+      queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
+      queryFn: () => getOrgEnheterLedetAvNavIdent.queryFn(ressurs.navident),
       select: (orgenhetLederList) =>
         orgenhetLederList.filter((orgEnhet) => {
           if (!orgEnhet.sluttdato) {
@@ -777,7 +777,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     ? ["fa520s", "fe857w", "hy255y", "ja464g", "py733e", "ru151s"]
     : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
 
-  const lederForOrgenheterFiltrert = lederForOrgenheter
+  const orgEnheterLedetAvRessursFiltrert = orgEnheterLedetAvRessurs
     .filter(
       (orgEnhet) =>
         !skjulteEksterneOrgEnheter.includes(orgEnhet?.orgEnhetId ?? ""),
@@ -786,7 +786,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
       isPeriodActive(orgEnhet?.startdato ?? "", orgEnhet.sluttdato),
     );
 
-  if (lederForOrgenheterFiltrert.length === 0) {
+  if (orgEnheterLedetAvRessursFiltrert.length === 0) {
     return;
   }
 
@@ -796,9 +796,9 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
      Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
     */
   const unikeOrgEnheter = uniqBy(
-    lederForOrgenheterFiltrert,
+    orgEnheterLedetAvRessursFiltrert,
     (orgEnhet) => orgEnhet.orgEnhetNavn,
-  ).sort((a, b) => (a.orgEnhetNavn ?? "").localeCompare(b.orgEnhetNavn ?? ""));
+  ).sort((a, b) => a.orgEnhetNavn?.localeCompare(b.orgEnhetNavn ?? "") ?? 0);
 
   return (
     <>
