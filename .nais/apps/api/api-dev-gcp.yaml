@@ -359,6 +359,9 @@ spec:
         - application: norg2
           namespace: org
           cluster: dev-gcp
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
+          cluster: dev-gcp
         - application: logging
           namespace: nais-system
       external:
