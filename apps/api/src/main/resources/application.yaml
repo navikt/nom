@@ -500,6 +500,10 @@ app:
         orgtilknytning: se198m    #  FP Oslo 1 Barnetrygd/Kontantstøtte 1 (se198m)
         sektor: NAV_STATLIG
 
+      - navident: Z993901         # EIEN Tilganger - Proof Of Concept / Tordbjørn Wang Eriksen
+        orgtilknytning: sa131z    # Gamle Oslo (sa131z)
+        sektor: NAV_KOMMUNAL
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
