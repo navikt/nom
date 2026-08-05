@@ -14,13 +14,13 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class OrgenhetKostnadsstedMappingClient {
+public class OrgEnhetKostnadsstedMappingClient {
 
     private static final String CLIENT_REGISTRATION_ID = "orgenhet-kostnadssted-mapping";
 
     private final RestClient restClient;
 
-    public OrgenhetKostnadsstedMappingClient(
+    public OrgEnhetKostnadsstedMappingClient(
         OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
         AppProperties appProperties,
         RestClient.Builder builder
@@ -55,9 +55,9 @@ public class OrgenhetKostnadsstedMappingClient {
         return Optional.empty();
     }
 
-    public List<KostnadsstedResponseDTO> hentKostnadsstedMappinger(String topOrgEnhetId) {
+    public List<KostnadsstedResponseDTO> hentKostnadsstedMappinger(String toppNodeOrgEnhetId) {
         return restClient.get()
-            .uri(uriBuilder -> uriBuilder.path("/api/v1/mappinger").queryParam("topOrgenhet", topOrgEnhetId).build())
+            .uri(uriBuilder -> uriBuilder.path("/api/v1/mappinger").queryParam("topOrgenhet", toppNodeOrgEnhetId).build())
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
     }
