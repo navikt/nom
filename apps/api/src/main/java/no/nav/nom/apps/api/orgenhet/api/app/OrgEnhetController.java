@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
@@ -418,6 +419,17 @@ public class OrgEnhetController {
                         .message(String.format("Enhet har fått satt sluttdato til %s", LocalDate.now()))
                         .build());
         }
+    }
+
+    @Operation(
+        description = "Hent kostnadssted for orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/kostnadssted/{orgEnhetId}")
+    public ResponseEntity<OrgEnhetKostnadsstedResponse> getOrgEnhetKostnadssted(@PathVariable String orgEnhetId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(orgEnhetRestService.getOrgEnhetKostnadssted(orgEnhetId));
     }
 
     @ExceptionHandler({
