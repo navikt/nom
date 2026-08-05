@@ -26,7 +26,8 @@ public record AppProperties(
         DvhOrds dvhOrds,
         NomPaarorende nomPaarorende,
         MainManager mainManager,
-        Slack slack
+        Slack slack,
+        OrgEnhetKostnadsstedMapping orgEnhetKostnadsstedMapping
     ) {}
 
     public record MainManager(
@@ -107,5 +108,10 @@ public record AppProperties(
         String vikafossenId,
         Set<String> linjeenhetene,
         Set<String> nasjonaloppfolgningIds
+    ) {}
+
+    public record OrgEnhetKostnadsstedMapping(
+        String baseUrl,
+        String aadScope
     ) {}
 }
