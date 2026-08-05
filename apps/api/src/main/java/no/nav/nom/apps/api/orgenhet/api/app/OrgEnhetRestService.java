@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.clients.koststed.OrgenhetKostnadsstedMappingClient;
+import no.nav.nom.apps.api.clients.koststed.OrgEnhetKostnadsstedMappingClient;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
@@ -27,6 +27,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerGyld
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhetNavn;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetKostnadsstedNotFoundException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCommandService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;
@@ -68,7 +69,7 @@ public class OrgEnhetRestService {
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
     private final OrganiseringStateRepository organiseringStateRepository;
     private final TilgangsenhetRepository tilgangsenhetRepository;
-    private final OrgenhetKostnadsstedMappingClient orgenhetKostnadsstedMappingClient;
+    private final OrgEnhetKostnadsstedMappingClient orgenhetKostnadsstedMappingClient;
 
     public OrgEnhetRestService(
         OrgEnhetIdGenerator orgEnhetIdGenerator,
@@ -79,7 +80,7 @@ public class OrgEnhetRestService {
         OrganiseringEventCommandService organiseringEventCommandService,
         OrgEnhetLederCommandService orgEnhetLederCommandService,
         OrganiseringStateRepository organiseringStateRepository, TilgangsenhetRepository tilgangsenhetRepository,
-        OrgenhetKostnadsstedMappingClient orgenhetKostnadsstedMappingClient
+        OrgEnhetKostnadsstedMappingClient orgenhetKostnadsstedMappingClient
     ) {
         this.orgEnhetIdGenerator = orgEnhetIdGenerator;
         this.orgenhetService = orgenhetService;
@@ -346,12 +347,30 @@ public class OrgEnhetRestService {
     }
 
     public OrgEnhetKostnadsstedResponse getOrgEnhetKostnadssted(String orgEnhetId) {
-        return orgenhetKostnadsstedMappingClient.hentKostnadsstedMapping(orgEnhetId).map(kostnadsstedResponseDTO -> new OrgEnhetKostnadsstedResponse(
-            kostnadsstedResponseDTO.kostnadsstedId(),
-            kostnadsstedResponseDTO.orgenhetId(),
-            kostnadsstedResponseDTO.gyldigFom(),
-            kostnadsstedResponseDTO.gyldigTom()
-        )).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+        var orgEnhet = orgenhetService.getById(orgEnhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+
+        return orgenhetKostnadsstedMappingClient.hentKostnadsstedMapping(orgEnhetId)
+            .map(kostnadsstedResponseDTO ->
+                new OrgEnhetKostnadsstedResponse(
+                    kostnadsstedResponseDTO.kostnadsstedId(),
+                    kostnadsstedResponseDTO.orgenhetId(),
+                    kostnadsstedResponseDTO.gyldigFom(),
+                    kostnadsstedResponseDTO.gyldigTom()
+                )).orElseThrow(() -> OrgEnhetKostnadsstedNotFoundException.notFound(orgEnhet.getId(), orgEnhet.getNavn()));
+    }
+
+    public List<OrgEnhetKostnadsstedResponse> getOrgEnhetKostnadssteder(String toppNodeOrgEnhetId) {
+        if (orgenhetService.getById(toppNodeOrgEnhetId).isEmpty()) throw OrgEnhetNotFoundException.id(toppNodeOrgEnhetId);
+
+        return orgenhetKostnadsstedMappingClient.hentKostnadsstedMappinger(toppNodeOrgEnhetId).stream()
+            .map(kostnadsstedResponseDTO ->
+                new OrgEnhetKostnadsstedResponse(
+                    kostnadsstedResponseDTO.kostnadsstedId(),
+                    kostnadsstedResponseDTO.orgenhetId(),
+                    kostnadsstedResponseDTO.gyldigFom(),
+                    kostnadsstedResponseDTO.gyldigTom()
+                ))
+            .toList();
     }
 
     private void validerOrgtilknytningGyldigTom(OrgEnhet orgEnhet, LocalDate gyldigTom) {
