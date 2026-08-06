@@ -47,7 +47,8 @@ type Ressurs {
     orgTilknytning: [RessursOrgTilknytning!]! @deprecated(reason: "orgTilknytning er erstattet med orgTilknytninger") # Deprekert Nov.2025
     orgTilknytninger (utvalg: PeriodiskUtvalgArg = AKTIVE): [RessursOrgTilknytning!]!
     gjeldendeTilknytningtype: TilknytningType
-    primaryFysiskBrukersted: String
+    primaryFysiskBrukersted: String!
+    additionalFysiskeBrukerstederNummer: [String]!
 }
 
 type RessursLeder {
@@ -83,6 +84,8 @@ type OrgTilknytning {
     erDagligOppfolging: Boolean
     sektor: Sektor
     tilknytningType: TilknytningType
+    primaryFysiskBrukersted: String
+    additionalFysiskeBrukerstederNummer: [String]
 }
 
 type RessursOrgTilknytning {
@@ -92,6 +95,8 @@ type RessursOrgTilknytning {
     erDagligOppfolging: Boolean
     sektor: Sektor
     tilknytningType: TilknytningType
+    primaryFysiskBrukersted: String
+    additionalFysiskeBrukerstederNummer: [String]
 }
 
 type AgressoInfo {
