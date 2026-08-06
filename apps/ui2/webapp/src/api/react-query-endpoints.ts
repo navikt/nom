@@ -21,6 +21,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
+  OrgEnhetKostnadsstedResponse,
   OrgEnhetLederResponse,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
@@ -46,8 +47,6 @@ const NOM_API_BASE_PATH = "/frackend/nom-api";
 const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
 const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
 const NOM_UNLEASH_BASE_PATH = "/frackend/unleash";
-const ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH =
-  "/frackend/org-koststed-mapping";
 
 /**
  * Intercept errors that are 401.
@@ -326,8 +325,8 @@ export const getKostnadssted = {
   queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
   queryFn: async (orgEnhetId: string) =>
     (
-      await axios.get<OrgKoststedMapping>(
-        `${ORGENHET_KOSTNADSSTED_MAPPING_BASE_PATH}/api/v1/mapping?orgenhetid=${orgEnhetId}`,
+      await axios.get<OrgEnhetKostnadsstedResponse>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/kostnadssted/${orgEnhetId}`,
       )
     ).data,
 };
@@ -896,13 +895,6 @@ export const getUnleashEnabled = async (unleashToggleName: string) =>
 async function hopeForKafkaStateToUpdate() {
   await new Promise((r) => setTimeout(r, 1000));
 }
-
-type RessurserWithMetadataGraphqlResponseWrapper = {
-  data: {
-    ressurserWithMetadata: RessursWithMetadata[];
-  };
-};
-
 export type GraphQlResponse<QueryKey extends string, ResponseType> = {
   data: {
     [key in QueryKey]: ResponseType;
@@ -963,9 +955,4 @@ export type Kontaktinfo = {
   postnr?: string;
   poststed?: string;
   land?: string;
-};
-
-export type OrgKoststedMapping = {
-  orgenhetId: string;
-  kostnadsstedId: string;
 };

@@ -20,8 +20,8 @@ export enum UserRoles {
   ROLE_WRITE_ROBOT = "ROLE_WRITE_ROBOT",
   ROLE_READONLY = "ROLE_READONLY",
   ROLE_EXTENDED_READONLY = "ROLE_EXTENDED_READONLY",
-  ROLE_KOSTNADSTED_MAPPING_ADMIN = "ROLE_KOSTNADSTED_MAPPING_ADMIN",
   ROLE_EXTERNAL_FUNDS_RECIPIENT = "ROLE_EXTERNAL_FUNDS_RECIPIENT",
+  ROLE_KOSTNADSTED_MAPPING_ADMIN = "ROLE_KOSTNADSTED_MAPPING_ADMIN",
 }
 
 /** @default null */
@@ -550,6 +550,15 @@ export interface OrgEnhet {
   tilgangsenhetId?: string;
   /** @default "" */
   underordnedeOrgEnhetId: string[];
+}
+
+export interface OrgEnhetKostnadsstedResponse {
+  /** @format date */
+  gyldigFom?: string;
+  /** @format date */
+  gyldigTom?: string;
+  kostnadsstedId?: string;
+  orgenhetId?: string;
 }
 
 export interface OrgEnhetLederResponse {

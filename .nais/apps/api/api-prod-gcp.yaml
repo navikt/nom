@@ -296,6 +296,9 @@ spec:
         - application: norg2
           namespace: org
           cluster: prod-gcp
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
+          cluster: prod-gcp
         - application: logging
           namespace: nais-system
       external:

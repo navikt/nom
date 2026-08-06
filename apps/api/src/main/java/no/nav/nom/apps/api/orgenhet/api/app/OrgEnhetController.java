@@ -18,9 +18,11 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
+import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetKostnadsstedNotFoundException;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
@@ -420,10 +422,33 @@ public class OrgEnhetController {
         }
     }
 
+    @Operation(
+        description = "Hent kostnadssted for orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/kostnadssted/{orgEnhetId}")
+    public ResponseEntity<OrgEnhetKostnadsstedResponse> getOrgEnhetKostnadssted(@PathVariable String orgEnhetId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(orgEnhetRestService.getOrgEnhetKostnadssted(orgEnhetId));
+    }
+
+    @Operation(
+        description = "Hent kostnadssteder for alle i hierarki for gitt orgEnhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/kostnadssteder/{toppNodeOrgEnhetId}")
+    public ResponseEntity<List<OrgEnhetKostnadsstedResponse>> getOrgEnhetKostnadssteder(@PathVariable String toppNodeOrgEnhetId) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(orgEnhetRestService.getOrgEnhetKostnadssteder(toppNodeOrgEnhetId));
+    }
+
     @ExceptionHandler({
         OrgEnhetNotFoundException.class,
         RessursNotFoundException.class,
         OrganiseringNotFoundException.class,
+        OrgEnhetKostnadsstedNotFoundException.class,
         InvalidTilgangsenhetException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException e) {

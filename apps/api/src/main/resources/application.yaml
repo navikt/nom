@@ -64,6 +64,9 @@ app:
       token: ${SLACK_TOKEN}
       channel-id-primary: "G01F99D2AHX"
       channel-id-secondary: "C040RV7KCH5"
+    org-enhet-kostnadssted-mapping:
+      aad-scope: ${ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE}
+      base-url: ${ORGENHET_KOSTNADSSTED_MAPPING_API_URL}
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
   email:
@@ -162,6 +165,13 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - ${NOM_REMEDY_INTEGRASJON_API_SCOPE}
+          orgenhet-kostnadssted-mapping:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE}
           dvh-ords:
             provider: dvh-ords
             client-id:  ${DVH_ORDS_CLIENT_ID:dvh_client_id}
@@ -544,6 +554,9 @@ NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:  "b83d8dcc-9d73-4609-8e86-f9d1666df1
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
 
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://dev-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
+
 --- # This is the same as having an application-prod.yaml file
 spring:
   config:
@@ -662,3 +675,5 @@ MAIN_MANAGER_BASEURL: "https://nav.mainmanager.no"
 PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
 PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default
 
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://prod-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
