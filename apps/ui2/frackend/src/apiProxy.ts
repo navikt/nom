@@ -52,14 +52,6 @@ export const setupPaarorendeProxy = (app: Express) =>
     scope: config.proxy.paarorendeApiScope,
   });
 
-export const setupOgEnhetKostnadsstedMappingProxy = (app: Express) =>
-  addProxyHandler(app, {
-    ingoingUrl: "/frackend/org-koststed-mapping",
-    outgoingUrl: config.proxy.orgEnhetKostnadsstedMappingApiUrl,
-    scope: config.proxy.orgEnhetKostnadsstedMappingApiScope,
-    tokenExchange: "m2m",
-  });
-
 export function addProxyHandler(
   server: Express,
   { ingoingUrl, outgoingUrl, scope, tokenExchange = "obo" }: ProxyOptions,
