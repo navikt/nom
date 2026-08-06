@@ -2,7 +2,6 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
@@ -30,6 +29,7 @@ public class Ressurs {
     String primaryTelefon;
     List<Telefon> telefon;
     String primaryFysiskBrukersted;
+    List<String> additionalFysiskeBrukerstederNummer;
 
     @Deprecated
     public String getNavIdent() {
@@ -102,4 +102,6 @@ public class Ressurs {
     Tilknytningtype gjeldendeTilknytningtype;
 
     public String getPrimaryFysiskBrukersted() { return primaryFysiskBrukersted; }
+
+    public List<String> getAdditionalFysiskeBrukerstederNummer() { return additionalFysiskeBrukerstederNummer; }
 }

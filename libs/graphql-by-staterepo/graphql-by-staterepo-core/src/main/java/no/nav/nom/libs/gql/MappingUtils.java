@@ -14,13 +14,11 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 
 public class MappingUtils {
 
     public static Ressurs toRessurs(RessursState ressursState) {
-        final var sektor = singletonList(ressursState.sektor());
 
         var sladdetPersonIdent = ressursState.personident().replaceFirst(".{5}$","*****");
         var startdato = ressursState.startdato();
@@ -46,6 +44,7 @@ public class MappingUtils {
             .telefon(telefon)
             .gjeldendeTilknytningtype(tilknytningstype)
             .primaryFysiskBrukersted(ressursState.primaryFysiskBrukersted())
+            .additionalFysiskeBrukerstederNummer(ressursState.fysiskeBrukersteder())
             .build();
     }
 

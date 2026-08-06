@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Value
 @Builder
@@ -16,4 +17,6 @@ public class RessursOrgTilknytning {
     LocalDate gyldigTom;
     Sektor sektor;
     Tilknytningtype tilknytningType;
+    String primaryFysiskBrukersted;
+    List<String> additionalFysiskeBrukerstederNummer;
 }
