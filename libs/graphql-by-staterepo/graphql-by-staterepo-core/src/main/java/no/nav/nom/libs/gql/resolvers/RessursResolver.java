@@ -127,6 +127,7 @@ public class RessursResolver {
         return unfilteredRessurser.stream()
             .filter(filterBySektor(filter))
             .filter(filterByIdenttype(filter))
+            .filter(filterByFysiskBrukersted(filter))
             .filter(ressurs -> Util.filterByPeriodiskUtvalg(ressurs, filter.periodiskUtvalg()))
             .toList();
     }
@@ -150,5 +151,14 @@ public class RessursResolver {
             case IKKE_EKSTERN -> r.isStatlig() || r.isKommunal();
             case ALLE -> true;
         };
+    }
+
+    private static Predicate<RessursState> filterByFysiskBrukersted(RessurserSearchFilter filter) {
+        var fysiskBrukersted = filter.fysiskBrukersted();
+        if (fysiskBrukersted == null || fysiskBrukersted.isBlank()) {
+            return r -> true;
+        }
+        return r -> fysiskBrukersted.equals(r.primaryFysiskBrukersted())
+            || (r.fysiskeBrukersteder() != null && r.fysiskeBrukersteder().contains(fysiskBrukersted));
     }
 }
