@@ -117,7 +117,7 @@ function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
     <>
       <OrgEnhetInfoWrapper
         heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
+        orgEnhet={orgEnhet}
       />
 
       <KorrigeringOrgEnhetLederForm orgEnhet={orgEnhet} />

@@ -28,20 +28,22 @@ import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
-import { FormRessursSearchWrapper } from "~/pages/OrganizationMastering/Common/CommonComponents";
+import {
+  FormRessursSearchWrapper,
+  OrgEnhetIkkeFunnet,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type {
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
+  OrgEnhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
-  const inDevelopment = isInDevelopment();
-
   const { id } = useSearch({
     from: "/opprett-organisasjonsenhet",
   });
@@ -51,6 +53,8 @@ export const OpprettOrgEnhet = () => {
   if (!hasAdminAccess) {
     return;
   }
+
+  const inDevelopment = isInDevelopment();
 
   const [opprettResponse, setOpprettResponse] = useState<any>();
 
@@ -69,62 +73,96 @@ export const OpprettOrgEnhet = () => {
         </ContentWrapper>
       ) : (
         <ContentWrapper limitWidth={!!id}>
-          {!id ? (
-            <ContainerWithHighlightedTop padding={6}>
-              <DynamiskOrgKart
-                opprettKnapp
-                title="Velg plassering"
-                toppOrgEnhetId={inDevelopment ? "sa312u" : "py437s"}
-              />
-
-              {!id && (
-                <div
-                  css={css`
-                    display: flex;
-                    justify-content: end;
-                    gap: var(--a-spacing-4);
-                  `}
-                >
-                  <SmartLink href="/organisasjonsmastring">
-                    <Button size="small" variant="secondary">
-                      Avbryt
-                    </Button>
-                  </SmartLink>
-                </div>
-              )}
-            </ContainerWithHighlightedTop>
-          ) : (
-            <ContainerWithHighlightedTop padding={6}>
-              <OrgEnhetInfoWrapper
-                heading="Enheten blir opprettet under"
-                orgEnhetId={id}
-              />
-
-              <OrgEnhetInfoForm
-                orgEnhetId={id}
+          <ContainerWithHighlightedTop padding={6}>
+            {!id ? (
+              <OrgKartView inDevelopment={inDevelopment} />
+            ) : (
+              <OpprettOrgEnhetFormView
+                overordnetOrgEnhetId={id}
                 setOpprettResponse={setOpprettResponse}
               />
-            </ContainerWithHighlightedTop>
-          )}
+            )}
+          </ContainerWithHighlightedTop>
         </ContentWrapper>
       )}
     </>
   );
 };
 
-function OrgEnhetInfoForm({
-  orgEnhetId,
+function OrgKartView({ inDevelopment }: { inDevelopment: boolean }) {
+  return (
+    <>
+      <DynamiskOrgKart
+        opprettKnapp
+        title="Velg plassering"
+        toppOrgEnhetId={inDevelopment ? "sa312u" : "py437s"}
+      />
+
+      <div
+        css={css`
+          display: flex;
+          justify-content: end;
+          gap: var(--a-spacing-4);
+        `}
+      >
+        <SmartLink href="/organisasjonsmastring">
+          <Button size="small" variant="secondary">
+            Avbryt
+          </Button>
+        </SmartLink>
+      </div>
+    </>
+  );
+}
+
+function OpprettOrgEnhetFormView({
+  overordnetOrgEnhetId,
   setOpprettResponse,
 }: {
-  orgEnhetId: string | null;
+  overordnetOrgEnhetId: string;
   setOpprettResponse: (response: any) => void;
 }) {
-  if (!orgEnhetId) {
-    return;
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId ?? ""),
+    enabled: !!overordnetOrgEnhetId,
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
+  if (orgEnhetQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
+  if (!orgEnhet || orgEnhetQuery.isError) {
+    return <OrgEnhetIkkeFunnet />;
+  }
+
+  return (
+    <>
+      <OrgEnhetInfoWrapper
+        heading="Enheten blir opprettet under"
+        orgEnhet={orgEnhet}
+      />
+
+      <OrgEnhetInfoForm
+        overordnetOrgEnhet={orgEnhet}
+        setOpprettResponse={setOpprettResponse}
+      />
+    </>
+  );
+}
+
+function OrgEnhetInfoForm({
+  overordnetOrgEnhet,
+  setOpprettResponse,
+}: {
+  overordnetOrgEnhet: OrgEnhet;
+  setOpprettResponse: (response: any) => void;
+}) {
   const methods = useForm({
     resolver: yupResolver(validationSchema),
+    defaultValues: { tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId },
   });
 
   const opprettOrgEnhetMutation = useMutation<
@@ -145,7 +183,7 @@ function OrgEnhetInfoForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OpprettOrgEnhetRequest = {
       ...values,
-      overordnetOrgEnhetId: orgEnhetId,
+      overordnetOrgEnhetId: overordnetOrgEnhet.id,
     };
 
     opprettOrgEnhetMutation.mutate(request);
@@ -268,46 +306,33 @@ function OrgEnhetOpprettetKvittering({
     </>
   );
 }
+
 export function OrgEnhetInfoWrapper({
-  orgEnhetId,
+  orgEnhet,
   heading,
 }: {
-  orgEnhetId?: string;
+  orgEnhet: OrgEnhet;
   heading: string;
 }) {
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
-  });
-
-  const orgEnhet = orgEnhetQuery.data;
-
-  if (orgEnhetQuery.isLoading) {
-    return <LoaderWithText>Laster...</LoaderWithText>;
-  }
-
   return (
-    !!orgEnhet && (
-      <VStack gap="2">
-        {!!heading && (
-          <Heading level="2" size="small">
-            {heading}
-          </Heading>
-        )}
+    <VStack gap="2">
+      {!!heading && (
+        <Heading level="2" size="small">
+          {heading}
+        </Heading>
+      )}
 
-        <div
-          css={css`
-            background-color: #deecef;
-            padding: var(--a-spacing-4);
-            border-radius: var(--a-border-radius-xlarge);
-            display: grid;
-          `}
-        >
-          <OrgEnhetInfo orgEnhet={orgEnhet} />
-        </div>
-      </VStack>
-    )
+      <div
+        css={css`
+          background-color: #deecef;
+          padding: var(--a-spacing-4);
+          border-radius: var(--a-border-radius-xlarge);
+          display: grid;
+        `}
+      >
+        <OrgEnhetInfo orgEnhet={orgEnhet} />
+      </div>
+    </VStack>
   );
 }
 

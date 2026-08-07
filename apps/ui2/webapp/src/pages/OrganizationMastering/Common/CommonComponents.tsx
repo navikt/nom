@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { BodyLong } from "@navikt/ds-react";
+import { Alert, BodyLong } from "@navikt/ds-react";
 import axios from "axios";
 import React from "react";
 import { useController } from "react-hook-form";
@@ -11,13 +11,14 @@ import {
 
 export function OrgEnhetIkkeFunnet() {
   return (
-    <BodyLong
+    <Alert
       css={css`
         font-size: var(--a-font-size-xlarge);
       `}
+      variant="error"
     >
       Organisasjonsenheten ble ikke funnet
-    </BodyLong>
+    </Alert>
   );
 }
 

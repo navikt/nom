@@ -91,7 +91,7 @@ function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
     <>
       <OrgEnhetInfoWrapper
         heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
+        orgEnhet={orgEnhet}
       />
 
       <AvsluttOrgEnhetInner orgEnhet={orgEnhet} />

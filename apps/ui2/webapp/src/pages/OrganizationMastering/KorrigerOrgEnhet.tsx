@@ -101,7 +101,7 @@ function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
     <>
       <OrgEnhetInfoWrapper
         heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
+        orgEnhet={orgEnhet}
       />
 
       <KorrigeringOrgEnhetForm orgEnhet={orgEnhet} />
