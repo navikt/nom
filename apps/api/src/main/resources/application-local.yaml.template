@@ -62,6 +62,7 @@ app:
     enabled: false
   google-storage-bucket-name:
     missing-ot: "DUMMY"
+    utbet-mottakere: "DUMMY"
   orgenhet:
     nav-id: dummyNavId
     helfo-id: dummyHelfoId
