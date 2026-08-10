@@ -85,6 +85,7 @@ app:
     orgenhet-id: dummyDollyOrgenhetId
   google-storage-bucket-name:
     missing-ot: none
+    utbet-mottakere: DUMMY
       
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080
