@@ -27,6 +27,10 @@ public interface OrgtilknytningStateRepository {
 
     List<String> getAktiveNavidenterPaaEnhet(String orgenhet, DOLIs dolIs);
 
+    List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter);
+
+    List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter, DOLIs dolIs);
+
     List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet);
 
     List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet, DOLIs dolIs);
@@ -34,6 +38,7 @@ public interface OrgtilknytningStateRepository {
     List<OrgtilknytningState> getOrgtilknytningerPaaEnhet(String orgenhet);
 
     List<OrgtilknytningState> getOrgtilknytningerPaaEnhet(String orgenhet, DOLIs dolIs);
+
 
     int count();
 

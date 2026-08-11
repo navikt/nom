@@ -35,7 +35,8 @@ public class OrgEnhetResolver {
     private final NomGraphqlSupportInterface graphqlSupport;
     private final OrganiseringStateRepository organiseringStateRepository;
 
-    public OrgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository, NomGraphqlSupportInterface graphqlSupport,
+    public OrgEnhetResolver(OrgEnhetStateRepository orgEnhetStateRepository,
+                            NomGraphqlSupportInterface graphqlSupport,
                             OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -74,7 +75,8 @@ public class OrgEnhetResolver {
             searchFilter.organiseringSelection(),
             searchFilter.organisertUnderOrgEnhetId(),
             searchFilter.nomNivaaSelection().isEmpty() ? nomNivaaInSearchObjekt : searchFilter.nomNivaaSelection(),
-            searchFilter.periodiskUtvalg()
+            searchFilter.periodiskUtvalg(),
+            searchFilter.tilgangsenhetId()
         );
 
         var agressoSearchDataProvided = !agressoIds.isEmpty() || search.getOrgNiv() != null || search.agressoOrgNiv() != null;
@@ -144,6 +146,7 @@ public class OrgEnhetResolver {
             .filter(orgenhet -> filter.periodiskUtvalg() == PeriodiskUtvalgArg.ALLE || enheterOrganisertIPeriode.contains(orgenhet.id()))
             .filter(orgenhet -> filter.nomNivaaSelection().isEmpty() || filter.nomNivaaSelection().contains(orgenhet.nomNivaa()))
             .filter(filterByLovnoder(filter, lovenodeIderForSlection))
+            .filter(filterByTilgangsenhetId(filter))
             .toList();
     }
 
@@ -162,6 +165,7 @@ public class OrgEnhetResolver {
             .filter(orgenhet -> filter.periodiskUtvalg() == PeriodiskUtvalgArg.ALLE || enheterOrganisertIPeriode.contains(orgenhet.id()))
             .filter(orgenhet -> filter.nomNivaaSelection().isEmpty() || filter.nomNivaaSelection().contains(orgenhet.nomNivaa()))
             .filter(filterByLovnoder(filter, lovenodeIderForSlection))
+            .filter(filterByTilgangsenhetId(filter))
             .toList();
     }
 
@@ -174,6 +178,14 @@ public class OrgEnhetResolver {
         } else {
             return orgEnhet -> !lovenodeIder.contains(orgEnhet.id());
         }
+    }
+
+    Predicate<OrgEnhetState> filterByTilgangsenhetId(OrgEnheterSearchFilter filter) {
+        var tilgangsenhetId = filter.tilgangsenhetId();
+        if (tilgangsenhetId == null || tilgangsenhetId.isBlank()) {
+            return _ -> true;
+        }
+        return orgEnhet -> tilgangsenhetId.equals(orgEnhet.tilgangsenhetId());
     }
 
     OrgenhetIdOgUnderOrganiseringer getOrganiseringerForSelection(OrgEnheterSearchFilter filter) {
@@ -192,7 +204,7 @@ public class OrgEnhetResolver {
 
     private String getOrgenhetIdForNodeSelection(OrgEnheterSearchFilter filter) {
         var orgNivFilter = filter.organiseringSelection();
-        var nodeOrgEnhetId = switch(orgNivFilter) {
+        return switch(orgNivFilter) {
             case UNDER_TOPPNODE_NAV -> graphqlSupport.getNavToppnodeOrgEnhetId();
             case UNDER_VIKAFOSSEN -> graphqlSupport.getOverEnhetIdForVikafossenOrgEnhet();
             case UNDER_HELFO -> graphqlSupport.getOverEnhetIdForHelfoOrgEnhet();
@@ -201,7 +213,6 @@ public class OrgEnhetResolver {
             case UNDER_ANGITT_ORGENHET -> filter.organisertUnderOrgEnhetId();
             default -> null;
         };
-        return nodeOrgEnhetId;
     }
 
     record OrgenhetIdOgUnderOrganiseringer(String nodeId, Set<OrganiseringState> organiseringer) {}
@@ -245,22 +256,18 @@ public class OrgEnhetResolver {
         // if no agressoIdHashSet are specified, then we want to filter everything by the other agresso parameters
         var orgenhetStateListByAgressoIdSet = agressoIds.isEmpty() ? this.orgEnhetStateRepository.getAll() : this.orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds);
 
-        var filteredOrgenhetStateList = orgenhetStateListByAgressoIdSet.stream()
+        return orgenhetStateListByAgressoIdSet.stream()
             .filter(e -> agressoOrgNiv == null || agressoOrgNiv.equals(e.agressoOrgNivaa()))
             .toList();
-
-        return filteredOrgenhetStateList;
     }
 
     List<OrgEnhetResult> nomIdsNotFound(Set<String> nomIds, List<OrgEnhetState> unfilteredFoundOrgenheter) {
         var foundNomIds = unfilteredFoundOrgenheter.stream().map(OrgEnhetState::id).collect(Collectors.toSet());
 
-        var nomIdsNotFound = nomIds.stream()
+        return nomIds.stream()
             .filter(id -> !foundNomIds.contains(id))
             .map(OrgEnhetResult::notFound)
             .toList();
-
-        return nomIdsNotFound;
     }
 
     List<OrgEnhetResult> nomIdsNotInFilter(
@@ -271,24 +278,20 @@ public class OrgEnhetResolver {
         var notFoundNomIds = notFoundElements.stream().map(OrgEnhetResult::getNomId).collect(Collectors.toSet());
         var filteredFoundNomIds = filteredFoundOrgenheter.stream().map(OrgEnhetState::id).collect(Collectors.toSet());
 
-        var nomIdsNotInFilter = nomIds.stream()
+        return nomIds.stream()
             .filter(id -> !notFoundNomIds.contains(id))
             .filter(id -> !filteredFoundNomIds.contains(id))
             .map(OrgEnhetResult::notInFilter)
             .toList();
-
-        return nomIdsNotInFilter;
     }
 
     List<OrgEnhetResult> agressoIdsNotFound(Set<String> agressoIds, String agressoOrgNiv, List<OrgEnhetState> unfilteredFoundOrgenheter) {
         var foundAgressoIds = unfilteredFoundOrgenheter.stream().map(OrgEnhetState::agressoId).collect(Collectors.toSet());
 
-        var agressoIdsNotFound = agressoIds.stream()
+        return agressoIds.stream()
             .filter(agressoId -> !foundAgressoIds.contains(agressoId))
             .map(agressoId -> OrgEnhetResult.notFound(agressoId, agressoOrgNiv))
             .toList();
-
-        return agressoIdsNotFound;
     }
 
     List<OrgEnhetResult> agressoIdsNotInFilter(
@@ -299,12 +302,10 @@ public class OrgEnhetResolver {
         var notFoundAgressoIds = notFoundElements.stream().map(OrgEnhetResult::getAgressoId).collect(Collectors.toSet());
         var filteredFoundAgressoIds = filteredFoundOrgenheter.stream().map(OrgEnhetState::agressoId).collect(Collectors.toSet());
 
-        var agressoIdsNotInFilter = agressoIds.stream()
+        return agressoIds.stream()
             .filter(agressoId -> !notFoundAgressoIds.contains(agressoId))
             .filter(agressoId -> !filteredFoundAgressoIds.contains(agressoId))
             .map(agressoId -> OrgEnhetResult.notInFilter(agressoId, agressoOrgNiv))
             .toList();
-
-        return agressoIdsNotInFilter;
     }
 }

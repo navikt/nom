@@ -24,6 +24,8 @@ public interface OrgEnhetStateRepository {
 
     List<OrgEnhetState> findAllByAgressoIdAndNiv(String id);
 
+    List<OrgEnhetState> findAllByTilgangsenhetId(String tilgangsenhetId);
+
     Optional<OrgEnhetState> findNewestUniqueAgressoId(String id);
 
     Collection<OrgEnhetState> getAll();

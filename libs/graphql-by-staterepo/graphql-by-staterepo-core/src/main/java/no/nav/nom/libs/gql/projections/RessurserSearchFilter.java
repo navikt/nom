@@ -6,7 +6,8 @@ public record RessurserSearchFilter(
     SektorSelection gjeldendeSektorSelection,
     IdentTypeSelection identTypeSelection,
     PeriodiskUtvalgArg periodiskUtvalg,
-    String fysiskBrukersted
+    String fysiskBrukersted,
+    String tilgangsenhetId
 ) {
 
     public enum IdentTypeSelection {
@@ -19,7 +20,7 @@ public record RessurserSearchFilter(
     }
 
     static RessurserSearchFilter alle() {
-        return new RessurserSearchFilter(SektorSelection.ALLE, IdentTypeSelection.ALLE, PeriodiskUtvalgArg.ALLE, null);
+        return new RessurserSearchFilter(SektorSelection.ALLE, IdentTypeSelection.ALLE, PeriodiskUtvalgArg.ALLE, null, null);
     }
 
     public static RessurserSearchFilter ALLE = alle();

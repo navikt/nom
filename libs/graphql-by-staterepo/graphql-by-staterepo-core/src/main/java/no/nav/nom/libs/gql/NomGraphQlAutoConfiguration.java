@@ -66,8 +66,10 @@ public class NomGraphQlAutoConfiguration {
     }
 
     @Bean
-    RessursResolver ressursResolver(RessursStateRepository ressursStateRepository) {
-        return new RessursResolver(ressursStateRepository);
+    RessursResolver ressursResolver(RessursStateRepository ressursStateRepository,
+                                    OrgEnhetStateRepository orgEnhetStateRepository,
+                                    OrgtilknytningStateRepository orgtilknytningStateRepository) {
+        return new RessursResolver(ressursStateRepository, orgEnhetStateRepository, orgtilknytningStateRepository);
     }
 
     @Bean

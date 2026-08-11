@@ -5,11 +5,14 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.gql.MappingUtils;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
+import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +32,15 @@ import static java.util.Objects.nonNull;
 public class RessursResolver {
 
     private final RessursStateRepository ressursStateRepository;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
 
-    public RessursResolver(RessursStateRepository ressursStateRepository) {
+    public RessursResolver(RessursStateRepository ressursStateRepository,
+                           OrgEnhetStateRepository orgEnhetStateRepository,
+                           OrgtilknytningStateRepository orgtilknytningStateRepository) {
         this.ressursStateRepository = ressursStateRepository;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.orgtilknytningStateRepository = orgtilknytningStateRepository;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
@@ -128,6 +137,7 @@ public class RessursResolver {
             .filter(filterBySektor(filter))
             .filter(filterByIdenttype(filter))
             .filter(filterByFysiskBrukersted(filter))
+            .filter(filterByTilgangsenhetId(filter))
             .filter(ressurs -> Util.filterByPeriodiskUtvalg(ressurs, filter.periodiskUtvalg()))
             .toList();
     }
@@ -156,9 +166,19 @@ public class RessursResolver {
     private static Predicate<RessursState> filterByFysiskBrukersted(RessurserSearchFilter filter) {
         var fysiskBrukersted = filter.fysiskBrukersted();
         if (fysiskBrukersted == null || fysiskBrukersted.isBlank()) {
-            return r -> true;
+            return _ -> true;
         }
         return r -> fysiskBrukersted.equals(r.primaryFysiskBrukersted())
             || (r.fysiskeBrukersteder() != null && r.fysiskeBrukersteder().contains(fysiskBrukersted));
+    }
+
+    private Predicate<RessursState> filterByTilgangsenhetId(RessurserSearchFilter filter) {
+        var tilgangsenhetId = filter.tilgangsenhetId();
+        if (tilgangsenhetId == null || tilgangsenhetId.isBlank()) {
+            return _ -> true;
+        }
+        var orgEnhetIdMedGittTilgangsenhetId = orgEnhetStateRepository.findAllByTilgangsenhetId(tilgangsenhetId).stream().map(OrgEnhetState::id).toList();
+        var navidenterMedGittOrgEnhetId = Set.copyOf(orgtilknytningStateRepository.getAktiveNavidenterPaaEnheter(orgEnhetIdMedGittTilgangsenhetId));
+        return r -> navidenterMedGittOrgEnhetId.contains(r.navident());
     }
 }
