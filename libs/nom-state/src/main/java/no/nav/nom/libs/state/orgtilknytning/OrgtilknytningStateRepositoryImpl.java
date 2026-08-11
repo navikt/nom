@@ -67,6 +67,22 @@ public class OrgtilknytningStateRepositoryImpl implements OrgtilknytningStateRep
     }
 
     @Override
+    public List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter) {
+        return orgEnheter.stream()
+            .flatMap(orgEnhetId -> getAktiveNavidenterPaaEnhet(orgEnhetId).stream())
+            .distinct()
+            .toList();
+    }
+
+    @Override
+    public List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter, DOLIs dolIs) {
+        return orgEnheter.stream()
+            .flatMap(orgEnhetId -> getAktiveNavidenterPaaEnhet(orgEnhetId, dolIs).stream())
+            .distinct()
+            .toList();
+    }
+
+    @Override
     public List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgEnhetId) {
         return getAktiveEllerFremtidigeNavidenterPaaEnhet(orgEnhetId, DOLIs.ANY);
     }

@@ -51,6 +51,7 @@ input OrgEnheterSearchFilter {
     organisertUnderOrgEnhetId: String
     nomNivaaSelection: [NomNivaa!]
     periodiskUtvalg: PeriodiskUtvalgArg = ALLE
+    tilgangsenhetId: String
 }
 
 input RessursSearch {
@@ -73,6 +74,7 @@ input RessurserSearchFilter {
     identTypeSelection: IdentTypeSelection = ALLE
     periodiskUtvalg: PeriodiskUtvalgArg = ALLE
     fysiskBrukersted: String
+    tilgangsenhetId: String
 }
 
 type OrgEnhetResult {
