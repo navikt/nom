@@ -4,7 +4,6 @@ import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.clients.dvhords.DvhOrdsService;
 import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -65,7 +64,6 @@ public class DvhRestConsumer {
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
     private final OrganiseringService organiseringService;
-    private final AuthorizedNavident authorizedNavident;
 
     private final ManuelleRessurserOgLedereTilState manuelleRessurserOgLedereTilState;
 
@@ -111,8 +109,7 @@ public class DvhRestConsumer {
             }
             loadOrganiseringerFromDvh(false);
             manuelleRessurserOgLedereTilState.oppdater();
-            authorizedNavident.oppdaterLedereForOrgenheter();
-            
+
             log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
             return;
         }
@@ -166,11 +163,6 @@ public class DvhRestConsumer {
         }
 
         manuelleRessurserOgLedereTilState.oppdater();
-
-        // TODO - denne kan i sekundær Pod (ikke leader) bli kjørt rett før leader pod har oppdatert ny info
-        //  - som gjør at sekundær pod er out of synch egentlig inntil denne trigges på nytt
-        // Men dette er best effort akkurat nå
-        authorizedNavident.oppdaterLedereForOrgenheter();
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
@@ -331,10 +323,6 @@ public class DvhRestConsumer {
         } catch (Exception e) {
             log.error("Failure loading ledere data from DVH", e);
         }
-    }
-
-    public void loadOrganiseringerFromDvh() {
-        loadOrganiseringerFromDvh(false);
     }
 
     public void loadOrganiseringerFromDvh(boolean forceEvtSrcUpdate) {
