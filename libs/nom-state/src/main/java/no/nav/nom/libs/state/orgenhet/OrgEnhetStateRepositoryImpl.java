@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +62,7 @@ public class OrgEnhetStateRepositoryImpl implements OrgEnhetStateRepository {
     public List<OrgEnhetState> findAllByUniqueAgressoId(String id) {
         List<OrgEnhetState> orgEnheter = orgEnheterByUniqueAgressoId.get(id);
         if (orgEnheter == null) {
-            orgEnheter = new ArrayList();
+            orgEnheter = new ArrayList<>();
             orgEnheterByUniqueAgressoId.put(id, orgEnheter);
         }
         return orgEnheter;
@@ -76,10 +77,17 @@ public class OrgEnhetStateRepositoryImpl implements OrgEnhetStateRepository {
     public List<OrgEnhetState> findAllByAgressoIdAndNiv(String id) {
         List<OrgEnhetState> orgEnheter = orgEnheterByAgressoIdAndNiv.get(id);
         if (orgEnheter == null) {
-            orgEnheter = new ArrayList();
+            orgEnheter = new ArrayList<>();
             orgEnheterByAgressoIdAndNiv.put(id, orgEnheter);
         }
         return orgEnheter;
+    }
+
+    @Override
+    public List<OrgEnhetState> findAllByTilgangsenhetId(String tilgangsenhetId) {
+        return getAll().stream()
+            .filter(orgEnhetState -> Objects.equals(orgEnhetState.tilgangsenhetId(), tilgangsenhetId))
+            .toList();
     }
 
     @Override

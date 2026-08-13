@@ -17,15 +17,15 @@ import { TestBanner } from "~/components/TestBanner";
 
 export const queryClient = new QueryClient();
 
-const TanStackRouterDevtools =
-  process.env.NODE_ENV === "production"
-    ? () => null // Render nothing in production
-    : React.lazy(() =>
-        // Lazy load in development
-        import("@tanstack/router-devtools").then((response) => ({
-          default: response.TanStackRouterDevtools,
-        })),
-      );
+// const TanStackRouterDevtools =
+//   process.env.NODE_ENV === "production"
+//     ? () => null // Render nothing in production
+//     : React.lazy(() =>
+//         // Lazy load in development
+//         import("@tanstack/router-devtools").then((response) => ({
+//           default: response.TanStackRouterDevtools,
+//         })),
+//       );
 
 export const Route = createRootRouteWithContext<{
   queryClient: typeof queryClient;
@@ -63,7 +63,7 @@ export const Route = createRootRouteWithContext<{
       <>
         {hasAdminAccess && <PrefetchUsefulAdminQueries />}
         <React.Suspense fallback="">
-          <TanStackRouterDevtools position="bottom-right" />
+          {/*<TanStackRouterDevtools position="bottom-right" />*/}
         </React.Suspense>
         <TestBanner />
         <NavHeader />

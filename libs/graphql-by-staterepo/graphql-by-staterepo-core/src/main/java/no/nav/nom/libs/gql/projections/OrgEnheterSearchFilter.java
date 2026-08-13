@@ -12,7 +12,8 @@ public record OrgEnheterSearchFilter(
     OrganiseringSelection organiseringSelection,
     String organisertUnderOrgEnhetId,
     Set<NomNivaa> nomNivaaSelection,
-    PeriodiskUtvalgArg periodiskUtvalg
+    PeriodiskUtvalgArg periodiskUtvalg,
+    String tilgangsenhetId
 ) {
     public OrgEnheterSearchFilter {
         if (nomNivaaSelection == null) {
@@ -37,7 +38,7 @@ public record OrgEnheterSearchFilter(
     }
 
     static OrgEnheterSearchFilter alle() {
-        return new OrgEnheterSearchFilter(LovnodeSelection.ALLE, OrganiseringSelection.ALLE, null,  emptySet(), PeriodiskUtvalgArg.ALLE);
+        return new OrgEnheterSearchFilter(LovnodeSelection.ALLE, OrganiseringSelection.ALLE, null,  emptySet(), PeriodiskUtvalgArg.ALLE, null);
     }
 
     public static OrgEnheterSearchFilter ALLE = alle();
