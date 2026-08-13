@@ -166,16 +166,19 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     const aFulltNavn = `${a.fornavn} ${a.etternavn}`;
     const bFulltNavn = `${b.fornavn} ${b.etternavn}`;
 
-    const navnCompare = aFulltNavn.localeCompare(bFulltNavn);
+    const navnCompare = aFulltNavn.localeCompare(bFulltNavn, "no");
     if (navnCompare !== 0) return navnCompare;
 
     const aPrioritet = a.kontaktpersonPrioritet ?? "";
     const bPrioritet = b.kontaktpersonPrioritet ?? "";
 
-    const prioritetCompare = aPrioritet.localeCompare(bPrioritet);
+    const prioritetCompare = aPrioritet.localeCompare(bPrioritet, "no");
     if (prioritetCompare !== 0) return prioritetCompare;
 
-    return (a.kontaktpersonNavn ?? "").localeCompare(b.kontaktpersonNavn ?? "");
+    return (a.kontaktpersonNavn ?? "").localeCompare(
+      b.kontaktpersonNavn ?? "",
+      "no",
+    );
   });
 
   return (

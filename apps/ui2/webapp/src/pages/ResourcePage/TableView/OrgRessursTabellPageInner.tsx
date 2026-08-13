@@ -330,8 +330,8 @@ function customSortByOrgEnhetName(
     const nameB = b.orgEnheter[0]?.name.toLowerCase() || "";
 
     return sortState.direction === "ascending"
-      ? nameA.localeCompare(nameB)
-      : nameB.localeCompare(nameA);
+      ? nameA.localeCompare(nameB, "no")
+      : nameB.localeCompare(nameA, "no");
   });
 
   return sortedData;

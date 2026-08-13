@@ -246,7 +246,7 @@ function AvsluttOrgEnhetForm({
       ),
       sluttdato: tilknytning.gyldigTom,
     }))
-    .sort((a, b) => a.navn.localeCompare(b.navn));
+    .sort((a, b) => a.navn.localeCompare(b.navn, "no"));
 
   const orgEnhetIder = orgEnhet.underordnedeOrgEnhetId;
 
@@ -261,7 +261,7 @@ function AvsluttOrgEnhetForm({
   const orgEnhetAvhengigheter =
     underliggendeOrgEnheter
       ?.filter((enhet) => nomDateIsAfter(enhet.gyldigTom, sluttdato))
-      .sort((a, b) => a.navn.localeCompare(b.navn)) ?? [];
+      .sort((a, b) => a.navn.localeCompare(b.navn, "no")) ?? [];
 
   return (
     <>

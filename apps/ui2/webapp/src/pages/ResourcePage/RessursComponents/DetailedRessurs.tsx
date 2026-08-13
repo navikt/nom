@@ -798,7 +798,9 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   const unikeOrgEnheter = uniqBy(
     orgEnheterLedetAvRessursFiltrert,
     (orgEnhet) => orgEnhet.orgEnhetNavn,
-  ).sort((a, b) => a.orgEnhetNavn?.localeCompare(b.orgEnhetNavn ?? "") ?? 0);
+  ).sort(
+    (a, b) => a.orgEnhetNavn?.localeCompare(b.orgEnhetNavn ?? "", "no") ?? 0,
+  );
 
   return (
     <>
