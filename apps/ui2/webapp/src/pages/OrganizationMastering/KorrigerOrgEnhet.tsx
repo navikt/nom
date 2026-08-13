@@ -3,19 +3,18 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
-  BodyShort,
+  BodyLong,
   Button,
   DatePicker,
-  Loader,
   Select,
   TextField,
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import { type AxiosError } from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -25,7 +24,14 @@ import {
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
@@ -38,8 +44,9 @@ import {
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
-import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
@@ -47,72 +54,120 @@ import type {
 import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
+  const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
+
   const hasAdminAccess = useHasAdminAccess();
 
-  const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(id ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(id ?? ""),
+    enabled: !!id,
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
+  if (!hasAdminAccess) {
+    return (
+      <ContentWrapper>
+        <IkkeTilgangRedigering />
+      </ContentWrapper>
+    );
+  }
+
+  if (!id) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
+
+  const [changeInfo, setChangeInfo] = useState<any>();
+
+  if (orgEnhetQuery.isLoading) {
+    return (
+      <ContentWrapper>
+        <LoaderWithText>Laster...</LoaderWithText>
+      </ContentWrapper>
+    );
+  }
+
+  if (!orgEnhet) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
 
   return (
     <>
       <PageBanner text="Korrigér organisasjonsenhet" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop padding={6}>
-          {hasAdminAccess ? (
-            <KorrigeringOrgEnhet orgEnhetId={id} />
-          ) : (
-            <IkkeTilgangRedigering />
-          )}
-        </ContainerWithHighlightedTop>
+        {!!changeInfo ? (
+          <KvitteringView changeInfo={changeInfo} orgEnhet={orgEnhet} />
+        ) : (
+          <FormView orgEnhet={orgEnhet} setChangeInfo={setChangeInfo} />
+        )}
       </ContentWrapper>
     </>
   );
 };
 
-function KorrigeringOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
-  });
-
-  const orgEnhet = orgEnhetQuery.data;
-
-  if (orgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Loader size="3xlarge" />
-        <BodyShort size="large">Laster...</BodyShort>
-      </div>
-    );
-  }
-
-  if (!orgEnhet) {
-    return <OrgEnhetIkkeFunnet />;
-  }
-
+function FormView({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   return (
-    <>
-      <OrgEnhetInfoWrapper
-        heading="Valgt organisasjonsenhet"
-        orgEnhet={orgEnhet}
-      />
+    <ModalProvider>
+      <ContainerWithHighlightedTop padding={6}>
+        <OrgEnhetInfoWrapper
+          heading="Valgt organisasjonsenhet"
+          orgEnhet={orgEnhet}
+        />
 
-      <KorrigeringOrgEnhetForm orgEnhet={orgEnhet} />
-    </>
+        <KorrigeringOrgEnhetForm
+          orgEnhet={orgEnhet}
+          setChangeInfo={setChangeInfo}
+        />
+      </ContainerWithHighlightedTop>
+
+      <ModalComponent />
+    </ModalProvider>
   );
 }
 
-function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const navigate = useNavigate();
+function KvitteringView({
+  orgEnhet,
+  changeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  changeInfo: any;
+}) {
+  return (
+    <OrgEnhetKvittering
+      orgEnhetId={orgEnhet.id}
+      title="Leder på organisasjonsenhet oppdatert"
+    >
+      <KorrigerOrgEnhetKvitteringContent orgEnhet={orgEnhet} />
+    </OrgEnhetKvittering>
+  );
+}
 
+function KorrigeringOrgEnhetForm({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   const queryClient = useQueryClient();
+
+  const { showModal } = useModal();
 
   const methods = useForm({
     defaultValues: {
@@ -139,9 +194,7 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         queryKey: orgEnheterKeys.id(orgEnhet.id),
       });
 
-      navigate({
-        to: "/organisasjonsmastring",
-      }).then();
+      setChangeInfo({ testtekst: "testtekst" });
     },
   });
 
@@ -154,7 +207,14 @@ function KorrigeringOrgEnhetForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 
-    endreOrgEnhetInformasjonMutation.mutate(request);
+    await showModal(
+      <BekreftModal
+        content={<KorrigerOrgEnhetModalContent orgEnhet={orgEnhet} />}
+        heading="Bekreft endring på organisasjonsenhet"
+      />,
+    ).then(() => {
+      endreOrgEnhetInformasjonMutation.mutate(request);
+    });
   };
 
   const mutateError =
@@ -264,18 +324,23 @@ function FormDateWrapper({ name }: { name: string }) {
   );
 }
 
-function KvitteringContent({
-  opprinneligNavn,
-  nyttNavn,
+function KorrigerOrgEnhetModalContent({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  return (
+    <BodyLong>
+      Informasjon blir oppdatert for <b>{orgEnhet.navn}</b>.
+    </BodyLong>
+  );
+}
+
+function KorrigerOrgEnhetKvitteringContent({
+  orgEnhet,
 }: {
-  opprinneligNavn: string;
-  nyttNavn: string;
+  orgEnhet: OrgEnhet;
 }) {
   return (
-    <span>
-      Organisasjonsenheten har byttet navn fra <b>{opprinneligNavn}</b> til{" "}
-      <b>{nyttNavn}</b>.
-    </span>
+    <BodyLong>
+      Informasjon oppdatert for <b>{orgEnhet.navn}</b>.
+    </BodyLong>
   );
 }
 

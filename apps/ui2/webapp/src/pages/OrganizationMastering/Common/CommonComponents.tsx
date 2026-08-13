@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Alert, BodyLong } from "@navikt/ds-react";
+import { Alert, Heading, VStack } from "@navikt/ds-react";
 import axios from "axios";
 import React from "react";
 import { useController } from "react-hook-form";
@@ -8,29 +8,47 @@ import {
   AsyncSearch,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
+import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
+import type { OrgEnhet } from "~/types/api-models";
 
 export function OrgEnhetIkkeFunnet() {
-  return (
-    <Alert
-      css={css`
-        font-size: var(--a-font-size-xlarge);
-      `}
-      variant="error"
-    >
-      Organisasjonsenheten ble ikke funnet
-    </Alert>
-  );
+  return <Alert variant="error">Organisasjonsenheten ble ikke funnet</Alert>;
 }
 
 export function IkkeTilgangRedigering() {
   return (
-    <BodyLong
-      css={css`
-        font-size: var(--a-font-size-xlarge);
-      `}
-    >
+    <Alert variant="error">
       Du har ikke tilgang til å redigere denne organisasjonsenheten
-    </BodyLong>
+    </Alert>
+  );
+}
+
+export function OrgEnhetInfoWrapper({
+  orgEnhet,
+  heading,
+}: {
+  orgEnhet: OrgEnhet;
+  heading: string;
+}) {
+  return (
+    <VStack gap="2">
+      {!!heading && (
+        <Heading level="2" size="small">
+          {heading}
+        </Heading>
+      )}
+
+      <div
+        css={css`
+          background-color: #deecef;
+          padding: var(--a-spacing-4);
+          border-radius: var(--a-border-radius-xlarge);
+          display: grid;
+        `}
+      >
+        <OrgEnhetInfo orgEnhet={orgEnhet} />
+      </div>
+    </VStack>
   );
 }
 

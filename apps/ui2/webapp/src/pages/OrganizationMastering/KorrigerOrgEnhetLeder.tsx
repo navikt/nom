@@ -3,19 +3,18 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
-  BodyShort,
+  BodyLong,
   Button,
   DatePicker,
   Heading,
-  Loader,
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import { subDays } from "date-fns";
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -44,8 +43,9 @@ import {
   FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
-import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import {
   nomDateIsAfterToday,
   nomDateIsTodayOrAfter,
@@ -59,73 +59,120 @@ import type {
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const KorrigerOrgEnhetLeder = () => {
+  const { id } = useSearch({ from: "/korriger-leder-organisasjonsenhet" });
+
   const hasAdminAccess = useHasAdminAccess();
 
-  const { id } = useSearch({ from: "/korriger-leder-organisasjonsenhet" });
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(id ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(id ?? ""),
+    enabled: !!id,
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
+  if (!hasAdminAccess) {
+    return (
+      <ContentWrapper>
+        <IkkeTilgangRedigering />
+      </ContentWrapper>
+    );
+  }
+
+  if (!id) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
+
+  const [changeInfo, setChangeInfo] = useState<any>();
+
+  if (orgEnhetQuery.isLoading) {
+    return (
+      <ContentWrapper>
+        <LoaderWithText>Laster...</LoaderWithText>
+      </ContentWrapper>
+    );
+  }
+
+  if (!orgEnhet) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
 
   return (
     <>
       <PageBanner text="Endre leder på organisasjonsenhet" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop padding={6}>
-          {hasAdminAccess ? (
-            <ModalProvider>
-              <KorrigeringOrgEnhetLeder orgEnhetId={id} />
-
-              <ModalComponent />
-            </ModalProvider>
-          ) : (
-            <IkkeTilgangRedigering />
-          )}
-        </ContainerWithHighlightedTop>
+        {!!changeInfo ? (
+          <KvitteringView changeInfo={changeInfo} orgEnhet={orgEnhet} />
+        ) : (
+          <FormView orgEnhet={orgEnhet} setChangeInfo={setChangeInfo} />
+        )}
       </ContentWrapper>
     </>
   );
 };
 
-function KorrigeringOrgEnhetLeder({ orgEnhetId }: { orgEnhetId?: string }) {
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
-  });
-
-  const orgEnhet = orgEnhetQuery.data;
-
-  if (orgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Loader size="3xlarge" />
-        <BodyShort size="large">Laster...</BodyShort>
-      </div>
-    );
-  }
-
-  if (!orgEnhet) {
-    return <OrgEnhetIkkeFunnet />;
-  }
-
+function FormView({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   return (
-    <>
-      <OrgEnhetInfoWrapper
-        heading="Valgt organisasjonsenhet"
-        orgEnhet={orgEnhet}
-      />
+    <ModalProvider>
+      <ContainerWithHighlightedTop padding={6}>
+        <OrgEnhetInfoWrapper
+          heading="Valgt organisasjonsenhet"
+          orgEnhet={orgEnhet}
+        />
 
-      <KorrigeringOrgEnhetLederForm orgEnhet={orgEnhet} />
-    </>
+        <KorrigerOrgEnhetLederForm
+          orgEnhet={orgEnhet}
+          setChangeInfo={setChangeInfo}
+        />
+      </ContainerWithHighlightedTop>
+
+      <ModalComponent />
+    </ModalProvider>
   );
 }
 
-function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+function KvitteringView({
+  orgEnhet,
+  changeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  changeInfo: any;
+}) {
+  return (
+    <OrgEnhetKvittering
+      orgEnhetId={orgEnhet.id}
+      title="Leder på organisasjonsenhet oppdatert"
+    >
+      <KorrigerOrgEnhetLederKvitteringContent
+        changeInfo={changeInfo}
+        orgEnhet={orgEnhet}
+      />
+    </OrgEnhetKvittering>
+  );
+}
+
+function KorrigerOrgEnhetLederForm({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   const periodiserteLedereQuery = useQuery({
     queryKey: getPeriodiserteLedereOrgEnhet.queryKey(orgEnhet.id),
     queryFn: () => getPeriodiserteLedereOrgEnhet.queryFn(orgEnhet.id),
@@ -143,8 +190,6 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     nomDateIsAfterToday(lederskap.startdato),
   );
 
-  const navigate = useNavigate();
-
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
@@ -161,16 +206,14 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     mutationFn: async (request) => {
       return opprettOrgEnhetLeder(request);
     },
-    onSuccess: async () => {
-      showToast({ text: "Oppdatert" });
+    onSuccess: async (_, request) => {
+      setChangeInfo({ request, aktivtLederskap });
+
+      showToast({ text: "Leder oppdatert" });
 
       await queryClient.invalidateQueries({
         queryKey: orgEnheterKeys.id(orgEnhet.id),
       });
-
-      navigate({
-        to: "/organisasjonsmastring",
-      }).then();
     },
   });
 
@@ -184,9 +227,8 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     await showModal(
       <BekreftModal
         content={
-          <LeggTilLederModalContent
+          <KorrigerOrgEnhetLederModalContent
             aktivtLederskap={aktivtLederskap}
-            planlagtLederskap={planlagtLederskap}
             request={request}
           />
         }
@@ -196,6 +238,9 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       opprettOrgEnhetLederMutation.mutate(request);
     });
   };
+
+  const mutateError =
+    opprettOrgEnhetLederMutation?.error?.response?.data?.message;
 
   return (
     <FormProvider {...methods}>
@@ -233,11 +278,7 @@ function KorrigeringOrgEnhetLederForm({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               Lagre
             </Button>
 
-            {!!opprettOrgEnhetLederMutation?.error?.response?.data?.message && (
-              <Alert variant="error">
-                {opprettOrgEnhetLederMutation?.error?.response?.data?.message}
-              </Alert>
-            )}
+            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
         </VStack>
       </form>
@@ -260,68 +301,17 @@ function FremtidigLeder({
         Fremtidig leder:
       </Heading>
 
-      <span>
+      <BodyLong>
         Det er registrert at{" "}
         <b>{formatVisningsnavn(planlagtLederskap.visningsnavn)}</b> blir leder
         for organisasjonsenheten fra og med{" "}
         <b>{formatDisplayDate(planlagtLederskap.startdato)}</b>.
-      </span>
+      </BodyLong>
 
-      <span>
+      <BodyLong>
         En registrering av ny leder overskriver den registrerte fremtidige
         lederen.
-      </span>
-    </VStack>
-  );
-}
-
-function LeggTilLederModalContent({
-  request,
-  aktivtLederskap,
-  planlagtLederskap,
-}: {
-  request: OpprettOrgEnhetLederRequest;
-  aktivtLederskap: OrgEnhetLederResponse | undefined;
-  planlagtLederskap: OrgEnhetLederResponse | undefined;
-}) {
-  const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(request?.navident ?? ""),
-    queryFn: () => getRessurs.queryFn(request?.navident ?? ""),
-    enabled: !!request.navident,
-  });
-
-  const ressurs = ressursQuery.data;
-
-  if (ressursQuery.isLoading) {
-    return <LoaderWithText />;
-  }
-
-  return (
-    <VStack gap="4">
-      <span>
-        Endringen innebærer at{" "}
-        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> blir leder for
-        enheten fra og med <b>{formatDisplayDate(request.gyldigFom)}</b>.
-      </span>
-      <span>
-        Dette betyr at{" "}
-        <b>{formatVisningsnavn(aktivtLederskap?.visningsnavn)}</b> er leder for
-        enheten til og med{" "}
-        <b>
-          {!!request.gyldigFom
-            ? formatDisplayDate(subDays(new Date(request.gyldigFom), 1))
-            : "dagen før dette"}
-        </b>
-        .
-      </span>
-      {!!planlagtLederskap && (
-        <span>
-          Det planlagte lederskapet til{" "}
-          <b>{formatVisningsnavn(planlagtLederskap.visningsnavn)}</b> fra og med{" "}
-          <b>{formatDisplayDate(planlagtLederskap.startdato)}</b> blir
-          overskrevet.
-        </span>
-      )}
+      </BodyLong>
     </VStack>
   );
 }
@@ -348,6 +338,97 @@ function FormDateWrapper({ name, label }: { name: string; label: string }) {
         size="medium"
       />
     </DatePicker>
+  );
+}
+
+function KorrigerOrgEnhetLederModalContent({
+  request,
+  aktivtLederskap,
+}: {
+  request: OpprettOrgEnhetLederRequest;
+  aktivtLederskap: OrgEnhetLederResponse | undefined;
+}) {
+  const navident = request.navident ?? "";
+
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(navident),
+    queryFn: () => getRessurs.queryFn(navident),
+  });
+
+  const ressurs = ressursQuery.data;
+
+  if (ressursQuery.isLoading) {
+    return <LoaderWithText />;
+  }
+
+  const gyldigFom = request.gyldigFom;
+
+  return (
+    <VStack gap="4">
+      <BodyLong>
+        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> fra og med{" "}
+        <b>{formatDisplayDate(gyldigFom)}</b>
+      </BodyLong>
+
+      <BodyLong>
+        <b>{formatVisningsnavn(aktivtLederskap?.visningsnavn)}</b> til og med{" "}
+        <b>
+          {!!gyldigFom
+            ? formatDisplayDate(subDays(new Date(gyldigFom), 1))
+            : "dagen før"}
+        </b>
+      </BodyLong>
+    </VStack>
+  );
+}
+
+function KorrigerOrgEnhetLederKvitteringContent({
+  orgEnhet,
+  changeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  changeInfo: any;
+}) {
+  const request = changeInfo.request;
+
+  const navident = request.navident;
+
+  const gyldigFom = request.gyldigFom;
+
+  const aktivtLederskap = changeInfo.aktivtLederskap;
+
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(navident),
+    queryFn: () => getRessurs.queryFn(navident),
+    enabled: !!navident,
+  });
+
+  const ressurs = ressursQuery.data;
+
+  if (ressursQuery.isLoading) {
+    return <LoaderWithText />;
+  }
+
+  return (
+    <VStack gap="4">
+      <BodyLong>
+        Leder oppdatert for <b>{orgEnhet.navn}</b>:
+      </BodyLong>
+
+      <BodyLong>
+        <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> fra og med{" "}
+        <b>{formatDisplayDate(gyldigFom)}</b>
+      </BodyLong>
+
+      <BodyLong>
+        <b>{formatVisningsnavn(aktivtLederskap?.visningsnavn)}</b> til og med{" "}
+        <b>
+          {!!gyldigFom
+            ? formatDisplayDate(subDays(new Date(gyldigFom), 1))
+            : "dagen før"}
+        </b>
+      </BodyLong>
+    </VStack>
   );
 }
 

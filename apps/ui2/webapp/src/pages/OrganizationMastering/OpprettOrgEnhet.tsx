@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
+  Alert,
   BodyLong,
   Button,
   DatePicker,
@@ -20,8 +21,14 @@ import * as yup from "yup";
 
 import { getOrgEnhet, opprettOrgEnhet } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
 import { LoaderWithText } from "~/components/LoaderWithText";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
@@ -30,11 +37,12 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import {
   FormRessursSearchWrapper,
+  IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
-import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import type {
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
@@ -51,10 +59,12 @@ export const OpprettOrgEnhet = () => {
   const hasAdminAccess = useHasAdminAccess();
 
   if (!hasAdminAccess) {
-    return;
+    return (
+      <ContentWrapper>
+        <IkkeTilgangRedigering />
+      </ContentWrapper>
+    );
   }
-
-  const inDevelopment = isInDevelopment();
 
   const [opprettResponse, setOpprettResponse] = useState<any>();
 
@@ -62,34 +72,33 @@ export const OpprettOrgEnhet = () => {
     <>
       <PageBanner text="Opprett ny organisasjonsenhet" />
 
-      {!!opprettResponse ? (
-        <ContentWrapper>
-          <OrgEnhetKvittering
-            orgEnhetId={opprettResponse.data.id}
-            title="Organisasjonsenheten er nå registrert i NOM"
-          >
-            <OrgEnhetOpprettetKvittering opprettResponse={opprettResponse} />
-          </OrgEnhetKvittering>
-        </ContentWrapper>
-      ) : (
-        <ContentWrapper limitWidth={!!id}>
-          <ContainerWithHighlightedTop padding={6}>
-            {!id ? (
-              <OrgKartView inDevelopment={inDevelopment} />
-            ) : (
-              <OpprettOrgEnhetFormView
-                overordnetOrgEnhetId={id}
-                setOpprettResponse={setOpprettResponse}
-              />
-            )}
-          </ContainerWithHighlightedTop>
-        </ContentWrapper>
-      )}
+      <ContentWrapper limitWidth={!!id}>
+        {!!opprettResponse ? (
+          <KvitteringView opprettResponse={opprettResponse} />
+        ) : (
+          <ModalProvider>
+            <ContainerWithHighlightedTop padding={6}>
+              {!id ? (
+                <OrgKartView />
+              ) : (
+                <FormView
+                  overordnetOrgEnhetId={id}
+                  setOpprettResponse={setOpprettResponse}
+                />
+              )}
+            </ContainerWithHighlightedTop>
+
+            <ModalComponent />
+          </ModalProvider>
+        )}
+      </ContentWrapper>
     </>
   );
 };
 
-function OrgKartView({ inDevelopment }: { inDevelopment: boolean }) {
+function OrgKartView() {
+  const inDevelopment = isInDevelopment();
+
   return (
     <>
       <DynamiskOrgKart
@@ -115,7 +124,7 @@ function OrgKartView({ inDevelopment }: { inDevelopment: boolean }) {
   );
 }
 
-function OpprettOrgEnhetFormView({
+function FormView({
   overordnetOrgEnhetId,
   setOpprettResponse,
 }: {
@@ -134,7 +143,7 @@ function OpprettOrgEnhetFormView({
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
-  if (!orgEnhet || orgEnhetQuery.isError) {
+  if (!orgEnhet) {
     return <OrgEnhetIkkeFunnet />;
   }
 
@@ -145,7 +154,7 @@ function OpprettOrgEnhetFormView({
         orgEnhet={orgEnhet}
       />
 
-      <OrgEnhetInfoForm
+      <OpprettOrgEnhetForm
         overordnetOrgEnhet={orgEnhet}
         setOpprettResponse={setOpprettResponse}
       />
@@ -153,7 +162,18 @@ function OpprettOrgEnhetFormView({
   );
 }
 
-function OrgEnhetInfoForm({
+function KvitteringView({ opprettResponse }: { opprettResponse: any }) {
+  return (
+    <OrgEnhetKvittering
+      orgEnhetId={opprettResponse.data.id}
+      title="Organisasjonsenheten er nå registrert i NOM"
+    >
+      <OpprettOrgEnhetKvitteringContent opprettResponse={opprettResponse} />
+    </OrgEnhetKvittering>
+  );
+}
+
+function OpprettOrgEnhetForm({
   overordnetOrgEnhet,
   setOpprettResponse,
 }: {
@@ -180,14 +200,25 @@ function OrgEnhetInfoForm({
     },
   });
 
+  const { showModal } = useModal();
+
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OpprettOrgEnhetRequest = {
       ...values,
       overordnetOrgEnhetId: overordnetOrgEnhet.id,
     };
 
-    opprettOrgEnhetMutation.mutate(request);
+    await showModal(
+      <BekreftModal
+        content={<OpprettOrgEnhetModalContent />}
+        heading="Bekreft navneendring på organisasjonsenhet"
+      />,
+    ).then(() => {
+      opprettOrgEnhetMutation.mutate(request);
+    });
   };
+
+  const mutateError = opprettOrgEnhetMutation?.error?.response?.data?.message;
 
   return (
     <FormProvider {...methods}>
@@ -202,7 +233,7 @@ function OrgEnhetInfoForm({
               {...methods.register("navn")}
               description="Enheten kan ikke ha likt navn som en annen enhet"
               error={methods.formState.errors.navn?.message}
-              label="Navn på den nye organisasjonsenhet"
+              label="Navn på ny organisasjonsenhet"
             />
 
             <FormRessursSearchWrapper
@@ -261,6 +292,8 @@ function OrgEnhetInfoForm({
               Lagre
             </Button>
           </div>
+
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>
@@ -290,7 +323,11 @@ function FormDateWrapper({ name }: { name: string }) {
   );
 }
 
-function OrgEnhetOpprettetKvittering({
+function OpprettOrgEnhetModalContent() {
+  return <BodyLong>Testmelding</BodyLong>;
+}
+
+function OpprettOrgEnhetKvitteringContent({
   opprettResponse,
 }: {
   opprettResponse: any;
@@ -298,41 +335,10 @@ function OrgEnhetOpprettetKvittering({
   const opprettetOrgEnhet = opprettResponse.data;
 
   return (
-    <>
-      <BodyLong>
-        Organisasjonsenheten <b>{opprettetOrgEnhet.navn}</b> er nå registrert i
-        NOM med ID <b>{opprettetOrgEnhet.id}</b>.
-      </BodyLong>
-    </>
-  );
-}
-
-export function OrgEnhetInfoWrapper({
-  orgEnhet,
-  heading,
-}: {
-  orgEnhet: OrgEnhet;
-  heading: string;
-}) {
-  return (
-    <VStack gap="2">
-      {!!heading && (
-        <Heading level="2" size="small">
-          {heading}
-        </Heading>
-      )}
-
-      <div
-        css={css`
-          background-color: #deecef;
-          padding: var(--a-spacing-4);
-          border-radius: var(--a-border-radius-xlarge);
-          display: grid;
-        `}
-      >
-        <OrgEnhetInfo orgEnhet={orgEnhet} />
-      </div>
-    </VStack>
+    <BodyLong>
+      Organisasjonsenheten <b>{opprettetOrgEnhet.navn}</b> er nå registrert i
+      NOM med ID <b>{opprettetOrgEnhet.id}</b>.
+    </BodyLong>
   );
 }
 
