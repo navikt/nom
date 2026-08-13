@@ -1,14 +1,7 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
-import {
-  Alert,
-  BodyShort,
-  Button,
-  Loader,
-  TextField,
-  VStack,
-} from "@navikt/ds-react";
+import { Alert, BodyLong, Button, TextField, VStack } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
@@ -25,6 +18,7 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
 import { LabelWithValue } from "~/components/LabelWithValue";
+import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
   ModalProvider,
@@ -37,83 +31,65 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
-import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
 import type { KorrigerOrgEnhetNavnRequest, OrgEnhet } from "~/types/api-models";
 
 export const KorrigerOrgEnhetNavn = () => {
-  const hasAdminAccess = useHasAdminAccess();
-
   const { id } = useSearch({ from: "/korriger-navn-organisasjonsenhet" });
 
-  const [requestInfo, setRequestInfo] = useState<any>();
+  const hasAdminAccess = useHasAdminAccess();
+
+  if (!hasAdminAccess) {
+    return (
+      <ContentWrapper>
+        <IkkeTilgangRedigering />
+      </ContentWrapper>
+    );
+  }
+
+  if (!id) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
+
+  const [changeInfo, setChangeInfo] = useState<any>();
 
   return (
     <>
       <PageBanner text="Korrigér organisasjonsenhetsnavn" />
 
       <ContentWrapper>
-        {!!requestInfo ? (
-          <OrgEnhetKvittering
-            orgEnhetId={id ?? ""}
-            title="Navn på organisasjonsenhet oppdatert"
-          >
-            <KvitteringContent
-              nyttNavn={requestInfo.nyttNavn}
-              opprinneligNavn={requestInfo.opprinneligNavn}
-            />
-          </OrgEnhetKvittering>
+        {!!changeInfo ? (
+          <KvitteringView changeInfo={changeInfo} orgEnhetId={id} />
         ) : (
-          <ModalProvider>
-            <ContainerWithHighlightedTop padding={6}>
-              {hasAdminAccess ? (
-                <KorrigeringOrgEnhetNavn
-                  orgEnhetId={id}
-                  setRequestInfo={setRequestInfo}
-                />
-              ) : (
-                <IkkeTilgangRedigering />
-              )}
-            </ContainerWithHighlightedTop>
-
-            <ModalComponent />
-          </ModalProvider>
+          <FormView orgEnhetId={id} setChangeInfo={setChangeInfo} />
         )}
       </ContentWrapper>
     </>
   );
 };
 
-function KorrigeringOrgEnhetNavn({
+function FormView({
   orgEnhetId,
-  setRequestInfo,
+  setChangeInfo,
 }: {
-  orgEnhetId?: string;
-  setRequestInfo: (response: any) => void;
+  orgEnhetId: string;
+  setChangeInfo: (response: any) => void;
 }) {
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
+    queryKey: getOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
   });
 
   const orgEnhet = orgEnhetQuery.data;
 
   if (orgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Loader size="3xlarge" />
-        <BodyShort size="large">Laster...</BodyShort>
-      </div>
-    );
+    return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
   if (!orgEnhet) {
@@ -121,34 +97,60 @@ function KorrigeringOrgEnhetNavn({
   }
 
   return (
-    <>
-      <OrgEnhetInfoWrapper
-        heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
-      />
+    <ModalProvider>
+      <ContainerWithHighlightedTop padding={6}>
+        <OrgEnhetInfoWrapper
+          heading="Valgt organisasjonsenhet"
+          orgEnhet={orgEnhet}
+        />
 
-      <KorrigeringOrgEnhetNavnForm
-        orgEnhet={orgEnhet}
-        setRequestInfo={setRequestInfo}
-      />
-    </>
+        <KorrigerOrgEnhetNavnForm
+          orgEnhet={orgEnhet}
+          setChangeInfo={setChangeInfo}
+        />
+      </ContainerWithHighlightedTop>
+
+      <ModalComponent />
+    </ModalProvider>
   );
 }
 
-function KorrigeringOrgEnhetNavnForm({
+function KvitteringView({
+  orgEnhetId,
+  changeInfo,
+}: {
+  orgEnhetId: string;
+  changeInfo: any;
+}) {
+  return (
+    <OrgEnhetKvittering
+      orgEnhetId={orgEnhetId}
+      title="Navn på organisasjonsenhet oppdatert"
+    >
+      <KorrigerOrgEnhetNavnKvitteringContent
+        nyttNavn={changeInfo.nyttNavn}
+        opprinneligNavn={changeInfo.opprinneligNavn}
+      />
+    </OrgEnhetKvittering>
+  );
+}
+
+function KorrigerOrgEnhetNavnForm({
   orgEnhet,
-  setRequestInfo,
+  setChangeInfo,
 }: {
   orgEnhet: OrgEnhet;
-  setRequestInfo: (response: any) => void;
+  setChangeInfo: (response: any) => void;
 }) {
-  const queryClient = useQueryClient();
+  const opprinneligNavn = orgEnhet.navn;
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
   });
 
-  const opprinneligNavn = orgEnhet.navn;
+  const queryClient = useQueryClient();
+
+  const { showModal } = useModal();
 
   const korrigerOrgEnhetNavnMutation = useMutation<
     unknown,
@@ -159,9 +161,7 @@ function KorrigeringOrgEnhetNavnForm({
       return korrigerOrgEnhetNavn(request);
     },
     onSuccess: async () => {
-      const nyttNavn = methods.getValues("navn");
-
-      setRequestInfo({ opprinneligNavn, nyttNavn });
+      setChangeInfo({ opprinneligNavn, nyttNavn: methods.getValues("navn") });
 
       showToast({ text: "Navn oppdatert" });
 
@@ -170,8 +170,6 @@ function KorrigeringOrgEnhetNavnForm({
       });
     },
   });
-
-  const { showModal } = useModal();
 
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: KorrigerOrgEnhetNavnRequest = {
@@ -182,7 +180,7 @@ function KorrigeringOrgEnhetNavnForm({
     await showModal(
       <BekreftModal
         content={
-          <ModalContent
+          <KorrigerOrgEnhetNavnModalContent
             nyttNavn={values.navn}
             opprinneligNavn={opprinneligNavn}
           />
@@ -237,7 +235,7 @@ function KorrigeringOrgEnhetNavnForm({
   );
 }
 
-function ModalContent({
+function KorrigerOrgEnhetNavnModalContent({
   opprinneligNavn,
   nyttNavn,
 }: {
@@ -261,7 +259,7 @@ function ModalContent({
   );
 }
 
-function KvitteringContent({
+function KorrigerOrgEnhetNavnKvitteringContent({
   opprinneligNavn,
   nyttNavn,
 }: {
@@ -269,10 +267,10 @@ function KvitteringContent({
   nyttNavn: string;
 }) {
   return (
-    <span>
+    <BodyLong>
       Organisasjonsenheten har byttet navn fra <b>{opprinneligNavn}</b> til{" "}
       <b>{nyttNavn}</b>.
-    </span>
+    </BodyLong>
   );
 }
 

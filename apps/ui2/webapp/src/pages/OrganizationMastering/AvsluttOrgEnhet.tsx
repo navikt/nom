@@ -14,7 +14,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React, { useState } from "react";
 
@@ -25,81 +25,144 @@ import {
   getRessurserByListNavident,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
+import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { OrgEnhetInfoWrapper } from "~/pages/OrganizationMastering/OpprettOrgEnhet";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { AvvikleOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const AvsluttOrgEnhet = () => {
+  const { id } = useSearch({ from: "/avslutt-organisasjonsenhet" });
+
   const hasAdminAccess = useHasAdminAccess();
 
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(id ?? ""),
+    queryFn: () => getOrgEnhet.queryFn(id ?? ""),
+    enabled: !!id,
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
   if (!hasAdminAccess) {
-    return;
+    return (
+      <ContentWrapper>
+        <IkkeTilgangRedigering />
+      </ContentWrapper>
+    );
   }
 
-  const { id } = useSearch({ from: "/avslutt-organisasjonsenhet" });
+  if (!id) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
+
+  const [changeInfo, setChangeInfo] = useState<any>();
+
+  if (orgEnhetQuery.isLoading) {
+    return (
+      <ContentWrapper>
+        <LoaderWithText>Laster...</LoaderWithText>
+      </ContentWrapper>
+    );
+  }
+
+  if (!orgEnhet) {
+    return (
+      <ContentWrapper>
+        <OrgEnhetIkkeFunnet />
+      </ContentWrapper>
+    );
+  }
 
   return (
     <>
       <PageBanner text="Avslutt organisasjonsenhet" />
 
       <ContentWrapper>
-        <ContainerWithHighlightedTop padding={6}>
-          <AvslutteOrgEnhet orgEnhetId={id} />
-        </ContainerWithHighlightedTop>
+        {!!changeInfo ? (
+          <KvitteringView changeInfo={changeInfo} orgEnhet={orgEnhet} />
+        ) : (
+          <FormView orgEnhet={orgEnhet} setChangeInfo={setChangeInfo} />
+        )}
       </ContentWrapper>
     </>
   );
 };
 
-function AvslutteOrgEnhet({ orgEnhetId }: { orgEnhetId?: string }) {
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId ?? ""),
-    enabled: !!orgEnhetId,
-  });
-
-  const orgEnhet = orgEnhetQuery.data;
-
-  if (orgEnhetQuery.isLoading) {
-    return (
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Loader size="3xlarge" />
-        <BodyShort size="large">Laster...</BodyShort>
-      </div>
-    );
-  }
-
-  if (!orgEnhet) {
-    return;
-  }
-
+function FormView({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   return (
-    <>
-      <OrgEnhetInfoWrapper
-        heading="Valgt organisasjonsenhet"
-        orgEnhetId={orgEnhetId}
-      />
+    <ModalProvider>
+      <ContainerWithHighlightedTop padding={6}>
+        <OrgEnhetInfoWrapper
+          heading="Valgt organisasjonsenhet"
+          orgEnhet={orgEnhet}
+        />
 
-      <AvsluttOrgEnhetInner orgEnhet={orgEnhet} />
-    </>
+        <AvsluttOrgEnhetForm
+          orgEnhet={orgEnhet}
+          setChangeInfo={setChangeInfo}
+        />
+      </ContainerWithHighlightedTop>
+
+      <ModalComponent />
+    </ModalProvider>
   );
 }
 
-function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+function KvitteringView({
+  orgEnhet,
+  changeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  changeInfo: any;
+}) {
+  return (
+    <OrgEnhetKvittering
+      orgEnhetId={orgEnhet.id}
+      title="Leder på organisasjonsenhet oppdatert"
+    >
+      <AvsluttOrgEnhetKvitteringContent
+        changeInfo={changeInfo}
+        orgEnhet={orgEnhet}
+      />
+    </OrgEnhetKvittering>
+  );
+}
+
+function AvsluttOrgEnhetForm({
+  orgEnhet,
+  setChangeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  setChangeInfo: (response: any) => void;
+}) {
   const [sluttdato, setSluttdato] = useState<string>("");
 
   const [displayDateError, setDisplayDateError] = useState<boolean>(false);
@@ -116,8 +179,6 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     }
   };
 
-  const navigate = useNavigate();
-
   const avvikleOrgEnhetMutation = useMutation<
     unknown,
     AxiosError<Error>,
@@ -127,22 +188,34 @@ function AvsluttOrgEnhetInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       return avvikleOrgEnhet(orgEnhet.id, request);
     },
     onSuccess: async () => {
-      showToast({ text: "Avsluttet" });
+      setChangeInfo({ sluttdato });
 
-      navigate({
-        to: "/",
-      }).then();
+      showToast({ text: "Avsluttet" });
     },
   });
 
-  const handleSaveClick = () => {
+  const { showModal } = useModal();
+
+  const handleSaveClick = async () => {
     if (!sluttdato) {
       setDisplayDateError(true);
     } else {
       if (ressursAvhengigheter.length > 0 || orgEnhetAvhengigheter.length > 0) {
         setDisplayErrorSummary(true);
       } else {
-        avvikleOrgEnhetMutation.mutate({ gyldigTom: sluttdato });
+        await showModal(
+          <BekreftModal
+            content={
+              <AvsluttOrgEnhetModalContent
+                orgEnhet={orgEnhet}
+                sluttdato={sluttdato}
+              />
+            }
+            heading="Bekreft avslutning"
+          />,
+        ).then(() => {
+          avvikleOrgEnhetMutation.mutate({ gyldigTom: sluttdato });
+        });
       }
     }
   };
@@ -503,6 +576,36 @@ function DatePickerWrapper({
         label="Avslutningsdato"
       />
     </DatePicker>
+  );
+}
+
+function AvsluttOrgEnhetModalContent({
+  orgEnhet,
+  sluttdato,
+}: {
+  orgEnhet: OrgEnhet;
+  sluttdato: string;
+}) {
+  return (
+    <BodyLong>
+      Avslutte <b>{orgEnhet.navn}</b> fra og med{" "}
+      <b>{formatDisplayDate(sluttdato)}</b>.
+    </BodyLong>
+  );
+}
+
+function AvsluttOrgEnhetKvitteringContent({
+  orgEnhet,
+  changeInfo,
+}: {
+  orgEnhet: OrgEnhet;
+  changeInfo: any;
+}) {
+  return (
+    <BodyLong>
+      <b>{orgEnhet.navn}</b> avsluttet fra og med{" "}
+      <b>{formatDisplayDate(changeInfo.sluttdato)}</b>.
+    </BodyLong>
   );
 }
 
