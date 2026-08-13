@@ -35,7 +35,7 @@ export function DynamiskOrgKart({
 
   const underliggendeOrgEnheter = (
     underliggendeOrgEnheterQuery.data ?? []
-  ).sort((a, b) => a.navn.localeCompare(b.navn));
+  ).sort((a, b) => a.navn.localeCompare(b.navn, "no"));
 
   const underUnderOrgEnhetIder = [
     ...new Set(
@@ -118,7 +118,7 @@ export function DynamiskOrgKart({
                           orgEnhet.id,
                         ),
                       )
-                      .sort((a, b) => a.navn.localeCompare(b.navn))}
+                      .sort((a, b) => a.navn.localeCompare(b.navn, "no"))}
                   />
                 </div>
               ))}
@@ -172,7 +172,7 @@ function OrgKartStack({
         .filter((orgEnhet) =>
           selectedOrgEnhet.underordnedeOrgEnhetId.includes(orgEnhet.id),
         )
-        .sort((a, b) => a.navn.localeCompare(b.navn))
+        .sort((a, b) => a.navn.localeCompare(b.navn, "no"))
     : [];
 
   return (

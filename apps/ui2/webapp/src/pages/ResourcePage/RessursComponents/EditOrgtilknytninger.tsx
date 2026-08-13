@@ -459,7 +459,7 @@ function OrgtilknytningForm({
 
   const fysiskeBrukerstederOptions = fysiskeBrukersteder
     .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .sort((a, b) => a.label.localeCompare(b.label, "no"));
 
   if (isLoading) {
     return (

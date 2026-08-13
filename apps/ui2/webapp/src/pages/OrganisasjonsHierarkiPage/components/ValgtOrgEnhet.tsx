@@ -300,7 +300,7 @@ function MedarbeidereList({
   }
 
   ressurser.sort((a, b) =>
-    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn),
+    a.visningsnavn.fornavn.localeCompare(b.visningsnavn.fornavn, "no"),
   );
 
   const [roboter, mennesker] = partition(

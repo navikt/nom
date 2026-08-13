@@ -358,7 +358,7 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
   }
 
   const sorterteOrgEnheter = orgEnheter?.sort((a, b) =>
-    a.navn.localeCompare(b.navn),
+    a.navn.localeCompare(b.navn, "no"),
   );
 
   if (orgEnheterQuery.isLoading) {
@@ -407,7 +407,7 @@ function UtvidOrgEnhetKort({
   const underliggendeOrgEnheter = underliggendeOrgEnheterQuery?.data;
 
   const sorterteOrgEnheter = underliggendeOrgEnheter?.sort((a, b) =>
-    a.navn.localeCompare(b.navn),
+    a.navn.localeCompare(b.navn, "no"),
   );
 
   return (
