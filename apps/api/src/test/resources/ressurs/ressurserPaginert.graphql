@@ -1,0 +1,16 @@
+query ($filter: RessurserSearchFilter, $paginering: PagineringInput) {
+    ressurserPaginert(filter: $filter, paginering: $paginering) {
+        totalCount
+        totalPages
+        pageNumber
+        pageSize
+        numberOfElements
+        hasNextPage
+        hasPreviousPage
+        first
+        last
+        content {
+            navident
+        }
+    }
+}
