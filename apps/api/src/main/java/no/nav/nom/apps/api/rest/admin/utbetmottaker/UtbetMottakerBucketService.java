@@ -271,6 +271,8 @@ public class UtbetMottakerBucketService {
             }
 
             String fodselsnr = kolonner[1].trim();
+            fodselsnr = fodselsnr.length() == 11 ? fodselsnr : "0" + fodselsnr;
+
             boolean erDuplikat = !setteFodselsnr.add(fodselsnr);
 
             rader.add(new ParsetRad(
