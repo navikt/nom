@@ -363,7 +363,7 @@ app:
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
-    utbet-mottakere: org-nom-api-utbet-mottakere
+    utbet-mottakere: org-nom-prod-api-utbet-mottakere
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
   dolly-ressurs:
