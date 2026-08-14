@@ -363,7 +363,7 @@ app:
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato
-    utbet-mottakere: org-nom-prod-api-utbet-mottakere
+    utbet-mottakere: org-nom-api-utbet-mottakere
   epost-varsel-for-enhet-navnendring:
     max-evt-alder-dager-for-varsel: 60
   dolly-ressurs:
@@ -646,7 +646,7 @@ app:
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
-    utbet-mottakere: org-nom-api-utbet-mottakere
+    utbet-mottakere: org-nom-prod-api-utbet-mottakere
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 
