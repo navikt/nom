@@ -321,6 +321,6 @@ spec:
       - name: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
         lifecycleCondition:
           age: 14
-      - name: org-nom-api-utbet-mottakere
+      - name: org-nom-prod-api-utbet-mottakere
         lifecycleCondition:
           age: 14
