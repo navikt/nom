@@ -6,6 +6,7 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetSide;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
@@ -16,11 +17,13 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.RessursSide;
 import no.nav.nom.libs.gql.exception.NotRelevantForIntegrationTestingException;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.Pagineringsparametre;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
@@ -53,6 +56,13 @@ public interface NomGraphQlControllerInterface {
         DataFetchingEnvironment environment
     );
 
+    @QueryMapping("orgEnheterPaginert")
+    OrgEnhetSide orgEnheterPaginert(
+        @Argument("filter") OrgEnheterSearchFilter orgEnheterSearchFilter,
+        @Argument("paginering") Pagineringsparametre paginering,
+        DataFetchingEnvironment environment
+    );
+
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
     List<Organisering> organisering(
         OrgEnhet orgEnhet,
@@ -80,6 +90,13 @@ public interface NomGraphQlControllerInterface {
     List<RessursResult> ressurser(
         @Argument("where") RessurserSearch search,
         @Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+        DataFetchingEnvironment environment
+    );
+
+    @QueryMapping("ressurserPaginert")
+    RessursSide ressurserPaginert(
+        @Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+        @Argument("paginering") Pagineringsparametre paginering,
         DataFetchingEnvironment environment
     );
 

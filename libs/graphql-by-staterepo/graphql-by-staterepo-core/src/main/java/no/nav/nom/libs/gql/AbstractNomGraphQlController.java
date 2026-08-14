@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetSide;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
@@ -15,10 +16,12 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.RessursSide;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.Pagineringsparametre;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
@@ -89,6 +92,17 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
         return orgEnhetResolver.orgEnheter(orgEnheterSearch, orgEnheterSearchFilter);
     }
 
+    @QueryMapping("orgEnheterPaginert")
+    @Override
+    public OrgEnhetSide orgEnheterPaginert(@Argument("filter") OrgEnheterSearchFilter orgEnheterSearchFilter,
+                                           @Argument("paginering") Pagineringsparametre paginering,
+                                           DataFetchingEnvironment environment) {
+        graphqlSupport.count(environment);
+        var filter = orgEnheterSearchFilter == null ? OrgEnheterSearchFilter.ALLE : orgEnheterSearchFilter;
+        var pagineringsparametre = paginering == null ? Pagineringsparametre.DEFAULT : paginering;
+        return orgEnhetResolver.orgEnheterPaginert(filter, pagineringsparametre);
+    }
+
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
     @Override
     public List<Organisering> organisering(
@@ -144,6 +158,17 @@ public abstract class AbstractNomGraphQlController implements NomGraphQlControll
         ressurserSearch = ressurserSearch == null ? RessurserSearch.EMPTY_SEARCH : ressurserSearch;
         ressurserSearchFilter = ressurserSearchFilter == null ? RessurserSearchFilter.ALLE : ressurserSearchFilter;
         return ressursResolver.ressurser(ressurserSearch, ressurserSearchFilter);
+    }
+
+    @QueryMapping("ressurserPaginert")
+    @Override
+    public RessursSide ressurserPaginert(@Argument("filter") RessurserSearchFilter ressurserSearchFilter,
+                                         @Argument("paginering") Pagineringsparametre paginering,
+                                         DataFetchingEnvironment environment) {
+        graphqlSupport.count(environment);
+        var filter = ressurserSearchFilter == null ? RessurserSearchFilter.ALLE : ressurserSearchFilter;
+        var pagineringsparametre = paginering == null ? Pagineringsparametre.DEFAULT : paginering;
+        return ressursResolver.ressurserPaginert(filter, pagineringsparametre);
     }
 
     @SchemaMapping(typeName = "Ressurs", field = "orgTilknytninger")

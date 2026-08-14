@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetSide;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.OrgTilknytning;
@@ -15,6 +16,7 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.RessursSide;
 import no.nav.nom.libs.gql.AbstractNomGraphQlController;
 import no.nav.nom.libs.gql.NomGraphQlControllerInterface;
 import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
@@ -22,6 +24,7 @@ import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearchFilter;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.Pagineringsparametre;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessursSearchFilter;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
@@ -80,6 +83,11 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
         DataFetchingEnvironment environment
     ) {
         return delegate.orgEnheter(orgEnheterSearch, orgEnheterSearchFilter, environment);
+    }
+
+    @Override
+    public OrgEnhetSide orgEnheterPaginert(OrgEnheterSearchFilter orgEnheterSearchFilter, Pagineringsparametre paginering, DataFetchingEnvironment environment) {
+        return delegate.orgEnheterPaginert(orgEnheterSearchFilter, paginering, environment);
     }
 
     @Override
@@ -178,6 +186,11 @@ public class NomGraphQlControllerForTest implements NomGraphQlControllerInterfac
     @Override
     public List<RessursResult> ressurser(RessurserSearch search, RessurserSearchFilter filter, DataFetchingEnvironment environment) {
         return delegate.ressurser(search, filter, environment);
+    }
+
+    @Override
+    public RessursSide ressurserPaginert(RessurserSearchFilter filter, Pagineringsparametre paginering, DataFetchingEnvironment environment) {
+        return delegate.ressurserPaginert(filter, paginering, environment);
     }
 
     @Override
