@@ -3,11 +3,13 @@ package no.nav.nom.libs.gql.resolvers;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.RessursSide;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Jobbtelefon;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.gql.MappingUtils;
+import no.nav.nom.libs.gql.projections.Pagineringsparametre;
 import no.nav.nom.libs.gql.projections.RessursSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearch;
 import no.nav.nom.libs.gql.projections.RessurserSearchFilter;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -113,6 +116,30 @@ public class RessursResolver {
                 .flatMap(List::stream)
                 .toList();
         }
+    }
+
+    public RessursSide ressurserPaginert(RessurserSearchFilter filter, Pagineringsparametre paginering) {
+        Paginering.valider(paginering);
+        var filtrert = filter(ressursStateRepository.getAll(), filter);
+        var sortert = filtrert.stream()
+            .sorted(Comparator.comparing(RessursState::navident))
+            .toList();
+        var side = Paginering.paginer(sortert, paginering);
+        var innhold = side.innhold().stream()
+            .map(MappingUtils::toRessurs)
+            .toList();
+        return new RessursSide(
+            innhold,
+            side.totalCount(),
+            side.totalPages(),
+            side.pageNumber(),
+            side.pageSize(),
+            side.numberOfElements(),
+            side.hasNextPage(),
+            side.hasPreviousPage(),
+            side.first(),
+            side.last()
+        );
     }
 
     List<RessursResult> filteredOut(Collection<String> ids, Collection<RessursState> unfilteredRessurser, Collection<RessursState> filteredRessurser) {

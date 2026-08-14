@@ -10,8 +10,10 @@ type Query {
     orgEnhet(where: OrgEnhetSearch!): OrgEnhet
     organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
     orgEnheter(where: OrgEnheterSearch, filter: OrgEnheterSearchFilter): [OrgEnhetResult!]!
+    orgEnheterPaginert(filter: OrgEnheterSearchFilter, paginering: PagineringInput): OrgEnhetSide!
     ressurs(where: RessursSearch!): Ressurs
     ressurser(where: RessurserSearch, filter: RessurserSearchFilter): [RessursResult!]!
+    ressurserPaginert(filter: RessurserSearchFilter, paginering: PagineringInput): RessursSide!
 }
 
 union SearchResult = Ressurs | OrgEnhet
@@ -77,6 +79,11 @@ input RessurserSearchFilter {
     tilgangsenhetId: String
 }
 
+input PagineringInput {
+    pageNumber: Int! = 0
+    pageSize: Int! = 100
+}
+
 type OrgEnhetResult {
     code: ResultCode!
     id: String  @deprecated(reason: "id er erstattet med agressoId")
@@ -92,6 +99,32 @@ type RessursResult {
     code: ResultCode!
     id: String!
     ressurs: Ressurs
+}
+
+type RessursSide {
+    content: [Ressurs!]!
+    totalCount: Int!
+    totalPages: Int!
+    pageNumber: Int!
+    pageSize: Int!
+    numberOfElements: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    first: Boolean!
+    last: Boolean!
+}
+
+type OrgEnhetSide {
+    content: [OrgEnhet!]!
+    totalCount: Int!
+    totalPages: Int!
+    pageNumber: Int!
+    pageSize: Int!
+    numberOfElements: Int!
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    first: Boolean!
+    last: Boolean!
 }
 
 enum ResultCode {

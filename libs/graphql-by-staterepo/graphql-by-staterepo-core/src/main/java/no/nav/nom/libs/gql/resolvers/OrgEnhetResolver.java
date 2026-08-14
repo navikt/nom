@@ -2,6 +2,7 @@ package no.nav.nom.libs.gql.resolvers;
 
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetSide;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.PeriodiskUtvalgArg;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -11,6 +12,7 @@ import no.nav.nom.libs.gql.NomGraphqlSupportInterface;
 import no.nav.nom.libs.gql.projections.OrgEnhetSearch;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearch;
 import no.nav.nom.libs.gql.projections.OrgEnheterSearchFilter;
+import no.nav.nom.libs.gql.projections.Pagineringsparametre;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
@@ -120,6 +122,33 @@ public class OrgEnhetResolver {
 
     public OrgEnhet orgEnhet(Organisering organisering) {
         return orgEnhetStateRepository.findById(organisering.getId()).map(MappingUtils::toOrgEnhet).orElse(null);
+    }
+
+    public OrgEnhetSide orgEnheterPaginert(OrgEnheterSearchFilter filter, Pagineringsparametre paginering) {
+        Paginering.valider(paginering);
+        if (filter.organiseringSelection() == UNDER_ANGITT_ORGENHET && filter.organisertUnderOrgEnhetId() == null) {
+            throw new IllegalArgumentException("Hvis organisering selection er UNDER_ANGITT_ORGENHET, må organisertUnderOrgEnhetId være satt");
+        }
+        var filtrert = orgenheterByFilter(filter);
+        var sortert = filtrert.stream()
+            .sorted(comparing(OrgEnhetState::id))
+            .toList();
+        var side = Paginering.paginer(sortert, paginering);
+        var innhold = side.innhold().stream()
+            .map(MappingUtils::toOrgEnhet)
+            .toList();
+        return new OrgEnhetSide(
+            innhold,
+            side.totalCount(),
+            side.totalPages(),
+            side.pageNumber(),
+            side.pageSize(),
+            side.numberOfElements(),
+            side.hasNextPage(),
+            side.hasPreviousPage(),
+            side.first(),
+            side.last()
+        );
     }
 
     List<OrgEnhetState> orgenheterByFilter(OrgEnheterSearchFilter filter) {
