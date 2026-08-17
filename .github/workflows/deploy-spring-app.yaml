@@ -154,7 +154,7 @@ jobs:
         id: attest-sign
         uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # ratchet:nais/attest-sign@v2.0.13
         with:
-          image_ref: ${{needs.build-app-docker.outputs.image}}@${{ needs.build-app-docker.outputs.digest }}
+          image_ref: ${{needs.build-app-docker.outputs.image}}
 
   deploy-dev:
     permissions:
