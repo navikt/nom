@@ -6,6 +6,7 @@ import { AvvikleOrgenhet } from "~/manuelle-meldinger/AvvikleOrgenhet.tsx";
 import { AvvikleRessurs } from "~/manuelle-meldinger/AvvikleRessurs.tsx";
 import { EndreDagligOppfolging } from "~/manuelle-meldinger/EndreDagligOppfolging.tsx";
 import { EndreOrgtilknytningSluttdato } from "~/manuelle-meldinger/EndreOrgtilknytningSluttdato.tsx";
+import { EndreTilgangsenhet } from "~/manuelle-meldinger/EndreTilgangsenhet.tsx";
 import { FjernOrgtilknytning } from "~/manuelle-meldinger/FjernOrgtilknytning.tsx";
 import { FornyDelegering } from "~/manuelle-meldinger/FornyDelegering.tsx";
 import { OppdatereRessursSektor } from "~/manuelle-meldinger/OppdatereRessursSektor.tsx";
@@ -47,6 +48,7 @@ function ManuelleMeldingerPage() {
       <div className="flex gap-2 flex-wrap mb-4">
         <AvvikleOrgenhet />
         <EndreDagligOppfolging />
+        <EndreTilgangsenhet />
       </div>
 
       <Heading level="2" size="medium" spacing>
