@@ -90,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=true --batch-mode
       - name: Build and push Docker image
-        uses: nais/docker-build-push@05dbb6091b30bd84279c6d64a45ef8782fd410a5 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@8e41f1f58749b9248e376c25d33bfbdd2b1163c0 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: org
