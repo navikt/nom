@@ -16,7 +16,7 @@ export function TestBanner() {
       }).data
     : undefined;
 
-  if (globalThis.location.href.includes("nom.ekstern.dev.nav.no")) {
+  if (globalThis.location.href.includes(".dev.nav.no")) {
     return (
       <>
         <div
