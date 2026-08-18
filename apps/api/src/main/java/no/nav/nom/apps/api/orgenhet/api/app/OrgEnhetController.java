@@ -29,6 +29,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.tilgangsenhet.exception.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,7 @@ public class OrgEnhetController {
     private final AuthResolver authResolver;
     private final ExcelGenerator excelGenerator;
     private final Unleash unleash;
+    private final OrganiseringStateRepository organiseringStateRepository;
 
     public OrgEnhetController(
         OrgenhetService orgenhetService,
@@ -79,7 +81,8 @@ public class OrgEnhetController {
         OrgEnhetMapper orgEnhetMapper,
         KontaktpersonerService kontaktpersonerService,
         AuthResolver authResolver,
-        Unleash unleash
+        Unleash unleash,
+        OrganiseringStateRepository organiseringStateRepository
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetRestService = orgEnhetRestService;
@@ -89,6 +92,7 @@ public class OrgEnhetController {
         this.authResolver = authResolver;
         this.excelGenerator = new ExcelGenerator();
         this.unleash = unleash;
+        this.organiseringStateRepository = organiseringStateRepository;
     }
 
     @GetMapping("/{orgenhetId}")
