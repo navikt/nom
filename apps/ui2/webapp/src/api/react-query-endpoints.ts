@@ -7,6 +7,7 @@ import type {
   AvvikleOrgEnhetRequest,
   AvvikleRessursRequest,
   ExcelExportRequest,
+  FysiskBrukersted,
   GetPersonRequest,
   GlobalStatistikkResponse,
   KorrigerOrgEnhetNavnRequest,
@@ -44,7 +45,6 @@ export const CACHE_FOR = {
 };
 
 const NOM_API_BASE_PATH = "/frackend/nom-api";
-const NOM_REMEDY_INTEGRATION_API_BASE_PATH = "/frackend/nom-remedy-integrasjon";
 const NOM_PAARORENDE_BASE_PATH = "/frackend/paarorende";
 const NOM_UNLEASH_BASE_PATH = "/frackend/unleash";
 
@@ -622,7 +622,7 @@ export const getFysiskeBrukersteder = {
   queryFn: async () =>
     (
       await axios.get<FysiskBrukersted[]>(
-        `${NOM_REMEDY_INTEGRATION_API_BASE_PATH}/api/fysiskebrukersteder`,
+        `${NOM_API_BASE_PATH}/app/fysiskeBrukersteder`,
       )
     ).data,
 };
@@ -937,11 +937,6 @@ export type RessursFields = {
   endretAv?: string;
   endretDato?: string;
   endringEvent?: string;
-};
-
-export type FysiskBrukersted = {
-  brukerstedNr: string;
-  brukerstedNavn: string;
 };
 
 export type Kontaktinfo = {

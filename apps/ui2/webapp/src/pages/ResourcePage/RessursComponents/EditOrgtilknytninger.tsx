@@ -47,7 +47,6 @@ import {
 } from "react-hook-form";
 import * as yup from "yup";
 
-import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
   getFysiskeBrukersteder,
   getOrgEnhet,
@@ -92,6 +91,7 @@ import { EndreOtBekreftelsesmodal } from "~/pages/ResourcePage/RessursComponents
 import { OrgtilknytningTimeline } from "~/pages/ResourcePage/RessursComponents/OrgtilknytningTimeline";
 import infoikonNOM from "~/resources/infoikonNOM.svg";
 import type {
+  FysiskBrukersted,
   OppdaterOrgtilknytningerForRessursRequest,
   OrgEnhet,
   OrgtilknytningState,
@@ -1417,7 +1417,7 @@ function fysiskBrukerstedOptionMapping(
   fysiskBrukersted: FysiskBrukersted,
 ): ComboboxOption {
   return {
-    value: fysiskBrukersted.brukerstedNr,
+    value: fysiskBrukersted.nr,
     label: formatDropdownFysiskBrukersted(fysiskBrukersted),
   };
 }

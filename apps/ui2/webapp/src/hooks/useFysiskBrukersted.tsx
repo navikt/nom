@@ -6,9 +6,7 @@ export function useFysiskBrukersted(fysiskBrukerStedNr?: string) {
   return useQuery({
     ...getFysiskeBrukersteder,
     select: (fysiskeBrukersteder) =>
-      fysiskeBrukersteder.find(
-        ({ brukerstedNr }) => fysiskBrukerStedNr === brukerstedNr,
-      ),
+      fysiskeBrukersteder.find(({ nr }) => fysiskBrukerStedNr === nr),
     enabled: !!fysiskBrukerStedNr,
   }).data;
 }
