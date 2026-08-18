@@ -46,7 +46,7 @@ export default defineConfig({
     cors: {
       origin: [
         "https://nom.nav.no",
-        "https://nom.ekstern.dev.nav.no",
+        "https://nom.ansatt.dev.nav.no",
         /^http:\/\/localhost:\d{4}$/,
       ],
     },
