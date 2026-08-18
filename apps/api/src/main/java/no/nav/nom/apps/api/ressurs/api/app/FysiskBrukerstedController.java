@@ -23,11 +23,9 @@ import java.util.List;
 public class FysiskBrukerstedController {
 
     private final FysiskBrukerstedService fysiskBrukerstedService;
-    private final NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
-    public FysiskBrukerstedController(FysiskBrukerstedService fysiskBrukerstedService, NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient) {
+    public FysiskBrukerstedController(FysiskBrukerstedService fysiskBrukerstedService) {
         this.fysiskBrukerstedService = fysiskBrukerstedService;
-        this.nomRemedyIntegrasjonClient = nomRemedyIntegrasjonClient;
     }
 
     @GetMapping
@@ -40,17 +38,5 @@ public class FysiskBrukerstedController {
     })
     public ResponseEntity<List<FysiskBrukersted>> getAllFysiskeBrukersteder() {
         return ResponseEntity.ok(fysiskBrukerstedService.getAllFysiskBrukersted().values().stream().toList());
-    }
-
-    @GetMapping("/remedy")
-    @Operation(
-        description = "Henter alle fysiske brukersteder fra Remedy",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "OK")
-    })
-    public ResponseEntity<List<FysiskBrukersted>> getAllRemedyFysiskBrukersteder() {
-        return ResponseEntity.ok(nomRemedyIntegrasjonClient.getFysiskeBrukersteder());
     }
 }
