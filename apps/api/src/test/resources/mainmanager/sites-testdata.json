@@ -144,7 +144,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 49870,
-      "XID": null
+      "XID": "0425"
     },
     {
       "NamePart": "Åsnes, Kaffegata 23",
@@ -159,7 +159,7 @@
       "Country1": null,
       "CountryState1": null,
       "Identification": "L04030",
-      "Identification2": null,
+      "Identification2": "0425",
       "SiteCode": "3418-96/72/0/0",
       "ProjectNumber": null,
       "KKS": null,
@@ -290,7 +290,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 47043,
-      "XID": "0425"
+      "XID": null
     },
     {
       "NamePart": "Suldal, Gata 22",
@@ -305,7 +305,7 @@
       "Country1": null,
       "CountryState1": null,
       "Identification": "L11050",
-      "Identification2": null,
+      "Identification2": "1134",
       "SiteCode": "1134-103/24/0/0",
       "ProjectNumber": null,
       "KKS": null,
@@ -436,7 +436,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 47039,
-      "XID": "1134"
+      "XID": null
     },
     {
       "NamePart": "Lillehammer, Kirkegata 76",
@@ -451,7 +451,7 @@
       "Country1": null,
       "CountryState1": null,
       "Identification": "L05039",
-      "Identification2": null,
+      "Identification2": "5501",
       "SiteCode": "3405-200/257/0/0",
       "ProjectNumber": null,
       "KKS": null,
@@ -582,7 +582,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 47035,
-      "XID": "5501"
+      "XID": null
     },
     {
       "NamePart": "Gjøvik, Parkgata 10A",
@@ -597,7 +597,7 @@
       "Country1": null,
       "CountryState1": null,
       "Identification": "L05040",
-      "Identification2": null,
+      "Identification2": "0502",
       "SiteCode": "3407-67/1078/0/0",
       "ProjectNumber": null,
       "KKS": null,
@@ -728,7 +728,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 47031,
-      "XID": "0502"
+      "XID": null
     },
     {
       "NamePart": "Gran, Rådhusvegen 39",
@@ -889,7 +889,7 @@
       "Country1": null,
       "CountryState1": null,
       "Identification": "L20026",
-      "Identification2": null,
+      "Identification2": "2004",
       "SiteCode": "5603-25/217/0/0",
       "ProjectNumber": null,
       "KKS": null,
@@ -1020,7 +1020,7 @@
       "EFBoolean4": false,
       "EFBoolean5": false,
       "ID": 46983,
-      "XID": "2004"
+      "XID": null
     }
   ],
   "Options": null,
