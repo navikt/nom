@@ -17,8 +17,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { Tilknytningtype } from "~/types/api-models";
+import { IdentType, Tilknytningtype } from "~/types/api-models";
 import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
 
 export function ConfirmStep() {
@@ -50,6 +49,7 @@ export function ConfirmStep() {
   });
 
   const selectOrgEnhet = orgEnhetQuery.data;
+
   const lederNavn = selectOrgEnhet?.leder?.visningsnavn;
 
   const selectedFysiskBrukersted = useFysiskBrukersted(

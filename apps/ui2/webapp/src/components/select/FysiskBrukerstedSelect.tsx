@@ -2,8 +2,7 @@ import { css } from "@emotion/react";
 import { HelpText, HStack, Select } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import type { FieldError, RefCallBack } from "react-hook-form";
-import { useController } from "react-hook-form";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useController, useFormContext } from "react-hook-form";
 
 import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import { getFysiskeBrukersteder } from "~/api/react-query-endpoints";
@@ -11,6 +10,7 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
+import type { Tilgangsenhet } from "~/types/api-models";
 import { formatDropdownFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
@@ -66,7 +66,9 @@ export function FysiskBrukerstedSelect({
     fysiskBrukerstedOption(fysiskBrukersted),
   );
 
-  const currentOption = options.find((option) => option.value === value);
+  const currentOption =
+    options.find((option) => option.value === value) ?? null;
+
   return (
     <SelectLayoutWrapper
       description={description}
@@ -81,7 +83,7 @@ export function FysiskBrukerstedSelect({
         onChange={(option) => onChange(option?.value ?? null)}
         options={options}
         placeholder="Søk etter fysisk brukersted"
-        value={currentOption ?? null}
+        value={currentOption}
       />
     </SelectLayoutWrapper>
   );
@@ -171,6 +173,50 @@ export function FysiskBrukerstedSelectNew({
   );
 }
 
+export function TilgangsenhetSelect({
+  tilgangsenheter,
+  description,
+  onChange,
+  error,
+  value,
+  helpText,
+  isClearable = false,
+}: {
+  tilgangsenheter: Tilgangsenhet[];
+  onChange: (s: string | null) => void;
+  error?: FieldError;
+  description?: string;
+  value?: string;
+  helpText?: string;
+  isClearable?: boolean;
+}) {
+  const options = tilgangsenheter.map((tilgangsenhet) =>
+    tilgangsenhetOption(tilgangsenhet),
+  );
+
+  const currentOption =
+    options.find((option) => option.value === value) ?? null;
+
+  return (
+    <SelectLayoutWrapper
+      description={description}
+      error={error}
+      helpText={helpText}
+      htmlFor="Tilgangsenhet"
+      label="Tilgangsenhet"
+    >
+      <BasicSelect
+        inputId="Tilgangsenhet"
+        isClearable={isClearable}
+        onChange={(option) => onChange(option?.value ?? null)}
+        options={options}
+        placeholder="Søk etter tilgangsenhet"
+        value={currentOption}
+      />
+    </SelectLayoutWrapper>
+  );
+}
+
 function SelectLabelWithHelpText({
   label,
   helpText,
@@ -202,5 +248,12 @@ function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
   return {
     label: formatDropdownFysiskBrukersted(fysiskBrukersted),
     value: fysiskBrukersted.brukerstedNr,
+  };
+}
+
+function tilgangsenhetOption(tilgangsenhet: Tilgangsenhet) {
+  return {
+    label: `${tilgangsenhet.enhetId}: ${tilgangsenhet.navn}`,
+    value: tilgangsenhet.enhetId,
   };
 }

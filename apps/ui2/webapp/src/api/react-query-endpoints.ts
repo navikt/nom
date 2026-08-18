@@ -31,6 +31,7 @@ import type {
   RessursKontaktperson,
   RessursLeder,
   SessionInfoResponse,
+  Tilgangsenhet,
   UpdateFysiskBrukerstedForOrgtilknytningRequest,
   UpdateFysiskeBrukerstederRequest,
   UpdatePrimaryFysiskBrukerstedForRessurserRequest,
@@ -285,6 +286,13 @@ export const getAllOrgEnheter = {
     (await axios.get<OrgEnhet[]>(`${NOM_API_BASE_PATH}/app/orgenheter`)).data,
   gcTime: CACHE_FOR.anHour,
   staleTime: CACHE_FOR.aMinute * 5,
+};
+
+export const getAlleTilgangsenheter = {
+  queryKey: () => ["ALLE_TILGANGSENHETER"],
+  queryFn: async () =>
+    (await axios.get<Tilgangsenhet[]>(`${NOM_API_BASE_PATH}/app/tilgangsenhet`))
+      .data,
 };
 
 export const getOrgEnhet = {

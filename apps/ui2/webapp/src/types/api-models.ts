@@ -855,6 +855,11 @@ export interface StandardResponse {
   message: string;
 }
 
+export interface Tilgangsenhet {
+  enhetId?: string;
+  navn?: string;
+}
+
 export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
   /** @default "" */
   orgtilknytningerFid: string[];

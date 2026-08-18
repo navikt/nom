@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 
 import {
+  getAlleTilgangsenheter,
   getFysiskeBrukersteder,
   getOrgEnhetList,
   getOrgtilknytningerByNavidentList,
@@ -25,7 +26,10 @@ import ContentWrapper from "~/components/ContentWrapper";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSelect";
+import {
+  FysiskBrukerstedSelect,
+  TilgangsenhetSelect,
+} from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
 import {
   isPeriodActive,
@@ -56,9 +60,17 @@ export function FysiskBrukerstedTabellPage() {
 
 function FysiskBrukerstedTabell() {
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
-  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data ?? [];
+
+  const alleTilgangsenheterQuery = useQuery({
+    queryKey: getAlleTilgangsenheter.queryKey(),
+    queryFn: () => getAlleTilgangsenheter.queryFn(),
+  });
+
+  const alleTilgangsenheter = alleTilgangsenheterQuery.data ?? [];
 
   const [fysiskBrukerstedFilter, setFysiskBrukerstedFilter] = useState("");
+  const [tilgangsenhetFilter, setTilgangsenhetFilter] = useState("");
 
   if (fysiskeBrukerstederQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
@@ -90,11 +102,19 @@ function FysiskBrukerstedTabell() {
               value={fysiskBrukerstedFilter}
             />
           </div>
+
           <div
             css={css`
               flex: 1;
             `}
-          ></div>
+          >
+            <TilgangsenhetSelect
+              isClearable
+              onChange={(value) => setTilgangsenhetFilter(value ?? "")}
+              tilgangsenheter={alleTilgangsenheter}
+              value={tilgangsenhetFilter}
+            />
+          </div>
         </HStack>
       </VStack>
 
