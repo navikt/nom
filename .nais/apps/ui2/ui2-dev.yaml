@@ -52,8 +52,6 @@ spec:
           namespace: org
           cluster: dev-gcp
   ingresses:
-    - https://nom-ui2.intern.dev.nav.no
-    - https://nom.ekstern.dev.nav.no
     - https://nom.ansatt.dev.nav.no
   replicas:
     min: 1
