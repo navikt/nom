@@ -50,12 +50,12 @@ public class MainManagerClientTest extends TestBase {
         var sites = mainManagerClient.getFysiskeBrukersteder();
 
         assertThat(sites).isNotEmpty();
-        assertThat(sites.getFirst().navn()).isEqualTo("Dovre, Kyrkjevegen 18");
-        assertThat(sites.getFirst().address()).isEqualTo("Kyrkjevegen 18");
-        assertThat(sites.getFirst().postnummer()).isEqualTo("2660");
-        assertThat(sites.getFirst().poststed()).isEqualTo("DOMBÅS");
-        assertThat(sites.getFirst().kommune()).isEqualTo("Dovre kommune");
-        assertThat(sites.getFirst().nr()).isNull();
+        assertThat(sites.getFirst().navn()).isEqualTo("Åsnes, Kaffegata 23");
+        assertThat(sites.getFirst().address()).isEqualTo("Kaffegata 23");
+        assertThat(sites.getFirst().postnummer()).isEqualTo("2270");
+        assertThat(sites.getFirst().poststed()).isEqualTo("FLISA");
+        assertThat(sites.getFirst().kommune()).isEqualTo("Åsnes kommune");
+        assertThat(sites.getFirst().nr()).isEqualTo("0425");
 
         verify(postRequestedFor(urlEqualTo("/restapi/token")));
         verify(getRequestedFor(urlEqualTo("/api/v2/sites")));
