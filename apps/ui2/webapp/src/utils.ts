@@ -46,7 +46,7 @@ export function capitalizeName(name: string) {
 export function formatDisplayFysiskBrukersted(
   fysiskBrukersted: FysiskBrukersted,
 ) {
-  return `${capitalizeNameFysiskBrukersted(fysiskBrukersted.navn)} (${fysiskBrukersted.navn})`;
+  return `${capitalizeNameFysiskBrukersted(fysiskBrukersted.navn)} (${fysiskBrukersted.nr})`;
 }
 
 export function formatDropdownFysiskBrukersted(
