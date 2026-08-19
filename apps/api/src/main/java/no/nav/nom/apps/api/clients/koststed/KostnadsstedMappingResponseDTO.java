@@ -1,8 +1,8 @@
-package no.nav.nom.apps.api.orgenhet.api.app.dto;
+package no.nav.nom.apps.api.clients.koststed;
 
 import java.time.LocalDate;
 
-public record OrgEnhetKostnadsstedResponse(
+public record KostnadsstedMappingResponseDTO(
     String kostnadsstedId,
     String orgenhetId,
     LocalDate gyldigFom,

@@ -15,10 +15,12 @@ import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.KostnadsstedResponse;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetKostnadsstedMappingRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
-import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedResponse;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedMappingResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetMedLedernavn;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.exceptions.DuplicateOrgEnhetNameException;
@@ -29,7 +31,6 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.tilgangsenhet.exception.InvalidTilgangsenhetException;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
-import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @Tag(name = "OrgEnheter")
@@ -72,7 +75,6 @@ public class OrgEnhetController {
     private final AuthResolver authResolver;
     private final ExcelGenerator excelGenerator;
     private final Unleash unleash;
-    private final OrganiseringStateRepository organiseringStateRepository;
 
     public OrgEnhetController(
         OrgenhetService orgenhetService,
@@ -81,8 +83,7 @@ public class OrgEnhetController {
         OrgEnhetMapper orgEnhetMapper,
         KontaktpersonerService kontaktpersonerService,
         AuthResolver authResolver,
-        Unleash unleash,
-        OrganiseringStateRepository organiseringStateRepository
+        Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetRestService = orgEnhetRestService;
@@ -92,7 +93,6 @@ public class OrgEnhetController {
         this.authResolver = authResolver;
         this.excelGenerator = new ExcelGenerator();
         this.unleash = unleash;
-        this.organiseringStateRepository = organiseringStateRepository;
     }
 
     @GetMapping("/{orgenhetId}")
@@ -385,7 +385,7 @@ public class OrgEnhetController {
     @PatchMapping("/korrigerNavn")
     public ResponseEntity<StandardResponse> korrigerOrgEnhetNavn(@RequestBody KorrigerOrgEnhetNavnRequest korrigerOrgEnhetNavnRequest) {
         if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(OK)
                 .body(orgEnhetRestService.korrigerOrgEnhetNavn(korrigerOrgEnhetNavnRequest));
         } else {
             return ResponseEntity.ok().build();
@@ -400,7 +400,7 @@ public class OrgEnhetController {
     @PatchMapping("/endreOvrige")
     public ResponseEntity<StandardResponse> overigeEndringerOrgEnhet(@RequestBody OvrigeEndringerOrgEnhetRequest ovrigeEndringerOrgEnhetRequest) {
         if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(OK)
                 .body(StandardResponse.builder().message(orgEnhetRestService.ovrigeEndringerOrgEnhet(ovrigeEndringerOrgEnhetRequest)).build());
         } else {
             return ResponseEntity.ok().build();
@@ -415,10 +415,10 @@ public class OrgEnhetController {
     @PatchMapping("/avvikle/{orgEnhetId}")
     public ResponseEntity<StandardResponse> avvikleOrgEnhet(@PathVariable String orgEnhetId, @RequestBody AvvikleOrgEnhetRequest avvikleOrgEnhetRequest) {
         if (unleash.isEnabled("nom-api.orgenhet-mastring")) {
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(OK)
                 .body(orgEnhetRestService.avvikleOrgEnhet(orgEnhetId, avvikleOrgEnhetRequest));
         } else {
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(OK)
                 .body(
                     StandardResponse.builder()
                         .message(String.format("Enhet har fått satt sluttdato til %s", LocalDate.now()))
@@ -427,25 +427,47 @@ public class OrgEnhetController {
     }
 
     @Operation(
-        description = "Hent kostnadssted for orgEnhet",
+        description = "Hent kostnadsstedmapping for orgEnhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @GetMapping("/kostnadssted/{orgEnhetId}")
-    public ResponseEntity<OrgEnhetKostnadsstedResponse> getOrgEnhetKostnadssted(@PathVariable String orgEnhetId) {
-        return ResponseEntity.status(HttpStatus.OK)
+    public ResponseEntity<OrgEnhetKostnadsstedMappingResponse> getOrgEnhetKostnadssted(@PathVariable String orgEnhetId) {
+        return ResponseEntity.status(OK)
             .body(orgEnhetRestService.getOrgEnhetKostnadssted(orgEnhetId));
     }
 
     @Operation(
-        description = "Hent kostnadssteder for alle i hierarki for gitt orgEnhet",
+        description = "Hent kostnadsstedmappinger for alle i hierarki for gitt orgEnhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/kostnadssteder/{toppNodeOrgEnhetId}")
-    public ResponseEntity<List<OrgEnhetKostnadsstedResponse>> getOrgEnhetKostnadssteder(@PathVariable String toppNodeOrgEnhetId) {
-        return ResponseEntity.status(HttpStatus.OK)
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/kostnadssted/{toppNodeOrgEnhetId}")
+    public ResponseEntity<List<OrgEnhetKostnadsstedMappingResponse>> getOrgEnhetKostnadssteder(@PathVariable String toppNodeOrgEnhetId) {
+        return ResponseEntity.status(OK)
             .body(orgEnhetRestService.getOrgEnhetKostnadssteder(toppNodeOrgEnhetId));
+    }
+
+    @Operation(
+        description = "Hent alle gyldige kostnadssteder",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @GetMapping("/kostnadssted")
+    public ResponseEntity<List<KostnadsstedResponse>> getAllKostnadssteder() {
+        return ResponseEntity.status(OK)
+            .body(orgEnhetRestService.getAllKostnadssteder());
+    }
+
+    @Operation(
+        description = "Opprett ny orgenhet-kostnadssted mapping",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("/kostnadssted")
+    public ResponseEntity<OrgEnhetKostnadsstedMappingResponse> opprettKostnadsstedMapping(OpprettOrgEnhetKostnadsstedMappingRequest orgEnhetKostnadsstedMappingRequest) {
+        return ResponseEntity.status(CREATED)
+            .body(orgEnhetRestService.opprettOrgEnhetKostnadsstedMapping(orgEnhetKostnadsstedMappingRequest));
     }
 
     @ExceptionHandler({
