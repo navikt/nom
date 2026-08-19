@@ -33,7 +33,7 @@
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-73.version>3.15.2</hypersistence-utils-hibernate-73.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
-        <unleash.version>11.2.1</unleash.version>
+        <unleash.version>12.2.3</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
@@ -158,6 +158,12 @@
                 <groupId>io.getunleash</groupId>
                 <artifactId>unleash-client-java</artifactId>
                 <version>${unleash.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.squareup.okhttp3</groupId>
+                        <artifactId>okhttp</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
