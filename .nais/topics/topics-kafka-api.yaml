@@ -32,6 +32,9 @@ spec:
     - team: repr
       application: repr-fullmakt
       access: read
+    - team: repr
+      application: fullmakt
+      access: read
     - team: shout-out
       application: shout-out-sync-service
       access: read
