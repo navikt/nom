@@ -465,7 +465,7 @@ public class OrgEnhetController {
     )
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/kostnadssted")
-    public ResponseEntity<OrgEnhetKostnadsstedMappingResponse> opprettKostnadsstedMapping(OpprettOrgEnhetKostnadsstedMappingRequest orgEnhetKostnadsstedMappingRequest) {
+    public ResponseEntity<OrgEnhetKostnadsstedMappingResponse> opprettKostnadsstedMapping(@RequestBody OpprettOrgEnhetKostnadsstedMappingRequest orgEnhetKostnadsstedMappingRequest) {
         return ResponseEntity.status(CREATED)
             .body(orgEnhetRestService.opprettOrgEnhetKostnadsstedMapping(orgEnhetKostnadsstedMappingRequest));
     }
