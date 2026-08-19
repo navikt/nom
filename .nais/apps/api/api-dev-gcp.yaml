@@ -183,6 +183,9 @@ spec:
         - application: repr-fullmakt
           namespace: repr
           cluster: dev-fss
+        - application: fullmakt
+          namespace: repr
+          cluster: dev-gcp
         - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
           cluster: dev-gcp
