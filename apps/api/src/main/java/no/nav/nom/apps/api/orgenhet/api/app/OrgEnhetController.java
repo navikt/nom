@@ -442,7 +442,7 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @GetMapping("/kostnadssted/{toppNodeOrgEnhetId}")
+    @GetMapping("/kostnadssted/get-all-by/{toppNodeOrgEnhetId}")
     public ResponseEntity<List<OrgEnhetKostnadsstedMappingResponse>> getOrgEnhetKostnadssteder(@PathVariable String toppNodeOrgEnhetId) {
         return ResponseEntity.status(OK)
             .body(orgEnhetRestService.getOrgEnhetKostnadssteder(toppNodeOrgEnhetId));

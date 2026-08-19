@@ -173,11 +173,9 @@ function GridItem({
         border-radius: 10px;
         border: 2px solid var(--a-icon-info);
         align-items: center;
-        ${
-          standalone
-            ? `height: fit-content;`
-            : `grid-column: span ${columns}; grid-row: span ${rows};`
-        }
+        ${standalone
+          ? `height: fit-content;`
+          : `grid-column: span ${columns}; grid-row: span ${rows};`}
       `}
     >
       {children}

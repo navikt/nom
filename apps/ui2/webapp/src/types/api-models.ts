@@ -302,6 +302,23 @@ export interface KorrigerOrgEnhetNavnRequest {
   navn: string;
 }
 
+export interface KostnadsstedResponse {
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigFom: string;
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigTom: string;
+  /** @default "" */
+  kostnadsstedId: string;
+  /** @default "" */
+  navn: string;
+}
+
 export interface LederTilgangForOrgenhetRequest {
   /** @default "" */
   delegertTilNavident: string;
@@ -408,6 +425,23 @@ export interface OppdaterOrgtilknytningerForRessursRequest {
   setRessursSluttdato: boolean;
   /** @default false */
   setRessursStartdato: boolean;
+}
+
+export interface OpprettOrgEnhetKostnadsstedMappingRequest {
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigFom: string;
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigTom: string;
+  /** @default "" */
+  kostnadsstedId: string;
+  /** @default "" */
+  orgenhetId: string;
 }
 
 export interface OpprettOrgEnhetLederRequest {
@@ -564,13 +598,21 @@ export interface OrgEnhet {
   underordnedeOrgEnhetId: string[];
 }
 
-export interface OrgEnhetKostnadsstedResponse {
-  /** @format date */
-  gyldigFom?: string;
-  /** @format date */
-  gyldigTom?: string;
-  kostnadsstedId?: string;
-  orgenhetId?: string;
+export interface OrgEnhetKostnadsstedMappingResponse {
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigFom: string;
+  /**
+   * @format date
+   * @default ""
+   */
+  gyldigTom: string;
+  /** @default "" */
+  kostnadsstedId: string;
+  /** @default "" */
+  orgenhetId: string;
 }
 
 export interface OrgEnhetLederResponse {
