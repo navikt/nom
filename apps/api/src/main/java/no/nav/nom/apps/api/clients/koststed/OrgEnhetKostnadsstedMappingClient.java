@@ -65,7 +65,7 @@ public class OrgEnhetKostnadsstedMappingClient {
 
     public List<KostnadsstedResponseDTO> hentAlleKostnadssteder() {
         return restClient.get()
-            .uri(uriBuilder -> uriBuilder.path("/api/v1/mapping").build())
+            .uri(uriBuilder -> uriBuilder.path("/api/v1/kostnadssteder").build())
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
     }
