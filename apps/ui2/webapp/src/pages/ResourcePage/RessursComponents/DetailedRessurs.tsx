@@ -22,7 +22,6 @@ import { subMonths } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
-import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
   getFysiskeBrukersteder,
   getOrgEnhet,
@@ -61,7 +60,11 @@ import {
 import { EditOrgtilknytninger } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/PersonOpplysninger";
 import { blueTopBorder } from "~/resources/NomStyles";
-import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import type {
+  FysiskBrukersted,
+  OrgtilknytningState,
+  Ressurs,
+} from "~/types/api-models";
 import { IdentType, Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,
@@ -558,14 +561,14 @@ function OrganisationHierarchyTree({
 
   const primaryFysiskBrukersted = fysiskeBrukersteder?.find(
     (brukersted) =>
-      brukersted.brukerstedNr === orgTilknytning.primaryFysiskBrukerstedNummer,
+      brukersted.nr === orgTilknytning.primaryFysiskBrukerstedNummer,
   );
 
   const ytterligereFysiskeBrukersteder =
     orgTilknytning.additionalFysiskeBrukerstederNummer
       ?.map((brukerstedNummer) =>
         fysiskeBrukersteder.find(
-          (brukersted) => brukersted.brukerstedNr === brukerstedNummer,
+          (brukersted) => brukersted.nr === brukerstedNummer,
         ),
       )
       .filter((brukersted) => brukersted !== undefined);
@@ -680,7 +683,7 @@ function OrganisationHierarchyTree({
                     <span>Ytterligere fysiske brukersteder:</span>
 
                     {ytterligereFysiskeBrukersteder.map((brukersted) => (
-                      <BodyShort key={brukersted?.brukerstedNr}>
+                      <BodyShort key={brukersted.nr}>
                         <b>{formatDisplayFysiskBrukersted(brukersted)}</b>
                       </BodyShort>
                     ))}

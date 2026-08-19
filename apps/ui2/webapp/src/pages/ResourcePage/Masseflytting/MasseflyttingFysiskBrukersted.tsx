@@ -16,7 +16,6 @@ import { useNavigate } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
 import React, { useState } from "react";
 
-import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import {
   getAllActiveOrgtilknytningerWithGivenFysiskBrukerstedNr,
   getFysiskeBrukersteder,
@@ -36,6 +35,7 @@ import { FysiskBrukerstedSelect } from "~/components/select/FysiskBrukerstedSele
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import type {
+  FysiskBrukersted,
   UpdateFysiskBrukerstedForOrgtilknytningRequest,
   Visningsnavn,
 } from "~/types/api-models";
@@ -247,8 +247,7 @@ function FysiskBrukerstedFlyttingTable() {
         <MasseflyttingFysiskBrukerstedBekreftModal
           orgtilknytninger={sorterteOrgtilknytninger}
           tilFysiskBrukersted={fysiskeBrukersteder.find(
-            (fysiskBrukersted) =>
-              fysiskBrukersted.brukerstedNr === fysiskBrukerstedTil,
+            (fysiskBrukersted) => fysiskBrukersted.nr === fysiskBrukerstedTil,
           )}
           valgteOrgtilknytninger={valgteOrgtilknytninger}
         />,
@@ -282,8 +281,7 @@ function FysiskBrukerstedFlyttingTable() {
   }
 
   const brukersted = fysiskeBrukersteder?.find(
-    (fysiskBrukersted) =>
-      fysiskBrukersted?.brukerstedNr === fysiskBrukerstedFra,
+    (fysiskBrukersted) => fysiskBrukersted.nr === fysiskBrukerstedFra,
   );
 
   return (
@@ -372,7 +370,7 @@ function FysiskBrukerstedFlyttingTable() {
               description="Velg hvilket fysisk brukersted medarbeiderne skal flyttes til"
               fysiskeBrukersteder={fysiskeBrukersteder.filter(
                 (fysiskBrukersted) =>
-                  fysiskBrukersted.brukerstedNr !== fysiskBrukerstedFra,
+                  fysiskBrukersted.nr !== fysiskBrukerstedFra,
               )}
               onChange={(value) => setFysiskBrukerstedTil(value ?? "")}
               value={fysiskBrukerstedTil}

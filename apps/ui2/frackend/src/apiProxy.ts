@@ -38,13 +38,6 @@ export const setupNomAzureProxy = (app: Express) =>
     scope: config.proxy.nomAzureApiScope,
   });
 
-export const setupNomRemedyIntegrasjonProxy = (app: Express) =>
-  addProxyHandler(app, {
-    ingoingUrl: "/frackend/nom-remedy-integrasjon",
-    outgoingUrl: config.proxy.nomRemedyIntegrasjonApiUrl,
-    scope: config.proxy.nomRemedyIntegrasjonApiScope,
-  });
-
 export const setupPaarorendeProxy = (app: Express) =>
   addProxyHandler(app, {
     ingoingUrl: "/frackend/paarorende",
