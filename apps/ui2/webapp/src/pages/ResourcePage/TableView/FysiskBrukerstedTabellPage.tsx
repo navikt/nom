@@ -9,6 +9,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import React, { useState } from "react";
 
 import {
@@ -60,6 +61,7 @@ export function FysiskBrukerstedTabellPage() {
 
 function FysiskBrukerstedTabell() {
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data ?? [];
 
   const alleTilgangsenheterQuery = useQuery({
@@ -118,9 +120,10 @@ function FysiskBrukerstedTabell() {
         </HStack>
       </VStack>
 
-      {!!fysiskBrukerstedFilter && (
+      {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
         <FysiskBrukerstedTabellInner
           fysiskBrukerstedNr={fysiskBrukerstedFilter}
+          tilgangsenhet={tilgangsenhetFilter}
         />
       )}
     </VStack>
@@ -129,8 +132,10 @@ function FysiskBrukerstedTabell() {
 
 function FysiskBrukerstedTabellInner({
   fysiskBrukerstedNr,
+  tilgangsenhet,
 }: {
   fysiskBrukerstedNr: string;
+  tilgangsenhet: string;
 }) {
   const fysiskBrukerstedRessurserAlleQuery = useQuery({
     queryKey: getRessurserForFysiskBrukerstedAlle.queryKey(fysiskBrukerstedNr),
@@ -162,6 +167,35 @@ function FysiskBrukerstedTabellInner({
       ),
     ]),
   );
+
+  const query = `
+    query FysiskBrukerstedTilgangsenhetQuery(
+      $fysiskBrukersted: String
+      $tilgangsenhet: String
+    ) {
+      ressurser(
+        filter: {
+          fysiskBrukersted: $fysiskBrukersted
+          tilgangsenhetId: $tilgangsenhet
+        }
+      ) {
+        ressurs {
+          navident
+          visningsnavn
+        }
+      }
+    }
+  `;
+
+  const result = axios.post("/frackend/nom-api/graphql", {
+    query: query,
+    variables: {
+      fysiskBrukersted: fysiskBrukerstedNr,
+      tilgangsenhet: tilgangsenhet,
+    },
+  });
+
+  console.log(result);
 
   const unikeOrgEnhetIder = [
     ...new Set(
