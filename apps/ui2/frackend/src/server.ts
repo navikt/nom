@@ -4,7 +4,6 @@ import { setupActuators } from "./actuators.js";
 import {
   setupNomApiProxy,
   setupNomAzureProxy,
-  setupNomRemedyIntegrasjonProxy,
   setupPaarorendeProxy,
   setupTeamcatApiProxy,
 } from "./apiProxy.js";
@@ -27,7 +26,6 @@ app.use(verifyToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 setupNomAzureProxy(app);
-setupNomRemedyIntegrasjonProxy(app);
 setupPaarorendeProxy(app);
 setupUnleashProxy(app);
 setupPlayground(app);

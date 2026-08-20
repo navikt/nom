@@ -188,6 +188,18 @@ export interface FolkeregisterPerson {
   navn: RessursNavn;
 }
 
+export interface FysiskBrukersted {
+  address?: string | null;
+  identification?: string | null;
+  kommune?: string | null;
+  /** @default "" */
+  navn: string;
+  /** @default "" */
+  nr: string;
+  postnummer?: string | null;
+  poststed?: string | null;
+}
+
 export interface GetPersonRequest {
   /** @default "" */
   identType?: IdentType;

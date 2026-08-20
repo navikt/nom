@@ -10,8 +10,11 @@ import {
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
-import type { FysiskBrukersted } from "~/api/react-query-endpoints";
-import type { OrgEnhet, Visningsnavn } from "~/types/api-models";
+import type {
+  FysiskBrukersted,
+  OrgEnhet,
+  Visningsnavn,
+} from "~/types/api-models";
 
 /**
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
@@ -43,13 +46,13 @@ export function capitalizeName(name: string) {
 export function formatDisplayFysiskBrukersted(
   fysiskBrukersted: FysiskBrukersted,
 ) {
-  return `${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)} (${fysiskBrukersted.brukerstedNr})`;
+  return `${capitalizeNameFysiskBrukersted(fysiskBrukersted.navn)} (${fysiskBrukersted.nr})`;
 }
 
 export function formatDropdownFysiskBrukersted(
   fysiskBrukersted: FysiskBrukersted,
 ) {
-  return `${fysiskBrukersted.brukerstedNr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.brukerstedNavn)}`;
+  return `${fysiskBrukersted.nr}: ${capitalizeNameFysiskBrukersted(fysiskBrukersted.navn)}`;
 }
 
 /**

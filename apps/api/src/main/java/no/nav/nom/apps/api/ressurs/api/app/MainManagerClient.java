@@ -13,8 +13,11 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static java.util.Objects.isNull;
 
 @Slf4j
 @Component
@@ -83,15 +86,19 @@ public class MainManagerClient {
             }
 
             return response.getBody().items().stream()
-                .map(item ->  FysiskBrukersted.builder()
-                    .nr(item.xid())
-                    .navn(item.namePart())
-                    .identification(item.identification())
-                    .address(item.address1())
-                    .postnummer(item.zipCode())
-                    .poststed(item.city())
-                    .kommune(item.region())
-                    .build())
+                .flatMap(item -> Arrays.stream(
+                        isNull(item.identification2()) ? new String[0] : item.identification2.split(","))
+                    .map(String::trim)
+                    .filter(nr -> !nr.isBlank())
+                    .map(nr -> FysiskBrukersted.builder()
+                        .nr(nr)
+                        .navn(item.namePart())
+                        .identification(item.identification())
+                        .address(item.address1())
+                        .postnummer(item.zipCode())
+                        .poststed(item.city())
+                        .kommune(item.region())
+                        .build()))
                 .toList();
         } catch (Exception e) {
             log.error("Feil ved henting av sites fra MainManager", e);
@@ -112,7 +119,7 @@ public class MainManagerClient {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record MainManagerSiteItem(
-        @JsonProperty("XID") String xid,
+        @JsonProperty("Identification2") String identification2,
         @JsonProperty("NamePart") String namePart,
         @JsonProperty("Identification") String identification,
         @JsonProperty("Address1") String address1,

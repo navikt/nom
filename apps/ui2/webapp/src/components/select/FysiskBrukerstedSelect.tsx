@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import type { FieldError, RefCallBack } from "react-hook-form";
 import { Controller, useController, useFormContext } from "react-hook-form";
 
-import type { FysiskBrukersted } from "~/api/react-query-endpoints";
 import { getFysiskeBrukersteder } from "~/api/react-query-endpoints";
 import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import type { Tilgangsenhet } from "~/types/api-models";
+import type { FysiskBrukersted } from "~/types/api-models";
 import { formatDropdownFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
@@ -162,10 +162,7 @@ export function FysiskBrukerstedSelectNew({
     >
       <option value="" />
       {fysiskeBrukersteder?.map((fysiskBrukersted) => (
-        <option
-          key={fysiskBrukersted.brukerstedNr}
-          value={fysiskBrukersted.brukerstedNr}
-        >
+        <option key={fysiskBrukersted.nr} value={fysiskBrukersted.nr}>
           {formatDropdownFysiskBrukersted(fysiskBrukersted)}
         </option>
       ))}
@@ -247,7 +244,7 @@ function SelectLabelWithHelpText({
 function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
   return {
     label: formatDropdownFysiskBrukersted(fysiskBrukersted),
-    value: fysiskBrukersted.brukerstedNr,
+    value: fysiskBrukersted.nr,
   };
 }
 

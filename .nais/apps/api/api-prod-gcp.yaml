@@ -153,6 +153,9 @@ spec:
         - application: repr-fullmakt
           namespace: repr
           cluster: prod-fss
+        - application: fullmakt
+          namespace: repr
+          cluster: prod-gcp
         - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
           cluster: prod-gcp
