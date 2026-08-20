@@ -154,6 +154,9 @@
                 <version>${graphql-extended-scalars.version}</version>
             </dependency>
 
+            <!--    Unleash v12 drar in okhttp4 transitivt, fordi den nå krever okhttp sin eventsource. Dette kræsjer med hva
+                    mock-oauth2-server drar med i bare test scope, som bruker okhttp5. Samme med slack-client. Jeg har nå ekskludert
+                    det begge steder (unleash og slack) og tvinger dem over til 5.4.0 -->
             <dependency>
                 <groupId>io.getunleash</groupId>
                 <artifactId>unleash-client-java</artifactId>
