@@ -11,7 +11,6 @@
 
     <name>NOM :: Apps :: Nav Ident</name>
     <artifactId>nav-ident</artifactId>
-    <version>1.1.0</version>
 
     <dependencies>
         <dependency>
@@ -242,7 +241,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.14</version>
+                        <version>0.8.15</version>
                         <executions>
                             <execution>
                                 <goals>
