@@ -22,7 +22,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
   OrgEnhet,
-  OrgEnhetKostnadsstedResponse,
+  OrgEnhetKostnadsstedMappingResponse,
   OrgEnhetLederResponse,
   OrgEnhetMedLedernavn,
   OrgtilknytningState,
@@ -325,7 +325,7 @@ export const getKostnadssted = {
   queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
   queryFn: async (orgEnhetId: string) =>
     (
-      await axios.get<OrgEnhetKostnadsstedResponse>(
+      await axios.get<OrgEnhetKostnadsstedMappingResponse>(
         `${NOM_API_BASE_PATH}/app/orgenheter/kostnadssted/${orgEnhetId}`,
       )
     ).data,

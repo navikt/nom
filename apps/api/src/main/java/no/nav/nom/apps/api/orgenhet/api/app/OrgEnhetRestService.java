@@ -12,10 +12,12 @@ import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.KostnadsstedResponse;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetKostnadsstedMappingRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
-import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedResponse;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhetKostnadsstedMappingResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -346,12 +348,12 @@ public class OrgEnhetRestService {
             .build();
     }
 
-    public OrgEnhetKostnadsstedResponse getOrgEnhetKostnadssted(String orgEnhetId) {
+    public OrgEnhetKostnadsstedMappingResponse getOrgEnhetKostnadssted(String orgEnhetId) {
         var orgEnhet = orgenhetService.getById(orgEnhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
 
         return orgenhetKostnadsstedMappingClient.hentKostnadsstedMapping(orgEnhetId)
             .map(kostnadsstedResponseDTO ->
-                new OrgEnhetKostnadsstedResponse(
+                new OrgEnhetKostnadsstedMappingResponse(
                     kostnadsstedResponseDTO.kostnadsstedId(),
                     kostnadsstedResponseDTO.orgenhetId(),
                     kostnadsstedResponseDTO.gyldigFom(),
@@ -359,18 +361,49 @@ public class OrgEnhetRestService {
                 )).orElseThrow(() -> OrgEnhetKostnadsstedNotFoundException.notFound(orgEnhet.getId(), orgEnhet.getNavn()));
     }
 
-    public List<OrgEnhetKostnadsstedResponse> getOrgEnhetKostnadssteder(String toppNodeOrgEnhetId) {
+    public List<OrgEnhetKostnadsstedMappingResponse> getOrgEnhetKostnadssteder(String toppNodeOrgEnhetId) {
         if (orgenhetService.getById(toppNodeOrgEnhetId).isEmpty()) throw OrgEnhetNotFoundException.id(toppNodeOrgEnhetId);
 
-        return orgenhetKostnadsstedMappingClient.hentKostnadsstedMappinger(toppNodeOrgEnhetId).stream()
+        return orgenhetKostnadsstedMappingClient.hentKostnadsstedMappingerForGittToppNode(toppNodeOrgEnhetId).stream()
             .map(kostnadsstedResponseDTO ->
-                new OrgEnhetKostnadsstedResponse(
+                new OrgEnhetKostnadsstedMappingResponse(
                     kostnadsstedResponseDTO.kostnadsstedId(),
                     kostnadsstedResponseDTO.orgenhetId(),
                     kostnadsstedResponseDTO.gyldigFom(),
                     kostnadsstedResponseDTO.gyldigTom()
                 ))
             .toList();
+    }
+
+    public List<KostnadsstedResponse> getAllKostnadssteder() {
+        return orgenhetKostnadsstedMappingClient.hentAlleKostnadssteder().stream().map(kostnadsstedResponseDTO ->
+            new KostnadsstedResponse(
+                kostnadsstedResponseDTO.kostnadsstedId(),
+                kostnadsstedResponseDTO.navn(),
+                kostnadsstedResponseDTO.gyldigFom(),
+                kostnadsstedResponseDTO.gyldigTom()
+            ))
+            .toList();
+    }
+
+    public OrgEnhetKostnadsstedMappingResponse opprettOrgEnhetKostnadsstedMapping(OpprettOrgEnhetKostnadsstedMappingRequest opprettOrgEnhetKostnadsstedMappingRequest) {
+        var orgEnhetId = opprettOrgEnhetKostnadsstedMappingRequest.orgenhetId();
+        if (orgenhetService.getById(orgEnhetId).isEmpty()) {
+            throw OrgEnhetNotFoundException.id(orgEnhetId);
+        }
+
+        var result = orgenhetKostnadsstedMappingClient.opprettKostnadsstedMapping(
+            orgEnhetId,
+            opprettOrgEnhetKostnadsstedMappingRequest.kostnadsstedId(),
+            opprettOrgEnhetKostnadsstedMappingRequest.gyldigFom(),
+            opprettOrgEnhetKostnadsstedMappingRequest.gyldigTom()
+        );
+        return new OrgEnhetKostnadsstedMappingResponse(
+            result.kostnadsstedId(),
+            result.orgenhetId(),
+            result.gyldigFom(),
+            result.gyldigTom()
+        );
     }
 
     private void validerOrgtilknytningGyldigTom(OrgEnhet orgEnhet, LocalDate gyldigTom) {
