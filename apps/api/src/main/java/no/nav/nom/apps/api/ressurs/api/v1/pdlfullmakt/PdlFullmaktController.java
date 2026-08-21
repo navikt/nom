@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Pdl-fullmakt")
 @RestController
 @RequestMapping(PdlFullmaktController.BASE_URL)
+@PreAuthorize("hasAuthority(\"FULLMAKT\")")
 public class PdlFullmaktController {
 
     public static final String BASE_URL = "/api/v1/pdlfullmakt";
@@ -36,9 +38,6 @@ public class PdlFullmaktController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<AnsattPersonResponse> getAnsatt(@RequestBody AnsattPersonRequest req, Authentication auth) {
-        if (!callerMatchesAllowedApps(auth)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         log.info("mottatt kall mot /getAnsattStatus");
         var fnr = req.personIdent();
         if (fnr == null) {
@@ -53,33 +52,5 @@ public class PdlFullmaktController {
             )))
             .orElse(new AnsattPersonResponse(null));
         return ResponseEntity.ok(ansattPersonResponse);
-    }
-
-    private boolean callerMatchesAllowedApps(Authentication auth) {
-        var matchReprFullmakt = callerMatches(auth, "repr", "repr-fullmakt");
-        return matchReprFullmakt;
-    }
-
-    private boolean callerMatches(Authentication auth, String namespace, String appname) {
-        var creds = auth.getCredentials();
-        if (!(creds instanceof Jwt)) {
-            return false;
-        }
-        var claims = ((Jwt) creds).getClaims();
-        var azpName = claims.get("azp_name").toString();
-
-        return matchAzpString(azpName, namespace, appname);
-    }
-
-
-    private boolean matchAzpString(String input, String namespace, String appname) {
-        var azpStringElements = input.split(":");
-        if (azpStringElements.length != 3) {
-            return false;
-        }
-        var isMatch = azpStringElements[0].matches("((prod)|(dev))-((fss)|(gcp))");
-        isMatch = isMatch && azpStringElements[1].equals(namespace);
-        isMatch = isMatch && azpStringElements[2].equals(appname);
-        return isMatch;
     }
 }
