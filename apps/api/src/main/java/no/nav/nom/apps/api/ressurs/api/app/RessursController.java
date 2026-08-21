@@ -52,17 +52,20 @@ public class RessursController {
 
     private final RessursRestService ressursRestService;
     private final RessursExcelGenerator ressursExcelGenerator;
+    private final RessurserByFysiskbrukerstedExcelGenerator ressurserByFysiskbrukerstedExcelGenerator;
     private final AuthResolver authResolver;
     private final TelefonService telefonService;
 
     public RessursController(
-            RessursRestService ressursRestService, 
-            RessursExcelGenerator ressursExcelGenerator, 
-            AuthResolver authResolver, 
-            TelefonService telefonService
+        RessursRestService ressursRestService,
+        RessursExcelGenerator ressursExcelGenerator,
+        RessurserByFysiskbrukerstedExcelGenerator ressurserByFysiskbrukerstedExcelGenerator,
+        AuthResolver authResolver,
+        TelefonService telefonService
     ) {
         this.ressursRestService = ressursRestService;
         this.ressursExcelGenerator = ressursExcelGenerator;
+        this.ressurserByFysiskbrukerstedExcelGenerator = ressurserByFysiskbrukerstedExcelGenerator;
         this.authResolver = authResolver;
         this.telefonService = telefonService;
     }
@@ -229,7 +232,7 @@ public class RessursController {
         try {
             var navidenter = excelExportRequest.navidenter();
             var ressurser = ressursRestService.findRessurserByNavident(navidenter);
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=skjerminger.xlsx");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ressurser.xlsx");
             ressursExcelGenerator.generate(response, ressurser, navidenter, excelExportRequest.topOrgEnhetId());
         } catch (Exception e) {
             log.error("Failed to generate export file", e);
@@ -326,6 +329,26 @@ public class RessursController {
         @PathVariable String fysiskBrukerstedNr
     ) {
         return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr));
+    }
+
+    @GetMapping("/byFysiskbrukerstedIAktivOt/{fysiskBrukerstedNr}/export")
+    @Operation(
+        description = "Genererer regneark med oversikt over alle ressurser som har angitt fysisk brukersted i primaryFysiskBrukerstedNummer eller optionalFysiskBrukersteder på en av sine aktive orgtilknytninger",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Exported file"),
+        @ApiResponse(responseCode = "403"),
+    })
+    public void getRessurserByFysiskbrukerstedIAktivOtExport(HttpServletResponse response,  @PathVariable String fysiskBrukerstedNr) throws IOException {
+        try {
+            var ressurser = ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ressurser_fysiskbrukersted.xlsx");
+            ressurserByFysiskbrukerstedExcelGenerator.generate(response, ressurser);
+        } catch (Exception e) {
+            log.error("Failed to generate export file", e);
+            response.sendError(500);
+        }
     }
 
     @GetMapping("/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}")
