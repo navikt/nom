@@ -218,7 +218,8 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         border: 1px solid
           ${!tilgang.active
             ? "var(--a-border-subtle)"
-            : "var(--a-border-default)"};
+            : "var(--a-border-default)"
+          };
       `}
       gap="6"
     >

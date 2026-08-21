@@ -175,7 +175,8 @@ function GridItem({
         align-items: center;
         ${standalone
           ? `height: fit-content;`
-          : `grid-column: span ${columns}; grid-row: span ${rows};`}
+          : `grid-column: span ${columns}; grid-row: span ${rows};`
+        }
       `}
     >
       {children}
