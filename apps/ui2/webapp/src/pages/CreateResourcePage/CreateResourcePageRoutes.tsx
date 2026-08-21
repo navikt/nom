@@ -10,8 +10,7 @@ import { OrganisasjonstilknytningStep } from "~/pages/CreateResourcePage/Organis
 import { PersonopplysningerStep } from "~/pages/CreateResourcePage/PersonopplysningerStep";
 import { SektorStep } from "~/pages/CreateResourcePage/SektorStep";
 import { SummaryStep } from "~/pages/CreateResourcePage/SummaryStep";
-import { Tilknytningtype } from "~/types/api-models";
-import { AnsettelsesType, Sektor } from "~/types/api-models";
+import { AnsettelsesType, Sektor, Tilknytningtype } from "~/types/api-models";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
@@ -121,8 +120,3 @@ export function validateCreateRessursSearch(
 }
 
 export type StatligFormValues = yup.InferType<typeof statligValidationSchema>;
-
-export const AnsettelsesTypeNameMapping = {
-  [AnsettelsesType.FAST]: "Fast",
-  [AnsettelsesType.MIDLERTIDIG]: "Midlertidig",
-};

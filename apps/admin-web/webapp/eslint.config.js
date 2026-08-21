@@ -1,5 +1,6 @@
 import eslintPluginTs from "@typescript-eslint/eslint-plugin";
 import parserTs from "@typescript-eslint/parser";
+import eslintPluginImport from "eslint-plugin-import";
 import lodash from "eslint-plugin-lodash";
 import prettier from "eslint-plugin-prettier";
 import react from "eslint-plugin-react";
@@ -33,6 +34,17 @@ export default [
             react,
             unicorn,
             "simple-import-sort": simpleImportSort,
+            eslintPluginImport,
+        },
+        settings: {
+            "import/parsers": {
+                "@typescript-eslint/parser": [".ts", ".tsx"],
+            },
+            "import/resolver": {
+                typescript: {
+                    project: "./tsconfig.json",
+                },
+            },
         },
         rules: {
             eqeqeq: ["error", "always"],
@@ -42,6 +54,7 @@ export default [
             "react/jsx-sort-props": "error",
             "prettier/prettier": ["error"],
             "import/prefer-default-export": "off",
+            "eslintPluginImport/no-cycle": "error",
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
             "@typescript-eslint/consistent-type-imports": ["warn"],

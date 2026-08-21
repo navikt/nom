@@ -3,8 +3,8 @@ import { Heading } from "@navikt/ds-react";
 import React, { Fragment } from "react";
 
 import { OrgEnhetView } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
+import { UnderEnheterGraphic } from "~/pages/OrganisasjonsHierarkiPage/components/UnderEnheterGraphic";
 import { ValgtOrgEnhet } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
-import { UnderEnheterGraphic } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import type { OrgEnhet } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
