@@ -288,6 +288,9 @@ spec:
         - application: sokos-up-kontoregister-api
           namespace: okonomi
           cluster: prod-gcp
+        - application: pensjon-deployment-audit
+          namespace: pensjon-revisjon
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
