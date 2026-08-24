@@ -27,7 +27,7 @@
     "@navikt/ds-css": "7.38.0",
     "@navikt/ds-react": "7.38.0",
     "@tanstack/react-query": "5.101.4",
-    "@tanstack/react-router": "1.170.29",
+    "@tanstack/react-router": "1.170.31",
     "axios": "1.19.0",
     "date-fns": "4.4.0",
     "lodash": "4.18.1",
@@ -48,7 +48,7 @@
     "@graphql-codegen/typescript-resolvers": "5.1.8",
     "@navikt/aksel-stylelint": "7.38.0",
     "@tanstack/react-query-devtools": "5.101.4",
-    "@tanstack/router-vite-plugin": "1.167.32",
+    "@tanstack/router-vite-plugin": "1.167.34",
     "@types/lodash": "4.17.25",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
@@ -72,9 +72,9 @@
     "swagger-typescript-api": "13.12.6",
     "typescript": "5.9.3",
     "vite": "7.3.6",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.62.4"
+    "@rollup/rollup-linux-x64-gnu": "4.62.5"
   }
 }
