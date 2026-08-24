@@ -7,12 +7,12 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useForm } from "react-hook-form";
 
-import { searchSchemaWithNavident } from "~/api/queries.ts";
 import {
+  getNomMasteredStateOptions,
   getOrgtilknytningerForListOfNavidents,
   getRessurser,
+  searchSchemaWithNavident,
 } from "~/api/queries.ts";
-import { getNomMasteredStateOptions } from "~/api/queries.ts";
 import { BigLoader } from "~/components/BigLoader.tsx";
 import { EmbeddedJsonView } from "~/components/KafkaEventTable.tsx";
 import { copyToClipboard } from "~/components/quickdialog.tsx";
@@ -192,11 +192,9 @@ function NomMasteredPage() {
                   ressursMastered,
                   orgtilknytninger,
                 )}
-                ressurs={
-                  ressurser.find(
-                    (value) => value.navident === ressursMastered.navident,
-                  )!
-                }
+                ressurs={ressurser.find(
+                  (value) => value.navident === ressursMastered.navident,
+                )!}
                 ressursMastered={ressursMastered}
               />
             );

@@ -8,56 +8,41 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as StateRouteImport } from './routes/state'
-import { Route as SinksRouteImport } from './routes/sinks'
-import { Route as SanityChecksRouteImport } from './routes/sanity-checks'
-import { Route as ManuelleMeldingerRouteImport } from './routes/manuelle-meldinger'
-import { Route as ManuellLastRouteImport } from './routes/manuell-last'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StateIndexRouteImport } from './routes/state.index'
-import { Route as SinksIndexRouteImport } from './routes/sinks.index'
-import { Route as StateRessursRouteImport } from './routes/state.ressurs'
-import { Route as StateOrgtilknytningRouteImport } from './routes/state.orgtilknytning'
-import { Route as StateOrgenhetLederRouteImport } from './routes/state.orgenhet-leder'
-import { Route as StateOrgenhetRouteImport } from './routes/state.orgenhet'
-import { Route as StateOrganiseringRouteImport } from './routes/state.organisering'
-import { Route as SinksTilgangRouteImport } from './routes/sinks.tilgang'
-import { Route as SinksRessursRouteImport } from './routes/sinks.ressurs'
-import { Route as SinksOrgtilknytningRouteImport } from './routes/sinks.orgtilknytning'
-import { Route as SinksOrgenhetLederRouteImport } from './routes/sinks.orgenhet-leder'
-import { Route as SinksOrgenhetRouteImport } from './routes/sinks.orgenhet'
-import { Route as SinksOrganiseringRouteImport } from './routes/sinks.organisering'
-import { Route as SinksNomMasteredRouteImport } from './routes/sinks.nom-mastered'
-import { Route as SinksDeadLetterRouteImport } from './routes/sinks.dead-letter'
-import { Route as SinksApiRessursHendelserRouteImport } from './routes/sinks.api-ressurs-hendelser'
-import { Route as SinksApiRessursRouteImport } from './routes/sinks.api-ressurs'
-import { Route as SinksApiOrgenhetRouteImport } from './routes/sinks.api-orgenhet'
-import { Route as SinksApiHendelserRouteImport } from './routes/sinks.api-hendelser'
-import { Route as SanityChecksU4diffRouteImport } from './routes/sanity-checks.u4diff'
-import { Route as SanityChecksRessursRouteImport } from './routes/sanity-checks.ressurs'
-import { Route as SanityChecksRemedyRouteImport } from './routes/sanity-checks.remedy'
-import { Route as SanityChecksOrgtilknytningRouteImport } from './routes/sanity-checks.orgtilknytning'
-import { Route as SanityChecksOrgenhetRouteImport } from './routes/sanity-checks.orgenhet'
+import {Route as rootRouteImport} from './routes/__root'
+import {Route as IndexRouteImport} from './routes/index'
+import {Route as ManuellLastRouteImport} from './routes/manuell-last'
+import {Route as ManuelleMeldingerRouteImport} from './routes/manuelle-meldinger'
+import {Route as SanityChecksRouteImport} from './routes/sanity-checks'
+import {Route as SinksRouteImport} from './routes/sinks'
+import {Route as StateRouteImport} from './routes/state'
+import {Route as SanityChecksOrgenhetRouteImport} from './routes/sanity-checks.orgenhet'
+import {Route as SanityChecksOrgtilknytningRouteImport} from './routes/sanity-checks.orgtilknytning'
+import {Route as SanityChecksRemedyRouteImport} from './routes/sanity-checks.remedy'
+import {Route as SanityChecksRessursRouteImport} from './routes/sanity-checks.ressurs'
+import {Route as SanityChecksU4diffRouteImport} from './routes/sanity-checks.u4diff'
+import {Route as SinksIndexRouteImport} from './routes/sinks.index'
+import {Route as SinksApiHendelserRouteImport} from './routes/sinks.api-hendelser'
+import {Route as SinksApiOrgenhetRouteImport} from './routes/sinks.api-orgenhet'
+import {Route as SinksApiRessursRouteImport} from './routes/sinks.api-ressurs'
+import {Route as SinksApiRessursHendelserRouteImport} from './routes/sinks.api-ressurs-hendelser'
+import {Route as SinksDeadLetterRouteImport} from './routes/sinks.dead-letter'
+import {Route as SinksNomMasteredRouteImport} from './routes/sinks.nom-mastered'
+import {Route as SinksOrganiseringRouteImport} from './routes/sinks.organisering'
+import {Route as SinksOrgenhetRouteImport} from './routes/sinks.orgenhet'
+import {Route as SinksOrgenhetLederRouteImport} from './routes/sinks.orgenhet-leder'
+import {Route as SinksOrgtilknytningRouteImport} from './routes/sinks.orgtilknytning'
+import {Route as SinksRessursRouteImport} from './routes/sinks.ressurs'
+import {Route as SinksTilgangRouteImport} from './routes/sinks.tilgang'
+import {Route as StateIndexRouteImport} from './routes/state.index'
+import {Route as StateOrganiseringRouteImport} from './routes/state.organisering'
+import {Route as StateOrgenhetRouteImport} from './routes/state.orgenhet'
+import {Route as StateOrgenhetLederRouteImport} from './routes/state.orgenhet-leder'
+import {Route as StateOrgtilknytningRouteImport} from './routes/state.orgtilknytning'
+import {Route as StateRessursRouteImport} from './routes/state.ressurs'
 
-const StateRoute = StateRouteImport.update({
-  id: '/state',
-  path: '/state',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SinksRoute = SinksRouteImport.update({
-  id: '/sinks',
-  path: '/sinks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SanityChecksRoute = SanityChecksRouteImport.update({
-  id: '/sanity-checks',
-  path: '/sanity-checks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManuelleMeldingerRoute = ManuelleMeldingerRouteImport.update({
-  id: '/manuelle-meldinger',
-  path: '/manuelle-meldinger',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManuellLastRoute = ManuellLastRouteImport.update({
@@ -65,120 +50,29 @@ const ManuellLastRoute = ManuellLastRouteImport.update({
   path: '/manuell-last',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ManuelleMeldingerRoute = ManuelleMeldingerRouteImport.update({
+  id: '/manuelle-meldinger',
+  path: '/manuelle-meldinger',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StateIndexRoute = StateIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => StateRoute,
+const SanityChecksRoute = SanityChecksRouteImport.update({
+  id: '/sanity-checks',
+  path: '/sanity-checks',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const SinksIndexRoute = SinksIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SinksRoute,
+const SinksRoute = SinksRouteImport.update({
+  id: '/sinks',
+  path: '/sinks',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const StateRessursRoute = StateRessursRouteImport.update({
-  id: '/ressurs',
-  path: '/ressurs',
-  getParentRoute: () => StateRoute,
+const StateRoute = StateRouteImport.update({
+  id: '/state',
+  path: '/state',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const StateOrgtilknytningRoute = StateOrgtilknytningRouteImport.update({
-  id: '/orgtilknytning',
-  path: '/orgtilknytning',
-  getParentRoute: () => StateRoute,
-} as any)
-const StateOrgenhetLederRoute = StateOrgenhetLederRouteImport.update({
-  id: '/orgenhet-leder',
-  path: '/orgenhet-leder',
-  getParentRoute: () => StateRoute,
-} as any)
-const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
+const SanityChecksOrgenhetRoute = SanityChecksOrgenhetRouteImport.update({
   id: '/orgenhet',
   path: '/orgenhet',
-  getParentRoute: () => StateRoute,
-} as any)
-const StateOrganiseringRoute = StateOrganiseringRouteImport.update({
-  id: '/organisering',
-  path: '/organisering',
-  getParentRoute: () => StateRoute,
-} as any)
-const SinksTilgangRoute = SinksTilgangRouteImport.update({
-  id: '/tilgang',
-  path: '/tilgang',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksRessursRoute = SinksRessursRouteImport.update({
-  id: '/ressurs',
-  path: '/ressurs',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksOrgtilknytningRoute = SinksOrgtilknytningRouteImport.update({
-  id: '/orgtilknytning',
-  path: '/orgtilknytning',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksOrgenhetLederRoute = SinksOrgenhetLederRouteImport.update({
-  id: '/orgenhet-leder',
-  path: '/orgenhet-leder',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
-  id: '/orgenhet',
-  path: '/orgenhet',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksOrganiseringRoute = SinksOrganiseringRouteImport.update({
-  id: '/organisering',
-  path: '/organisering',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksNomMasteredRoute = SinksNomMasteredRouteImport.update({
-  id: '/nom-mastered',
-  path: '/nom-mastered',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksDeadLetterRoute = SinksDeadLetterRouteImport.update({
-  id: '/dead-letter',
-  path: '/dead-letter',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksApiRessursHendelserRoute =
-  SinksApiRessursHendelserRouteImport.update({
-    id: '/api-ressurs-hendelser',
-    path: '/api-ressurs-hendelser',
-    getParentRoute: () => SinksRoute,
-  } as any)
-const SinksApiRessursRoute = SinksApiRessursRouteImport.update({
-  id: '/api-ressurs',
-  path: '/api-ressurs',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksApiOrgenhetRoute = SinksApiOrgenhetRouteImport.update({
-  id: '/api-orgenhet',
-  path: '/api-orgenhet',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SinksApiHendelserRoute = SinksApiHendelserRouteImport.update({
-  id: '/api-hendelser',
-  path: '/api-hendelser',
-  getParentRoute: () => SinksRoute,
-} as any)
-const SanityChecksU4diffRoute = SanityChecksU4diffRouteImport.update({
-  id: '/u4diff',
-  path: '/u4diff',
-  getParentRoute: () => SanityChecksRoute,
-} as any)
-const SanityChecksRessursRoute = SanityChecksRessursRouteImport.update({
-  id: '/ressurs',
-  path: '/ressurs',
-  getParentRoute: () => SanityChecksRoute,
-} as any)
-const SanityChecksRemedyRoute = SanityChecksRemedyRouteImport.update({
-  id: '/remedy',
-  path: '/remedy',
   getParentRoute: () => SanityChecksRoute,
 } as any)
 const SanityChecksOrgtilknytningRoute =
@@ -187,10 +81,116 @@ const SanityChecksOrgtilknytningRoute =
     path: '/orgtilknytning',
     getParentRoute: () => SanityChecksRoute,
   } as any)
-const SanityChecksOrgenhetRoute = SanityChecksOrgenhetRouteImport.update({
+const SanityChecksRemedyRoute = SanityChecksRemedyRouteImport.update({
+  id: '/remedy',
+  path: '/remedy',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+const SanityChecksRessursRoute = SanityChecksRessursRouteImport.update({
+  id: '/ressurs',
+  path: '/ressurs',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+const SanityChecksU4diffRoute = SanityChecksU4diffRouteImport.update({
+  id: '/u4diff',
+  path: '/u4diff',
+  getParentRoute: () => SanityChecksRoute,
+} as any)
+const SinksIndexRoute = SinksIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksApiHendelserRoute = SinksApiHendelserRouteImport.update({
+  id: '/api-hendelser',
+  path: '/api-hendelser',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksApiOrgenhetRoute = SinksApiOrgenhetRouteImport.update({
+  id: '/api-orgenhet',
+  path: '/api-orgenhet',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksApiRessursRoute = SinksApiRessursRouteImport.update({
+  id: '/api-ressurs',
+  path: '/api-ressurs',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksApiRessursHendelserRoute =
+  SinksApiRessursHendelserRouteImport.update({
+    id: '/api-ressurs-hendelser',
+    path: '/api-ressurs-hendelser',
+    getParentRoute: () => SinksRoute,
+  } as any)
+const SinksDeadLetterRoute = SinksDeadLetterRouteImport.update({
+  id: '/dead-letter',
+  path: '/dead-letter',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksNomMasteredRoute = SinksNomMasteredRouteImport.update({
+  id: '/nom-mastered',
+  path: '/nom-mastered',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrganiseringRoute = SinksOrganiseringRouteImport.update({
+  id: '/organisering',
+  path: '/organisering',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrgenhetRoute = SinksOrgenhetRouteImport.update({
   id: '/orgenhet',
   path: '/orgenhet',
-  getParentRoute: () => SanityChecksRoute,
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrgenhetLederRoute = SinksOrgenhetLederRouteImport.update({
+  id: '/orgenhet-leder',
+  path: '/orgenhet-leder',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksOrgtilknytningRoute = SinksOrgtilknytningRouteImport.update({
+  id: '/orgtilknytning',
+  path: '/orgtilknytning',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksRessursRoute = SinksRessursRouteImport.update({
+  id: '/ressurs',
+  path: '/ressurs',
+  getParentRoute: () => SinksRoute,
+} as any)
+const SinksTilgangRoute = SinksTilgangRouteImport.update({
+  id: '/tilgang',
+  path: '/tilgang',
+  getParentRoute: () => SinksRoute,
+} as any)
+const StateIndexRoute = StateIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrganiseringRoute = StateOrganiseringRouteImport.update({
+  id: '/organisering',
+  path: '/organisering',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrgenhetRoute = StateOrgenhetRouteImport.update({
+  id: '/orgenhet',
+  path: '/orgenhet',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrgenhetLederRoute = StateOrgenhetLederRouteImport.update({
+  id: '/orgenhet-leder',
+  path: '/orgenhet-leder',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateOrgtilknytningRoute = StateOrgtilknytningRouteImport.update({
+  id: '/orgtilknytning',
+  path: '/orgtilknytning',
+  getParentRoute: () => StateRoute,
+} as any)
+const StateRessursRoute = StateRessursRouteImport.update({
+  id: '/ressurs',
+  path: '/ressurs',
+  getParentRoute: () => StateRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -396,32 +396,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/state': {
-      id: '/state'
-      path: '/state'
-      fullPath: '/state'
-      preLoaderRoute: typeof StateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sinks': {
-      id: '/sinks'
-      path: '/sinks'
-      fullPath: '/sinks'
-      preLoaderRoute: typeof SinksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sanity-checks': {
-      id: '/sanity-checks'
-      path: '/sanity-checks'
-      fullPath: '/sanity-checks'
-      preLoaderRoute: typeof SanityChecksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manuelle-meldinger': {
-      id: '/manuelle-meldinger'
-      path: '/manuelle-meldinger'
-      fullPath: '/manuelle-meldinger'
-      preLoaderRoute: typeof ManuelleMeldingerRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manuell-last': {
@@ -431,165 +410,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManuellLastRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/manuelle-meldinger': {
+      id: '/manuelle-meldinger'
+      path: '/manuelle-meldinger'
+      fullPath: '/manuelle-meldinger'
+      preLoaderRoute: typeof ManuelleMeldingerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/state/': {
-      id: '/state/'
-      path: '/'
-      fullPath: '/state/'
-      preLoaderRoute: typeof StateIndexRouteImport
-      parentRoute: typeof StateRoute
+    '/sanity-checks': {
+      id: '/sanity-checks'
+      path: '/sanity-checks'
+      fullPath: '/sanity-checks'
+      preLoaderRoute: typeof SanityChecksRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/sinks/': {
-      id: '/sinks/'
-      path: '/'
-      fullPath: '/sinks/'
-      preLoaderRoute: typeof SinksIndexRouteImport
-      parentRoute: typeof SinksRoute
+    '/sinks': {
+      id: '/sinks'
+      path: '/sinks'
+      fullPath: '/sinks'
+      preLoaderRoute: typeof SinksRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/state/ressurs': {
-      id: '/state/ressurs'
-      path: '/ressurs'
-      fullPath: '/state/ressurs'
-      preLoaderRoute: typeof StateRessursRouteImport
-      parentRoute: typeof StateRoute
+    '/state': {
+      id: '/state'
+      path: '/state'
+      fullPath: '/state'
+      preLoaderRoute: typeof StateRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/state/orgtilknytning': {
-      id: '/state/orgtilknytning'
-      path: '/orgtilknytning'
-      fullPath: '/state/orgtilknytning'
-      preLoaderRoute: typeof StateOrgtilknytningRouteImport
-      parentRoute: typeof StateRoute
-    }
-    '/state/orgenhet-leder': {
-      id: '/state/orgenhet-leder'
-      path: '/orgenhet-leder'
-      fullPath: '/state/orgenhet-leder'
-      preLoaderRoute: typeof StateOrgenhetLederRouteImport
-      parentRoute: typeof StateRoute
-    }
-    '/state/orgenhet': {
-      id: '/state/orgenhet'
+    '/sanity-checks/orgenhet': {
+      id: '/sanity-checks/orgenhet'
       path: '/orgenhet'
-      fullPath: '/state/orgenhet'
-      preLoaderRoute: typeof StateOrgenhetRouteImport
-      parentRoute: typeof StateRoute
-    }
-    '/state/organisering': {
-      id: '/state/organisering'
-      path: '/organisering'
-      fullPath: '/state/organisering'
-      preLoaderRoute: typeof StateOrganiseringRouteImport
-      parentRoute: typeof StateRoute
-    }
-    '/sinks/tilgang': {
-      id: '/sinks/tilgang'
-      path: '/tilgang'
-      fullPath: '/sinks/tilgang'
-      preLoaderRoute: typeof SinksTilgangRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/ressurs': {
-      id: '/sinks/ressurs'
-      path: '/ressurs'
-      fullPath: '/sinks/ressurs'
-      preLoaderRoute: typeof SinksRessursRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/orgtilknytning': {
-      id: '/sinks/orgtilknytning'
-      path: '/orgtilknytning'
-      fullPath: '/sinks/orgtilknytning'
-      preLoaderRoute: typeof SinksOrgtilknytningRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/orgenhet-leder': {
-      id: '/sinks/orgenhet-leder'
-      path: '/orgenhet-leder'
-      fullPath: '/sinks/orgenhet-leder'
-      preLoaderRoute: typeof SinksOrgenhetLederRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/orgenhet': {
-      id: '/sinks/orgenhet'
-      path: '/orgenhet'
-      fullPath: '/sinks/orgenhet'
-      preLoaderRoute: typeof SinksOrgenhetRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/organisering': {
-      id: '/sinks/organisering'
-      path: '/organisering'
-      fullPath: '/sinks/organisering'
-      preLoaderRoute: typeof SinksOrganiseringRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/nom-mastered': {
-      id: '/sinks/nom-mastered'
-      path: '/nom-mastered'
-      fullPath: '/sinks/nom-mastered'
-      preLoaderRoute: typeof SinksNomMasteredRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/dead-letter': {
-      id: '/sinks/dead-letter'
-      path: '/dead-letter'
-      fullPath: '/sinks/dead-letter'
-      preLoaderRoute: typeof SinksDeadLetterRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/api-ressurs-hendelser': {
-      id: '/sinks/api-ressurs-hendelser'
-      path: '/api-ressurs-hendelser'
-      fullPath: '/sinks/api-ressurs-hendelser'
-      preLoaderRoute: typeof SinksApiRessursHendelserRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/api-ressurs': {
-      id: '/sinks/api-ressurs'
-      path: '/api-ressurs'
-      fullPath: '/sinks/api-ressurs'
-      preLoaderRoute: typeof SinksApiRessursRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/api-orgenhet': {
-      id: '/sinks/api-orgenhet'
-      path: '/api-orgenhet'
-      fullPath: '/sinks/api-orgenhet'
-      preLoaderRoute: typeof SinksApiOrgenhetRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sinks/api-hendelser': {
-      id: '/sinks/api-hendelser'
-      path: '/api-hendelser'
-      fullPath: '/sinks/api-hendelser'
-      preLoaderRoute: typeof SinksApiHendelserRouteImport
-      parentRoute: typeof SinksRoute
-    }
-    '/sanity-checks/u4diff': {
-      id: '/sanity-checks/u4diff'
-      path: '/u4diff'
-      fullPath: '/sanity-checks/u4diff'
-      preLoaderRoute: typeof SanityChecksU4diffRouteImport
-      parentRoute: typeof SanityChecksRoute
-    }
-    '/sanity-checks/ressurs': {
-      id: '/sanity-checks/ressurs'
-      path: '/ressurs'
-      fullPath: '/sanity-checks/ressurs'
-      preLoaderRoute: typeof SanityChecksRessursRouteImport
-      parentRoute: typeof SanityChecksRoute
-    }
-    '/sanity-checks/remedy': {
-      id: '/sanity-checks/remedy'
-      path: '/remedy'
-      fullPath: '/sanity-checks/remedy'
-      preLoaderRoute: typeof SanityChecksRemedyRouteImport
+      fullPath: '/sanity-checks/orgenhet'
+      preLoaderRoute: typeof SanityChecksOrgenhetRouteImport
       parentRoute: typeof SanityChecksRoute
     }
     '/sanity-checks/orgtilknytning': {
@@ -599,12 +452,159 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SanityChecksOrgtilknytningRouteImport
       parentRoute: typeof SanityChecksRoute
     }
-    '/sanity-checks/orgenhet': {
-      id: '/sanity-checks/orgenhet'
-      path: '/orgenhet'
-      fullPath: '/sanity-checks/orgenhet'
-      preLoaderRoute: typeof SanityChecksOrgenhetRouteImport
+    '/sanity-checks/remedy': {
+      id: '/sanity-checks/remedy'
+      path: '/remedy'
+      fullPath: '/sanity-checks/remedy'
+      preLoaderRoute: typeof SanityChecksRemedyRouteImport
       parentRoute: typeof SanityChecksRoute
+    }
+    '/sanity-checks/ressurs': {
+      id: '/sanity-checks/ressurs'
+      path: '/ressurs'
+      fullPath: '/sanity-checks/ressurs'
+      preLoaderRoute: typeof SanityChecksRessursRouteImport
+      parentRoute: typeof SanityChecksRoute
+    }
+    '/sanity-checks/u4diff': {
+      id: '/sanity-checks/u4diff'
+      path: '/u4diff'
+      fullPath: '/sanity-checks/u4diff'
+      preLoaderRoute: typeof SanityChecksU4diffRouteImport
+      parentRoute: typeof SanityChecksRoute
+    }
+    '/sinks/': {
+      id: '/sinks/'
+      path: '/'
+      fullPath: '/sinks/'
+      preLoaderRoute: typeof SinksIndexRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/api-hendelser': {
+      id: '/sinks/api-hendelser'
+      path: '/api-hendelser'
+      fullPath: '/sinks/api-hendelser'
+      preLoaderRoute: typeof SinksApiHendelserRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/api-orgenhet': {
+      id: '/sinks/api-orgenhet'
+      path: '/api-orgenhet'
+      fullPath: '/sinks/api-orgenhet'
+      preLoaderRoute: typeof SinksApiOrgenhetRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/api-ressurs': {
+      id: '/sinks/api-ressurs'
+      path: '/api-ressurs'
+      fullPath: '/sinks/api-ressurs'
+      preLoaderRoute: typeof SinksApiRessursRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/api-ressurs-hendelser': {
+      id: '/sinks/api-ressurs-hendelser'
+      path: '/api-ressurs-hendelser'
+      fullPath: '/sinks/api-ressurs-hendelser'
+      preLoaderRoute: typeof SinksApiRessursHendelserRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/dead-letter': {
+      id: '/sinks/dead-letter'
+      path: '/dead-letter'
+      fullPath: '/sinks/dead-letter'
+      preLoaderRoute: typeof SinksDeadLetterRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/nom-mastered': {
+      id: '/sinks/nom-mastered'
+      path: '/nom-mastered'
+      fullPath: '/sinks/nom-mastered'
+      preLoaderRoute: typeof SinksNomMasteredRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/organisering': {
+      id: '/sinks/organisering'
+      path: '/organisering'
+      fullPath: '/sinks/organisering'
+      preLoaderRoute: typeof SinksOrganiseringRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/orgenhet': {
+      id: '/sinks/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/sinks/orgenhet'
+      preLoaderRoute: typeof SinksOrgenhetRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/orgenhet-leder': {
+      id: '/sinks/orgenhet-leder'
+      path: '/orgenhet-leder'
+      fullPath: '/sinks/orgenhet-leder'
+      preLoaderRoute: typeof SinksOrgenhetLederRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/orgtilknytning': {
+      id: '/sinks/orgtilknytning'
+      path: '/orgtilknytning'
+      fullPath: '/sinks/orgtilknytning'
+      preLoaderRoute: typeof SinksOrgtilknytningRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/ressurs': {
+      id: '/sinks/ressurs'
+      path: '/ressurs'
+      fullPath: '/sinks/ressurs'
+      preLoaderRoute: typeof SinksRessursRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/sinks/tilgang': {
+      id: '/sinks/tilgang'
+      path: '/tilgang'
+      fullPath: '/sinks/tilgang'
+      preLoaderRoute: typeof SinksTilgangRouteImport
+      parentRoute: typeof SinksRoute
+    }
+    '/state/': {
+      id: '/state/'
+      path: '/'
+      fullPath: '/state/'
+      preLoaderRoute: typeof StateIndexRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/organisering': {
+      id: '/state/organisering'
+      path: '/organisering'
+      fullPath: '/state/organisering'
+      preLoaderRoute: typeof StateOrganiseringRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/orgenhet': {
+      id: '/state/orgenhet'
+      path: '/orgenhet'
+      fullPath: '/state/orgenhet'
+      preLoaderRoute: typeof StateOrgenhetRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/orgenhet-leder': {
+      id: '/state/orgenhet-leder'
+      path: '/orgenhet-leder'
+      fullPath: '/state/orgenhet-leder'
+      preLoaderRoute: typeof StateOrgenhetLederRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/orgtilknytning': {
+      id: '/state/orgtilknytning'
+      path: '/orgtilknytning'
+      fullPath: '/state/orgtilknytning'
+      preLoaderRoute: typeof StateOrgtilknytningRouteImport
+      parentRoute: typeof StateRoute
+    }
+    '/state/ressurs': {
+      id: '/state/ressurs'
+      path: '/ressurs'
+      fullPath: '/state/ressurs'
+      preLoaderRoute: typeof StateRessursRouteImport
+      parentRoute: typeof StateRoute
     }
   }
 }

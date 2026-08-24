@@ -1,8 +1,6 @@
 import { Search } from "@navikt/ds-react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
-
-import { Route } from "~/routes/ressurs.create.$step";
 
 export function SearchForPerson() {
   const { personident } = useSearch({ from: "/ressurs/create/$step" });
@@ -13,7 +11,7 @@ export function SearchForPerson() {
   });
   const navigate = useNavigate();
 
-  const { step } = Route.useParams();
+  const { step } = useParams({ from: "/ressurs/create/$step" });
 
   return (
     <form

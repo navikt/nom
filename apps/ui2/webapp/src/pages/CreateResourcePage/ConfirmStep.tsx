@@ -8,7 +8,6 @@ import { createRessurs, getOrgEnhet } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
-import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
@@ -17,8 +16,11 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
-import { IdentType } from "~/types/api-models";
-import { Tilknytningtype } from "~/types/api-models";
+import {
+  AnsettelsesType,
+  IdentType,
+  Tilknytningtype,
+} from "~/types/api-models";
 import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
 
 export function ConfirmStep() {
@@ -209,3 +211,8 @@ export function ConfirmStep() {
     </Modal>
   );
 }
+
+export const AnsettelsesTypeNameMapping = {
+  [AnsettelsesType.FAST]: "Fast",
+  [AnsettelsesType.MIDLERTIDIG]: "Midlertidig",
+};
