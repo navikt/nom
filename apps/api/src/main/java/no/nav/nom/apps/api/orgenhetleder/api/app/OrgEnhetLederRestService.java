@@ -26,6 +26,7 @@ public class OrgEnhetLederRestService {
 
     public List<OrgEnhetLederResponse> getLederByNavident(String navident) {
         return orgEnhetLederService.getOrgEnheterNavidentErLederFor(navident).stream()
+            .filter(OrgEnhetLederState::isActive)
             .map(this::enrichWithData)
             .toList();
     }
