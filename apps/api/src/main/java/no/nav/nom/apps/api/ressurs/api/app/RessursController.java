@@ -342,13 +342,23 @@ public class RessursController {
     })
     public void getRessurserByFysiskbrukerstedIAktivOtExport(HttpServletResponse response,  @PathVariable String fysiskBrukerstedNr) throws IOException {
         try {
+            if (!isDigitsOnly(fysiskBrukerstedNr)) {
+                response.sendError(400, "Fysisk brukersted må bestå kun av sifre");
+                return;
+            }
             var ressurser = ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr);
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ressurser_fysiskbrukersted.xlsx");
-            ressurserByFysiskbrukerstedExcelGenerator.generate(response, ressurser);
+            ressurserByFysiskbrukerstedExcelGenerator.generate(response, ressurser, fysiskBrukerstedNr);
         } catch (Exception e) {
             log.error("Failed to generate export file", e);
             response.sendError(500);
         }
+    }
+
+    public static boolean isDigitsOnly(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        return str.chars().allMatch(Character::isDigit);
     }
 
     @GetMapping("/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}")
