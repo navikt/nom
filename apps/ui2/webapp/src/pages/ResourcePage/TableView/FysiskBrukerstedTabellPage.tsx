@@ -238,7 +238,7 @@ function FysiskBrukerstedTabellInner({
 
   const orgEnheter = orgEnheterQuery.data;
 
-  const ressursRows: FysiskBrukerstedTabellRow[] =
+  const ressursRows: FysiskBrukerstedTabellRow[] = (
     fysiskBrukerstedRessurser?.map((ressurs) => {
       const tilknytningerForRessurs =
         filteredOrgtilknytninger?.[ressurs.navident] ?? [];
@@ -276,7 +276,10 @@ function FysiskBrukerstedTabellInner({
         orgEnheter: relevanteOrgEnheter,
         tilgangsenhetId: dolTilgangsenhetId,
       };
-    }) ?? [];
+    }) ?? []
+  ).filter((row) =>
+    !tilgangsenhet ? true : row.tilgangsenhetId === tilgangsenhet,
+  );
 
   const { data, sort, handleSort } = useTableSort(ressursRows, "navn");
 
