@@ -43,7 +43,7 @@
     "@graphql-codegen/cli": "6.3.0",
     "@graphql-codegen/introspection": "5.0.2",
     "@graphql-codegen/typescript": "5.0.10",
-    "@graphql-codegen/typescript-operations": "5.1.0",
+    "@graphql-codegen/typescript-operations": "6.1.6",
     "@graphql-codegen/typescript-react-apollo": "4.4.2",
     "@graphql-codegen/typescript-resolvers": "5.1.8",
     "@navikt/aksel-stylelint": "7.38.0",
