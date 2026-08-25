@@ -9,7 +9,6 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import React, { useState } from "react";
 
 import {
@@ -175,54 +174,54 @@ function FysiskBrukerstedTabellInner({
     ]),
   );
 
-  const query = `
-    query FysiskBrukerstedTilgangsenhetQuery(
-      $fysiskBrukersted: String
-      $tilgangsenhet: String
-    ) {
-      ressurser(
-        filter: {
-          fysiskBrukersted: $fysiskBrukersted
-          tilgangsenhetId: $tilgangsenhet
-        }
-      ) {
-        ressurs {
-          navident
-          visningsnavn
-          orgTilknytninger(utvalg: AKTIVE) {
-            orgEnhet {
-              navn
-              id
-              tilgangsenhetId
-            }
-            erDagligOppfolging
-          }
-        }
-      }
-    }
-  `;
+  // const query = `
+  //   query FysiskBrukerstedTilgangsenhetQuery(
+  //     $fysiskBrukersted: String
+  //     $tilgangsenhet: String
+  //   ) {
+  //     ressurser(
+  //       filter: {
+  //         fysiskBrukersted: $fysiskBrukersted
+  //         tilgangsenhetId: $tilgangsenhet
+  //       }
+  //     ) {
+  //       ressurs {
+  //         navident
+  //         visningsnavn
+  //         orgTilknytninger(utvalg: AKTIVE) {
+  //           orgEnhet {
+  //             navn
+  //             id
+  //             tilgangsenhetId
+  //           }
+  //           erDagligOppfolging
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
 
-  const resultQuery = useQuery({
-    queryKey: ["testkey"],
-    queryFn: () =>
-      axios.post("/frackend/nom-api/graphql", {
-        query: query,
-        variables: {
-          fysiskBrukersted: fysiskBrukerstedNr,
-          tilgangsenhet: tilgangsenhet,
-        },
-      }),
-  });
+  // const resultQuery = useQuery({
+  //   queryKey: ["testkey"],
+  //   queryFn: () =>
+  //     axios.post("/frackend/nom-api/graphql", {
+  //       query: query,
+  //       variables: {
+  //         fysiskBrukersted: fysiskBrukerstedNr,
+  //         tilgangsenhet: tilgangsenhet,
+  //       },
+  //     }),
+  // });
 
-  const resultRessurser = resultQuery.data?.data?.data?.ressurser;
-
-  if (!!resultRessurser) {
-    const filtrerteRessurser = resultRessurser.filter(
-      (entry) => entry.ressurs?.orgTilknytninger?.length > 0,
-    );
-
-    console.log(filtrerteRessurser);
-  }
+  // const resultRessurser = resultQuery.data?.data?.data?.ressurser;
+  //
+  // if (!!resultRessurser) {
+  //   const filtrerteRessurser = resultRessurser.filter(
+  //     (entry) => entry.ressurs?.orgTilknytninger?.length > 0,
+  //   );
+  //
+  //   console.log(filtrerteRessurser);
+  // }
 
   const unikeOrgEnhetIder = [
     ...new Set(

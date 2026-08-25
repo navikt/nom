@@ -17,7 +17,8 @@ import type {
   OpprettRessursResponse,
 } from "~/types/api-models";
 import {
-  AnsettelsesType, IdentType,
+  AnsettelsesType,
+  IdentType,
   Tilknytningtype,
 } from "~/types/api-models";
 import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
