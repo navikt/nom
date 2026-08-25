@@ -108,11 +108,11 @@ public class RessurserByFysiskbrukerstedExcelGenerator {
         var excelHeaders = sortedResult.getFirst().keySet().stream().toList();
         var filename = String.format(
             "Ressurser med fysiskbrukersted %s-%s",
-            "Fysisk brukersted " + fysiskBrukerstedNr,
+            fysiskBrukerstedNr,
             LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
         );
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.xlsx", filename));
-        excelGenerator.generateWorkbook(response, fysiskBrukerstedNr, excelHeaders, sortedResult);
+        excelGenerator.generateWorkbook(response, "Fysisk brukersted " + fysiskBrukerstedNr, excelHeaders, sortedResult);
     }
 
     private Map<String, Object> generateRow(RessursState ressurs, String orgEnhetId, String agressoId, String orgEnhetNavn, String tilgangsenhet, LocalDate gyldigFom, String epost) {
