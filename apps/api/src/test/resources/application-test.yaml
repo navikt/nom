@@ -43,6 +43,9 @@ app:
       teamcatClient:
         client-id: teamcatClient
         scopes: ["TEAMCAT"]
+      fullmaktClient:
+        client-id: fullmaktClient
+        scopes: ["FULLMAKT"]
       nomUiClient:
         client-id: nomUiClient
         scopes: ["QUERY_PERSON", "NOM_UI_APP"]

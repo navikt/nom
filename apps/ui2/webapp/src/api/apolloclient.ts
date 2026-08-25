@@ -1,20 +1,30 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import { SetContextLink } from "@apollo/client/link/context";
+
+declare module "@apollo/client" {
+  namespace ApolloClient {
+    namespace DeclareDefaultOptions {
+      interface WatchQuery {
+        errorPolicy: "all";
+      }
+    }
+  }
+}
 
 const getCookieValue = (name: string): string =>
   document.cookie
     .match(String.raw`(^|;)\s*` + name + String.raw`\s*=\s*([^;]+)`)
     ?.pop() || "";
 
-const httpLink = createHttpLink({
+const httpLink = new HttpLink({
   uri: "/frackend/nom-api/graphql",
 });
 
-const csrfLink = setContext((_, { headers }) => {
+const csrfLink = new SetContextLink((prevContext, operation) => {
   const csrfToken = getCookieValue("XSRF-TOKEN");
   return {
     headers: {
-      ...headers,
+      ...prevContext.headers,
       "X-XSRF-TOKEN": csrfToken,
       "Content-Type": "application/json;charset=UTF8;",
     },

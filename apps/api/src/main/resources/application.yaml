@@ -301,6 +301,12 @@ app:
       fullmaktsregister-web:
         client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
         scopes: ["QUERY_PERSON"]
+      fullmakt:
+        client-id: "8e9fd6ca-0af4-4fa5-80d7-60889f02d3ee"
+        scopes: ["FULLMAKT"]
+      repr-fullmakt:
+        client-id: "1eb7a565-8481-4369-98f2-08f791d7ac61"
+        scopes: ["FULLMAKT"]
       teamcat:
         client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
         scopes: ["TEAMCAT"]
@@ -592,6 +598,12 @@ app:
       teamcat:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
+      fullmakt:
+        client-id: "mangler foreløpig i prod"
+        scopes: ["FULLMAKT"]
+      repr-fullmakt:
+        client-id: "4546fbba-b729-469c-ac49-cc208643b745"
+        scopes: ["FULLMAKT"]
       nom-admin:
         client-id: "00c7dcfe-c3ad-44eb-aaac-4f88c5d4f1d2"
         scopes: ["QUERY_PERSON"]

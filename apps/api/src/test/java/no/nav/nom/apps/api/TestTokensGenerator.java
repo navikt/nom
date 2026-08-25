@@ -159,7 +159,7 @@ public class TestTokensGenerator {
 
     public String queryReprFullmaktClient() {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("azp_name", "dev-fss:repr:repr-fullmakt");
+        claims.put("azp_name", "fullmaktClient");
         return validToken(claims);
     }
 

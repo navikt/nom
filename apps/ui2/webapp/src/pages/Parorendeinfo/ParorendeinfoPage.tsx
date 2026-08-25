@@ -54,7 +54,6 @@ import { PageBanner } from "~/components/PageBanner";
 import { Pluralize } from "~/components/Pluralize";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { Route } from "~/routes/kontaktpersoner.$id";
 import type { Ressurs } from "~/types/api-models";
 import { formatTlf, formatVisningsnavn } from "~/utils";
 
@@ -441,7 +440,7 @@ function ParorendeForm({
     }
   };
 
-  const { id } = Route.useParams();
+  const { id } = useParams({ from: "/kontaktpersoner/$id" });
 
   async function onValid(data: { kontaktinfo?: Kontaktinfo[] }) {
     const opprettKontakter = data.kontaktinfo?.filter(

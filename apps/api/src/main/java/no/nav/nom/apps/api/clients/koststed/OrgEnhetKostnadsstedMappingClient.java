@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,13 +39,13 @@ public class OrgEnhetKostnadsstedMappingClient {
             .build();
     }
 
-    public Optional<KostnadsstedResponseDTO> hentKostnadsstedMapping(String orgenhetId) {
+    public Optional<KostnadsstedMappingResponseDTO> hentKostnadsstedMapping(String orgenhetId) {
         try {
             return Optional.ofNullable(
                 restClient.get()
                     .uri(uriBuilder -> uriBuilder.path("/api/v1/mapping").queryParam("orgenhetid", orgenhetId).build())
                     .retrieve()
-                    .body(KostnadsstedResponseDTO.class)
+                    .body(KostnadsstedMappingResponseDTO.class)
             );
         } catch (RestClientResponseException e) {
             if (e.getStatusCode().value() == 404) {
@@ -55,10 +56,31 @@ public class OrgEnhetKostnadsstedMappingClient {
         return Optional.empty();
     }
 
-    public List<KostnadsstedResponseDTO> hentKostnadsstedMappinger(String toppNodeOrgEnhetId) {
+    public List<KostnadsstedMappingResponseDTO> hentKostnadsstedMappingerForGittToppNode(String toppNodeOrgEnhetId) {
         return restClient.get()
             .uri(uriBuilder -> uriBuilder.path("/api/v1/mappinger").queryParam("topOrgenhet", toppNodeOrgEnhetId).build())
             .retrieve()
             .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public List<KostnadsstedResponseDTO> hentAlleKostnadssteder() {
+        return restClient.get()
+            .uri(uriBuilder -> uriBuilder.path("/api/v1/kostnadssteder").build())
+            .retrieve()
+            .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public KostnadsstedMappingResponseDTO opprettKostnadsstedMapping(String orgEnhetId, String kostnadsstedId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return restClient.post()
+            .uri(uriBuilder -> uriBuilder.path("/api/v1/mapping").build())
+            .body(new CreateOrgenhetKostnadsstedMappingExternalRequest(
+                kostnadsstedId,
+                orgEnhetId,
+                gyldigFom,
+                gyldigTom
+            ))
+            .retrieve()
+            .toEntity(KostnadsstedMappingResponseDTO.class)
+            .getBody();
     }
 }

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record KostnadsstedResponseDTO(
     String kostnadsstedId,
-    String orgenhetId,
+    String navn,
     LocalDate gyldigFom,
     LocalDate gyldigTom
 ) {
