@@ -321,6 +321,16 @@ export function getParentOgUnderliggende(orgEnhetId: string) {
   });
 }
 
+export const getAlleKostnadssteder = {
+  queryKey: () => ["ALLE_KOSTNADSSTEDER"],
+  queryFn: async () =>
+    (
+      await axios.get<OrgEnhetKostnadsstedMappingResponse[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/kostnadssted`,
+      )
+    ).data,
+};
+
 export const getKostnadssted = {
   queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),
   queryFn: async (orgEnhetId: string) =>

@@ -1,15 +1,21 @@
 import { css } from "@emotion/react";
 import { Alert, Heading, VStack } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import React from "react";
-import { useController } from "react-hook-form";
+import { type FieldError, useController } from "react-hook-form";
 
+import { getAlleKostnadssteder } from "~/api/react-query-endpoints";
 import {
   AsyncSearch,
+  BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { OrgEnhet } from "~/types/api-models";
+import type {
+  OrgEnhet,
+  OrgEnhetKostnadsstedMappingResponse,
+} from "~/types/api-models";
 
 export function OrgEnhetIkkeFunnet() {
   return <Alert variant="error">Organisasjonsenheten ble ikke funnet</Alert>;
@@ -110,4 +116,97 @@ async function searchIfEnoughInput(searchTerm: string) {
     label: `${ressurs.visningsnavn} (${ressurs.navident})`,
     value: ressurs.navident,
   }));
+}
+
+export function KostnadsstedSelectFormPart({
+  name,
+  kostnadssteder,
+  label = "Kostnadssted",
+  description,
+  helpText,
+  isClearable = false,
+}: {
+  name: string;
+  kostnadssteder?: OrgEnhetKostnadsstedMappingResponse[];
+  label?: string;
+  description?: string;
+  helpText?: string;
+  isClearable?: boolean;
+}) {
+  const { field, fieldState } = useController({ name });
+
+  return (
+    <KostnadsstedSelect
+      description={description}
+      error={fieldState.error}
+      helpText={helpText}
+      isClearable={isClearable}
+      kostnadssteder={kostnadssteder}
+      label={label}
+      onChange={field.onChange}
+      value={field.value}
+    />
+  );
+}
+
+export function KostnadsstedSelect({
+  kostnadssteder,
+  label,
+  description,
+  onChange,
+  error,
+  value,
+  helpText,
+  isClearable = false,
+}: {
+  kostnadssteder?: OrgEnhetKostnadsstedMappingResponse[];
+  label: string;
+  description?: string;
+  onChange: (s: string | null) => void;
+  error?: FieldError;
+  value?: string;
+  helpText?: string;
+  isClearable?: boolean;
+}) {
+  const alleKostnadsstederQuery = useQuery({
+    queryKey: getAlleKostnadssteder.queryKey(),
+    queryFn: () => getAlleKostnadssteder.queryFn(),
+    enabled: !!kostnadssteder,
+  });
+
+  const alleKostnadssteder = alleKostnadsstederQuery.data ?? [];
+
+  const optionKostnadssteder = kostnadssteder ?? alleKostnadssteder;
+
+  const options = optionKostnadssteder.map((kostnadssted) =>
+    kostnadsstedOption(kostnadssted),
+  );
+
+  const currentOption = options.find((option) => option.value === value);
+
+  return (
+    <SelectLayoutWrapper
+      description={description}
+      error={error}
+      helpText={helpText}
+      htmlFor="Kostnadssted"
+      label={label}
+    >
+      <BasicSelect
+        inputId="Kostnadssted"
+        isClearable={isClearable}
+        onChange={(option) => onChange(option?.value ?? null)}
+        options={options}
+        placeholder="Søk etter kostnadssted"
+        value={currentOption}
+      />
+    </SelectLayoutWrapper>
+  );
+}
+
+function kostnadsstedOption(kostnadssted: OrgEnhetKostnadsstedMappingResponse) {
+  return {
+    label: `${kostnadssted.kostnadsstedId}`,
+    value: kostnadssted.kostnadsstedId,
+  };
 }

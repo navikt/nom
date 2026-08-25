@@ -42,6 +42,7 @@ import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/comp
 import {
   FormRessursSearchWrapper,
   IkkeTilgangRedigering,
+  KostnadsstedSelectFormPart,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
@@ -149,8 +150,6 @@ function FormView({
 
   const kostnadssted = kostnadsstedQuery.data;
 
-  console.log(kostnadssted);
-
   const orgEnhet = orgEnhetQuery.data;
 
   if (orgEnhetQuery.isLoading) {
@@ -170,6 +169,7 @@ function FormView({
 
       <OpprettOrgEnhetForm
         overordnetOrgEnhet={orgEnhet}
+        overordnetOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? "3"}
         setOpprettResponse={setOpprettResponse}
       />
     </>
@@ -189,14 +189,19 @@ function KvitteringView({ opprettResponse }: { opprettResponse: any }) {
 
 function OpprettOrgEnhetForm({
   overordnetOrgEnhet,
+  overordnetOrgEnhetKostnadsstedId,
   setOpprettResponse,
 }: {
   overordnetOrgEnhet: OrgEnhet;
+  overordnetOrgEnhetKostnadsstedId: string;
   setOpprettResponse: (response: any) => void;
 }) {
   const methods = useForm({
     resolver: yupResolver(validationSchema),
-    defaultValues: { tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId },
+    defaultValues: {
+      tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
+      kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
+    },
   });
 
   const opprettOrgEnhetMutation = useMutation<
@@ -283,6 +288,11 @@ function OpprettOrgEnhetForm({
               error={methods.formState.errors.tilgangsenhetId?.message}
               label="Tilgangsenhet"
             />
+
+            <KostnadsstedSelectFormPart
+              label="Kostnadssted"
+              name="kostnadsstedId"
+            />
           </VStack>
 
           <div
@@ -365,4 +375,5 @@ const validationSchema = yup.object({
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
     .required("Obligatorisk"),
+  kostnadsstedId: yup.string().required("Obligatorisk"),
 });

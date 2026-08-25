@@ -20,6 +20,7 @@ import * as yup from "yup";
 
 import {
   endreOrgEnhetInfo,
+  getKostnadssted,
   getOrgEnhet,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
@@ -43,6 +44,7 @@ import {
 } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import {
   IkkeTilgangRedigering,
+  KostnadsstedSelectFormPart,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
@@ -130,7 +132,7 @@ function FormView({
           orgEnhet={orgEnhet}
         />
 
-        <KorrigeringOrgEnhetForm
+        <KorrigerOrgEnhetForm
           orgEnhet={orgEnhet}
           setChangeInfo={setChangeInfo}
         />
@@ -158,13 +160,21 @@ function KvitteringView({
   );
 }
 
-function KorrigeringOrgEnhetForm({
+function KorrigerOrgEnhetForm({
   orgEnhet,
   setChangeInfo,
 }: {
   orgEnhet: OrgEnhet;
   setChangeInfo: (response: any) => void;
 }) {
+  const orgEnhetKostnadsstedQuery = useQuery({
+    queryKey: getKostnadssted.queryKey(orgEnhet.id),
+    queryFn: () => getKostnadssted.queryFn(orgEnhet.id),
+    enabled: !!orgEnhet.id,
+  });
+
+  const orgEnhetKostnadssted = orgEnhetKostnadsstedQuery.data;
+
   const queryClient = useQueryClient();
 
   const { showModal } = useModal();
@@ -175,6 +185,7 @@ function KorrigeringOrgEnhetForm({
       tilgangsenhetId: orgEnhet.tilgangsenhetId ?? null,
       orgEnhetsType: orgEnhet.orgEnhetsType,
       nomNivaa: orgEnhet.nomNivaa ?? null,
+      kostnadsstedId: orgEnhetKostnadssted?.kostnadsstedId ?? undefined,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -269,6 +280,11 @@ function KorrigeringOrgEnhetForm({
               error={methods.formState.errors.tilgangsenhetId?.message}
               label="Tilgangsenhet"
             />
+
+            <KostnadsstedSelectFormPart
+              label="Kostnadssted"
+              name="kostnadsstedId"
+            />
           </VStack>
 
           <div
@@ -359,4 +375,5 @@ const validationSchema = yup.object({
       "Ugyldig",
       (value) => !value || Object.values(NomNivaa).includes(value),
     ),
+  kostnadsstedId: yup.string().required("Obligatorisk"),
 });
