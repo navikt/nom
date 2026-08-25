@@ -19,7 +19,11 @@ import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet, opprettOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  getKostnadssted,
+  getOrgEnhet,
+  opprettOrgEnhet,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -132,10 +136,20 @@ function FormView({
   setOpprettResponse: (response: any) => void;
 }) {
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId ?? ""),
+    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId),
     enabled: !!overordnetOrgEnhetId,
   });
+
+  const kostnadsstedQuery = useQuery({
+    queryKey: getKostnadssted.queryKey(overordnetOrgEnhetId),
+    queryFn: () => getKostnadssted.queryFn(overordnetOrgEnhetId),
+    enabled: !!overordnetOrgEnhetId,
+  });
+
+  const kostnadssted = kostnadsstedQuery.data;
+
+  console.log(kostnadssted);
 
   const orgEnhet = orgEnhetQuery.data;
 
