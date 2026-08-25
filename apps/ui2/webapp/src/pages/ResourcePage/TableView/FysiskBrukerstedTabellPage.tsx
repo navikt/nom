@@ -100,6 +100,7 @@ function FysiskBrukerstedTabell() {
             <FysiskBrukerstedSelect
               fysiskeBrukersteder={fysiskeBrukersteder}
               isClearable
+              label="Primært fysisk brukersted"
               onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
               value={fysiskBrukerstedFilter}
             />
@@ -112,12 +113,18 @@ function FysiskBrukerstedTabell() {
           >
             <TilgangsenhetSelect
               isClearable
+              label="Primær tilgangsenhet"
               onChange={(value) => setTilgangsenhetFilter(value ?? "")}
               tilgangsenheter={alleTilgangsenheter}
               value={tilgangsenhetFilter}
             />
           </div>
         </HStack>
+
+        <Alert variant="info">
+          Filtrene baserer seg på brukeres organisasjonstilknytninger med daglig
+          oppfølging.
+        </Alert>
       </VStack>
 
       {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
@@ -182,20 +189,40 @@ function FysiskBrukerstedTabellInner({
         ressurs {
           navident
           visningsnavn
+          orgTilknytninger(utvalg: AKTIVE) {
+            orgEnhet {
+              navn
+              id
+              tilgangsenhetId
+            }
+            erDagligOppfolging
+          }
         }
       }
     }
   `;
 
-  const result = axios.post("/frackend/nom-api/graphql", {
-    query: query,
-    variables: {
-      fysiskBrukersted: fysiskBrukerstedNr,
-      tilgangsenhet: tilgangsenhet,
-    },
+  const resultQuery = useQuery({
+    queryKey: ["testkey"],
+    queryFn: () =>
+      axios.post("/frackend/nom-api/graphql", {
+        query: query,
+        variables: {
+          fysiskBrukersted: fysiskBrukerstedNr,
+          tilgangsenhet: tilgangsenhet,
+        },
+      }),
   });
 
-  console.log(result);
+  const resultRessurser = resultQuery.data?.data?.data?.ressurser;
+
+  if (!!resultRessurser) {
+    const filtrerteRessurser = resultRessurser.filter(
+      (entry) => entry.ressurs?.orgTilknytninger?.length > 0,
+    );
+
+    console.log(filtrerteRessurser);
+  }
 
   const unikeOrgEnhetIder = [
     ...new Set(

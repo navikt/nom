@@ -9,8 +9,7 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import type { Tilgangsenhet } from "~/types/api-models";
-import type { FysiskBrukersted } from "~/types/api-models";
+import type { FysiskBrukersted, Tilgangsenhet } from "~/types/api-models";
 import { formatDropdownFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
@@ -47,6 +46,7 @@ export function FysiskBrukerstedSelectFormPart({
 
 export function FysiskBrukerstedSelect({
   fysiskeBrukersteder,
+  label = "Fysisk brukersted",
   description,
   onChange,
   error,
@@ -55,6 +55,7 @@ export function FysiskBrukerstedSelect({
   isClearable = false,
 }: {
   fysiskeBrukersteder: FysiskBrukersted[];
+  label?: string;
   onChange: (s: string | null) => void;
   error?: FieldError;
   description?: string;
@@ -75,7 +76,7 @@ export function FysiskBrukerstedSelect({
       error={error}
       helpText={helpText}
       htmlFor="Fysisk brukersted"
-      label="Fysisk brukersted"
+      label={label}
     >
       <BasicSelect
         inputId="Fysisk brukersted"
@@ -172,6 +173,7 @@ export function FysiskBrukerstedSelectNew({
 
 export function TilgangsenhetSelect({
   tilgangsenheter,
+  label = "Tilgangsenhet",
   description,
   onChange,
   error,
@@ -180,6 +182,7 @@ export function TilgangsenhetSelect({
   isClearable = false,
 }: {
   tilgangsenheter: Tilgangsenhet[];
+  label?: string;
   onChange: (s: string | null) => void;
   error?: FieldError;
   description?: string;
@@ -200,7 +203,7 @@ export function TilgangsenhetSelect({
       error={error}
       helpText={helpText}
       htmlFor="Tilgangsenhet"
-      label="Tilgangsenhet"
+      label={label}
     >
       <BasicSelect
         inputId="Tilgangsenhet"
