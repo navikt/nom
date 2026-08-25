@@ -108,7 +108,7 @@ public class RessurserByFysiskbrukerstedExcelGenerator {
         var excelHeaders = sortedResult.getFirst().keySet().stream().toList();
         var filename = String.format(
             "Ressurser med fysiskbrukersted %s-%s",
-            fysiskBrukerstedNr,
+            "Fysisk brukersted " + fysiskBrukerstedNr,
             LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
         );
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.xlsx", filename));
