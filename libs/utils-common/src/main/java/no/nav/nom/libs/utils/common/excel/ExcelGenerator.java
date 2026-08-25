@@ -57,8 +57,9 @@ public class ExcelGenerator {
             );
 
             XSSFTable table = xssfSheet.createTable(areaRef);
-            table.setName(sheetName + "Table");
-            table.setDisplayName(sheetName + "Table");
+            String safeTableName = sheetName.replaceAll("[^a-zA-Z0-9_]", "_") + "Table";
+            table.setName(safeTableName);
+            table.setDisplayName(sheetName);
 
             table.getCTTable().addNewTableStyleInfo().setName("TableStyleMedium4");
             table.setStyleName("TableStyleMedium4");
