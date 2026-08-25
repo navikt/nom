@@ -8,74 +8,34 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as TilgangerRouteImport } from './routes/tilganger'
-import { Route as OrganisasjonsmastringRouteImport } from './routes/organisasjonsmastring'
-import { Route as OpprettOrganisasjonsenhetRouteImport } from './routes/opprett-organisasjonsenhet'
-import { Route as MasseflyttingFysiskBrukerstedRouteImport } from './routes/masseflytting-fysisk-brukersted'
-import { Route as KorrigerOrganisasjonsenhetRouteImport } from './routes/korriger-organisasjonsenhet'
-import { Route as KorrigerNavnOrganisasjonsenhetRouteImport } from './routes/korriger-navn-organisasjonsenhet'
-import { Route as KorrigerLederOrganisasjonsenhetRouteImport } from './routes/korriger-leder-organisasjonsenhet'
-import { Route as FysiskBrukerstedTabellRouteImport } from './routes/fysisk-brukersted-tabell'
-import { Route as AvsluttOrganisasjonsenhetRouteImport } from './routes/avslutt-organisasjonsenhet'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as RessursSpecialreceiptRouteImport } from './routes/ressurs.specialreceipt'
-import { Route as RessursCreatespecialRouteImport } from './routes/ressurs.createspecial'
-import { Route as RessursCreateExternalFundsRecipientRouteImport } from './routes/ressurs.create-external-funds-recipient'
-import { Route as RessursIdRouteImport } from './routes/ressurs.$id'
-import { Route as RessursTerminateIdRouteImport } from './routes/ressurs-terminate.$id'
-import { Route as OrgTableRouteImport } from './routes/org.table'
-import { Route as OrgIdRouteImport } from './routes/org.$id'
-import { Route as MasseflyttingIdRouteImport } from './routes/masseflytting.$id'
-import { Route as KontaktpersonerIdRouteImport } from './routes/kontaktpersoner.$id'
-import { Route as KontaktpersonerTabellIdRouteImport } from './routes/kontaktpersoner-tabell.$id'
-import { Route as RessursCreateStepRouteImport } from './routes/ressurs.create.$step'
-import { Route as OrgTableIdRouteImport } from './routes/org.table.$id'
-import { Route as OrgResourcesTableIdRouteImport } from './routes/org.resources-table.$id'
+import {Route as rootRouteImport} from './routes/__root'
+import {Route as IndexRouteImport} from './routes/index'
+import {Route as AvsluttOrganisasjonsenhetRouteImport} from './routes/avslutt-organisasjonsenhet'
+import {Route as FysiskBrukerstedTabellRouteImport} from './routes/fysisk-brukersted-tabell'
+import {Route as KorrigerLederOrganisasjonsenhetRouteImport} from './routes/korriger-leder-organisasjonsenhet'
+import {Route as KorrigerNavnOrganisasjonsenhetRouteImport} from './routes/korriger-navn-organisasjonsenhet'
+import {Route as KorrigerOrganisasjonsenhetRouteImport} from './routes/korriger-organisasjonsenhet'
+import {Route as MasseflyttingFysiskBrukerstedRouteImport} from './routes/masseflytting-fysisk-brukersted'
+import {Route as OpprettOrganisasjonsenhetRouteImport} from './routes/opprett-organisasjonsenhet'
+import {Route as OrganisasjonsmastringRouteImport} from './routes/organisasjonsmastring'
+import {Route as TilgangerRouteImport} from './routes/tilganger'
+import {Route as KontaktpersonerTabellIdRouteImport} from './routes/kontaktpersoner-tabell.$id'
+import {Route as KontaktpersonerIdRouteImport} from './routes/kontaktpersoner.$id'
+import {Route as MasseflyttingIdRouteImport} from './routes/masseflytting.$id'
+import {Route as OrgIdRouteImport} from './routes/org.$id'
+import {Route as OrgTableRouteImport} from './routes/org.table'
+import {Route as RessursTerminateIdRouteImport} from './routes/ressurs-terminate.$id'
+import {Route as RessursIdRouteImport} from './routes/ressurs.$id'
+import {Route as RessursCreateExternalFundsRecipientRouteImport} from './routes/ressurs.create-external-funds-recipient'
+import {Route as RessursCreatespecialRouteImport} from './routes/ressurs.createspecial'
+import {Route as RessursSpecialreceiptRouteImport} from './routes/ressurs.specialreceipt'
+import {Route as OrgResourcesTableIdRouteImport} from './routes/org.resources-table.$id'
+import {Route as OrgTableIdRouteImport} from './routes/org.table.$id'
+import {Route as RessursCreateStepRouteImport} from './routes/ressurs.create.$step'
 
-const TilgangerRoute = TilgangerRouteImport.update({
-  id: '/tilganger',
-  path: '/tilganger',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrganisasjonsmastringRoute = OrganisasjonsmastringRouteImport.update({
-  id: '/organisasjonsmastring',
-  path: '/organisasjonsmastring',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpprettOrganisasjonsenhetRoute =
-  OpprettOrganisasjonsenhetRouteImport.update({
-    id: '/opprett-organisasjonsenhet',
-    path: '/opprett-organisasjonsenhet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const MasseflyttingFysiskBrukerstedRoute =
-  MasseflyttingFysiskBrukerstedRouteImport.update({
-    id: '/masseflytting-fysisk-brukersted',
-    path: '/masseflytting-fysisk-brukersted',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const KorrigerOrganisasjonsenhetRoute =
-  KorrigerOrganisasjonsenhetRouteImport.update({
-    id: '/korriger-organisasjonsenhet',
-    path: '/korriger-organisasjonsenhet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const KorrigerNavnOrganisasjonsenhetRoute =
-  KorrigerNavnOrganisasjonsenhetRouteImport.update({
-    id: '/korriger-navn-organisasjonsenhet',
-    path: '/korriger-navn-organisasjonsenhet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const KorrigerLederOrganisasjonsenhetRoute =
-  KorrigerLederOrganisasjonsenhetRouteImport.update({
-    id: '/korriger-leder-organisasjonsenhet',
-    path: '/korriger-leder-organisasjonsenhet',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const FysiskBrukerstedTabellRoute = FysiskBrukerstedTabellRouteImport.update({
-  id: '/fysisk-brukersted-tabell',
-  path: '/fysisk-brukersted-tabell',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AvsluttOrganisasjonsenhetRoute =
@@ -84,19 +44,84 @@ const AvsluttOrganisasjonsenhetRoute =
     path: '/avslutt-organisasjonsenhet',
     getParentRoute: () => rootRouteImport,
   } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FysiskBrukerstedTabellRoute = FysiskBrukerstedTabellRouteImport.update({
+  id: '/fysisk-brukersted-tabell',
+  path: '/fysisk-brukersted-tabell',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RessursSpecialreceiptRoute = RessursSpecialreceiptRouteImport.update({
-  id: '/ressurs/specialreceipt',
-  path: '/ressurs/specialreceipt',
+const KorrigerLederOrganisasjonsenhetRoute =
+  KorrigerLederOrganisasjonsenhetRouteImport.update({
+    id: '/korriger-leder-organisasjonsenhet',
+    path: '/korriger-leder-organisasjonsenhet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const KorrigerNavnOrganisasjonsenhetRoute =
+  KorrigerNavnOrganisasjonsenhetRouteImport.update({
+    id: '/korriger-navn-organisasjonsenhet',
+    path: '/korriger-navn-organisasjonsenhet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const KorrigerOrganisasjonsenhetRoute =
+  KorrigerOrganisasjonsenhetRouteImport.update({
+    id: '/korriger-organisasjonsenhet',
+    path: '/korriger-organisasjonsenhet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MasseflyttingFysiskBrukerstedRoute =
+  MasseflyttingFysiskBrukerstedRouteImport.update({
+    id: '/masseflytting-fysisk-brukersted',
+    path: '/masseflytting-fysisk-brukersted',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OpprettOrganisasjonsenhetRoute =
+  OpprettOrganisasjonsenhetRouteImport.update({
+    id: '/opprett-organisasjonsenhet',
+    path: '/opprett-organisasjonsenhet',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OrganisasjonsmastringRoute = OrganisasjonsmastringRouteImport.update({
+  id: '/organisasjonsmastring',
+  path: '/organisasjonsmastring',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RessursCreatespecialRoute = RessursCreatespecialRouteImport.update({
-  id: '/ressurs/createspecial',
-  path: '/ressurs/createspecial',
+const TilgangerRoute = TilgangerRouteImport.update({
+  id: '/tilganger',
+  path: '/tilganger',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KontaktpersonerTabellIdRoute = KontaktpersonerTabellIdRouteImport.update({
+  id: '/kontaktpersoner-tabell/$id',
+  path: '/kontaktpersoner-tabell/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KontaktpersonerIdRoute = KontaktpersonerIdRouteImport.update({
+  id: '/kontaktpersoner/$id',
+  path: '/kontaktpersoner/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasseflyttingIdRoute = MasseflyttingIdRouteImport.update({
+  id: '/masseflytting/$id',
+  path: '/masseflytting/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrgIdRoute = OrgIdRouteImport.update({
+  id: '/org/$id',
+  path: '/org/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrgTableRoute = OrgTableRouteImport.update({
+  id: '/org/table',
+  path: '/org/table',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RessursTerminateIdRoute = RessursTerminateIdRouteImport.update({
+  id: '/ressurs-terminate/$id',
+  path: '/ressurs-terminate/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RessursIdRoute = RessursIdRouteImport.update({
+  id: '/ressurs/$id',
+  path: '/ressurs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RessursCreateExternalFundsRecipientRoute =
@@ -105,44 +130,19 @@ const RessursCreateExternalFundsRecipientRoute =
     path: '/ressurs/create-external-funds-recipient',
     getParentRoute: () => rootRouteImport,
   } as any)
-const RessursIdRoute = RessursIdRouteImport.update({
-  id: '/ressurs/$id',
-  path: '/ressurs/$id',
+const RessursCreatespecialRoute = RessursCreatespecialRouteImport.update({
+  id: '/ressurs/createspecial',
+  path: '/ressurs/createspecial',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RessursTerminateIdRoute = RessursTerminateIdRouteImport.update({
-  id: '/ressurs-terminate/$id',
-  path: '/ressurs-terminate/$id',
+const RessursSpecialreceiptRoute = RessursSpecialreceiptRouteImport.update({
+  id: '/ressurs/specialreceipt',
+  path: '/ressurs/specialreceipt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrgTableRoute = OrgTableRouteImport.update({
-  id: '/org/table',
-  path: '/org/table',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrgIdRoute = OrgIdRouteImport.update({
-  id: '/org/$id',
-  path: '/org/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MasseflyttingIdRoute = MasseflyttingIdRouteImport.update({
-  id: '/masseflytting/$id',
-  path: '/masseflytting/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KontaktpersonerIdRoute = KontaktpersonerIdRouteImport.update({
-  id: '/kontaktpersoner/$id',
-  path: '/kontaktpersoner/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KontaktpersonerTabellIdRoute = KontaktpersonerTabellIdRouteImport.update({
-  id: '/kontaktpersoner-tabell/$id',
-  path: '/kontaktpersoner-tabell/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
-  id: '/ressurs/create/$step',
-  path: '/ressurs/create/$step',
+const OrgResourcesTableIdRoute = OrgResourcesTableIdRouteImport.update({
+  id: '/org/resources-table/$id',
+  path: '/org/resources-table/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrgTableIdRoute = OrgTableIdRouteImport.update({
@@ -150,9 +150,9 @@ const OrgTableIdRoute = OrgTableIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => OrgTableRoute,
 } as any)
-const OrgResourcesTableIdRoute = OrgResourcesTableIdRouteImport.update({
-  id: '/org/resources-table/$id',
-  path: '/org/resources-table/$id',
+const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
+  id: '/ressurs/create/$step',
+  path: '/ressurs/create/$step',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -337,60 +337,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tilganger': {
-      id: '/tilganger'
-      path: '/tilganger'
-      fullPath: '/tilganger'
-      preLoaderRoute: typeof TilgangerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/organisasjonsmastring': {
-      id: '/organisasjonsmastring'
-      path: '/organisasjonsmastring'
-      fullPath: '/organisasjonsmastring'
-      preLoaderRoute: typeof OrganisasjonsmastringRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/opprett-organisasjonsenhet': {
-      id: '/opprett-organisasjonsenhet'
-      path: '/opprett-organisasjonsenhet'
-      fullPath: '/opprett-organisasjonsenhet'
-      preLoaderRoute: typeof OpprettOrganisasjonsenhetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/masseflytting-fysisk-brukersted': {
-      id: '/masseflytting-fysisk-brukersted'
-      path: '/masseflytting-fysisk-brukersted'
-      fullPath: '/masseflytting-fysisk-brukersted'
-      preLoaderRoute: typeof MasseflyttingFysiskBrukerstedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/korriger-organisasjonsenhet': {
-      id: '/korriger-organisasjonsenhet'
-      path: '/korriger-organisasjonsenhet'
-      fullPath: '/korriger-organisasjonsenhet'
-      preLoaderRoute: typeof KorrigerOrganisasjonsenhetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/korriger-navn-organisasjonsenhet': {
-      id: '/korriger-navn-organisasjonsenhet'
-      path: '/korriger-navn-organisasjonsenhet'
-      fullPath: '/korriger-navn-organisasjonsenhet'
-      preLoaderRoute: typeof KorrigerNavnOrganisasjonsenhetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/korriger-leder-organisasjonsenhet': {
-      id: '/korriger-leder-organisasjonsenhet'
-      path: '/korriger-leder-organisasjonsenhet'
-      fullPath: '/korriger-leder-organisasjonsenhet'
-      preLoaderRoute: typeof KorrigerLederOrganisasjonsenhetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fysisk-brukersted-tabell': {
-      id: '/fysisk-brukersted-tabell'
-      path: '/fysisk-brukersted-tabell'
-      fullPath: '/fysisk-brukersted-tabell'
-      preLoaderRoute: typeof FysiskBrukerstedTabellRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/avslutt-organisasjonsenhet': {
@@ -400,74 +351,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AvsluttOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/fysisk-brukersted-tabell': {
+      id: '/fysisk-brukersted-tabell'
+      path: '/fysisk-brukersted-tabell'
+      fullPath: '/fysisk-brukersted-tabell'
+      preLoaderRoute: typeof FysiskBrukerstedTabellRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs/specialreceipt': {
-      id: '/ressurs/specialreceipt'
-      path: '/ressurs/specialreceipt'
-      fullPath: '/ressurs/specialreceipt'
-      preLoaderRoute: typeof RessursSpecialreceiptRouteImport
+    '/korriger-leder-organisasjonsenhet': {
+      id: '/korriger-leder-organisasjonsenhet'
+      path: '/korriger-leder-organisasjonsenhet'
+      fullPath: '/korriger-leder-organisasjonsenhet'
+      preLoaderRoute: typeof KorrigerLederOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs/createspecial': {
-      id: '/ressurs/createspecial'
-      path: '/ressurs/createspecial'
-      fullPath: '/ressurs/createspecial'
-      preLoaderRoute: typeof RessursCreatespecialRouteImport
+    '/korriger-navn-organisasjonsenhet': {
+      id: '/korriger-navn-organisasjonsenhet'
+      path: '/korriger-navn-organisasjonsenhet'
+      fullPath: '/korriger-navn-organisasjonsenhet'
+      preLoaderRoute: typeof KorrigerNavnOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs/create-external-funds-recipient': {
-      id: '/ressurs/create-external-funds-recipient'
-      path: '/ressurs/create-external-funds-recipient'
-      fullPath: '/ressurs/create-external-funds-recipient'
-      preLoaderRoute: typeof RessursCreateExternalFundsRecipientRouteImport
+    '/korriger-organisasjonsenhet': {
+      id: '/korriger-organisasjonsenhet'
+      path: '/korriger-organisasjonsenhet'
+      fullPath: '/korriger-organisasjonsenhet'
+      preLoaderRoute: typeof KorrigerOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs/$id': {
-      id: '/ressurs/$id'
-      path: '/ressurs/$id'
-      fullPath: '/ressurs/$id'
-      preLoaderRoute: typeof RessursIdRouteImport
+    '/masseflytting-fysisk-brukersted': {
+      id: '/masseflytting-fysisk-brukersted'
+      path: '/masseflytting-fysisk-brukersted'
+      fullPath: '/masseflytting-fysisk-brukersted'
+      preLoaderRoute: typeof MasseflyttingFysiskBrukerstedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs-terminate/$id': {
-      id: '/ressurs-terminate/$id'
-      path: '/ressurs-terminate/$id'
-      fullPath: '/ressurs-terminate/$id'
-      preLoaderRoute: typeof RessursTerminateIdRouteImport
+    '/opprett-organisasjonsenhet': {
+      id: '/opprett-organisasjonsenhet'
+      path: '/opprett-organisasjonsenhet'
+      fullPath: '/opprett-organisasjonsenhet'
+      preLoaderRoute: typeof OpprettOrganisasjonsenhetRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/org/table': {
-      id: '/org/table'
-      path: '/org/table'
-      fullPath: '/org/table'
-      preLoaderRoute: typeof OrgTableRouteImport
+    '/organisasjonsmastring': {
+      id: '/organisasjonsmastring'
+      path: '/organisasjonsmastring'
+      fullPath: '/organisasjonsmastring'
+      preLoaderRoute: typeof OrganisasjonsmastringRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/org/$id': {
-      id: '/org/$id'
-      path: '/org/$id'
-      fullPath: '/org/$id'
-      preLoaderRoute: typeof OrgIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/masseflytting/$id': {
-      id: '/masseflytting/$id'
-      path: '/masseflytting/$id'
-      fullPath: '/masseflytting/$id'
-      preLoaderRoute: typeof MasseflyttingIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kontaktpersoner/$id': {
-      id: '/kontaktpersoner/$id'
-      path: '/kontaktpersoner/$id'
-      fullPath: '/kontaktpersoner/$id'
-      preLoaderRoute: typeof KontaktpersonerIdRouteImport
+    '/tilganger': {
+      id: '/tilganger'
+      path: '/tilganger'
+      fullPath: '/tilganger'
+      preLoaderRoute: typeof TilgangerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kontaktpersoner-tabell/$id': {
@@ -477,11 +414,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KontaktpersonerTabellIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ressurs/create/$step': {
-      id: '/ressurs/create/$step'
-      path: '/ressurs/create/$step'
-      fullPath: '/ressurs/create/$step'
-      preLoaderRoute: typeof RessursCreateStepRouteImport
+    '/kontaktpersoner/$id': {
+      id: '/kontaktpersoner/$id'
+      path: '/kontaktpersoner/$id'
+      fullPath: '/kontaktpersoner/$id'
+      preLoaderRoute: typeof KontaktpersonerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masseflytting/$id': {
+      id: '/masseflytting/$id'
+      path: '/masseflytting/$id'
+      fullPath: '/masseflytting/$id'
+      preLoaderRoute: typeof MasseflyttingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org/$id': {
+      id: '/org/$id'
+      path: '/org/$id'
+      fullPath: '/org/$id'
+      preLoaderRoute: typeof OrgIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org/table': {
+      id: '/org/table'
+      path: '/org/table'
+      fullPath: '/org/table'
+      preLoaderRoute: typeof OrgTableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs-terminate/$id': {
+      id: '/ressurs-terminate/$id'
+      path: '/ressurs-terminate/$id'
+      fullPath: '/ressurs-terminate/$id'
+      preLoaderRoute: typeof RessursTerminateIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs/$id': {
+      id: '/ressurs/$id'
+      path: '/ressurs/$id'
+      fullPath: '/ressurs/$id'
+      preLoaderRoute: typeof RessursIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs/create-external-funds-recipient': {
+      id: '/ressurs/create-external-funds-recipient'
+      path: '/ressurs/create-external-funds-recipient'
+      fullPath: '/ressurs/create-external-funds-recipient'
+      preLoaderRoute: typeof RessursCreateExternalFundsRecipientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs/createspecial': {
+      id: '/ressurs/createspecial'
+      path: '/ressurs/createspecial'
+      fullPath: '/ressurs/createspecial'
+      preLoaderRoute: typeof RessursCreatespecialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ressurs/specialreceipt': {
+      id: '/ressurs/specialreceipt'
+      path: '/ressurs/specialreceipt'
+      fullPath: '/ressurs/specialreceipt'
+      preLoaderRoute: typeof RessursSpecialreceiptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org/resources-table/$id': {
+      id: '/org/resources-table/$id'
+      path: '/org/resources-table/$id'
+      fullPath: '/org/resources-table/$id'
+      preLoaderRoute: typeof OrgResourcesTableIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/org/table/$id': {
@@ -491,11 +491,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgTableIdRouteImport
       parentRoute: typeof OrgTableRoute
     }
-    '/org/resources-table/$id': {
-      id: '/org/resources-table/$id'
-      path: '/org/resources-table/$id'
-      fullPath: '/org/resources-table/$id'
-      preLoaderRoute: typeof OrgResourcesTableIdRouteImport
+    '/ressurs/create/$step': {
+      id: '/ressurs/create/$step'
+      path: '/ressurs/create/$step'
+      fullPath: '/ressurs/create/$step'
+      preLoaderRoute: typeof RessursCreateStepRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
