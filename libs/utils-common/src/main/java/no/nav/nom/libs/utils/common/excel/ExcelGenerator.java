@@ -57,16 +57,18 @@ public class ExcelGenerator {
             );
 
             XSSFTable table = xssfSheet.createTable(areaRef);
+            // Excel tillater ikke mellomrom i verken name eller displayName (OOXML-spec)
             String safeTableName = sheetName.replaceAll("[^a-zA-Z0-9_]", "_") + "Table";
             table.setName(safeTableName);
-            table.setDisplayName(sheetName);
+            table.setDisplayName(safeTableName);
 
             table.getCTTable().addNewTableStyleInfo().setName("TableStyleMedium4");
             table.setStyleName("TableStyleMedium4");
             table.getCTTable().setTotalsRowShown(false);
             table.getCTTable().getTableStyleInfo().setShowRowStripes(true);
             table.getCTTable().getTableStyleInfo().setShowColumnStripes(false);
-            table.getCTTable().addNewAutoFilter();
+            // autoFilter må ha ref-attributt, ellers reparerer Excel filen
+            table.getCTTable().addNewAutoFilter().setRef(areaRef.formatAsString());
 
             for (int col = 0; col <= lastColumn; col++) {
                 sheet.autoSizeColumn(col);
