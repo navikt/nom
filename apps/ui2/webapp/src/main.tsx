@@ -26,7 +26,7 @@ import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
 
 // Don't initialize faro when running the dev-server
-if (process.env.NODE_ENV === "production") {
+if (import.meta.env.PROD) {
   const url = isInDevelopment()
     ? "https://telemetry.ekstern.dev.nav.no/collect"
     : "https://telemetry.nav.no/collect";
