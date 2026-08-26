@@ -47,7 +47,7 @@ public class NIKClient {
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
 
-        return opprettNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, opprettNavidentRequest);
+        return opprettNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, opprettNavidentRequest, "client_credentials");
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavidentOnBehalfOfUser(OpprettNavidentRequest opprettNavidentRequest) {
@@ -57,18 +57,34 @@ public class NIKClient {
             .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
             .build();
 
-        return opprettNavidentWithSuppliedWebClient(onBehalfOfAuthorizedWebClient, opprettNavidentRequest);
+        return opprettNavidentWithSuppliedWebClient(onBehalfOfAuthorizedWebClient, opprettNavidentRequest, "on_behalf_of");
     }
 
-    private ResponseEntity<OpprettNavidentResponse> opprettNavidentWithSuppliedWebClient(WebClient suppliedWebClient, OpprettNavidentRequest opprettNavidentRequest) {
-
-        return suppliedWebClient.post()
-            .uri("/navident/create")
-            .bodyValue(opprettNavidentRequest)
-            .retrieve()
-            .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.
-            .toEntity(OpprettNavidentResponse.class)
-            .block();
+    private ResponseEntity<OpprettNavidentResponse> opprettNavidentWithSuppliedWebClient(
+        WebClient suppliedWebClient,
+        OpprettNavidentRequest opprettNavidentRequest,
+        String authMode
+    ) {
+        try {
+            log.info("Oppretter navident gjennom NIK med authMode={}", authMode);
+            return suppliedWebClient.post()
+                .uri("/navident/create")
+                .bodyValue(opprettNavidentRequest)
+                .retrieve()
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.
+                .toEntity(OpprettNavidentResponse.class)
+                .block();
+        } catch (WebClientResponseException e) {
+            if (HttpStatus.UNAUTHORIZED.equals(e.getStatusCode())) {
+                log.warn(
+                    "NIK /navident/create returned 401. authMode={}, www-authenticate='{}', responseBody='{}'",
+                    authMode,
+                    e.getHeaders().getFirst("www-authenticate"),
+                    e.getResponseBodyAsString()
+                );
+            }
+            throw e;
+        }
     }
 
     public String lookupNavident(LookupNavidentRequest lookupNavidentRequest) {

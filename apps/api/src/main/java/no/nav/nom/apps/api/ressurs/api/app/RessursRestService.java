@@ -699,6 +699,7 @@ public class RessursRestService {
             .build();
 
         ResponseEntity<OpprettNavidentResponse> opprettNavidentResponse;
+        log.info("createNavident(...) kalt i bruker-innlogget scope: {}", isUserLoggedIn());
         if (isUserLoggedIn()) {
             opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(opprettNavidentRequest);
         } else {
