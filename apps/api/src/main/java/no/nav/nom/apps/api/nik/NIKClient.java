@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.common.security.OnBehalfOfTokenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,38 +16,33 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 public class NIKClient {
-    private final WebClient clientCredentialsAuthorizedWebClient;
     private final WebClient.Builder nikWebClientBuilder;
 
     private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+    private final OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
     private final String nikScope;
 
     public NIKClient(OnBehalfOfTokenRepository onBehalfOfTokenRepository, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
                      WebClient.Builder builder, AppProperties appProperties) {
+        this.oAuth2AuthorizedClientManager = oAuth2AuthorizedClientManager;
 
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
-        oAuth2Filter.setDefaultClientRegistrationId("nik");
-
-        WebClient.Builder baseWebClientBuilder = builder.clone()
+        this.nikWebClientBuilder = builder.clone()
             .baseUrl(appProperties.clients().nik().baseUrl())
             .defaultHeaders(headers -> {
                 headers.add("Nav-Consumer-Id", appProperties.name());
                 headers.add("Nav-Call-Id", appProperties.name());
             });
 
-        this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
-            .apply(oAuth2Filter.oauth2Configuration())
-            .build();
-
-        this.nikWebClientBuilder = baseWebClientBuilder;
-
         this.nikScope = appProperties.clients().nik().aadScope();
         this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
+        var webClient = nikWebClientBuilder.clone()
+            .defaultHeaders(h -> h.setBearerAuth(clientCredentialsToken()))
+            .build();
 
-        return opprettNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, opprettNavidentRequest, "client_credentials");
+        return opprettNavidentWithSuppliedWebClient(webClient, opprettNavidentRequest, "client_credentials");
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavidentOnBehalfOfUser(OpprettNavidentRequest opprettNavidentRequest) {
@@ -88,7 +83,23 @@ public class NIKClient {
     }
 
     public String lookupNavident(LookupNavidentRequest lookupNavidentRequest) {
-        return lookupNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, lookupNavidentRequest);
+        var webClient = nikWebClientBuilder.clone()
+            .defaultHeaders(h -> h.setBearerAuth(clientCredentialsToken()))
+            .build();
+
+        return lookupNavidentWithSuppliedWebClient(webClient, lookupNavidentRequest);
+    }
+
+    private String clientCredentialsToken() {
+        var authorizeRequest = OAuth2AuthorizeRequest
+            .withClientRegistrationId("nik")
+            .principal("system")
+            .build();
+        var authorizedClient = oAuth2AuthorizedClientManager.authorize(authorizeRequest);
+        if (authorizedClient == null || authorizedClient.getAccessToken() == null) {
+            throw new IllegalStateException("Klarte ikke å hente client_credentials token for NIK");
+        }
+        return authorizedClient.getAccessToken().getTokenValue();
     }
 
     public String lookupNavidentOnBehalfOfUser(LookupNavidentRequest lookupNavidentRequest) {
