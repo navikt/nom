@@ -70,8 +70,19 @@ public class ExcelGenerator {
             // autoFilter må ha ref-attributt, ellers reparerer Excel filen
             table.getCTTable().addNewAutoFilter().setRef(areaRef.formatAsString());
 
+            // Autoresize does not work
+            // The issue is that autoSizeColumn relies on AWT font rendering, which silently returns the minimum default width in headless server environments. The fix is to calculate column widths manually based on content length.
             for (int col = 0; col <= lastColumn; col++) {
-                sheet.autoSizeColumn(col);
+                String header = headers.get(col);
+                int maxWidth = header.length();
+                for (Map<String, Object> mappedObject : listOfMappedObjects) {
+                    var value = mappedObject.get(header);
+                    if (nonNull(value)) {
+                        maxWidth = Math.max(maxWidth, value.toString().length());
+                    }
+                }
+                // POI column width unit is 1/256th of a character width; cap at 255 chars
+                sheet.setColumnWidth(col, Math.min((maxWidth + 4) * 256, 255 * 256));
             }
 
             workbook.write(response.getOutputStream());
