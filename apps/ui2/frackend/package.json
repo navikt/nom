@@ -23,7 +23,7 @@
     "node-cache": "5.1.2",
     "node-jose": "2.2.0",
     "unleash-client": "6.12.1",
-    "uuid": "14.0.1"
+    "uuid": "14.0.2"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.8",
