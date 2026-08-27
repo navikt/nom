@@ -196,12 +196,13 @@ export function SektorStep() {
                 : tilknytningstyperStatlige
               ).map((tilknytningstype) => {
                 if (
-                  (tilknytningstype === Tilknytningtype.HELFO ||
+                  ((tilknytningstype === Tilknytningtype.HELFO ||
                     tilknytningstype === Tilknytningtype.SKATTEETATEN ||
                     tilknytningstype === Tilknytningtype.RIKSREVISJONEN ||
                     tilknytningstype === Tilknytningtype.STATSFORVALTEREN) &&
-                  !brukerJobberIDirektoratet &&
-                  !hasAdminAccess
+                    !brukerJobberIDirektoratet &&
+                    !hasAdminAccess) ||
+                  tilknytningstype === Tilknytningtype.ANNET
                 ) {
                   return;
                 }
