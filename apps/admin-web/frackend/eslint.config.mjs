@@ -1,4 +1,4 @@
-import { defineConfig, globalIgnores } from "eslint/config";
+import {defineConfig, globalIgnores} from "eslint/config";
 import prettier from "eslint-plugin-prettier";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 
@@ -8,6 +8,11 @@ import unicorn from "eslint-plugin-unicorn";
 
 const IGNORED_UNICORN_RULES = {
     "unicorn/filename-case": "off",
+    // server.ts er Express-appens entrypoint – toppnivå-oppsett (app.use, setupX(app))
+    // er det korrekte mønsteret, ikke en tree-shaking-bekymring som regelen er ment for.
+    "unicorn/no-top-level-side-effects": "off",
+    // "navIdent" er NAV-domenebegrep (JWT-claim heter "NAVident"), ikke en forkortelse å døpe om.
+    "unicorn/name-replacements": "off",
 };
 
 export default defineConfig([

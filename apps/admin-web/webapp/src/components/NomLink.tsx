@@ -13,7 +13,7 @@ export function NomLink({
 
   return (
     <Link
-      href={`https://${prodEnv ? "nom.nav.no" : "nom.ekstern.dev.nav.no"}/${path}`}
+      href={`https://${prodEnv ? "nom.nav.no" : "nom.ansatt.dev.nav.no"}/${path}`}
       target="_blank"
     >
       {children}
