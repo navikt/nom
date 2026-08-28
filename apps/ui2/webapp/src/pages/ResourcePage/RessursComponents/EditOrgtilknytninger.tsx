@@ -642,6 +642,7 @@ function OrgtilknytningForm({
                 />
 
                 <FormTilknytningstypeSelectWrapper
+                  opprinneligTilknytningstype={originalOt?.orgtilknytningType}
                   disabled={editTilknytningstypeDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.orgtilknytningType
@@ -1051,12 +1052,14 @@ function FormTilknytningstypeSelectWrapper({
   disabled,
   triggerOthers,
   selectedSektor,
+  opprinneligTilknytningstype,
 }: {
   name: string;
   error: string;
   disabled?: boolean;
   triggerOthers?: string[];
   selectedSektor: Sektor | undefined;
+  opprinneligTilknytningstype: Tilknytningtype | undefined;
 }) {
   const { trigger } = useFormContext();
 
@@ -1159,7 +1162,7 @@ function FormTilknytningstypeSelectWrapper({
                 !brukerJobberIDirektoratet &&
                 !hasAdminAccess) ||
               (tilknytningstype === Tilknytningtype.ANNET &&
-                field.value !== Tilknytningtype.ANNET)
+                opprinneligTilknytningstype !== Tilknytningtype.ANNET)
             ) {
               return;
             }
