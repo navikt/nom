@@ -124,6 +124,17 @@ function FormView({
   orgEnhet: OrgEnhet;
   setChangeInfo: (response: any) => void;
 }) {
+  const orgEnhetKostnadsstedQuery = useQuery({
+    queryKey: getKostnadssted.queryKey(orgEnhet.id),
+    queryFn: () => getKostnadssted.queryFn(orgEnhet.id),
+  });
+
+  const orgEnhetKostnadssted = orgEnhetKostnadsstedQuery.data;
+
+  if (orgEnhetKostnadsstedQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={6}>
@@ -134,6 +145,9 @@ function FormView({
 
         <KorrigerOrgEnhetForm
           orgEnhet={orgEnhet}
+          overordnetOrgEnhetKostnadsstedId={
+            orgEnhetKostnadssted?.kostnadsstedId ?? ""
+          }
           setChangeInfo={setChangeInfo}
         />
       </ContainerWithHighlightedTop>
@@ -162,19 +176,13 @@ function KvitteringView({
 
 function KorrigerOrgEnhetForm({
   orgEnhet,
+  overordnetOrgEnhetKostnadsstedId,
   setChangeInfo,
 }: {
   orgEnhet: OrgEnhet;
+  overordnetOrgEnhetKostnadsstedId: string;
   setChangeInfo: (response: any) => void;
 }) {
-  const orgEnhetKostnadsstedQuery = useQuery({
-    queryKey: getKostnadssted.queryKey(orgEnhet.id),
-    queryFn: () => getKostnadssted.queryFn(orgEnhet.id),
-    enabled: !!orgEnhet.id,
-  });
-
-  const orgEnhetKostnadssted = orgEnhetKostnadsstedQuery.data;
-
   const queryClient = useQueryClient();
 
   const { showModal } = useModal();
@@ -185,7 +193,7 @@ function KorrigerOrgEnhetForm({
       tilgangsenhetId: orgEnhet.tilgangsenhetId ?? null,
       orgEnhetsType: orgEnhet.orgEnhetsType,
       nomNivaa: orgEnhet.nomNivaa ?? null,
-      kostnadsstedId: orgEnhetKostnadssted?.kostnadsstedId ?? undefined,
+      kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
     },
     resolver: yupResolver(validationSchema),
   });

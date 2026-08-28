@@ -12,10 +12,7 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type {
-  OrgEnhet,
-  OrgEnhetKostnadsstedMappingResponse,
-} from "~/types/api-models";
+import type { KostnadsstedResponse, OrgEnhet } from "~/types/api-models";
 
 export function OrgEnhetIkkeFunnet() {
   return <Alert variant="error">Organisasjonsenheten ble ikke funnet</Alert>;
@@ -127,7 +124,7 @@ export function KostnadsstedSelectFormPart({
   isClearable = false,
 }: {
   name: string;
-  kostnadssteder?: OrgEnhetKostnadsstedMappingResponse[];
+  kostnadssteder?: KostnadsstedResponse[];
   label?: string;
   description?: string;
   helpText?: string;
@@ -159,7 +156,7 @@ export function KostnadsstedSelect({
   helpText,
   isClearable = false,
 }: {
-  kostnadssteder?: OrgEnhetKostnadsstedMappingResponse[];
+  kostnadssteder?: KostnadsstedResponse[];
   label: string;
   description?: string;
   onChange: (s: string | null) => void;
@@ -171,7 +168,7 @@ export function KostnadsstedSelect({
   const alleKostnadsstederQuery = useQuery({
     queryKey: getAlleKostnadssteder.queryKey(),
     queryFn: () => getAlleKostnadssteder.queryFn(),
-    enabled: !!kostnadssteder,
+    enabled: !kostnadssteder,
   });
 
   const alleKostnadssteder = alleKostnadsstederQuery.data ?? [];
@@ -204,9 +201,9 @@ export function KostnadsstedSelect({
   );
 }
 
-function kostnadsstedOption(kostnadssted: OrgEnhetKostnadsstedMappingResponse) {
+function kostnadsstedOption(kostnadssted: KostnadsstedResponse) {
   return {
-    label: `${kostnadssted.kostnadsstedId}`,
+    label: `${kostnadssted.kostnadsstedId}: ${kostnadssted.navn}`,
     value: kostnadssted.kostnadsstedId,
   };
 }

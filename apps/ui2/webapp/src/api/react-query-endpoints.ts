@@ -11,6 +11,7 @@ import type {
   GetPersonRequest,
   GlobalStatistikkResponse,
   KorrigerOrgEnhetNavnRequest,
+  KostnadsstedResponse,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
@@ -325,7 +326,7 @@ export const getAlleKostnadssteder = {
   queryKey: () => ["ALLE_KOSTNADSSTEDER"],
   queryFn: async () =>
     (
-      await axios.get<OrgEnhetKostnadsstedMappingResponse[]>(
+      await axios.get<KostnadsstedResponse[]>(
         `${NOM_API_BASE_PATH}/app/orgenheter/kostnadssted`,
       )
     ).data,

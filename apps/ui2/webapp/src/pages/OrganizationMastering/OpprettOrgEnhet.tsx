@@ -152,7 +152,7 @@ function FormView({
 
   const orgEnhet = orgEnhetQuery.data;
 
-  if (orgEnhetQuery.isLoading) {
+  if (orgEnhetQuery.isLoading || kostnadsstedQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
@@ -169,7 +169,7 @@ function FormView({
 
       <OpprettOrgEnhetForm
         overordnetOrgEnhet={orgEnhet}
-        overordnetOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? "3"}
+        overordnetOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? ""}
         setOpprettResponse={setOpprettResponse}
       />
     </>
