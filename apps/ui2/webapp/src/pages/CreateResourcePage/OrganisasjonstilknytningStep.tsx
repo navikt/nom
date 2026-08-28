@@ -157,7 +157,6 @@ function CreateEksternRessurs() {
       gyldigTom: undefined,
       fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
-
     context: { tilknytningtype, sektor },
     resolver: yupResolver(validationSchema),
   });
