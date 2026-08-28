@@ -20,7 +20,6 @@ import * as yup from "yup";
 
 import {
   endreOrgEnhetInfo,
-  getKostnadssted,
   getOrgEnhet,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
@@ -44,7 +43,6 @@ import {
 } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import {
   IkkeTilgangRedigering,
-  KostnadsstedSelectFormPart,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
@@ -124,17 +122,6 @@ function FormView({
   orgEnhet: OrgEnhet;
   setChangeInfo: (response: any) => void;
 }) {
-  const orgEnhetKostnadsstedQuery = useQuery({
-    queryKey: getKostnadssted.queryKey(orgEnhet.id),
-    queryFn: () => getKostnadssted.queryFn(orgEnhet.id),
-  });
-
-  const orgEnhetKostnadssted = orgEnhetKostnadsstedQuery.data;
-
-  if (orgEnhetKostnadsstedQuery.isLoading) {
-    return <LoaderWithText>Laster...</LoaderWithText>;
-  }
-
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={6}>
@@ -145,9 +132,6 @@ function FormView({
 
         <KorrigerOrgEnhetForm
           orgEnhet={orgEnhet}
-          overordnetOrgEnhetKostnadsstedId={
-            orgEnhetKostnadssted?.kostnadsstedId ?? ""
-          }
           setChangeInfo={setChangeInfo}
         />
       </ContainerWithHighlightedTop>
@@ -176,11 +160,9 @@ function KvitteringView({
 
 function KorrigerOrgEnhetForm({
   orgEnhet,
-  overordnetOrgEnhetKostnadsstedId,
   setChangeInfo,
 }: {
   orgEnhet: OrgEnhet;
-  overordnetOrgEnhetKostnadsstedId: string;
   setChangeInfo: (response: any) => void;
 }) {
   const queryClient = useQueryClient();
@@ -193,7 +175,6 @@ function KorrigerOrgEnhetForm({
       tilgangsenhetId: orgEnhet.tilgangsenhetId ?? null,
       orgEnhetsType: orgEnhet.orgEnhetsType,
       nomNivaa: orgEnhet.nomNivaa ?? null,
-      kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -288,11 +269,6 @@ function KorrigerOrgEnhetForm({
               error={methods.formState.errors.tilgangsenhetId?.message}
               label="Tilgangsenhet"
             />
-
-            <KostnadsstedSelectFormPart
-              label="Kostnadssted"
-              name="kostnadsstedId"
-            />
           </VStack>
 
           <div
@@ -383,5 +359,4 @@ const validationSchema = yup.object({
       "Ugyldig",
       (value) => !value || Object.values(NomNivaa).includes(value),
     ),
-  kostnadsstedId: yup.string().required("Obligatorisk"),
 });
