@@ -1,8 +1,7 @@
 import { css } from "@emotion/react";
 import { BodyShort, ErrorMessage, HelpText, Label } from "@navikt/ds-react";
 import type { ReactElement, ReactNode } from "react";
-import React from "react";
-import { forwardRef } from "react";
+import React, { forwardRef } from "react";
 import type { FieldError } from "react-hook-form";
 import type {
   CSSObjectWithLabel,
@@ -10,8 +9,7 @@ import type {
   MenuListProps,
   Props,
 } from "react-select";
-import { components } from "react-select";
-import Select from "react-select";
+import Select, { components } from "react-select";
 import type { AsyncProps } from "react-select/async";
 import AsyncSelect from "react-select/async";
 

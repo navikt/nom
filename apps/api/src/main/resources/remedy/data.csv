@@ -97,6 +97,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 062600;0626;ORGNIV3;Lier;Beholdt;;;JA;062600;ORGNIV3;leggInn;
 063200;0632;ORGNIV3;Numedal;Beholdt;;;JA;063200;ORGNIV3;leggInn;
 0687000;0687;AGRESSOORGENHET;Vest-Viken Forvaltningstjenester Leder;;;;JA;068700;ORGNIV4;by896h;13.07.23: Flyttet mapping fra na946b til overliggende, by896h, slik at alle underliggende skal arve remedyEnhet
+068700;0687;ORGNIV3;Vest-Viken Virksomhetsstøtte;;;;JA;068700;ORGNIV3;he709j;28.08.2026: lagt inn ny mapping
 0699200;0691;AGRESSOORGENHET;Vest-Viken Arbeidslivssenter avdeling 1;Opp til ORGNIV4;069900;;JA;069900;ORGNIV4;leggInn;
 0696100;0696;AGRESSOORGENHET;Vest-Viken Arbeidsrådgivning;Beholdt;;;JA;0696100;ORGENHET;leggInn;
 070100;0701;ORGNIV3;Horten;Beholdt;;;JA;070100;ORGNIV3;leggInn;

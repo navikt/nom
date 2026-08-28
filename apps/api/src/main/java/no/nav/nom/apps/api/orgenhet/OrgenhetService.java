@@ -349,6 +349,10 @@ public class OrgenhetService {
             .findFirst();
     }
 
+    public String getTilgangsenhetId(String orgEnhetId) {
+        return getById(orgEnhetId).map(IOrgenhet::getTilgangsenhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+    }
+
 
     @KafkaListener(
         id = "nomApi_organiseringState_listener_for_tilgangsenhet_resolve",
