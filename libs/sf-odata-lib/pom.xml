@@ -35,31 +35,60 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.sap.cloud.sdk.datamodel</groupId>
-                <artifactId>odata-generator-maven-plugin</artifactId>
-                <version>${sap.cloud.sdk.version}</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
-                        <id>generate-vdm-sources</id>
+                        <id>add-generated-odata-sources</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>add-source</goal>
                         </goals>
                         <configuration>
-                            <inputDirectory>${project.basedir}/edmx-source-input</inputDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources/vdm</outputDirectory>
-                            <deleteOutputDirectory>true</deleteOutputDirectory>
-                            <packageName>no.nav.nom.sf.odata.vdm</packageName>
-                            <defaultBasePath>odata/v2/</defaultBasePath>
-                            <compileScope>COMPILE</compileScope>
-                            <serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
-                            <nameSource>NAME</nameSource>
-                            <serviceNameMappingFile>${project.basedir}/serviceNameMappings.properties</serviceNameMappingFile>
+                            <sources>
+                                <source>${project.basedir}/src/generated/java</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>generate-odata</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.sap.cloud.sdk.datamodel</groupId>
+                        <artifactId>odata-generator-maven-plugin</artifactId>
+                        <version>${sap.cloud.sdk.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generate-vdm-sources</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <inputDirectory>${project.basedir}/edmx-source-input</inputDirectory>
+                                    <outputDirectory>${project.basedir}/src/generated/java</outputDirectory>
+                                    <deleteOutputDirectory>true</deleteOutputDirectory>
+                                    <packageName>no.nav.nom.sf.odata.vdm</packageName>
+                                    <defaultBasePath>odata/v2/</defaultBasePath>
+                                    <compileScope>COMPILE</compileScope>
+                                    <serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
+                                    <nameSource>NAME</nameSource>
+                                    <serviceNameMappingFile>${project.basedir}/serviceNameMappings.properties</serviceNameMappingFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

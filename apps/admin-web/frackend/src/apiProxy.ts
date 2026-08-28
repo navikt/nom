@@ -47,11 +47,10 @@ export function addProxyHandler(
       if (obo.ok) {
         request.headers["obo-token"] = obo.token;
         return next();
-      } else {
-        console.log("OBO-exchange failed", obo.error);
-        response.status(403).send();
-        return;
       }
+      console.log("OBO-exchange failed", obo.error);
+      response.status(403).send();
+      return;
     },
     createProxyMiddleware({
       target: outgoingUrl,
