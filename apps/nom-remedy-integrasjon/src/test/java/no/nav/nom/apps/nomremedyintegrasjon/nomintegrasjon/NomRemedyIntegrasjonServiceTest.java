@@ -75,7 +75,7 @@ public class NomRemedyIntegrasjonServiceTest {
     public void setUp() {
         // Clear the repositories before each test
         lenient().doReturn(true).when(leaderElection).isLeader();
-        lenient().doReturn("2990").when(nomApiClient).getRemedyEnhetId(anyString());
+        lenient().doReturn("2990").when(nomApiClient).getTilgangsenhetId(anyString());
         lenient().doReturn("12345678").when(nomApiClient).getTelefonnummer(anyString());
     }
 

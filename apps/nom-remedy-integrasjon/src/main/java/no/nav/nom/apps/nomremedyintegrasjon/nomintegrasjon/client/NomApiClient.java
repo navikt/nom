@@ -65,10 +65,10 @@ public class NomApiClient {
             .body(OrgEnhet.class);
     }
 
-    public String getRemedyEnhetId(String orgenhetId) {
+    public String getTilgangsenhetId(String orgenhetId) {
         return nomApiAuthorizedRestClient.get()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/orgenheter/getRemedyEnhetId/{orgenhetId}")
+                .path("/app/orgenheter/getTilgangsEnhetId/{orgenhetId}")
                 .build(orgenhetId)
             )
             .retrieve()
