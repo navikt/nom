@@ -1,6 +1,13 @@
 [extend]
 useDefault = true
 
+[allowlist]
+description = "Global allowlist for common false positives"
+
+regexes = [
+    'linkedInApiToken',
+]
+
 [[rules]]
 id = "personident"
 description = "Kandidat for fødselsnummer eller D-nummer (11 siffer) - ikke Dolly identer (+40 på måneden)."

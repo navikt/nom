@@ -47,7 +47,7 @@ export const Route = createRootRouteWithContext<{
                   </Dropdown.Menu.GroupedList.Heading>
                   <Dropdown.Menu.GroupedList.Item
                     as="a"
-                    href="https://nom.ekstern.dev.nav.no"
+                    href="https://nom.ansatt.dev.nav.no"
                     target="_blank"
                   >
                     NOM <ExternalLinkIcon aria-hidden />

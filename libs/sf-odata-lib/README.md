@@ -2,7 +2,7 @@
 
 Bibliotek for typesikker tilgang til SAP SuccessFactors OData v2-tjenester via SAP Cloud SDK VDM (Virtual Data Model).
 
-Modulen konfigurerer SAP Cloud SDK sin OData v2 Maven-plugin til å generere Java-klasser automatisk fra EDMX-metadata-filer.
+Modulen konfigurerer SAP Cloud SDK sin OData v2 Maven-plugin til å generere Java-klasser fra EDMX-metadata-filer.
 
 ## Forutsetninger
 
@@ -14,6 +14,7 @@ Modulen konfigurerer SAP Cloud SDK sin OData v2 Maven-plugin til å generere Jav
 ```
 nedlastede-edmx-filer/   ← arkiv: lagre alle nedlastede EDMX-filer her
 edmx-source-input/       ← input til generatoren: kopier hit de filene du vil generere kode fra
+src/generated/java/      ← generert VDM-kode som sjekkes inn i git
 ```
 
 ## Legge til nye tjenester
@@ -35,25 +36,33 @@ edmx-source-input/       ← input til generatoren: kopier hit de filene du vil 
 
 ## Generere VDM-kilder
 
-Genereringen kjøres automatisk i `generate-sources`-fasen ved vanlig bygg:
+Genereringen er skrudd av som standard. Pluginen kjører kun når profilen `generate-odata` er aktiv.
+
+For regenerering med rent output (anbefalt etter EDMX-endringer):
+
+```bash
+JAVA_TOOL_OPTIONS="" mvn clean install -pl libs/sf-odata-lib -am -Pgenerate-odata -Dmaven.build.cache.skipCache=true
+```
+
+Kun generering (uten full build):
+
+```bash
+JAVA_TOOL_OPTIONS="" mvn generate-sources -pl libs/sf-odata-lib -am -Pgenerate-odata
+```
+
+Vanlig bygg uten regenerering:
 
 ```bash
 JAVA_TOOL_OPTIONS="" mvn install -pl libs/sf-odata-lib -am
 ```
 
-For å tvinge regenerering med rent output (anbefalt etter EDMX-endringer):
+Genererte klasser havner i `src/generated/java/` og kompileres i vanlig bygg.
 
-```bash
-JAVA_TOOL_OPTIONS="" mvn clean install -pl libs/sf-odata-lib -am -Dmaven.build.cache.skipCache=true
-```
+Dette betyr:
 
-Genererte klasser havner i `target/generated-sources/vdm/` og kompileres automatisk inn i modulen.
+- `mvn clean install` fungerer uten å kjøre generatoren.
+- Regenerering skjer kun når du eksplisitt aktiverer `-Pgenerate-odata`.
 
-### Kun generering (uten bygg)
-
-```bash
-JAVA_TOOL_OPTIONS="" mvn generate-sources -pl libs/sf-odata-lib -am
-```
 ## Konfigurasjon
 
 Plugin-parametere i `pom.xml`:
@@ -61,7 +70,7 @@ Plugin-parametere i `pom.xml`:
 | Parameter                   | Verdi                                      | Beskrivelse                                        |
 |-----------------------------|--------------------------------------------|----------------------------------------------------|
 | `inputDirectory`            | `${project.basedir}/edmx-source-input`     | Mappe med EDMX-filer som genereres (kun OData v2)  |
-| `outputDirectory`           | `${project.build.directory}/generated-sources/vdm` | Mappe for genererte Java-klasser           |
+| `outputDirectory`           | `${project.basedir}/src/generated/java` | Mappe for genererte Java-klasser (versjonert) |
 | `packageName`               | `no.nav.nom.sf.odata.vdm`                 | Pakkenavn for generert kode                        |
 | `defaultBasePath`           | `odata/v2/`                                | Standard basesti for tjenestene                    |
 | `deleteOutputDirectory`     | `true`                                     | Sletter output-mappen ved ny generering            |

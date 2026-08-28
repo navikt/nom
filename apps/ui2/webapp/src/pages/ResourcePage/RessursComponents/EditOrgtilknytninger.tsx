@@ -6,6 +6,7 @@ import {
   MinusCircleIcon,
   PlusCircleIcon,
 } from "@navikt/aksel-icons";
+import type { ComboboxProps } from "@navikt/ds-react";
 import {
   Alert,
   BodyLong,
@@ -25,7 +26,6 @@ import {
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
-import type { ComboboxOption } from "@navikt/ds-react/cjs/form/combobox/types";
 import {
   useMutation,
   useQueries,
@@ -112,6 +112,8 @@ import {
   isInDevelopment,
   todayWithoutTimezone,
 } from "~/utils";
+
+type ComboboxOption = Exclude<ComboboxProps["options"][number], string>;
 
 export function EditOrgtilknytninger({
   ressurs,
