@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNullElse;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -272,7 +273,7 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
             orgEnhetState.tilgangsenhetId(),
             orgtilknytningState.primaryFysiskBrukerstedNummer(),
             fysiskBrukerstedNavn,
-            ressursState.jobbtelefon().nummer(),
+            nonNull(ressursState.jobbtelefon()) ? ressursState.jobbtelefon().nummer() : null,
             ressursState.sektor().name(),
             ressursState.tilknytningtype().name(),
             ressursState.startdato(),
