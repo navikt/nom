@@ -88,7 +88,10 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
             .filter(orgtilknytningState -> orgEnhetStateIds.contains(orgtilknytningState.orgEnhetId()))
             .toList();
 
-        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream().map(OrgtilknytningState::navident).toList());
+        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream()
+            .map(OrgtilknytningState::navident)
+            .filter(Objects::nonNull)
+            .toList());
 
         var ressurserEpost = ressursContactDetailsResolver.fetchEmails(ressursStates.keySet().stream().toList());
 
@@ -130,7 +133,10 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
 
         orgEnhetLedere.forEach((orgEnhetId, navident) -> ressursStateLederMap.put(orgEnhetId, ressursStateRepository.findByNavident(navident).orElse(null)));
 
-        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream().map(OrgtilknytningState::navident).toList());
+        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream()
+            .map(OrgtilknytningState::navident)
+            .filter(Objects::nonNull)
+            .toList());
 
         var ressurserEpost = ressursContactDetailsResolver.fetchEmails(ressursStates.keySet().stream().toList());
 
@@ -168,7 +174,10 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
                 .collect(Collectors.toSet()), OrgtilknytningStateRepository.DOLIs.TRUE
         ).values().stream().flatMap(Collection::stream).toList();
 
-        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream().map(OrgtilknytningState::navident).toList());
+        var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream()
+            .map(OrgtilknytningState::navident)
+            .filter(Objects::nonNull)
+            .toList());
 
         var ressurserEpost = ressursContactDetailsResolver.fetchEmails(ressursStates.keySet().stream().toList());
 
@@ -275,7 +284,7 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
             fysiskBrukerstedNavn,
             nonNull(ressursState.jobbtelefon()) ? ressursState.jobbtelefon().nummer() : null,
             ressursState.sektor().name(),
-            ressursState.tilknytningtype().name(),
+            nonNull(ressursState.tilknytningtype()) ? ressursState.tilknytningtype().name() : null,
             ressursState.startdato(),
             ressursEpost,
             leder.navident(),
