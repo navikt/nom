@@ -14,6 +14,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.LocalDate;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,12 +48,14 @@ class SamlAssertionServiceTest {
         testPrivateKeyPem = encodePrivateKey(testPrivateKey);
 
         SfProperties props = new SfProperties(
-                "https://api55.sapsf.eu/",
-                "test-client-id",
-                testPrivateKeyPem,
-                "test-tenant",
-                "test-user-id",
-                "dummy-cpi-url"
+            "https://api55.sapsf.eu/",
+            "test-client-id",
+            testPrivateKeyPem,
+            "test-tenant",
+            "test-user-id",
+            "dummy-cpi-url",
+            LocalDate.now().minusDays(5),
+            "TOPPPNODE_ID"
         );
         service = new SamlAssertionService(props);
     }

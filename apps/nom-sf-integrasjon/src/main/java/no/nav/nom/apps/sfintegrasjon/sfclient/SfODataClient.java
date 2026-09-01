@@ -5,6 +5,9 @@ import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfTokenCache;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FOBusinessUnit;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FODepartment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FODivision;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
 import no.nav.nom.sf.odata.vdm.services.DefaultSuccessfactorsService;
@@ -76,11 +79,138 @@ public class SfODataClient {
                 .build());
     }
 
+    public List<User> getUsersBySsn(String ssn) throws ODataException {
+        return getUsersBySsn(ssn, null);
+    }
+
+    public List<User> getUsersBySsn(String ssn, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.SSN.eq(ssn))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<User> getUsersByEmpId(String empId) throws ODataException {
+        return getUsersByEmpId(empId, null);
+    }
+
+    public List<User> getUsersByEmpId(String empId, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.EMP_ID.eq(empId))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<User> getUsersByUserId(String userId) throws ODataException {
+        return getUsersByUserId(userId, null);
+    }
+
+    public List<User> getUsersByUserId(String userId, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.USER_ID.eq(userId))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<User> getUsersByUsername(String username) throws ODataException {
+        return getUsersByUsername(username, null);
+    }
+
+    public List<User> getUsersByUsername(String username, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.USERNAME.eq(username))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<User> getUsersByEmail(String email) throws ODataException {
+        return getUsersByEmail(email, null);
+    }
+
+    public List<User> getUsersByEmail(String email, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.EMAIL.eq(email))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<User> getUsersByDisplayName(String displayName) throws ODataException {
+        return getUsersByDisplayName(displayName, null);
+    }
+
+    public List<User> getUsersByDisplayName(String displayName, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllUser()
+            .filter(User.DISPLAY_NAME.eq(displayName))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
     public List<EmpEmployment> getFirst10EmpEmployments(String accessToken) throws ODataException {
         return new DefaultSuccessfactorsService()
             .withServicePath(ODATA2_SERVICE_PATH)
             .getAllEmpEmployment()
             .top(10)
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+
+    public List<FODepartment> getFODepartmentsByNomOrgEnhetId(String nomOrgEnhetId) throws ODataException {
+        return getFODepartmentsByNomOrgEnhetId(nomOrgEnhetId, null);
+    }
+
+    public List<FODepartment> getFODepartmentsByNomOrgEnhetId(String nomOrgEnhetId, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllFODepartment()
+            .filter(FODepartment.EXTERNAL_CODE.eq(nomOrgEnhetId))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<FODivision> getFODivisionsByNomOrgEnhetId(String nomOrgEnhetId) throws ODataException {
+        return getFODivisionsByNomOrgEnhetId(nomOrgEnhetId, null);
+    }
+
+    public List<FODivision> getFODivisionsByNomOrgEnhetId(String nomOrgEnhetId, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllFODivision()
+            .filter(FODivision.EXTERNAL_CODE.eq(nomOrgEnhetId))
+            .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
+                .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
+                .build());
+    }
+
+    public List<FOBusinessUnit> getFOBusinessUnitsByNomOrgEnhetId(String nomOrgEnhetId) throws ODataException {
+        return getFOBusinessUnitsByNomOrgEnhetId(nomOrgEnhetId, null);
+    }
+
+    public List<FOBusinessUnit> getFOBusinessUnitsByNomOrgEnhetId(String nomOrgEnhetId, String accessToken) throws ODataException {
+        return new DefaultSuccessfactorsService()
+            .withServicePath(ODATA2_SERVICE_PATH)
+            .getAllFOBusinessUnit()
+            .filter(FOBusinessUnit.EXTERNAL_CODE.eq(nomOrgEnhetId))
             .executeRequest(DefaultHttpDestination.builder(sfProperties.apiUrl().replaceAll("/$", ""))
                 .header("Authorization", "Bearer " + resolveAccessToken(accessToken))
                 .build());

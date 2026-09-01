@@ -17,15 +17,15 @@ This is a simple overview of the `FODepartment` entity fields.
 | `createdBy` | `String` | User id that created the record. |
 | `createdDateTime` | `ZonedDateTime` | Creation timestamp (with timezone). |
 | `createdOn` | `LocalDateTime` | Creation datetime. |
+| `cust_BusinessUnit` | `String` | Custom Business Unit. |
 | `cust_Division` | `String` | Custom division reference. |
+| `cust_LederNavIdent` | `String` | Custom Leder Nav Ident. |
+| `cust_LegacyID` | `String` | Custom legacy identifier. |
 | `cust_Location` | `String` | Custom location reference. |
+| `cust_Tilgangsenhet` | `String` | Custom access unit reference. |
 | `cust_Virksomhet` | `String` | Custom virksomhet reference. |
-| `description` | `String` | Department description. |
-| `description_defaultValue` | `String` | Default description translation value. |
-| `description_en_DEBUG` | `String` | Description (`en_DEBUG`). |
-| `description_en_US` | `String` | Description (`en_US`). |
-| `description_localized` | `String` | Localized description value. |
-| `description_nb_NO` | `String` | Description (`nb_NO`). |
+| `cust_nom_nivaa` | `String` | Custom NOM level reference. |
+| `cust_orgenhet_type` | `String` | Custom organizational unit type reference. |
 | `endDate` | `LocalDateTime` | End of validity period. |
 | `entityOID` | `String` | Internal object id. |
 | `entityUUID` | `String` | Entity UUID. |
@@ -36,14 +36,8 @@ This is a simple overview of the `FODepartment` entity fields.
 | `lastModifiedOn` | `LocalDateTime` | Last modification datetime. |
 | `mdfSystemRecordId` | `String` | MDF system record id. |
 | `name` | `String` | Department name. |
-| `name_defaultValue` | `String` | Default name translation value. |
-| `name_en_DEBUG` | `String` | Name (`en_DEBUG`). |
-| `name_en_US` | `String` | Name (`en_US`). |
-| `name_localized` | `String` | Localized name value. |
-| `name_nb_NO` | `String` | Name (`nb_NO`). |
-| `parent` | `String` | Parent department reference. |
 | `startDate` | `LocalDateTime` | Validity start (key). |
-| `status` | `String` | Department status code. |
+| `status` | `String` | Department status code. A/I - Active/inactive |
 
 ## Navigation fields
 
@@ -51,15 +45,14 @@ This is a simple overview of the `FODepartment` entity fields.
 |---|---|---|
 | `toCostCenterNav` | `FOCostCenter` | `costCenterNav` |
 | `toCreatedByNav` | `User` | `createdByNav` |
+| `toCust_BusinessUnitNav` | `FOBusinessUnit` | `cust_BusinessUnitNav` |
 | `toCust_DivisionNav` | `FODivision` | `cust_DivisionNav` |
 | `toCust_LocationNav` | `FOLocation` | `cust_LocationNav` |
 | `toCust_VirksomhetNav` | `Cust_NAVVirksomhet` | `cust_VirksomhetNav` |
-| `toDescriptionTranslationNav` | `FoTranslation` | `descriptionTranslationNav` |
-| `toDescriptionTranslationTextNav` | `List<MDFLocalizedValue>` | `descriptionTranslationTextNav` |
+| `toCust_nom_nivaaNav` | `Cust_nom_nivaa` | `cust_nom_nivaaNav` |
+| `toCust_orgenhet_typeNav` | `Cust_orgenhet` | `cust_orgenhet_typeNav` |
 | `toHeadOfUnitNav` | `User` | `headOfUnitNav` |
 | `toLastModifiedByNav` | `User` | `lastModifiedByNav` |
 | `toNameTranslationNav` | `FoTranslation` | `nameTranslationNav` |
 | `toNameTranslationTextNav` | `List<MDFLocalizedValue>` | `nameTranslationTextNav` |
-| `toParentNav` | `FODepartment` | `parentNav` |
 | `toStatusNav` | `MDFEnumValue` | `statusNav` |
-
