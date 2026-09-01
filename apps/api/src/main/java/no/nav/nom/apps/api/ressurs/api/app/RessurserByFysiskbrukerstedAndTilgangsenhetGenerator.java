@@ -224,13 +224,13 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
             );
         } else if (isBlank(fysiskBrukerstedNr)) {
             filename = String.format(
-                "Ressurser med fysiskbrukersted og tilgangsEnhetId %s-%s",
+                "Ressurser med tilgangsEnhetId %s-%s",
                 tilgangsEnhetId,
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
             );
         } else {
             filename = String.format(
-                "Ressurser med fysiskbrukersted og tilgangsEnhetId %s-%s-%s",
+                "Ressurser med fysiskbrukersted %s og tilgangsEnhetId %s-%s",
                 fysiskBrukerstedNr,
                 tilgangsEnhetId,
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
