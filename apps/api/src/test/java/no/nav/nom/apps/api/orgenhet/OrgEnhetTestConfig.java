@@ -27,6 +27,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
@@ -37,8 +38,8 @@ import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.mockito.Mockito;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.webclient.autoconfigure.WebClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -82,6 +83,10 @@ public class OrgEnhetTestConfig {
     @Bean
     ValidationRepository validationRepository() {
         return Mockito.mock(ValidationRepository.class, MockReset.after());
+    }
+    @Bean
+    FysiskBrukerstedService fysiskBrukerstedService() {
+        return Mockito.mock(FysiskBrukerstedService.class, MockReset.after());
     }
 
     @Bean
