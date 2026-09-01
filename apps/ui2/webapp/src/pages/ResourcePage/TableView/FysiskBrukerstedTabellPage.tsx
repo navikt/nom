@@ -1,7 +1,9 @@
 import { css } from "@emotion/react";
+import { FileExcelIcon } from "@navikt/aksel-icons";
 import {
   Alert,
   BodyShort,
+  Button,
   Heading,
   HStack,
   Pagination,
@@ -9,13 +11,12 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import {
+  downloadExcelRessurserForFysiskBrukerstedAlle,
   getAlleTilgangsenheter,
   getFysiskeBrukersteder,
-  getOrgEnhetList,
-  getOrgtilknytningerByNavidentList,
   getRessurserForFysiskBrukerstedAlle,
 } from "~/api/react-query-endpoints";
 import {
@@ -31,12 +32,7 @@ import {
   TilgangsenhetSelect,
 } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import {
-  isPeriodActive,
-  nomDateIsTodayOrAfter,
-  nomDateIsTodayOrBefore,
-} from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import type { OrgEnhet } from "~/types/api-models";
+import type { RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function FysiskBrukerstedTabellPage() {
@@ -73,58 +69,116 @@ function FysiskBrukerstedTabell() {
   const [fysiskBrukerstedFilter, setFysiskBrukerstedFilter] = useState("");
   const [tilgangsenhetFilter, setTilgangsenhetFilter] = useState("");
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const eksportFilnavn = () => {
+    const valgtBrukersted = fysiskeBrukersteder.find(
+      (brukersted) => brukersted.nr === fysiskBrukerstedFilter,
+    );
+    const valgtTilgangsenhet = alleTilgangsenheter.find(
+      (tilgangsenhet) => tilgangsenhet.enhetId === tilgangsenhetFilter,
+    );
+
+    const deler: string[] = [];
+
+    if (valgtBrukersted) {
+      deler.push(`fysisk brukersted ${valgtBrukersted.navn}`);
+    }
+
+    if (valgtTilgangsenhet) {
+      deler.push(
+        `tilgangsenhet ${valgtTilgangsenhet.navn ?? tilgangsenhetFilter}`,
+      );
+    }
+
+    return `Medarbeidere ${deler.join(" og ")}.xlsx`;
+  };
+
+  const handleDownloadExcel = async () => {
+    try {
+      setIsDownloading(true);
+      await downloadExcelRessurserForFysiskBrukerstedAlle(
+        {
+          fysiskBrukerstedNr: fysiskBrukerstedFilter || undefined,
+          tilgangsenhetId: tilgangsenhetFilter || undefined,
+        },
+        eksportFilnavn(),
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (fysiskeBrukerstederQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
   return (
     <VStack gap="6">
-      <VStack
+      <HStack
         css={css`
+          margin: auto;
           width: 100%;
           max-width: 1008px;
-          margin: auto;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
-          background-color: #deecef;
         `}
+        align="end"
         gap="4"
       >
-        <HStack gap="4">
-          <div
-            css={css`
-              flex: 1;
-            `}
-          >
-            <FysiskBrukerstedSelect
-              fysiskeBrukersteder={fysiskeBrukersteder}
-              isClearable
-              label="Primært fysisk brukersted"
-              onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
-              value={fysiskBrukerstedFilter}
-            />
-          </div>
+        <VStack
+          css={css`
+            flex: 1;
+            padding: var(--a-spacing-4) var(--a-spacing-6);
+            border-radius: var(--a-border-radius-large);
+            background-color: #deecef;
+          `}
+          gap="4"
+        >
+          <HStack gap="4">
+            <div
+              css={css`
+                flex: 1;
+              `}
+            >
+              <FysiskBrukerstedSelect
+                fysiskeBrukersteder={fysiskeBrukersteder}
+                isClearable
+                label="Primært fysisk brukersted"
+                onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
+                value={fysiskBrukerstedFilter}
+              />
+            </div>
 
-          <div
-            css={css`
-              flex: 1;
-            `}
-          >
-            <TilgangsenhetSelect
-              isClearable
-              label="Primær tilgangsenhet"
-              onChange={(value) => setTilgangsenhetFilter(value ?? "")}
-              tilgangsenheter={alleTilgangsenheter}
-              value={tilgangsenhetFilter}
-            />
-          </div>
-        </HStack>
+            <div
+              css={css`
+                flex: 1;
+              `}
+            >
+              <TilgangsenhetSelect
+                isClearable
+                label="Primær tilgangsenhet"
+                onChange={(value) => setTilgangsenhetFilter(value ?? "")}
+                tilgangsenheter={alleTilgangsenheter}
+                value={tilgangsenhetFilter}
+              />
+            </div>
+          </HStack>
 
-        <Alert variant="info">
-          Filtrene baserer seg på brukeres organisasjonstilknytninger med daglig
-          oppfølging.
-        </Alert>
-      </VStack>
+          <Alert variant="info">
+            Filtrene baserer seg på brukeres organisasjonstilknytninger med
+            daglig oppfølging.
+          </Alert>
+        </VStack>
+
+        <Button
+          disabled={!fysiskBrukerstedFilter && !tilgangsenhetFilter}
+          icon={<FileExcelIcon aria-hidden />}
+          loading={isDownloading}
+          onClick={handleDownloadExcel}
+          variant="secondary"
+        >
+          Eksportér til Excel
+        </Button>
+      </HStack>
 
       {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
         <FysiskBrukerstedTabellInner
@@ -143,143 +197,61 @@ function FysiskBrukerstedTabellInner({
   fysiskBrukerstedNr: string;
   tilgangsenhet: string;
 }) {
+  const request: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest = {
+    fysiskBrukerstedNr: fysiskBrukerstedNr || undefined,
+    tilgangsenhetId: tilgangsenhet || undefined,
+  };
+
   const fysiskBrukerstedRessurserAlleQuery = useQuery({
-    queryKey: getRessurserForFysiskBrukerstedAlle.queryKey(fysiskBrukerstedNr),
-    queryFn: () =>
-      getRessurserForFysiskBrukerstedAlle.queryFn(fysiskBrukerstedNr),
-    enabled: !!fysiskBrukerstedNr,
+    queryKey: getRessurserForFysiskBrukerstedAlle.queryKey(request),
+    queryFn: () => getRessurserForFysiskBrukerstedAlle.queryFn(request),
+    enabled: !!fysiskBrukerstedNr || !!tilgangsenhet,
   });
 
   const fysiskBrukerstedRessurser = fysiskBrukerstedRessurserAlleQuery.data;
 
-  const navidentListe =
-    fysiskBrukerstedRessurser?.map((ressurs) => ressurs.navident) ?? [];
+  const ressursRows: FysiskBrukerstedTabellRow[] = useMemo(() => {
+    const radPerNavident = new Map<string, FysiskBrukerstedTabellRow>();
 
-  const orgtilknytningerQuery = useQuery({
-    queryKey: getOrgtilknytningerByNavidentList.queryKey(navidentListe),
-    queryFn: () => getOrgtilknytningerByNavidentList.queryFn(navidentListe),
-    enabled: navidentListe.length > 0,
-  });
+    for (const ressurs of fysiskBrukerstedRessurser ?? []) {
+      let rad = radPerNavident.get(ressurs.navident);
 
-  const orgtilknytninger = orgtilknytningerQuery.data;
+      if (!rad) {
+        rad = {
+          navident: ressurs.navident,
+          navn: formatVisningsnavn(ressurs.visningsnavn),
+          orgEnheter: [],
+          fysiskeBrukersteder: [],
+          tilgangsenhetId: ressurs.tilgangsenhetId,
+        };
+        radPerNavident.set(ressurs.navident, rad);
+      }
 
-  const filteredOrgtilknytninger = Object.fromEntries(
-    Object.entries(orgtilknytninger ?? {}).map(([id, tilknytninger]) => [
-      id,
-      tilknytninger.filter(
-        (tilknytning) =>
-          nomDateIsTodayOrBefore(tilknytning.gyldigFom) &&
-          nomDateIsTodayOrAfter(tilknytning.gyldigTom),
-      ),
-    ]),
-  );
+      if (
+        ressurs.orgEnhetId &&
+        !rad.orgEnheter.some((orgEnhet) => orgEnhet.id === ressurs.orgEnhetId)
+      ) {
+        rad.orgEnheter.push({
+          id: ressurs.orgEnhetId,
+          navn: ressurs.orgEnhetNavn,
+        });
+      }
 
-  // const query = `
-  //   query FysiskBrukerstedTilgangsenhetQuery(
-  //     $fysiskBrukersted: String
-  //     $tilgangsenhet: String
-  //   ) {
-  //     ressurser(
-  //       filter: {
-  //         fysiskBrukersted: $fysiskBrukersted
-  //         tilgangsenhetId: $tilgangsenhet
-  //       }
-  //     ) {
-  //       ressurs {
-  //         navident
-  //         visningsnavn
-  //         orgTilknytninger(utvalg: AKTIVE) {
-  //           orgEnhet {
-  //             navn
-  //             id
-  //             tilgangsenhetId
-  //           }
-  //           erDagligOppfolging
-  //         }
-  //       }
-  //     }
-  //   }
-  // `;
-
-  // const resultQuery = useQuery({
-  //   queryKey: ["testkey"],
-  //   queryFn: () =>
-  //     axios.post("/frackend/nom-api/graphql", {
-  //       query: query,
-  //       variables: {
-  //         fysiskBrukersted: fysiskBrukerstedNr,
-  //         tilgangsenhet: tilgangsenhet,
-  //       },
-  //     }),
-  // });
-
-  // const resultRessurser = resultQuery.data?.data?.data?.ressurser;
-  //
-  // if (!!resultRessurser) {
-  //   const filtrerteRessurser = resultRessurser.filter(
-  //     (entry) => entry.ressurs?.orgTilknytninger?.length > 0,
-  //   );
-  //
-  //   console.log(filtrerteRessurser);
-  // }
-
-  const unikeOrgEnhetIder = [
-    ...new Set(
-      Object.values(filteredOrgtilknytninger ?? {}).flatMap((tilknytninger) =>
-        tilknytninger.map((tilknytning) => tilknytning.orgEnhetId),
-      ),
-    ),
-  ];
-
-  const orgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(unikeOrgEnhetIder),
-    queryFn: () => getOrgEnhetList.queryFn(unikeOrgEnhetIder),
-  });
-
-  const orgEnheter = orgEnheterQuery.data;
-
-  const ressursRows: FysiskBrukerstedTabellRow[] = (
-    fysiskBrukerstedRessurser?.map((ressurs) => {
-      const tilknytningerForRessurs =
-        filteredOrgtilknytninger?.[ressurs.navident] ?? [];
-
-      const relevanteTilknytninger = tilknytningerForRessurs.filter(
-        (tilknytning) =>
-          tilknytning.primaryFysiskBrukerstedNummer === fysiskBrukerstedNr ||
-          tilknytning.additionalFysiskeBrukerstederNummer?.includes(
-            fysiskBrukerstedNr,
-          ),
-      );
-
-      const relevanteOrgEnheter = relevanteTilknytninger
-        .map((tilknytning) =>
-          orgEnheter?.find(
-            (orgEnhet) => orgEnhet.id === tilknytning.orgEnhetId,
-          ),
+      if (
+        ressurs.fysiskBrukerstedNummer &&
+        !rad.fysiskeBrukersteder.some(
+          (brukersted) => brukersted.nummer === ressurs.fysiskBrukerstedNummer,
         )
-        .filter((orgEnhet) => orgEnhet !== undefined);
+      ) {
+        rad.fysiskeBrukersteder.push({
+          nummer: ressurs.fysiskBrukerstedNummer,
+          navn: ressurs.fysiskBrukerstedNavn,
+        });
+      }
+    }
 
-      const dolTilknytning = tilknytningerForRessurs.find(
-        (tilknytning) =>
-          isPeriodActive(tilknytning.gyldigFom, tilknytning.gyldigTom) &&
-          tilknytning.erDagligOppfolging,
-      );
-
-      const dolTilgangsenhetId =
-        orgEnheter?.find(
-          (orgEnhet) => orgEnhet.id === dolTilknytning?.orgEnhetId,
-        )?.tilgangsenhetId ?? "";
-
-      return {
-        navident: ressurs.navident,
-        navn: formatVisningsnavn(ressurs.visningsnavn),
-        orgEnheter: relevanteOrgEnheter,
-        tilgangsenhetId: dolTilgangsenhetId,
-      };
-    }) ?? []
-  ).filter((row) =>
-    !tilgangsenhet ? true : row.tilgangsenhetId === tilgangsenhet,
-  );
+    return [...radPerNavident.values()];
+  }, [fysiskBrukerstedRessurser]);
 
   const { data, sort, handleSort } = useTableSort(ressursRows, "navn");
 
@@ -294,19 +266,11 @@ function FysiskBrukerstedTabellInner({
     rowsPerPage * page,
   );
 
-  if (
-    fysiskBrukerstedRessurserAlleQuery.isLoading ||
-    orgtilknytningerQuery.isLoading ||
-    orgEnheterQuery.isLoading
-  ) {
+  if (fysiskBrukerstedRessurserAlleQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
-  if (
-    fysiskBrukerstedRessurserAlleQuery.isError ||
-    orgtilknytningerQuery.isError ||
-    orgEnheterQuery.isError
-  ) {
+  if (fysiskBrukerstedRessurserAlleQuery.isError) {
     return (
       <Alert variant="error">
         <Heading level="3" size="small">
@@ -356,6 +320,14 @@ function FysiskBrukerstedTabellInner({
               Organisasjonsenhet
             </Table.ColumnHeader>
 
+            <Table.ColumnHeader
+              scope="col"
+              sortKey="fysiskeBrukersteder[0].navn"
+              sortable
+            >
+              Fysisk brukersted
+            </Table.ColumnHeader>
+
             <Table.ColumnHeader scope="col" sortKey="tilgangsenhetId" sortable>
               Tilgangsenhet
             </Table.ColumnHeader>
@@ -397,6 +369,15 @@ function FysiskBrukerstedTabellInner({
                   ))}
                 </VStack>
               </Table.DataCell>
+              <Table.DataCell>
+                <VStack gap="1">
+                  {rad.fysiskeBrukersteder.map((brukersted) => (
+                    <BodyShort key={brukersted.nummer}>
+                      {`${brukersted.navn} (${brukersted.nummer})`}
+                    </BodyShort>
+                  ))}
+                </VStack>
+              </Table.DataCell>
               <Table.DataCell>{rad.tilgangsenhetId}</Table.DataCell>
             </Table.Row>
           ))}
@@ -423,6 +404,7 @@ function FysiskBrukerstedTabellInner({
 type FysiskBrukerstedTabellRow = {
   navident: string;
   navn: string;
-  orgEnheter: OrgEnhet[];
+  orgEnheter: { id: string; navn: string }[];
+  fysiskeBrukersteder: { nummer: string; navn: string }[];
   tilgangsenhetId: string;
 };
