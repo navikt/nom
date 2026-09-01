@@ -257,7 +257,7 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
         map.put("Jobbtelefon", requireNonNullElse(ressurs.telefonnummer(), "UKJENT"));
         map.put("Sektor", requireNonNullElse(ressurs.sektor(), "UKJENT"));
         map.put("Tilknytnings Type", requireNonNullElse(ressurs.tilknytningsType(), "UKJENT"));
-        map.put("Startdato", requireNonNullElse(ressurs.startdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), "UKJENT"));
+        map.put("Startdato", nonNull(ressurs.startdato()) ? ressurs.startdato().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) : "UKJENT");
         map.put("Epost", ressurs.epost());
         map.put("Leder Navident", requireNonNullElse(ressurs.lederNavident(), "UKJENT"));
         map.put("Leder Navn", requireNonNullElse(ressurs.lederNavn(), "UKJENT"));
