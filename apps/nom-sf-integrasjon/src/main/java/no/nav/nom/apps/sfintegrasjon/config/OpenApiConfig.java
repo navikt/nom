@@ -29,7 +29,7 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
             .group("SF Client API")
             .displayName("SF Client API v1")
-            .pathsToMatch("/api/v1/sf-client/**")
+            .pathsToMatch("/api/sf/client/**")
             .build();
     }
 
