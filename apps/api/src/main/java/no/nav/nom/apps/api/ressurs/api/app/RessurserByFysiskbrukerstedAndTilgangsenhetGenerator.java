@@ -14,6 +14,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.utils.common.excel.ExcelGenerator;
+import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
@@ -121,6 +122,7 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
         var orgtilknytningStates = orgtilknytningService.getActiveOrgtilknytningerByFysiskBrukerstedNr(fysiskBrukerstedNr)
             .stream()
             .filter(OrgtilknytningState::erDagligOppfolging)
+            .filter(orgtilknytningState -> DateUtils.isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
             .toList();
 
         var orgEnhetStates = orgEnhetStateRepository.findByIdIn(orgtilknytningStates.stream().map(OrgtilknytningState::orgEnhetId).collect(Collectors.toSet()))
@@ -169,10 +171,15 @@ public class RessurserByFysiskbrukerstedAndTilgangsenhetGenerator {
         orgEnhetLedere.forEach((orgEnhetId, navident) -> ressursStateLederMap.put(orgEnhetId, ressursStateRepository.findByNavident(navident).orElse(null)));
 
         var orgtilknytningStates = orgtilknytningStateRepository.getOrgtilknytningerPaaEnheter(
-            orgEnhetStates.stream()
-                .map(OrgEnhetState::id)
-                .collect(Collectors.toSet()), OrgtilknytningStateRepository.DOLIs.TRUE
-        ).values().stream().flatMap(Collection::stream).toList();
+                orgEnhetStates.stream()
+                    .map(OrgEnhetState::id)
+                    .collect(Collectors.toSet()), OrgtilknytningStateRepository.DOLIs.TRUE
+            )
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .filter(orgtilknytningState -> DateUtils.isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .toList();
 
         var ressursStates = ressursStateRepository.findByNavidentBulk(orgtilknytningStates.stream()
             .map(OrgtilknytningState::navident)
