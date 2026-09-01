@@ -13,7 +13,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
-import { subDays } from "date-fns";
+import { addDays, subDays } from "date-fns";
 import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -47,6 +47,7 @@ import {
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import {
+  nomDateIsAfter,
   nomDateIsAfterToday,
   nomDateIsTodayOrAfter,
   nomDateIsTodayOrBefore,
@@ -192,6 +193,7 @@ function KorrigerOrgEnhetLederForm({
 
   const methods = useForm({
     resolver: yupResolver(validationSchema),
+    context: { aktivtLederskapStart: aktivtLederskap?.startdato },
   });
 
   const queryClient = useQueryClient();
@@ -243,46 +245,58 @@ function KorrigerOrgEnhetLederForm({
     opprettOrgEnhetLederMutation?.error?.response?.data?.message;
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="8">
-          <VStack gap="6">
-            <FormRessursSearchWrapper
-              label="Ny leder på organisasjonsenhet"
-              name="lederRessursNavident"
-            />
+    <>
+      <Alert
+        css={css`
+          width: 50%;
+        `}
+        variant="info"
+      >
+        Dagens leder: <b>{orgEnhet.leder.visningsnavn}</b> siden{" "}
+        <b>{formatDisplayDate(aktivtLederskap?.startdato)}</b>
+      </Alert>
 
-            <FormDateWrapper label="Leder fra og med" name="gyldigFom" />
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onValid)}>
+          <VStack gap="8">
+            <VStack gap="6">
+              <FormRessursSearchWrapper
+                label="Ny leder på organisasjonsenhet"
+                name="lederRessursNavident"
+              />
 
-            <FremtidigLeder planlagtLederskap={planlagtLederskap} />
-          </VStack>
+              <FormDateWrapper label="Leder fra og med" name="gyldigFom" />
 
-          <div
-            css={css`
-              display: flex;
-              justify-content: end;
-              gap: var(--a-spacing-4);
-            `}
-          >
-            <SmartLink href="/organisasjonsmastring">
-              <Button size="small" variant="secondary">
-                Avbryt
-              </Button>
-            </SmartLink>
+              <FremtidigLeder planlagtLederskap={planlagtLederskap} />
+            </VStack>
 
-            <Button
-              icon={<FloppydiskIcon aria-hidden />}
-              size="small"
-              type="submit"
+            <div
+              css={css`
+                display: flex;
+                justify-content: end;
+                gap: var(--a-spacing-4);
+              `}
             >
-              Lagre
-            </Button>
+              <SmartLink href="/organisasjonsmastring">
+                <Button size="small" variant="secondary">
+                  Avbryt
+                </Button>
+              </SmartLink>
 
-            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
-          </div>
-        </VStack>
-      </form>
-    </FormProvider>
+              <Button
+                icon={<FloppydiskIcon aria-hidden />}
+                size="small"
+                type="submit"
+              >
+                Lagre
+              </Button>
+
+              {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
+            </div>
+          </VStack>
+        </form>
+      </FormProvider>
+    </>
   );
 }
 
@@ -434,5 +448,27 @@ function KorrigerOrgEnhetLederKvitteringContent({
 
 const validationSchema = yup.object({
   lederRessursNavident: yup.string().required("Obligatorisk"),
-  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigFom: yup
+    .string()
+    .required("Obligatorisk")
+    .test({
+      name: "gyldigTom-ikke-før-aktivt-lederskap-startdato",
+      message: "Kan ikke være før startdato",
+      test: function (value) {
+        const aktivtLederskapStart =
+          this?.options?.context?.aktivtLederskapStart;
+
+        if (
+          !aktivtLederskapStart ||
+          nomDateIsAfter(value, aktivtLederskapStart)
+        ) {
+          return true;
+        }
+
+        return this.createError({
+          path: this.path,
+          message: `Må være tidligst ${formatDisplayDate(addDays(aktivtLederskapStart, 1))}`,
+        });
+      },
+    }),
 });

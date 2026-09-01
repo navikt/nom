@@ -370,6 +370,10 @@ public class OrgenhetService {
             ))
             .toList();
     }
+  
+    public String getTilgangsenhetId(String orgEnhetId) {
+        return getById(orgEnhetId).map(IOrgenhet::getTilgangsenhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+    }
 
 
     @KafkaListener(

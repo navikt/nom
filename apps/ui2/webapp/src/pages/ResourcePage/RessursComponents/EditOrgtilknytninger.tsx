@@ -642,6 +642,7 @@ function OrgtilknytningForm({
                 />
 
                 <FormTilknytningstypeSelectWrapper
+                  opprinneligTilknytningstype={originalOt?.orgtilknytningType}
                   disabled={editTilknytningstypeDisabled}
                   error={
                     errors?.mappedeOrgtilknytninger?.[index]?.orgtilknytningType
@@ -1051,12 +1052,14 @@ function FormTilknytningstypeSelectWrapper({
   disabled,
   triggerOthers,
   selectedSektor,
+  opprinneligTilknytningstype,
 }: {
   name: string;
   error: string;
   disabled?: boolean;
   triggerOthers?: string[];
   selectedSektor: Sektor | undefined;
+  opprinneligTilknytningstype: Tilknytningtype | undefined;
 }) {
   const { trigger } = useFormContext();
 
@@ -1152,12 +1155,14 @@ function FormTilknytningstypeSelectWrapper({
             : tilknytningstyperStatlige
           ).map((tilknytningstype) => {
             if (
-              (tilknytningstype === Tilknytningtype.HELFO ||
+              ((tilknytningstype === Tilknytningtype.HELFO ||
                 tilknytningstype === Tilknytningtype.SKATTEETATEN ||
                 tilknytningstype === Tilknytningtype.RIKSREVISJONEN ||
                 tilknytningstype === Tilknytningtype.STATSFORVALTEREN) &&
-              !brukerJobberIDirektoratet &&
-              !hasAdminAccess
+                !brukerJobberIDirektoratet &&
+                !hasAdminAccess) ||
+              (tilknytningstype === Tilknytningtype.ANNET &&
+                opprinneligTilknytningstype !== Tilknytningtype.ANNET)
             ) {
               return;
             }

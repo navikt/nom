@@ -199,13 +199,13 @@ public class OrgEnhetController {
         return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapToOrgEnhet).collect(Collectors.toList());
     }
 
-    @GetMapping("/getRemedyEnhetId/{orgenhetId}")
+    @GetMapping("/getTilgangsEnhetId/{orgenhetId}")
     @Operation(
         description = "Henter remedy id til en orgenhet med gitt id",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<String> getRemedyEnhetId(@PathVariable String orgenhetId) {
-        return ResponseEntity.ok(orgEnhetMapper.getRemedyEnhetId(orgenhetId));
+    public ResponseEntity<String> getTilgangsenhetId(@PathVariable String orgenhetId) {
+        return ResponseEntity.ok(orgenhetService.getTilgangsenhetId(orgenhetId));
     }
 
     @GetMapping("/kanHaRessurser")
