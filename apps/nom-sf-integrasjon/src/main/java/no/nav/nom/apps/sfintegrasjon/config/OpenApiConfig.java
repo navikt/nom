@@ -24,6 +24,15 @@ public class OpenApiConfig {
             .build();
     }
 
+    @Bean
+    public GroupedOpenApi SfClientApi() {
+        return GroupedOpenApi.builder()
+            .group("SF Client API")
+            .displayName("SF Client API v1")
+            .pathsToMatch("/api/v1/sf-client/**")
+            .build();
+    }
+
     /**
      * In dev/prod: Swagger UI shows the "Authorize" button with Bearer token input.
      * All endpoints require a valid Azure AD JWT with NOM_ADMIN group membership.
