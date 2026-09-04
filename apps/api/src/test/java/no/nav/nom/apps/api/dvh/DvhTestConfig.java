@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.job.OTUtenforHierarki;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.libs.state.authorize.NomStateDelegertLederListener;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
@@ -60,6 +61,10 @@ public class DvhTestConfig {
     @Bean
     RessursStateRepository ressursStateRepository() {
         return Mockito.mock(RessursStateRepository.class, MockReset.after());
+    }
+    @Bean
+    FysiskBrukerstedService fysiskBrukerstedService() {
+        return Mockito.mock(FysiskBrukerstedService.class, MockReset.after());
     }
     @Bean
     OrgenhetService orgenhetService() {

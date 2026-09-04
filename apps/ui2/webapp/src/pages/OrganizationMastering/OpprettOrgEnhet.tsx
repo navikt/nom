@@ -211,7 +211,7 @@ function OpprettOrgEnhetForm({
     await showModal(
       <BekreftModal
         content={<OpprettOrgEnhetModalContent />}
-        heading="Bekreft navneendring på organisasjonsenhet"
+        heading="Bekreft opprettelse av organisasjonsenhet"
       />,
     ).then(() => {
       opprettOrgEnhetMutation.mutate(request);

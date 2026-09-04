@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -341,6 +342,10 @@ public class OrgEnhetLederService {
 
     public Optional<OrgEnhetLederState> getAktivLederForOrgEnhet(String orgEnhetId) {
         return orgEnhetLederStateRepository.getActiveForOrgEnhet(orgEnhetId);
+    }
+
+    public Map<String, String> getAktivLederForOrgEnhetIds(Set<String> orgEnhetIds) {
+        return orgEnhetLederStateRepository.getActiveForOrgEnhetIds(orgEnhetIds);
     }
 
     public Map<String, Map<String, OrgEnhetLederState>> getAktiveOrgEnhetLederStateMappedByNavidentAndOrgEnhetId() {

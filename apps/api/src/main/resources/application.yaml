@@ -510,7 +510,7 @@ app:
         orgtilknytning: sa352n    # Kontroll Nord avd Trondheim (sa352n)
         sektor: NAV_STATLIG
       - navident: Z990778         # Team Holmes / Snorri Hansson Engen
-        orgtilknytning: va903j    # Kontroll Øst (va903j), leder av Kontroll Øst (ky153k)
+        orgtilknytning: va903j    # Kontroll Øst (va903j), leder av Kontroll Øst (je679z)
         sektor: NAV_STATLIG
       - navident: Z990933         # Team Holmes / Snorri Hansson Engen
         orgtilknytning: ka919j    # Kontroll Nord (ka919j), leder av Kontroll Nord (hu424t)
@@ -537,7 +537,7 @@ app:
       - navident: Z993219
         orgenhet: ke793y
       - navident: Z990778
-        orgenhet: ky153k
+        orgenhet: je679z
       - navident: Z990933
         orgenhet: hu424t
 
