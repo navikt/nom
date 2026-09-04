@@ -114,6 +114,9 @@ public class RessursControllerTest extends RestTestBase {
     @MockitoBean
     FysiskBrukerstedService fysiskBrukerstedService;
 
+    @MockitoBean
+    RessurserByFysiskbrukerstedAndTilgangsenhetGenerator ressurserByFysiskbrukerstedAndTilgangsenhetGenerator;
+
     @Autowired
     TestTokensGenerator testToken;
 
@@ -1462,24 +1465,48 @@ public class RessursControllerTest extends RestTestBase {
     void test_getRessurserByFysiskbrukerstedIAktivOt() {
         var fysiskbrukerstedNr = "1234";
 
-        when(fysiskBrukerstedService.getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskbrukerstedNr)).thenReturn(List.of(
-            ressursState().toBuilder().navident("A000001").build(),
-            ressursState().toBuilder().navident("A000002").build()
+        when(ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskbrukerstedNr)).thenReturn(List.of(
+            excelResponse("A000001", fysiskbrukerstedNr),
+            excelResponse("A000002", fysiskbrukerstedNr)
         ));
 
-        var ressurser = webTestClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/ressurser/byFysiskbrukerstedIAktivOt/{fysiskbrukerstedNr}")
-                .build(fysiskbrukerstedNr)
-            )
+        var request = new RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest(fysiskbrukerstedNr, null);
+
+        var ressurser = webTestClient.post()
+            .uri("/app/ressurser/byFysiskbrukerstedIAktivOt")
             .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(request))
             .exchange()
             .expectStatus().isOk()
-            .expectBodyList(RessursState.class)
+            .expectBodyList(RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse.class)
             .returnResult().getResponseBody();
 
         assertThat(ressurser).hasSize(2);
-        assertThat(ressurser).allMatch(r -> r.personident().endsWith("*****"));
+        assertThat(ressurser).extracting(RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse::navident)
+            .containsExactly("A000001", "A000002");
+        assertThat(ressurser).allMatch(r -> Objects.equals(r.fysiskBrukerstedNummer(), fysiskbrukerstedNr));
+    }
+
+    private static RessurserByFysiskBrukerstedAndTilgangsenhetIdExcelResponse excelResponse(String navident, String fysiskbrukerstedNr) {
+        return new RessurserByFysiskBrukerstedAndTilgangsenhetIdExcelResponse(
+            navident,
+            "Fornavn",
+            null,
+            "Etternavn",
+            "orgEnhetId",
+            "orgEnhetNavn",
+            null,
+            fysiskbrukerstedNr,
+            "fysiskBrukerstedNavn",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
     }
 
     @Test

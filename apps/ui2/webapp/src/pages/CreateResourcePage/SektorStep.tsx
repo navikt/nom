@@ -12,52 +12,6 @@ import opprettRessursIconRoundedBackground from "~/resources/opprettRessursIconR
 import { OrgEnhetsType, Sektor, Tilknytningtype } from "~/types/api-models";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
-export const SektorNameMapping = {
-  [Sektor.EKSTERN]: "Ekstern",
-  [Sektor.NAV_KOMMUNAL]: "Kommunal",
-  [Sektor.NAV_STATLIG]: "Statlig",
-};
-
-export const TilknytningtypeNameMapping = {
-  [Tilknytningtype.FAST]: "Fast",
-  [Tilknytningtype.MIDLERTIDIG]: "Midlertidig",
-  [Tilknytningtype.PENSJONIST]: "Pensjonist",
-  [Tilknytningtype.LAERLING]: "Lærling",
-  [Tilknytningtype.KONSULENT]: "Konsulent",
-  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
-  [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
-  [Tilknytningtype.STUDENT]: "Student",
-  [Tilknytningtype.JOBBSPESIALIST]: "Jobbspesialist",
-  [Tilknytningtype.PRAKSISARBEID]: "Praksisarbeid § 9c",
-  [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov § 9e",
-  [Tilknytningtype.VIKAR]: "Vikar § 9b",
-  [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger § 9d",
-  [Tilknytningtype.HELFO]: "Helfo",
-  [Tilknytningtype.SKATTEETATEN]: "Skatteetaten",
-  [Tilknytningtype.RIKSREVISJONEN]: "Riksrevisjonen",
-  [Tilknytningtype.STATSFORVALTEREN]: "Statsforvalteren",
-  [Tilknytningtype.ANNET]: "Annet",
-  [Tilknytningtype.INGEN]: "Ingen",
-};
-
-export const tilknytningstyperStatlige = [
-  Tilknytningtype.FAST,
-  Tilknytningtype.MIDLERTIDIG,
-  Tilknytningtype.LAERLING,
-  Tilknytningtype.PENSJONIST,
-];
-
-export const tilknytningstyperEksterne = [
-  Tilknytningtype.KONSULENT,
-  Tilknytningtype.STUDENT,
-  Tilknytningtype.ARBEIDSTRENING,
-  Tilknytningtype.STATSFORVALTEREN,
-  Tilknytningtype.HELFO,
-  Tilknytningtype.SKATTEETATEN,
-  Tilknytningtype.RIKSREVISJONEN,
-  Tilknytningtype.ANNET,
-];
-
 export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
@@ -196,12 +150,13 @@ export function SektorStep() {
                 : tilknytningstyperStatlige
               ).map((tilknytningstype) => {
                 if (
-                  (tilknytningstype === Tilknytningtype.HELFO ||
+                  ((tilknytningstype === Tilknytningtype.HELFO ||
                     tilknytningstype === Tilknytningtype.SKATTEETATEN ||
                     tilknytningstype === Tilknytningtype.RIKSREVISJONEN ||
                     tilknytningstype === Tilknytningtype.STATSFORVALTEREN) &&
-                  !brukerJobberIDirektoratet &&
-                  !hasAdminAccess
+                    !brukerJobberIDirektoratet &&
+                    !hasAdminAccess) ||
+                  tilknytningstype === Tilknytningtype.ANNET
                 ) {
                   return;
                 }
@@ -221,9 +176,11 @@ export function SektorStep() {
                 `}
                 variant="info"
               >
-                Øvrige kategorier av medarbeidere, som lese- og sekretærhjelper
-                og frilanstolker, må foreløpig registreres via Identrutina og
-                Unit4.
+                Eksterne utbetalingsmottakere (lese- og sekretærhjelper,
+                frilanstolker, brukerutvalgsmedlemme og personer som får
+                refundert kostnader ved jobbintervju) skal ikke opprettes i NOM.
+                Eksterne utbetalingsmottakere opprettes ved å fylle ut skjemaet
+                “Etablering eksterne” i Unit4.
               </Alert>
             )}
           </>
@@ -234,3 +191,49 @@ export function SektorStep() {
     </ContainerWithHighlightedTop>
   );
 }
+
+export const SektorNameMapping = {
+  [Sektor.EKSTERN]: "Ekstern",
+  [Sektor.NAV_KOMMUNAL]: "Kommunal",
+  [Sektor.NAV_STATLIG]: "Statlig",
+};
+
+export const TilknytningtypeNameMapping = {
+  [Tilknytningtype.FAST]: "Fast",
+  [Tilknytningtype.MIDLERTIDIG]: "Midlertidig",
+  [Tilknytningtype.PENSJONIST]: "Pensjonist",
+  [Tilknytningtype.LAERLING]: "Lærling",
+  [Tilknytningtype.KONSULENT]: "Konsulent",
+  [Tilknytningtype.EKSTERN_SAMARBEIDSPARTNER]: "Ekstern samarbeidspartner",
+  [Tilknytningtype.ARBEIDSTRENING]: "Arbeidstrening",
+  [Tilknytningtype.STUDENT]: "Student",
+  [Tilknytningtype.JOBBSPESIALIST]: "Jobbspesialist",
+  [Tilknytningtype.PRAKSISARBEID]: "Praksisarbeid § 9c",
+  [Tilknytningtype.UFORUTSETT_BEHOV]: "Uforutsett behov § 9e",
+  [Tilknytningtype.VIKAR]: "Vikar § 9b",
+  [Tilknytningtype.UTDANNINGSSTILLINGER]: "Utdanningsstillinger § 9d",
+  [Tilknytningtype.HELFO]: "Helfo",
+  [Tilknytningtype.SKATTEETATEN]: "Skatteetaten",
+  [Tilknytningtype.RIKSREVISJONEN]: "Riksrevisjonen",
+  [Tilknytningtype.STATSFORVALTEREN]: "Statsforvalteren",
+  [Tilknytningtype.ANNET]: "Annet",
+  [Tilknytningtype.INGEN]: "Ingen",
+};
+
+export const tilknytningstyperStatlige = [
+  Tilknytningtype.FAST,
+  Tilknytningtype.MIDLERTIDIG,
+  Tilknytningtype.LAERLING,
+  Tilknytningtype.PENSJONIST,
+];
+
+export const tilknytningstyperEksterne = [
+  Tilknytningtype.KONSULENT,
+  Tilknytningtype.STUDENT,
+  Tilknytningtype.ARBEIDSTRENING,
+  Tilknytningtype.STATSFORVALTEREN,
+  Tilknytningtype.HELFO,
+  Tilknytningtype.SKATTEETATEN,
+  Tilknytningtype.RIKSREVISJONEN,
+  Tilknytningtype.ANNET,
+];

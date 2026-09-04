@@ -349,6 +349,32 @@ public class OrgenhetService {
             .findFirst();
     }
 
+    public List<OrgEnhetState> findAllWithTilgangsenhetId(String tilgangsenhetId) {
+        return getAktiveEnheterIOrganisasjonen().stream()
+            .filter(iOrgenhet -> Objects.equals(iOrgenhet.getTilgangsenhetId(), tilgangsenhetId))
+            .map(orgEnhet -> new OrgEnhetState(
+                orgEnhet.getFid(),
+                orgEnhet.getId(),
+                orgEnhet.getNavn(),
+                orgEnhet.getGyldigFom(),
+                orgEnhet.getGyldigTom(),
+                orgEnhet.getOverordnetOrgEnhetFid(),
+                null,
+                orgEnhet.getOrgEnhetsType(),
+                orgEnhet.getNomNivaa(),
+                orgEnhet.getUniqueAgressoId(),
+                orgEnhet.getAgressoId(),
+                orgEnhet.getOrgNiv(),
+                orgEnhet.getAgressoOrgenhetType(),
+                orgEnhet.getTilgangsenhetId()
+            ))
+            .toList();
+    }
+  
+    public String getTilgangsenhetId(String orgEnhetId) {
+        return getById(orgEnhetId).map(IOrgenhet::getTilgangsenhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+    }
+
 
     @KafkaListener(
         id = "nomApi_organiseringState_listener_for_tilgangsenhet_resolve",

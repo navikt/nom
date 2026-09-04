@@ -509,6 +509,12 @@ app:
       - navident: Z990474         # Team Holmes / Snorri Hansson Engen
         orgtilknytning: sa352n    # Kontroll Nord avd Trondheim (sa352n)
         sektor: NAV_STATLIG
+      - navident: Z990778         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: va903j    # Kontroll Øst (va903j), leder av Kontroll Øst (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z990933         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: ka919j    # Kontroll Nord (ka919j), leder av Kontroll Nord (hu424t)
+        sektor: NAV_STATLIG
 
       - navident: Z993795         # Funksjonell Brukerstøtte / Lina Mohammad
         orgtilknytning: by959t    # Arbeid og ytelser Sarpsborg (by959t)
@@ -530,6 +536,10 @@ app:
         orgenhet: na494k
       - navident: Z993219
         orgenhet: ke793y
+      - navident: Z990778
+        orgenhet: je679z
+      - navident: Z990933
+        orgenhet: hu424t
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default

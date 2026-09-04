@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.common.speiling.SpeilingService;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.MasseflyttOrgtilknytningerService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.DuplicateFysiskBrukersted;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.FysiskBrukerstedNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOppdaterOrgtilknytningerForRessursRequestException;
@@ -86,8 +87,9 @@ public class OrgtilknytningRestService {
     private final MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService;
     private final FysiskBrukerstedService fysiskBrukerstedService;
     private final SpeilingService speilingService;
+    private final OrgtilknytningService orgtilknytningService;
 
-    private String vikafossenOrgEnhetId;
+    private final String vikafossenOrgEnhetId;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository,
@@ -99,7 +101,8 @@ public class OrgtilknytningRestService {
         MasseflyttOrgtilknytningerService masseflyttOrgtilknytningerService,
         FysiskBrukerstedService fysiskBrukerstedService,
         AppProperties appProperties,
-        SpeilingService speilingService
+        SpeilingService speilingService,
+        OrgtilknytningService orgtilknytningService
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
@@ -112,6 +115,7 @@ public class OrgtilknytningRestService {
 
         this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
         this.speilingService = speilingService;
+        this.orgtilknytningService = orgtilknytningService;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(String navident) {
@@ -639,13 +643,6 @@ public class OrgtilknytningRestService {
             requireNonNullElse(endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(), ""));
     }
 
-    private boolean optionalFysiskBrukerstederAreEqual(Set<String> optionalFysiskBrukersteder, List<String> fysiskeBrukersteder) {
-        return new HashSet<>(requireNonNullElse(
-            optionalFysiskBrukersteder,
-            List.of()
-        )).equals(new HashSet<>(requireNonNullElse(fysiskeBrukersteder, List.of())));
-    }
-
     private static boolean optionalFysiskBrukerstederAreEqual(
         EndreOrgtilknytningRequest endreOrgtilknytningRequest,
         OrgtilknytningState orgtilknytningStateBeforeChanges
@@ -1013,15 +1010,7 @@ public class OrgtilknytningRestService {
     }
 
     public List<OrgtilknytningState> getActiveOrgtilknytningerByFysiskBrukerstedNr(String fysiskBrukerstedNr) {
-        if (isNull(fysiskBrukerstedNr) || !fysiskBrukerstedService.fysiskBrukerstedExists(fysiskBrukerstedNr)) {
-            throw FysiskBrukerstedNotFoundException.notFound(fysiskBrukerstedNr);
-        }
-
-        return orgtilknytningStateRepository.getAll().stream()
-            .filter(orgtilknytningState -> isActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
-            .filter(orgtilknytningState -> Objects.equals(fysiskBrukerstedNr, orgtilknytningState.primaryFysiskBrukerstedNummer())
-                || (nonNull(orgtilknytningState.additionalFysiskeBrukerstederNummer()) && orgtilknytningState.additionalFysiskeBrukerstederNummer().contains(fysiskBrukerstedNr)))
-            .toList();
+        return orgtilknytningService.getActiveOrgtilknytningerByFysiskBrukerstedNr(fysiskBrukerstedNr);
     }
 
     private Set<String> orgEnhetIderForOterUnderEndring(OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest) {
