@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrgEnhetLederStateRepository {
 
@@ -22,6 +23,8 @@ public interface OrgEnhetLederStateRepository {
     List<OrgEnhetLederState> findAllFutureByOrgEnhetId(String orgEnhetId);
 
     Optional<OrgEnhetLederState> getActiveForOrgEnhet(String orgEnhetId);
+
+    Map<String, String> getActiveForOrgEnhetIds(Set<String> orgEnhetIds);
 
     boolean hasActiveInPeriodByOrgEnhetId(String orgEnhetId, LocalDate startdato, LocalDate sluttdato);
 

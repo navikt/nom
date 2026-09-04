@@ -4,7 +4,9 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface OrgtilknytningStateRepository {
     enum DOLIs {
@@ -29,8 +31,6 @@ public interface OrgtilknytningStateRepository {
 
     List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter);
 
-    List<String> getAktiveNavidenterPaaEnheter(List<String> orgEnheter, DOLIs dolIs);
-
     List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet);
 
     List<String> getAktiveEllerFremtidigeNavidenterPaaEnhet(String orgenhet, DOLIs dolIs);
@@ -39,6 +39,7 @@ public interface OrgtilknytningStateRepository {
 
     List<OrgtilknytningState> getOrgtilknytningerPaaEnhet(String orgenhet, DOLIs dolIs);
 
+    Map<String, List<OrgtilknytningState>> getOrgtilknytningerPaaEnheter(Set<String> orgenheter, DOLIs dolIs);
 
     int count();
 

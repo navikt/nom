@@ -5,9 +5,11 @@ import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
@@ -61,6 +63,14 @@ public class OrgEnhetLederStateRepositoryImpl implements OrgEnhetLederStateRepos
         return orgEnhetLederByOrgEnhetIdMap.getOrDefault(orgEnhetId, Collections.emptyMap()).values().stream()
             .filter(orgEnhetLederState -> isPeriodActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
             .findFirst();
+    }
+
+    @Override
+    public Map<String, String> getActiveForOrgEnhetIds(Set<String> orgEnhetIds) {
+        Map<String, String> result = new HashMap<>();
+
+        orgEnhetIds.forEach(orgEnhetId -> result.put(orgEnhetId, getActiveForOrgEnhet(orgEnhetId).map(OrgEnhetLederState::navident).orElse("N/A")));
+        return result;
     }
 
     @Override

@@ -61,6 +61,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.JsonNode;
 
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,8 +113,9 @@ public class RessursRestService {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgEnhetLederService orgEnhetLederService;
     private final RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService;
+    private final RessurserByFysiskbrukerstedAndTilgangsenhetGenerator ressurserByFysiskbrukerstedAndTilgangsenhetGenerator;
 
-    private String vikafossenOrgEnhetId;
+    private final String vikafossenOrgEnhetId;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -134,7 +137,8 @@ public class RessursRestService {
         OrgtilknytningService orgtilknytningService,
         OrgEnhetLederService orgEnhetLederService,
         RessursBytterFysiskBrukerstedTilFyrstikkaleen1EmailService ressursFyrstikkaleen1EmailService,
-        AppProperties appProperties
+        AppProperties appProperties,
+        RessurserByFysiskbrukerstedAndTilgangsenhetGenerator ressurserByFysiskbrukerstedAndTilgangsenhetGenerator
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
@@ -157,6 +161,7 @@ public class RessursRestService {
         this.ressursFyrstikkaleen1EmailService = ressursFyrstikkaleen1EmailService;
 
         this.vikafossenOrgEnhetId = appProperties.orgenhet().vikafossenId();
+        this.ressurserByFysiskbrukerstedAndTilgangsenhetGenerator = ressurserByFysiskbrukerstedAndTilgangsenhetGenerator;
     }
 
     public List<RessursState> findRessurser(RessursFilter ressursFilter) {
@@ -837,15 +842,49 @@ public class RessursRestService {
             .toList();
     }
 
-    public List<RessursState> getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(String fysiskBrukerstedNr) {
-        var ressursStates = fysiskBrukerstedService.getAlleRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr);
+    public List<RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse> getRessurserFysiskBrukerstedTilgangsenhetId(
+        RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest
+    ) {
+        if (isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId())) {
+            return ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(
+                    ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr()).stream()
+                .map(this::createResponse)
+                .toList();
+        }
 
-        return ressursStates.stream()
-            .map(ressursState -> ressursState.toBuilder()
-                .personident(ressursState.personident().replaceFirst(".{5}$", "*****"))
-                .build()
-            )
+        if (isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr())) {
+            return ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedTilgangsEnhetIdIAktivOrgtilknytning(
+                    ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId()).stream()
+                .map(this::createResponse)
+                .toList();
+        }
+
+        return ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedFysiskBrukerstedOgTilgangsEnhetIAktivOrgtilknytning(
+                ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest).stream()
+            .map(this::createResponse)
             .toList();
+    }
+
+    public void exportRessurserFysiskBrukerstedTilgangsenhetId(
+        HttpServletResponse response,
+        RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest
+    ) throws IOException {
+        String fysiskBrukerstedNr = ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr();
+        String tilgangsenhetId = ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId();
+        if (isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId())) {
+            var ressurser = ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr());
+            ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.generate(response, ressurser, fysiskBrukerstedNr, null);
+            return;
+        }
+
+        if (isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr())) {
+            var ressurser = ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedTilgangsEnhetIdIAktivOrgtilknytning(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId());
+            ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.generate(response, ressurser, null, tilgangsenhetId);
+            return;
+        }
+
+        var ressurser = ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.getRessurserMedFysiskBrukerstedOgTilgangsEnhetIAktivOrgtilknytning(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest);
+        ressurserByFysiskbrukerstedAndTilgangsenhetGenerator.generate(response, ressurser, fysiskBrukerstedNr, tilgangsenhetId);
     }
 
     public List<RessursState> getRessurserPaaEnhetMedFysiskBrukersted(String orgenhetId, String fysiskBrukerstedNr) {
@@ -948,5 +987,17 @@ public class RessursRestService {
             case VIKAFOSSEN -> SecurityUtil.loggedInUserHasAnyAccessScope(NOM_WRITE_VIKAFOSSEN); // NOM admin skal fratas denne rollen etterhvert
             default -> authResolver.kanRedigereRessurs(navident);
         };
+    }
+
+    public RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse createResponse(RessurserByFysiskBrukerstedAndTilgangsenhetIdExcelResponse response) {
+        return new RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse(
+            response.navident(),
+            new Visningsnavn(response.fornavn(), Optional.ofNullable(response.mellomnavn()), response.etternavn()),
+            response.orgEnhetId(),
+            response.orgEnhetNavn(),
+            response.tilgangsenhetId(),
+            response.fysiskBrukerstedNr(),
+            response.fysiskBrukerstedNavn()
+        );
     }
 }
