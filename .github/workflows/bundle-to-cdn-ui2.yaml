@@ -35,7 +35,7 @@ jobs:
         run: zip -r dist.zip ./dist
 
       - name: Upload static files to CDN
-        uses: nais/deploy/actions/cdn-upload/v2@849e900e3cfa7faf7ad1532bb3a3e6499c932199 # ratchet:nais/deploy/actions/cdn-upload/v2@master
+        uses: nais/deploy/actions/cdn-upload/v2@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/cdn-upload/v2@master
         with:
           team: org
           source: ./apps/ui2/webapp/dist.zip
