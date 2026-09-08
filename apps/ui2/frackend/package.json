@@ -13,7 +13,7 @@
   "author": "NAV",
   "license": "MIT",
   "dependencies": {
-    "@navikt/oasis": "4.1.4",
+    "@navikt/oasis": "4.2.2",
     "@navikt/vite-mode": "0.16.1",
     "adm-zip": "0.6.0",
     "cookie-parser": "1.4.7",
@@ -30,7 +30,7 @@
     "@types/cookie-parser": "1.4.10",
     "@types/node-jose": "1.1.13",
     "@types/uuid": "11.0.0",
-    "eslint": "10.9.1",
+    "eslint": "10.10.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import-x": "4.17.1",
     "eslint-plugin-prettier": "5.5.6",
