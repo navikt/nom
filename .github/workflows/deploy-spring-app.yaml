@@ -152,7 +152,7 @@ jobs:
           team: org
       - name: Generate SBOM, attest and sign image
         id: attest-sign
-        uses: nais/attest-sign@65d1aaa8b7dc5913ae02b80f16f7c1cf9bad6491 # ratchet:nais/attest-sign@v2.0.17
+        uses: nais/attest-sign@c778867caf15ed06f2893afd5723898560b2dcc9 # ratchet:nais/attest-sign@v2.0.18
         with:
           image_ref: ${{needs.build-app-docker.outputs.image}}
 
