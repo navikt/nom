@@ -94,3 +94,4 @@ AGENTS.md
 /.github/.nav-pilot-state.json
 /.github/copilot-instructions.md
 /.cplt.toml
+/.github/copilot-review-instructions.md

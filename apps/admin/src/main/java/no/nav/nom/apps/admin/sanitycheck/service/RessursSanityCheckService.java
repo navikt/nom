@@ -283,9 +283,8 @@ public class RessursSanityCheckService {
 
        var ressursOrgtilknytningMap = orgtilknytningStateRepository.findByNavidentIn(alleRessurserSomErAktive.keySet().stream().toList()).stream().collect(Collectors.groupingBy(OrgtilknytningState::navident));
 
-       var alleRessurserUtenOrgtilknytninger = ressursOrgtilknytningMap.entrySet().stream()
-           .filter(ressursOt -> ressursOt.getValue().isEmpty())
-           .map(Map.Entry::getKey);
+       var alleRessurserUtenOrgtilknytninger = alleRessurserSomErAktive.keySet().stream()
+           .filter(navident -> !ressursOrgtilknytningMap.containsKey(navident));
 
        var alleRessursMedOrgtilknytningerSomHarOTMenIkkeAktiv = ressursOrgtilknytningMap.entrySet().stream()
            .filter(ressursOt -> !ressursOt.getValue().isEmpty())
