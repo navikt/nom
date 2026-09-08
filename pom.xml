@@ -50,7 +50,7 @@
         <commons-compress.version>1.28.0</commons-compress.version>
         <postgresql.version>42.7.13</postgresql.version>
         <microsoft-graph.version>6.69.0</microsoft-graph.version>
-        <azure-identity.version>1.18.5</azure-identity.version>
+        <azure-identity.version>1.18.6</azure-identity.version>
         <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>5.5.1</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
