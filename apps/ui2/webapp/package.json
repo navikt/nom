@@ -60,7 +60,7 @@
     "eslint-plugin-import-x": "4.17.1",
     "eslint-plugin-lodash": "8.0.0",
     "eslint-plugin-prettier": "5.5.6",
-    "eslint-plugin-react-jsx": "5.18.7",
+    "eslint-plugin-react-jsx": "5.18.8",
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-unicorn": "74.0.0",
     "graphql": "17.0.2",
