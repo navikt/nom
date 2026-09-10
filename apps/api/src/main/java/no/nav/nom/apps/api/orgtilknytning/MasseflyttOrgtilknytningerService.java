@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.email.OrgtilknytningEndretEmailSer
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytningCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -177,8 +178,9 @@ public class MasseflyttOrgtilknytningerService {
                     ot.sektor(),
                     ot.orgtilknytningType(),
                     ot.erDagligOppfolging(),
-                    inputMetadata,
-                    ventPaaState
+                    ot.primaryFysiskBrukerstedNummer(),
+                    ot.additionalFysiskeBrukerstederNummer(),
+                    inputMetadata, ventPaaState
                 );
             } else {
                 // Avslutt eksisterende OT på dagen før flyttedato, og lage ny på destinasjon fra flyttedato
@@ -200,8 +202,9 @@ public class MasseflyttOrgtilknytningerService {
                     ot.sektor(),
                     ot.orgtilknytningType(),
                     ot.erDagligOppfolging(),
-                    inputMetadata,
-                    ventPaaState
+                    ot.primaryFysiskBrukerstedNummer(),
+                    ot.additionalFysiskeBrukerstederNummer(),
+                    inputMetadata, ventPaaState
                 );
             }
 
@@ -225,6 +228,8 @@ public class MasseflyttOrgtilknytningerService {
         Sektor sektor,
         Tilknytningtype tilknytningType,
         boolean isDOL,
+        String primaryFysiskBrukerstedNummer,
+        List<String> additionalFysiskeBrukerstederNummer,
         InputMetadata inputMetadata,
         boolean ventPaaState
     ) {
@@ -274,6 +279,18 @@ public class MasseflyttOrgtilknytningerService {
                 inputMetadata
             ));
         }
+
+        orgtilknytningCommandService.endreFysiskeBrukersted(
+            new EndreFysiskeBrukerstederCommand(
+                newFid,
+                navident,
+                nyOrgenhetId,
+                primaryFysiskBrukerstedNummer,
+                additionalFysiskeBrukerstederNummer,
+                beholdTilganger ? originalFid : null,
+                inputMetadata
+            )
+        );
 
         // NBNB! Hvis det legges til flere eventer i denne metoden, pass på å ta med evt masseflyttetFraFid
 
