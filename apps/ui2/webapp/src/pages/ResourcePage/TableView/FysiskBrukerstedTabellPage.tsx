@@ -32,8 +32,11 @@ import {
   TilgangsenhetSelect,
 } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import type { RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import type {
+  FysiskBrukersted,
+  RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+} from "~/types/api-models";
+import { formatDisplayFysiskBrukersted, formatVisningsnavn } from "~/utils";
 
 export function FysiskBrukerstedTabellPage() {
   const hasAdminAccess = useHasAdminAccess();
@@ -75,6 +78,7 @@ function FysiskBrukerstedTabell() {
     const valgtBrukersted = fysiskeBrukersteder.find(
       (brukersted) => brukersted.nr === fysiskBrukerstedFilter,
     );
+
     const valgtTilgangsenhet = alleTilgangsenheter.find(
       (tilgangsenhet) => tilgangsenhet.enhetId === tilgangsenhetFilter,
     );
@@ -97,11 +101,13 @@ function FysiskBrukerstedTabell() {
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
+
       await downloadExcelRessurserForFysiskBrukerstedAlle(
         {
           fysiskBrukerstedNr: fysiskBrukerstedFilter || undefined,
           tilgangsenhetId: tilgangsenhetFilter || undefined,
         },
+
         eksportFilnavn(),
       );
     } finally {
@@ -373,7 +379,7 @@ function FysiskBrukerstedTabellInner({
                 <VStack gap="1">
                   {rad.fysiskeBrukersteder.map((brukersted) => (
                     <BodyShort key={brukersted.nummer}>
-                      {`${brukersted.navn} (${brukersted.nummer})`}
+                      {formatTableDisplayFysiskBrukersted(brukersted)}
                     </BodyShort>
                   ))}
                 </VStack>
@@ -399,6 +405,18 @@ function FysiskBrukerstedTabellInner({
       )}
     </VStack>
   );
+}
+
+function formatTableDisplayFysiskBrukersted(brukersted: {
+  nummer: string;
+  navn: string;
+}) {
+  const tempFysiskBrukersted: FysiskBrukersted = {
+    navn: brukersted.navn,
+    nr: brukersted.nummer,
+  };
+
+  return formatDisplayFysiskBrukersted(tempFysiskBrukersted);
 }
 
 type FysiskBrukerstedTabellRow = {
