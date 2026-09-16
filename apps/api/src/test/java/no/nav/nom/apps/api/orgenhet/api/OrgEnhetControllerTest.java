@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.api;
 
 import no.nav.nom.apps.api.TestTokensGenerator;
+import no.nav.nom.apps.api.clients.koststed.KostnadsstedMappingResponseDTO;
+import no.nav.nom.apps.api.clients.koststed.OrgEnhetKostnadsstedMappingClient;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -84,6 +86,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
     private OrganiseringEventCommandService organiseringEventCommandService;
     @MockitoBean
     private OrgEnhetLederCommandService orgEnhetLederCommandService;
+    @MockitoBean
+    private OrgEnhetKostnadsstedMappingClient orgEnhetKostnadsstedMappingClient;
 
 
     @BeforeEach
@@ -199,6 +203,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     void should_return_200_and_response_when_creating_orgenhet() throws ExecutionException, InterruptedException, TimeoutException {
         var overordnetId = "orgEnhet123";
         var lederNavident = "X123456";
+        var kostnadsstedId = "KS1234";
         var opprettOrgEnhetRequest = OpprettOrgEnhetRequest.builder()
             .overordnetOrgEnhetId(overordnetId)
             .navn("Nav ny orgEnhet")
@@ -206,6 +211,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .lederRessursNavident(lederNavident)
             .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .kostnadsstedId(kostnadsstedId)
             .build();
 
         var overordnetOrgEnhet = map(orgEnhetState());
@@ -226,6 +232,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         when(orgenhetService.getById(overordnetId)).thenReturn(Optional.of(overordnetOrgEnhet));
 
+        when(orgenhetService.getById(orgEnhetState.id())).thenReturn(Optional.of(map(orgEnhetState)));
+
         when(ressursService.findByNavident(lederNavident)).thenReturn(ressursState);
 
         when(orgenhetService.activeOrFutureWithEqualName(opprettOrgEnhetRequest.navn())).thenReturn(false);
@@ -233,6 +241,15 @@ public class OrgEnhetControllerTest extends RestTestBase {
         when(orgEnhetCommandService.opprettOrgEnhetSync(any(OpprettOrgEnhet.class))).thenReturn(orgEnhetState);
 
         when(orgEnhetLederCommandService.opprettOrgEnhetLeder(any(OpprettOrgEnhetLeder.class))).thenReturn("LEDERFID_1");
+
+        when(orgEnhetKostnadsstedMappingClient.opprettKostnadsstedMapping(
+            eq(orgEnhetState.id()), eq(kostnadsstedId), any(), any()
+        )).thenReturn(new KostnadsstedMappingResponseDTO(
+            kostnadsstedId,
+            orgEnhetState.id(),
+            orgEnhetState.gyldigFom(),
+            orgEnhetState.gyldigTom()
+        ));
 
         var response = webTestClient.post()
             .uri("/app/orgenheter/opprett")
