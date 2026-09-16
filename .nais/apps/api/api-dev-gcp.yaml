@@ -354,6 +354,9 @@ spec:
         - application: pensjon-deployment-audit
           namespace: pensjon-revisjon
           cluster: dev-gcp
+        - application: nom-pusher
+          namespace: oksty
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
