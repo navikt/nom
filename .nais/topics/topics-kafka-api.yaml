@@ -44,8 +44,8 @@ spec:
     - team: tilgangsmaskin
       application: populasjonstilgangskontroll
       access: read
-    - application: nom-pusher
-      namespace: oksty
+    - team: oksty
+      application: nom-pusher
       access: read
 
 ---
@@ -78,9 +78,10 @@ spec:
     - team: org
       application: nom-admin
       access: read     
-    - application: nom-pusher
-      namespace: oksty
+    - team: oksty
+      application: nom-pusher
       access: read
+
 
 ---
 
