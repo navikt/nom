@@ -12,5 +12,6 @@ public record SfProperties(
         String clientId,
         String privateKey,
         String tenant,
-        String userId
+        String userId,
+        String cpiApiUrl
 ) {}
