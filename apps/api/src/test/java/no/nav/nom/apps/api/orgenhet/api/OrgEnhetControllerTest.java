@@ -297,6 +297,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .lederRessursNavident(lederNavident)
             .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .kostnadsstedId("KS1234")
             .build();
 
         webTestClient.post()
@@ -318,6 +319,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .lederRessursNavident(lederNavident)
             .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
+            .kostnadsstedId("KS1234")
             .build();
 
         var overordnetOrgEnhet = map(orgEnhetState());
