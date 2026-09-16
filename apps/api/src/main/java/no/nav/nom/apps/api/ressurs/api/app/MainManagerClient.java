@@ -80,22 +80,10 @@ public class MainManagerClient {
                 .toEntity(MainManagerSitesResponse.class)
                 .block();
 
-            var stringResponse = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/api/v1/sites")
-                    .build()
-                )
-                .headers(headers -> headers.setBearerAuth(token))
-                .retrieve()
-                .toEntity(String.class)
-                .block();
-
             if (response == null || response.getBody() == null || response.getBody().items() == null) {
                 log.error("Fikk ingen sites fra MainManager");
                 return List.of();
             }
-
-            log.info("Hentet sites fra MainManager {}", stringResponse.getBody());
 
             return response.getBody().items().stream()
                 .flatMap(item -> Arrays.stream(
