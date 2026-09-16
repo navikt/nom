@@ -72,7 +72,7 @@ public class MainManagerClient {
             var token = getToken();
             var response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                    .path("/api/v2/sites")
+                    .path("/api/v1/sites")
                     .build()
                 )
                 .headers(headers -> headers.setBearerAuth(token))
