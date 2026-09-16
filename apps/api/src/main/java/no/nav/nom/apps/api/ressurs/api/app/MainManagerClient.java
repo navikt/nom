@@ -85,6 +85,8 @@ public class MainManagerClient {
                 return List.of();
             }
 
+            log.info("Hentet sites fra MainManager {}", response.getBody().items());
+
             return response.getBody().items().stream()
                 .flatMap(item -> Arrays.stream(
                         isNull(item.identification2()) ? new String[0] : item.identification2.split(","))
