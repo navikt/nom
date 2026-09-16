@@ -348,7 +348,7 @@ spec:
         - application: sokos-up-kontoregister-api
           namespace: okonomi
           cluster: dev-gcp
-        - application: eien-tilganger-poc
+        - application: eien-poc
           namespace: eien
           cluster: dev-gcp
         - application: pensjon-deployment-audit
