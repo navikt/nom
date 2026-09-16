@@ -99,4 +99,6 @@ spec:
           cluster: prod-gcp
       external:
         - host: org-unleash-api.nav.cloud.nais.io
-        - host: api55.sapsf.eu
+        - host: api55.sapsf.eu # SAP SF API server
+        - host: cloud-platform-integration-test-02d6jg6h.authentication.eu20.hana.ondemand.com # CPI Oauth server
+        - host: cloud-platform-integration-test-02d6jg6h.it-cpi050-rt.cfapps.eu20-002.hana.ondemand.com # Zalaris SF CPI endepunkt server
