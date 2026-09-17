@@ -609,7 +609,7 @@ app:
         client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
         scopes: ["TEAMCAT"]
       fullmakt:
-        client-id: "mangler foreløpig i prod"
+        client-id: "97a53cb7-347b-49c3-956d-a4c051a72ba0"
         scopes: ["FULLMAKT"]
       repr-fullmakt:
         client-id: "4546fbba-b729-469c-ac49-cc208643b745"
