@@ -120,6 +120,7 @@ spring:
             provider: sap-cpi
             client-id:  ${SF_CPI_CLIENT_ID:sf-cpi-client-id}
             client-secret:  ${SF_CPI_CLIENT_SECRET:sf-cpi-client-secret}
+            client-authentication-method: client_secret_post
             authorization-grant-type: client_credentials
         provider:
           azure:
