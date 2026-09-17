@@ -13,6 +13,7 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SfCpiClient;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -81,5 +82,20 @@ public class SfCpiClientController {
                       """;
         }
         return sfCpiClient.sendOrgenhetPayload(payload);
+    }
+
+    @Value("${SF_CPI_CLIENT_ID:missing}")
+    private String cpiClientId;
+
+    @Value("${SF_CPI_CLIENT_SECRET:missing}")
+    private String cpiClientSecret;
+
+    @GetMapping("/giveMeDaMoney")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "valider SF CPI creds"
+    )
+    public ResponseEntity<String> giveMeDaMoney() {
+        return  ResponseEntity.ok("%s/%s".formatted(cpiClientId, cpiClientSecret));
     }
 }
