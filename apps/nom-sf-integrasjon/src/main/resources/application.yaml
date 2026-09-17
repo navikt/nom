@@ -121,7 +121,6 @@ spring:
             client-id:  ${SF_CPI_CLIENT_ID:sf-cpi-client-id}
             client-secret:  ${SF_CPI_CLIENT_SECRET:sf-cpi-client-secret}
             authorization-grant-type: client_credentials
-            client-authentication-method: client_secret_post
         provider:
           azure:
             issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}

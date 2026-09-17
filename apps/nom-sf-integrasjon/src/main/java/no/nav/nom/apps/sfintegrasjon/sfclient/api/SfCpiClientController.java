@@ -83,19 +83,4 @@ public class SfCpiClientController {
         }
         return sfCpiClient.sendOrgenhetPayload(payload);
     }
-
-    @Value("${SF_CPI_CLIENT_ID:missing}")
-    private String cpiClientId;
-
-    @Value("${SF_CPI_CLIENT_SECRET:missing}")
-    private String cpiClientSecret;
-
-    @GetMapping("/giveMeDaMoney")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @Operation(
-        summary = "valider SF CPI creds"
-    )
-    public ResponseEntity<String> giveMeDaMoney() {
-        return  ResponseEntity.ok("%s/%s".formatted(cpiClientId, cpiClientSecret));
-    }
 }
