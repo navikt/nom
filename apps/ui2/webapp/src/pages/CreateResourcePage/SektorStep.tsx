@@ -16,11 +16,12 @@ export function SektorStep() {
   const { sektor, tilknytningtype } = useSearch({
     from: "/ressurs/create/$step",
   });
+
+  const hasAdminAccess = useHasAdminAccess();
+
   const navident = useGetSession().data?.navident;
 
   const navigate = useNavigate();
-
-  const hasAdminAccess = useHasAdminAccess();
 
   // TODO: Forbedre logikk; sjekke om navident har redigeringstilgang til enhet i direktoratet
   const dinOrgenhetId = useQuery({

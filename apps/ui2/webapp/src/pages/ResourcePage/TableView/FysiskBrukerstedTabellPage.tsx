@@ -32,8 +32,11 @@ import {
   TilgangsenhetSelect,
 } from "~/components/select/FysiskBrukerstedSelect";
 import { useTableSort } from "~/hooks/useTableSort";
-import type { RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import type {
+  FysiskBrukersted,
+  RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+} from "~/types/api-models";
+import { formatDisplayFysiskBrukersted, formatVisningsnavn } from "~/utils";
 
 export function FysiskBrukerstedTabellPage() {
   const hasAdminAccess = useHasAdminAccess();
@@ -75,6 +78,7 @@ function FysiskBrukerstedTabell() {
     const valgtBrukersted = fysiskeBrukersteder.find(
       (brukersted) => brukersted.nr === fysiskBrukerstedFilter,
     );
+
     const valgtTilgangsenhet = alleTilgangsenheter.find(
       (tilgangsenhet) => tilgangsenhet.enhetId === tilgangsenhetFilter,
     );
@@ -97,11 +101,13 @@ function FysiskBrukerstedTabell() {
   const handleDownloadExcel = async () => {
     try {
       setIsDownloading(true);
+
       await downloadExcelRessurserForFysiskBrukerstedAlle(
         {
           fysiskBrukerstedNr: fysiskBrukerstedFilter || undefined,
           tilgangsenhetId: tilgangsenhetFilter || undefined,
         },
+
         eksportFilnavn(),
       );
     } finally {
@@ -115,18 +121,17 @@ function FysiskBrukerstedTabell() {
 
   return (
     <VStack gap="6">
-      <HStack
+      <div
         css={css`
-          margin: auto;
-          width: 100%;
-          max-width: 1008px;
+          display: grid;
+          grid-template-columns: 1fr minmax(0, 1008px) 1fr;
+          gap: var(--a-spacing-4);
+          align-items: end;
         `}
-        align="end"
-        gap="4"
       >
         <VStack
           css={css`
-            flex: 1;
+            grid-column: 2;
             padding: var(--a-spacing-4) var(--a-spacing-6);
             border-radius: var(--a-border-radius-large);
             background-color: #deecef;
@@ -170,6 +175,11 @@ function FysiskBrukerstedTabell() {
         </VStack>
 
         <Button
+          css={css`
+            grid-column: 3;
+            justify-self: end;
+          `}
+
           disabled={!fysiskBrukerstedFilter && !tilgangsenhetFilter}
           icon={<FileExcelIcon aria-hidden />}
           loading={isDownloading}
@@ -178,7 +188,7 @@ function FysiskBrukerstedTabell() {
         >
           Eksportér til Excel
         </Button>
-      </HStack>
+      </div>
 
       {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
         <FysiskBrukerstedTabellInner
@@ -373,7 +383,7 @@ function FysiskBrukerstedTabellInner({
                 <VStack gap="1">
                   {rad.fysiskeBrukersteder.map((brukersted) => (
                     <BodyShort key={brukersted.nummer}>
-                      {`${brukersted.navn} (${brukersted.nummer})`}
+                      {formatTableDisplayFysiskBrukersted(brukersted)}
                     </BodyShort>
                   ))}
                 </VStack>
@@ -399,6 +409,18 @@ function FysiskBrukerstedTabellInner({
       )}
     </VStack>
   );
+}
+
+function formatTableDisplayFysiskBrukersted(brukersted: {
+  nummer: string;
+  navn: string;
+}) {
+  const tempFysiskBrukersted: FysiskBrukersted = {
+    navn: brukersted.navn,
+    nr: brukersted.nummer,
+  };
+
+  return formatDisplayFysiskBrukersted(tempFysiskBrukersted);
 }
 
 type FysiskBrukerstedTabellRow = {

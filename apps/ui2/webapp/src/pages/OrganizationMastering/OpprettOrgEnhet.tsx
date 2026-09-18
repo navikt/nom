@@ -19,7 +19,11 @@ import React, { useState } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
-import { getOrgEnhet, opprettOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  getAlleTilgangsenheter,
+  getOrgEnhet,
+  opprettOrgEnhet,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
@@ -31,6 +35,7 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
@@ -245,7 +250,7 @@ function OpprettOrgEnhetForm({
 
             <Select
               css={css`
-                width: fit-content;
+                width: 50%;
               `}
               {...methods.register("orgEnhetsType")}
               error={methods.formState.errors.orgEnhetsType?.message}
@@ -261,14 +266,7 @@ function OpprettOrgEnhetForm({
                 ))}
             </Select>
 
-            <TextField
-              css={css`
-                width: 20%;
-              `}
-              {...methods.register("tilgangsenhetId")}
-              error={methods.formState.errors.tilgangsenhetId?.message}
-              label="Tilgangsenhet"
-            />
+            <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
           </VStack>
 
           <div
@@ -320,6 +318,35 @@ function FormDateWrapper({ name }: { name: string }) {
         label="Dato"
       />
     </DatePicker>
+  );
+}
+
+function FormTilgangsenhetSelectWrapper({ name }: { name: string }) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  const alleTilgangsenheterQuery = useQuery({
+    queryKey: getAlleTilgangsenheter.queryKey(),
+    queryFn: () => getAlleTilgangsenheter.queryFn(),
+  });
+
+  const alleTilgangsenheter = alleTilgangsenheterQuery.data ?? [];
+
+  return (
+    <div
+      css={css`
+        width: 50%;
+      `}
+    >
+      <TilgangsenhetSelect
+        error={fieldState.error}
+        label="Tilgangsenhet"
+        tilgangsenheter={alleTilgangsenheter}
+        value={field.value}
+        onChange={field.onChange}
+      />
+    </div>
   );
 }
 
