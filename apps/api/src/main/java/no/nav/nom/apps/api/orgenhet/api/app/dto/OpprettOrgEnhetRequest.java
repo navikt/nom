@@ -21,5 +21,7 @@ public record OpprettOrgEnhetRequest(
     @NotBlank(message = "Organisasjonsenheten må tilhøre en RemedyEnhet")
     @Schema(example = "1234") String tilgangsenhetId,
     @NotNull(message = "OrgEnhet må ha en OrgEnhetsType satt")
-    @Schema(example = "DIREKTORAT") OrgEnhetsType orgEnhetsType
+    @Schema(example = "DIREKTORAT") OrgEnhetsType orgEnhetsType,
+    @NotBlank(message = "kostnadsstedId må ha navn satt")
+    @Schema(example = "123456") String kostnadsstedId
 ) {}

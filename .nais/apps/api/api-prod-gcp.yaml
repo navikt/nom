@@ -282,6 +282,12 @@ spec:
         - application: puzzel-widgets-api-db
           namespace: navdig
           cluster: prod-gcp
+        - application: skjermd
+          namespace: navdig
+          cluster: dev-gcp
+        - application: skjermd
+          namespace: navdig
+          cluster: prod-gcp
         - application: jira-data-manager-sync
           namespace: team-service-management
           cluster: prod-gcp

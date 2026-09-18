@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = SfClientController.class, excludeAutoConfiguration = OAuth2ClientAutoConfiguration.class)
+@WebMvcTest(controllers = SfOdataClientController.class, excludeAutoConfiguration = OAuth2ClientAutoConfiguration.class)
 @Import(SecurityConfig.class)
 @TestPropertySource(properties = {
     "NOM_ADMIN_GROUP_ID=test-admin-group",

@@ -95,7 +95,8 @@ class SfOAuthServiceTest {
             "test-client-id",
             "dummy-key",
             "test-tenant",
-            "test-user"
+            "test-user",
+            "dummy-cpi-url"
         );
 
         SamlAssertionService mockSaml = mock(SamlAssertionService.class);

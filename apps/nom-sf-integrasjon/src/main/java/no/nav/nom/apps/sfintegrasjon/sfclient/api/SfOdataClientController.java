@@ -28,21 +28,17 @@ import org.springframework.web.client.RestClientResponseException;
 import java.util.Base64;
 import java.util.List;
 
-/**
- * Debug endpoints for inspecting SAP SuccessFactors authentication artifacts.
- * Accessible locally without auth; requires ADMIN group membership in dev/prod.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/sf/client")
-@Tag(name = "SF Client", description = "Endpoints for SAP SuccessFactors authentication. Admin only in dev/prod.")
-public class SfClientController {
+@Tag(name = "SF ODATA Client", description = "Endpoints for SAP SuccessFactors authentication. Admin only in dev/prod.")
+public class SfOdataClientController {
 
     private final SamlAssertionService samlAssertionService;
     private final SfOAuthService sfOAuthService;
     private final SfODataClient sfODataClient;
 
-    public SfClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService, SfODataClient sfODataClient) {
+    public SfOdataClientController(SamlAssertionService samlAssertionService, SfOAuthService sfOAuthService, SfODataClient sfODataClient) {
         this.samlAssertionService = samlAssertionService;
         this.sfOAuthService = sfOAuthService;
         this.sfODataClient = sfODataClient;
