@@ -523,6 +523,7 @@ public class RessursRestService {
                     request.orgEnhetId(),
                     request.fysiskBrukerstedNr(),
                     null,
+                    null,
                     metaData
                 )
             );
@@ -615,6 +616,7 @@ public class RessursRestService {
                 request.orgEnhetId(),
                 request.fysiskBrukerstedNr(),
                 new ArrayList<>(),
+                null,
                 metadata
             )
         );

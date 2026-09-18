@@ -12,6 +12,7 @@ public record EndreFysiskeBrukerstederCommand(
     String orgEnhetId,
     String primaryFysiskBrukerstedNummer,
     List<String> additionalFysiskeBrukerstederNummer,
+    String masseflyttetFraFid,
     InputMetadata inputMetadata
 ) implements OrgtilknytningCommand {
 }

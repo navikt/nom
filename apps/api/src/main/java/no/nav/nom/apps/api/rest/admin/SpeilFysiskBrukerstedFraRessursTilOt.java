@@ -81,6 +81,7 @@ public class SpeilFysiskBrukerstedFraRessursTilOt {
                                     orgtilknytningState.orgEnhetId(),
                                     ressurserState.primaryFysiskBrukersted(),
                                     additionalFysiskBrukersteder,
+                                    null,
                                     inputMetadata.toBuilder()
                                         .inputInterfaceMethodArguments(
                                             Map.of(
