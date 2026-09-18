@@ -30,9 +30,12 @@ import type {
   OvrigeEndringerOrgEnhetRequest,
   Person,
   Ressurs,
+  RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+  RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse,
   RessursKontaktperson,
   RessursLeder,
   SessionInfoResponse,
+  Tilgangsenhet,
   UpdateFysiskBrukerstedForOrgtilknytningRequest,
   UpdateFysiskeBrukerstederRequest,
   UpdatePrimaryFysiskBrukerstedForRessurserRequest,
@@ -182,16 +185,42 @@ export const getRessurserForFysiskBrukersted = {
 };
 
 export const getRessurserForFysiskBrukerstedAlle = {
-  queryKey: (fysiskBrukerstedNr: string) => [
+  queryKey: (
+    fysiskBrukerstedOgTilgangsenhetId: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+  ) => [
     "RESSURSER_BY_FYSISK_BRUKERSTED_YTTERLIGERE",
-    ...fysiskBrukerstedNr,
+    fysiskBrukerstedOgTilgangsenhetId,
   ],
-  queryFn: async (fysiskBrukerstedNr: string) =>
+  queryFn: async (
+    fysiskBrukerstedOgTilgangsenhetId: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+  ) =>
     (
-      await axios.get<Ressurs[]>(
-        `${NOM_API_BASE_PATH}/app/ressurser/byFysiskbrukerstedIAktivOt/${fysiskBrukerstedNr}`,
+      await axios.post<RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse[]>(
+        `${NOM_API_BASE_PATH}/app/ressurser/byFysiskbrukerstedIAktivOt`,
+        fysiskBrukerstedOgTilgangsenhetId,
       )
     ).data,
+};
+
+export const downloadExcelRessurserForFysiskBrukerstedAlle = async (
+  request: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
+  excelDocumentNavn: string,
+) => {
+  const response = await axios.post(
+    `${NOM_API_BASE_PATH}/app/ressurser/byFysiskbrukerstedIAktivOt/export`,
+    request,
+    {
+      responseType: "blob",
+    },
+  );
+
+  const url = globalThis.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", excelDocumentNavn);
+  document.body.append(link);
+  link.click();
+  link.remove();
 };
 
 export const getRessurserByListNavident = {
@@ -286,6 +315,13 @@ export const getAllOrgEnheter = {
     (await axios.get<OrgEnhet[]>(`${NOM_API_BASE_PATH}/app/orgenheter`)).data,
   gcTime: CACHE_FOR.anHour,
   staleTime: CACHE_FOR.aMinute * 5,
+};
+
+export const getAlleTilgangsenheter = {
+  queryKey: () => ["ALLE_TILGANGSENHETER"],
+  queryFn: async () =>
+    (await axios.get<Tilgangsenhet[]>(`${NOM_API_BASE_PATH}/app/tilgangsenhet`))
+      .data,
 };
 
 export const getOrgEnhet = {

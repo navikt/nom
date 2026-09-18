@@ -355,7 +355,7 @@ public class NomRemedyIntegrasjonService {
             .navId(ressursState.navident())
             .fodselsnummer(ressursState.personident())
             .sektor(sektor)
-            .enhetsId(getRemedyEnhetId(dolOrgtilknytning.orgEnhetId()))
+            .enhetsId(getTilgangsenhetId(dolOrgtilknytning.orgEnhetId()))
             .fysiskBrukerstedId(nonNull(dolOrgtilknytning.primaryFysiskBrukerstedNummer()) ? dolOrgtilknytning.primaryFysiskBrukerstedNummer() : ressursState.primaryFysiskBrukersted())
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(dolOrgtilknytning.gyldigFom()))
             .utlopsdato(utlopsdato.map(Utils::epochSecondsNorwegianTimeEndOfDay).orElse(null))
@@ -403,9 +403,9 @@ public class NomRemedyIntegrasjonService {
         return deleteWhitespace(nummer);
     }
 
-    private String getRemedyEnhetId(String orgEnhetId) {
-        return Optional.ofNullable(nomApiClient.getRemedyEnhetId(orgEnhetId))
-            .orElseThrow(() -> new RequiredValueMissingException(String.format("No remedyEnhetId set for orgEnhet with id %s", orgEnhetId)));
+    private String getTilgangsenhetId(String orgEnhetId) {
+        return Optional.ofNullable(nomApiClient.getTilgangsenhetId(orgEnhetId))
+            .orElseThrow(() -> new RequiredValueMissingException(String.format("No tilgangsenhetId set for orgEnhet with id %s", orgEnhetId)));
     }
 
     private Optional<LocalDate> getUtlopsdato(Integer sektor, OrgtilknytningState dolOrgtilknytning) {

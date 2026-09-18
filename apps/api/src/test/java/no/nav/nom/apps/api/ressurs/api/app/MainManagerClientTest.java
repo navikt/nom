@@ -39,7 +39,7 @@ public class MainManagerClientTest extends TestBase {
             .getContentAsString(StandardCharsets.UTF_8);
 
         stubFor(
-            get(urlEqualTo("/api/v2/sites"))
+            get(urlEqualTo("/api/v1/sites"))
                 .willReturn(
                     aResponse()
                         .withBody(body)
@@ -58,7 +58,7 @@ public class MainManagerClientTest extends TestBase {
         assertThat(sites.getFirst().nr()).isEqualTo("0425");
 
         verify(postRequestedFor(urlEqualTo("/restapi/token")));
-        verify(getRequestedFor(urlEqualTo("/api/v2/sites")));
+        verify(getRequestedFor(urlEqualTo("/api/v1/sites")));
     }
 }
 

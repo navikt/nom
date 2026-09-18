@@ -51,7 +51,8 @@ class SamlAssertionServiceTest {
                 "test-client-id",
                 testPrivateKeyPem,
                 "test-tenant",
-                "test-user-id"
+                "test-user-id",
+                "dummy-cpi-url"
         );
         service = new SamlAssertionService(props);
     }

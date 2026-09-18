@@ -52,6 +52,7 @@ export function ConfirmStep() {
   });
 
   const selectOrgEnhet = orgEnhetQuery.data;
+
   const lederNavn = selectOrgEnhet?.leder?.visningsnavn;
 
   const selectedFysiskBrukersted = useFysiskBrukersted(

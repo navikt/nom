@@ -630,6 +630,21 @@ export interface RessursStatistikk {
   antallStatligeRessurser?: number;
 }
 
+export interface RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest {
+  fysiskBrukerstedNr?: string;
+  tilgangsenhetId?: string;
+}
+
+export interface RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse {
+  fysiskBrukerstedNavn: string;
+  fysiskBrukerstedNummer: string;
+  navident: string;
+  orgEnhetId: string;
+  orgEnhetNavn: string;
+  tilgangsenhetId: string;
+  visningsnavn: Visningsnavn;
+}
+
 export interface SessionInfoResponse {
   name: string;
   navident: string;

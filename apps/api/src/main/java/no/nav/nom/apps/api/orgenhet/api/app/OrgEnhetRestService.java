@@ -173,6 +173,16 @@ public class OrgEnhetRestService {
 
             orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, oppdaterOrgEnhetLederStartdato);
 
+            // map to a kostnadssted
+            opprettOrgEnhetKostnadsstedMapping(
+                new OpprettOrgEnhetKostnadsstedMappingRequest(
+                    opprettOrgEnhetRequest.kostnadsstedId(),
+                    orgEnhetState.id(),
+                    orgEnhetState.gyldigFom(),
+                    orgEnhetState.gyldigTom()
+                )
+            );
+
             return new OpprettOrgEnhetResponse(
                 orgEnhetState.fid(),
                 orgEnhetState.id(),

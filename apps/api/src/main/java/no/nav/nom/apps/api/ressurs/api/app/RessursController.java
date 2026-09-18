@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.JsonNode;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static java.util.Objects.isNull;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedRoller;
 
@@ -52,20 +54,17 @@ public class RessursController {
 
     private final RessursRestService ressursRestService;
     private final RessursExcelGenerator ressursExcelGenerator;
-    private final RessurserByFysiskbrukerstedExcelGenerator ressurserByFysiskbrukerstedExcelGenerator;
     private final AuthResolver authResolver;
     private final TelefonService telefonService;
 
     public RessursController(
         RessursRestService ressursRestService,
         RessursExcelGenerator ressursExcelGenerator,
-        RessurserByFysiskbrukerstedExcelGenerator ressurserByFysiskbrukerstedExcelGenerator,
         AuthResolver authResolver,
         TelefonService telefonService
     ) {
         this.ressursRestService = ressursRestService;
         this.ressursExcelGenerator = ressursExcelGenerator;
-        this.ressurserByFysiskbrukerstedExcelGenerator = ressurserByFysiskbrukerstedExcelGenerator;
         this.authResolver = authResolver;
         this.telefonService = telefonService;
     }
@@ -316,7 +315,7 @@ public class RessursController {
         return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukersted(fysiskBrukerstedNr));
     }
 
-    @GetMapping("/byFysiskbrukerstedIAktivOt/{fysiskBrukerstedNr}")
+    @PostMapping("/byFysiskbrukerstedIAktivOt")
     @Operation(
         description = "Hent alle ressurser som har angitt fysisk brukersted i primaryFysiskBrukerstedNummer eller optionalFysiskBrukersteder på en av sine aktive orgtilknytninger",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -325,13 +324,16 @@ public class RessursController {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "403"),
     })
-    public ResponseEntity<List<RessursState>> getRessurserByFysiskbrukerstedIAktivOt(
-        @PathVariable String fysiskBrukerstedNr
+    public ResponseEntity<List<RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse>> getRessurserByFysiskbrukerstedIAktivOt(
+        @RequestBody RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest
     ) {
-        return ResponseEntity.ok(ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr));
+        if (isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.fysiskBrukerstedNr()) && isNull(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest.tilgangsenhetId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Både fysisk brukersted og tilgangsenhet ID kan ikke være null");
+        }
+        return ResponseEntity.ok(ressursRestService.getRessurserFysiskBrukerstedTilgangsenhetId(ressurserByFysiskBrukerstedAndTilgangsenhetIdRequest));
     }
 
-    @GetMapping("/byFysiskbrukerstedIAktivOt/{fysiskBrukerstedNr}/export")
+    @PostMapping("/byFysiskbrukerstedIAktivOt/export")
     @Operation(
         description = "Genererer regneark med oversikt over alle ressurser som har angitt fysisk brukersted i primaryFysiskBrukerstedNummer eller optionalFysiskBrukersteder på en av sine aktive orgtilknytninger",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -340,25 +342,16 @@ public class RessursController {
         @ApiResponse(responseCode = "200", description = "Exported file"),
         @ApiResponse(responseCode = "403"),
     })
-    public void getRessurserByFysiskbrukerstedIAktivOtExport(HttpServletResponse response,  @PathVariable String fysiskBrukerstedNr) throws IOException {
+    public void getRessurserByFysiskbrukerstedIAktivOtExport(HttpServletResponse response,  @RequestBody RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest request) throws IOException {
         try {
-            if (!isDigitsOnly(fysiskBrukerstedNr)) {
-                response.sendError(400, "Fysisk brukersted må bestå kun av sifre");
-                return;
+            if (isNull(request.fysiskBrukerstedNr()) && isNull(request.tilgangsenhetId())) {
+                response.sendError(HttpStatus.BAD_REQUEST.value(), "Både fysisk brukersted og tilgangsenhet ID kan ikke være null");
             }
-            var ressurser = ressursRestService.getRessurserMedFysiskBrukerstedIAktivOrgtilknytning(fysiskBrukerstedNr);
-            ressurserByFysiskbrukerstedExcelGenerator.generate(response, ressurser, fysiskBrukerstedNr);
+            ressursRestService.exportRessurserFysiskBrukerstedTilgangsenhetId(response, request);
         } catch (Exception e) {
             log.error("Failed to generate export file", e);
             response.sendError(500);
         }
-    }
-
-    public static boolean isDigitsOnly(String str) {
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-        return str.chars().allMatch(Character::isDigit);
     }
 
     @GetMapping("/byEnhetAndFysiskbrukersted/{orgenhetId}/{fysiskBrukerstedNr}")
@@ -537,7 +530,8 @@ public class RessursController {
         NoSuchElementException.class,
         NomMasteredException.class,
         InvalidSektorException.class,
-        InvalidOrgtilknytningTypeAndSektorCombinationException.class
+        InvalidOrgtilknytningTypeAndSektorCombinationException.class,
+        ResponseStatusException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity
