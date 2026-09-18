@@ -63,9 +63,9 @@ export function FysiskBrukerstedSelect({
   helpText?: string;
   isClearable?: boolean;
 }) {
-  const options = fysiskeBrukersteder.map((fysiskBrukersted) =>
-    fysiskBrukerstedOption(fysiskBrukersted),
-  );
+  const options = fysiskeBrukersteder
+    .map((fysiskBrukersted) => fysiskBrukerstedOption(fysiskBrukersted))
+    .sort((a, b) => (a.value ?? "").localeCompare(b.value ?? "", "no"));
 
   const currentOption =
     options.find((option) => option.value === value) ?? null;
@@ -190,9 +190,9 @@ export function TilgangsenhetSelect({
   helpText?: string;
   isClearable?: boolean;
 }) {
-  const options = tilgangsenheter.map((tilgangsenhet) =>
-    tilgangsenhetOption(tilgangsenhet),
-  );
+  const options = tilgangsenheter
+    .map((tilgangsenhet) => tilgangsenhetOption(tilgangsenhet))
+    .sort((a, b) => (a.value ?? "").localeCompare(b.value ?? "", "no"));
 
   const currentOption =
     options.find((option) => option.value === value) ?? null;
