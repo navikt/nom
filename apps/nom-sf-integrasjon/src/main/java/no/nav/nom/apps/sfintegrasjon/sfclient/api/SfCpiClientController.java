@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SfCpiClient;
+import no.nav.nom.apps.sfintegrasjon.sfclient.SfCpiClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -73,13 +73,9 @@ public class SfCpiClientController {
         }
         log.info("postDummyOrgenhetData: sending payload to SAP CPI");
         try {
-            ResponseEntity<String> response = sfCpiClient.sendOrgenhetPayload(payload);
-            log.info(
-                "postDummyOrgenhetData: SAP CPI responded with status {}, headers {}",
-                response.getStatusCode(),
-                response.getHeaders()
-            );
-            return response;
+            String responseBody = sfCpiClient.sendOrgenhetPayload(payload);
+            log.info("postDummyOrgenhetData: SAP CPI responded successfully");
+            return ResponseEntity.ok(responseBody);
         } catch (RestClientResponseException e) {
             log.error(
                 "postDummyOrgenhetData: SAP CPI returned error status {}. Body: {}",
