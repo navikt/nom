@@ -81,6 +81,16 @@ public class SfCpiClientController {
                           }
                       """;
         }
-        return sfCpiClient.sendOrgenhetPayload(payload);
+        try {
+            return sfCpiClient.sendOrgenhetPayload(payload);
+        } catch (RestClientResponseException e) {
+            log.error(
+                "SAP CPI returned error status {} for postDummyOrgenhetData. Body: {}",
+                e.getStatusCode(),
+                e.getResponseBodyAsString(),
+                e
+            );
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        }
     }
 }
