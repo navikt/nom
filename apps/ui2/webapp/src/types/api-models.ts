@@ -355,6 +355,11 @@ export interface OpprettOrgEnhetRequest {
   gyldigFom: string;
   /**
    * @minLength 1
+   * @example "123456"
+   */
+  kostnadsstedId: string;
+  /**
+   * @minLength 1
    * @example "A123456"
    */
   lederRessursNavident: string;

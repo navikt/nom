@@ -20,8 +20,8 @@ import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import {
-  getKostnadssted,
   getAlleTilgangsenheter,
+  getKostnadssted,
   getOrgEnhet,
   opprettOrgEnhet,
 } from "~/api/react-query-endpoints";
@@ -148,6 +148,7 @@ function FormView({
     queryKey: getKostnadssted.queryKey(overordnetOrgEnhetId),
     queryFn: () => getKostnadssted.queryFn(overordnetOrgEnhetId),
     enabled: !!overordnetOrgEnhetId,
+    retry: false,
   });
 
   const kostnadssted = kostnadsstedQuery.data;
@@ -284,10 +285,16 @@ function OpprettOrgEnhetForm({
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
 
-            <KostnadsstedSelectFormPart
-              label="Kostnadssted"
-              name="kostnadsstedId"
-            />
+            <div
+              css={css`
+                width: 50%;
+              `}
+            >
+              <KostnadsstedSelectFormPart
+                label="Kostnadssted"
+                name="kostnadsstedId"
+              />
+            </div>
           </VStack>
 
           <div

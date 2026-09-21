@@ -175,9 +175,9 @@ export function KostnadsstedSelect({
 
   const optionKostnadssteder = kostnadssteder ?? alleKostnadssteder;
 
-  const options = optionKostnadssteder.map((kostnadssted) =>
-    kostnadsstedOption(kostnadssted),
-  );
+  const options = optionKostnadssteder
+    .map((kostnadssted) => kostnadsstedOption(kostnadssted))
+    .sort((a, b) => (a.value ?? "").localeCompare(b.value ?? "", "no"));
 
   const currentOption = options.find((option) => option.value === value);
 
