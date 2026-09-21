@@ -74,7 +74,11 @@ public class SfCpiClientController {
         log.info("postDummyOrgenhetData: sending payload to SAP CPI");
         try {
             ResponseEntity<String> response = sfCpiClient.sendOrgenhetPayload(payload);
-            log.info("postDummyOrgenhetData: SAP CPI responded with status {}", response.getStatusCode());
+            log.info(
+                "postDummyOrgenhetData: SAP CPI responded with status {}, headers {}",
+                response.getStatusCode(),
+                response.getHeaders()
+            );
             return response;
         } catch (RestClientResponseException e) {
             log.error(
