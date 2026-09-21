@@ -1,34 +1,20 @@
 package no.nav.nom.apps.sfintegrasjon.sfclient.api;
 
-import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
+import com.google.common.base.Strings;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.sfintegrasjon.sfclient.SfODataClient;
-import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
-import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
-import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
-import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SfCpiClient;
-import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
-import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
-import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientResponseException;
-
-import java.util.Base64;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -48,9 +34,13 @@ public class SfCpiClientController {
         summary = "Post a dummy Orgenhet data payload to SF CPI"
     )
     public ResponseEntity<String> postDummyOrgenhetData(
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Optional payload data",
+            content = @Content(schema = @Schema(type = "string", example = ""))
+        )
         @RequestBody(required = false) String payload
     ) {
-        if (payload == null) {
+        if (Strings.isNullOrEmpty(payload)) {
             payload = """
                       {
                           "sporingsId": "KUN FOR ENDEPUNKT TESTING",
@@ -81,16 +71,23 @@ public class SfCpiClientController {
                           }
                       """;
         }
+        log.info("postDummyOrgenhetData: sending payload to SAP CPI");
         try {
-            return sfCpiClient.sendOrgenhetPayload(payload);
+            ResponseEntity<String> response = sfCpiClient.sendOrgenhetPayload(payload);
+            log.info("postDummyOrgenhetData: SAP CPI responded with status {}", response.getStatusCode());
+            return response;
         } catch (RestClientResponseException e) {
             log.error(
-                "SAP CPI returned error status {} for postDummyOrgenhetData. Body: {}",
+                "postDummyOrgenhetData: SAP CPI returned error status {}. Body: {}",
                 e.getStatusCode(),
                 e.getResponseBodyAsString(),
                 e
             );
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.error("postDummyOrgenhetData: call to SAP CPI failed with {}", e.getClass().getName(), e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body("Call to SAP CPI failed: " + e.getMessage());
         }
     }
 }
