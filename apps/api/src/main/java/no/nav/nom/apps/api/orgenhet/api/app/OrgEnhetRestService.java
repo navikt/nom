@@ -179,7 +179,7 @@ public class OrgEnhetRestService {
                     opprettOrgEnhetRequest.kostnadsstedId(),
                     orgEnhetState.id(),
                     orgEnhetState.gyldigFom(),
-                    Objects.requireNonNullElse(orgEnhetState.gyldigTom(), LocalDate.MAX)
+                    Objects.requireNonNullElse(orgEnhetState.gyldigTom(), LocalDate.parse("2099-12-31"))
                 )
             );
 
