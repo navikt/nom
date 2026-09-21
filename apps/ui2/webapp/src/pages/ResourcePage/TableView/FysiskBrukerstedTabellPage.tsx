@@ -121,79 +121,59 @@ function FysiskBrukerstedTabell() {
 
   return (
     <VStack gap="6">
-      <div
+      <VStack
         css={css`
-          display: grid;
-          grid-template-columns: 1fr minmax(0, 1008px) 1fr;
-          gap: var(--a-spacing-4);
-          align-items: end;
+          max-width: 1008px;
+          width: 100%;
+          margin: auto;
+          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--a-border-radius-large);
+          background-color: #deecef;
         `}
+        gap="4"
       >
-        <VStack
-          css={css`
-            grid-column: 2;
-            padding: var(--a-spacing-4) var(--a-spacing-6);
-            border-radius: var(--a-border-radius-large);
-            background-color: #deecef;
-          `}
-          gap="4"
-        >
-          <HStack gap="4">
-            <div
-              css={css`
-                flex: 1;
-              `}
-            >
-              <FysiskBrukerstedSelect
-                fysiskeBrukersteder={fysiskeBrukersteder}
-                isClearable
-                label="Primært fysisk brukersted"
-                onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
-                value={fysiskBrukerstedFilter}
-              />
-            </div>
+        <HStack gap="4">
+          <div
+            css={css`
+              flex: 1;
+            `}
+          >
+            <FysiskBrukerstedSelect
+              fysiskeBrukersteder={fysiskeBrukersteder}
+              isClearable
+              label="Primært fysisk brukersted"
+              onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
+              value={fysiskBrukerstedFilter}
+            />
+          </div>
 
-            <div
-              css={css`
-                flex: 1;
-              `}
-            >
-              <TilgangsenhetSelect
-                isClearable
-                label="Primær tilgangsenhet"
-                onChange={(value) => setTilgangsenhetFilter(value ?? "")}
-                tilgangsenheter={alleTilgangsenheter}
-                value={tilgangsenhetFilter}
-              />
-            </div>
-          </HStack>
+          <div
+            css={css`
+              flex: 1;
+            `}
+          >
+            <TilgangsenhetSelect
+              isClearable
+              label="Primær tilgangsenhet"
+              onChange={(value) => setTilgangsenhetFilter(value ?? "")}
+              tilgangsenheter={alleTilgangsenheter}
+              value={tilgangsenhetFilter}
+            />
+          </div>
+        </HStack>
 
-          <Alert variant="info">
-            Filtrene baserer seg på brukeres organisasjonstilknytninger med
-            daglig oppfølging.
-          </Alert>
-        </VStack>
-
-        <Button
-          css={css`
-            grid-column: 3;
-            justify-self: end;
-          `}
-
-          disabled={!fysiskBrukerstedFilter && !tilgangsenhetFilter}
-          icon={<FileExcelIcon aria-hidden />}
-          loading={isDownloading}
-          onClick={handleDownloadExcel}
-          variant="secondary"
-        >
-          Eksportér til Excel
-        </Button>
-      </div>
+        <Alert variant="info">
+          Filtrene baserer seg på brukeres organisasjonstilknytninger med daglig
+          oppfølging.
+        </Alert>
+      </VStack>
 
       {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
         <FysiskBrukerstedTabellInner
+          handleDownloadExcel={handleDownloadExcel}
           fysiskBrukerstedNr={fysiskBrukerstedFilter}
           tilgangsenhet={tilgangsenhetFilter}
+          isDownloading={isDownloading}
         />
       )}
     </VStack>
@@ -203,9 +183,13 @@ function FysiskBrukerstedTabell() {
 function FysiskBrukerstedTabellInner({
   fysiskBrukerstedNr,
   tilgangsenhet,
+  handleDownloadExcel,
+  isDownloading,
 }: {
   fysiskBrukerstedNr: string;
   tilgangsenhet: string;
+  handleDownloadExcel: any;
+  isDownloading: boolean;
 }) {
   const request: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest = {
     fysiskBrukerstedNr: fysiskBrukerstedNr || undefined,
@@ -292,9 +276,33 @@ function FysiskBrukerstedTabellInner({
 
   return (
     <VStack gap="2">
-      <BodyShort>
-        Antall medarbeidere: <b>{ressursRows.length}</b>
-      </BodyShort>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+          align-items: end;
+        `}
+      >
+        <BodyShort>
+          Antall medarbeidere: <b>{ressursRows.length}</b>
+        </BodyShort>
+
+        <Button
+          loading={isDownloading}
+          size="small"
+          css={css`
+            justify-self: end;
+            margin-bottom: var(--a-spacing-1);
+          `}
+
+          icon={<FileExcelIcon aria-hidden />}
+
+          onClick={handleDownloadExcel}
+          variant="secondary"
+        >
+          Eksportér til Excel
+        </Button>
+      </div>
 
       <Table
         css={css`
