@@ -163,8 +163,8 @@ function FysiskBrukerstedTabell() {
         </HStack>
 
         <Alert variant="info">
-          Filtrene baserer seg på brukeres organisasjonstilknytninger med daglig
-          oppfølging.
+          Filtrene baserer seg på medarbeideres organisasjonstilknytninger med
+          daglig oppfølging.
         </Alert>
       </VStack>
 
