@@ -11,6 +11,7 @@ import type {
   GetPersonRequest,
   GlobalStatistikkResponse,
   KorrigerOrgEnhetNavnRequest,
+  KostnadsstedResponse,
   LederTilgangForOrgenhetRequest,
   LederTilgangState,
   MasseFlyttingRequest,
@@ -356,6 +357,16 @@ export function getParentOgUnderliggende(orgEnhetId: string) {
     enabled: !!orgEnhetId,
   });
 }
+
+export const getAlleKostnadssteder = {
+  queryKey: () => ["ALLE_KOSTNADSSTEDER"],
+  queryFn: async () =>
+    (
+      await axios.get<KostnadsstedResponse[]>(
+        `${NOM_API_BASE_PATH}/app/orgenheter/kostnadssted`,
+      )
+    ).data,
+};
 
 export const getKostnadssted = {
   queryKey: (orgEnhetId: string) => kostnadsstedKeys.orgEnhetId(orgEnhetId),

@@ -527,6 +527,10 @@ app:
         orgtilknytning: sa131z    # Gamle Oslo (sa131z)
         sektor: NAV_KOMMUNAL
 
+      - navident: Z994019         # Team RPA, Morten Andre Mathisen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
