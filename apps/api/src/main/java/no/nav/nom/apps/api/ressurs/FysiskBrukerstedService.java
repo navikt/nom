@@ -201,6 +201,7 @@ public class FysiskBrukerstedService {
             orgtilknytningState.orgEnhetId(),
             tilFysiskBrukerstedNr,
             orgtilknytningState.additionalFysiskeBrukerstederNummer(),
+            null,
             inputMetaData
         );
         orgtilknytningCommandService.endreFysiskeBrukersted(orgtilknytningCmd);

@@ -297,6 +297,26 @@ class MasseflyttOrgtilknytningerServiceTest {
         assertEquals("Orgtilknytning er gyldig etter ny orgenhet sin gyldighetsperiode", res.get(orgtilknytninger.get(1)));
     }
 
+    @Test
+    public void alsoAttemptsToMoveFysiskBrukersted(){
+        boolean beholdTilganger = true;
+        OrgEnhet nyOrgenhet = getOrgenhet("ab123c", "Ny Enhet");
+        OrgEnhet gmlOrgenhet = getOrgenhet("de456f", "Gml Enhet");
+
+        List<OrgtilknytningState> orgtilknytninger = List.of(
+            getOT("A000001", gmlOrgenhet.getId()),
+            getOT("A000002", gmlOrgenhet.getId()),
+            getOT("A000003", gmlOrgenhet.getId())
+        );
+
+        when(orgtilknytningStateRepository.findByFidIn(any())).thenReturn(orgtilknytninger);
+        when(orgenhetService.getById(any())).thenReturn(Optional.of(nyOrgenhet));
+
+        cut.flyttOrgtilknytninger(orgtilknytninger.stream().map(OrgtilknytningState::fid).toList(), nyOrgenhet.getId(), beholdTilganger, today, null);
+
+        verify(orgtilknytningCommandService, times(orgtilknytninger.size())).endreFysiskeBrukersted(any());
+    }
+
     private void assertArgumentEquals(OpprettOrgtilknytning actual, OrgtilknytningState originalOT, String nyOrgEnhetId, boolean beholdTilganger) {
         assertThat(actual).usingRecursiveComparison()
             .ignoringFields("inputMetadata")

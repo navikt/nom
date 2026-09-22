@@ -628,6 +628,7 @@ public class OrgtilknytningRestService {
                     orgtilknytningStateBeforeChanges.orgEnhetId(),
                     endreOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
                     optionalFysiskeBrukersteder,
+                    null,
                     inputMetadata
                 )
             );
@@ -743,6 +744,7 @@ public class OrgtilknytningRestService {
                 leggTilOrgtilknytningRequest.orgEnhetId(),
                 leggTilOrgtilknytningRequest.primaryFysiskBrukerstedNummer(),
                 optionalFysiskeBrukersteder,
+                null,
                 inputMetadata
             )
         );

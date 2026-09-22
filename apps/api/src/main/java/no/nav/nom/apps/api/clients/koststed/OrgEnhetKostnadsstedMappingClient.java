@@ -71,6 +71,8 @@ public class OrgEnhetKostnadsstedMappingClient {
     }
 
     public KostnadsstedMappingResponseDTO opprettKostnadsstedMapping(String orgEnhetId, String kostnadsstedId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        // TODO testing...remove this log line
+        log.info("Oppretter kostnadssted mapping for orgenhet {} og kostnadssted {}, gyldigFra {} og gyldigTil {}", orgEnhetId, kostnadsstedId, gyldigFom, gyldigTom);
         return restClient.post()
             .uri(uriBuilder -> uriBuilder.path("/api/v1/mapping").build())
             .body(new CreateOrgenhetKostnadsstedMappingExternalRequest(

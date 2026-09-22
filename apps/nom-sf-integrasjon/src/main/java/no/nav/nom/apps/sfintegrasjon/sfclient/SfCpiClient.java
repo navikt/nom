@@ -1,7 +1,5 @@
-package no.nav.nom.apps.sfintegrasjon.sfclient.saml;
+package no.nav.nom.apps.sfintegrasjon.sfclient;
 
-import no.nav.nom.apps.sfintegrasjon.sfclient.SfProperties;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -27,11 +25,11 @@ public class SfCpiClient {
             .build();
     }
 
-    public ResponseEntity<String> sendOrgenhetPayload(String payload) {
+    public String sendOrgenhetPayload(String payload) {
         return cpiClient.post()
             .uri("http/NOM_to_Zalaris_Org_Data")
             .body(payload)
             .retrieve()
-            .toEntity(String.class);
+            .body(String.class);
     }
 }
