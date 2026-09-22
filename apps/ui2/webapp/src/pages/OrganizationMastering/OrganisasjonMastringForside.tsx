@@ -2,6 +2,8 @@ import { css } from "@emotion/react";
 import {
   ArrowRightLeftIcon,
   ChevronDownDoubleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
   PlusCircleIcon,
   TrashIcon,
 } from "@navikt/aksel-icons";
@@ -389,6 +391,8 @@ function UtvidOrgEnhetKort({
 
   const [expanded, setExpanded] = useState(defaultOpen);
 
+  const [underenheterExpanded, setUnderenheterExpanded] = useState(false);
+
   const ledereForOrgEnhetQuery = useQuery({
     queryKey: getLedereForOrgEnhet.queryKey([orgEnhet.id]),
     queryFn: () => getLedereForOrgEnhet.queryFn([orgEnhet.id]),
@@ -444,16 +448,15 @@ function UtvidOrgEnhetKort({
           </div>
 
           <Button
+            icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
             css={css`
               height: fit-content;
               align-self: center;
             `}
             onClick={() => setExpanded(!expanded)}
             type="button"
-            variant={expanded ? "primary" : "secondary"}
-          >
-            {expanded ? "Minimer" : "Utvid"}
-          </Button>
+            variant="tertiary"
+          />
         </div>
 
         {expanded && (
@@ -504,11 +507,7 @@ function UtvidOrgEnhetKort({
                       Alternativer
                     </Button>
 
-                    <Dropdown.Menu
-                      css={css`
-                        width: 460px;
-                      `}
-                    >
+                    <Dropdown.Menu>
                       <Dropdown.Menu.GroupedList>
                         <Dropdown.Menu.GroupedList.Heading>
                           Endre organisasjonsenhet
@@ -584,7 +583,7 @@ function UtvidOrgEnhetKort({
             display: flex;
           `}
         >
-          {expanded ? (
+          {underenheterExpanded ? (
             <VStack
               css={css`
                 width: 100%;
@@ -705,7 +704,24 @@ function UtvidOrgEnhetKort({
                       z-index: 3;
                     `}
                   >
-                    {`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}
+                    <div
+                      css={css`
+                        display: flex;
+                        justify-content: space-between;
+                      `}
+                    >
+                      <span>{`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}</span>
+
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() =>
+                          setUnderenheterExpanded(!underenheterExpanded)
+                        }
+                      >
+                        Utvid
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
