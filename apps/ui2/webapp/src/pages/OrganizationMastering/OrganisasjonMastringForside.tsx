@@ -1,16 +1,15 @@
 import { css } from "@emotion/react";
 import {
   ArrowRightLeftIcon,
-  ChevronDownDoubleIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  PencilIcon,
   PlusCircleIcon,
   TrashIcon,
 } from "@navikt/aksel-icons";
 import {
   BodyShort,
   Button,
-  Dropdown,
   Heading,
   HGrid,
   HStack,
@@ -371,9 +370,9 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
     <VStack gap="4">
       {sorterteOrgEnheter?.map((orgEnhet) => (
         <UtvidOrgEnhetKort
-          defaultOpen={sorterteOrgEnheter?.length === 1}
           key={orgEnhet.id}
           orgEnhet={orgEnhet}
+          underenheterDefaultopen={sorterteOrgEnheter?.length === 1}
         />
       ))}
     </VStack>
@@ -383,15 +382,19 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
 function UtvidOrgEnhetKort({
   orgEnhet,
   defaultOpen = false,
+  underenheterDefaultopen = false,
 }: {
   orgEnhet: OrgEnhet;
   defaultOpen?: boolean;
+  underenheterDefaultopen?: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
 
   const [expanded, setExpanded] = useState(defaultOpen);
 
-  const [underenheterExpanded, setUnderenheterExpanded] = useState(false);
+  const [underenheterExpanded, setUnderenheterExpanded] = useState(
+    underenheterDefaultopen,
+  );
 
   const ledereForOrgEnhetQuery = useQuery({
     queryKey: getLedereForOrgEnhet.queryKey([orgEnhet.id]),
@@ -422,7 +425,7 @@ function UtvidOrgEnhetKort({
     >
       <div
         css={css`
-          background: white;
+          background: #eef6fc;
           border: 2px solid #457c9d;
           border-radius: var(--a-border-radius-large);
           padding: var(--a-spacing-4) var(--a-spacing-6);
@@ -449,6 +452,7 @@ function UtvidOrgEnhetKort({
 
           <Button
             icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            iconPosition="right"
             css={css`
               height: fit-content;
               align-self: center;
@@ -482,96 +486,72 @@ function UtvidOrgEnhetKort({
               />
             </HStack>
 
-            <div
-              css={css`
-                display: flex;
-                align-items: end;
-                justify-content: space-between;
-              `}
-            >
-              <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
+            <SmartLink href={`/org/${orgEnhet.id}`}>
+              Gå til enhetskortet i NOM-hierarkiet
+            </SmartLink>
 
-              {hasAdminAccess && (
-                <div
-                  css={css`
-                    display: flex;
-                    gap: var(--a-spacing-2);
-                  `}
+            <HvemKanRedigereSection kanAdministrere={ledereForOrgEnhet} />
+
+            {hasAdminAccess && (
+              <HStack
+                css={css`
+                  margin-left: auto;
+                `}
+                gap="2"
+              >
+                <SmartLink
+                  href={`/korriger-navn-organisasjonsenhet?id=${orgEnhet.id}`}
                 >
-                  <Dropdown>
-                    <Button
-                      as={Dropdown.Toggle}
-                      icon={<ChevronDownDoubleIcon title="Alternativer" />}
-                      variant="secondary"
-                    >
-                      Alternativer
-                    </Button>
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre navn
+                  </Button>
+                </SmartLink>
 
-                    <Dropdown.Menu>
-                      <Dropdown.Menu.GroupedList>
-                        <Dropdown.Menu.GroupedList.Heading>
-                          Endre organisasjonsenhet
-                        </Dropdown.Menu.GroupedList.Heading>
+                <SmartLink
+                  href={`/korriger-leder-organisasjonsenhet?id=${orgEnhet.id}`}
+                >
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre leder
+                  </Button>
+                </SmartLink>
 
-                        <SmartLink
-                          href={`/korriger-navn-organisasjonsenhet?id=${orgEnhet.id}`}
-                        >
-                          <Dropdown.Menu.GroupedList.Item
-                            css={css`
-                              color: var(--a-text-action);
-                            `}
-                          >
-                            Endre navn
-                          </Dropdown.Menu.GroupedList.Item>
-                        </SmartLink>
+                <SmartLink
+                  href={`/korriger-organisasjonsenhet?id=${orgEnhet.id}`}
+                >
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre informasjon
+                  </Button>
+                </SmartLink>
 
-                        <Dropdown.Menu.Divider />
-
-                        <SmartLink
-                          href={`/korriger-leder-organisasjonsenhet?id=${orgEnhet.id}`}
-                        >
-                          <Dropdown.Menu.GroupedList.Item
-                            css={css`
-                              color: var(--a-text-action);
-                            `}
-                          >
-                            Endre leder
-                          </Dropdown.Menu.GroupedList.Item>
-                        </SmartLink>
-
-                        <Dropdown.Menu.Divider />
-
-                        <SmartLink
-                          href={`/korriger-organisasjonsenhet?id=${orgEnhet.id}`}
-                        >
-                          <Dropdown.Menu.GroupedList.Item
-                            css={css`
-                              color: var(--a-text-action);
-                            `}
-                          >
-                            Endre informasjon
-                          </Dropdown.Menu.GroupedList.Item>
-                        </SmartLink>
-
-                        <Dropdown.Menu.Divider />
-
-                        <SmartLink
-                          href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
-                        >
-                          <Dropdown.Menu.GroupedList.Item
-                            css={css`
-                              color: var(--a-text-action);
-                            `}
-                          >
-                            Avslutt organisasjonsenhet
-                          </Dropdown.Menu.GroupedList.Item>
-                        </SmartLink>
-                      </Dropdown.Menu.GroupedList>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
-              )}
-            </div>
+                <SmartLink
+                  href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
+                >
+                  <Button
+                    size="small"
+                    icon={<TrashIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Avvikle enhet
+                  </Button>
+                </SmartLink>
+              </HStack>
+            )}
           </VStack>
         )}
       </div>
@@ -655,9 +635,13 @@ function HvemKanRedigereSection({
   );
 
   return (
-    <div>
+    <VStack gap="2">
+      <Heading size="small" level="4">
+        Administratorer for enheten:
+      </Heading>
+
       <BodyShort>
-        <b>Personer som kan redigere medarbeidere på denne enheten:</b>
+        <b>Alle</b>
       </BodyShort>
 
       {unikeFiltrerteRessurser.length > 0 ? (
@@ -677,7 +661,7 @@ function HvemKanRedigereSection({
       ) : (
         <BodyShort>Ingen registrert</BodyShort>
       )}
-    </div>
+    </VStack>
   );
 }
 
@@ -740,7 +724,7 @@ function UnderenhetListIllustration({
               inset: 0;
               top: -14px;
               left: 44px;
-              background: white;
+              background: #eef6fc;
               border: 2px solid #457c9d;
               border-radius: var(--a-border-radius-large);
               z-index: 1;
@@ -753,7 +737,7 @@ function UnderenhetListIllustration({
               inset: 0;
               top: -7px;
               left: 30px;
-              background: white;
+              background: #eef6fc;
               border: 2px solid #457c9d;
               border-radius: var(--a-border-radius-large);
               z-index: 2;
@@ -764,11 +748,9 @@ function UnderenhetListIllustration({
             css={css`
               position: relative;
               padding: var(--a-spacing-1) var(--a-spacing-4);
-              background: white;
+              background: #eef6fc;
               border: 2px solid #457c9d;
               border-radius: var(--a-border-radius-large);
-              font-size: var(--a-font-size-heading-medium);
-              font-weight: var(--a-font-weight-bold);
               z-index: 3;
             `}
           >
@@ -776,9 +758,17 @@ function UnderenhetListIllustration({
               css={css`
                 display: flex;
                 justify-content: space-between;
+                align-items: center;
               `}
             >
-              <span>{`+ ${length} underenhet${length > 1 ? "er" : ""}`}</span>
+              <BodyShort
+                css={css`
+                  font-size: var(--a-font-size-heading-small);
+                  font-weight: var(--a-font-weight-bold);
+                `}
+              >
+                {`+ ${length} underenhet${length > 1 ? "er" : ""}`}
+              </BodyShort>
 
               <Button size="small" variant="secondary" onClick={onExpand}>
                 Utvid

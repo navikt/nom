@@ -149,6 +149,7 @@ function FormView({
     queryFn: () => getKostnadssted.queryFn(overordnetOrgEnhetId),
     enabled: !!overordnetOrgEnhetId,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const kostnadssted = kostnadsstedQuery.data;
