@@ -6,8 +6,6 @@ import {
   BodyLong,
   Button,
   DatePicker,
-  Select,
-  TextField,
   useDatepicker,
   VStack,
 } from "@navikt/ds-react";
@@ -38,20 +36,17 @@ import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
-  NomNivaaNameMapping,
-  OrgEnhetsTypeNameMapping,
-} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
-import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
+  OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
@@ -172,9 +167,8 @@ function KorrigerOrgEnhetForm({
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
-      tilgangsenhetId: orgEnhet.tilgangsenhetId ?? null,
+
       orgEnhetsType: orgEnhet.orgEnhetsType,
-      nomNivaa: orgEnhet.nomNivaa ?? null,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -201,9 +195,9 @@ function KorrigerOrgEnhetForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-      tilgangsenhetId: values.tilgangsenhetId ?? undefined,
+
       gyldigFom: values.gyldigFom,
-      nomNivaa: values.nomNivaa ?? undefined,
+
       orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 
@@ -227,47 +221,9 @@ function KorrigerOrgEnhetForm({
           <VStack gap="4">
             <FormDateWrapper name="gyldigFom" />
 
-            <Select
-              css={css`
-                width: fit-content;
-              `}
-              {...methods.register("orgEnhetsType")}
-              error={methods.formState.errors.orgEnhetsType?.message}
-              label="Organisasjonsenhetstype"
-            >
-              {!orgEnhet.orgEnhetsType && <option value="" />}
-              {Object.values(OrgEnhetsType)
-                .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
-                .map((orgEnhetsType) => (
-                  <option key={orgEnhetsType} value={orgEnhetsType}>
-                    {OrgEnhetsTypeNameMapping[orgEnhetsType]}
-                  </option>
-                ))}
-            </Select>
-
-            <Select
-              css={css`
-                width: fit-content;
-              `}
-              {...methods.register("nomNivaa")}
-              error={methods.formState.errors.nomNivaa?.message}
-              label="NOM-nivå"
-            >
-              {!orgEnhet.nomNivaa && <option value={undefined} />}
-              {Object.values(NomNivaa).map((nomNivaa) => (
-                <option key={nomNivaa} value={nomNivaa}>
-                  {NomNivaaNameMapping[nomNivaa]}
-                </option>
-              ))}
-            </Select>
-
-            <TextField
-              css={css`
-                width: 20%;
-              `}
-              {...methods.register("tilgangsenhetId")}
-              error={methods.formState.errors.tilgangsenhetId?.message}
-              label="Tilgangsenhet"
+            <OrgEnhetTypeSelect
+              emptyOption={!orgEnhet.orgEnhetsType}
+              name="orgEnhetsType"
             />
           </VStack>
 
@@ -349,14 +305,4 @@ const validationSchema = yup.object({
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
-  tilgangsenhetId: yup.string().nullable(),
-  nomNivaa: yup
-    .mixed<NomNivaa>()
-    .nullable()
-    .notRequired()
-    .test(
-      "valid-if-present",
-      "Ugyldig",
-      (value) => !value || Object.values(NomNivaa).includes(value),
-    ),
 });
