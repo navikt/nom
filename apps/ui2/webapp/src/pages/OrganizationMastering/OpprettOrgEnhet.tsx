@@ -21,6 +21,7 @@ import * as yup from "yup";
 
 import {
   getAlleTilgangsenheter,
+  getKostnadssted,
   getOrgEnhet,
   opprettOrgEnhet,
 } from "~/api/react-query-endpoints";
@@ -43,6 +44,7 @@ import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/comp
 import {
   FormRessursSearchWrapper,
   IkkeTilgangRedigering,
+  KostnadsstedSelectFormPart,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
@@ -137,14 +139,23 @@ function FormView({
   setOpprettResponse: (response: any) => void;
 }) {
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId ?? ""),
-    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId ?? ""),
+    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId),
     enabled: !!overordnetOrgEnhetId,
   });
 
+  const kostnadsstedQuery = useQuery({
+    queryKey: getKostnadssted.queryKey(overordnetOrgEnhetId),
+    queryFn: () => getKostnadssted.queryFn(overordnetOrgEnhetId),
+    enabled: !!overordnetOrgEnhetId,
+    retry: false,
+  });
+
+  const kostnadssted = kostnadsstedQuery.data;
+
   const orgEnhet = orgEnhetQuery.data;
 
-  if (orgEnhetQuery.isLoading) {
+  if (orgEnhetQuery.isLoading || kostnadsstedQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
@@ -161,6 +172,7 @@ function FormView({
 
       <OpprettOrgEnhetForm
         overordnetOrgEnhet={orgEnhet}
+        overordnetOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? ""}
         setOpprettResponse={setOpprettResponse}
       />
     </>
@@ -180,14 +192,19 @@ function KvitteringView({ opprettResponse }: { opprettResponse: any }) {
 
 function OpprettOrgEnhetForm({
   overordnetOrgEnhet,
+  overordnetOrgEnhetKostnadsstedId,
   setOpprettResponse,
 }: {
   overordnetOrgEnhet: OrgEnhet;
+  overordnetOrgEnhetKostnadsstedId: string;
   setOpprettResponse: (response: any) => void;
 }) {
   const methods = useForm({
     resolver: yupResolver(validationSchema),
-    defaultValues: { tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId },
+    defaultValues: {
+      tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
+      kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
+    },
   });
 
   const opprettOrgEnhetMutation = useMutation<
@@ -267,6 +284,17 @@ function OpprettOrgEnhetForm({
             </Select>
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
+
+            <div
+              css={css`
+                width: 50%;
+              `}
+            >
+              <KostnadsstedSelectFormPart
+                label="Kostnadssted"
+                name="kostnadsstedId"
+              />
+            </div>
           </VStack>
 
           <div
@@ -378,4 +406,5 @@ const validationSchema = yup.object({
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
     .required("Obligatorisk"),
+  kostnadsstedId: yup.string().required("Obligatorisk"),
 });

@@ -130,7 +130,7 @@ function FormView({
           orgEnhet={orgEnhet}
         />
 
-        <KorrigeringOrgEnhetForm
+        <KorrigerOrgEnhetForm
           orgEnhet={orgEnhet}
           setChangeInfo={setChangeInfo}
         />
@@ -158,7 +158,7 @@ function KvitteringView({
   );
 }
 
-function KorrigeringOrgEnhetForm({
+function KorrigerOrgEnhetForm({
   orgEnhet,
   setChangeInfo,
 }: {
