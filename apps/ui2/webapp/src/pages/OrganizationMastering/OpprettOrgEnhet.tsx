@@ -7,7 +7,6 @@ import {
   Button,
   DatePicker,
   Heading,
-  Select,
   TextField,
   useDatepicker,
   VStack,
@@ -40,13 +39,13 @@ import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect"
 import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import {
   FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
+  OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
@@ -266,23 +265,13 @@ function OpprettOrgEnhetForm({
 
             <FormDateWrapper name="gyldigFom" />
 
-            <Select
+            <div
               css={css`
                 width: 50%;
               `}
-              {...methods.register("orgEnhetsType")}
-              error={methods.formState.errors.orgEnhetsType?.message}
-              label="Organisasjonsenhetstype"
             >
-              <option value="" />
-              {Object.values(OrgEnhetsType)
-                .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
-                .map((orgEnhetsType) => (
-                  <option key={orgEnhetsType} value={orgEnhetsType}>
-                    {OrgEnhetsTypeNameMapping[orgEnhetsType]}
-                  </option>
-                ))}
-            </Select>
+              <OrgEnhetTypeSelect name="orgEnhetsType" fullWidth />
+            </div>
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
 

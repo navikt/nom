@@ -1,9 +1,13 @@
 import { css } from "@emotion/react";
-import { Alert, Heading, VStack } from "@navikt/ds-react";
+import { Alert, Heading, Select, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import React from "react";
-import { type FieldError, useController } from "react-hook-form";
+import {
+  type FieldError,
+  useController,
+  useFormContext,
+} from "react-hook-form";
 
 import { getAlleKostnadssteder } from "~/api/react-query-endpoints";
 import {
@@ -11,8 +15,13 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
+import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type { KostnadsstedResponse, OrgEnhet } from "~/types/api-models";
+import {
+  type KostnadsstedResponse,
+  type OrgEnhet,
+  OrgEnhetsType,
+} from "~/types/api-models";
 
 export function OrgEnhetIkkeFunnet() {
   return <Alert variant="error">Organisasjonsenheten ble ikke funnet</Alert>;
@@ -206,4 +215,39 @@ function kostnadsstedOption(kostnadssted: KostnadsstedResponse) {
     label: `${kostnadssted.kostnadsstedId}: ${kostnadssted.navn}`,
     value: kostnadssted.kostnadsstedId,
   };
+}
+
+export function OrgEnhetTypeSelect({
+  name,
+  emptyOption = true,
+  fullWidth = false,
+}: {
+  name: string;
+  emptyOption?: boolean;
+  fullWidth?: boolean;
+}) {
+  const methods = useFormContext();
+
+  const { fieldState } = useController({ name });
+
+  return (
+    <Select
+      css={css`
+        width: ${fullWidth ? "100%" : "fit-content"};
+      `}
+      {...methods.register(name)}
+      error={fieldState.error?.message}
+      label="Organisasjonsenhetstype"
+    >
+      {emptyOption && <option value="" />}
+
+      {Object.values(OrgEnhetsType)
+        .filter((orgEnhetsType) => orgEnhetsType !== OrgEnhetsType.DIR)
+        .map((orgEnhetsType) => (
+          <option key={orgEnhetsType} value={orgEnhetsType}>
+            {OrgEnhetsTypeNameMapping[orgEnhetsType]}
+          </option>
+        ))}
+    </Select>
+  );
 }
