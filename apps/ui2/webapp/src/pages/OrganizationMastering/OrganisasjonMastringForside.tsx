@@ -621,111 +621,10 @@ function UtvidOrgEnhetKort({
               ))}
             </VStack>
           ) : (
-            <div
-              css={css`
-                width: 100%;
-              `}
-            >
-              <div
-                css={css`
-                  height: 22px;
-                  border-left: 4px solid #457c9d;
-                `}
-              />
-
-              <div
-                css={css`
-                  margin-left: auto;
-                  position: relative;
-                  display: flex;
-                `}
-              >
-                <div
-                  css={css`
-                    width: 16px;
-                  `}
-                >
-                  <div
-                    css={css`
-                      height: 50%;
-                      border-left: 4px solid #457c9d;
-                      border-bottom: 2px solid #457c9d;
-                    `}
-                  />
-
-                  <div
-                    css={css`
-                      height: 50%;
-                      border-top: 2px solid #457c9d;
-                    `}
-                  />
-                </div>
-
-                <div
-                  css={css`
-                    width: 100%;
-                  `}
-                >
-                  <div
-                    css={css`
-                      position: absolute;
-                      inset: 0;
-                      top: -14px;
-                      left: 44px;
-                      background: white;
-                      border: 2px solid #457c9d;
-                      border-radius: var(--a-border-radius-large);
-                      z-index: 1;
-                    `}
-                  />
-
-                  <div
-                    css={css`
-                      position: absolute;
-                      inset: 0;
-                      top: -7px;
-                      left: 30px;
-                      background: white;
-                      border: 2px solid #457c9d;
-                      border-radius: var(--a-border-radius-large);
-                      z-index: 2;
-                    `}
-                  />
-
-                  <div
-                    css={css`
-                      position: relative;
-                      padding: var(--a-spacing-1) var(--a-spacing-4);
-                      background: white;
-                      border: 2px solid #457c9d;
-                      border-radius: var(--a-border-radius-large);
-                      font-size: var(--a-font-size-heading-medium);
-                      font-weight: var(--a-font-weight-bold);
-                      z-index: 3;
-                    `}
-                  >
-                    <div
-                      css={css`
-                        display: flex;
-                        justify-content: space-between;
-                      `}
-                    >
-                      <span>{`+ ${sorterteOrgEnheter.length} underenhet${sorterteOrgEnheter.length > 1 ? "er" : ""}`}</span>
-
-                      <Button
-                        size="small"
-                        variant="secondary"
-                        onClick={() =>
-                          setUnderenheterExpanded(!underenheterExpanded)
-                        }
-                      >
-                        Utvid
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <UnderenhetListIllustration
+              onExpand={() => setUnderenheterExpanded(!underenheterExpanded)}
+              length={sorterteOrgEnheter.length}
+            />
           )}
         </div>
       )}
@@ -778,6 +677,116 @@ function HvemKanRedigereSection({
       ) : (
         <BodyShort>Ingen registrert</BodyShort>
       )}
+    </div>
+  );
+}
+
+function UnderenhetListIllustration({
+  length,
+  onExpand,
+}: {
+  length: number;
+  onExpand: any;
+}) {
+  return (
+    <div
+      css={css`
+        width: 100%;
+      `}
+    >
+      <div
+        css={css`
+          height: 22px;
+          border-left: 4px solid #457c9d;
+        `}
+      />
+
+      <div
+        css={css`
+          margin-left: auto;
+          position: relative;
+          display: flex;
+        `}
+      >
+        <div
+          css={css`
+            width: 16px;
+          `}
+        >
+          <div
+            css={css`
+              height: 50%;
+              border-left: 4px solid #457c9d;
+              border-bottom: 2px solid #457c9d;
+            `}
+          />
+
+          <div
+            css={css`
+              height: 50%;
+              border-top: 2px solid #457c9d;
+            `}
+          />
+        </div>
+
+        <div
+          css={css`
+            width: 100%;
+          `}
+        >
+          <div
+            css={css`
+              position: absolute;
+              inset: 0;
+              top: -14px;
+              left: 44px;
+              background: white;
+              border: 2px solid #457c9d;
+              border-radius: var(--a-border-radius-large);
+              z-index: 1;
+            `}
+          />
+
+          <div
+            css={css`
+              position: absolute;
+              inset: 0;
+              top: -7px;
+              left: 30px;
+              background: white;
+              border: 2px solid #457c9d;
+              border-radius: var(--a-border-radius-large);
+              z-index: 2;
+            `}
+          />
+
+          <div
+            css={css`
+              position: relative;
+              padding: var(--a-spacing-1) var(--a-spacing-4);
+              background: white;
+              border: 2px solid #457c9d;
+              border-radius: var(--a-border-radius-large);
+              font-size: var(--a-font-size-heading-medium);
+              font-weight: var(--a-font-weight-bold);
+              z-index: 3;
+            `}
+          >
+            <div
+              css={css`
+                display: flex;
+                justify-content: space-between;
+              `}
+            >
+              <span>{`+ ${length} underenhet${length > 1 ? "er" : ""}`}</span>
+
+              <Button size="small" variant="secondary" onClick={onExpand}>
+                Utvid
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
