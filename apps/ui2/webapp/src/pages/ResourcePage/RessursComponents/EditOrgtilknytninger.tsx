@@ -329,6 +329,13 @@ function OrgtilknytningForm({
         })
       : [defaultNyOrgtilknytning(ressurs)];
 
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+
+  const fysiskeBrukerstederOptions = fysiskeBrukersteder
+    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
+    .sort((a, b) => a.label.localeCompare(b.label, "no"));
+
   const methods = useForm<{
     mappedeOrgtilknytninger: Partial<OrgtilknytningState>[];
   }>({
@@ -337,6 +344,7 @@ function OrgtilknytningForm({
     },
     // @ts-expect-error -- Type inferred fra resolver er typen etter submit der flere felter er required, men under utfylling av formet vil flere verdier kunne være undefined. Derfor bruker vi heller eksplisitt type til UseForm
     resolver: yupResolver(formValuesSchema),
+    context: { fysiskeBrukersteder: fysiskeBrukersteder },
   });
 
   useEffect(() => {
@@ -456,14 +464,7 @@ function OrgtilknytningForm({
     }
   };
 
-  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
-  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
-
-  const fysiskeBrukerstederOptions = fysiskeBrukersteder
-    .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
-    .sort((a, b) => a.label.localeCompare(b.label, "no"));
-
-  if (isLoading) {
+  if (isLoading || fysiskeBrukerstederQuery.isLoading) {
     return (
       <div
         css={css`
@@ -1194,12 +1195,19 @@ function FysiskBrukerstedSelectWrapper({
     field.onChange(isSelected ? option : undefined);
   };
 
-  const existingValue = field.value;
-  const selectedOption = fysiskeBrukerstederOptions.find(
-    (fysiskBrukerstedOption) => fysiskBrukerstedOption.value === existingValue,
-  );
+  const fieldValue = field.value;
 
-  const selectedOptions = !!selectedOption ? [selectedOption] : [];
+  const selectedOptions =
+    fysiskeBrukerstederOptions?.length > 0 && fieldValue
+      ? [
+          fysiskeBrukerstederOptions.find(
+            (option) => option.value === fieldValue,
+          ) ?? {
+            label: `${fieldValue}: Utdatert fysisk brukersted`,
+            value: fieldValue,
+          },
+        ]
+      : [];
 
   return (
     <Combobox
@@ -1233,6 +1241,20 @@ function FysiskBrukerstedSelectMultipleWrapper({
     }
   };
 
+  const selectedOptions =
+    fysiskeBrukerstederOptions?.length > 0
+      ? field.value.map(
+          (value: string) =>
+            fysiskeBrukerstederOptions.find(
+              (fysiskBrukerstedOption) =>
+                fysiskBrukerstedOption.value === value,
+            ) ?? {
+              label: `${value}: Utdatert fysisk brukersted`,
+              value: value,
+            },
+        )
+      : [];
+
   return (
     <Combobox
       error={fieldState.error?.message}
@@ -1241,16 +1263,7 @@ function FysiskBrukerstedSelectMultipleWrapper({
       onToggleSelected={handleToggleSelected}
       options={fysiskeBrukerstederOptions}
       ref={field.ref}
-      selectedOptions={
-        fysiskeBrukerstederOptions?.length > 0
-          ? field.value.map((value: string) =>
-              fysiskeBrukerstederOptions.find(
-                (fysiskBrukerstedOption) =>
-                  fysiskBrukerstedOption.value === value,
-              ),
-            )
-          : []
-      }
+      selectedOptions={selectedOptions}
       size="small"
     />
   );
@@ -1564,17 +1577,37 @@ const orgtilknytningSchema = yup.object().shape({
         return required ? !!value : true;
       },
     }),
-  primaryFysiskBrukerstedNummer: yup.string().test({
-    name: "primary-fysisk-brukersted-obligatorisk-fremtid-aktiv",
-    message: "Obligatorisk",
-    test: function (value, context) {
-      const otTom = context?.parent?.gyldigTom ?? undefined;
+  primaryFysiskBrukerstedNummer: yup
+    .string()
+    .test({
+      name: "primary-fysisk-brukersted-obligatorisk-fremtid-aktiv",
+      message: "Obligatorisk",
+      test: function (value, context) {
+        const otTom = context?.parent?.gyldigTom ?? undefined;
+        const required = nomDateIsTodayOrAfter(otTom);
 
-      const required = nomDateIsTodayOrAfter(otTom);
+        return required ? !!value : true;
+      },
+    })
+    .test({
+      name: "primary-fysisk-brukersted-gyldig-fremtid-aktiv",
+      message: "Utdatert fysisk brukersted",
+      test: function (value, context) {
+        const otTom = context?.parent?.gyldigTom ?? undefined;
+        const active = nomDateIsTodayOrAfter(otTom);
 
-      return required ? !!value : true;
-    },
-  }),
+        if (!active) {
+          return true;
+        }
+
+        const fysiskeBrukersteder: FysiskBrukersted[] =
+          this.options.context?.fysiskeBrukersteder ?? [];
+
+        return fysiskeBrukersteder.some(
+          (fysiskBrukersted) => fysiskBrukersted.nr === value,
+        );
+      },
+    }),
   additionalFysiskeBrukerstederNummer: yup
     .array()
     .of(yup.string().defined())
@@ -1587,6 +1620,27 @@ const orgtilknytningSchema = yup.object().shape({
           context?.parent?.primaryFysiskBrukerstedNummer ?? undefined;
 
         return !value?.includes(primaryFysiskBrukerstedNummer);
+      },
+    })
+    .test({
+      name: "additional-fysiske-brukersteder-gyldige-fremtid-aktiv",
+      message: "Utdatert fysisk brukersted",
+      test: function (value, context) {
+        const otTom = context?.parent?.gyldigTom ?? undefined;
+        const active = nomDateIsTodayOrAfter(otTom);
+
+        if (!active || !value?.length) {
+          return true;
+        }
+
+        const fysiskeBrukersteder: FysiskBrukersted[] =
+          this.options.context?.fysiskeBrukersteder ?? [];
+
+        return value.every((nummer) =>
+          fysiskeBrukersteder.some(
+            (fysiskBrukersted) => fysiskBrukersted.nr === nummer,
+          ),
+        );
       },
     }),
 });
