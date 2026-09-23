@@ -132,11 +132,20 @@ public class FysiskBrukerstedService {
         return feiledeNavidenter;
     }
 
-    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids, String tilFysiskBrukerstedNr,
+                                                                              String fraFysiskBrukerstedNr,
+                                                                              InputMetadata inputMetaData
+    ) {
         HashMap<String, String> feiledeEventer = new HashMap<>();
         var orgtilknytningerGruppertPaaFid = orgtilknytningStateRepository.findByFidIn(otFids)
             .stream()
             .filter(orgtilknytningState -> isPeriodActive(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom()))
+            .filter(orgtilknytningState -> {
+                var matchPrimary = fraFysiskBrukerstedNr.equals(orgtilknytningState.primaryFysiskBrukerstedNummer());
+                var matchAdditional = orgtilknytningState.additionalFysiskeBrukerstederNummer()
+                    .contains(fraFysiskBrukerstedNr);
+                return matchPrimary || matchAdditional;
+            })
             .collect(Collectors.toMap(OrgtilknytningState::fid, orgtilknytningState -> orgtilknytningState, (ot1, _) -> ot1));
         var alleNavidenterSomBleFlyttet = orgtilknytningerGruppertPaaFid.values().stream().map(OrgtilknytningState::navident).collect(Collectors.toList());
 

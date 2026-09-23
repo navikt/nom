@@ -997,18 +997,18 @@ public class OrgtilknytningRestService {
         };
     }
 
-    public void updateFysiskBrukerstedForRessursByOrgtilknytningFidList(List<String> otFids, String tilFysiskBrukerstedNr) {
+    public void updateFysiskBrukerstedForRessursByOrgtilknytningFidList(List<String> otFids, String tilFysiskBrukerstedNr, String fraFysiskBrukerstedNr) {
         var metadata = new InputMetadata(
             "REST",
             "updateFysiskBrukerstedForRessurserByNavidentList",
-            Map.of("otFids", otFids, "tilFysiskBrukersted", tilFysiskBrukerstedNr),
+            Map.of("otFids", otFids, "tilFysiskBrukersted", tilFysiskBrukerstedNr, "fraFysiskBrukersted", fraFysiskBrukerstedNr),
             new Origination(
                 getAuthenticatedNavIdent(),
                 SecurityUtil.getAuthenticatedAzpName()
             )
         );
 
-        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(otFids, tilFysiskBrukerstedNr, metadata);
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(otFids, tilFysiskBrukerstedNr, fraFysiskBrukerstedNr, metadata);
     }
 
     public List<OrgtilknytningState> getActiveOrgtilknytningerByFysiskBrukerstedNr(String fysiskBrukerstedNr) {
