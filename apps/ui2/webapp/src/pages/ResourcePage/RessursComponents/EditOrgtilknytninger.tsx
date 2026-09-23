@@ -1195,16 +1195,16 @@ function FysiskBrukerstedSelectWrapper({
     field.onChange(isSelected ? option : undefined);
   };
 
-  const existingValue = field.value;
+  const fieldValue = field.value;
 
   const selectedOptions =
-    fysiskeBrukerstederOptions?.length > 0 && existingValue
+    fysiskeBrukerstederOptions?.length > 0 && fieldValue
       ? [
           fysiskeBrukerstederOptions.find(
-            (option) => option.value === existingValue,
+            (option) => option.value === fieldValue,
           ) ?? {
-            label: `${existingValue}: Utdatert fysisk brukersted`,
-            value: existingValue,
+            label: `${fieldValue}: Utdatert fysisk brukersted`,
+            value: fieldValue,
           },
         ]
       : [];
