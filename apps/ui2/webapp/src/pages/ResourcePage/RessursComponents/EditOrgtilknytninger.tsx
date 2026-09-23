@@ -458,10 +458,7 @@ function OrgtilknytningForm({
             ressurs.sektor,
           );
 
-          // oppdaterOrgtilknytningerMutation.mutate(request);
-
-          console.log("Would save");
-          console.log(request);
+          oppdaterOrgtilknytningerMutation.mutate(request);
         },
       );
     }
