@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,8 @@ public class FysiskBrukerstedService {
         return feiledeNavidenter;
     }
 
-    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids, String tilFysiskBrukerstedNr,
+    public HashMap<String, String> flyttOrgtilknytningerTilNyFysiskBrukersted(List<String> otFids,
+                                                                              String tilFysiskBrukerstedNr,
                                                                               String fraFysiskBrukerstedNr,
                                                                               InputMetadata inputMetaData
     ) {
@@ -161,7 +163,7 @@ public class FysiskBrukerstedService {
                 if (isNull(orgtilknytning)) {
                     throw OrgtilknytningNotFoundException.fid(otFid);
                 }
-                oppdaterOrgtilknytningFysiskBrukersted(orgtilknytningerGruppertPaaFid.get(otFid), tilFysiskBrukerstedNr, inputMetaData);
+                oppdaterOrgtilknytningFysiskBrukersted(orgtilknytningerGruppertPaaFid.get(otFid), tilFysiskBrukerstedNr, fraFysiskBrukerstedNr, inputMetaData);
             } catch (OrgtilknytningNotFoundException e) {
                 feiledeEventer.put(otFid, e.getMessage());
                 stateWaits.remove(otFid);
@@ -199,21 +201,53 @@ public class FysiskBrukerstedService {
         ressursCommandService.oppdaterFysiskeBrukerstederCommand(ressursCmd, inputMetaData);
     }
 
-    private void oppdaterOrgtilknytningFysiskBrukersted(OrgtilknytningState orgtilknytningState, String tilFysiskBrukerstedNr, InputMetadata inputMetaData) {
+    private void oppdaterOrgtilknytningFysiskBrukersted(OrgtilknytningState orgtilknytningState, String tilFysiskBrukerstedNr, String fraFysiskBrukerstedNr, InputMetadata inputMetaData) {
         if (!fysiskBrukerstedExists(tilFysiskBrukerstedNr)) {
             throw FysiskBrukerstedNotFoundException.notFound(tilFysiskBrukerstedNr);
         }
+        class ChangePayload {String primaryFbr; List<String> additionalFbrList; boolean wasChanged;}
+        var changePayload = new ChangePayload();
+        { // init
+            changePayload.primaryFbr = orgtilknytningState.primaryFysiskBrukerstedNummer();
+            changePayload.additionalFbrList = List.copyOf(orgtilknytningState.additionalFysiskeBrukerstederNummer());
+            changePayload.wasChanged = false;
+        }
 
-        var orgtilknytningCmd = new EndreFysiskeBrukerstederCommand(
-            orgtilknytningState.fid(),
-            orgtilknytningState.navident(),
-            orgtilknytningState.orgEnhetId(),
-            tilFysiskBrukerstedNr,
-            orgtilknytningState.additionalFysiskeBrukerstederNummer(),
-            null,
-            inputMetaData
-        );
-        orgtilknytningCommandService.endreFysiskeBrukersted(orgtilknytningCmd);
+        var shouldChangePrimaryFysiskBrukersted = changePayload.primaryFbr.equals(fraFysiskBrukerstedNr);
+        if (shouldChangePrimaryFysiskBrukersted) {
+            changePayload.primaryFbr = tilFysiskBrukerstedNr;
+            changePayload.wasChanged = true;
+        }
+        var shouldChangeAdditionalFysiskBrukersted = changePayload.additionalFbrList.contains(fraFysiskBrukerstedNr);
+        if (shouldChangeAdditionalFysiskBrukersted) {
+            changePayload.additionalFbrList = changePayload.additionalFbrList.stream()
+                .map(fysiskBrukerstedNr -> fraFysiskBrukerstedNr.equals(fysiskBrukerstedNr) ? tilFysiskBrukerstedNr : fysiskBrukerstedNr)
+                .toList();
+            changePayload.wasChanged = true;
+        }
+        if (changePayload.wasChanged) {// remove duplicate entries [A,[A,B]] -> [A,[B]], [A,[A]] -> [A,[]], etc
+            var filteredData = new ArrayList<String>(changePayload.additionalFbrList.size());
+            for (var item : changePayload.additionalFbrList) {
+                if (!filteredData.contains(item) && !changePayload.primaryFbr.equals(item)) {
+                    filteredData.add(item);
+                }
+            }
+            changePayload.additionalFbrList = filteredData;
+        }
+
+        if(changePayload.wasChanged){
+            orgtilknytningCommandService.endreFysiskeBrukersted(new EndreFysiskeBrukerstederCommand(
+                orgtilknytningState.fid(),
+                orgtilknytningState.navident(),
+                orgtilknytningState.orgEnhetId(),
+                changePayload.primaryFbr,
+                changePayload.additionalFbrList,
+                null,
+                inputMetaData
+            ));
+        } else{
+            log.warn("Skulle oppdatere fysisk brukersted {} -> {} for orgtilknytning {}, men ingenting ble endret ", fraFysiskBrukerstedNr, tilFysiskBrukerstedNr, orgtilknytningState.fid());
+        }
     }
 
     public boolean fysiskBrukerstedExists(String fysiskBrukerstedNr) {
