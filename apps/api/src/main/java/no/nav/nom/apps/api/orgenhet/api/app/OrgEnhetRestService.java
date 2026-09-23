@@ -437,6 +437,88 @@ public class OrgEnhetRestService {
     }
 
     public EndreOpphengOrgEnhetResponse endreOpphengForOrgenhet(EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
-        return null;
+        var orgEnhetId = endreOpphengOrgEnhetRequest.orgenhetId();
+        var nyOverordnetId = endreOpphengOrgEnhetRequest.updatedOverenhetId();
+
+        if (Objects.equals(orgEnhetId, nyOverordnetId)) {
+            throw new IllegalStateException("En enhet kan ikke være overordnet seg selv");
+        }
+
+        var orgEnhet = orgenhetService.getById(orgEnhetId)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+        var nyOverordnetOrgEnhet = orgenhetService.getById(nyOverordnetId)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(nyOverordnetId));
+
+        var gjeldendeOrganisering = organiseringStateRepository.findActiveById(orgEnhetId)
+            .orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetId));
+
+        if (!Objects.equals(gjeldendeOrganisering.idOver(), endreOpphengOrgEnhetRequest.currentOverenhetId())) {
+            throw new IllegalStateException(String.format(
+                "Enhet %s (%s) er ikke lenger knyttet til oppgitt overenhet %s",
+                orgEnhet.getNavn(),
+                orgEnhetId,
+                endreOpphengOrgEnhetRequest.currentOverenhetId()
+            ));
+        }
+
+        if (Objects.equals(gjeldendeOrganisering.idOver(), nyOverordnetId)) {
+            throw new IllegalStateException(String.format(
+                "Enhet %s (%s) er allerede knyttet til %s (%s)",
+                orgEnhet.getNavn(),
+                orgEnhetId,
+                nyOverordnetOrgEnhet.getNavn(),
+                nyOverordnetId
+            ));
+        }
+
+        var gyldigFom = endreOpphengOrgEnhetRequest.gyldigFom();
+        var nyttOpphengGyldigTom = gjeldendeOrganisering.gyldigTom();
+
+        if (gyldigFom.isBefore(orgEnhet.getGyldigFom())) {
+            throw new IllegalStateException("Ny opphengsdato kan ikke være før enhetens gyldigFom");
+        }
+        if (nonNull(orgEnhet.getGyldigTom()) && gyldigFom.isAfter(orgEnhet.getGyldigTom())) {
+            throw new IllegalStateException("Ny opphengsdato kan ikke være etter enhetens sluttdato");
+        }
+        if (nonNull(nyOverordnetOrgEnhet.getGyldigTom()) && nyOverordnetOrgEnhet.getGyldigTom().isBefore(gyldigFom)) {
+            throw new IllegalStateException("Ny overordnet enhet er avviklet før ny opphengsdato");
+        }
+        if (gyldigFom.minusDays(1).isBefore(gjeldendeOrganisering.gyldigFom())) {
+            throw new IllegalStateException("Ny opphengsdato kan ikke være før eller lik gjeldende opphengs gyldigFom");
+        }
+
+        InputMetadata inputMetadata = new InputMetadata(
+            "REST-API",
+            "endreOpphengForOrgenhet",
+            endreOpphengOrgEnhetRequest,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        organiseringEventCommandService.avsluttOrganisering(
+            gjeldendeOrganisering.fid(),
+            new AvsluttOrganiseringCmd(gyldigFom.minusDays(1), inputMetadata)
+        );
+
+        organiseringEventCommandService.opprettOrganisering(
+            new OpprettOrganiseringCmd(
+                orgEnhet.getId(),
+                orgEnhet.getNavn(),
+                nyOverordnetOrgEnhet.getId(),
+                nyOverordnetOrgEnhet.getNavn(),
+                gyldigFom,
+                nyttOpphengGyldigTom,
+                inputMetadata
+            )
+        );
+
+        return new EndreOpphengOrgEnhetResponse(
+            orgEnhet.getId(),
+            nyOverordnetOrgEnhet.getId(),
+            gyldigFom,
+            nyttOpphengGyldigTom
+        );
     }
 }
