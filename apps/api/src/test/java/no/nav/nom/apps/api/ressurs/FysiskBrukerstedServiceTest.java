@@ -324,8 +324,9 @@ class FysiskBrukerstedServiceTest {
     void flyttOrgtilknytningerTilNyFysiskBrukersted_ok() {
         var fysiskBrukerstedToMatch = "1234";
         var fysiskBrukerstedNotToMatch = "9876";
-        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").build();
-        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+        var previousFysiskBrukersted = "4321";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").primaryFysiskBrukerstedNummer(previousFysiskBrukersted).build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").primaryFysiskBrukerstedNummer(previousFysiskBrukersted).build();
 
         var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
         var allOts = List.of(orgtilknytning1, orgtilknytning2);
@@ -338,7 +339,7 @@ class FysiskBrukerstedServiceTest {
             )
         );
 
-        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, null);
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, previousFysiskBrukersted, null);
 
         verify(orgtilknytningCommandServiceMock, times(2)).endreFysiskeBrukersted(any());
     }
@@ -369,8 +370,9 @@ class FysiskBrukerstedServiceTest {
     void flyttOrgtilknytningerTilNyFysiskBrukersted_fails() {
         var fysiskBrukerstedToMatch = "1234";
         var fysiskBrukerstedNotToMatch = "9876";
-        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").build();
-        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+        var fysiskBrukerstedOriginal = "4321";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().primaryFysiskBrukerstedNummer(fysiskBrukerstedOriginal).navident("A000001").build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().primaryFysiskBrukerstedNummer(fysiskBrukerstedOriginal).navident("A000002").build();
 
         var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
         var allOts = List.of(orgtilknytning1, orgtilknytning2);
@@ -383,7 +385,7 @@ class FysiskBrukerstedServiceTest {
             )
         );
 
-        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, "FINNES IKKE", null);
+        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, "FINNES IKKE", fysiskBrukerstedOriginal, null);
         assertEquals(2, failed.size());
 
         verify(orgtilknytningCommandServiceMock, times(0)).endreFysiskeBrukersted(any());
@@ -414,8 +416,9 @@ class FysiskBrukerstedServiceTest {
     void flyttOrgtilknytningerTilNyFysiskBrukersted_fails_2() {
         var fysiskBrukerstedToMatch = "1234";
         var fysiskBrukerstedNotToMatch = "9876";
+        var fysiskBrukerstedOriginal = "4321";
         var orgtilknytning1 = orgtilknytningState().toBuilder().fid("FINNES_IKKE").navident("A000001").build();
-        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().primaryFysiskBrukerstedNummer(fysiskBrukerstedOriginal).navident("A000002").build();
 
         var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid());
         var allOts = List.of(orgtilknytning2);
@@ -428,7 +431,7 @@ class FysiskBrukerstedServiceTest {
             )
         );
 
-        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, null);
+        var failed = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch,fysiskBrukerstedOriginal , null);
         assertEquals(1, failed.size());
 
         verify(orgtilknytningCommandServiceMock, times(1)).endreFysiskeBrukersted(any());
@@ -524,6 +527,33 @@ class FysiskBrukerstedServiceTest {
         assertTrue(fysiskBrukerstedService.fysiskBrukerstedExists("9876"));
         assertFalse(fysiskBrukerstedService.fysiskBrukerstedExists("5555"));
     }
+
+    @Test
+    void verifyUnrelatedOtToPreviousFysiskBrukerstedNummerIsIgnored(){
+
+        var fysiskBrukerstedToMatch = "1234";
+        var previousFysiskBrukersted = "4321";
+        var unrelatedPreviousFysiskBrukersted = "4001";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").primaryFysiskBrukerstedNummer(previousFysiskBrukersted).build();
+        var orgtilknytning2 = orgtilknytningState().toBuilder().navident("A000002").primaryFysiskBrukerstedNummer(previousFysiskBrukersted).build();
+        var unrlatedOrgtilknytning3 = orgtilknytningState().toBuilder().navident("A000003").primaryFysiskBrukerstedNummer(unrelatedPreviousFysiskBrukersted).build();
+
+        var allFids = List.of(orgtilknytning1.fid(), orgtilknytning2.fid(), unrlatedOrgtilknytning3.fid());
+        var allOts = List.of(orgtilknytning1, orgtilknytning2, unrlatedOrgtilknytning3);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(fysiskBrukerstedToMatch).navn("Der").build()
+            )
+        );
+
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fysiskBrukerstedToMatch, previousFysiskBrukersted, null);
+
+        verify(orgtilknytningCommandServiceMock, times(2)).endreFysiskeBrukersted(any());
+
+    }
+
 
     public static RessursState ressursState() {
         return new RessursState(
