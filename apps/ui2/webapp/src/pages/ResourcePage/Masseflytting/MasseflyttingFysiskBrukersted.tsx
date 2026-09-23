@@ -256,6 +256,7 @@ function FysiskBrukerstedFlyttingTable() {
           masseflyttingFysiskBrukerstedMutation.mutate({
             orgtilknytningerFid: valgteOrgtilknytninger,
             tilFysiskBrukerstedNr: fysiskBrukerstedTil,
+            fraFysiskBrukerstedNr: fysiskBrukerstedFra,
           });
         })
         .catch(() => {});
