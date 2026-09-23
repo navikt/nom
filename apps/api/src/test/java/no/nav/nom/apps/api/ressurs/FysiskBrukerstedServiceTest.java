@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.MicrosoftGraphClient;
 import no.nav.nom.apps.api.common.speiling.SpeilingService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.IdentType;
@@ -23,16 +24,21 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -552,6 +558,127 @@ class FysiskBrukerstedServiceTest {
 
         verify(orgtilknytningCommandServiceMock, times(2)).endreFysiskeBrukersted(any());
 
+    }
+
+    @Test
+    void changesAdditionalBrukerstedWhenMatching(){
+        var newBrukersted = "1234";
+        var previousMatchingAdditionalFysiskBrukersted = "4321";
+        var previousNonMatchingPrimaryFysiskBrukersted = "9876";
+        var orgtilknytning1 = orgtilknytningState().toBuilder().navident("A000001").primaryFysiskBrukerstedNummer(previousNonMatchingPrimaryFysiskBrukersted).additionalFysiskeBrukerstederNummer(List.of(previousMatchingAdditionalFysiskBrukersted)).build();
+
+        var allFids = List.of(orgtilknytning1.fid());
+        var allOts = List.of(orgtilknytning1);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(newBrukersted).navn("Der").build()
+            )
+        );
+
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, newBrukersted, previousMatchingAdditionalFysiskBrukersted, null);
+
+        verify(orgtilknytningCommandServiceMock, times(1)).endreFysiskeBrukersted(argThat(s -> {
+            assertTrue(s.additionalFysiskeBrukerstederNummer().contains(newBrukersted),"should contain new fysisk brukersted");
+            assertEquals(previousNonMatchingPrimaryFysiskBrukersted, s.primaryFysiskBrukerstedNummer(), "Should not change non-matching primarybrukersted");
+            return true;
+        }));
+    }
+
+    @Test
+    void leavesUnrelatedAdditionalBrukerstedIntact(){
+        var newBrukersted = "1234";
+        var previousMatchingAdditionalFysiskBrukersted = "4321";
+        var previousNonMatchingAdditionalFysiskBrukersted = "9876";
+        var orgtilknytning1 = orgtilknytningState().toBuilder()
+            .navident("A000001")
+            .additionalFysiskeBrukerstederNummer(List.of(previousMatchingAdditionalFysiskBrukersted,previousNonMatchingAdditionalFysiskBrukersted))
+            .build();
+
+        var allFids = List.of(orgtilknytning1.fid());
+        var allOts = List.of(orgtilknytning1);
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(newBrukersted).navn("Der").build()
+            )
+        );
+
+        fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, newBrukersted, previousMatchingAdditionalFysiskBrukersted, null);
+
+        verify(orgtilknytningCommandServiceMock, times(1)).endreFysiskeBrukersted(argThat(s -> {
+            assertTrue(s.additionalFysiskeBrukerstederNummer().contains(newBrukersted),"should contain new fysisk brukersted");
+            assertTrue(s.additionalFysiskeBrukerstederNummer().contains(previousNonMatchingAdditionalFysiskBrukersted),"should not change non-matching primarybrukersted");
+            return true;
+        }));
+    }
+
+    @Test
+    void checkOverallMasseflyttBehavior(){
+        var fbrA = "1234";
+        var fbrB = "4321";
+        var fbrC = "4001";
+        var fbrD = "5004";
+        var ot1 = orgtilknytningState().toBuilder().navident("A000001").primaryFysiskBrukerstedNummer(fbrA).additionalFysiskeBrukerstederNummer(List.of(fbrB)).build();
+        var ot2 = orgtilknytningState().toBuilder().navident("A000002").primaryFysiskBrukerstedNummer(fbrB).additionalFysiskeBrukerstederNummer(List.of(fbrA)).build();
+        var ot3 = orgtilknytningState().toBuilder().navident("A000003").primaryFysiskBrukerstedNummer(fbrC).additionalFysiskeBrukerstederNummer(List.of(fbrA)).build();
+        var ot4 = orgtilknytningState().toBuilder().navident("A000004").primaryFysiskBrukerstedNummer(fbrC).additionalFysiskeBrukerstederNummer(List.of(fbrA, fbrB, fbrD)).build();
+        var otSkip1 = orgtilknytningState().toBuilder().navident("B000001").primaryFysiskBrukerstedNummer(fbrC).build();
+        var otSkip2 = orgtilknytningState().toBuilder().navident("B000002").primaryFysiskBrukerstedNummer(fbrC).additionalFysiskeBrukerstederNummer(List.of(fbrB)).build();
+        var otSkip3 = orgtilknytningState().toBuilder().navident("B000003").primaryFysiskBrukerstedNummer(fbrB).build();
+        var otSkip4 = orgtilknytningState().toBuilder().navident("B000004").primaryFysiskBrukerstedNummer(fbrB).additionalFysiskeBrukerstederNummer(List.of(fbrD)).build();
+
+        var otForChangeList = List.of(ot1, ot2, ot3, ot4);
+        var otForSkipList = List.of(otSkip1, otSkip2, otSkip3, otSkip4);
+
+        var allOts = Stream.concat(otForChangeList.stream(), otForSkipList.stream()).toList();
+        var allFids = allOts.stream().map(OrgtilknytningState::fid).toList();
+
+        when(orgtilknytningStateRepositoryMock.findByFidIn(allFids)).thenReturn(allOts);
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(
+            List.of(
+                FysiskBrukersted.builder().nr(fbrA).navn("fbr a").build(),
+                FysiskBrukersted.builder().nr(fbrB).navn("fbr b").build(),
+                FysiskBrukersted.builder().nr(fbrC).navn("fbr c").build(),
+                FysiskBrukersted.builder().nr(fbrD).navn("fbr d").build()
+            )
+        );
+        var failures = fysiskBrukerstedService.flyttOrgtilknytningerTilNyFysiskBrukersted(allFids, fbrB, fbrA, null);
+
+        assertThat(failures).hasSize(otForSkipList.size()).containsOnlyKeys(otForSkipList.stream().map(OrgtilknytningState::fid).toList());
+        final var changeCommandMapFromNavident = new HashMap<String, EndreFysiskeBrukerstederCommand>();
+
+        verify(orgtilknytningCommandServiceMock, times(4)).endreFysiskeBrukersted(argThat(s -> {
+            changeCommandMapFromNavident.put(s.navident(),s);
+            return true;
+        }));
+        { // masseflytt A til B: [A,[B]] -> [B,[]]
+            var change1 = changeCommandMapFromNavident.get(ot1.navident());
+            assertThat(change1.primaryFysiskBrukerstedNummer()).isEqualTo(fbrB);
+            assertThat(change1.additionalFysiskeBrukerstederNummer()).isEmpty();
+        }
+        { // masseflytt A til B: [B,[A]] -> [B,[]]
+            var change2 = changeCommandMapFromNavident.get(ot2.navident());
+            assertThat(change2.primaryFysiskBrukerstedNummer()).isEqualTo(fbrB);
+            assertThat(change2.additionalFysiskeBrukerstederNummer()).isEmpty();
+        }
+        {  // masseflytt A til B: [C,[A]] -> [C,[B]]
+            var change3 = changeCommandMapFromNavident.get(ot3.navident());
+            assertThat(change3.primaryFysiskBrukerstedNummer()).isEqualTo(fbrC);
+            assertThat(change3.additionalFysiskeBrukerstederNummer()).containsExactly(fbrB);
+        }
+        { // masseflytt A til B: [C,[A,B,D]] -> [C,[B,D]]
+            var change4 = changeCommandMapFromNavident.get(ot4.navident());
+            assertThat(change4.primaryFysiskBrukerstedNummer()).isEqualTo(fbrC);
+            assertThat(change4.additionalFysiskeBrukerstederNummer()).containsExactlyInAnyOrder(fbrB,fbrD);
+        }
+        {
+            for (var ot : List.of(otSkip1, otSkip2, otSkip3, otSkip4)) {
+                assertNull(changeCommandMapFromNavident.get(ot.navident()), "Expected this OT connected to navident " + ot.navident() + " to not have been changed");
+            }
+        }
     }
 
 
