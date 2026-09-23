@@ -673,6 +673,7 @@ export interface Tilgangsenhet {
 export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
   orgtilknytningerFid: string[];
   tilFysiskBrukerstedNr: string;
+  fraFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
