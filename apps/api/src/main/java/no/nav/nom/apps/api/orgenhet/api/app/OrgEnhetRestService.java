@@ -11,6 +11,8 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettO
 import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KostnadsstedResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetKostnadsstedMappingRequest;
@@ -432,5 +434,9 @@ public class OrgEnhetRestService {
                 throw new IllegalStateException(format);
             }
         });
+    }
+
+    public EndreOpphengOrgEnhetResponse endreOpphengForOrgenhet(EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
+        return null;
     }
 }

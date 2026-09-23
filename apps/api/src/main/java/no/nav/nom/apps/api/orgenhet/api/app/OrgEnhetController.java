@@ -14,6 +14,8 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KostnadsstedResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetKostnadsstedMappingRequest;
@@ -468,6 +470,17 @@ public class OrgEnhetController {
     public ResponseEntity<OrgEnhetKostnadsstedMappingResponse> opprettKostnadsstedMapping(@RequestBody OpprettOrgEnhetKostnadsstedMappingRequest orgEnhetKostnadsstedMappingRequest) {
         return ResponseEntity.status(CREATED)
             .body(orgEnhetRestService.opprettOrgEnhetKostnadsstedMapping(orgEnhetKostnadsstedMappingRequest));
+    }
+
+    @Operation(
+        description = "Endre oppheng for orgenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PostMapping("/endreOpphengForOrgenhet")
+    public ResponseEntity<EndreOpphengOrgEnhetResponse> endreOpphengForOrgenhet(@RequestBody EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
+        return ResponseEntity.status(CREATED)
+            .body(orgEnhetRestService.endreOpphengForOrgenhet(endreOpphengOrgEnhetRequest));
     }
 
     @ExceptionHandler({
