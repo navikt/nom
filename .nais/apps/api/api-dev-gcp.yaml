@@ -373,7 +373,7 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
-        - name: populasjonstilgangskontroll
+        - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: dev-gcp
       external:
