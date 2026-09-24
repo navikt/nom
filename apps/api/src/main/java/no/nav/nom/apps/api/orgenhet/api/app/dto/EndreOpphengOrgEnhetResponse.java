@@ -10,7 +10,7 @@ public record EndreOpphengOrgEnhetResponse(
     @Schema(requiredMode = REQUIRED)
     String orgenhetId,
     @Schema(requiredMode = REQUIRED)
-    String updatedOverenhetId,
+    String nyOverenhetId,
     @Schema(requiredMode = REQUIRED)
     LocalDate gyldigFom,
     @Schema(requiredMode = REQUIRED)

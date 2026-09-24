@@ -437,6 +437,75 @@ public class OrgEnhetRestService {
     }
 
     public EndreOpphengOrgEnhetResponse endreOpphengForOrgenhet(EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
-        return null;
+        /*
+         first change existing organisering - gyldigTom is yesterday
+         then add new organisering - gyldigFom is set today and gyldigTom is set to current organisering´s gyldigTom
+         */
+        var orgEnhetId = endreOpphengOrgEnhetRequest.orgenhetId();
+        var nyOverenhetId = endreOpphengOrgEnhetRequest.nyOverenhetId();
+
+        if (Objects.equals(orgEnhetId, nyOverenhetId)) {
+            throw new IllegalStateException("En enhet kan ikke være overordnet seg selv");
+        }
+
+        var orgEnhet = orgenhetService.getById(orgEnhetId)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+        var nyOverenhet = orgenhetService.getById(nyOverenhetId)
+            .orElseThrow(() -> OrgEnhetNotFoundException.id(nyOverenhetId));
+
+        var gjeldendeOrganisering = organiseringStateRepository.findActiveById(orgEnhetId)
+            .orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetId));
+
+        if (!Objects.equals(gjeldendeOrganisering.idOver(), endreOpphengOrgEnhetRequest.currentOverenhetId())) {
+            throw new IllegalStateException(String.format(
+                "Enhet %s (%s) er ikke knyttet til oppgitt overenhet %s",
+                orgEnhet.getNavn(), orgEnhetId, endreOpphengOrgEnhetRequest.currentOverenhetId()));
+        }
+
+        if (Objects.equals(gjeldendeOrganisering.idOver(), nyOverenhetId)) {
+            throw new IllegalStateException(String.format(
+                "Enhet %s (%s) er allerede knyttet til %s (%s)",
+                orgEnhet.getNavn(), orgEnhetId, nyOverenhet.getNavn(), nyOverenhetId));
+        }
+
+        var iDag = LocalDate.now();
+        var nyGyldigTom = gjeldendeOrganisering.gyldigTom();
+
+        InputMetadata inputMetadata = new InputMetadata(
+            "REST-API",
+            "endreOpphengForOrgenhet",
+            endreOpphengOrgEnhetRequest,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        // Avslutt gjeldende organisering i går
+        organiseringEventCommandService.endreOrganisering(
+            gjeldendeOrganisering.fid(),
+            new EndreOrganiseringCmd(
+                gjeldendeOrganisering.id(),
+                gjeldendeOrganisering.navn(),
+                gjeldendeOrganisering.idOver(),
+                gjeldendeOrganisering.navnOver(),
+                gjeldendeOrganisering.gyldigFom(),
+                iDag.minusDays(1),
+                inputMetadata
+            )
+        );
+
+        // Opprett ny organisering fra i dag med gjeldende gyldigTom
+        organiseringEventCommandService.opprettOrganisering(new OpprettOrganiseringCmd(
+            orgEnhet.getId(),
+            orgEnhet.getNavn(),
+            nyOverenhet.getId(),
+            nyOverenhet.getNavn(),
+            iDag,
+            nyGyldigTom,
+            inputMetadata
+        ));
+
+        return new EndreOpphengOrgEnhetResponse(orgEnhet.getId(), nyOverenhet.getId(), iDag, nyGyldigTom);
     }
 }

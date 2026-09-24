@@ -12,6 +12,6 @@ public record EndreOpphengOrgEnhetRequest(
     @Schema(requiredMode = REQUIRED)
     String currentOverenhetId,
     @Schema(requiredMode = REQUIRED)
-    String updatedOverenhetId
+    String nyOverenhetId
 ) {
 }
