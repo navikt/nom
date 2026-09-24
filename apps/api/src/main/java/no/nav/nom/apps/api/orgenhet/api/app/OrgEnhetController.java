@@ -479,8 +479,11 @@ public class OrgEnhetController {
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/endreOpphengForOrgenhet")
     public ResponseEntity<EndreOpphengOrgEnhetResponse> endreOpphengForOrgenhet(@RequestBody EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
-        return ResponseEntity.status(CREATED)
-            .body(orgEnhetRestService.endreOpphengForOrgenhet(endreOpphengOrgEnhetRequest));
+        if (unleash.isEnabled("nom-api.endre-orgenhet-oppheng")) {
+            return ResponseEntity.status(CREATED).body(orgEnhetRestService.endreOpphengForOrgenhet(endreOpphengOrgEnhetRequest));
+        } else {
+            return ResponseEntity.ok().build();
+        }
     }
 
     @ExceptionHandler({
