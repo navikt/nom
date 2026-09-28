@@ -297,6 +297,9 @@ spec:
         - application: pensjon-deployment-audit
           namespace: pensjon-revisjon
           cluster: prod-gcp
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
