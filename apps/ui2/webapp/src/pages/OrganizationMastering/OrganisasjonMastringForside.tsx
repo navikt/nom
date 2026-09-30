@@ -273,12 +273,7 @@ function MineOrgEnheterSeksjon() {
     <VStack gap="6">
       {visPerspektivSearch && (
         <>
-          <VStack
-            css={css`
-              width: 35%;
-            `}
-            gap="4"
-          >
+          <div>
             {delegerbareRessurserQuery.isLoading ? (
               <LoaderWithText>Laster...</LoaderWithText>
             ) : (
@@ -289,7 +284,7 @@ function MineOrgEnheterSeksjon() {
                 size="medium"
               />
             )}
-          </VStack>
+          </div>
 
           {!!valgtRessurs && (
             <BodyShort
