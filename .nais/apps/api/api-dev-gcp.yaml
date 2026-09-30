@@ -399,3 +399,6 @@ spec:
       - name: org-nom-api-utbet-mottakere
         lifecycleCondition:
           age: 14
+      - name: no-nav-nom-dev-ressurs-syntetisering-storage-bucket
+        lifecycleCondition:
+          age: 14
