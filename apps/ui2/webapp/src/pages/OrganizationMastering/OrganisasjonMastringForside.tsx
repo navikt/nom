@@ -14,7 +14,6 @@ import {
   HGrid,
   HStack,
   LinkCard,
-  Search,
   UNSAFE_Combobox,
   VStack,
 } from "@navikt/ds-react";
@@ -44,7 +43,7 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { useUnleashToggle } from "~/hooks/useUnleashToggle";
+
 import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn, navToppnode } from "~/utils";
 
