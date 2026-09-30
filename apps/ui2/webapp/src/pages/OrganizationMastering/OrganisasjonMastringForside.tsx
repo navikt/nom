@@ -224,13 +224,6 @@ function MineOrgEnheterSeksjon() {
 
   const visPerspektivSearch = hasAdminAccess || hasAdminReadOnlyAccess;
 
-  const simpleSearchEnabled = useUnleashToggle(
-    "nom-fe.orgmastring.simple-search",
-  );
-  const advancedSearchEnabled = useUnleashToggle(
-    "nom-fe.orgmastring.advanced-search",
-  );
-
   const [perspectiveSelected, setPerspectiveSelected] = useState("");
 
   const handlePerpectiveSelect = (input: string) =>
@@ -248,6 +241,11 @@ function MineOrgEnheterSeksjon() {
       ),
   });
 
+  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
+
+  const toppnodeIder =
+    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
+
   const valgtRessursQuery = useQuery({
     queryKey: getRessurs.queryKey(perspectiveSelected),
     queryFn: () => getRessurs.queryFn(perspectiveSelected),
@@ -256,15 +254,10 @@ function MineOrgEnheterSeksjon() {
 
   const valgtRessurs = valgtRessursQuery.data;
 
-  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
-
-  const toppnodeIder =
-    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
-
   const delegerbareRessurserQuery = useQuery({
     queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
     queryFn: () => getRessurserWhichCanBeDelegatedTo.queryFn(),
-    enabled: advancedSearchEnabled && visPerspektivSearch,
+    enabled: visPerspektivSearch,
   });
 
   const delegerbareRessurser = delegerbareRessurserQuery?.data;
@@ -287,32 +280,16 @@ function MineOrgEnheterSeksjon() {
             `}
             gap="4"
           >
-            {simpleSearchEnabled && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <Search
-                  autoComplete="off"
-                  hideLabel={false}
-                  label="Se perspektivet til ressurs"
-                  onSearchClick={handlePerpectiveSelect}
-                />
-              </form>
+            {delegerbareRessurserQuery.isLoading ? (
+              <LoaderWithText>Laster...</LoaderWithText>
+            ) : (
+              <UNSAFE_Combobox
+                label="Se perspektivet til ledere eller lederstøtte"
+                onToggleSelected={handlePerpectiveSelect}
+                options={alleOptions}
+                size="medium"
+              />
             )}
-
-            {advancedSearchEnabled &&
-              (delegerbareRessurserQuery.isLoading ? (
-                <LoaderWithText>Laster...</LoaderWithText>
-              ) : (
-                <UNSAFE_Combobox
-                  label="Se perspektivet til ledere eller lederstøtte"
-                  onToggleSelected={handlePerpectiveSelect}
-                  options={alleOptions}
-                  size="medium"
-                />
-              ))}
           </VStack>
 
           {!!valgtRessurs && (
@@ -353,6 +330,8 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
   });
 
   const orgEnheter = orgEnheterQuery?.data;
+
+  console.log(orgEnheter);
 
   if (toppnodeIder.length === 0) {
     return;
