@@ -180,9 +180,6 @@ spec:
         - application: testnav-nom-proxy
           namespace: dolly
           cluster: dev-gcp
-        - application: repr-fullmakt
-          namespace: repr
-          cluster: dev-fss
         - application: fullmakt
           namespace: repr
           cluster: dev-gcp
