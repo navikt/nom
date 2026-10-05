@@ -354,6 +354,9 @@ spec:
         - application: nom-pusher
           namespace: oksty
           cluster: dev-gcp
+        - application: tolketjenester
+          namespace: oksty
+          cluster: dev-gcp
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
           cluster: dev-gcp
