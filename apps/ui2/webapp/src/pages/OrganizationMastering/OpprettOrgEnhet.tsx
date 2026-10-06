@@ -256,11 +256,13 @@ function OpprettOrgEnhetForm({
               description="Enheten kan ikke ha likt navn som en annen enhet"
               error={methods.formState.errors.navn?.message}
               label="Navn på ny organisasjonsenhet"
+              autoComplete="off"
             />
 
             <FormRessursSearchWrapper
               label="Leder på organisasjonsenhet"
               name="lederRessursNavident"
+              valgtRessursInfo
             />
 
             <FormDateWrapper name="gyldigFom" />
