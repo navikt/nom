@@ -4,11 +4,14 @@ import no.nav.nom.apps.api.TestTokensGenerator;
 import no.nav.nom.apps.api.clients.koststed.KostnadsstedMappingResponseDTO;
 import no.nav.nom.apps.api.clients.koststed.OrgEnhetKostnadsstedMappingClient;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.AvvikleOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetRequest;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.EndreOpphengOrgEnhetResponse;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.KorrigerOrgEnhetNavnRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OpprettOrgEnhetResponse;
@@ -1002,6 +1005,49 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         assertNotNull(ikkeAvvikletOrgEnhet);
         assertThat(responseMessage).isEqualTo(ikkeAvvikletOrgEnhet.getMessage());
+    }
+
+    @Test
+    void should_return_422_when_endre_oppheng_gyldigFom_is_before_today() {
+        var gammelOver = orgEnhetStateBuilderWithDefaultValues().toBuilder().id("ov1111").gyldigTom(null).build();
+        var nyOver = orgEnhetStateBuilderWithDefaultValues().toBuilder().id("ov2222").gyldigTom(null).build();
+        var orgEnhet = orgEnhetStateBuilderWithDefaultValues().toBuilder().id("en3333").gyldigTom(null).build();
+
+        var organisering = organiseringState().toBuilder()
+            .id(orgEnhet.id())
+            .navn(orgEnhet.navn())
+            .idOver(gammelOver.id())
+            .navnOver(gammelOver.navn())
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(null)
+            .build();
+
+        orgEnhetStateRepository.update(gammelOver);
+        orgEnhetStateRepository.update(nyOver);
+        orgEnhetStateRepository.update(orgEnhet);
+        organiseringStateRepository.update(organisering);
+
+        var iDag = LocalDate.now();
+        var gyldigFom = iDag.minusDays(1);
+
+        when(unleash.isEnabled("nom-api.endre-orgenhet-oppheng")).thenReturn(true);
+
+        var response = webTestClient.post()
+            .uri("/app/orgenheter/endreOpphengForOrgenhet")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(testToken.nomAdminUser()))
+            .bodyValue(new EndreOpphengOrgEnhetRequest(orgEnhet.id(), gammelOver.id(), nyOver.id(), gyldigFom))
+            .exchange()
+            .expectStatus().isEqualTo(422)
+            .expectBody(StandardResponse.class)
+            .returnResult()
+            .getResponseBody();
+
+        assertNotNull(response);
+        assertThat(response.getMessage())
+            .isEqualTo(String.format("GyldigFom %s kan ikke være før i dag %s", gyldigFom, iDag));
+
+        verify(organiseringEventCommandService, times(0)).endreOrganisering(any(), any());
+        verify(organiseringEventCommandService, times(0)).opprettOrganisering(any());
     }
 
     private WebTestClient.ResponseSpec postOrgenhetType(String accessToken, SetOrgEnhetsTypeRequest requestBody) {
