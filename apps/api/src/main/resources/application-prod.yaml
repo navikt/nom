@@ -1,0 +1,119 @@
+app:
+  fiksEventsourcePayload:
+    offsets:
+      ressurs: 932000 # 932901
+      orgenhet: 790000 # 790761
+      orgenhetLeder: 9900 # 9928
+      orgtilknytning: 944000 # 945017
+      organisering: 9400 # 9439
+      authorize: 1100 # 1139
+  granted-authorities:
+    clients:
+      nom-ui2:
+        client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
+        scopes: ["QUERY_PERSON", "NOM_UI_APP"]
+      nom-remedy-integrasjon:
+        client-id: "38988a2b-d0d7-4675-bfdb-03d486c47cf0"
+        scopes: ["NOM_REMEDY_INTEGRASJON_APP"]
+      remedy:
+        client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      teamcat:
+        client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
+        scopes: ["TEAMCAT"]
+      fullmakt:
+        client-id: "97a53cb7-347b-49c3-956d-a4c051a72ba0"
+        scopes: ["FULLMAKT"]
+      repr-fullmakt:
+        client-id: "4546fbba-b729-469c-ac49-cc208643b745"
+        scopes: ["FULLMAKT"]
+      tolketjenesten:
+        client-id: "DONT-KNOW-YET"
+        scopes: ["TOLKETJENESTEN"]
+      nom-admin:
+        client-id: "00c7dcfe-c3ad-44eb-aaac-4f88c5d4f1d2"
+        scopes: ["QUERY_PERSON"]
+      # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
+      local-nom-api:
+        client-id: "3e962532-1cd2-4bb4-8222-515c83df854a"
+        scopes: ["LOCAL_NOM_API"]
+    groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      write:
+        group-id: "${NOM_WRITE_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN", "MUTATE_RESSURS"]
+      nom-pilot:
+        group-id: "${NOM_PILOT_GROUPID}"
+        scopes: ["NOM_PILOT"]
+      nom-write-utl-konsulent:
+        group-id: "${NOM_WRITE_UTL_KONSULENT_GROUPID}"
+        scopes: ["NOM_WRITE_UTL_KONSULENT", "MUTATE_RESSURS"]
+      nom-write-vikafossen:
+        group-id: "${NOM_WRITE_VIKAFOSSEN_GROUPID}"
+        scopes: ["NOM_WRITE_VIKAFOSSEN", "MUTATE_RESSURS"]
+      nom-write-robot:
+        group-id: "${NOM_WRITE_ROBOT_GROUPID}"
+        scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
+      readonly:
+        group-id: "${READONLY_GROUPID}"
+        scopes: ["READONLY"]
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}"
+        scopes: ["READONLY", "EXTENDED_READONLY"]
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
+  manuelle-ressurser-og-ledere:
+    enabled: false
+  orgenhet:
+    nav-id: py437s
+    helfo-id: je305h
+    skatt-id: ne938h
+    riksrevisjonen-id: ke602d
+    vikafossen-id: ru664y
+    linjeenhetene: ry630r,te464t,se232x,ne994m
+    nasjonaloppfolgning-ids: fu549z,nu155v
+  google-storage-bucket-name:
+    missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
+    missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
+    utbet-mottakere: org-nom-prod-api-utbet-mottakere
+NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
+NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
+
+PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
+PDL_API_SCOPE: api://prod-fss.pdl.pdl-api/.default
+
+NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
+NOM_PROXY_API_SCOPE: api://prod-fss.nom.nom-proxy/.default
+
+NOM_DELEGERT_GROUPID: "b32023b5-4644-4b52-b6fc-bbb7723b8fbf" # 0000-GA-NOM-WRITE-DELEGERT
+NOM_LEDER_GROUPID: "f267e0a5-1ef6-4ef1-9303-4543b34f3b05" # 0000-GA-NOM-WRITE-LEDER
+NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
+NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
+NOM_PILOT_GROUPID: "e219ba08-0685-40b5-95e6-5fd82ec7414a" # NOM-PILOT
+NOM_WRITE_UTL_KONSULENT_GROUPID:  "9b3bcb75-12ae-4af7-aecf-fcd8f5b27dc5" # 0000-CA-NOM-Write-Utl-Konsulent
+NOM_WRITE_VIKAFOSSEN_GROUPID:     "220b7326-c379-4611-b1ad-57c29dd60914" # 0000-CA-NOM-Write-Vikafossen
+NOM_WRITE_ROBOT_GROUPID:          "ea2cd5fb-b0c0-4ffa-98ea-c5439dfcc3a9" # 0000-CA-NOM-Write-Robot
+READONLY_GROUPID:           "9a608366-69eb-42a9-a787-3469359ce322" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "cea028e1-811f-4cd6-aa67-d0130207fd7a" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+KOSTNADSSTEDSADMIN_GROUPID: "818ec344-1c3b-48e5-8a62-68bb9eeb2a09" # orgenhet-kostnadssted-mapping-admin
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID: "deae8838-59fd-4c27-9ccc-f0ed844bf091" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
+
+NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
+NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default
+
+MAIN_MANAGER_BASEURL: "https://nav.mainmanager.no"
+
+PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
+PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default
+
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://prod-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
