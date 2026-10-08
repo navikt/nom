@@ -8,7 +8,6 @@ import {
 } from "@navikt/aksel-icons";
 import { Button, Dropdown } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 
 import {
   getOrgEnheterLedetAvOptions,
@@ -27,7 +26,6 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
-import { navToppnode } from "~/utils";
 
 export function BurgerMenu() {
   const hasAdminAccess = useHasAdminAccess();
@@ -44,11 +42,9 @@ export function BurgerMenu() {
 
   const innloggetNavident = session.data?.navident;
 
-  const navigate = useNavigate();
-
   const adminLenke: string = globalThis.location.href.includes("nom.nav.no")
     ? "https://nom-admin.ansatt.nav.no"
-    : "https://nom-admin.intern.dev.nav.no";
+    : "https://nom-admin.ansatt.dev.nav.no/";
 
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(
