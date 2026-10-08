@@ -150,9 +150,6 @@ spec:
         - application: modiacontextholder
           namespace: personoversikt
           cluster: prod-fss
-        - application: repr-fullmakt
-          namespace: repr
-          cluster: prod-fss
         - application: fullmakt
           namespace: repr
           cluster: prod-gcp
@@ -296,6 +293,12 @@ spec:
           cluster: prod-gcp
         - application: pensjon-deployment-audit
           namespace: pensjon-revisjon
+          cluster: prod-gcp
+        - application: populasjonstilgangskontroll
+          namespace: tilgangsmaskin
+          cluster: prod-gcp
+        - application: entra-proxy
+          namespace: sikkerhetstjenesten
           cluster: prod-gcp
     outbound:
       rules:

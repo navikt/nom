@@ -18,6 +18,8 @@ app:
     tenant: ${SF_TENANT:sf-tenant}
     user-id: ${SF_USER_ID:sf-user-id}
     cpi-api-url: https://cloud-platform-integration-test-02d6jg6h.it-cpi050-rt.cfapps.eu20-002.hana.ondemand.com
+    historicalCutoffDate: 2026-09-28
+    nav-toppnode-id: ${SF_NAV_TOPPNODE_ID:sf-nav-topnode-id}
   nik:
     base-url: ${NIK_BASEURL}
     aad-scope: ${NIK_API_SCOPE}

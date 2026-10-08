@@ -13,13 +13,15 @@ This is a simple overview of the `EmpEmployment` entity fields.
 
 | Field | Java type | Notes |
 |---|---|---|
-| `StockEndDate` | `LocalDateTime` | Stock plan end date. |
+| `stockEndDate` | `LocalDateTime` | Stock plan end date. |
 | `assignmentClass` | `String` | Assignment class/code. |
 | `assignmentIdExternal` | `String` | External assignment id. |
 | `benefitsEndDate` | `LocalDateTime` | Benefits end date. |
 | `createdBy` | `String` | User id that created the record. |
 | `createdDateTime` | `ZonedDateTime` | Creation timestamp (with timezone). |
 | `createdOn` | `LocalDateTime` | Creation datetime. |
+| `customDate1` | `LocalDateTime` | Custom date field 1. |
+| `customString1` | `String` | Custom string field 1. |
 | `customString16` | `String` | Custom string field 16. |
 | `eligibleForSalContinuation` | `Boolean` | Salary continuation eligibility flag. |
 | `employmentId` | `Long` | Internal employment id. |
@@ -28,7 +30,6 @@ This is a simple overview of the `EmpEmployment` entity fields.
 | `includeAllRecords` | `Boolean` | Include all records flag. |
 | `isContingentWorker` | `Boolean` | Contingent worker flag. |
 | `isECRecord` | `Boolean` | Employee Central record flag. |
-| `isPrimary` | `Boolean` | Primary employment flag. |
 | `isSecondaryAllSfProcesses` | `Boolean` | Secondary assignment processing flag. |
 | `jobNumber` | `Long` | Job number/id. |
 | `lastDateWorked` | `LocalDateTime` | Last worked date. |
@@ -38,27 +39,29 @@ This is a simple overview of the `EmpEmployment` entity fields.
 | `okToRehire` | `Boolean` | Rehire eligibility flag. |
 | `originalStartDate` | `LocalDateTime` | Original start date. |
 | `payrollEndDate` | `LocalDateTime` | Payroll end date. |
+| `personIdExternal` | `String` | External person id (key). |
 | `salaryEndDate` | `LocalDateTime` | Salary end date. |
 | `seniorityDate` | `LocalDateTime` | Seniority date. |
 | `sourceOfRecord` | `Long` | Source-of-record identifier. |
 | `startDate` | `LocalDateTime` | Employment start date. |
+| `userId` | `String` | User id (key). |
 
 ## Navigation fields
 
 | Field | Java type | Target |
 |---|---|---|
-| `compInfoNav` | `List<EmpCompensation>` | `compInfoNav` |
-| `costDistributionNav` | `List<EmpCostDistribution>` | `costDistributionNav` |
-| `customString16Nav` | `PicklistOption` | `customString16Nav` |
-| `empJobRelationshipNav` | `List<EmpJobRelationships>` | `empJobRelationshipNav` |
-| `empPayCompNonRecurringNav` | `List<EmpPayCompNonRecurring>` | `empPayCompNonRecurringNav` |
-| `jobInfoNav` | `List<EmpJob>` | `jobInfoNav` |
-| `onboardingInfoNav` | `List<OnboardingInfo>` | `onboardingInfoNav` |
-| `paymentInformationNav` | `List<PaymentInformationV3>` | `paymentInformationNav` |
-| `personNav` | `PerPerson` | `personNav` |
-| `photoNav` | `List<Photo>` | `photoNav` |
-| `sourceOfRecordNav` | `PicklistOption` | `sourceOfRecordNav` |
-| `userNav` | `User` | `userNav` |
-| `wfRequestNav` | `WfRequest` | `wfRequestNav` |
-| `workOrderNav` | `List<WorkOrder>` | `workOrderNav` |
-
+| `toCompInfoNav` | `List<EmpCompensation>` | `compInfoNav` |
+| `toCostDistributionNav` | `List<EmpCostDistribution>` | `costDistributionNav` |
+| `toCustomString16Nav` | `PicklistOption` | `customString16Nav` |
+| `toCustomString1Nav` | `PicklistOption` | `customString1Nav` |
+| `toEmpJobRelationshipNav` | `List<EmpJobRelationships>` | `empJobRelationshipNav` |
+| `toEmpPayCompNonRecurringNav` | `List<EmpPayCompNonRecurring>` | `empPayCompNonRecurringNav` |
+| `toJobInfoNav` | `List<EmpJob>` | `jobInfoNav` |
+| `toOnboardingInfoNav` | `List<OnboardingInfo>` | `onboardingInfoNav` |
+| `toPaymentInformationNav` | `List<PaymentInformationV3>` | `paymentInformationNav` |
+| `toPersonNav` | `PerPerson` | `personNav` |
+| `toPhotoNav` | `List<Photo>` | `photoNav` |
+| `toSourceOfRecordNav` | `PicklistOption` | `sourceOfRecordNav` |
+| `toUserNav` | `User` | `userNav` |
+| `toWfRequestNav` | `WfRequest` | `wfRequestNav` |
+| `toWorkOrderNav` | `List<WorkOrder>` | `workOrderNav` |

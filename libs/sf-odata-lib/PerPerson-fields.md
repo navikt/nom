@@ -24,21 +24,22 @@ This is a simple overview of the `PerPerson` entity fields.
 | `lastModifiedOn` | `LocalDateTime` | Last modification datetime. |
 | `perPersonUuid` | `String` | Per-person UUID. |
 | `personId` | `Long` | Internal person id. |
+| `personIdExternal` | `String` | External person id (key). |
 | `userId` | `String` | User id link. |
 
 ## Navigation fields
 
 | Field | Java type | Target |
 |---|---|---|
-| `emailNav` | `List<PerEmail>` | `emailNav` |
-| `emergencyContactNav` | `List<PerEmergencyContacts>` | `emergencyContactNav` |
-| `employmentNav` | `List<EmpEmployment>` | `employmentNav` |
-| `homeAddressNavDEFLT` | `List<PerAddressDEFLT>` | `homeAddressNavDEFLT` |
-| `nationalIdNav` | `List<PerNationalId>` | `nationalIdNav` |
-| `personEmpTerminationInfoNav` | `PersonEmpTerminationInfo` | `personEmpTerminationInfoNav` |
-| `personTypeUsageNav` | `PersonTypeUsage` | `personTypeUsageNav` |
-| `personalInfoNav` | `List<PerPersonal>` | `personalInfoNav` |
-| `phoneNav` | `List<PerPhone>` | `phoneNav` |
-| `secondaryAssignmentsNav` | `List<SecondaryAssignments>` | `secondaryAssignmentsNav` |
-| `userAccountNav` | `UserAccount` | `userAccountNav` |
-
+| `toEmailNav` | `List<PerEmail>` | `emailNav` |
+| `toEmergencyContactNav` | `List<PerEmergencyContacts>` | `emergencyContactNav` |
+| `toEmploymentNav` | `List<EmpEmployment>` | `employmentNav` |
+| `toHomeAddressNavDEFLT` | `List<PerAddressDEFLT>` | `homeAddressNavDEFLT` |
+| `toNationalIdNav` | `List<PerNationalIdWithValidityPeriod>` | `nationalIdNav` |
+| `toPersonEmpTerminationInfoNav` | `PersonEmpTerminationInfo` | `personEmpTerminationInfoNav` |
+| `toPersonRerlationshipNav` | `List<PerPersonRelationship>` | `personRerlationshipNav` |
+| `toPersonTypeUsageNav` | `PersonTypeUsage` | `personTypeUsageNav` |
+| `toPersonalInfoNav` | `List<PerPersonal>` | `personalInfoNav` |
+| `toPhoneNav` | `List<PerPhone>` | `phoneNav` |
+| `toSecondaryAssignmentsNav` | `List<SecondaryAssignments>` | `secondaryAssignmentsNav` |
+| `toUserAccountNav` | `UserAccount` | `userAccountNav` |

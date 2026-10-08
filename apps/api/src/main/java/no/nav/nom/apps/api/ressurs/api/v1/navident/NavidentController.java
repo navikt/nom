@@ -28,7 +28,7 @@ import static no.nav.nom.apps.api.common.AppConfig.TEAM_LOGS;
 @Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
-@PreAuthorize("hasAuthority('ADMIN') || hasAuthority('NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT')")
+@PreAuthorize("hasAuthority('ADMIN') || hasAuthority('NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT') || hasAuthority('TOLKETJENESTEN')")
 public class NavidentController {
 
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.

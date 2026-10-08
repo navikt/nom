@@ -74,6 +74,8 @@ app:
   dolly-ressurs:
     fysisk-brukersted-nr: none
     orgenhet-id: none
+  google-storage-bucket-name:
+    ressurs-endringer: no-nav-nom-dev-ressurs-syntetisering-storage-bucket
 
 nom.libs.state.ressurs.enabled: true
 nom.libs.state.orgenhet.enabled: true
@@ -310,6 +312,9 @@ app:
       teamcat:
         client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
         scopes: ["TEAMCAT"]
+      tolketjenesten:
+        client-id: "60a087d7-2b5c-4586-abfe-b62189d4d02c"
+        scopes: ["TOLKETJENESTEN"]
       nom-admin:
         client-id: "66c5096f-89dc-446f-bc15-a39d5b4274e7"
         scopes: ["QUERY_PERSON"]
@@ -618,6 +623,9 @@ app:
       repr-fullmakt:
         client-id: "4546fbba-b729-469c-ac49-cc208643b745"
         scopes: ["FULLMAKT"]
+      tolketjenesten:
+        client-id: "DONT-KNOW-YET"
+        scopes: ["TOLKETJENESTEN"]
       nom-admin:
         client-id: "00c7dcfe-c3ad-44eb-aaac-4f88c5d4f1d2"
         scopes: ["QUERY_PERSON"]

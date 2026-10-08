@@ -180,9 +180,6 @@ spec:
         - application: testnav-nom-proxy
           namespace: dolly
           cluster: dev-gcp
-        - application: repr-fullmakt
-          namespace: repr
-          cluster: dev-fss
         - application: fullmakt
           namespace: repr
           cluster: dev-gcp
@@ -357,8 +354,14 @@ spec:
         - application: nom-pusher
           namespace: oksty
           cluster: dev-gcp
+        - application: tolketjenester
+          namespace: oksty
+          cluster: dev-gcp
         - application: populasjonstilgangskontroll
           namespace: tilgangsmaskin
+          cluster: dev-gcp
+        - application: entra-proxy
+          namespace: sikkerhetstjenesten
           cluster: dev-gcp
     outbound:
       rules:
@@ -397,5 +400,8 @@ spec:
         lifecycleCondition:
           age: 14
       - name: org-nom-api-utbet-mottakere
+        lifecycleCondition:
+          age: 14
+      - name: no-nav-nom-dev-ressurs-syntetisering-storage-bucket
         lifecycleCondition:
           age: 14
