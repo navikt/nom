@@ -43,6 +43,7 @@ import {
   FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
+  NomNivaaSelect,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
   OrgEnhetTypeSelect,
@@ -54,7 +55,7 @@ import type {
   OpprettOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
@@ -256,6 +257,7 @@ function OpprettOrgEnhetForm({
               description="Enheten kan ikke ha likt navn som en annen enhet"
               error={methods.formState.errors.navn?.message}
               label="Navn på ny organisasjonsenhet"
+              autoComplete="off"
             />
 
             <FormRessursSearchWrapper
@@ -271,6 +273,14 @@ function OpprettOrgEnhetForm({
               `}
             >
               <OrgEnhetTypeSelect name="orgEnhetsType" fullWidth />
+            </div>
+
+            <div
+              css={css`
+                width: 50%;
+              `}
+            >
+              <NomNivaaSelect name="nomNivaa" fullWidth />
             </div>
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
@@ -395,6 +405,10 @@ const validationSchema = yup.object({
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
+    .required("Obligatorisk"),
+  nomNivaa: yup
+    .mixed<NomNivaa>()
+    .oneOf(Object.values(NomNivaa), "Obligatorisk")
     .required("Obligatorisk"),
   kostnadsstedId: yup.string().required("Obligatorisk"),
 });
