@@ -3,7 +3,7 @@ import type { AxiosResponse } from "axios";
 import axios from "axios";
 
 import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import {
+import type {
   AvvikleOrgEnhetRequest,
   AvvikleRessursRequest,
   EndreOpphengOrgEnhetRequest,

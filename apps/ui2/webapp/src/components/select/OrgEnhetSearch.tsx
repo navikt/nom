@@ -1,23 +1,32 @@
+import axios from "axios";
+import type { FieldError } from "react-hook-form";
+
 import {
   AsyncSearch,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import axios from "axios";
-import { useController } from "react-hook-form";
 
 export function OrgEnhetSearch({
-  name,
-  label,
+  label = "Organisasjonsenhet",
+  onChange,
+  error,
 }: {
-  name: string;
-  label: string;
+  label?: string;
+  onChange: (value: string) => void;
+  error?: FieldError | string;
 }) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
   return (
-    <SelectLayoutWrapper error={fieldState.error} htmlFor="Leder" label={label}>
+    <SelectLayoutWrapper
+      error={
+        error
+          ? typeof error === "string"
+            ? ({ message: error } as FieldError)
+            : error
+          : undefined
+      }
+      htmlFor="Orgenhet"
+      label={label}
+    >
       <AsyncSearch
         loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
         noOptionsMessage={({ inputValue }: { inputValue: string }) =>
@@ -26,7 +35,7 @@ export function OrgEnhetSearch({
             : `Fant ingen resultater for "${inputValue}"`
         }
         onChange={(selectedOption: { label: string; value: string } | null) => {
-          field.onChange(selectedOption?.value ?? "");
+          onChange(selectedOption?.value ?? "");
         }}
         placeholder="Søk etter organisasjonsenhet"
       />

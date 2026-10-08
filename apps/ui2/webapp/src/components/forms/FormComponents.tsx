@@ -1,7 +1,10 @@
-import { useController } from "react-hook-form";
 import { DatePicker, useDatepicker } from "@navikt/ds-react";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import React from "react";
+import { useController } from "react-hook-form";
+
+import { OrgEnhetSearch } from "~/components/select/OrgEnhetSearch";
+import { RessursSearch } from "~/components/select/RessursSearch";
+import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 
 export function FormDateWrapper({
   name,
@@ -30,5 +33,45 @@ export function FormDateWrapper({
         label={label}
       />
     </DatePicker>
+  );
+}
+
+export function FormRessursSearchWrapper({
+  name,
+  label,
+}: {
+  name: string;
+  label: string;
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  return (
+    <RessursSearch
+      label={label}
+      onChange={field.onChange}
+      error={fieldState.error}
+    />
+  );
+}
+
+export function FormOrgEnhetSearchWrapper({
+  name,
+  label,
+}: {
+  name: string;
+  label: string;
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  return (
+    <OrgEnhetSearch
+      label={label}
+      onChange={field.onChange}
+      error={fieldState.error}
+    />
   );
 }

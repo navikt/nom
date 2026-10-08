@@ -1,43 +1,46 @@
-import { useSearch } from "@tanstack/react-router";
-import { useHasAdminAccess } from "~/api/useGetSession";
-import ContentWrapper from "~/components/ContentWrapper";
-import {
-  IkkeTilgangRedigering,
-  OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
-} from "~/pages/OrganizationMastering/Common/CommonComponents";
-import React from "react";
-import { PageBanner } from "~/components/PageBanner";
-import {
-  EndreOpphengOrgEnhetRequest,
-  EndreOpphengOrgEnhetResponse,
-  OrgEnhet,
-} from "~/types/api-models";
-import {
-  ModalProvider,
-  useModal,
-} from "~/components/modalProvider/ModalProvider";
-import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import ModalComponent from "~/components/modalProvider/ModalComponent";
+import { css } from "@emotion/react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
+import { Alert, Button, VStack } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
+import type { AxiosError, AxiosResponse } from "axios";
+import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import * as yup from "yup";
+
 import {
   endreOrgEnhetOverliggende,
   getOrgEnhet,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
-import { LoaderWithText } from "~/components/LoaderWithText";
-import { FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
-import type { AxiosError, AxiosResponse } from "axios";
-import { showToast } from "~/hooks/showToast";
-import { Alert, Button, VStack } from "@navikt/ds-react";
-import { css } from "@emotion/react";
+import ContentWrapper from "~/components/ContentWrapper";
+import {
+  FormDateWrapper,
+  FormOrgEnhetSearchWrapper,
+} from "~/components/forms/FormComponents";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import ModalComponent from "~/components/modalProvider/ModalComponent";
+import {
+  ModalProvider,
+  useModal,
+} from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { FormDateWrapper } from "~/components/forms/FormComponents";
-import { OrgEnhetSearch } from "~/components/select/OrgEnhetSearch";
+import { PageBanner } from "~/components/PageBanner";
+import { showToast } from "~/hooks/showToast";
+import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
+import {
+  IkkeTilgangRedigering,
+  OrgEnhetIkkeFunnet,
+  OrgEnhetInfoWrapper,
+} from "~/pages/OrganizationMastering/Common/CommonComponents";
+import type {
+  EndreOpphengOrgEnhetRequest,
+  EndreOpphengOrgEnhetResponse,
+  OrgEnhet,
+} from "~/types/api-models";
 
 export const EndreOverliggendeEnhet = () => {
   const { id } = useSearch({ from: "/endre-overliggende-enhet" });
@@ -182,9 +185,9 @@ function EndreOverliggendeEnhetForm({
       <form onSubmit={methods.handleSubmit(onValid)}>
         <VStack gap="9">
           <VStack gap="4">
-            <OrgEnhetSearch
-              name="nyOverenhetId"
+            <FormOrgEnhetSearchWrapper
               label="Ny overliggende enhet"
+              name="nyOverenhetId"
             />
 
             <FormDateWrapper name="gyldigFom" label="Gjeldende f.o.m." />
