@@ -1044,7 +1044,8 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         assertNotNull(response);
         assertThat(response.getMessage())
-            .isEqualTo(String.format("GyldigFom %s kan ikke være før i dag %s", gyldigFom, iDag));
+            .isEqualTo(String.format("GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s",
+                gyldigFom, iDag, organisering.gyldigTom()));
 
         verify(organiseringEventCommandService, times(0)).endreOrganisering(any(), any());
         verify(organiseringEventCommandService, times(0)).opprettOrganisering(any());
