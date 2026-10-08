@@ -1,0 +1,15 @@
+spring:
+  flyway:
+    locations: classpath:/db/migration,classpath:/db/dev/migration
+
+app:
+  gs-bucket-name: no-nav-org-dev-nav-ident-storage-bucket
+
+PDL_CLIENT_ID: dev-fss.pdl.pdl-api
+PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
+REDIS_HOST: nav-ident-redis.org.svc.cluster.local
+
+#logging:
+#  level:
+#    no.nav.nom.apps.navident: DEBUG

@@ -47,6 +47,8 @@ app:
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
 
+  gs-bucket-name: no-nav-org-dev-nav-ident-storage-bucket
+
 authentication:
   aad:
     issuerBaseUrl: ${mock-oauth2-server.baseUrl}

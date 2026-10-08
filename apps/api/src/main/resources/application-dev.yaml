@@ -1,0 +1,327 @@
+# Her kan log level settes spesifikt for DEV. Log level setting for både prod/dev kan settes i logback-nais.xml
+logging:
+  level:
+    no.nav.nom: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,mappings,flyway,info,loggers,metrics
+
+app:
+  fiksEventsourcePayload:
+    offsets:
+      ressurs: 865000 # 865444
+      orgenhet: 795000 # 795909
+      orgenhetLeder: 1104000 # 1104798
+      orgtilknytning: 1786900 # 1787058
+      organisering: 14000 # 14911
+      authorize: 0
+  email:
+    enabled: false
+  clients:
+    microsoft-graph:
+      send-email: false
+  granted-authorities:
+    clients:
+      nom-ui2:
+        client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
+      nom-remedy-integrasjon:
+        client-id: "fd1e7585-d5b5-46b5-8f4c-95327cc9bfe5"
+        scopes: ["NOM_REMEDY_INTEGRASJON_APP"]
+      nom-ui2-srvuser:
+        client-id: "9735c586-f3eb-4630-9b80-4088c21a8959"
+        scopes: ["QUERY_PERSON"]
+      ida:
+        client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      dolly:
+        client-id: "0395cdd9-bb3b-4370-adcb-d67e3dd63b7d"
+        scopes: ["MUTATE_RESSURS", "DOLLY"]
+      remedy:
+        client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      fullmaktsregister-web:
+        client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
+        scopes: ["QUERY_PERSON"]
+      fullmakt:
+        client-id: "8e9fd6ca-0af4-4fa5-80d7-60889f02d3ee"
+        scopes: ["FULLMAKT"]
+      repr-fullmakt:
+        client-id: "1eb7a565-8481-4369-98f2-08f791d7ac61"
+        scopes: ["FULLMAKT"]
+      teamcat:
+        client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
+        scopes: ["TEAMCAT"]
+      tolketjenesten:
+        client-id: "60a087d7-2b5c-4586-abfe-b62189d4d02c"
+        scopes: ["TOLKETJENESTEN"]
+      nom-admin:
+        client-id: "66c5096f-89dc-446f-bc15-a39d5b4274e7"
+        scopes: ["QUERY_PERSON"]
+      #     For testing av endepunkter under /api/v1/teamcat
+      org-token-tool:
+        client-id: "18c1d86b-4635-461c-8718-62c130087211"
+        scopes: ["TEAMCAT"]
+      # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
+      local-nom-api:
+        client-id: "17487989-d874-4b22-ab20-3fd7b99785d6"
+        scopes: ["LOCAL_NOM_API"]
+    groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-write:
+        group-id: "${NOM_WRITE_GROUPID}"
+        scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN", "MUTATE_RESSURS"]
+      nom-pilot:
+        group-id: "${NOM_PILOT_GROUPID}"
+        scopes: ["NOM_PILOT"]
+      nom-write-utl-konsulent:
+        group-id: "${NOM_WRITE_UTL_KONSULENT_GROUPID}"
+        scopes: ["NOM_WRITE_UTL_KONSULENT", "MUTATE_RESSURS"]
+      nom-write-vikafossen:
+        group-id: "${NOM_WRITE_VIKAFOSSEN_GROUPID}"
+        scopes: ["NOM_WRITE_VIKAFOSSEN", "MUTATE_RESSURS"]
+      nom-write-robot:
+        group-id: "${NOM_WRITE_ROBOT_GROUPID}"
+        scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
+      readonly:
+        group-id: "${READONLY_GROUPID}"
+        scopes:
+          - READONLY
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}"
+        scopes:
+          - READONLY
+          - EXTENDED_READONLY
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}"
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
+  orgenhet:
+    nav-id: sa312u
+    helfo-id: mu405g
+    skatt-id: ja464g
+    riksrevisjonen-id: ge146b
+    vikafossen-id: ru151s
+    linjeenhetene: me177r,ju219d,tu734a,sy471r
+    nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
+  google-storage-bucket-name:
+    missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
+    missing-ekstern-sluttdato: remedy-ressurs-sluttdato
+    utbet-mottakere: org-nom-api-utbet-mottakere
+  epost-varsel-for-enhet-navnendring:
+    max-evt-alder-dager-for-varsel: 60
+  dolly-ressurs:
+    fysisk-brukersted-nr: 1424
+    orgenhet-id: ra970u #Årdal
+
+  manuelle-ressurser-og-ledere:
+    enabled: true
+    ressurser:
+      - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av dy165d - 857610-Brukerstøtte-ORGNIV3
+        orgtilknytning: de870y    # 8576100-Brukerstøtte-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: F869325         # kald.floy@trygdeetaten.no - Leder av sy293c - 8576101-Brukerstøtte 1-ORGENHET - Har N852930 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: F850744         # lei.frukt@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHETT
+        sektor: NAV_STATLIG
+      - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHET
+        sektor: EKSTERN
+      - navident: A862414         # toff.andrefiolin@trygdeetaten.no - Leder av na494k - 192400-Målselv-Bardu-ORGNIV3
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: G850411         # Varm.Gullstol@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har A862414 som leder
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_KOMMUNAL
+
+      # PRIM/Christian Prestvik
+      - navident: Z993219
+        orgtilknytning: ke793y    # 4430503-Arbeid og Ytelser Innlandet AAP 1 - Har NOM-WRITE-DELEGERT tilgang
+        sektor: NAV_STATLIG
+
+      # Team ISA / Øystein Brox -  https://nav-it.slack.com/archives/C0362LA7ZLN/p1723203417454239?thread_ts=1718097159.822789&cid=C0362LA7ZLN
+      - navident: Z992683         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z992029         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990891         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z991555         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z991770         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994247         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z991459         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993182         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993836         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993388         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993192         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990141         # Team ISA / Øystein Brox
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993907         # Team ISA / Ingebjørg Semb Tørresen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990118         # Team ISA / Michael Venables
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z994864         # Team Klage / Kristin Jacobsen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994651         # Team Klage / Kristin Jacobsen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z991507         # Team Klage / Kristin Jacobsen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994863         # Team Klage / Øyvind Norsted Wedøe
+        orgtilknytning: ra365v    # 7210300-Klageinstans Oslo-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z993527         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990211         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990696         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990761         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z994573         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990601         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z993525         # Team AAP / Tor Idland
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z990434         # Team Yrkesskade / Ingvild Faye-Schjøll
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: Z990729         # Team Yrkesskade / Ingvild Faye-Schjøll
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z993141         # https://ferielisten.intern.dev.nav.no / Erlend Wiklem
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z991561         # Team Dokumentløsninger / Joakim Bjørnstad
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      - navident: Z993376         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993741         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: je679z    # Kontroll Øst 01 (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z993471         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: gu300t    # Kontroll Vest 02 (gu300t)
+        sektor: NAV_STATLIG
+      - navident: Z990474         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: sa352n    # Kontroll Nord avd Trondheim (sa352n)
+        sektor: NAV_STATLIG
+      - navident: Z990778         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: va903j    # Kontroll Øst (va903j), leder av Kontroll Øst (je679z)
+        sektor: NAV_STATLIG
+      - navident: Z990933         # Team Holmes / Snorri Hansson Engen
+        orgtilknytning: ka919j    # Kontroll Nord (ka919j), leder av Kontroll Nord (hu424t)
+        sektor: NAV_STATLIG
+
+      - navident: Z993795         # Funksjonell Brukerstøtte / Lina Mohammad
+        orgtilknytning: by959t    # Arbeid og ytelser Sarpsborg (by959t)
+        sektor: NAV_STATLIG
+      - navident: Z993635         # Funksjonell Brukerstøtte / Lina Mohammad
+        orgtilknytning: se198m    #  FP Oslo 1 Barnetrygd/Kontantstøtte 1 (se198m)
+        sektor: NAV_STATLIG
+
+      - navident: Z993901         # EIEN Tilganger - Proof Of Concept / Tordbjørn Wang Eriksen
+        orgtilknytning: sa131z    # Gamle Oslo (sa131z)
+        sektor: NAV_KOMMUNAL
+
+      - navident: Z994019         # Team RPA, Morten Andre Mathisen
+        orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+    ledere:
+      - navident: N852930
+        orgenhet: dy165d
+      - navident: F869325
+        orgenhet: sy293c
+      - navident: A862414
+        orgenhet: na494k
+      - navident: Z993219
+        orgenhet: ke793y
+      - navident: Z990778
+        orgenhet: je679z
+      - navident: Z990933
+        orgenhet: hu424t
+
+NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
+NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
+
+PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io"
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
+
+NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
+NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
+
+NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
+NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
+
+MAIN_MANAGER_BASEURL: "https://nav-test.mainmanager.no"
+
+NOM_DELEGERT_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT
+NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
+NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
+NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
+NOM_WRITE_UTL_KONSULENT_GROUPID:  "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent
+NOM_WRITE_VIKAFOSSEN_GROUPID:     "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen
+NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+# FINNES IKKE I DEV KOSTNADSSTEDSADMIN_GROUPID: "" # orgenhet-kostnadssted-mapping-admin
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:  "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
+
+PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
+PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende/.default
+
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://dev-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
