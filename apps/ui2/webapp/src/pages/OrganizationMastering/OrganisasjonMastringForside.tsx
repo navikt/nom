@@ -538,6 +538,17 @@ function UtvidOrgEnhetKort({
                   </Button>
                 </SmartLink>
 
+                <SmartLink href={`/endre-overliggende-enhet?id=${orgEnhet.id}`}>
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre overliggende enhet
+                  </Button>
+                </SmartLink>
+
                 <SmartLink
                   href={`/avslutt-organisasjonsenhet?id=${orgEnhet.id}`}
                 >

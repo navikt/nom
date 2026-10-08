@@ -81,7 +81,7 @@ export function FormRessursSearchWrapper({
         loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
         noOptionsMessage={({ inputValue }: { inputValue: string }) =>
           inputValue.length < 3
-            ? "Du må skrive minst 3 tegn for å søke"
+            ? "Du må skrive lenger for å søke"
             : `Fant ingen resultater for "${inputValue}"`
         }
         onChange={(selectedOption: { label: string; value: string } | null) => {
@@ -98,12 +98,14 @@ async function searchIfEnoughInput(searchTerm: string) {
     return [];
   }
 
-  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
-        searchRessurs(term: $searchTerm, filter: $filter) {
-          navident
-          visningsnavn
+  const searchQuery = `
+    query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
+          searchRessurs(term: $searchTerm, filter: $filter) {
+            navident
+            visningsnavn
+          }
         }
-      }`;
+  `;
 
   const filter = { statusSelection: "AKTIV" };
 

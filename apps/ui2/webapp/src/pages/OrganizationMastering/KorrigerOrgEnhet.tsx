@@ -195,9 +195,7 @@ function KorrigerOrgEnhetForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-
       gyldigFom: values.gyldigFom,
-
       orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 

@@ -116,6 +116,21 @@ export interface BrukerSkrivetilgangRessurserRequest {
   ressurser: string[];
 }
 
+export interface EndreOpphengOrgEnhetRequest {
+  currentOverenhetId: string;
+  nyOverenhetId: string;
+  orgenhetId: string;
+}
+
+export interface EndreOpphengOrgEnhetResponse {
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom: string;
+  nyOverenhetId: string;
+  orgenhetId: string;
+}
+
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   /** @minLength 1 */
@@ -671,9 +686,9 @@ export interface Tilgangsenhet {
 }
 
 export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  fraFysiskBrukerstedNr: string;
   orgtilknytningerFid: string[];
   tilFysiskBrukerstedNr: string;
-  fraFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
