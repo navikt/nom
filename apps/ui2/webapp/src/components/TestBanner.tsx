@@ -5,9 +5,13 @@ import { getRessurs } from "~/api/react-query-endpoints";
 import { useGetSession } from "~/api/useGetSession";
 import { isInDevelopment } from "~/utils";
 
-export function TestBanner() {
-  const inDevelopment = isInDevelopment();
+const inDevelopment = isInDevelopment();
 
+const displayTestBanner = inDevelopment;
+
+export const testBannerHeight = displayTestBanner ? "48px" : "0px";
+
+export function TestBanner() {
   const session = useGetSession();
 
   const navident = session.data?.navident;
@@ -20,14 +24,16 @@ export function TestBanner() {
 
   const ressurs = ressursQuery.data;
 
-  if (inDevelopment) {
+  if (displayTestBanner) {
     return (
       <div
         css={css`
           width: 100%;
+          height: ${testBannerHeight};
           box-sizing: border-box;
           background: var(--a-orange-300);
           text-align: center;
+          align-content: center;
           padding: 0.5rem;
           position: sticky;
           top: 0;
