@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import javax.sql.DataSource;
 import java.time.OffsetDateTime;
@@ -38,8 +38,7 @@ public class BehandlingSchedulerTest {
     @TestConfiguration
     static class ContainerConfig {
 
-        @SuppressWarnings("resource")
-        static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
+        static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
         static {
             POSTGRES.start();
@@ -85,5 +84,10 @@ public class BehandlingSchedulerTest {
         var mottattStatus = behandlingRepository.getBehandlingByBehandlingsId(organisasjonHendelse.getBehandlingsId())
             .stream().filter(behandling -> behandling.getStatus() == BehandlingStatus.MOTTATT).findAny();
         assertThat(mottattStatus.isPresent());
+
+        var ubehandlede = behandlingRepository.getLatestNonProcessedBehandlinger();
+        assertThat(ubehandlede.size()).isEqualTo(1);
+        assertThat(ubehandlede.getFirst().getBehandlingsId()).isEqualTo(organisasjonHendelse.getBehandlingsId());
+        assertThat(ubehandlede.getFirst().getOutboxSporingsId()).isNull();
     }
 }

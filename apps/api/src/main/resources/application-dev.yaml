@@ -61,6 +61,9 @@ app:
       nom-admin:
         client-id: "66c5096f-89dc-446f-bc15-a39d5b4274e7"
         scopes: ["QUERY_PERSON"]
+      nom-sf-integrasjon:
+        client-id: "2bf24748-6176-498e-ac9f-acd9d4f636e4"
+        scopes: ["NOM_SF_INTEGRASJON_APP"]
       #     For testing av endepunkter under /api/v1/teamcat
       org-token-tool:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"

@@ -8,6 +8,7 @@ import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendels
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class BehandlingService {
@@ -23,7 +24,7 @@ public class BehandlingService {
     public void oppdaterStatus(OrganisasjonHendelse organisasjonHendelse, BehandlingStatus status) {
         if (status == BehandlingStatus.MOTTATT) {
             var behandling = Behandling.builder()
-                .behandlingsId(behandlingRepository.getBehandlingsId())
+                .behandlingsId(behandlingRepository.getNextBehandlingsId())
                 .status(BehandlingStatus.MOTTATT)
                 .behandlingTidspunkt(LocalDateTime.now())
                 .build();
@@ -32,5 +33,33 @@ public class BehandlingService {
             organisasjonHendelse.setBehandlingsId(behandling.getBehandlingsId());
             organisasjonHendelseRepository.save(organisasjonHendelse);
         }
+    }
+
+    public void oppdaterStatusTilSynket(List<Long> behandlingIds, Long outboxSporingsId) {
+
+        behandlingIds.forEach(id -> {
+            var oppdatertBehandling = Behandling.builder()
+                .behandlingsId(id)
+                .outboxSporingsId(outboxSporingsId)
+                .status(BehandlingStatus.SYNKET)
+                .behandlingTidspunkt(LocalDateTime.now())
+                .build();
+            behandlingRepository.save(oppdatertBehandling);
+        });
+    }
+
+    public void oppdaterStatusTilFeilet(List<Long> behandlingIds) {
+        behandlingIds.forEach(id -> {
+            var oppdatertBehandling = Behandling.builder()
+                .behandlingsId(id)
+                .status(BehandlingStatus.FEILET)
+                .behandlingTidspunkt(LocalDateTime.now())
+                .build();
+            behandlingRepository.save(oppdatertBehandling);
+        });
+    }
+
+    public List<Behandling> getLatestNonProcessedBehandlingObjects() {
+        return behandlingRepository.getLatestNonProcessedBehandlinger();
     }
 }
