@@ -21,7 +21,6 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -86,7 +85,7 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
         this.objectMapper = objectMapper;
     }
 
-    @Scheduled(fixedRate = 60000)
+    //@Scheduled(fixedRate = 60000)
     public void oppdaterSuccessFactors() {
         if (leaderElection.isLeader() && isInitialStateReady()) {
             var unprocessedBehandlinger = behandlingService.getLatestNonProcessedBehandlingObjects()
