@@ -78,6 +78,113 @@ jobs:
           RESOURCE: .nais/apps/admin-web/admin-web-dev.yaml
           VAR: image=${{needs.build-app-docker.outputs.image}}
 
+  prepare-dev-variants:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      deployments: ${{ steps.variants.outputs.deployments }}
+    steps:
+      - id: variants
+        env:
+          # Enable only after variant manifests and matching backends are ready:
+          # ADDITIONAL_DEV_DEPLOYMENTS: '[{"suffix":"q0","manifest":".nais/apps/admin-web/admin-web-dev-q0.yaml"},{"suffix":"sf-test","manifest":".nais/apps/admin-web/admin-web-dev-sf-test.yaml"}]'
+          ADDITIONAL_DEV_DEPLOYMENTS: '[]'
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          deployments = json.loads(os.environ['ADDITIONAL_DEV_DEPLOYMENTS'])
+          if not isinstance(deployments, list):
+              raise ValueError('ADDITIONAL_DEV_DEPLOYMENTS must be a JSON array')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'deployments={json.dumps(deployments, separators=(",", ":"))}\n')
+          PY
+
+  deploy-additional-dev:
+    if: ${{ needs.prepare-dev-variants.outputs.deployments != '[]' }}
+    name: Deploy nom-admin-web-${{ matrix.deployment.suffix }} to dev-gcp
+    permissions:
+      contents: read
+      id-token: write
+    needs: [build-app-docker, deploy-dev, prepare-dev-variants]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        deployment: ${{ fromJSON(needs.prepare-dev-variants.outputs.deployments) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
+      - name: Validate variant manifest
+        env:
+          BASE_MANIFEST: .nais/apps/admin-web/admin-web-dev.yaml
+          VARIANT_MANIFEST: ${{ matrix.deployment.manifest }}
+          SUFFIX: ${{ matrix.deployment.suffix }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+          import sys
+          from urllib.parse import urlsplit
+
+          base = pathlib.Path(os.environ['BASE_MANIFEST'])
+          variant = pathlib.Path(os.environ['VARIANT_MANIFEST'])
+          suffix = os.environ['SUFFIX']
+
+          def section_values(lines, heading):
+              values = []
+              in_section = False
+              for line in lines:
+                  if line == heading:
+                      in_section = True
+                  elif in_section and line.strip() and not line.lstrip().startswith('#'):
+                      if len(line) - len(line.lstrip()) <= len(heading) - len(heading.lstrip()):
+                          break
+                      if line.startswith('    - '):
+                          values.append(line.removeprefix('    - ').strip().strip('"\''))
+              return values
+
+          def manifest_info(path):
+              lines = path.read_text().splitlines()
+              if not any(re.fullmatch(r'kind: ["\']?Application["\']?', line) for line in lines):
+                  raise ValueError(f'{path}: expected a Nais Application')
+              metadata = lines.index('metadata:')
+              name = next((line.split(':', 1)[1].strip().strip('"\'') for line in lines[metadata + 1:]
+                           if line.startswith('  name:')), None)
+              if not name or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', name):
+                  raise ValueError(f'{path}: invalid metadata.name')
+              return name, section_values(lines, '  ingresses:')
+
+          try:
+              if not isinstance(suffix, str) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', suffix):
+                  raise ValueError('invalid variant suffix')
+              expected_path = base.with_name(f'{base.stem}-{suffix}{base.suffix}')
+              if variant != expected_path or not variant.is_file():
+                  raise ValueError(f'variant manifest must be {expected_path}')
+              base_name, base_ingresses = manifest_info(base)
+              name, ingresses = manifest_info(variant)
+              expected_name = f'{base_name}-{suffix}'
+              if name != expected_name or len(name) > 63:
+                  raise ValueError(f'{variant}: metadata.name must be {expected_name}')
+              expected_hosts = {f'{urlsplit(url).hostname.split(".", 1)[0]}-{suffix}.{urlsplit(url).hostname.split(".", 1)[1]}'
+                                for url in base_ingresses}
+              if len(ingresses) != len(base_ingresses) or any(
+                  urlsplit(url).scheme != 'https' or urlsplit(url).hostname not in expected_hosts
+                  or urlsplit(url).port is not None or urlsplit(url).path not in ('', '/')
+                  for url in ingresses
+              ) or {urlsplit(url).hostname for url in ingresses} != expected_hosts:
+                  raise ValueError(f'{variant}: ingresses must use the base hosts with -{suffix}')
+          except (OSError, ValueError, AttributeError) as error:
+              sys.exit(str(error))
+          PY
+      - uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: ${{ matrix.deployment.manifest }}
+          VAR: image=${{ needs.build-app-docker.outputs.image }}
+
   deploy-prod:
     name: Deploy prod-gcp
     permissions:

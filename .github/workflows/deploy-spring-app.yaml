@@ -16,6 +16,11 @@ on:
       nais-config-file-path-prod:
         required: true
         type: string
+      additional-dev-deployments:
+        required: false
+        type: string
+        default: '[]'
+        description: 'JSON array of {"suffix":"q0","manifest":".nais/apps/api/api-dev-gcp-q0.yaml"} entries'
       deploy-timeout:
         required: false
         type: string
@@ -182,6 +187,101 @@ jobs:
           RESOURCE: ${{ inputs.nais-config-file-path-dev }}
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-dev }}
+          TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
+
+  deploy-additional-dev:
+    if: ${{ inputs.additional-dev-deployments != '[]' }}
+    name: Deploy ${{ matrix.deployment.suffix }} to NAIS ${{ inputs.dev-cluster }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    needs:
+      - build-app-docker
+      - deploy-dev
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        deployment: ${{ fromJSON(inputs.additional-dev-deployments) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
+      - name: Validate variant manifest
+        env:
+          BASE_MANIFEST: ${{ inputs.nais-config-file-path-dev }}
+          VARIANT_MANIFEST: ${{ matrix.deployment.manifest }}
+          SUFFIX: ${{ matrix.deployment.suffix }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+          import sys
+          from urllib.parse import urlsplit
+
+          base = pathlib.Path(os.environ['BASE_MANIFEST'])
+          variant = pathlib.Path(os.environ['VARIANT_MANIFEST'])
+          suffix = os.environ['SUFFIX']
+
+          def app_name(path):
+              lines = path.read_text().splitlines()
+              if not any(line.strip() == 'kind: Application' for line in lines):
+                  raise ValueError(f'{path}: expected a Nais Application')
+              in_metadata = False
+              for line in lines:
+                  if line == 'metadata:':
+                      in_metadata = True
+                  elif in_metadata and line and not line.startswith((' ', '#')):
+                      break
+                  elif in_metadata:
+                      match = re.fullmatch(r'  name: ([a-z0-9-]+)(?:\s+#.*)?', line)
+                      if match:
+                          return match.group(1)
+              raise ValueError(f'{path}: expected an unquoted metadata.name')
+
+          def list_values(lines, heading, item_pattern):
+              indent = len(heading) - len(heading.lstrip())
+              values = []
+              in_section = False
+              for line in lines:
+                  if line == heading:
+                      in_section = True
+                  elif in_section and line.strip() and not line.lstrip().startswith('#'):
+                      if len(line) - len(line.lstrip()) <= indent:
+                          break
+                      match = re.fullmatch(item_pattern, line)
+                      if match:
+                          values.append(match.group(1))
+              return values
+
+          try:
+              if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', suffix):
+                  raise ValueError('invalid variant suffix')
+              expected_path = base.with_name(f'{base.stem}-{suffix}{base.suffix}')
+              if variant != expected_path or not variant.is_file():
+                  raise ValueError(f'variant manifest must be {expected_path}')
+              expected_name = f'{app_name(base)}-{suffix}'
+              if len(expected_name) > 63 or app_name(variant) != expected_name:
+                  raise ValueError(f'{variant}: metadata.name must be {expected_name}')
+              lines = variant.read_text().splitlines()
+              sql_names = list_values(lines, '    sqlInstances:', r'      - name: ([a-z0-9-]+)')
+              if any(not name.startswith(expected_name) for name in sql_names):
+                  raise ValueError(f'{variant}: every gcp.sqlInstances.name must start with {expected_name}')
+              ingresses = list_values(lines, '  ingresses:', r'    - (\S+)')
+              if any(
+                  urlsplit(ingress).scheme != 'https'
+                  or not (urlsplit(ingress).hostname or '').startswith(f'{expected_name}.')
+                  for ingress in ingresses
+              ):
+                  raise ValueError(f'{variant}: every ingress must use https://{expected_name}.<domain>')
+          except (KeyError, OSError, ValueError) as error:
+              sys.exit(str(error))
+          PY
+      - uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: ${{ inputs.dev-cluster }}
+          RESOURCE: ${{ matrix.deployment.manifest }}
+          TIMEOUT: ${{ inputs.deploy-timeout }}
+          VAR: image=${{ needs.build-app-docker.outputs.image }}${{ inputs.additional-nais-vars-dev }}
           TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
 
   deploy-prod:
