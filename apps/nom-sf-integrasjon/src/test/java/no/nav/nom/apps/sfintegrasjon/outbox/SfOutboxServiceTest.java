@@ -53,6 +53,7 @@ class SfOutboxServiceTest {
     private static final String SVAR_FRA_SF = "{\"feil\":\"Ugyldig nivaa\"}";
     private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final String OUTBOX_TOGGLE = "nom-sf-integrasjon.outbox-service";
+    private static final String SENDE_TOGGLE = "nom-sf-integrasjon.outbox-service-sende-til-sf";
 
     @Mock SfOutboxRepository sfOutboxRepository;
     @Mock SfCpiClient sfCpiClient;
@@ -68,6 +69,7 @@ class SfOutboxServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(unleash.isEnabled(OUTBOX_TOGGLE)).thenReturn(true);
+        lenient().when(unleash.isEnabled(SENDE_TOGGLE)).thenReturn(true);
         lenient().when(leaderElection.isLeader()).thenReturn(true);
         service = new SfOutboxService(sfOutboxRepository, sfCpiClient, leaderElection, JSON, unleash);
     }
@@ -80,6 +82,41 @@ class SfOutboxServiceTest {
         service.sendPayloadToSfCpi();
 
         verifyNoInteractions(sfOutboxRepository, sfCpiClient);
+    }
+
+    @Nested
+    @DisplayName("Når sendingen til SF er av")
+    class NaarSendingenErAv {
+
+        @BeforeEach
+        void slaAvSending() {
+            lenient().when(unleash.isEnabled(SENDE_TOGGLE)).thenReturn(false);
+        }
+
+        @Test
+        @DisplayName("SF kalles ikke, nyeste rad blir SENDT og eldre rader blir ERSTATTET")
+        void markererSendtUtenAaKalleSf() {
+            outboxInneholder(rad(1, "aa0001", SfStatus.FEILET), rad(2, "aa0001", SfStatus.IKKE_SENDT));
+
+            service.sendPayloadToSfCpi();
+
+            verifyNoInteractions(sfCpiClient);
+            var lagret = lagretPerSporingsId();
+            assertThat(lagret.get(1L).getSfStatus()).isEqualTo(SfStatus.ERSTATTET);
+            assertThat(lagret.get(2L).getSfStatus()).isEqualTo(SfStatus.SENDT);
+            assertThat(lagret.get(2L).getFeilmelding()).isNull();
+        }
+
+        @Test
+        @DisplayName("Orgenhet i outboxen som ikke kan leses, blir fortsatt AVVIST")
+        void orgenhetSomIkkeKanLesesBlirAvvist() {
+            outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT).toBuilder().orgenhet("{\"nivaa\":\"FINNES_IKKE\"}").build());
+
+            service.sendPayloadToSfCpi();
+
+            verifyNoInteractions(sfCpiClient);
+            assertThat(lagretPerSporingsId().get(1L).getSfStatus()).isEqualTo(SfStatus.AVVIST);
+        }
     }
 
     @Test

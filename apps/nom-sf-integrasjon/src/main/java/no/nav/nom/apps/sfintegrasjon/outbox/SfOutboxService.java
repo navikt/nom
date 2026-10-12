@@ -46,11 +46,14 @@ public class SfOutboxService {
         this.unleash = unleash;
     }
 
-    @Scheduled(fixedRate = 60000)
+    // Ved :40, etter at NomSuccessFactorsOrgEnhetOppdateringService har bygget radene (:20)
+    @Scheduled(cron = "40 * * * * *")
     public void sendPayloadToSfCpi() {
-        if (!unleash.isEnabled("nom-sf-integrasjon.outbox-service")) return;
-
         if (!leaderElection.isLeader()) {
+            return;
+        }
+
+        if (!unleash.isEnabled("nom-sf-integrasjon.outbox-service")) {
             return;
         }
 
@@ -70,8 +73,19 @@ public class SfOutboxService {
 
             try {
                 var sfOrgEnhet = objectMapper.readValue(nyesteSfOutboxEnhet.getOrgenhet(), SfOrgEnhet.class);
-                var respons = sfCpiClient.sendOrgenhetPayload(sfOutboxDTO.toBuilder().sfOrgEnhet(sfOrgEnhet).build()).getBody();
-                if (isNull(respons) || !Objects.equals(respons.sporingsId(), sfOutboxDTO.sporingsId())) {
+                SfOutboxDTO response;
+                if (unleash.isEnabled("nom-sf-integrasjon.outbox-service-sende-til-sf")) {
+                    response = sfCpiClient.sendOrgenhetPayload(sfOutboxDTO.toBuilder().sfOrgEnhet(sfOrgEnhet).build()).getBody();
+                } else {
+                    response = SfOutboxDTO.builder()
+                        .sporingsId(nyesteSfOutboxEnhet.getSporingsId().toString())
+                        .endretAv(nyesteSfOutboxEnhet.getEndretAv())
+                        .endringshendelser(nyesteSfOutboxEnhet.getEndringshendelser())
+                        .sfOrgEnhet(sfOrgEnhet)
+                        .build();
+                    log.info("UNLEASH TOGGLE ER AV, OUTBOX RAD BLIR SATT TIL SENDT. SporingsId: {}", response.sporingsId());
+                }
+                if (isNull(response) || !Objects.equals(response.sporingsId(), sfOutboxDTO.sporingsId())) {
                     var feilmelding = String.format("Tomt eller uventet svar fra SF for sporingsId %s", sfOutboxDTO.sporingsId());
                     nyesteSfOutboxEnhet = nyesteSfOutboxEnhet.toBuilder().sfStatus(SfStatus.AVVIST).feilmelding(feilmelding).build();
                     log.error(feilmelding);

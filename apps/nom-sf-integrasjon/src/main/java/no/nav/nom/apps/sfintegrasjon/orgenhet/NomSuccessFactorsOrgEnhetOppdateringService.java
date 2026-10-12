@@ -1,5 +1,6 @@
 package no.nav.nom.apps.sfintegrasjon.orgenhet;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.sfintegrasjon.behandling.BehandlingService;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.Behandling;
@@ -21,6 +22,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgenhetleder.NomStateOrgEnhetLederListener;
 import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -55,6 +57,7 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
     private final LeaderElection leaderElection;
 
     private final ObjectMapper objectMapper;
+    private final Unleash unleash;
 
 
     public NomSuccessFactorsOrgEnhetOppdateringService(
@@ -69,7 +72,8 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
         NomStateOrgEnhetListener nomStateOrgEnhetListener,
         NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener,
         LeaderElection leaderElection,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        Unleash unleash
     ) {
         this.organiseringStateRepository = organiseringStateRepository;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
@@ -83,11 +87,13 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
         this.nomStateOrgEnhetLederListener = nomStateOrgEnhetLederListener;
         this.leaderElection = leaderElection;
         this.objectMapper = objectMapper;
+        this.unleash = unleash;
     }
 
-    //@Scheduled(fixedRate = 60000)
+    // Ved :20, etter at BehandlingScheduler har satt MOTTATT (:00) og før SfOutboxService sender (:40)
+    @Scheduled(cron = "20 * * * * *")
     public void oppdaterSuccessFactors() {
-        if (leaderElection.isLeader() && isInitialStateReady()) {
+        if (leaderElection.isLeader() && isInitialStateReady() && unleash.isEnabled("nom-sf-integrasjon.orgenhet-aggregering-service")) {
             var unprocessedBehandlinger = behandlingService.getLatestNonProcessedBehandlingObjects()
                 .stream()
                 .collect(Collectors.toMap(Behandling::getBehandlingsId, behandling -> behandling, (b1, _) -> b1));

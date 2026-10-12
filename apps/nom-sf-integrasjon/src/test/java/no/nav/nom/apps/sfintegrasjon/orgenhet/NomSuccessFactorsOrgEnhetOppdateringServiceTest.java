@@ -1,5 +1,6 @@
 package no.nav.nom.apps.sfintegrasjon.orgenhet;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.sfintegrasjon.behandling.BehandlingService;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.Behandling;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingStatus;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.when;
 class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
 
     private static final LocalDate IDAG = LocalDate.now();
+    private static final String AGGREGERING_TOGGLE = "nom-sf-integrasjon.orgenhet-aggregering-service";
 
     @Mock OrganisasjonHendelseRepository organisasjonHendelseRepository;
     @Mock SfOutboxRepository sfOutboxRepository;
@@ -67,6 +69,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
     @Mock NomStateOrgEnhetListener nomStateOrgEnhetListener;
     @Mock NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
     @Mock LeaderElection leaderElection;
+    @Mock Unleash unleash;
 
     // Ekte state i minnet, slik at testene bruker nom-state sin tolkning av datoer og slettede oppheng
     private final OrgEnhetStateRepositoryImpl orgEnhetStateRepository = new OrgEnhetStateRepositoryImpl();
@@ -82,6 +85,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
     @BeforeEach
     void setUp() {
         lenient().when(leaderElection.isLeader()).thenReturn(true);
+        lenient().when(unleash.isEnabled(AGGREGERING_TOGGLE)).thenReturn(true);
         lenient().when(nomStateOrganiseringListener.hasReadToEndOnStartup()).thenReturn(true);
         lenient().when(nomStateOrgEnhetListener.hasReadToEndOnStartup()).thenReturn(true);
         lenient().when(nomStateOrgEnhetLederListener.hasReadToEndOnStartup()).thenReturn(true);
@@ -108,7 +112,8 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
             nomStateOrgEnhetListener,
             nomStateOrgEnhetLederListener,
             leaderElection,
-            jsonMapper
+            jsonMapper,
+            unleash
         );
     }
 
@@ -362,6 +367,16 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
         @DisplayName("Ingenting skjer når state ikke er lest inn")
         void ingentingSkjerNaarStateIkkeErLestInn() {
             when(nomStateOrganiseringListener.hasReadToEndOnStartup()).thenReturn(false);
+
+            service.oppdaterSuccessFactors();
+
+            verifyNoInteractions(behandlingService, organisasjonHendelseRepository, sfOutboxRepository);
+        }
+
+        @Test
+        @DisplayName("Ingenting skjer når togglen er av")
+        void ingentingSkjerNaarTogglenErAv() {
+            when(unleash.isEnabled(AGGREGERING_TOGGLE)).thenReturn(false);
 
             service.oppdaterSuccessFactors();
 

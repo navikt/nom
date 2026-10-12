@@ -25,7 +25,8 @@ public class BehandlingScheduler {
         this.leaderElection = leaderElection;
     }
 
-    @Scheduled(initialDelay = 30000, fixedDelay = 60000)
+    // Ved :00, før byggeren (:20) og sendingen (:40) i samme minutt
+    @Scheduled(cron = "0 * * * * *")
     public void setMottattStatusForOrganisasjonsHendelser() {
         if (leaderElection.isLeader()) {
             organisasjonHendelseRepository.getOrgranisasjonHendelserUtenStatus(LocalDateTime.now().minusSeconds(DELTA_SECONDS))

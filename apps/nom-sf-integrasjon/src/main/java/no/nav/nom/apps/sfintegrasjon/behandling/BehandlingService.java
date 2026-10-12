@@ -6,6 +6,7 @@ import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingStatus;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelse;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,7 @@ public class BehandlingService {
         this.organisasjonHendelseRepository = organisasjonHendelseRepository;
     }
 
+    @Transactional
     public void oppdaterStatus(OrganisasjonHendelse organisasjonHendelse, BehandlingStatus status) {
         if (status == BehandlingStatus.MOTTATT) {
             var behandling = Behandling.builder()
@@ -35,6 +37,7 @@ public class BehandlingService {
         }
     }
 
+    @Transactional
     public void oppdaterStatusTilSynket(List<Long> behandlingIds, Long outboxSporingsId) {
 
         behandlingIds.forEach(id -> {
@@ -48,6 +51,7 @@ public class BehandlingService {
         });
     }
 
+    @Transactional
     public void oppdaterStatusTilFeilet(List<Long> behandlingIds) {
         behandlingIds.forEach(id -> {
             var oppdatertBehandling = Behandling.builder()
