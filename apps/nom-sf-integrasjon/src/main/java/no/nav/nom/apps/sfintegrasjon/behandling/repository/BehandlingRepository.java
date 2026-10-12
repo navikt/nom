@@ -26,6 +26,7 @@ public interface BehandlingRepository extends JpaRepository<Behandling, Long> {
                 FROM siste_status ss
                 WHERE ss.status IN ('MOTTATT', 'FEILET')
                 ORDER BY ss.behandling_tidspunkt, id
+                LIMIT 5000
                 """, nativeQuery = true
     )
     List<Behandling> getLatestNonProcessedBehandlinger();
