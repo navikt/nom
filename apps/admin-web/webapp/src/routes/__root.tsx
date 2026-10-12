@@ -7,6 +7,8 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 
+import { TestBanner } from "~/components/TestBanner.tsx";
+
 // const TanStackRouterDevtools =
 //   process.env.NODE_ENV === "production"
 //     ? () => null // Render nothing in production
@@ -27,6 +29,7 @@ export const Route = createRootRouteWithContext<{
         {/*  <TanStackRouterDevtools position="bottom-right" />*/}
         {/*</React.Suspense>*/}
         <div>
+          <TestBanner />
           <InternalHeader>
             <InternalHeader.Title as={Link} to="/">
               NOM ADMIN
