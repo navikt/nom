@@ -56,3 +56,9 @@ export const exportSanityCheckToExcel = async (
 ) => {
   await exportSanityCheckToExcelOptions(exportType, exportName);
 };
+
+export function isInDevelopment() {
+  const match = globalThis.location.hostname.match(/localhost|\.dev\./);
+
+  return !!match;
+}
