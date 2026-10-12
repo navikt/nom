@@ -118,6 +118,8 @@ export interface BrukerSkrivetilgangRessurserRequest {
 
 export interface EndreOpphengOrgEnhetRequest {
   currentOverenhetId: string;
+  /** @format date */
+  gyldigFom: string;
   nyOverenhetId: string;
   orgenhetId: string;
 }
