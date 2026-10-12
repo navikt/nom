@@ -163,6 +163,7 @@ function EndreOverliggendeEnhetForm({
       currentOverenhetId: orgEnhet.overordnetEnhetId ?? "",
       nyOverenhetId: values.nyOverenhetId,
       orgenhetId: orgEnhet.id,
+      gyldigFom: values.gyldigFom,
     };
 
     await showModal(
@@ -171,9 +172,7 @@ function EndreOverliggendeEnhetForm({
         heading="Bekreft endring på organisasjonsenhet"
       />,
     ).then(() => {
-      //endreOverordnetOrgEnhetMutation.mutate(request);
-
-      console.log("Would save", request);
+      endreOverordnetOrgEnhetMutation.mutate(request);
     });
   };
 
@@ -224,4 +223,5 @@ function EndreOverliggendeEnhetForm({
 
 const validationSchema = yup.object({
   nyOverenhetId: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
 });

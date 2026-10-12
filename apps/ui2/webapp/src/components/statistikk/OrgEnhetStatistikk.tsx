@@ -373,7 +373,11 @@ function OrgEnheterStatistikk({
   statistikk: OrgEnhetStatistikkItem[];
 }) {
   return (
-    <div>
+    <div
+      css={css`
+        width: 100%;
+      `}
+    >
       {(!!title || !!helpText) && (
         <div
           css={css`

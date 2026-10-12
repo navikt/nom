@@ -39,6 +39,8 @@ export const NavHeader = () => {
       <div css={innerDiv}>
         <SmartLink
           css={css`
+            display: flex;
+            align-content: center;
             ${`margin-right: var(--a-spacing-${displayChristmasLogo ? "3" : "8"})`};
           `}
           href="/"

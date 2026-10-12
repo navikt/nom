@@ -824,7 +824,7 @@ export const endreOrgEnhetInfo = async (
 export const endreOrgEnhetOverliggende = async (
   request: EndreOpphengOrgEnhetRequest,
 ) => {
-  return axios.patch<unknown, AxiosResponse<EndreOpphengOrgEnhetResponse>>(
+  return axios.post<unknown, AxiosResponse<EndreOpphengOrgEnhetResponse>>(
     `${NOM_API_BASE_PATH}/app/orgenheter/endreOpphengForOrgenhet`,
     request,
   );
