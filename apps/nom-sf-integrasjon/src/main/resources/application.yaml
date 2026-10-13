@@ -23,6 +23,8 @@ app:
   nik:
     base-url: ${NIK_BASEURL}
     aad-scope: ${NIK_API_SCOPE}
+  nom-api:
+    base-url: ${NOM_API_URL}
 
 
 nom.libs.state.ressurs.enabled: true
@@ -124,6 +126,13 @@ spring:
             client-secret:  ${SF_CPI_CLIENT_SECRET:sf-cpi-client-secret}
             client-authentication-method: client_secret_post
             authorization-grant-type: client_credentials
+          nom-api:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
         provider:
           azure:
             issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}

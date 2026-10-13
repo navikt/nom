@@ -363,6 +363,9 @@ spec:
         - application: entra-proxy
           namespace: sikkerhetstjenesten
           cluster: dev-gcp
+        - application: nom-sf-integrasjon
+          namespace: org
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
