@@ -10,8 +10,8 @@ app:
     evtsrc:
       # Startoffset ved første oppstart. Sett til ønsket offset i prod ved første deploy.
       orgenhet:
-        start-offset: 815631
+        start-offset: 815839
       orgenhet-leder:
-        start-offset: 1105710
+        start-offset: 1105834
       organisering:
-        start-offset: 15081
+        start-offset: 15136
