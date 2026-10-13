@@ -4,6 +4,7 @@ app:
     evtsrc:
       group-id: nom-sf-integrasjon-evtsrc
       auto-startup: true
+      state-ready-timeout: PT10M
       retry-delay-ms: 2000
       orgenhet:
         topic: org.nom.orgenhet-eventsource
