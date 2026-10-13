@@ -42,7 +42,7 @@
         <swagger-annotations-jakarta.version>2.2.55</swagger-annotations-jakarta.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
         <org.wiremock-spring-boot.version>4.4.2</org.wiremock-spring-boot.version>
-        <mock-oauth2-server.version>6.0.4</mock-oauth2-server.version>
+        <mock-oauth2-server.version>6.0.5</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.5.Final</hibernate-validator.version>
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
