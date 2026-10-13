@@ -279,6 +279,15 @@ app:
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
         sektor: NAV_STATLIG
 
+      # Team Komet / https://nav-it.slack.com/archives/C0362LA7ZLN/p1791885140662729
+      - navident: Z993894
+        orgtilknytning: fa408a    # Grünerløkka
+        sektor: NAV_STATLIG
+
+      - navident: Z993285
+        orgtilknytning: fa408a    # Grünerløkka
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
