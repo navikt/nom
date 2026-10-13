@@ -132,39 +132,23 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
         }
 
         @Test
-        @DisplayName("En aktiv enhet som er flyttet fra B til C, arver nivå fra C")
-        void aktivEnhetSomErFlyttetArverNivaaFraNaavaerendeOverenhet() {
-            enhet("B", NomNivaa.ARBEIDSOMRAADE);
+        @DisplayName("En enhet uten eget nivå får ikke nivå fra overenheten")
+        void enhetUtenEgetNivaaFaarIkkeNivaaFraOverenheten() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", null);
-            oppheng("Z", "B", IDAG.minusYears(2), IDAG.minusYears(1).minusDays(1));
             oppheng("Z", "C", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").nivaa()).isEqualTo(NomNivaa.DRIFTSENHET);
+            assertThat(synk("Z").nivaa()).isNull();
         }
 
         @Test
-        @DisplayName("En avsluttet enhet arver nivå fra nyeste oppheng")
-        void avsluttetEnhetArverNivaaFraNyesteOppheng() {
-            enhet("B", NomNivaa.ARBEIDSOMRAADE);
+        @DisplayName("En avsluttet enhet uten eget nivå får heller ikke nivå")
+        void avsluttetEnhetUtenEgetNivaaFaarIkkeNivaa() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", null, IDAG.minusYears(3), IDAG.minusMonths(1));
-            oppheng("Z", "B", IDAG.minusYears(3), IDAG.minusYears(1).minusDays(1));
-            oppheng("Z", "C", IDAG.minusYears(1), IDAG.minusMonths(1));
+            oppheng("Z", "C", IDAG.minusYears(3), IDAG.minusMonths(1));
 
-            assertThat(synk("Z").nivaa()).isEqualTo(NomNivaa.DRIFTSENHET);
-        }
-
-        @Test
-        @DisplayName("Enheten arver over flere nivåer når overenheten rett over også mangler nivå")
-        void enhetenArverOverFlereNivaaer() {
-            enhet("X", NomNivaa.DRIFTSENHET);
-            enhet("Y", null);
-            enhet("Z", null);
-            oppheng("Y", "X", IDAG.minusYears(1), null);
-            oppheng("Z", "Y", IDAG.minusYears(1), null);
-
-            assertThat(synk("Z").nivaa()).isEqualTo(NomNivaa.DRIFTSENHET);
+            assertThat(synk("Z").nivaa()).isNull();
         }
     }
 
@@ -173,8 +157,8 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
     class NivaaForOverenhetene {
 
         @Test
-        @DisplayName("En overenhet uten nivå får arvet nivå")
-        void overenhetUtenNivaaFaarArvetNivaa() {
+        @DisplayName("En overenhet uten eget nivå sendes uten nivå")
+        void overenhetUtenEgetNivaaSendesUtenNivaa() {
             enhet("X", NomNivaa.DRIFTSENHET);
             enhet("Y", null);
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
@@ -182,31 +166,12 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
             oppheng("Z", "Y", IDAG.minusYears(1), null);
 
             assertThat(synk("Z").overOrgEnheter())
-                .containsExactly(new OverOrgEnhet("Y", NomNivaa.DRIFTSENHET, IDAG.minusYears(1), null));
+                .containsExactly(new OverOrgEnhet("Y", null, IDAG.minusYears(1), null));
         }
 
         @Test
-        @DisplayName("En tidligere overenhet får nyeste arvede nivå, ikke nivået den hadde da enheten lå under den")
-        void tidligereOverenhetFaarNyesteArvedeNivaa() {
-            enhet("X", NomNivaa.ARBEIDSOMRAADE);
-            enhet("Y", NomNivaa.DRIFTSENHET);
-            enhet("B", null);
-            enhet("C", NomNivaa.DRIFTSENHET);
-            enhet("Z", NomNivaa.ARBEIDSOMRAADE);
-            oppheng("B", "X", IDAG.minusYears(3), IDAG.minusMonths(6).minusDays(1));
-            oppheng("B", "Y", IDAG.minusMonths(6), null);
-            oppheng("Z", "B", IDAG.minusYears(2), IDAG.minusYears(1).minusDays(1));
-            oppheng("Z", "C", IDAG.minusYears(1), null);
-
-            assertThat(synk("Z").overOrgEnheter())
-                .filteredOn(overOrgEnhet -> overOrgEnhet.id().equals("B"))
-                .extracting(OverOrgEnhet::nivaa)
-                .containsExactly(NomNivaa.DRIFTSENHET);
-        }
-
-        @Test
-        @DisplayName("En overenhet med bare fremtidige oppheng gir ikke FEILET")
-        void overenhetMedBareFremtidigeOpphengGirIkkeFeilet() {
+        @DisplayName("En fremtidig overenhet uten eget nivå sendes uten nivå og gir ikke FEILET")
+        void fremtidigOverenhetUtenEgetNivaaSendesUtenNivaa() {
             enhet("A", NomNivaa.DRIFTSENHET);
             enhet("P", NomNivaa.DRIFTSENHET);
             enhet("O", null, IDAG.plusMonths(2), null);
@@ -217,7 +182,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
 
             assertThat(synk("Z").overOrgEnheter())
                 .filteredOn(overOrgEnhet -> overOrgEnhet.id().equals("O"))
-                .containsExactly(new OverOrgEnhet("O", NomNivaa.DRIFTSENHET, IDAG.plusMonths(2), null));
+                .containsExactly(new OverOrgEnhet("O", null, IDAG.plusMonths(2), null));
         }
     }
 

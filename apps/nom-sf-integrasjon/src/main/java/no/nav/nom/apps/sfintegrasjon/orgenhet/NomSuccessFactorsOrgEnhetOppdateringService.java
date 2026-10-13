@@ -144,14 +144,14 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
                             .toList());
                     }
 
-                    checkForNomNivaaAndFetchIfMissing(overOrgEnheter);
-
-                    var nivaa = finnNivaa(orgEnhet);
+                    //TODO (hamkel): Vurder å fjerne denne hvis det ikke brukes lenger frem i tid.
+                    //checkForNomNivaaAndFetchIfMissing(overOrgEnheter);
+                    //var nivaa = finnNivaa(orgEnhet);
 
                     var sfOrgEnhet = new SfOrgEnhet(
                         orgEnhet.id(),
                         orgEnhet.navn(),
-                        nivaa,
+                        orgEnhet.nomNivaa(),
                         erLovnode(orgEnhet.id()),
                         orgEnhet.orgEnhetsType(),
                         orgEnhet.tilgangsenhetId(),
