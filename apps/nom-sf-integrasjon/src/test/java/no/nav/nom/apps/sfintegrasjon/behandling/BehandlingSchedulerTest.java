@@ -1,6 +1,7 @@
 package no.nav.nom.apps.sfintegrasjon.behandling;
 
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingRepository;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingStatus;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelse;
@@ -32,8 +33,13 @@ import static org.mockito.Mockito.when;
 @Import({BehandlingSchedulerTest.ContainerConfig.class, BehandlingScheduler.class, BehandlingService.class})
 public class BehandlingSchedulerTest {
 
+    private static final String BEHANDLING_TOGGLE = "nom-sf-integrasjon.behandling-scheduler";
+
     @MockitoBean
     private LeaderElection leaderElection;
+
+    @MockitoBean
+    private Unleash unleash;
 
     @TestConfiguration
     static class ContainerConfig {
@@ -67,6 +73,7 @@ public class BehandlingSchedulerTest {
     @Test
     public void registrererMottattStatusForOrganisasjonHedelser() {
         when(leaderElection.isLeader()).thenReturn(true);
+        when(unleash.isEnabled(BEHANDLING_TOGGLE)).thenReturn(true);
         var organisasjonHendelse = organisasjonHendelseRepository.save(
             OrganisasjonHendelse.builder()
                 .fid("abc")
@@ -89,5 +96,25 @@ public class BehandlingSchedulerTest {
         assertThat(ubehandlede.size()).isEqualTo(1);
         assertThat(ubehandlede.getFirst().getBehandlingsId()).isEqualTo(organisasjonHendelse.getBehandlingsId());
         assertThat(ubehandlede.getFirst().getOutboxSporingsId()).isNull();
+    }
+
+    @Test
+    public void registrererIkkeMottattStatusNaarTogglenErAv() {
+        when(leaderElection.isLeader()).thenReturn(true);
+        when(unleash.isEnabled(BEHANDLING_TOGGLE)).thenReturn(false);
+        var organisasjonHendelse = organisasjonHendelseRepository.save(
+            OrganisasjonHendelse.builder()
+                .fid("abc")
+                .eventType("")
+                .eventKey("")
+                .orgEnhetId("abc")
+                .melding("{\"a\": \"b\"}")
+                .mottattTidspunkt(OffsetDateTime.now().minusSeconds(5))
+                .build());
+
+        behandlingScheduler.setMottattStatusForOrganisasjonsHendelser();
+
+        assertThat(organisasjonHendelseRepository.getReferenceById(organisasjonHendelse.getId()).getBehandlingsId()).isNull();
+        assertThat(behandlingRepository.getLatestNonProcessedBehandlinger().size()).isZero();
     }
 }
