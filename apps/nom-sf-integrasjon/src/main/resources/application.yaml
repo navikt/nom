@@ -4,6 +4,7 @@ app:
     evtsrc:
       group-id: nom-sf-integrasjon-evtsrc
       auto-startup: true
+      state-ready-timeout: PT10M
       retry-delay-ms: 2000
       orgenhet:
         topic: org.nom.orgenhet-eventsource
@@ -18,9 +19,13 @@ app:
     tenant: ${SF_TENANT:sf-tenant}
     user-id: ${SF_USER_ID:sf-user-id}
     cpi-api-url: https://cloud-platform-integration-test-02d6jg6h.it-cpi050-rt.cfapps.eu20-002.hana.ondemand.com
+    historicalCutoffDate: 2026-09-28
+    nav-toppnode-id: ${SF_NAV_TOPPNODE_ID:sf-nav-topnode-id}
   nik:
     base-url: ${NIK_BASEURL}
     aad-scope: ${NIK_API_SCOPE}
+  nom-api:
+    base-url: ${NOM_API_URL}
 
 
 nom.libs.state.ressurs.enabled: true
@@ -122,6 +127,13 @@ spring:
             client-secret:  ${SF_CPI_CLIENT_SECRET:sf-cpi-client-secret}
             client-authentication-method: client_secret_post
             authorization-grant-type: client_credentials
+          nom-api:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
         provider:
           azure:
             issuer-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}

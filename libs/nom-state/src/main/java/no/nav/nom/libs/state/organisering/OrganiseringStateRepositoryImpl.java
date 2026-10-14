@@ -227,7 +227,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         // -> jeg må da legge til alle organiseringer som inneholder idOver i oppover-kartet for id
         var meg = organiseringState.id();
 
-        var alleMineOppoverOrganiseringer = enhetOgOrganiseringerOppover.computeIfAbsent(meg, k -> new HashSet<>());
+        var alleMineOppoverOrganiseringer = enhetOgOrganiseringerOppover.computeIfAbsent(meg, _ -> new HashSet<>());
 
         Set<OrganiseringState> mineOppoverOrganiseringerFraDenneStaten = new HashSet<>();
         mineOppoverOrganiseringerFraDenneStaten.add(organiseringState);
@@ -410,10 +410,9 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     public Set<String> getAlleLovnodeIder() {
         var alleOverenhetIder = organiseringByFid.values().stream().map(OrganiseringState::idOver).collect(Collectors.toSet());
         var alleEnheterMedOrganisering = organiseringByFid.values().stream().map(OrganiseringState::id).collect(Collectors.toSet());
-        var alleEnheterUtenUnderOrganisering = alleEnheterMedOrganisering.stream()
+        return alleEnheterMedOrganisering.stream()
             .filter(id -> !alleOverenhetIder.contains(id))
             .collect(Collectors.toSet());
-        return alleEnheterUtenUnderOrganisering;
     }
 
     @Override

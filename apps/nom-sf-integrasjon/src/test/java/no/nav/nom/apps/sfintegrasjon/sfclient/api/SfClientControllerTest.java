@@ -6,7 +6,10 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfAccessToken;
 import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FOBusinessUnit;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FODivision;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
@@ -281,6 +284,104 @@ class SfClientControllerTest {
             .andExpect(status().isNotFound());
     }
 
+    // --- /api/sf/client/odata-users/by-* ---
+
+    @Test
+    void odataUsersBySsn_shouldReturn200AndPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getUsersBySsn(eq("12345678901"), eq("local-token"))).thenReturn(List.of(new User()));
+
+        mockMvc.perform(post("/api/sf/client/odata-users/by-ssn")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("12345678901")
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersBySsn_shouldReturn400WhenSsnIsBlank() throws Exception {
+        mockMvc.perform(post("/api/sf/client/odata-users/by-ssn")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .contentType(MediaType.TEXT_PLAIN)
+                .content(" "))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void odataUsersByEmpId_shouldReturn200WhenAdmin() throws Exception {
+        when(sfODataClient.getUsersByEmpId(eq("employee-id"), isNull())).thenReturn(List.of(new User()));
+
+        mockMvc.perform(get("/api/sf/client/odata-users/by-emp-id")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("empId", "employee-id"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersByUserId_shouldReturn200WhenAdmin() throws Exception {
+        when(sfODataClient.getUsersByUserId(eq("user-id"), isNull())).thenReturn(List.of(new User()));
+
+        mockMvc.perform(get("/api/sf/client/odata-users/by-user-id")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("userId", "user-id"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersByUsername_shouldReturn200WhenAdmin() throws Exception {
+        when(sfODataClient.getUsersByUsername(eq("username"), isNull())).thenReturn(List.of(new User()));
+
+        mockMvc.perform(get("/api/sf/client/odata-users/by-username")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("username", "username"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersByEmail_shouldReturn200WhenAdmin() throws Exception {
+        when(sfODataClient.getUsersByEmail(eq("user@example.com"), isNull())).thenReturn(List.of(new User()));
+
+        mockMvc.perform(get("/api/sf/client/odata-users/by-email")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("email", "user@example.com"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersByEmail_shouldReturn400WhenEmailIsBlank() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-users/by-email")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("email", " "))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void odataUsersByDisplayName_shouldReturn200AndPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getUsersByDisplayName(eq("Test User"), eq("local-token"))).thenReturn(List.of(new User()));
+
+        mockMvc.perform(get("/api/sf/client/odata-users/by-display-name")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("displayName", "Test User")
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataUsersByDisplayName_shouldReturn400WhenDisplayNameIsBlank() throws Exception {
+        mockMvc.perform(get("/api/sf/client/odata-users/by-display-name")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("displayName", " "))
+            .andExpect(status().isBadRequest());
+    }
+
     // --- /api/sf/client/odata-emp-employment ---
 
     @Test
@@ -349,6 +450,54 @@ class SfClientControllerTest {
         when(sfODataClient.getFirst10PerPersons(eq("local-token"))).thenReturn(List.of(new PerPerson()));
 
         mockMvc.perform(get("/api/sf/client/odata-per-person")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    // --- /api/sf/client/odata-fo-division/{nomOrgEnhetId} ---
+
+    @Test
+    void odataFODivision_shouldReturn200WithObjectsWhenAdmin() throws Exception {
+        when(sfODataClient.getFODivisionsByNomOrgEnhetId(eq("123"), isNull())).thenReturn(List.of(new FODivision()));
+
+        mockMvc.perform(get("/api/sf/client/odata-fo-division/123")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataFODivision_shouldPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getFODivisionsByNomOrgEnhetId(eq("123"), eq("local-token"))).thenReturn(List.of(new FODivision()));
+
+        mockMvc.perform(get("/api/sf/client/odata-fo-division/123")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
+                .param("accessToken", "local-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    // --- /api/sf/client/odata-fo-business-unit/{nomOrgEnhetId} ---
+
+    @Test
+    void odataFOBusinessUnit_shouldReturn200WithObjectsWhenAdmin() throws Exception {
+        when(sfODataClient.getFOBusinessUnitsByNomOrgEnhetId(eq("123"), isNull())).thenReturn(List.of(new FOBusinessUnit()));
+
+        mockMvc.perform(get("/api/sf/client/odata-fo-business-unit/123")
+                .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN"))))
+            .andExpect(status().isOk())
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void odataFOBusinessUnit_shouldPassThroughAccessTokenWhenAdmin() throws Exception {
+        when(sfODataClient.getFOBusinessUnitsByNomOrgEnhetId(eq("123"), eq("local-token"))).thenReturn(List.of(new FOBusinessUnit()));
+
+        mockMvc.perform(get("/api/sf/client/odata-fo-business-unit/123")
                 .with(jwt().authorities(new SimpleGrantedAuthority("ADMIN")))
                 .param("accessToken", "local-token"))
             .andExpect(status().isOk())

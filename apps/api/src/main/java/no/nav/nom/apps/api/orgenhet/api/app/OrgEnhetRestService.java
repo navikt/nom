@@ -438,8 +438,8 @@ public class OrgEnhetRestService {
 
     public EndreOpphengOrgEnhetResponse endreOpphengForOrgenhet(EndreOpphengOrgEnhetRequest endreOpphengOrgEnhetRequest) {
         /*
-         first change existing organisering - gyldigTom is yesterday
-         then add new organisering - gyldigFom is set today and gyldigTom is set to current organisering´s gyldigTom
+         first change existing organisering - gyldigTom is the day before requested gyldigFom
+         then add new organisering - gyldigFom is set to requested gyldigFom and gyldigTom is set to current organisering´s gyldigTom
          */
         var orgEnhetId = endreOpphengOrgEnhetRequest.orgenhetId();
         var nyOverenhetId = endreOpphengOrgEnhetRequest.nyOverenhetId();
@@ -456,6 +456,18 @@ public class OrgEnhetRestService {
         var gjeldendeOrganisering = organiseringStateRepository.findActiveById(orgEnhetId)
             .orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetId));
 
+        var iDag = LocalDate.now();
+        var nyGyldigFom = endreOpphengOrgEnhetRequest.gyldigFom();
+        var nyGyldigTom = gjeldendeOrganisering.gyldigTom();
+
+        if (nyGyldigFom.isBefore(iDag)
+            || (gjeldendeOrganisering.gyldigTom() != null
+            && nyGyldigFom.isAfter(gjeldendeOrganisering.gyldigTom()))) {
+            throw new IllegalStateException(String.format(
+                "GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s",
+                nyGyldigFom, iDag, gjeldendeOrganisering.gyldigTom()));
+        }
+
         if (!Objects.equals(gjeldendeOrganisering.idOver(), endreOpphengOrgEnhetRequest.currentOverenhetId())) {
             throw new IllegalStateException(String.format(
                 "Enhet %s (%s) er ikke knyttet til oppgitt overenhet %s",
@@ -468,9 +480,6 @@ public class OrgEnhetRestService {
                 orgEnhet.getNavn(), orgEnhetId, nyOverenhet.getNavn(), nyOverenhetId));
         }
 
-        var iDag = LocalDate.now();
-        var nyGyldigTom = gjeldendeOrganisering.gyldigTom();
-
         InputMetadata inputMetadata = new InputMetadata(
             "REST-API",
             "endreOpphengForOrgenhet",
@@ -481,7 +490,7 @@ public class OrgEnhetRestService {
             )
         );
 
-        // Avslutt gjeldende organisering i går
+        // endre gjeldende organisering - gyldigTom settes til dagen før ny gyldigFom
         organiseringEventCommandService.endreOrganisering(
             gjeldendeOrganisering.fid(),
             new EndreOrganiseringCmd(
@@ -490,22 +499,22 @@ public class OrgEnhetRestService {
                 gjeldendeOrganisering.idOver(),
                 gjeldendeOrganisering.navnOver(),
                 gjeldendeOrganisering.gyldigFom(),
-                iDag.minusDays(1),
+                nyGyldigFom.minusDays(1),
                 inputMetadata
             )
         );
 
-        // Opprett ny organisering fra i dag med gjeldende gyldigTom
+        // Opprett ny organisering fra gyldigFom med gjeldende gyldigTom
         organiseringEventCommandService.opprettOrganisering(new OpprettOrganiseringCmd(
             orgEnhet.getId(),
             orgEnhet.getNavn(),
             nyOverenhet.getId(),
             nyOverenhet.getNavn(),
-            iDag,
+            nyGyldigFom,
             nyGyldigTom,
             inputMetadata
         ));
 
-        return new EndreOpphengOrgEnhetResponse(orgEnhet.getId(), nyOverenhet.getId(), iDag, nyGyldigTom);
+        return new EndreOpphengOrgEnhetResponse(orgEnhet.getId(), nyOverenhet.getId(), nyGyldigFom, nyGyldigTom);
     }
 }

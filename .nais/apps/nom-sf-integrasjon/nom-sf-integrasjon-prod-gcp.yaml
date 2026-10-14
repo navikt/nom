@@ -20,6 +20,10 @@ spec:
       value: 'classpath:logback-nais.xml'
     - name: OTEL_JAVAAGENT_LOGGING
       value: none
+    - name: NOM_API_URL
+      value: http://nom-api.nom
+    - name: NOM_API_SCOPE
+      value: api://prod-gcp.nom.nom-api/.default
   envFrom:
     - secret: nom-sf-integrasjon-unleash-api-token
     - secret: sap-sf-credentials
@@ -96,6 +100,9 @@ spec:
       rules:
         - application: nav-ident
           namespace: org
+          cluster: prod-gcp
+        - application: nom-api
+          namespace: nom
           cluster: prod-gcp
       external:
         - host: org-unleash-api.nav.cloud.nais.io

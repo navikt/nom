@@ -8,6 +8,7 @@ import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -34,13 +35,14 @@ public class EvtsrcKafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> evtsrcKafkaListenerContainerFactory(
-        ConsumerFactory<String, String> evtsrcConsumerFactory
+    public ConcurrentKafkaListenerContainerFactory<String, String> organisasjonEvtsrcKafkaListenerContainerFactory(
+        ConsumerFactory<String, String> evtsrcConsumerFactory,
+        KafkaListenerEndpointRegistry registry
     ) {
         var factory = new ConcurrentKafkaListenerContainerFactory<String, String>();
         factory.setConsumerFactory(evtsrcConsumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-        factory.setCommonErrorHandler(evtsrcErrorHandler());
+        factory.setCommonErrorHandler(new CommonStopAlleContainereErrorHandler(registry));
         return factory;
     }
 
@@ -50,15 +52,5 @@ public class EvtsrcKafkaConfig {
     @Bean
     public AdminClient evtsrcAdminClient(KafkaProperties kafkaProperties) {
         return AdminClient.create(kafkaProperties.buildAdminProperties());
-    }
-
-    /**
-     * Ingen retry – OrgEnhetStateIkkeFunnetException er ikke-gjenopprettbar og skal ikke retryes.
-     * Listeneren stopper seg selv ved denne feilen.
-     */
-    private DefaultErrorHandler evtsrcErrorHandler() {
-        var handler = new DefaultErrorHandler(new FixedBackOff(0L, 0L));
-        handler.addNotRetryableExceptions(OrgEnhetStateIkkeFunnetException.class);
-        return handler;
     }
 }

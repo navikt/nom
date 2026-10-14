@@ -9,6 +9,9 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.oauth.SfOAuthService;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionParams;
 import no.nav.nom.apps.sfintegrasjon.sfclient.saml.SamlAssertionService;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.EmpEmployment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FOBusinessUnit;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FODepartment;
+import no.nav.nom.sf.odata.vdm.namespaces.successfactors.FODivision;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.PerPerson;
 import no.nav.nom.sf.odata.vdm.namespaces.successfactors.User;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataException;
@@ -158,6 +161,144 @@ public class SfOdataClientController {
         }
     }
 
+    @PostMapping(
+        value = "/odata-users/by-ssn",
+        consumes = MediaType.TEXT_PLAIN_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by SSN",
+        description = "Fetches User records matching the SSN provided as plain text in the request body. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersBySsn(
+        @RequestBody String ssn,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (ssn.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(sfODataClient.getUsersBySsn(ssn, accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by SSN from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users/by-emp-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by employee ID",
+        description = "Fetches User records matching the given employee ID. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersByEmpId(
+        @RequestParam String empId,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (empId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(sfODataClient.getUsersByEmpId(empId, accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by employee ID from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users/by-user-id", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by user ID",
+        description = "Fetches User records matching the given user ID. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersByUserId(
+        @RequestParam String userId,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (userId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(sfODataClient.getUsersByUserId(userId, accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by user ID from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users/by-username", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by username",
+        description = "Fetches User records matching the given username. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersByUsername(
+        @RequestParam String username,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (username.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(sfODataClient.getUsersByUsername(username, accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by username from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users/by-email", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by email",
+        description = "Fetches User records matching the given email address. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersByEmail(
+        @RequestParam String email,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (email.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(sfODataClient.getUsersByEmail(email, accessToken).stream().map(User::toString).toList());
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by email from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-users/by-display-name", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF User objects by display name",
+        description = "Fetches User records matching the given display name. " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataUsersByDisplayName(
+        @RequestParam String displayName,
+        @RequestParam(required = false) String accessToken
+    ) {
+        if (displayName.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(
+                sfODataClient.getUsersByDisplayName(displayName, accessToken).stream().map(User::toString).toList()
+            );
+        } catch (ODataException e) {
+            log.error("Failed to fetch users by display name from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
     @GetMapping(value = "/odata-emp-employment", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
     @Operation(
@@ -190,6 +331,81 @@ public class SfOdataClientController {
             return ResponseEntity.ok(sfODataClient.getFirst10PerPersons(accessToken).stream().map(PerPerson::toString).toList());
         } catch (ODataException e) {
             log.error("Failed to fetch PerPerson objects from SAP SuccessFactors OData API", e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-fo-department/{nomOrgEnhetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF FODepartment by NOM orgenhet-ID",
+        description = "Fetches all FODepartment records matching the given NOM orgenhet-ID (mapped to externalCode in SF). " +
+            "May return multiple records when the department has several time-bounded versions (historikk). " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataFODepartmentByNomOrgEnhetId(
+        @PathVariable String nomOrgEnhetId,
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(
+                sfODataClient.getFODepartmentsByNomOrgEnhetId(nomOrgEnhetId, accessToken)
+                    .stream()
+                    .map(FODepartment::toString)
+                    .toList()
+            );
+        } catch (ODataException e) {
+            log.error("Failed to fetch FODepartment for nomOrgEnhetId={} from SAP SuccessFactors OData API", nomOrgEnhetId, e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-fo-division/{nomOrgEnhetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF FODivision by NOM orgenhet-ID",
+        description = "Fetches all FODivision records matching the given NOM orgenhet-ID (mapped to externalCode in SF). " +
+            "May return multiple records when the division has several time-bounded versions (historikk). " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataFODivisionByNomOrgEnhetId(
+        @PathVariable String nomOrgEnhetId,
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(
+                sfODataClient.getFODivisionsByNomOrgEnhetId(nomOrgEnhetId, accessToken)
+                    .stream()
+                    .map(FODivision::toString)
+                    .toList()
+            );
+        } catch (ODataException e) {
+            log.error("Failed to fetch FODivision for nomOrgEnhetId={} from SAP SuccessFactors OData API", nomOrgEnhetId, e);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
+        }
+    }
+
+    @GetMapping(value = "/odata-fo-business-unit/{nomOrgEnhetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(
+        summary = "Fetch SF FOBusinessUnit by NOM orgenhet-ID",
+        description = "Fetches all FOBusinessUnit records matching the given NOM orgenhet-ID (mapped to externalCode in SF). " +
+            "May return multiple records when the business unit has several time-bounded versions (historikk). " +
+            "Uses the cached SF OAuth token unless an accessToken query parameter is provided."
+    )
+    public ResponseEntity<List<String>> getODataFOBusinessUnitByNomOrgEnhetId(
+        @PathVariable String nomOrgEnhetId,
+        @RequestParam(required = false) String accessToken
+    ) {
+        try {
+            return ResponseEntity.ok(
+                sfODataClient.getFOBusinessUnitsByNomOrgEnhetId(nomOrgEnhetId, accessToken)
+                    .stream()
+                    .map(FOBusinessUnit::toString)
+                    .toList()
+            );
+        } catch (ODataException e) {
+            log.error("Failed to fetch FOBusinessUnit for nomOrgEnhetId={} from SAP SuccessFactors OData API", nomOrgEnhetId, e);
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).build();
         }
     }

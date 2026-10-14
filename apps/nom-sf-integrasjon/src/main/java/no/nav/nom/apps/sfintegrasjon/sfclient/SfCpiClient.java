@@ -1,5 +1,7 @@
 package no.nav.nom.apps.sfintegrasjon.sfclient;
 
+import no.nav.nom.apps.sfintegrasjon.outbox.SfOutboxDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -31,5 +33,13 @@ public class SfCpiClient {
             .body(payload)
             .retrieve()
             .body(String.class);
+    }
+
+    public ResponseEntity<SfOutboxDTO> sendOrgenhetPayload(SfOutboxDTO payload) {
+        return cpiClient.post()
+            .uri("http/NOM_to_Zalaris_Org_Data")
+            .body(payload)
+            .retrieve()
+            .toEntity(SfOutboxDTO.class);
     }
 }

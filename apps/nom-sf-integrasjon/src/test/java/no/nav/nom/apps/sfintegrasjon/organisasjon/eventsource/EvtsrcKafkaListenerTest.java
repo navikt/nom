@@ -50,7 +50,6 @@ class EvtsrcKafkaListenerTest {
     @Mock OrgEnhetStateRepository orgEnhetStateRepository;
     @Mock OrgEnhetLederStateRepository orgEnhetLederStateRepository;
     @Mock OrganiseringStateRepository organiseringStateRepository;
-    @Mock KafkaListenerEndpointRegistry listenerRegistry;
     @Mock ConsumerSeekAware.ConsumerSeekCallback callback;
 
     private EvtsrcKafkaListener listener;
@@ -72,7 +71,7 @@ class EvtsrcKafkaListenerTest {
         var objectMapper = JsonMapper.builder().build();
         listener = new EvtsrcKafkaListener(
             repository, objectMapper, properties, evtsrcAdminClient,
-            orgEnhetStateRepository, orgEnhetLederStateRepository, organiseringStateRepository, listenerRegistry
+            orgEnhetStateRepository, orgEnhetLederStateRepository, organiseringStateRepository
         );
     }
 
@@ -234,7 +233,7 @@ class EvtsrcKafkaListenerTest {
     void onPartitionsAssigned_seekNaarIngenCommittedOffsets() throws Exception {
         properties.getOrgenhet().setStartOffset(500L);
         var tp = new TopicPartition(ORGENHET_TOPIC, 0);
-        stubAdminClient(Map.of());
+        stubAdminClient(EvtsrcKafkaListener.ORGENHET_LISTENER_ID, Map.of());
 
         listener.onPartitionsAssigned(Map.of(tp, 0L), callback);
 
@@ -246,7 +245,7 @@ class EvtsrcKafkaListenerTest {
     void onPartitionsAssigned_ingenSeekNaarStartOffsetErMinusEn() throws Exception {
         properties.getOrgenhet().setStartOffset(-1L);
         var tp = new TopicPartition(ORGENHET_TOPIC, 0);
-        stubAdminClient(Map.of());
+        stubAdminClient(EvtsrcKafkaListener.ORGENHET_LISTENER_ID, Map.of());
 
         listener.onPartitionsAssigned(Map.of(tp, 0L), callback);
 
@@ -258,10 +257,37 @@ class EvtsrcKafkaListenerTest {
     void onPartitionsAssigned_ingenSeekNaarCommittedOffsetFinnes() throws Exception {
         properties.getOrgenhet().setStartOffset(500L);
         var tp = new TopicPartition(ORGENHET_TOPIC, 0);
-        stubAdminClient(Map.of(tp, new OffsetAndMetadata(123L)));
+        stubAdminClient(EvtsrcKafkaListener.ORGENHET_LISTENER_ID, Map.of(tp, new OffsetAndMetadata(123L)));
 
         listener.onPartitionsAssigned(Map.of(tp, 123L), callback);
 
+        verify(evtsrcAdminClient).listConsumerGroupOffsets(EvtsrcKafkaListener.ORGENHET_LISTENER_ID);
+        verify(callback, never()).seek(any(), any(Integer.class), any(Long.class));
+    }
+
+    @Test
+    @DisplayName("onPartitionsAssigned: bruker leder-listenerens gruppe for committed offset")
+    void onPartitionsAssigned_brukerLederGruppe() throws Exception {
+        properties.getOrgenhetLeder().setStartOffset(1105710L);
+        var tp = new TopicPartition(ORGENHET_LEDER_TOPIC, 0);
+        stubAdminClient(EvtsrcKafkaListener.ORGENHET_LEDER_LISTENER_ID, Map.of(tp, new OffsetAndMetadata(1105717L)));
+
+        listener.onPartitionsAssigned(Map.of(tp, 1105717L), callback);
+
+        verify(evtsrcAdminClient).listConsumerGroupOffsets(EvtsrcKafkaListener.ORGENHET_LEDER_LISTENER_ID);
+        verify(callback, never()).seek(any(), any(Integer.class), any(Long.class));
+    }
+
+    @Test
+    @DisplayName("onPartitionsAssigned: bruker organisering-listenerens gruppe for committed offset")
+    void onPartitionsAssigned_brukerOrganiseringGruppe() throws Exception {
+        properties.getOrganisering().setStartOffset(15081L);
+        var tp = new TopicPartition(ORGANISERING_TOPIC, 0);
+        stubAdminClient(EvtsrcKafkaListener.ORGANISERING_LISTENER_ID, Map.of(tp, new OffsetAndMetadata(15082L)));
+
+        listener.onPartitionsAssigned(Map.of(tp, 15082L), callback);
+
+        verify(evtsrcAdminClient).listConsumerGroupOffsets(EvtsrcKafkaListener.ORGANISERING_LISTENER_ID);
         verify(callback, never()).seek(any(), any(Integer.class), any(Long.class));
     }
 
@@ -380,10 +406,10 @@ class EvtsrcKafkaListenerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void stubAdminClient(Map<TopicPartition, OffsetAndMetadata> committedOffsets) throws Exception {
+    private void stubAdminClient(String groupId, Map<TopicPartition, OffsetAndMetadata> committedOffsets) throws Exception {
         var mockResult = mock(ListConsumerGroupOffsetsResult.class);
         var mockFuture = (KafkaFuture<Map<TopicPartition, OffsetAndMetadata>>) mock(KafkaFuture.class);
-        when(evtsrcAdminClient.listConsumerGroupOffsets("nom-sf-integrasjon-evtsrc-test")).thenReturn(mockResult);
+        when(evtsrcAdminClient.listConsumerGroupOffsets(groupId)).thenReturn(mockResult);
         when(mockResult.partitionsToOffsetAndMetadata()).thenReturn(mockFuture);
         when(mockFuture.get(10, TimeUnit.SECONDS)).thenReturn(committedOffsets);
     }

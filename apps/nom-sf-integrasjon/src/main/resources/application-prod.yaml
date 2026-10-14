@@ -3,6 +3,8 @@ NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 ZALARIS_CLIENT_ID: "43e22b72-91d9-45ac-8436-776423aedef6"
 
+SF_NAV_TOPPNODE_ID: "py437s"
+
 app:
   kafka:
     evtsrc:

@@ -33,6 +33,15 @@ public class OpenApiConfig {
             .build();
     }
 
+    @Bean
+    public GroupedOpenApi AdminApi() {
+        return GroupedOpenApi.builder()
+            .group("Internal admin")
+            .displayName("Internal admin")
+            .pathsToMatch("/api/admin/**")
+            .build();
+    }
+
     /**
      * In dev/prod: Swagger UI shows the "Authorize" button with Bearer token input.
      * All endpoints require a valid Azure AD JWT with NOM_ADMIN group membership.

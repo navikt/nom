@@ -3,13 +3,15 @@ NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
 ZALARIS_CLIENT_ID: "301f612f-eab6-47b5-84d0-8e517a8b48fc"
 
+SF_NAV_TOPPNODE_ID: "sa312u"
+
 app:
   kafka:
     evtsrc:
       # Startoffset ved første oppstart. Sett til ønsket offset i prod ved første deploy.
       orgenhet:
-        start-offset: 815631
+        start-offset: 815839
       orgenhet-leder:
-        start-offset: 1105710
+        start-offset: 1105834
       organisering:
-        start-offset: 15081
+        start-offset: 15136

@@ -1,0 +1,8 @@
+app:
+  google-storage-bucket:
+    name: no-nav-org-dev-nom-admin-storage-bucket
+    remedy-data: IR_export.csv
+
+NOM_ADMIN_GROUPID:          "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
