@@ -17,9 +17,12 @@ import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -161,7 +164,11 @@ public class OrgEnhetResolver {
             lovenodeIderForSlection = organiseringStateRepository.getAlleLovnodeIder();
         } else {
             var organiseringerForSelection = getOrganiseringerForSelection(filter);
-            enheterOrganisertIPeriode = enheterOrganisertIPeriode(organiseringerForSelection, filter.periodiskUtvalg());
+            enheterOrganisertIPeriode = enheterOrganisertIPeriode(
+                organiseringerForSelection,
+                filter.periodiskUtvalg(),
+                filter.organiseringSelection() == UNDER_ANGITT_ORGENHET && filter.periodiskUtvalg() == PeriodiskUtvalgArg.AKTIVE
+            );
 
             lovenodeIderForSlection = organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter));
             alleEnheter = enheterOrganisertIPeriode.stream()
@@ -184,7 +191,11 @@ public class OrgEnhetResolver {
         OrgEnheterSearchFilter filter
     ) {
         var organiseringerForSelection = getOrganiseringerForSelection(filter);
-        var enheterOrganisertIPeriode = enheterOrganisertIPeriode(organiseringerForSelection, filter.periodiskUtvalg());
+        var enheterOrganisertIPeriode = enheterOrganisertIPeriode(
+            organiseringerForSelection,
+            filter.periodiskUtvalg(),
+            filter.organiseringSelection() == UNDER_ANGITT_ORGENHET && filter.periodiskUtvalg() == PeriodiskUtvalgArg.AKTIVE
+        );
         var lovenodeIderForSlection = filter.organiseringSelection() == ALLE
             ? organiseringStateRepository.getAlleLovnodeIder()
             : organiseringStateRepository.getLovnoderIderUnder(getOrgenhetIdForNodeSelection(filter));
@@ -246,17 +257,48 @@ public class OrgEnhetResolver {
 
     record OrgenhetIdOgUnderOrganiseringer(String nodeId, Set<OrganiseringState> organiseringer) {}
 
-    List<String> enheterOrganisertIPeriode(OrgenhetIdOgUnderOrganiseringer idOgUnderEnheterOrganiseringer, PeriodiskUtvalgArg organiseringPeriode) {
+    List<String> enheterOrganisertIPeriode(
+        OrgenhetIdOgUnderOrganiseringer idOgUnderEnheterOrganiseringer,
+        PeriodiskUtvalgArg organiseringPeriode,
+        boolean krevSammenhengendeAktivKjede
+    ) {
         String toppNodeOrgenhetId = idOgUnderEnheterOrganiseringer.nodeId();
         var organiseringer = idOgUnderEnheterOrganiseringer.organiseringer();
 
         var result = new ArrayList<String>();
         result.add(toppNodeOrgenhetId); // Topp node for utvalget skal også med
-        result.addAll(organiseringer.stream()
-            .filter(organisering -> Util.filterByPeriodiskUtvalg(organisering, organiseringPeriode))
-            .map(OrganiseringState::id)
-            .toList()
-        );
+        if (krevSammenhengendeAktivKjede) {
+            var iderSomKanNaasGjennomAktivOrganisering = new HashSet<String>();
+            iderSomKanNaasGjennomAktivOrganisering.add(toppNodeOrgenhetId);
+            var aktiveOrganiseringer = organiseringer.stream()
+                .filter(organisering -> Util.filterByPeriodiskUtvalg(organisering, organiseringPeriode))
+                .toList();
+            Map<String, List<String>> aktiveBarnPerForelder = new HashMap<>();
+            for (var organisering : aktiveOrganiseringer) {
+                aktiveBarnPerForelder.computeIfAbsent(organisering.idOver(), _ -> new ArrayList<>())
+                    .add(organisering.id());
+            }
+            //koe er en kø med ID-er til enheter vi har funnet, men ennå ikke undersøkt barna til.
+            //Den starter med ID-en til enheten det søkes under. For hver ID som tas ut av køen, legges aktive barn i køen.
+            // Slik går koden nivå for nivå nedover i treet, og den fortsetter ikke forbi en historisk forbindelse.
+            var koe = new ArrayDeque<String>();
+            koe.add(toppNodeOrgenhetId);
+            while (!koe.isEmpty()) {
+                var forelderId = koe.remove();
+                for (var barnId : aktiveBarnPerForelder.getOrDefault(forelderId, emptyList())) {
+                    if (iderSomKanNaasGjennomAktivOrganisering.add(barnId)) {
+                        koe.add(barnId);
+                    }
+                }
+            }
+            result.addAll(iderSomKanNaasGjennomAktivOrganisering.stream().filter(id -> !id.equals(toppNodeOrgenhetId)).toList());
+        } else {
+            result.addAll(organiseringer.stream()
+                .filter(organisering -> Util.filterByPeriodiskUtvalg(organisering, organiseringPeriode))
+                .map(OrganiseringState::id)
+                .toList()
+            );
+        }
         return result;
     }
 
