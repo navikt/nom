@@ -348,9 +348,6 @@ spec:
         - application: eien-poc
           namespace: eien
           cluster: dev-gcp
-        - application: pensjon-deployment-audit
-          namespace: pensjon-revisjon
-          cluster: dev-gcp
         - application: nom-pusher
           namespace: oksty
           cluster: dev-gcp
@@ -366,7 +363,7 @@ spec:
         - application: nom-sf-integrasjon
           namespace: org
           cluster: dev-gcp
-        - application: nav-deployment-audit
+        - application: nda
           namespace: proaktiv
           cluster: dev-gcp
     outbound:
