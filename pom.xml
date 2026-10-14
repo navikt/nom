@@ -48,7 +48,7 @@
         <ojdbc.version>23.26.3.0.0</ojdbc.version>
         <poi-ooxml.version>5.5.1</poi-ooxml.version>
         <commons-compress.version>1.28.0</commons-compress.version>
-        <postgresql.version>42.7.13</postgresql.version>
+        <postgresql.version>42.7.14</postgresql.version>
         <microsoft-graph.version>6.71.0</microsoft-graph.version>
         <azure-identity.version>1.18.7</azure-identity.version>
         <caffeine.version>3.2.3</caffeine.version>
