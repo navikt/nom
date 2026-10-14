@@ -14,7 +14,7 @@
     <name>NOM :: Libs :: Lucene Wrapper Core</name>
 
     <properties>
-        <lucene.version>10.5.1</lucene.version>
+        <lucene.version>10.5.2</lucene.version>
         <lucene-analyzers-phonetic.version>8.11.4</lucene-analyzers-phonetic.version>
     </properties>
 
