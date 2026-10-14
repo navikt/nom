@@ -3,7 +3,7 @@ import type { AxiosResponse } from "axios";
 import axios from "axios";
 
 import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
-import type {
+import {
   AvvikleOrgEnhetRequest,
   AvvikleRessursRequest,
   ExcelExportRequest,
@@ -29,6 +29,7 @@ import type {
   OrgtilknytningState,
   OvrigeEndringerOrgEnhetRequest,
   Person,
+  RedigeringsTilgangRessurs,
   Ressurs,
   RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
   RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse,
@@ -551,7 +552,7 @@ export const getLedereForOrgEnhet = {
     (
       await axios.post<
         string[],
-        AxiosResponse<Record<string, MinimalRessurs[]>>
+        AxiosResponse<Record<string, RedigeringsTilgangRessurs[]>>
       >(
         `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLedereForOrgenheter`,
         orgEnhetIder,

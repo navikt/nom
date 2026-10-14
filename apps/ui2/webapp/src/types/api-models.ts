@@ -322,6 +322,12 @@ export interface MinimalRessurs {
   visningsnavn: string;
 }
 
+export interface RedigeringsTilgangRessurs {
+  navident: string;
+  visningsnavn: string;
+  erDelegert: boolean;
+}
+
 export interface OppdaterOrgtilknytningerForRessursRequest {
   eksisterendeOrgtilknytninger: EndreOrgtilknytningRequest[];
   nyeOrgtilknytninger: LeggTilOrgtilknytningRequest[];
