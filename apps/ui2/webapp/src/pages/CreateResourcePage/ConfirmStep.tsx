@@ -122,7 +122,7 @@ export function ConfirmStep() {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-9);
+          gap: var(--a-spacing-4);
         `}
       >
         <span

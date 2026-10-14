@@ -325,8 +325,6 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
 
   const orgEnheter = orgEnheterQuery?.data;
 
-  console.log(orgEnheter);
-
   if (toppnodeIder.length === 0) {
     return;
   }

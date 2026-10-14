@@ -7,6 +7,7 @@ import {
   Button,
   DatePicker,
   Heading,
+  HGrid,
   TextField,
   useDatepicker,
   VStack,
@@ -22,6 +23,7 @@ import {
   getAlleTilgangsenheter,
   getKostnadssted,
   getOrgEnhet,
+  getRessurs,
   opprettOrgEnhet,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
@@ -55,7 +57,8 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
+import { formatVisningsnavn, isInDevelopment } from "~/utils";
+import { LabelWithValue } from "~/components/LabelWithValue";
 
 export const OpprettOrgEnhet = () => {
   const { id } = useSearch({
@@ -232,11 +235,13 @@ function OpprettOrgEnhetForm({
 
     await showModal(
       <BekreftModal
-        content={<OpprettOrgEnhetModalContent />}
-        heading="Bekreft opprettelse av organisasjonsenhet"
+        content={<OpprettOrgEnhetModalContent request={request} />}
+        heading="Bekreft opprettelse"
       />,
     ).then(() => {
-      opprettOrgEnhetMutation.mutate(request);
+      //opprettOrgEnhetMutation.mutate(request);
+
+      console.log("Would save", request);
     });
   };
 
@@ -370,8 +375,30 @@ function FormTilgangsenhetSelectWrapper({ name }: { name: string }) {
   );
 }
 
-function OpprettOrgEnhetModalContent() {
-  return <BodyLong>Testmelding</BodyLong>;
+function OpprettOrgEnhetModalContent({
+  request,
+}: {
+  request: OpprettOrgEnhetRequest;
+}) {
+  console.log(request);
+
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(request.lederRessursNavident),
+    queryFn: () => getRessurs.queryFn(request.lederRessursNavident),
+  });
+
+  const ressurs = ressursQuery.data;
+
+  return (
+    <HGrid columns="max-content max-content" gap="2 2">
+      <LabelWithValue split label="Navn" value={request.navn} />
+      <LabelWithValue
+        split
+        label="Leder"
+        value={`${formatVisningsnavn(ressurs?.visningsnavn)} (${ressurs?.navident})`}
+      />
+    </HGrid>
+  );
 }
 
 function OpprettOrgEnhetKvitteringContent({
