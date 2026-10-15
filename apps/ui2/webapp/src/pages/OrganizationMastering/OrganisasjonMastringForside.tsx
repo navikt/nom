@@ -273,7 +273,11 @@ function MineOrgEnheterSeksjon() {
     <VStack gap="6">
       {visPerspektivSearch && (
         <>
-          <div>
+          <div
+            css={css`
+              width: 50%;
+            `}
+          >
             {delegerbareRessurserQuery.isLoading ? (
               <LoaderWithText>Laster...</LoaderWithText>
             ) : (
