@@ -38,6 +38,9 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: prod-gcp
+        - application: nom-sf-integrasjon
+          namespace: org
+          cluster: prod-gcp
       external:
         - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
   ingresses:
