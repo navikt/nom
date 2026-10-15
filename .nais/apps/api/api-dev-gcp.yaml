@@ -366,6 +366,9 @@ spec:
         - application: nda
           namespace: proaktiv
           cluster: dev-gcp
+        - application: rekruttering
+          namespace: oksty
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
