@@ -90,6 +90,9 @@ spec:
         - application: nom-admin
           namespace: org
           cluster: prod-gcp
+        - application: nom-admin-web
+          namespace: org
+          cluster: prod-gcp
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp

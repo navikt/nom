@@ -10,6 +10,7 @@ import no.nav.nom.apps.sfintegrasjon.sfclient.SfCpiClient;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -134,6 +135,31 @@ public class SfOutboxService {
                 sfOutboxRepository.save(nyesteSfOutboxEnhet);
             }
         });
+    }
 
+    @Transactional
+    @Scheduled(cron = "0 30 8 * * MON-FRI")
+    public void logRejectedErrorStates() {
+        if (leaderElection.isLeader()) {
+            var failedAndRejectedStates = sfOutboxRepository.getAllBySfStatusIn(List.of(SfStatus.AVVIST, SfStatus.FEILET));
+            if (failedAndRejectedStates.isEmpty()) {
+                return;
+            }
+
+            var rejectedSize = failedAndRejectedStates.stream().filter(sfOutbox -> sfOutbox.getSfStatus().equals(SfStatus.AVVIST)).count();
+            if (rejectedSize > 0) {
+                log.info(
+                    "ALERT: En sjekk har blitt gjort på nom-sf-integrasjonen og det er {} avviste rader i Outbox tabellen, det kan sjekkes i nom-admin",
+                    rejectedSize
+                );
+            }
+            var failedSize = failedAndRejectedStates.stream().filter(sfOutbox -> sfOutbox.getSfStatus().equals(SfStatus.FEILET)).count();
+            if (failedSize > 0) {
+                log.info(
+                    "ALERT: En sjekk har blitt gjort på nom-sf-integrasjonen og det er {} feilede rader i Outbox tabellen, det kan sjekkes i nom-admin",
+                    failedSize
+                );
+            }
+        }
     }
 }

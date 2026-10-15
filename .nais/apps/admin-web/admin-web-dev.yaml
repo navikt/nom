@@ -93,4 +93,8 @@ spec:
       value: https://nom-remedy-integrasjon.dev-fss-pub.nais.io
     - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
       value: api://dev-fss.org.nom-remedy-integrasjon/.default
+    - name: NOM_SF_INTEGRASJON_API_URL
+      value: http://nom-sf-integrasjon.org.svc.nais.local
+    - name: NOM_SF_INTEGRASJON_API_SCOPE
+      value: api://dev-gcp.org.nom-sf-integrasjon/.default
 
