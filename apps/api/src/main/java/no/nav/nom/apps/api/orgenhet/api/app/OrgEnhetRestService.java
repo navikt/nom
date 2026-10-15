@@ -148,6 +148,14 @@ public class OrgEnhetRestService {
 
             orgEnhetCommandService.endreOrgEnhetsType(orgEnhetState.fid(), endreOrgEnhetsType);
 
+            // set nomNivaa
+            if (opprettOrgEnhetRequest.nomNivaa() != null) {
+                orgEnhetCommandService.endreNomNivaa(
+                    orgEnhetState.fid(),
+                    new EndreNomNivaa(opprettOrgEnhetRequest.nomNivaa(), inputMetadata)
+                );
+            }
+
             final var opprettOrganisering = new OpprettOrganiseringCmd(
                 orgEnhetState.id(),
                 orgEnhetState.navn(),
