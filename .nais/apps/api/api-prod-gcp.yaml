@@ -270,6 +270,9 @@ spec:
         - application: nav-persondata-api
           namespace: holmes
           cluster: prod-gcp
+        - application: watson-admin-api
+          namespace: holmes
+          cluster: prod-gcp
         - application: klage-lookup
           namespace: klage
           cluster: prod-gcp
