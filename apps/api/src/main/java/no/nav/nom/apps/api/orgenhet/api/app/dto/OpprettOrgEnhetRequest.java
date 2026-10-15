@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet.api.app.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import jakarta.validation.constraints.NotBlank;
@@ -23,5 +24,6 @@ public record OpprettOrgEnhetRequest(
     @NotNull(message = "OrgEnhet må ha en OrgEnhetsType satt")
     @Schema(example = "DIREKTORAT") OrgEnhetsType orgEnhetsType,
     @NotBlank(message = "kostnadsstedId må ha navn satt")
-    @Schema(example = "123456") String kostnadsstedId
+    @Schema(example = "123456") String kostnadsstedId,
+    @Schema(example = "ARBEIDSOMRAADE") NomNivaa nomNivaa
 ) {}

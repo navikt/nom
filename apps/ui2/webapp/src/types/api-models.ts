@@ -364,6 +364,8 @@ export interface OpprettOrgEnhetRequest {
    * @example "123456"
    */
   kostnadsstedId: string;
+  /** @example "ARBEIDSOMRAADE" */
+  nomNivaa?: "ARBEIDSOMRAADE" | "DRIFTSENHET" | "LINJEENHET";
   /**
    * @minLength 1
    * @example "A123456"
