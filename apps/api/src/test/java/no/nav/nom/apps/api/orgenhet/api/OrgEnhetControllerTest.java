@@ -215,6 +215,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
             .kostnadsstedId(kostnadsstedId)
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .build();
 
         var overordnetOrgEnhet = map(orgEnhetState());
