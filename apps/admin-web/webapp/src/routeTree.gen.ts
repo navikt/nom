@@ -8,37 +8,38 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as ManuellLastRouteImport } from "./routes/manuell-last";
-import { Route as ManuelleMeldingerRouteImport } from "./routes/manuelle-meldinger";
-import { Route as SanityChecksRouteImport } from "./routes/sanity-checks";
-import { Route as SinksRouteImport } from "./routes/sinks";
-import { Route as StateRouteImport } from "./routes/state";
-import { Route as SanityChecksOrgenhetRouteImport } from "./routes/sanity-checks.orgenhet";
-import { Route as SanityChecksOrgtilknytningRouteImport } from "./routes/sanity-checks.orgtilknytning";
-import { Route as SanityChecksRemedyRouteImport } from "./routes/sanity-checks.remedy";
-import { Route as SanityChecksRessursRouteImport } from "./routes/sanity-checks.ressurs";
-import { Route as SanityChecksU4diffRouteImport } from "./routes/sanity-checks.u4diff";
-import { Route as SinksIndexRouteImport } from "./routes/sinks.index";
-import { Route as SinksApiHendelserRouteImport } from "./routes/sinks.api-hendelser";
-import { Route as SinksApiOrgenhetRouteImport } from "./routes/sinks.api-orgenhet";
-import { Route as SinksApiRessursRouteImport } from "./routes/sinks.api-ressurs";
-import { Route as SinksApiRessursHendelserRouteImport } from "./routes/sinks.api-ressurs-hendelser";
-import { Route as SinksDeadLetterRouteImport } from "./routes/sinks.dead-letter";
-import { Route as SinksNomMasteredRouteImport } from "./routes/sinks.nom-mastered";
-import { Route as SinksOrganiseringRouteImport } from "./routes/sinks.organisering";
-import { Route as SinksOrgenhetRouteImport } from "./routes/sinks.orgenhet";
-import { Route as SinksOrgenhetLederRouteImport } from "./routes/sinks.orgenhet-leder";
-import { Route as SinksOrgtilknytningRouteImport } from "./routes/sinks.orgtilknytning";
-import { Route as SinksRessursRouteImport } from "./routes/sinks.ressurs";
-import { Route as SinksTilgangRouteImport } from "./routes/sinks.tilgang";
-import { Route as StateIndexRouteImport } from "./routes/state.index";
-import { Route as StateOrganiseringRouteImport } from "./routes/state.organisering";
-import { Route as StateOrgenhetRouteImport } from "./routes/state.orgenhet";
-import { Route as StateOrgenhetLederRouteImport } from "./routes/state.orgenhet-leder";
-import { Route as StateOrgtilknytningRouteImport } from "./routes/state.orgtilknytning";
-import { Route as StateRessursRouteImport } from "./routes/state.ressurs";
+import {Route as rootRouteImport} from "./routes/__root";
+import {Route as IndexRouteImport} from "./routes/index";
+import {Route as ManuellLastRouteImport} from "./routes/manuell-last";
+import {Route as ManuelleMeldingerRouteImport} from "./routes/manuelle-meldinger";
+import {Route as SanityChecksRouteImport} from "./routes/sanity-checks";
+import {Route as SinksRouteImport} from "./routes/sinks";
+import {Route as StateRouteImport} from "./routes/state";
+import {Route as SanityChecksOrgenhetRouteImport} from "./routes/sanity-checks.orgenhet";
+import {Route as SanityChecksOrgtilknytningRouteImport} from "./routes/sanity-checks.orgtilknytning";
+import {Route as SanityChecksRemedyRouteImport} from "./routes/sanity-checks.remedy";
+import {Route as SanityChecksRessursRouteImport} from "./routes/sanity-checks.ressurs";
+import {Route as SanityChecksSfIntegrasjonRouteImport} from "./routes/sanity-checks.sf-integrasjon";
+import {Route as SanityChecksU4diffRouteImport} from "./routes/sanity-checks.u4diff";
+import {Route as SinksIndexRouteImport} from "./routes/sinks.index";
+import {Route as SinksApiHendelserRouteImport} from "./routes/sinks.api-hendelser";
+import {Route as SinksApiOrgenhetRouteImport} from "./routes/sinks.api-orgenhet";
+import {Route as SinksApiRessursRouteImport} from "./routes/sinks.api-ressurs";
+import {Route as SinksApiRessursHendelserRouteImport} from "./routes/sinks.api-ressurs-hendelser";
+import {Route as SinksDeadLetterRouteImport} from "./routes/sinks.dead-letter";
+import {Route as SinksNomMasteredRouteImport} from "./routes/sinks.nom-mastered";
+import {Route as SinksOrganiseringRouteImport} from "./routes/sinks.organisering";
+import {Route as SinksOrgenhetRouteImport} from "./routes/sinks.orgenhet";
+import {Route as SinksOrgenhetLederRouteImport} from "./routes/sinks.orgenhet-leder";
+import {Route as SinksOrgtilknytningRouteImport} from "./routes/sinks.orgtilknytning";
+import {Route as SinksRessursRouteImport} from "./routes/sinks.ressurs";
+import {Route as SinksTilgangRouteImport} from "./routes/sinks.tilgang";
+import {Route as StateIndexRouteImport} from "./routes/state.index";
+import {Route as StateOrganiseringRouteImport} from "./routes/state.organisering";
+import {Route as StateOrgenhetRouteImport} from "./routes/state.orgenhet";
+import {Route as StateOrgenhetLederRouteImport} from "./routes/state.orgenhet-leder";
+import {Route as StateOrgtilknytningRouteImport} from "./routes/state.orgtilknytning";
+import {Route as StateRessursRouteImport} from "./routes/state.ressurs";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
@@ -91,6 +92,12 @@ const SanityChecksRessursRoute = SanityChecksRessursRouteImport.update({
   path: "/ressurs",
   getParentRoute: () => SanityChecksRoute,
 } as any);
+const SanityChecksSfIntegrasjonRoute =
+  SanityChecksSfIntegrasjonRouteImport.update({
+    id: "/sf-integrasjon",
+    path: "/sf-integrasjon",
+    getParentRoute: () => SanityChecksRoute,
+  } as any);
 const SanityChecksU4diffRoute = SanityChecksU4diffRouteImport.update({
   id: "/u4diff",
   path: "/u4diff",
@@ -204,6 +211,7 @@ export interface FileRoutesByFullPath {
   "/sanity-checks/orgtilknytning": typeof SanityChecksOrgtilknytningRoute;
   "/sanity-checks/remedy": typeof SanityChecksRemedyRoute;
   "/sanity-checks/ressurs": typeof SanityChecksRessursRoute;
+  "/sanity-checks/sf-integrasjon": typeof SanityChecksSfIntegrasjonRoute;
   "/sanity-checks/u4diff": typeof SanityChecksU4diffRoute;
   "/sinks/api-hendelser": typeof SinksApiHendelserRoute;
   "/sinks/api-orgenhet": typeof SinksApiOrgenhetRoute;
@@ -234,6 +242,7 @@ export interface FileRoutesByTo {
   "/sanity-checks/orgtilknytning": typeof SanityChecksOrgtilknytningRoute;
   "/sanity-checks/remedy": typeof SanityChecksRemedyRoute;
   "/sanity-checks/ressurs": typeof SanityChecksRessursRoute;
+  "/sanity-checks/sf-integrasjon": typeof SanityChecksSfIntegrasjonRoute;
   "/sanity-checks/u4diff": typeof SanityChecksU4diffRoute;
   "/sinks/api-hendelser": typeof SinksApiHendelserRoute;
   "/sinks/api-orgenhet": typeof SinksApiOrgenhetRoute;
@@ -267,6 +276,7 @@ export interface FileRoutesById {
   "/sanity-checks/orgtilknytning": typeof SanityChecksOrgtilknytningRoute;
   "/sanity-checks/remedy": typeof SanityChecksRemedyRoute;
   "/sanity-checks/ressurs": typeof SanityChecksRessursRoute;
+  "/sanity-checks/sf-integrasjon": typeof SanityChecksSfIntegrasjonRoute;
   "/sanity-checks/u4diff": typeof SanityChecksU4diffRoute;
   "/sinks/api-hendelser": typeof SinksApiHendelserRoute;
   "/sinks/api-orgenhet": typeof SinksApiOrgenhetRoute;
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | "/sanity-checks/orgtilknytning"
     | "/sanity-checks/remedy"
     | "/sanity-checks/ressurs"
+    | "/sanity-checks/sf-integrasjon"
     | "/sanity-checks/u4diff"
     | "/sinks/api-hendelser"
     | "/sinks/api-orgenhet"
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | "/sanity-checks/orgtilknytning"
     | "/sanity-checks/remedy"
     | "/sanity-checks/ressurs"
+    | "/sanity-checks/sf-integrasjon"
     | "/sanity-checks/u4diff"
     | "/sinks/api-hendelser"
     | "/sinks/api-orgenhet"
@@ -363,6 +375,7 @@ export interface FileRouteTypes {
     | "/sanity-checks/orgtilknytning"
     | "/sanity-checks/remedy"
     | "/sanity-checks/ressurs"
+    | "/sanity-checks/sf-integrasjon"
     | "/sanity-checks/u4diff"
     | "/sinks/api-hendelser"
     | "/sinks/api-orgenhet"
@@ -464,6 +477,13 @@ declare module "@tanstack/react-router" {
       path: "/ressurs";
       fullPath: "/sanity-checks/ressurs";
       preLoaderRoute: typeof SanityChecksRessursRouteImport;
+      parentRoute: typeof SanityChecksRoute;
+    };
+    "/sanity-checks/sf-integrasjon": {
+      id: "/sanity-checks/sf-integrasjon";
+      path: "/sf-integrasjon";
+      fullPath: "/sanity-checks/sf-integrasjon";
+      preLoaderRoute: typeof SanityChecksSfIntegrasjonRouteImport;
       parentRoute: typeof SanityChecksRoute;
     };
     "/sanity-checks/u4diff": {
@@ -614,6 +634,7 @@ interface SanityChecksRouteChildren {
   SanityChecksOrgtilknytningRoute: typeof SanityChecksOrgtilknytningRoute;
   SanityChecksRemedyRoute: typeof SanityChecksRemedyRoute;
   SanityChecksRessursRoute: typeof SanityChecksRessursRoute;
+  SanityChecksSfIntegrasjonRoute: typeof SanityChecksSfIntegrasjonRoute;
   SanityChecksU4diffRoute: typeof SanityChecksU4diffRoute;
 }
 
@@ -622,6 +643,7 @@ const SanityChecksRouteChildren: SanityChecksRouteChildren = {
   SanityChecksOrgtilknytningRoute: SanityChecksOrgtilknytningRoute,
   SanityChecksRemedyRoute: SanityChecksRemedyRoute,
   SanityChecksRessursRoute: SanityChecksRessursRoute,
+  SanityChecksSfIntegrasjonRoute: SanityChecksSfIntegrasjonRoute,
   SanityChecksU4diffRoute: SanityChecksU4diffRoute,
 };
 

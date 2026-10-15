@@ -5,6 +5,7 @@ import {
   setupNomAdminApiProxy,
   setupNomApiProxy,
   setupNomRemedyProxy,
+  setupNomSfIntegrasjonProxy,
 } from "./apiProxy.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { verifyToken } from "./tokenValidation.js";
@@ -23,6 +24,7 @@ app.use(verifyToken);
 setupNomAdminApiProxy(app);
 setupNomApiProxy(app);
 setupNomRemedyProxy(app);
+setupNomSfIntegrasjonProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);
