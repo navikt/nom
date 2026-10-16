@@ -36,12 +36,12 @@ import {
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import type {
   EndreOpphengOrgEnhetRequest,
   EndreOpphengOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
-import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { formatDisplayDate } from "~/utils";
 
 export const EndreOverliggendeEnhet = () => {

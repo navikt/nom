@@ -45,12 +45,12 @@ import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OrgEnhet,
   RedigeringsTilgangRessursResponse,
 } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn, navToppnode } from "~/utils";
-import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
