@@ -70,7 +70,7 @@ function OrgenhetLederPagePage() {
           <Table.Row key={orgenhetleder.fid}>
             <Table.DataCell>
               <CopyButton
-                copyText={orgenhetleder.fid}
+                copyText={orgenhetleder.fid ?? ""}
                 text={orgenhetleder.fid}
               />
             </Table.DataCell>
