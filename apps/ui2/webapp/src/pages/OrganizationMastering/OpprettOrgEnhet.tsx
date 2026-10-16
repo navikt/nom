@@ -51,11 +51,12 @@ import {
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import type {
+  NomNivaa,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
-import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
