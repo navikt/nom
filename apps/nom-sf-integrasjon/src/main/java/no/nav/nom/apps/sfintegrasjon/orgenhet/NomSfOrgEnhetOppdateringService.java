@@ -12,8 +12,6 @@ import no.nav.nom.apps.sfintegrasjon.orgenhet.domain.SfOrgEnhet;
 import no.nav.nom.apps.sfintegrasjon.outbox.domain.SfOutbox;
 import no.nav.nom.apps.sfintegrasjon.outbox.repository.SfOutboxRepository;
 import no.nav.nom.contract.nom.NomNivaa;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.state.common.StateNotFoundException;
 import no.nav.nom.libs.state.organisering.NomStateOrganiseringListener;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
@@ -26,20 +24,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static no.nav.nom.libs.utils.common.util.DateUtils.isPeriodActive;
 
 @Slf4j
 @Service
-public class NomSuccessFactorsOrgEnhetOppdateringService {
+public class NomSfOrgEnhetOppdateringService {
 
     private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
@@ -60,7 +54,7 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
     private final Unleash unleash;
 
 
-    public NomSuccessFactorsOrgEnhetOppdateringService(
+    public NomSfOrgEnhetOppdateringService(
         OrganiseringStateRepository organiseringStateRepository,
         OrgEnhetLederStateRepository orgEnhetLederStateRepository,
         OrgEnhetStateRepository orgEnhetStateRepository,
@@ -172,13 +166,24 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
                     behandlingService.oppdaterStatusTilSynket(behandlingsIds, outboxSporingsId);
                 } catch (Exception e) {
                     behandlingService.oppdaterStatusTilFeilet(behandlingsIds);
-                    log.error(e.getMessage(), e);
+                    log.error("ALERT: En feil skjedde under aggregering av behandling: {}", e.getMessage(), e);
                 }
             });
         }
     }
 
-    private NomNivaa finnNivaa(OrgEnhetState orgEnhet) {
+    // Samme regel som NOM bruker for hvor ansatte kan plasseres: ingen aktive underenheter
+    private boolean erLovnode(String orgEnhetId) {
+        return !organiseringStateRepository.orgEnhetHasChildren(orgEnhetId);
+    }
+
+    private boolean isInitialStateReady() {
+        return nomStateOrganiseringListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetListener.hasReadToEndOnStartup()
+            && nomStateOrgEnhetLederListener.hasReadToEndOnStartup();
+    }
+
+    /*private NomNivaa finnNivaa(OrgEnhetState orgEnhet) {
         if (nonNull(orgEnhet.nomNivaa())) {
             return orgEnhet.nomNivaa();
         }
@@ -188,12 +193,7 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
             : findNewestNomNivaaForOverOrgEnhet(orgEnhet.id());
     }
 
-    // Samme regel som NOM bruker for hvor ansatte kan plasseres: ingen aktive underenheter
-    private boolean erLovnode(String orgEnhetId) {
-        return !organiseringStateRepository.orgEnhetHasChildren(orgEnhetId);
-    }
-
-    private void checkForNomNivaaAndFetchIfMissing(List<OverOrgEnhet> overOrgEnheter) {
+    /*private void checkForNomNivaaAndFetchIfMissing(List<OverOrgEnhet> overOrgEnheter) {
         overOrgEnheter.replaceAll(overOrgEnhet -> {
             if (nonNull(overOrgEnhet.nivaa())) {
                 return overOrgEnhet;
@@ -233,11 +233,5 @@ public class NomSuccessFactorsOrgEnhetOppdateringService {
             return findActiveNomNivaaForOverOrgEnhet(orgEnhetState.id());
         }
         return orgEnhetState.nomNivaa();
-    }
-
-    private boolean isInitialStateReady() {
-        return nomStateOrganiseringListener.hasReadToEndOnStartup()
-            && nomStateOrgEnhetListener.hasReadToEndOnStartup()
-            && nomStateOrgEnhetLederListener.hasReadToEndOnStartup();
-    }
+    }*/
 }

@@ -318,7 +318,7 @@ public class DvhRestConsumer {
     public void loadLedereFromDvh() {
         log.info("Laster ledere fra dvh");
         try {
-            Thread.sleep(5_000);
+            Thread.sleep(15_000);
             var ledere = dvhOrdsService.getLedere();
             dvhService.saveLedere(ledere);
         } catch (Exception e) {
@@ -343,7 +343,7 @@ public class DvhRestConsumer {
     public void findOTUtenforHierarki() {
         log.info("Finn OTer utenfor hierarki");
         try {
-            Thread.sleep(5_000);
+            Thread.sleep(15_000);
             otUtenforHierarki.findOTUtenforHierarkiFromDataLast();
         } catch (Exception e) {
             log.error("Feilet i 'Finn OTer utenfor hierarki'", e);
