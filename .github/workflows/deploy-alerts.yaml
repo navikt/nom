@@ -20,13 +20,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
 
       - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/alerts/dev/api-alerts.yaml
 
       - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/alerts/prod/api-alerts.yaml
@@ -42,13 +42,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
 
       - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/alerts/dev/nav-ident-alerts.yaml
 
       - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/alerts/prod/nav-ident-alerts.yaml
@@ -65,13 +65,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
 
       - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-fss
           RESOURCE: .nais/alerts/dev/proxy-alerts.yaml
 
       - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-fss
           RESOURCE: .nais/alerts/prod/proxy-alerts.yaml
@@ -87,13 +87,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
 
       - name: Deploy to dev
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/alerts/dev/ui-alerts.yaml
 
       - name: Deploy to prod
-        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/alerts/prod/ui-alerts.yaml
