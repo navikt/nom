@@ -43,6 +43,7 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import {
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
+  NomNivaaSelect,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
   OrgEnhetTypeSelect,
@@ -50,6 +51,7 @@ import {
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import type {
+  NomNivaa,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
   OrgEnhet,
@@ -202,6 +204,7 @@ function OpprettOrgEnhetForm({
   const methods = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      nomNivaa: undefined,
       tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
       kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
     },
@@ -228,6 +231,7 @@ function OpprettOrgEnhetForm({
     const request: OpprettOrgEnhetRequest = {
       ...values,
       overordnetOrgEnhetId: overordnetOrgEnhet.id,
+      nomNivaa: values.nomNivaa || undefined,
     };
 
     await showModal(
@@ -256,6 +260,7 @@ function OpprettOrgEnhetForm({
               description="Enheten kan ikke ha likt navn som en annen enhet"
               error={methods.formState.errors.navn?.message}
               label="Navn på ny organisasjonsenhet"
+              autoComplete="off"
             />
 
             <FormRessursSearchWrapper
@@ -271,6 +276,14 @@ function OpprettOrgEnhetForm({
               `}
             >
               <OrgEnhetTypeSelect name="orgEnhetsType" fullWidth />
+            </div>
+
+            <div
+              css={css`
+                width: 50%;
+              `}
+            >
+              <NomNivaaSelect name="nomNivaa" fullWidth />
             </div>
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
@@ -396,5 +409,6 @@ const validationSchema = yup.object({
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
     .required("Obligatorisk"),
+  nomNivaa: yup.mixed<NomNivaa>(),
   kostnadsstedId: yup.string().required("Obligatorisk"),
 });
