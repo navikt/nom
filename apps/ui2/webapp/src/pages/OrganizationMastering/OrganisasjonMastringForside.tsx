@@ -45,6 +45,7 @@ import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OrgEnhet,
   RedigeringsTilgangRessursResponse,
@@ -262,7 +263,9 @@ function MineOrgEnheterSeksjon() {
   const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
 
   const toppnodeIder =
-    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
+    redigerbareToppnoder
+      ?.filter((orgEnhet) => nomDateIsTodayOrAfter(orgEnhet.gyldigTom))
+      .map((orgEnhet) => orgEnhet.id) ?? [];
 
   const delegerbareRessurserQuery = useQuery({
     queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
@@ -537,6 +540,17 @@ function UtvidOrgEnhetKort({
                     iconPosition="right"
                   >
                     Endre informasjon
+                  </Button>
+                </SmartLink>
+
+                <SmartLink href={`/endre-overliggende-enhet?id=${orgEnhet.id}`}>
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre overliggende enhet
                   </Button>
                 </SmartLink>
 

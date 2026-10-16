@@ -12,7 +12,6 @@
 
 type UtilRequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
-/** @default null */
 export enum OrgEnhetsType {
   ARBEIDSLIVSSENTER = "ARBEIDSLIVSSENTER",
   NAV_ARBEID_OG_YTELSER = "NAV_ARBEID_OG_YTELSER",

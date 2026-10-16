@@ -6,6 +6,8 @@ import type { MasseflyttingData } from "~/pages/ResourcePage/Masseflytting/Masse
 import type {
   AvvikleOrgEnhetRequest,
   AvvikleRessursRequest,
+  EndreOpphengOrgEnhetRequest,
+  EndreOpphengOrgEnhetResponse,
   ExcelExportRequest,
   FysiskBrukersted,
   GetPersonRequest,
@@ -311,7 +313,7 @@ export const getSession = {
 };
 
 export const getAllOrgEnheter = {
-  queryKey: orgEnheterKeys.all,
+  queryKey: () => orgEnheterKeys.all,
   queryFn: async () =>
     (await axios.get<OrgEnhet[]>(`${NOM_API_BASE_PATH}/app/orgenheter`)).data,
   gcTime: CACHE_FOR.anHour,
@@ -816,6 +818,15 @@ export const endreOrgEnhetInfo = async (
 ) => {
   return axios.patch<unknown, AxiosResponse<unknown>>(
     `${NOM_API_BASE_PATH}/app/orgenheter/endreOvrige`,
+    request,
+  );
+};
+
+export const endreOrgEnhetOverliggende = async (
+  request: EndreOpphengOrgEnhetRequest,
+) => {
+  return axios.post<unknown, AxiosResponse<EndreOpphengOrgEnhetResponse>>(
+    `${NOM_API_BASE_PATH}/app/orgenheter/endreOpphengForOrgenhet`,
     request,
   );
 };

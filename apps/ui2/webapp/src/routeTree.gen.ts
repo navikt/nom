@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AvsluttOrganisasjonsenhetRouteImport } from './routes/avslutt-organisasjonsenhet'
+import { Route as EndreOverliggendeEnhetRouteImport } from './routes/endre-overliggende-enhet'
 import { Route as FysiskBrukerstedTabellRouteImport } from './routes/fysisk-brukersted-tabell'
 import { Route as KorrigerLederOrganisasjonsenhetRouteImport } from './routes/korriger-leder-organisasjonsenhet'
 import { Route as KorrigerNavnOrganisasjonsenhetRouteImport } from './routes/korriger-navn-organisasjonsenhet'
@@ -44,6 +45,11 @@ const AvsluttOrganisasjonsenhetRoute =
     path: '/avslutt-organisasjonsenhet',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EndreOverliggendeEnhetRoute = EndreOverliggendeEnhetRouteImport.update({
+  id: '/endre-overliggende-enhet',
+  path: '/endre-overliggende-enhet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FysiskBrukerstedTabellRoute = FysiskBrukerstedTabellRouteImport.update({
   id: '/fysisk-brukersted-tabell',
   path: '/fysisk-brukersted-tabell',
@@ -159,6 +165,7 @@ const RessursCreateStepRoute = RessursCreateStepRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/endre-overliggende-enhet': typeof EndreOverliggendeEnhetRoute
   '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/endre-overliggende-enhet': typeof EndreOverliggendeEnhetRoute
   '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/avslutt-organisasjonsenhet': typeof AvsluttOrganisasjonsenhetRoute
+  '/endre-overliggende-enhet': typeof EndreOverliggendeEnhetRoute
   '/fysisk-brukersted-tabell': typeof FysiskBrukerstedTabellRoute
   '/korriger-leder-organisasjonsenhet': typeof KorrigerLederOrganisasjonsenhetRoute
   '/korriger-navn-organisasjonsenhet': typeof KorrigerNavnOrganisasjonsenhetRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/endre-overliggende-enhet'
     | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/endre-overliggende-enhet'
     | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/avslutt-organisasjonsenhet'
+    | '/endre-overliggende-enhet'
     | '/fysisk-brukersted-tabell'
     | '/korriger-leder-organisasjonsenhet'
     | '/korriger-navn-organisasjonsenhet'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AvsluttOrganisasjonsenhetRoute: typeof AvsluttOrganisasjonsenhetRoute
+  EndreOverliggendeEnhetRoute: typeof EndreOverliggendeEnhetRoute
   FysiskBrukerstedTabellRoute: typeof FysiskBrukerstedTabellRoute
   KorrigerLederOrganisasjonsenhetRoute: typeof KorrigerLederOrganisasjonsenhetRoute
   KorrigerNavnOrganisasjonsenhetRoute: typeof KorrigerNavnOrganisasjonsenhetRoute
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/avslutt-organisasjonsenhet'
       fullPath: '/avslutt-organisasjonsenhet'
       preLoaderRoute: typeof AvsluttOrganisasjonsenhetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/endre-overliggende-enhet': {
+      id: '/endre-overliggende-enhet'
+      path: '/endre-overliggende-enhet'
+      fullPath: '/endre-overliggende-enhet'
+      preLoaderRoute: typeof EndreOverliggendeEnhetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fysisk-brukersted-tabell': {
@@ -516,6 +536,7 @@ const OrgTableRouteWithChildren = OrgTableRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvsluttOrganisasjonsenhetRoute: AvsluttOrganisasjonsenhetRoute,
+  EndreOverliggendeEnhetRoute: EndreOverliggendeEnhetRoute,
   FysiskBrukerstedTabellRoute: FysiskBrukerstedTabellRoute,
   KorrigerLederOrganisasjonsenhetRoute: KorrigerLederOrganisasjonsenhetRoute,
   KorrigerNavnOrganisasjonsenhetRoute: KorrigerNavnOrganisasjonsenhetRoute,
