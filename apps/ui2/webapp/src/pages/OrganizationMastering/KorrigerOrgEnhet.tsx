@@ -245,9 +245,9 @@ function KorrigerOrgEnhetForm({
             >
               Lagre
             </Button>
-
-            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
+
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>

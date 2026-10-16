@@ -1,11 +1,11 @@
 import { css } from "@emotion/react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { Alert, Button, VStack } from "@navikt/ds-react";
+import { Alert, BodyLong, Button, VStack } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
@@ -41,6 +41,8 @@ import type {
   EndreOpphengOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
+import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
+import { formatDisplayDate } from "~/utils";
 
 export const EndreOverliggendeEnhet = () => {
   const { id } = useSearch({ from: "/endre-overliggende-enhet" });
@@ -71,6 +73,9 @@ export const EndreOverliggendeEnhet = () => {
     );
   }
 
+  const [responseData, setResponseData] =
+    useState<EndreOpphengOrgEnhetResponse>();
+
   if (orgEnhetQuery.isLoading) {
     return (
       <ContentWrapper>
@@ -92,7 +97,11 @@ export const EndreOverliggendeEnhet = () => {
       <PageBanner text="Endre overliggende enhet" />
 
       <ContentWrapper>
-        <FormView orgEnhet={orgEnhet} setChangeInfo={() => {}} />
+        {!!responseData ? (
+          <KvitteringView responseData={responseData} />
+        ) : (
+          <FormView orgEnhet={orgEnhet} setResponseData={setResponseData} />
+        )}
       </ContentWrapper>
     </>
   );
@@ -100,10 +109,10 @@ export const EndreOverliggendeEnhet = () => {
 
 function FormView({
   orgEnhet,
-  setChangeInfo,
+  setResponseData,
 }: {
   orgEnhet: OrgEnhet;
-  setChangeInfo: (response: any) => void;
+  setResponseData: (response: EndreOpphengOrgEnhetResponse) => void;
 }) {
   return (
     <ModalProvider>
@@ -115,7 +124,7 @@ function FormView({
 
         <EndreOverliggendeEnhetForm
           orgEnhet={orgEnhet}
-          setChangeInfo={setChangeInfo}
+          setResponseData={setResponseData}
         />
       </ContainerWithHighlightedTop>
 
@@ -124,12 +133,27 @@ function FormView({
   );
 }
 
+function KvitteringView({
+  responseData,
+}: {
+  responseData: EndreOpphengOrgEnhetResponse;
+}) {
+  return (
+    <OrgEnhetKvittering
+      title="Overliggende enhet endret"
+      orgEnhetId={responseData.orgenhetId}
+    >
+      <EndreOverliggendeKvitteringContent responseData={responseData} />
+    </OrgEnhetKvittering>
+  );
+}
+
 function EndreOverliggendeEnhetForm({
   orgEnhet,
-  setChangeInfo,
+  setResponseData,
 }: {
   orgEnhet: OrgEnhet;
-  setChangeInfo: (response: any) => void;
+  setResponseData: (response: EndreOpphengOrgEnhetResponse) => void;
 }) {
   const queryClient = useQueryClient();
 
@@ -147,14 +171,14 @@ function EndreOverliggendeEnhetForm({
     mutationFn: async (request) => {
       return endreOrgEnhetOverliggende(request);
     },
-    onSuccess: async () => {
+    onSuccess: async (response) => {
       showToast({ text: "Oppdatert" });
 
       await queryClient.invalidateQueries({
         queryKey: orgEnheterKeys.id(orgEnhet.id),
       });
 
-      setChangeInfo({ testtekst: "testtekst" });
+      setResponseData(response.data);
     },
   });
 
@@ -168,7 +192,7 @@ function EndreOverliggendeEnhetForm({
 
     await showModal(
       <BekreftModal
-        content={<div>Bekreft endring</div>}
+        content={<EndreOverliggendeModalContent request={request} />}
         heading="Bekreft endring på organisasjonsenhet"
       />,
     ).then(() => {
@@ -212,12 +236,66 @@ function EndreOverliggendeEnhetForm({
             >
               Lagre
             </Button>
-
-            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
+
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>
+  );
+}
+
+function EndreOverliggendeModalContent({
+  request,
+}: {
+  request: EndreOpphengOrgEnhetRequest;
+}) {
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(request.nyOverenhetId),
+    queryFn: () => getOrgEnhet.queryFn(request.nyOverenhetId),
+  });
+
+  const nyOverliggendeEnhet = orgEnhetQuery.data;
+
+  if (orgEnhetQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
+  return (
+    <BodyLong>
+      Enheten blir liggende under{" "}
+      <b>
+        {nyOverliggendeEnhet?.navn} ({nyOverliggendeEnhet?.id})
+      </b>{" "}
+      fra og med <b>{formatDisplayDate(request.gyldigFom)}</b>.
+    </BodyLong>
+  );
+}
+
+function EndreOverliggendeKvitteringContent({
+  responseData,
+}: {
+  responseData: EndreOpphengOrgEnhetResponse;
+}) {
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(responseData.nyOverenhetId),
+    queryFn: () => getOrgEnhet.queryFn(responseData.nyOverenhetId),
+  });
+
+  const overliggendeOrgEnhet = orgEnhetQuery.data;
+
+  if (orgEnhetQuery.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
+  return (
+    <BodyLong>
+      Enheten blir liggende under{" "}
+      <b>
+        {overliggendeOrgEnhet?.navn} ({overliggendeOrgEnhet?.id})
+      </b>{" "}
+      fra og med <b>{formatDisplayDate(responseData.gyldigFom)}</b>.
+    </BodyLong>
   );
 }
 

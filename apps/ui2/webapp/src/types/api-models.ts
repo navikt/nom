@@ -375,8 +375,6 @@ export interface OpprettOrgEnhetRequest {
    * @example "123456"
    */
   kostnadsstedId: string;
-  /** @example "ARBEIDSOMRAADE" */
-  nomNivaa?: "ARBEIDSOMRAADE" | "DRIFTSENHET" | "LINJEENHET";
   /**
    * @minLength 1
    * @example "A123456"
@@ -387,6 +385,8 @@ export interface OpprettOrgEnhetRequest {
    * @example "Nav Lokal kontor"
    */
   navn: string;
+  /** @example "ARBEIDSOMRAADE" */
+  nomNivaa?: NomNivaa;
   /** @example "DIREKTORAT" */
   orgEnhetsType: OrgEnhetsType;
   /**
