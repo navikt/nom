@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
+class NomSfOrgEnhetOppdateringServiceTest {
 
     private static final LocalDate IDAG = LocalDate.now();
     private static final String AGGREGERING_TOGGLE = "nom-sf-integrasjon.orgenhet-aggregering-service";
@@ -80,7 +80,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
     private final AtomicLong idTeller = new AtomicLong();
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
-    private NomSuccessFactorsOrgEnhetOppdateringService service;
+    private NomSfOrgEnhetOppdateringService service;
 
     @BeforeEach
     void setUp() {
@@ -100,7 +100,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
             return lagret;
         });
 
-        service = new NomSuccessFactorsOrgEnhetOppdateringService(
+        service = new NomSfOrgEnhetOppdateringService(
             organiseringStateRepository,
             orgEnhetLederStateRepository,
             orgEnhetStateRepository,
@@ -424,7 +424,7 @@ class NomSuccessFactorsOrgEnhetOppdateringServiceTest {
     }
 
     private static String lesMelding(String sti) {
-        try (var is = NomSuccessFactorsOrgEnhetOppdateringServiceTest.class.getClassLoader().getResourceAsStream(sti)) {
+        try (var is = NomSfOrgEnhetOppdateringServiceTest.class.getClassLoader().getResourceAsStream(sti)) {
             return new String(Objects.requireNonNull(is, "Fant ikke: " + sti).readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
