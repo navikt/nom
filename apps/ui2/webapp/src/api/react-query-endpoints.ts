@@ -31,6 +31,7 @@ import type {
   OrgtilknytningState,
   OvrigeEndringerOrgEnhetRequest,
   Person,
+  RedigeringsTilgangRessursResponse,
   Ressurs,
   RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest,
   RessurserByFysiskBrukerstedAndTilgangsenhetIdResponse,
@@ -553,7 +554,7 @@ export const getLedereForOrgEnhet = {
     (
       await axios.post<
         string[],
-        AxiosResponse<Record<string, MinimalRessurs[]>>
+        AxiosResponse<Record<string, RedigeringsTilgangRessursResponse[]>>
       >(
         `${NOM_API_BASE_PATH}/app/authorizedRessursRedigering/getLedereForOrgenheter`,
         orgEnhetIder,

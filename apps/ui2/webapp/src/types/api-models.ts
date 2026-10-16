@@ -375,6 +375,8 @@ export interface OpprettOrgEnhetRequest {
    * @example "123456"
    */
   kostnadsstedId: string;
+  /** @example "ARBEIDSOMRAADE" */
+  nomNivaa?: "ARBEIDSOMRAADE" | "DRIFTSENHET" | "LINJEENHET";
   /**
    * @minLength 1
    * @example "A123456"
@@ -567,6 +569,12 @@ export interface ReadTopicRequest {
   maxRecords: number;
   /** @format int32 */
   partition?: number;
+}
+
+export interface RedigeringsTilgangRessursResponse {
+  erDelegert: boolean;
+  navident: string;
+  visningsnavn: string;
 }
 
 export interface Ressurs {
