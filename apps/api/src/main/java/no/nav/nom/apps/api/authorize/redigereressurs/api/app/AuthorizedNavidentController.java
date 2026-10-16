@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.authorize.AuthResolver;
 import no.nav.nom.apps.api.authorize.redigereressurs.AuthorizedNavident;
 import no.nav.nom.apps.api.authorize.redigereressurs.DelegationAdService;
 import no.nav.nom.apps.api.authorize.redigereressurs.NotAuthorizedToDelegateLeder;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.app.dto.RedigeringsTilgangRessursResponse;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -226,7 +227,7 @@ public class AuthorizedNavidentController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @PreAuthorize("hasAuthority('NOM_UI_APP')")
-    public Map<String,List<MinimalRessurs>> getLedereMedRedigeringsTilgangForEnhet(@RequestBody List<String> orgenhetIdSet) {
+    public Map<String,List<RedigeringsTilgangRessursResponse>> getLedereMedRedigeringsTilgangForEnhet(@RequestBody List<String> orgenhetIdSet) {
         return authorizedNavident.ledereSomKanRedigereOrgenhet(Set.copyOf(orgenhetIdSet));
     }
 

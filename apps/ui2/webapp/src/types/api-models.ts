@@ -116,6 +116,23 @@ export interface BrukerSkrivetilgangRessurserRequest {
   ressurser: string[];
 }
 
+export interface EndreOpphengOrgEnhetRequest {
+  currentOverenhetId: string;
+  /** @format date */
+  gyldigFom: string;
+  nyOverenhetId: string;
+  orgenhetId: string;
+}
+
+export interface EndreOpphengOrgEnhetResponse {
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom: string;
+  nyOverenhetId: string;
+  orgenhetId: string;
+}
+
 export interface EndreOrgtilknytningRequest {
   erDagligOppfolging: boolean;
   /** @minLength 1 */
@@ -368,6 +385,8 @@ export interface OpprettOrgEnhetRequest {
    * @example "Nav Lokal kontor"
    */
   navn: string;
+  /** @example "ARBEIDSOMRAADE" */
+  nomNivaa?: NomNivaa;
   /** @example "DIREKTORAT" */
   orgEnhetsType: OrgEnhetsType;
   /**
@@ -552,6 +571,12 @@ export interface ReadTopicRequest {
   partition?: number;
 }
 
+export interface RedigeringsTilgangRessursResponse {
+  erDelegert: boolean;
+  navident: string;
+  visningsnavn: string;
+}
+
 export interface Ressurs {
   epost?: string;
   fid: string;
@@ -671,9 +696,9 @@ export interface Tilgangsenhet {
 }
 
 export interface UpdateFysiskBrukerstedForOrgtilknytningRequest {
+  fraFysiskBrukerstedNr: string;
   orgtilknytningerFid: string[];
   tilFysiskBrukerstedNr: string;
-  fraFysiskBrukerstedNr: string;
 }
 
 export interface UpdateFysiskeBrukerstederRequest {

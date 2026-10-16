@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { Alert, Heading, Select, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import React from "react";
 import {
   type FieldError,
@@ -11,7 +10,6 @@ import {
 
 import { getAlleKostnadssteder } from "~/api/react-query-endpoints";
 import {
-  AsyncSearch,
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
@@ -44,7 +42,7 @@ export function OrgEnhetInfoWrapper({
   heading,
 }: {
   orgEnhet: OrgEnhet;
-  heading: string;
+  heading?: string;
 }) {
   return (
     <VStack gap="2">
@@ -66,66 +64,6 @@ export function OrgEnhetInfoWrapper({
       </div>
     </VStack>
   );
-}
-
-export function FormRessursSearchWrapper({
-  name,
-  label,
-}: {
-  name: string;
-  label: string;
-}) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
-  return (
-    <SelectLayoutWrapper error={fieldState.error} htmlFor="Leder" label={label}>
-      <AsyncSearch
-        loadOptions={(searchTerm) => searchIfEnoughInput(searchTerm)}
-        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-          inputValue.length < 3
-            ? "Du må skrive minst 3 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(selectedOption: { label: string; value: string } | null) => {
-          field.onChange(selectedOption?.value ?? "");
-        }}
-        placeholder="Søk etter medarbeider"
-      />
-    </SelectLayoutWrapper>
-  );
-}
-
-async function searchIfEnoughInput(searchTerm: string) {
-  if (searchTerm.length < 3) {
-    return [];
-  }
-
-  const searchQuery = `query ressurs($searchTerm: String!, $filter: RessursSearchFilter) {
-        searchRessurs(term: $searchTerm, filter: $filter) {
-          navident
-          visningsnavn
-        }
-      }`;
-
-  const filter = { statusSelection: "AKTIV" };
-
-  const resultRaw = await axios.post("/frackend/nom-api/graphql", {
-    operationName: "ressurs",
-    query: searchQuery,
-    variables: {
-      searchTerm: searchTerm,
-      filter: filter,
-    },
-  });
-
-  const resultRessurser = resultRaw.data.data.searchRessurs;
-
-  return resultRessurser.map((ressurs: any) => ({
-    label: `${ressurs.visningsnavn} (${ressurs.navident})`,
-    value: ressurs.navident,
-  }));
 }
 
 export function KostnadsstedSelectFormPart({

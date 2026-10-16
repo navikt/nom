@@ -148,6 +148,14 @@ public class OrgEnhetRestService {
 
             orgEnhetCommandService.endreOrgEnhetsType(orgEnhetState.fid(), endreOrgEnhetsType);
 
+            // set nomNivaa
+            if (opprettOrgEnhetRequest.nomNivaa() != null) {
+                orgEnhetCommandService.endreNomNivaa(
+                    orgEnhetState.fid(),
+                    new EndreNomNivaa(opprettOrgEnhetRequest.nomNivaa(), inputMetadata)
+                );
+            }
+
             final var opprettOrganisering = new OpprettOrganiseringCmd(
                 orgEnhetState.id(),
                 orgEnhetState.navn(),
@@ -460,9 +468,12 @@ public class OrgEnhetRestService {
         var nyGyldigFom = endreOpphengOrgEnhetRequest.gyldigFom();
         var nyGyldigTom = gjeldendeOrganisering.gyldigTom();
 
-        if (nyGyldigFom.isBefore(iDag) || nyGyldigFom.isAfter(gjeldendeOrganisering.gyldigTom())) {
+        if (nyGyldigFom.isBefore(iDag)
+            || (gjeldendeOrganisering.gyldigTom() != null
+            && nyGyldigFom.isAfter(gjeldendeOrganisering.gyldigTom()))) {
             throw new IllegalStateException(String.format(
-                "GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s", nyGyldigFom, iDag, gjeldendeOrganisering.gyldigTom()));
+                "GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s",
+                nyGyldigFom, iDag, gjeldendeOrganisering.gyldigTom()));
         }
 
         if (!Objects.equals(gjeldendeOrganisering.idOver(), endreOpphengOrgEnhetRequest.currentOverenhetId())) {

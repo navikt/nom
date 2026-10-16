@@ -6,8 +6,10 @@ import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingStatus;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelse;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class BehandlingService {
@@ -20,10 +22,11 @@ public class BehandlingService {
         this.organisasjonHendelseRepository = organisasjonHendelseRepository;
     }
 
+    @Transactional
     public void oppdaterStatus(OrganisasjonHendelse organisasjonHendelse, BehandlingStatus status) {
         if (status == BehandlingStatus.MOTTATT) {
             var behandling = Behandling.builder()
-                .behandlingsId(behandlingRepository.getBehandlingsId())
+                .behandlingsId(behandlingRepository.getNextBehandlingsId())
                 .status(BehandlingStatus.MOTTATT)
                 .behandlingTidspunkt(LocalDateTime.now())
                 .build();
@@ -32,5 +35,35 @@ public class BehandlingService {
             organisasjonHendelse.setBehandlingsId(behandling.getBehandlingsId());
             organisasjonHendelseRepository.save(organisasjonHendelse);
         }
+    }
+
+    @Transactional
+    public void oppdaterStatusTilSynket(List<Long> behandlingIds, Long outboxSporingsId) {
+
+        behandlingIds.forEach(id -> {
+            var oppdatertBehandling = Behandling.builder()
+                .behandlingsId(id)
+                .outboxSporingsId(outboxSporingsId)
+                .status(BehandlingStatus.SYNKET)
+                .behandlingTidspunkt(LocalDateTime.now())
+                .build();
+            behandlingRepository.save(oppdatertBehandling);
+        });
+    }
+
+    @Transactional
+    public void oppdaterStatusTilFeilet(List<Long> behandlingIds) {
+        behandlingIds.forEach(id -> {
+            var oppdatertBehandling = Behandling.builder()
+                .behandlingsId(id)
+                .status(BehandlingStatus.FEILET)
+                .behandlingTidspunkt(LocalDateTime.now())
+                .build();
+            behandlingRepository.save(oppdatertBehandling);
+        });
+    }
+
+    public List<Behandling> getLatestNonProcessedBehandlingObjects() {
+        return behandlingRepository.getLatestNonProcessedBehandlinger();
     }
 }

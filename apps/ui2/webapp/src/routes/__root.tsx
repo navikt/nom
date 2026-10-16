@@ -13,7 +13,7 @@ import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
-import { TestBanner } from "~/components/TestBanner";
+import { TestBanner, testBannerHeight } from "~/components/TestBanner";
 
 export const queryClient = new QueryClient();
 
@@ -41,8 +41,6 @@ export const Route = createRootRouteWithContext<{
       "/ressurs/create",
       "/ressurs/createspecial",
       "/org/",
-      "/opprett-organisasjonsenhet",
-      "/organisasjonsmastring",
       "/kontaktpersoner/",
       "/masseflytting/",
       "/masseflytting-fysisk-brukersted",
@@ -50,9 +48,15 @@ export const Route = createRootRouteWithContext<{
       "/ressurs-terminate/",
       "/tilganger",
       "/kontaktpersoner-tabell",
-      "/korriger-organisasjonsenhet/",
+      "/organisasjonsmastring",
+      "/opprett-organisasjonsenhet",
+      "/korriger-organisasjonsenhet",
+      "/korriger-leder-organisasjonsenhet",
+      "/korriger-navn-organisasjonsenhet",
+      "/endre-overliggende-enhet",
       "/avslutt-organisasjonsenhet",
       "/fysisk-brukersted-tabell",
+      "/korriger-leder-organisasjonsenhet",
     ];
 
     const showChristmasBanner = !routesWithPageBanner.some((bannerRoute) =>
@@ -73,7 +77,11 @@ export const Route = createRootRouteWithContext<{
           css={css`
             background-color: var(--nom-bg);
             min-height: calc(
-              100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight}
+              100vh -
+                (
+                  ${headerHeight} + ${pilotBannerHeight} + ${footerHeight} +
+                    ${testBannerHeight}
+                )
             );
             width: 100%;
             display: flex;

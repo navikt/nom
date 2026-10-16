@@ -27,6 +27,7 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { FormRessursSearchWrapper } from "~/components/forms/FormComponents";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -40,7 +41,6 @@ import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
-  FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
   NomNivaaSelect,

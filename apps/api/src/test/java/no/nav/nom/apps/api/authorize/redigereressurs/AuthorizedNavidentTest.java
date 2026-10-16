@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.authorize.redigereressurs;
 
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.AuthorizeCommandService;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.app.dto.RedigeringsTilgangRessursResponse;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.LederTilgangState;
@@ -316,7 +317,10 @@ class AuthorizedNavidentTest extends MockBasisTestOrganisering {
         assertThat(enheterLederKanRedigere.get("C").size()).isEqualTo(1);
         assertThat(enheterLederKanRedigere.get("C1").size()).isEqualTo(2);
         assertThat(enheterLederKanRedigere.get("C11").size()).isEqualTo(3);
+        assertThat(enheterLederKanRedigere.get("C11")).allMatch(redigeringsTilgangRessurs -> !redigeringsTilgangRessurs.erDelegert());
         assertThat(enheterLederKanRedigere.get("C22").size()).isEqualTo(4); // sjekker også om delegert leder blir med
+        assertThat(enheterLederKanRedigere.get("C22")).filteredOn(RedigeringsTilgangRessursResponse::erDelegert).size().isEqualTo(1);
+        assertThat(enheterLederKanRedigere.get("C22")).filteredOn(it -> !it.erDelegert()).size().isEqualTo(3);
 
         // todo, hvis filtrering på nom-nivå blir tatt i bruk må dette testes også
 

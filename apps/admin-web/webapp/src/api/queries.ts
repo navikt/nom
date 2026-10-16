@@ -41,10 +41,12 @@ import type {
   RessursState,
 } from "~/types/nom-api/nom-api-models.ts";
 import type { ErrorState } from "~/types/nom-remedy-integrasjon/nom-remedy-integrasjon-models.ts";
+import type { SfOutboxResponse } from "~/types/nom-sf-integrasjon/nom-sf-integrasjon-models.ts";
 
 const API_BASE_URL = "/frackend/admin-api";
 const NOM_API_BASE_URL = "/frackend/api";
 export const NOM_REMEDY_INTEGRASJON_BASE_URL = "/frackend/remedy";
+const NOM_SF_INTEGRASJON_BASE_URL = "/frackend/nom-sf";
 
 export const searchSchema = z.object({
   filterText: z.string().optional(),
@@ -791,6 +793,22 @@ export function deleteErrorStateById(fid: string) {
   return ky.delete(
     `${NOM_REMEDY_INTEGRASJON_BASE_URL}/admin/deleteErrorState/${fid}`,
   );
+}
+
+export async function getAvvisteSfOutboxRader(): Promise<SfOutboxResponse[]> {
+  return await ky
+    .get(`${NOM_SF_INTEGRASJON_BASE_URL}/api/admin/outbox/getAllRejected`, {
+      timeout: 60_000,
+    })
+    .json<SfOutboxResponse[]>();
+}
+
+export async function getFeiledeSfOutboxRader(): Promise<SfOutboxResponse[]> {
+  return await ky
+    .get(`${NOM_SF_INTEGRASJON_BASE_URL}/api/admin/outbox/getAllFailed`, {
+      timeout: 60_000,
+    })
+    .json<SfOutboxResponse[]>();
 }
 
 export async function getOverlappendeHistoriskeDolOrgtilknytninger(): Promise<

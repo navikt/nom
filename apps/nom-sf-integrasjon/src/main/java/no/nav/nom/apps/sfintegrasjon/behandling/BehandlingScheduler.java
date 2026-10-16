@@ -1,5 +1,6 @@
 package no.nav.nom.apps.sfintegrasjon.behandling;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.sfintegrasjon.behandling.repository.BehandlingStatus;
 import no.nav.nom.apps.sfintegrasjon.organisasjon.repository.OrganisasjonHendelseRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -16,18 +17,22 @@ public class BehandlingScheduler {
     private final LeaderElection leaderElection;
 
     private final long DELTA_SECONDS = 5;
+    private final Unleash unleash;
 
     public BehandlingScheduler(OrganisasjonHendelseRepository organisasjonHendelseRepository, BehandlingService behandlingService,
-                               LeaderElection leaderElection
+                               LeaderElection leaderElection,
+                               Unleash unleash
     ) {
         this.organisasjonHendelseRepository = organisasjonHendelseRepository;
         this.behandlingService = behandlingService;
         this.leaderElection = leaderElection;
+        this.unleash = unleash;
     }
 
-    @Scheduled(initialDelay = 30000, fixedDelay = 60000)
+    // Ved :00, før byggeren (:20) og sendingen (:40) i samme minutt
+    @Scheduled(cron = "0 * * * * *")
     public void setMottattStatusForOrganisasjonsHendelser() {
-        if (leaderElection.isLeader()) {
+        if (leaderElection.isLeader() && unleash.isEnabled("nom-sf-integrasjon.behandling-scheduler")) {
             organisasjonHendelseRepository.getOrgranisasjonHendelserUtenStatus(LocalDateTime.now().minusSeconds(DELTA_SECONDS))
                 .forEach(hendelse -> behandlingService.oppdaterStatus(hendelse, BehandlingStatus.MOTTATT));
         }

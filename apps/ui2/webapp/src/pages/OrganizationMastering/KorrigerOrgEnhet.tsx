@@ -195,9 +195,7 @@ function KorrigerOrgEnhetForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-
       gyldigFom: values.gyldigFom,
-
       orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 
@@ -247,9 +245,9 @@ function KorrigerOrgEnhetForm({
             >
               Lagre
             </Button>
-
-            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
+
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>

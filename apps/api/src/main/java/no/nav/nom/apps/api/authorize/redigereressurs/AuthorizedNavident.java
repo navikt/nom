@@ -7,13 +7,13 @@ import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.AvsluttDele
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.FornyDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.eventsourcing.producer.commands.OpprettDelegertAuthorization;
 import no.nav.nom.apps.api.authorize.redigereressurs.api.app.LederTilgangForOrgenhetRequest;
+import no.nav.nom.apps.api.authorize.redigereressurs.api.app.dto.RedigeringsTilgangRessursResponse;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
-import no.nav.nom.apps.api.ressurs.api.dto.MinimalRessurs;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -168,8 +168,8 @@ public class AuthorizedNavident {
             .toList()).values().stream().toList();
     }
 
-    public Map<String, List<MinimalRessurs>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
-        var out = new HashMap<String, List<MinimalRessurs>>();
+    public Map<String, List<RedigeringsTilgangRessursResponse>> ledereSomKanRedigereOrgenhet(Set<String> orgenhetIdSet) {
+        var out = new HashMap<String, List<RedigeringsTilgangRessursResponse>>();
 
         for (var oeId : orgenhetIdSet) {
             var hierarkiOppover = stiTilRotForEnhet(oeId, true);
@@ -177,22 +177,31 @@ public class AuthorizedNavident {
                 .filter(hierarkiElementPredicate())
                 .toList();
 
-            var delegerteLedereNavidenter = hierarkiOppoverFiltrertList.stream()
-                .flatMap(hierarkiOeId -> delegertLederStateRepository.getDelegertLederByEnhet(hierarkiOeId).stream()
-                    .filter(LederTilgangState::isActive)
-                    .map(LederTilgangState::til));
+            final ArrayList<RedigeringsTilgangRessursResponse> redigeringsTilgangRessursList = new ArrayList<>();
+            {
+                var delegertLederNavidenter = hierarkiOppoverFiltrertList.stream()
+                    .flatMap(hierarkiOeId -> delegertLederStateRepository.getDelegertLederByEnhet(hierarkiOeId).stream()
+                        .filter(LederTilgangState::isActive)
+                        .map(LederTilgangState::til));
 
-            var vanligLedereNavidenter = hierarkiOppoverFiltrertList.stream().map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream);
-
-            var navidentList = Stream.concat(vanligLedereNavidenter, delegerteLedereNavidenter).toList();
-            if (navidentList.isEmpty()) {
-                continue;
+                delegertLederNavidenter
+                    .map(ressursStateRepository::findByNavident)
+                    .flatMap(Optional::stream)
+                    .map(RedigeringsTilgangRessursResponse::createDelegert)
+                    .forEach(redigeringsTilgangRessursList::add);
             }
-            var ressursStream = navidentList.stream().map(ressursStateRepository::findByNavident).filter(Optional::isPresent).map(Optional::get);
-            var minimalRessursList = ressursStream.map(it -> new MinimalRessurs(it.navident(), it.visningsnavn().getFormattedVisningsnavn())).toList();
-            out.put(oeId, minimalRessursList);
+            {
+                var vanligLederNavidenter = hierarkiOppoverFiltrertList.stream().map(this.mapOrgenhetToLedereMedRedigeringsTilgang::get)
+                    .filter(Objects::nonNull)
+                    .flatMap(Collection::stream);
+
+                vanligLederNavidenter
+                    .map(ressursStateRepository::findByNavident)
+                    .flatMap(Optional::stream)
+                    .map(RedigeringsTilgangRessursResponse::createIkkeDelegert)
+                    .forEach(redigeringsTilgangRessursList::add);
+            }
+            out.put(oeId, redigeringsTilgangRessursList);
         }
         return out;
 
