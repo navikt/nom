@@ -203,6 +203,7 @@ function OpprettOrgEnhetForm({
   const methods = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      nomNivaa: undefined,
       tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
       kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
     },
@@ -229,6 +230,7 @@ function OpprettOrgEnhetForm({
     const request: OpprettOrgEnhetRequest = {
       ...values,
       overordnetOrgEnhetId: overordnetOrgEnhet.id,
+      nomNivaa: values.nomNivaa || undefined,
     };
 
     await showModal(
@@ -406,9 +408,6 @@ const validationSchema = yup.object({
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
     .required("Obligatorisk"),
-  nomNivaa: yup
-    .mixed<NomNivaa>()
-    .oneOf(Object.values(NomNivaa), "Obligatorisk")
-    .required("Obligatorisk"),
+  nomNivaa: yup.mixed<NomNivaa>(),
   kostnadsstedId: yup.string().required("Obligatorisk"),
 });

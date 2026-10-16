@@ -216,7 +216,7 @@ export function NomNivaaSelect({
       error={fieldState.error?.message}
       label="NOM-nivå"
     >
-      {emptyOption && <option value="" />}
+      {emptyOption && <option />}
 
       {Object.values(NomNivaa).map((nomNivaa) => (
         <option key={nomNivaa} value={nomNivaa}>
