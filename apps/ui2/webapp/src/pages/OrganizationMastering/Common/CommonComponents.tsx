@@ -13,10 +13,14 @@ import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import {
+  NomNivaaNameMapping,
+  OrgEnhetsTypeNameMapping,
+} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import {
   type KostnadsstedResponse,
+  NomNivaa,
   type OrgEnhet,
   OrgEnhetsType,
 } from "~/types/api-models";
@@ -186,6 +190,39 @@ export function OrgEnhetTypeSelect({
             {OrgEnhetsTypeNameMapping[orgEnhetsType]}
           </option>
         ))}
+    </Select>
+  );
+}
+
+export function NomNivaaSelect({
+  name,
+  emptyOption = true,
+  fullWidth = false,
+}: {
+  name: string;
+  emptyOption?: boolean;
+  fullWidth?: boolean;
+}) {
+  const methods = useFormContext();
+
+  const { fieldState } = useController({ name });
+
+  return (
+    <Select
+      css={css`
+        width: ${fullWidth ? "100%" : "fit-content"};
+      `}
+      {...methods.register(name)}
+      error={fieldState.error?.message}
+      label="NOM-nivå"
+    >
+      {emptyOption && <option />}
+
+      {Object.values(NomNivaa).map((nomNivaa) => (
+        <option key={nomNivaa} value={nomNivaa}>
+          {NomNivaaNameMapping[nomNivaa]}
+        </option>
+      ))}
     </Select>
   );
 }
