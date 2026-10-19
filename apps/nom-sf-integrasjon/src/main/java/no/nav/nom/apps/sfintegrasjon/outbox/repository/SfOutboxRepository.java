@@ -14,4 +14,6 @@ public interface SfOutboxRepository extends JpaRepository<SfOutbox, Long> {
     List<SfOutbox> getAllByOrgEnhetId(String orgEnhetId);
 
     List<SfOutbox> getAllBySfStatus(SfStatus sfStatus);
+
+    List<SfOutbox> getAllByOrgEnhetIdAndSfStatusIn(String orgEnhetId, Collection<SfStatus> sfStatuses);
 }

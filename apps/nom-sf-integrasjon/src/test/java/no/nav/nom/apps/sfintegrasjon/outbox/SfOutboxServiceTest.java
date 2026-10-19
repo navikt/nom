@@ -79,7 +79,7 @@ class SfOutboxServiceTest {
     void gjorIngentingNaarTogglenErAv() {
         when(unleash.isEnabled(OUTBOX_TOGGLE)).thenReturn(false);
 
-        service.sendPayloadToSfCpi();
+        service.runScheduledPayloadsToCpi();
 
         verifyNoInteractions(sfOutboxRepository, sfCpiClient);
     }
@@ -98,7 +98,7 @@ class SfOutboxServiceTest {
         void markererSendtUtenAaKalleSf() {
             outboxInneholder(rad(1, "aa0001", SfStatus.FEILET), rad(2, "aa0001", SfStatus.IKKE_SENDT));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             verifyNoInteractions(sfCpiClient);
             var lagret = lagretPerSporingsId();
@@ -112,7 +112,7 @@ class SfOutboxServiceTest {
         void orgenhetSomIkkeKanLesesBlirAvvist() {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT).toBuilder().orgenhet("{\"nivaa\":\"FINNES_IKKE\"}").build());
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             verifyNoInteractions(sfCpiClient);
             assertThat(lagretPerSporingsId().get(1L).getSfStatus()).isEqualTo(SfStatus.AVVIST);
@@ -124,7 +124,7 @@ class SfOutboxServiceTest {
     void gjorIngentingNaarPodenIkkeErLeder() {
         when(leaderElection.isLeader()).thenReturn(false);
 
-        service.sendPayloadToSfCpi();
+        service.runScheduledPayloadsToCpi();
 
         verifyNoInteractions(sfOutboxRepository, sfCpiClient);
     }
@@ -134,7 +134,7 @@ class SfOutboxServiceTest {
     void henterRaderSomIkkeErSendtEllerHarFeilet() {
         outboxInneholder();
 
-        service.sendPayloadToSfCpi();
+        service.runScheduledPayloadsToCpi();
 
         verify(sfOutboxRepository).getAllBySfStatusIn(statusCaptor.capture());
         assertThat(statusCaptor.getValue()).containsExactlyInAnyOrder(SfStatus.IKKE_SENDT, SfStatus.FEILET);
@@ -157,7 +157,7 @@ class SfOutboxServiceTest {
             );
             sfSpeilerForesporselen();
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             assertThat(sendtTilSf()).singleElement().satisfies(sendt -> {
                 assertThat(sendt.sporingsId()).isEqualTo("10");
@@ -177,7 +177,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT), rad(2, "bb0002", SfStatus.IKKE_SENDT));
             sfSpeilerForesporselen();
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             assertThat(sendtTilSf()).extracting(SfOutboxDTO::sporingsId).containsExactlyInAnyOrder("1", "2");
             verify(sfOutboxRepository, times(2)).save(any(SfOutbox.class));
@@ -196,7 +196,7 @@ class SfOutboxServiceTest {
                 return ResponseEntity.ok(dto);
             });
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId();
             assertThat(lagret.get(1L).getSfStatus()).isEqualTo(SfStatus.FEILET);
@@ -209,7 +209,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.FEILET), rad(2, "aa0001", SfStatus.IKKE_SENDT));
             sfKaster(httpFeil(503));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId();
             assertThat(lagret.get(1L).getSfStatus()).isEqualTo(SfStatus.ERSTATTET);
@@ -227,7 +227,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.FEILET).toBuilder().feilmelding("Timeout i forrige forsøk").build());
             sfSpeilerForesporselen();
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.SENDT);
@@ -240,7 +240,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT));
             when(sfCpiClient.sendOrgenhetPayload(any(SfOutboxDTO.class))).thenReturn(ResponseEntity.ok().build());
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.AVVIST);
@@ -256,7 +256,7 @@ class SfOutboxServiceTest {
                 return ResponseEntity.ok(dto.toBuilder().sporingsId("999").build());
             });
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.AVVIST);
@@ -274,7 +274,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT));
             sfKaster(httpFeil(statuskode));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.FEILET);
@@ -287,7 +287,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT));
             sfKaster(httpFeil(statuskode));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.AVVIST);
@@ -300,7 +300,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT));
             sfKaster(new ResourceAccessException("I/O error on POST request: Connection reset"));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.FEILET);
@@ -313,7 +313,7 @@ class SfOutboxServiceTest {
             outboxInneholder(rad(1, "aa0001", SfStatus.IKKE_SENDT));
             sfKaster(new RestClientException("Could not extract response"));
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             var lagret = lagretPerSporingsId().get(1L);
             assertThat(lagret.getSfStatus()).isEqualTo(SfStatus.FEILET);
@@ -330,7 +330,7 @@ class SfOutboxServiceTest {
             );
             sfSpeilerForesporselen();
 
-            service.sendPayloadToSfCpi();
+            service.runScheduledPayloadsToCpi();
 
             assertThat(sendtTilSf()).extracting(SfOutboxDTO::sporingsId).containsExactly("2");
             var lagret = lagretPerSporingsId();
