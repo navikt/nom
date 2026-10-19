@@ -38,7 +38,7 @@
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <ulid-creator.version>5.2.4</ulid-creator.version>
-        <vault-jdbc.version>1.3.10</vault-jdbc.version>
+        <vault-jdbc.version>1.4.1</vault-jdbc.version>
         <swagger-annotations-jakarta.version>2.2.55</swagger-annotations-jakarta.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
         <org.wiremock-spring-boot.version>4.4.3</org.wiremock-spring-boot.version>
