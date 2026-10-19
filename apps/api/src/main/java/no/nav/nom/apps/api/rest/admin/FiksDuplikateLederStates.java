@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -59,30 +61,32 @@ public class FiksDuplikateLederStates {
                 .stream()
                 .collect(Collectors.groupingBy(FiksDuplikateLederStates::getLederStateGroupingKey));
 
-        List<String> fidsToDelete = new ArrayList<>();
+        Map<String, String> ledereToDelete = new HashMap<>();
 
         alleLederStatesPerNavidentEnhetOgPeriode.forEach((key, lederStates) -> {
             if (lederStates.size() > 1) {
-                var fids = lederStates.stream().skip(1).map(OrgEnhetLederState::fid).toList();
+                var ledere = lederStates.stream().skip(1).collect(Collectors.toMap(OrgEnhetLederState::fid, OrgEnhetLederState::orgEnhetId));
                 output.append("Duplikate leder states (%s) for %s:\n".formatted(lederStates.size(), key));
-                output.append("Vil slette %s leder states:\n".formatted(fids.size(), key));
-                fidsToDelete.addAll(fids);
+                output.append("Vil slette %s leder states:\n".formatted(ledere.size(), key));
+                ledereToDelete.putAll(ledere);
             }
         });
 
         var inputMetaData = new InputMetadata("/api/admin/fiksDuplikateLederStates", "fiksDuplikateLederStates", null, new Origination("nom-api", "nom-api"));
 
         if (performUpdate) {
-            fidsToDelete.forEach(fid ->
+            ledereToDelete.forEach((fid, orgEnhetId) ->
                 orgEnhetLederCommandService.slettOrgEnhetLederState(
                     new SlettOrgEnhetLeder(
-                        fid, inputMetaData
+                        fid,
+                        orgEnhetId,
+                        inputMetaData
                     )
                 )
             );
-            output.append("Utført sletting av %s duplikate leder states\n".formatted(fidsToDelete.size()));
+            output.append("Utført sletting av %s duplikate leder states\n".formatted(ledereToDelete.size()));
         } else {
-            output.append("DRYRUN Lederstates å slette: %s\n".formatted(fidsToDelete.size()));
+            output.append("DRYRUN Lederstates å slette: %s\n".formatted(ledereToDelete.size()));
         }
 
         // Sjekk etter overlappende leder states
@@ -94,31 +98,31 @@ public class FiksDuplikateLederStates {
                     .thenComparing(OrgEnhetLederState::sluttdato, Comparator.nullsLast(LocalDate::compareTo)))
                 .collect(Collectors.groupingBy(lederState -> lederState.navident() + "_" + lederState.orgEnhetId()));
 
-        List<String> coveredFidsToDelete= new ArrayList<>();
+        Map<String, String> coveredLederToDelete= new HashMap<>();
         alleLederStatesPerNavidentEnhet.forEach((key, lederStates) -> {
-            List<String> fidsCovered = new ArrayList<>();
+            Map<String, String> ledereCovered = new HashMap<>();
             lederStates.forEach(state -> {
                 if (isCovered(state, lederStates)) {
-                    fidsCovered.add(state.fid());
+                    ledereCovered.put(state.fid(), state.orgEnhetId());
                 }
             });
-            if (!fidsCovered.isEmpty()) {
-                output.append("Overlappende leder states å slette for %s (%s): %s\n".formatted(key, fidsCovered.size(), fidsCovered));
-                coveredFidsToDelete.addAll(fidsCovered);
+            if (!ledereCovered.isEmpty()) {
+                output.append("Overlappende leder states å slette for %s (%s): %s\n".formatted(key, ledereCovered.size(), ledereCovered));
+                coveredLederToDelete.putAll(ledereCovered);
             }
         });
 
         if (performUpdate) {
-            coveredFidsToDelete.forEach(fid ->
+            coveredLederToDelete.forEach((fid, orgEnhetId) ->
                 orgEnhetLederCommandService.slettOrgEnhetLederState(
                     new SlettOrgEnhetLeder(
-                        fid, inputMetaData
+                        fid, orgEnhetId, inputMetaData
                     )
                 )
             );
-            output.append("Utført sletting av %s duplikate overlappende  leder states".formatted(coveredFidsToDelete.size()));
+            output.append("Utført sletting av %s duplikate overlappende  leder states".formatted(coveredLederToDelete.size()));
         } else {
-            output.append("DRYRUN overlappende Leder states å slette: %s".formatted(coveredFidsToDelete.size()));
+            output.append("DRYRUN overlappende Leder states å slette: %s".formatted(coveredLederToDelete.size()));
         }
 
         return output.toString();

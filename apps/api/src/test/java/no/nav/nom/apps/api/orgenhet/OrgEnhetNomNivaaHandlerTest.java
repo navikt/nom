@@ -92,6 +92,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
         assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
+        assertThat(endreNomNivaaArgumentCaptor.getValue().id()).isEqualTo(overordnetOrgEnhetState.id());
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_topmost_with_orgenhet_type_input() {
@@ -154,6 +155,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
         assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
+        assertThat(endreNomNivaaArgumentCaptor.getValue().id()).isEqualTo(overordnetOrgEnhet.id());
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_second_topmost_with_orgenhet_type_input() {
@@ -223,6 +225,7 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
             .endreNomNivaa(any(), endreNomNivaaArgumentCaptor.capture());
 
         assertThat(endreNomNivaaArgumentCaptor.getValue().nomNivaa()).isEqualTo(exptectedNomNivaa);
+        assertThat(endreNomNivaaArgumentCaptor.getValue().id()).isEqualTo(overOverordnetOrgEnhet.id());
     }
 
     public static Stream<Arguments> mapOrgEnhetTypeToNewNomNivaaAndUpdate_should_map_niva_correctly_and_send_event_for_third_topmost_with_orgenhet_type_input() {
@@ -341,6 +344,8 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
 
         assertThat(endreNomNivaaArgumentCaptor.getAllValues())
             .allMatch(endreNomNivaa -> endreNomNivaa.nomNivaa().equals(NomNivaa.ARBEIDSOMRAADE));
+        assertThat(endreNomNivaaArgumentCaptor.getAllValues())
+            .allMatch(endreNomNivaa -> endreNomNivaa.id().equals(secondBottomInPathWithNoArbeidsomraade.id()));
     }
 
     @Test
@@ -372,7 +377,8 @@ public class OrgEnhetNomNivaaHandlerTest extends OrgEnhetTestBase {
         verify(orgEnhetCommandService).endreNomNivaa(fidArgumentCaptor.capture(), endreNomNivaaArgumentCaptor.capture());
 
         assertThat(fidArgumentCaptor.getAllValues()).containsOnly(secondBottomInPathWithNoArbeidsomraade.fid());
-
+        assertThat(endreNomNivaaArgumentCaptor.getAllValues())
+            .allMatch(endreNomNivaa -> endreNomNivaa.id().equals(secondBottomInPathWithNoArbeidsomraade.id()));
     }
 
     private void mockChildren(OrgEnhetState parent, List<OrgEnhetState> children) {

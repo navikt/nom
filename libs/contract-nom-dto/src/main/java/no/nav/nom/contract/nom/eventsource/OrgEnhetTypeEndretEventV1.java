@@ -26,6 +26,7 @@ public class OrgEnhetTypeEndretEventV1 extends OrgEnhetEvent {
     }
 
     public record OrgEnhetTypeEndretEventData(
+        String id,
         OrgEnhetsType orgEnhetsType
     ) implements Data {}
 

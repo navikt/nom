@@ -129,7 +129,7 @@ public class DvhOrgenhetsLast {
                         stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
                             // Parsed DVH enhet found in state
                             if (nonNull(parsedEnhet.getGyldigTom()) && isNull(orgEnhetState.gyldigTom())) {
-                                avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
+                                avvikleOrgEnhet(orgEnhetState.fid(), orgEnhetState.id(), parsedEnhet);
                                 // Need to keep track of Eventual gyldigTom in case there are more parsed enheter for same uniqueAgressoId to process
                                 fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom());
                             }
@@ -141,9 +141,10 @@ public class DvhOrgenhetsLast {
                             }
                         }, () -> {
                             // Parsed DVH enhet NOT found in state
-                            String fid = opprettOrgEnhet(parsedEnhet);
+                            String id = orgEnhetIdGenerator.newId();
+                            String fid = opprettOrgEnhet(id, parsedEnhet);
                             if (nonNull(fid) && nonNull(parsedEnhet.getGyldigTom())) {
-                                avvikleOrgEnhet(fid, parsedEnhet);
+                                avvikleOrgEnhet(fid, id, parsedEnhet);
                             }
                         });
                     } else {
@@ -180,7 +181,7 @@ public class DvhOrgenhetsLast {
                         .forEach(orgEnhetState -> {
                             LocalDate gyldigTom = Objects.requireNonNullElse(orgenhetV2.getGyldigTom(), LocalDate.now());
                             if (orgEnhetState.gyldigTom().isAfter(gyldigTom)) { // hvis State har gyldigTom < evt. ny 'kalkulert gyldigTom' så ikke endre, for å slippe case med dobbelt parkerte enheter
-                                avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                                avvikleOrgEnhet(orgEnhetState.fid(), orgEnhetState.id(), orgenhetV2, gyldigTom);
                             }
                         });
                 }
@@ -192,7 +193,7 @@ public class DvhOrgenhetsLast {
                     stateEnheterPerUniqueAgressoId
                         .stream()
                         .filter(orgEnhetState -> nonNull(orgEnhetState.gyldigTom()) && orgEnhetState.gyldigTom().isBefore(LocalDate.now()))
-                        .forEach(orgEnhetState -> avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now()));
+                        .forEach(orgEnhetState -> avvikleOrgEnhet(orgEnhetState.fid(), orgEnhetState.id(), orgenhetV2, LocalDate.now()));
                 }
             );
             log.info("Ferdig med orgenhet last");
@@ -248,9 +249,9 @@ public class DvhOrgenhetsLast {
                 )) <= 1);
     }
 
-    private String opprettOrgEnhet(DvhOrgenhetV2 dvhOrgenhetV2) {
+    private String opprettOrgEnhet(String id, DvhOrgenhetV2 dvhOrgenhetV2) {
         final var opprettOrgEnhet = new OpprettOrgEnhet(
-                orgEnhetIdGenerator.newId(),
+                id,
                 dvhOrgenhetV2.getNavn(),
                 dvhOrgenhetV2.getGyldigFom(),
                 null,
@@ -262,12 +263,13 @@ public class DvhOrgenhetsLast {
         return orgEnhetCommandService.opprettOrgEnhet(opprettOrgEnhet);
     }
 
-    private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2) {
-        avvikleOrgEnhet(fid, dvhOrgenhetV2, dvhOrgenhetV2.getGyldigTom());
+    private void avvikleOrgEnhet(String fid, String id, DvhOrgenhetV2 dvhOrgenhetV2) {
+        avvikleOrgEnhet(fid, id, dvhOrgenhetV2, dvhOrgenhetV2.getGyldigTom());
     }
 
-    private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2, LocalDate gyldigTom) {
+    private void avvikleOrgEnhet(String fid, String id, DvhOrgenhetV2 dvhOrgenhetV2, LocalDate gyldigTom) {
         final var avvikleOrgEnhet = new AvvikleOrgEnhet(
+            id,
             gyldigTom,
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );

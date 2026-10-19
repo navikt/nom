@@ -48,7 +48,11 @@ public class EventsrcToState {
                         // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
                         // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
                     }
-                    state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
+                    var eventData = jsonMapper.convertValue(event.getData(), ObjectNode.class);
+                    if (state.hasNonNull("orgEnhetId") && eventData.has("orgEnhetId") && eventData.get("orgEnhetId").isNull()) {
+                        eventData.remove("orgEnhetId");
+                    }
+                    state.setAll(eventData);
                     if (nonNull(event.getMetadata()) && nonNull(event.getMetadata().inputMetadata().origination())) {
                         var origination = event.getMetadata().inputMetadata().origination();
                         if (nonNull(origination.initiatedBy())) state.put("sistEndretAv",  origination.initiatedBy());
@@ -66,6 +70,9 @@ public class EventsrcToState {
         try {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
+            }
+            if (!eventStateAggregate.hasNonNull("orgEnhetId")) {
+                throw new IllegalStateException("Missing orgEnhetId for FID " + fid);
             }
             if ( eventStateAggregate.get("navident") == null) {
                 log.error("Missing Navident for FID {}", fid);

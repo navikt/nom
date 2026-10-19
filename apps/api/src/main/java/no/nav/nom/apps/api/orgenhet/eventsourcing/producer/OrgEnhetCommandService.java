@@ -66,7 +66,11 @@ public class OrgEnhetCommandService {
             throw e;
         } finally {
             if (exceptionThrown) {
-                avvikleOrgEnhet(fid, new AvvikleOrgEnhet(opprettOrgEnhet.gyldigFom(), opprettOrgEnhet.inputMetadata()));
+                avvikleOrgEnhet(fid, new AvvikleOrgEnhet(
+                    opprettOrgEnhet.id(),
+                    opprettOrgEnhet.gyldigFom(),
+                    opprettOrgEnhet.inputMetadata()
+                ));
             }
         }
     }
@@ -121,6 +125,7 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new OrgEnhetEndretNavnEventV1(
             fid,
             new OrgEnhetEndretNavnEventV1.OrgEnhetNavnEndretEventData(
+                oppdaterOrgEnhet.id(),
                 oppdaterOrgEnhet.navn()
             ),
             oppdaterOrgEnhet.inputMetadata()
@@ -131,7 +136,8 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
                 fid,
                 new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
-                        avvikleOrgEnhet.gyldigTom()
+                    avvikleOrgEnhet.id(),
+                    avvikleOrgEnhet.gyldigTom()
                 ),
                 avvikleOrgEnhet.inputMetadata()
         ));
@@ -180,6 +186,7 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new OrgEnhetTypeEndretEventV1(
             fid,
             new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(
+                endreOrgEnhetsType.id(),
                 endreOrgEnhetsType.orgEnhetsType()
             ),
             endreOrgEnhetsType.inputMetadata()
@@ -190,6 +197,7 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new NomNivaaEndretEventV1(
             fid,
             new NomNivaaEndretEventV1.NomNivaaEndretEventData(
+                endreNomNivaa.id(),
                 endreNomNivaa.nomNivaa()
             ),
             endreNomNivaa.inputMetadata()
@@ -200,6 +208,7 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new KorrigerGyldigFomEventV1(
             fid,
             new KorrigerGyldigFomEventV1.KorrigerGyldigFomEventData(
+                korrigerGyldigFom.id(),
                 korrigerGyldigFom.gyldigFom()
             ),
             korrigerGyldigFom.inputMetadata()
@@ -209,7 +218,10 @@ public class OrgEnhetCommandService {
     public CompletableFuture<SendResult<String, OrgEnhetEvent>> endreTilgangsenhet(String fid, EndreTilgangsenhet endreTilgangsenhet) {
         return eventProducer.sendMessage(new TilgangsenhetEndretEventV1(
             fid,
-            new TilgangsenhetEndretEventV1.TilgangsenhetEndretEventData(endreTilgangsenhet.tilgangsenhetId()),
+            new TilgangsenhetEndretEventV1.TilgangsenhetEndretEventData(
+                endreTilgangsenhet.id(),
+                endreTilgangsenhet.tilgangsenhetId()
+            ),
             endreTilgangsenhet.inputMetadata()
         ));
     }

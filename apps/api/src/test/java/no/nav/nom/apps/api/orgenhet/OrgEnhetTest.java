@@ -4,9 +4,21 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.consumer.OrgEnhetEventSourceListener;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +32,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,6 +69,44 @@ public class OrgEnhetTest extends OrgEnhetTestBase {
     void resetOrgEnhetState() {
         when(orgEnhetCommandService.opprettOrgEnhet(any())).thenReturn("DUMMY_FID");
         orgEnhetStateRepository.clear();
+    }
+
+    @Test
+    void orgEnhetEventsArePassedToHandlers() {
+        var orgEnhetTypeHandler = mock(OrgEnhetTypeHandler.class);
+        var orgEnhetNomNivaaHandler = mock(OrgEnhetNomNivaaHandler.class);
+        var orgEnhetEventSourceListener = new OrgEnhetEventSourceListener(
+            orgEnhetTypeHandler,
+            orgEnhetNomNivaaHandler,
+            mock(no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor.class)
+        );
+        var typeMetadata = new InputMetadata("test", "type", Map.of(), null);
+        var nivaaMetadata = new InputMetadata("test", "nivaa", Map.of(), null);
+        var typeEvent = new OrgEnhetTypeEndretEventV1(
+            "TYPE_FID",
+            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData("TYPE_ID", OrgEnhetsType.FYLKE),
+            typeMetadata
+        );
+        var nivaaEvent = new NomNivaaEndretEventV1(
+            "NIVAA_FID",
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData("NIVAA_ID", NomNivaa.DRIFTSENHET),
+            nivaaMetadata
+        );
+        var records = records(typeEvent, nivaaEvent);
+
+        orgEnhetEventSourceListener.onMessage(records, null);
+
+        verify(orgEnhetTypeHandler).orgEnhetsTypeChanged("TYPE_FID", OrgEnhetsType.FYLKE);
+        verify(orgEnhetNomNivaaHandler).mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren("TYPE_FID", OrgEnhetsType.FYLKE);
+        verify(orgEnhetNomNivaaHandler).ensureArbeidsomraadePresentUnderDriftsenhet("NIVAA_FID", NomNivaa.DRIFTSENHET);
+    }
+
+    private ConsumerRecords<String, OrgEnhetEvent> records(OrgEnhetEvent... events) {
+        var topicPartition = new TopicPartition("events", 0);
+        var eventRecords = java.util.stream.IntStream.range(0, events.length)
+            .mapToObj(index -> new ConsumerRecord<>("events", 0, index, "key", events[index]))
+            .toList();
+        return new ConsumerRecords<>(Map.of(topicPartition, eventRecords));
     }
 
     @Test

@@ -38,7 +38,14 @@ public class EventsrcToState {
             .aggregate(
                 jsonMapper::createObjectNode,
                 (_, event, state) -> {
-                    state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
+                    ObjectNode eventData = jsonMapper.convertValue(event.getData(), ObjectNode.class);
+                    if (eventData.has("id") && (eventData.get("id").isNull() || eventData.get("id").asString().isBlank())) {
+                        eventData.remove("id");
+                    }
+                    state.setAll(eventData);
+                    if (!state.hasNonNull("id")) {
+                        throw new IllegalStateException("Organisering state aggregate is missing id after merge");
+                    }
                     return state;
                 },
                 Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
