@@ -153,7 +153,7 @@ public class OrgEnhetRestService {
             if (opprettOrgEnhetRequest.nomNivaa() != null) {
                 orgEnhetCommandService.endreNomNivaa(
                     orgEnhetState.fid(),
-                    new EndreNomNivaa(opprettOrgEnhetRequest.nomNivaa(), inputMetadata)
+                    new EndreNomNivaa(orgEnhetState.id(), opprettOrgEnhetRequest.nomNivaa(), inputMetadata)
                 );
             }
 
