@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+      - uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/admin-web/admin-web-dev.yaml
@@ -91,6 +91,7 @@ jobs:
           # ADDITIONAL_DEV_DEPLOYMENTS: '[{"suffix":"q0","manifest":".nais/apps/admin-web/admin-web-dev-q0.yaml"},{"suffix":"sf-test","manifest":".nais/apps/admin-web/admin-web-dev-sf-test.yaml"}]'
           ADDITIONAL_DEV_DEPLOYMENTS: '[]'
         run: |
+          # Parse the deployment JSON array and publish it as a compact GitHub Actions output.
           python3 - <<'PY'
           import json
           import os
@@ -122,6 +123,7 @@ jobs:
           VARIANT_MANIFEST: ${{ matrix.deployment.manifest }}
           SUFFIX: ${{ matrix.deployment.suffix }}
         run: |
+          # Check the variant path and Application name; HTTPS ingresses must match base hosts with -<suffix> before the domain.
           python3 - <<'PY'
           import os
           import pathlib
@@ -179,7 +181,7 @@ jobs:
           except (OSError, ValueError, AttributeError) as error:
               sys.exit(str(error))
           PY
-      - uses: nais/deploy/actions/deploy@027a91857992525139798892f2804b0ca21f4af6 # ratchet:nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: dev-gcp
           RESOURCE: ${{ matrix.deployment.manifest }}
@@ -195,7 +197,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891 # ratchet:nais/deploy/actions/deploy@v3
+      - uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/admin-web/admin-web-prod.yaml
