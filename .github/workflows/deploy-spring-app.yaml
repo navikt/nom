@@ -197,7 +197,7 @@ jobs:
       id-token: "write"
     needs:
       - build-app-docker
-      - deploy-dev
+      - build-test-app
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

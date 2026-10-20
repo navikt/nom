@@ -151,7 +151,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    needs: [build-app-docker, deploy-dev, prepare-dev-variants]
+    needs: [build-app-docker, prepare-dev-variants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
