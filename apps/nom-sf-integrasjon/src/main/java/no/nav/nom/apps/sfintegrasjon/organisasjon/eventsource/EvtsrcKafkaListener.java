@@ -15,7 +15,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -25,11 +24,15 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Service
 public class EvtsrcKafkaListener implements ConsumerSeekAware {
+
+    @FunctionalInterface
+    private interface OrgEnhetIdLookup {
+        String apply(JsonNode jsonMelding, String fid, String eventKey);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(EvtsrcKafkaListener.class);
 
@@ -70,7 +73,7 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
         containerFactory = "organisasjonEvtsrcKafkaListenerContainerFactory"
     )
     public void orgenhetListener(String melding, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
-        prosesserEvtsrcMelding(melding, key, this::hentOrgEnhetIdFraOrgenhetState, "orgenhet");
+        prosesserEvtsrcMelding(melding, key, this::finnOrgEnhetIdForOrgEnhetEvt, "orgenhet");
     }
 
     @KafkaListener(
@@ -80,7 +83,7 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
         containerFactory = "organisasjonEvtsrcKafkaListenerContainerFactory"
     )
     public void orgenhetLederListener(String melding, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
-        prosesserEvtsrcMelding(melding, key, this::hentOrgEnhetIdFraOrgenhetLederState, "orgenhet-leder");
+        prosesserEvtsrcMelding(melding, key, this::finnOrgEnhetIdForOrgenhetLedertEvt, "orgenhet-leder");
     }
 
     @KafkaListener(
@@ -90,23 +93,24 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
         containerFactory = "organisasjonEvtsrcKafkaListenerContainerFactory"
     )
     public void organiseringListener(String melding, @Header(KafkaHeaders.RECEIVED_KEY) String key) {
-        prosesserEvtsrcMelding(melding, key, this::hentOrgEnhetIdFraOrganiseringState, "organisering");
+        prosesserEvtsrcMelding(melding, key, this::finnOrgEnhetIdForOrganiseringEvt, "organisering");
     }
 
     /**
      * Felles prosesseringsflyt for alle tre evtsrc-topics:
-     * parser fid, slår opp orgEnhetId via NOM state, og lagrer hendelsen.
+     * parser fid, bruker orgEnhetId fra evt meldingen hvis dette finnes, eller slår opp orgEnhetId via NOM state, og lagrer hendelsen.
      * Håndterer race condition ved at state opprettes asynkront som følge av evtsrc.
      */
     private void prosesserEvtsrcMelding(String melding, String key,
-                                        BiFunction<String, String, String> orgEnhetIdLookup,
+                                        OrgEnhetIdLookup orgEnhetIdLookup,
                                         String topicNavn) {
         try {
-            String fid = parseFid(melding);
+            JsonNode jsonMelding = objectMapper.readTree(melding);
+            String fid = parseFid(jsonMelding);
             if (fid == null || fid.isBlank()) {
                 throw new IllegalArgumentException("Melding mangler påkrevde felter (fid, type)");
             }
-            lagreMelding(melding, key, orgEnhetIdLookup.apply(fid, key));
+            lagreMelding(melding, key, orgEnhetIdLookup.apply(jsonMelding, fid, key));
         } catch (OrgEnhetStateIkkeFunnetException | IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
@@ -117,16 +121,19 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
 
     // ── NOM state-oppslag med retry ───────────────────────────────────────────
 
-    private String hentOrgEnhetIdFraOrgenhetState(String fid, String eventKey) {
-        return hentIdMedRetry(fid, eventKey, f -> orgEnhetStateRepository.findByFid(f).map(OrgEnhetState::id));
+    private String finnOrgEnhetIdForOrgEnhetEvt(JsonNode jsonMelding, String fid, String eventKey) {
+        return parseOrgEnhetId(jsonMelding, "id")
+            .orElseGet(() -> hentIdMedRetry(fid, eventKey, f -> orgEnhetStateRepository.findByFid(f).map(OrgEnhetState::id)));
     }
 
-    private String hentOrgEnhetIdFraOrgenhetLederState(String fid, String eventKey) {
-        return hentIdMedRetry(fid, eventKey, f -> orgEnhetLederStateRepository.findByFid(f).map(OrgEnhetLederState::orgEnhetId));
+    private String finnOrgEnhetIdForOrgenhetLedertEvt(JsonNode jsonMelding, String fid, String eventKey) {
+        return parseOrgEnhetId(jsonMelding, "orgEnhetId")
+            .orElseGet(() -> hentIdMedRetry(fid, eventKey, f -> orgEnhetLederStateRepository.findByFid(f).map(OrgEnhetLederState::orgEnhetId)));
     }
 
-    private String hentOrgEnhetIdFraOrganiseringState(String fid, String eventKey) {
-        return hentIdMedRetry(fid, eventKey, f -> organiseringStateRepository.findByFid(f).map(OrganiseringState::id));
+    private String finnOrgEnhetIdForOrganiseringEvt(JsonNode jsonMelding, String fid, String eventKey) {
+        return parseOrgEnhetId(jsonMelding, "id")
+            .orElseGet(() -> hentIdMedRetry(fid, eventKey, f -> organiseringStateRepository.findByFid(f).map(OrganiseringState::id)));
     }
 
     /**
@@ -156,7 +163,7 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
         throw new OrgEnhetStateIkkeFunnetException("State ikke funnet for fid=" + fid + " etter retry");
     }
 
-    // ── Lagring ───────────────────────────────────────────────────────────────
+    // ── Lagring ──────────────────────────────────────────────────────────��────
 
     private void lagreMelding(String melding, String eventKey, String orgEnhetId) {
         try {
@@ -187,8 +194,16 @@ public class EvtsrcKafkaListener implements ConsumerSeekAware {
         }
     }
 
-    private String parseFid(String melding) {
-        return objectMapper.readTree(melding).path("fid").asText(null);
+    private String parseFid(JsonNode jsonMelding) {
+        return jsonMelding.path("fid").asString(null);
+    }
+
+    private Optional<String> parseOrgEnhetId(JsonNode jsonMelding, String idField) {
+        var id = jsonMelding.path("data").path(idField).asString(null);
+        if (id == null || id.isBlank()) {
+            return Optional.empty();
+        }
+        return Optional.of(id);
     }
 
     // ── ConsumerSeekAware ─────────────────────────────────────────────────────

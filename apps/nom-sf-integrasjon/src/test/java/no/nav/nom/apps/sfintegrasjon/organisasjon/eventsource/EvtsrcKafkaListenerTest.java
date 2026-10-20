@@ -39,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -80,7 +81,7 @@ class EvtsrcKafkaListenerTest {
     @Test
     @DisplayName("orgenhetListener: orgEnhetId hentes fra NOM state (state.id)")
     void orgenhetListener_orgEnhetIdFraNomState() {
-        stubOrgEnhetState("orgenhet-fid-42", "NAV123456");
+        stubOrgEnhetState("orgenhet-fid-42", "NAV123");
         var melding = """
             {"type":"OrgEnhetOpprettetEventV1","fid":"orgenhet-fid-42"}
             """.strip();
@@ -91,11 +92,25 @@ class EvtsrcKafkaListenerTest {
         verify(repository).save(captor.capture());
         var lagret = captor.getValue();
         assertThat(lagret.getFid()).isEqualTo("orgenhet-fid-42");
-        assertThat(lagret.getOrgEnhetId()).isEqualTo("NAV123456");
+        assertThat(lagret.getOrgEnhetId()).isEqualTo("NAV123");
         assertThat(lagret.getEventType()).isEqualTo("OrgEnhetOpprettetEventV1");
         assertThat(lagret.getEventKey()).isEqualTo("kafka-key-42");
         assertThat(lagret.getMottattTidspunkt()).isNotNull();
         assertThat(lagret.getBehandlingsId()).isNull();
+    }
+
+    @Test
+    @DisplayName("orgenhetListener: event-ID prioriteres uten state-oppslag")
+    void orgenhetListener_eventIdPrioriteres() {
+        listener.orgenhetListener(
+            """
+            {"type":"OrgEnhetOpprettetEventV1","fid":"orgenhet-id-fid","data":{"id":"EVORG1"}}
+            """.strip(), "event-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("EVORG1");
+        verify(orgEnhetStateRepository, never()).findByFid("orgenhet-id-fid");
     }
 
     @Test
@@ -117,6 +132,25 @@ class EvtsrcKafkaListenerTest {
     }
 
     @Test
+    @DisplayName("orgenhetListener: blank event-ID bruker state med eksisterende retry")
+    void orgenhetListener_blankEventIdBrukerStateEtterRetry() {
+        var state = OrgEnhetState.builder().fid("fid-blank-id").id("NAVBKP").build();
+        when(orgEnhetStateRepository.findByFid("fid-blank-id"))
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.of(state));
+
+        listener.orgenhetListener(
+            """
+            {"type":"OrgEnhetEndretNavnEventV1","fid":"fid-blank-id","data":{"id":" "}}
+            """.strip(), "blank-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("NAVBKP");
+        verify(orgEnhetStateRepository, times(2)).findByFid("fid-blank-id");
+    }
+
+    @Test
     @DisplayName("orgenhetListener: kaster OrgEnhetStateIkkeFunnetException etter to mislykkede forsøk")
     void orgenhetListener_kastertNaarStateIkkeFunnetEtterRetry() {
         when(orgEnhetStateRepository.findByFid("ukjent-fid")).thenReturn(Optional.empty());
@@ -127,6 +161,24 @@ class EvtsrcKafkaListenerTest {
             """.strip(), "key-x"))
             .isInstanceOf(OrgEnhetStateIkkeFunnetException.class);
 
+        verify(orgEnhetStateRepository, times(2)).findByFid("ukjent-fid");
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("orgenhetListener: blank event-ID kaster når state ikke finnes etter retry")
+    void orgenhetListener_blankEventIdKasterNaarStateIkkeFunnetEtterRetry() {
+        when(orgEnhetStateRepository.findByFid("blank-ukjent"))
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> listener.orgenhetListener(
+            """
+            {"type":"OrgEnhetEndretNavnEventV1","fid":"blank-ukjent","data":{"id":" "}}
+            """.strip(), "blank-ukjent-key"))
+            .isInstanceOf(OrgEnhetStateIkkeFunnetException.class);
+
+        verify(orgEnhetStateRepository, times(2)).findByFid("blank-ukjent");
         verify(repository, never()).save(any());
     }
 
@@ -135,7 +187,7 @@ class EvtsrcKafkaListenerTest {
     @Test
     @DisplayName("orgenhetLederListener: orgEnhetId hentes fra NOM orgenhet-leder state (state.orgEnhetId)")
     void orgenhetLederListener_orgEnhetIdFraNomState() {
-        var state = OrgEnhetLederState.builder().fid("leder-fid-1").orgEnhetId("NAV-ORG-1").build();
+        var state = OrgEnhetLederState.builder().fid("leder-fid-1").orgEnhetId("NAV001").build();
         when(orgEnhetLederStateRepository.findByFid("leder-fid-1")).thenReturn(Optional.of(state));
 
         listener.orgenhetLederListener(
@@ -145,7 +197,40 @@ class EvtsrcKafkaListenerTest {
 
         var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
         verify(repository).save(captor.capture());
-        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("NAV-ORG-1");
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("NAV001");
+    }
+
+    @Test
+    @DisplayName("orgenhetLederListener: event-ID prioriteres uten state-oppslag")
+    void orgenhetLederListener_eventIdPrioriteres() {
+        listener.orgenhetLederListener(
+            """
+            {"type":"OrgEnhetLederOpprettetEventV1","fid":"leder-event-id-fid","data":{"orgEnhetId":"EVL001"}}
+            """.strip(), "leder-event-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("EVL001");
+        verify(orgEnhetLederStateRepository, never()).findByFid("leder-event-id-fid");
+    }
+
+    @Test
+    @DisplayName("orgenhetLederListener: blank event-ID bruker state med eksisterende retry")
+    void orgenhetLederListener_blankEventIdBrukerStateEtterRetry() {
+        var state = OrgEnhetLederState.builder().fid("leder-blank-id-fid").orgEnhetId("LEDBAK").build();
+        when(orgEnhetLederStateRepository.findByFid("leder-blank-id-fid"))
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.of(state));
+
+        listener.orgenhetLederListener(
+            """
+            {"type":"OrgEnhetLederOpprettetEventV1","fid":"leder-blank-id-fid","data":{"orgEnhetId":""}}
+            """.strip(), "leder-blank-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("LEDBAK");
+        verify(orgEnhetLederStateRepository, times(2)).findByFid("leder-blank-id-fid");
     }
 
     @Test
@@ -167,7 +252,7 @@ class EvtsrcKafkaListenerTest {
     @Test
     @DisplayName("organiseringListener: orgEnhetId hentes fra NOM organisering state (state.id)")
     void organiseringListener_orgEnhetIdFraNomState() {
-        var state = OrganiseringState.builder().fid("org-fid-7").id("NAV-ORG-7").build();
+        var state = OrganiseringState.builder().fid("org-fid-7").id("NAV007").build();
         when(organiseringStateRepository.findByFid("org-fid-7")).thenReturn(Optional.of(state));
 
         listener.organiseringListener(
@@ -178,7 +263,40 @@ class EvtsrcKafkaListenerTest {
         var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().getFid()).isEqualTo("org-fid-7");
-        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("NAV-ORG-7");
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("NAV007");
+    }
+
+    @Test
+    @DisplayName("organiseringListener: event-ID prioriteres uten state-oppslag")
+    void organiseringListener_eventIdPrioriteres() {
+        listener.organiseringListener(
+            """
+            {"type":"OrganiseringOpprettetEventV1","fid":"org-event-id-fid","data":{"id":"EORG07"}}
+            """.strip(), "org-event-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("EORG07");
+        verify(organiseringStateRepository, never()).findByFid("org-event-id-fid");
+    }
+
+    @Test
+    @DisplayName("organiseringListener: blank event-ID bruker state med eksisterende retry")
+    void organiseringListener_blankEventIdBrukerStateEtterRetry() {
+        var state = OrganiseringState.builder().fid("org-blank-id-fid").id("ORGBKP").build();
+        when(organiseringStateRepository.findByFid("org-blank-id-fid"))
+            .thenReturn(Optional.empty())
+            .thenReturn(Optional.of(state));
+
+        listener.organiseringListener(
+            """
+            {"type":"OrganiseringOpprettetEventV1","fid":"org-blank-id-fid","data":{"id":""}}
+            """.strip(), "org-blank-id-key");
+
+        var captor = ArgumentCaptor.forClass(OrganisasjonHendelse.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getOrgEnhetId()).isEqualTo("ORGBKP");
+        verify(organiseringStateRepository, times(2)).findByFid("org-blank-id-fid");
     }
 
     @Test
@@ -298,8 +416,11 @@ class EvtsrcKafkaListenerTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("orgenhetMeldinger")
     @DisplayName("orgenhetListener: faktisk melding fra orgenhet-eventsource topic")
-    void orgenhetListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType) {
-        stubOrgEnhetState(fid, "854600");
+    void orgenhetListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType, String eventId) {
+        String expectedOrgEnhetId = eventId == null || eventId.isBlank() ? "STORG1" : eventId;
+        if (eventId == null || eventId.isBlank()) {
+            stubOrgEnhetState(fid, expectedOrgEnhetId);
+        }
 
         listener.orgenhetListener(melding, "key-" + filnavn);
 
@@ -308,7 +429,12 @@ class EvtsrcKafkaListenerTest {
         var lagret = captor.getValue();
         assertThat(lagret.getFid()).isEqualTo(fid);
         assertThat(lagret.getEventType()).isEqualTo(expectedEventType);
-        assertThat(lagret.getOrgEnhetId()).isEqualTo("854600");
+        assertThat(lagret.getOrgEnhetId()).isEqualTo(expectedOrgEnhetId);
+        if (eventId == null || eventId.isBlank()) {
+            verify(orgEnhetStateRepository).findByFid(fid);
+        } else {
+            verify(orgEnhetStateRepository, never()).findByFid(fid);
+        }
         assertThat(lagret.getEventKey()).isEqualTo("key-" + filnavn);
         assertThat(lagret.getMelding()).isEqualTo(melding);
         assertThat(lagret.getMottattTidspunkt()).isNotNull();
@@ -316,22 +442,24 @@ class EvtsrcKafkaListenerTest {
 
     static Stream<Arguments> orgenhetMeldinger() {
         return Stream.of(
-            lesMeldingArgs("evtsrcmeldinger/orgenhet/NomNivaaEndretEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetAvvikletEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetKorrigertEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetOpprettetEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetOpprettetEventV1_2.json")
+            lesMeldingArgs("evtsrcmeldinger/orgenhet/NomNivaaEndretEventV1_1.json", "id"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetAvvikletEventV1_1.json", "id"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetKorrigertEventV1_1.json", "id"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetOpprettetEventV1_1.json", "id"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhet/OrgEnhetOpprettetEventV1_2.json", "id")
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("orgenhetLederMeldinger")
     @DisplayName("orgenhetLederListener: faktisk melding fra orgenhet-leder-eventsource topic")
-    void orgenhetLederListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType) {
-        // SluttdatoOppdatert og StartdatoOppdatert har ingen orgEnhetId i data —
-        // bevis på at state-oppslag er nødvendig for alle event-typer.
-        var state = OrgEnhetLederState.builder().fid(fid).orgEnhetId("ka609r").build();
-        when(orgEnhetLederStateRepository.findByFid(fid)).thenReturn(Optional.of(state));
+    void orgenhetLederListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType, String eventId) {
+        // Opprettet-hendelsen har orgEnhetId i data; dato-hendelsene mangler feltet og bruker state.
+        String expectedOrgEnhetId = eventId == null || eventId.isBlank() ? "KA609R" : eventId;
+        if (eventId == null || eventId.isBlank()) {
+            var state = OrgEnhetLederState.builder().fid(fid).orgEnhetId(expectedOrgEnhetId).build();
+            when(orgEnhetLederStateRepository.findByFid(fid)).thenReturn(Optional.of(state));
+        }
 
         listener.orgenhetLederListener(melding, "key-" + filnavn);
 
@@ -340,25 +468,33 @@ class EvtsrcKafkaListenerTest {
         var lagret = captor.getValue();
         assertThat(lagret.getFid()).isEqualTo(fid);
         assertThat(lagret.getEventType()).isEqualTo(expectedEventType);
-        assertThat(lagret.getOrgEnhetId()).isEqualTo("ka609r");
+        assertThat(lagret.getOrgEnhetId()).isEqualTo(expectedOrgEnhetId);
+        if (eventId == null || eventId.isBlank()) {
+            verify(orgEnhetLederStateRepository).findByFid(fid);
+        } else {
+            verify(orgEnhetLederStateRepository, never()).findByFid(fid);
+        }
         assertThat(lagret.getMelding()).isEqualTo(melding);
         assertThat(lagret.getMottattTidspunkt()).isNotNull();
     }
 
     static Stream<Arguments> orgenhetLederMeldinger() {
         return Stream.of(
-            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederOpprettetEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederSluttdatoOppdatertEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederStartdatoOppdatertEventV1_1.json")
+            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederOpprettetEventV1_1.json", "orgEnhetId"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederSluttdatoOppdatertEventV1_1.json", "orgEnhetId"),
+            lesMeldingArgs("evtsrcmeldinger/orgenhetleder/OrgEnhetLederStartdatoOppdatertEventV1_1.json", "orgEnhetId")
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("organiseringMeldinger")
     @DisplayName("organiseringListener: faktisk melding fra organisering-eventsource topic")
-    void organiseringListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType) {
-        var state = OrganiseringState.builder().fid(fid).id("fy872h").build();
-        when(organiseringStateRepository.findByFid(fid)).thenReturn(Optional.of(state));
+    void organiseringListener_faktiskMelding(String filnavn, String melding, String fid, String expectedEventType, String eventId) {
+        String expectedOrgEnhetId = eventId == null || eventId.isBlank() ? "FY872H" : eventId;
+        if (eventId == null || eventId.isBlank()) {
+            var state = OrganiseringState.builder().fid(fid).id(expectedOrgEnhetId).build();
+            when(organiseringStateRepository.findByFid(fid)).thenReturn(Optional.of(state));
+        }
 
         listener.organiseringListener(melding, "key-" + filnavn);
 
@@ -367,26 +503,32 @@ class EvtsrcKafkaListenerTest {
         var lagret = captor.getValue();
         assertThat(lagret.getFid()).isEqualTo(fid);
         assertThat(lagret.getEventType()).isEqualTo(expectedEventType);
-        assertThat(lagret.getOrgEnhetId()).isEqualTo("fy872h");
+        assertThat(lagret.getOrgEnhetId()).isEqualTo(expectedOrgEnhetId);
+        if (eventId == null || eventId.isBlank()) {
+            verify(organiseringStateRepository).findByFid(fid);
+        } else {
+            verify(organiseringStateRepository, never()).findByFid(fid);
+        }
         assertThat(lagret.getMelding()).isEqualTo(melding);
         assertThat(lagret.getMottattTidspunkt()).isNotNull();
     }
 
     static Stream<Arguments> organiseringMeldinger() {
         return Stream.of(
-            lesMeldingArgs("evtsrcmeldinger/organisering/OrganiseringAvsluttetEventV1_1.json"),
-            lesMeldingArgs("evtsrcmeldinger/organisering/OrganiseringOpprettetEventV1_1.json")
+            lesMeldingArgs("evtsrcmeldinger/organisering/OrganiseringAvsluttetEventV1_1.json", "id"),
+            lesMeldingArgs("evtsrcmeldinger/organisering/OrganiseringOpprettetEventV1_1.json", "id")
         );
     }
 
     // ── hjelpemetoder ─────────────────────────────────────────────────────────
 
-    private static Arguments lesMeldingArgs(String sti) {
+    private static Arguments lesMeldingArgs(String sti, String idField) {
         String melding = lesMelding(sti);
         String filnavn = sti.substring(sti.lastIndexOf('/') + 1);
         try {
             var root = EVTSRC_MAPPER.readTree(melding);
-            return Arguments.of(filnavn, melding, root.path("fid").asText(), root.path("type").asText());
+            String eventId = root.path("data").path(idField).asString(null);
+            return Arguments.of(filnavn, melding, root.path("fid").asText(), root.path("type").asText(), eventId);
         } catch (Exception e) {
             throw new RuntimeException("Feil ved parsing av " + sti, e);
         }
