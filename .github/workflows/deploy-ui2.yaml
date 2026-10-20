@@ -121,6 +121,9 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
     outputs:
       deployments: ${{ steps.variants.outputs.deployments }}
     steps:
