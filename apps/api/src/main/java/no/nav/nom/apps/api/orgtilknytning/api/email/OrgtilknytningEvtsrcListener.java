@@ -23,7 +23,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 public class OrgtilknytningEvtsrcListener {
-    
+
     private final Environment env;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
     private final JsonMapper jsonMapper = configureJsonMapper();
@@ -66,13 +66,13 @@ public class OrgtilknytningEvtsrcListener {
 
     private void addToOTEndretDataEmailQueue(OrgtilknytningEvent event) {
         String initiatedFrom = event.getMetadata().inputMetadata().origination().initiatedFrom();
-        if(!initiatedFrom.equals(getClusterName()+":org:nom-ui2")) {
+        if (!initiatedFrom.equals(getClusterName() + ":org:nom-ui2")) {
             log.debug("OT-endringer operation is not performed nom frontend: {}. OTendretData won´t be added to the email queue", initiatedFrom);
             return;
         }
 
         String initiatedBy = event.getMetadata().inputMetadata().origination().initiatedBy();
-        String navident =  orgtilknytningEndretEmailService.getNavidentFromOrgtilknytningStateRepository(event.getFid());
+        String navident = orgtilknytningEndretEmailService.getNavidentFromOrgtilknytningStateRepository(event.getFid());
 
         // loggin now for checking
         log.info("Adding to the OT changes email cache for fid: {}, event: {}", event.getFid(), event);
@@ -91,21 +91,19 @@ public class OrgtilknytningEvtsrcListener {
     private static OTEndretData.OTEndretDataType getOtEndretDataType(OrgtilknytningEvent event) {
         OTEndretData.OTEndretDataType eventType;
         switch (event) {
-            case OrgtilknytningOpprettetEventV1 ignored->
-                eventType = OTEndretData.OTEndretDataType.OT_NY;
-            case OrgtilknytningAvsluttetEventV1 ignored ->
-                eventType = OTEndretData.OTEndretDataType.OT_AVSLUTTET;
-            case OrgtilknytningFjernetEventV1 ignored ->
-                eventType = OTEndretData.OTEndretDataType.OT_FJERNET;
-            default ->
-                eventType =OTEndretData.OTEndretDataType.OT_ENDRET;
+            case OrgtilknytningOpprettetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_NY;
+            case OrgtilknytningAvsluttetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_AVSLUTTET;
+            case OrgtilknytningFjernetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_FJERNET;
+            default -> eventType = OTEndretData.OTEndretDataType.OT_ENDRET;
         }
         return eventType;
     }
 
     private String getClusterName() {
         var isProd = "prod-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
-        if(isProd) return "prod-gcp";
+        if (isProd) {
+            return "prod-gcp";
+        }
         return "dev-gcp";
     }
 
@@ -122,7 +120,7 @@ public class OrgtilknytningEvtsrcListener {
         if (tilknytningstypeNode != null) {
             var tilknytningstype = tilknytningstypeNode.asString();
             if ("MIDLERTIDLIG".equals(tilknytningstype)) {
-                ((ObjectNode)jsonNode.findParent("orgtilknytningType")).put("orgtilknytningType", "MIDLERTIDIG");
+                ((ObjectNode) jsonNode.findParent("orgtilknytningType")).put("orgtilknytningType", "MIDLERTIDIG");
                 log.info("New json: {}", jsonNode);
             }
         } else {
