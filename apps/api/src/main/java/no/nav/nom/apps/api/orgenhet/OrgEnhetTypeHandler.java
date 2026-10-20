@@ -53,6 +53,7 @@ public class OrgEnhetTypeHandler {
                         if (orgEnhetsTypeNotEqualToExistingValue) {
                             // Send kafka melding om å oppdatere orgEnhetsType. Antar at type fra agresso er sannheten.
                             final var endreType = new EndreOrgEnhetsType(
+                                leafOrgEnhet.id(),
                                 nomOrgenhetType,
                                 new InputMetadata("nom-api BatchJob", "updateOrgEnhetsTypeForLeafs", null, new Origination("nom-api", "nom-api"))
                             );
@@ -67,8 +68,8 @@ public class OrgEnhetTypeHandler {
         logger.debug("Satt orgenhet type for {} loevnoder", leafOrgEnheter.size());
     }
 
-    public void orgEnhetsTypeChanged(OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEventV1) {
-        OrgEnhetState endretOrgEnhet = orgEnhetStateRepository.findByFid(orgEnhetTypeEndretEventV1.getFid()).orElse(null);
+    public void orgEnhetsTypeChanged(String  orgEnhetFid, OrgEnhetsType newOrgEnhetsType) {
+        OrgEnhetState endretOrgEnhet = orgEnhetStateRepository.findByFid(orgEnhetFid).orElse(null);
         var maybeOverOrdnetOrgEnhet = orgEnhetOverordnetResolver.findOverordnetOrgEnhet(endretOrgEnhet);
         if(maybeOverOrdnetOrgEnhet.isEmpty()) {
             return;
@@ -90,16 +91,15 @@ public class OrgEnhetTypeHandler {
         }
 
         var andreAktiveUnderenheterStream = orgEnhetStateRepository.getAll().stream()
-            .filter(orgEnhetState -> !orgEnhetState.fid().equals(orgEnhetTypeEndretEventV1.getFid()))
+            .filter(orgEnhetState -> !orgEnhetState.fid().equals(orgEnhetFid))
             .filter(this::isOrgEnhetActive)
             .filter(orgEnhetState -> overorgenhetMatch(orgEnhetState, overordnetOrgEnhet));
 
 
-        var endretOrgEnhetsType = orgEnhetTypeEndretEventV1.getData().orgEnhetsType();
         var orgEnhetsTyperTilUnderenheter = andreAktiveUnderenheterStream
             .map(OrgEnhetState::orgEnhetsType)
-            .collect(Collectors.<OrgEnhetsType>toSet());
-        orgEnhetsTyperTilUnderenheter.add(endretOrgEnhetsType);
+            .collect(Collectors.toSet());
+        orgEnhetsTyperTilUnderenheter.add(newOrgEnhetsType);
 
 
         var alleUnderEnhetsTyperErDenSamme = orgEnhetsTyperTilUnderenheter.size() == 1;
@@ -114,16 +114,16 @@ public class OrgEnhetTypeHandler {
             return;
         }
 
-        var overOrdnetEnhetTypeSameAsChildren = Objects.equals(overordnetOrgEnhet.orgEnhetsType(), endretOrgEnhetsType);
+        var overOrdnetEnhetTypeSameAsChildren = Objects.equals(overordnetOrgEnhet.orgEnhetsType(), newOrgEnhetsType);
         if(!overOrdnetEnhetTypeSameAsChildren) {
             var commandToPush = new EndreOrgEnhetsType(
-                endretOrgEnhetsType,
+                overordnetOrgEnhet.id(),
+                newOrgEnhetsType,
                 new InputMetadata("kafka: org.nom.orgenhet-eventsource", "orgEnhetsTypeChanged", null, new Origination("nom-api", "nom-api"))
             );
             orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.fid(), commandToPush);
-            logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.fid(), endretOrgEnhetsType);
+            logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.fid(), newOrgEnhetsType);
         }
-
     }
 
     private boolean overorgenhetMatch(OrgEnhetState it, OrgEnhetState overordnetOrgEnhet) {

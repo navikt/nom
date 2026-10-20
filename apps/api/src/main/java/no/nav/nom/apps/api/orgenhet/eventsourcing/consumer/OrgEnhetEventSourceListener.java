@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.consumer;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
@@ -44,15 +45,24 @@ public class OrgEnhetEventSourceListener {
 
         StreamSupport.stream(records.spliterator(), false).forEach(consumerRecord -> {
             var orgEnhetEvent = consumerRecord.value();
-            if (orgEnhetEvent instanceof OrgEnhetTypeEndretEventV1 orgEnhetEndretEvent) {
-                orgEnhetTypeHandler.orgEnhetsTypeChanged(orgEnhetEndretEvent);
-                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(orgEnhetEndretEvent);
-
-                logger.debug("Listener received message with fid {} and orgEnhetsType {}", orgEnhetEvent.getFid(),
-                    orgEnhetEndretEvent.getData().orgEnhetsType());
-            } else if (orgEnhetEvent instanceof NomNivaaEndretEventV1 nomNivaaEndretEventV1) {
-                orgEnhetNomNivaaHandler.ensureArbeidsomraadePresentUnderDriftsenhet(nomNivaaEndretEventV1);
+            if (orgEnhetEvent == null) {
+                logger.warn("Received null orgEnhetEvent from Kafka. Skipping processing.");
+                return;
+            }
+            switch (orgEnhetEvent) {
+                case OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEvent ->
+                    mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(orgEnhetTypeEndretEvent.getFid(), orgEnhetTypeEndretEvent.getData().orgEnhetsType());
+                case NomNivaaEndretEventV1 nomNivaaEndretEvent ->
+                    orgEnhetNomNivaaHandler.ensureArbeidsomraadePresentUnderDriftsenhet(nomNivaaEndretEvent.getFid(), nomNivaaEndretEvent.getNomNivaaEndretEventData().nomNivaa());
+                default -> {}
             }
         });
+    }
+
+    void mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(String fid, OrgEnhetsType endretType) {
+        orgEnhetTypeHandler.orgEnhetsTypeChanged(fid, endretType);
+        logger.debug("Listener received message with fid {} and orgEnhetsType {}", fid, endretType);
+
+        orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(fid, endretType);
     }
 }

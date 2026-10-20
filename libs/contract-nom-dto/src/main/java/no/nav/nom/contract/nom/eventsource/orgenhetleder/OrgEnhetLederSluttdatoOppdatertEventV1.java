@@ -23,6 +23,7 @@ public class OrgEnhetLederSluttdatoOppdatertEventV1 extends OrgEnhetLederEvent {
     }
 
     public record OrgEnhetLederAvsluttetEventData(
+        String orgEnhetId,
         LocalDate sluttdato
     ) implements Data {}
 }

@@ -48,7 +48,11 @@ class EventsrcToState {
                             } else if (event.getAdditionalData() instanceof OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData data){
                                 state.set("additionalData", jsonMapper.convertValue(data, ObjectNode.class));
                             }
-                            state.setAll(jsonMapper.convertValue(event.getData(), ObjectNode.class));
+                            ObjectNode eventData = jsonMapper.convertValue(event.getData(), ObjectNode.class);
+                            if (eventData.has("id") && (eventData.get("id").isNull() || eventData.get("id").asString().isBlank())) {
+                                eventData.remove("id");
+                            }
+                            state.setAll(eventData);
                             return state;
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
@@ -58,6 +62,10 @@ class EventsrcToState {
     }
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
+        if (!eventStateAggregate.hasNonNull("id")) {
+            throw new IllegalStateException("OrgEnhet state is missing required id for fid " + fid);
+        }
+
         String overordnetOrgEnhetFid = eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asString() : null;
         String lederFid = eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asString() : null;
 

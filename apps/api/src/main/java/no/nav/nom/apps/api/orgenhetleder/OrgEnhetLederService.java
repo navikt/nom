@@ -75,7 +75,7 @@ public class OrgEnhetLederService {
                             orgEnhetId,
                             inputMetadata
                         ));
-                        orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata));
+                        orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, new OppdaterOrgEnhetLederStartdato(orgEnhetId, LocalDate.now(), inputMetadata));
                     } else {
                         var aktivLedere = orgEnhetLedere.stream()
                             .filter(orgEnhetLederState -> isPeriodActive(orgEnhetLederState.startdato(), orgEnhetLederState.sluttdato()))
@@ -106,7 +106,7 @@ public class OrgEnhetLederService {
                             ));
                             orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
                                 newFid,
-                                new OppdaterOrgEnhetLederStartdato(LocalDate.now(), inputMetadata)
+                                new OppdaterOrgEnhetLederStartdato(orgEnhetId, LocalDate.now(), inputMetadata)
                             );
                         }
                         aktivLedere.forEach(orgEnhetLederState -> {
@@ -115,13 +115,13 @@ public class OrgEnhetLederService {
                             if (isNull(orgEnhetLederState.startdato())) {
                                 orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
                                     fid,
-                                    new OppdaterOrgEnhetLederStartdato(LocalDate.now().minusDays(2), inputMetadata)
+                                    new OppdaterOrgEnhetLederStartdato(orgEnhetLederState.orgEnhetId(), LocalDate.now().minusDays(2), inputMetadata)
                                 );
                             }
                             var sluttdato = orgEnhetLederState.startdato() != null && !orgEnhetLederState.startdato().isAfter(LocalDate.now()) ? LocalDate.now() : LocalDate.now().minusDays(1);
                             orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                                 fid,
-                                new OppdaterOrgEnhetLederSluttdato(sluttdato, inputMetadata)
+                                new OppdaterOrgEnhetLederSluttdato(orgEnhetLederState.orgEnhetId(), sluttdato, inputMetadata)
                             );
                         });
                     }
@@ -141,7 +141,7 @@ public class OrgEnhetLederService {
                     log.info("{} er ikke leder i Unit4, alle aktive stater blir avsluttet hos oss", navident);
                     orgEnhetLederStateByNavident.values().forEach(orgEnhetLederState -> orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                         orgEnhetLederState.fid(),
-                        new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
+                        new OppdaterOrgEnhetLederSluttdato(orgEnhetLederState.orgEnhetId(), LocalDate.now().minusDays(1), inputMetadata)
                     ));
                     return;
                 }
@@ -161,7 +161,7 @@ public class OrgEnhetLederService {
                     log.info("{} er ikke leder for {} lenger, staten blir avsluttet", navident, orgEnhetId);
                     orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                         orgEnhetLederState.fid(),
-                        new OppdaterOrgEnhetLederSluttdato(LocalDate.now().minusDays(1), inputMetadata)
+                        new OppdaterOrgEnhetLederSluttdato(orgEnhetLederState.orgEnhetId(), LocalDate.now().minusDays(1), inputMetadata)
                     );
                 });
             });
@@ -188,6 +188,7 @@ public class OrgEnhetLederService {
         aktivLederForOrgEnhet.ifPresent(orgEnhetLederState -> orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
             orgEnhetLederState.fid(),
             new OppdaterOrgEnhetLederSluttdato(
+                orgEnhetLederState.orgEnhetId(),
                 opprettOrgEnhetLederRequest.gyldigFom().minusDays(1),
                 inputMetadata
             )
@@ -195,6 +196,7 @@ public class OrgEnhetLederService {
 
         alleFremtidigeLedereForOrgEnhet.forEach(orgEnhetLederState -> orgEnhetLederCommandService.slettOrgEnhetLederState(new SlettOrgEnhetLeder(
             orgEnhetLederState.fid(),
+            orgEnhetLederState.orgEnhetId(),
             inputMetadata
         )));
 
@@ -209,6 +211,7 @@ public class OrgEnhetLederService {
         orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
             fid,
             new OppdaterOrgEnhetLederStartdato(
+                opprettOrgEnhetLederRequest.orgEnhetId(),
                 opprettOrgEnhetLederRequest.gyldigFom(),
                 inputMetadata
             )
@@ -218,6 +221,7 @@ public class OrgEnhetLederService {
             orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                 fid,
                 new OppdaterOrgEnhetLederSluttdato(
+                    opprettOrgEnhetLederRequest.orgEnhetId(),
                     opprettOrgEnhetLederRequest.gyldigTom(),
                     inputMetadata
                 )

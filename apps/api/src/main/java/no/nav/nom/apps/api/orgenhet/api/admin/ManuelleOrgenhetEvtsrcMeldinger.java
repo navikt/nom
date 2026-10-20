@@ -95,6 +95,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         orgEnhetCommandService.avvikleOrgEnhet(
             orgenhet.getFid(),
             new AvvikleOrgEnhet(
+                orgenhetId,
                 gyldigTom,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",

@@ -76,10 +76,11 @@ public class HendelserTestUtils {
         );
     }
 
-    static OrgEnhetEvent getOrgEnhetAvvikletEvent(String orgEnhetFid, Event.Metadata eventMetadata) {
+    static OrgEnhetEvent getOrgEnhetAvvikletEvent(String orgEnhetFid, String orgEnhetId, Event.Metadata eventMetadata) {
         return new OrgEnhetAvvikletEventV1(
             orgEnhetFid,
             new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
+                orgEnhetId,
                 LocalDate.now().minusDays(2)
             ),
             eventMetadata
@@ -118,11 +119,13 @@ public class HendelserTestUtils {
 
     static OrganiseringEvent getAvsluttetOrganiseringEvent(
         String fid,
+        String orgEnhetId,
         Event.Metadata eventMetadata
     ) {
         return new OrganiseringAvsluttetEventV1(
             fid,
             new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
+                orgEnhetId,
                 LocalDate.now().minusDays(2)
             ),
             eventMetadata

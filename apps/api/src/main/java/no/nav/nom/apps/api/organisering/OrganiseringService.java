@@ -203,6 +203,7 @@ public class OrganiseringService {
 
     private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(LocalDate gyldigFom, OrganiseringState organiseringState) {
         return new AvsluttOrganiseringCmd(
+            organiseringState.id(),
             (gyldigFom == null || gyldigFom.isEqual(LocalDate.now())) ? LocalDate.now() : LocalDate.now().minusDays(1),
             createInputMetadata(getRawData(organiseringState))
         );

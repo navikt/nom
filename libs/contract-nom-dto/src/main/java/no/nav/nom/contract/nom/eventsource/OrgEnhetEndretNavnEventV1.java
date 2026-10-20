@@ -21,6 +21,7 @@ public class OrgEnhetEndretNavnEventV1 extends OrgEnhetEvent {
     }
 
     public record OrgEnhetNavnEndretEventData(
+        String id,
         String navn
     ) implements Data{}
 }

@@ -38,7 +38,7 @@ public class OrgEnhetLederCommandService {
     public void slettOrgEnhetLederState(SlettOrgEnhetLeder slettOrgEnhetLeder) {
         eventProducer.sendMessage(new OrgEnhetLederSlettetEventV1(
             slettOrgEnhetLeder.fid(),
-            new OrgEnhetLederSlettetEventV1.OrgEnhetLederSlettetEventData(),
+            new OrgEnhetLederSlettetEventV1.OrgEnhetLederSlettetEventData(slettOrgEnhetLeder.orgEnhetId()),
             slettOrgEnhetLeder.inputMetadata()
         ));
     }
@@ -57,26 +57,22 @@ public class OrgEnhetLederCommandService {
         ));
     }
 
-    private void oppdaterStardato(
-        String fid,
-        OppdaterOrgEnhetLederStartdato oppdaterOrgEnhetLederStartdato
-    ) {
+    private void oppdaterStardato(String fid, OppdaterOrgEnhetLederStartdato oppdaterOrgEnhetLederStartdato) {
         eventProducer.sendMessage(new OrgEnhetLederStartdatoOppdatertEventV1(
             fid,
             new OrgEnhetLederStartdatoOppdatertEventV1.OrgEnhetLederStartdatoOppdatertData(
+                oppdaterOrgEnhetLederStartdato.orgEnhetId(),
                 oppdaterOrgEnhetLederStartdato.startdato()
             ),
             oppdaterOrgEnhetLederStartdato.inputMetadata()
         ));
     }
 
-    private void oppdaterSluttdato(
-        String fid,
-        OppdaterOrgEnhetLederSluttdato oppdaterOrgEnhetLederSluttdato
-    ) {
+    private void oppdaterSluttdato(String fid, OppdaterOrgEnhetLederSluttdato oppdaterOrgEnhetLederSluttdato) {
         eventProducer.sendMessage(new OrgEnhetLederSluttdatoOppdatertEventV1(
             fid,
             new OrgEnhetLederSluttdatoOppdatertEventV1.OrgEnhetLederAvsluttetEventData(
+                oppdaterOrgEnhetLederSluttdato.orgEnhetId(),
                 oppdaterOrgEnhetLederSluttdato.sluttdato()
             ),
             oppdaterOrgEnhetLederSluttdato.inputMetadata()

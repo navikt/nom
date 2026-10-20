@@ -118,6 +118,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         verify(orgEnhetCommandService, times(1))
                 .endreOrgEnhetsType(eq(existingOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
+        assertEquals(endreOrgEnhetsTypeArgumentCaptor.getValue().id(), existingOrgEnhet.id());
         assertEquals(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType(), setOrgEnhetsTypeRequest.getOrgEnhetsType());
     }
 

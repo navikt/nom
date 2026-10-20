@@ -27,6 +27,7 @@ public class NomNivaaEndretEventV1 extends OrgEnhetEvent {
     }
 
     public record NomNivaaEndretEventData(
+        String id,
         NomNivaa nomNivaa
     ) implements Data {}
 

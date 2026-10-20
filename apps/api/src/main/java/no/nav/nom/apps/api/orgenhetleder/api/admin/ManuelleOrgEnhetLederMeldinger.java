@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.OrgEnhetLederCommandService;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederSluttdato;
 import no.nav.nom.apps.api.orgenhetleder.eventsourcing.producer.commands.OppdaterOrgEnhetLederStartdato;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNullElse;
 
 @Slf4j
 @Tag(name = "Admin for å lage manuelle leder Evtsrc meldinger")
@@ -43,11 +45,14 @@ public class ManuelleOrgEnhetLederMeldinger {
 
     private final OrgEnhetLederCommandService orgEnhetLederCommandService;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
+    private final OrgenhetService orgenhetService;
 
     public ManuelleOrgEnhetLederMeldinger(OrgEnhetLederCommandService orgEnhetLederCommandService,
-                                          OrgEnhetLederStateRepository orgEnhetLederStateRepository) {
+                                          OrgEnhetLederStateRepository orgEnhetLederStateRepository, OrgenhetService orgenhetService
+    ) {
         this.orgEnhetLederCommandService = orgEnhetLederCommandService;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
+        this.orgenhetService = orgenhetService;
     }
 
     @Operation(
@@ -72,6 +77,18 @@ public class ManuelleOrgEnhetLederMeldinger {
     ) {
         if (orgEnhetLederStateRepository.hasActiveInPeriodByOrgEnhetId(orgEnhetId, startdato, sluttdato)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        if (startdato == null) {
+            throw new IllegalArgumentException("Startdato kan ikke være null");
+        }
+
+        var orgenhet = orgenhetService.getById(orgEnhetId).orElseThrow(() -> new IllegalArgumentException("Orgenhet med id %s finnes ikke".formatted(orgEnhetId)));
+        if (orgenhet.getGyldigFom().isAfter(startdato)) {
+            throw new IllegalArgumentException("Startdato kan ikke være før enhetens gyldigFom %s".formatted(orgenhet.getGyldigFom()));
+        }
+        if (orgenhet.getGyldigTom() != null && (sluttdato == null || orgenhet.getGyldigTom().isBefore(sluttdato))) {
+            throw new IllegalArgumentException("Sluttdato kan ikke være etter enhetens gyldigTom %s".formatted(orgenhet.getGyldigTom()));
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -103,11 +120,11 @@ public class ManuelleOrgEnhetLederMeldinger {
         var fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(opprettOrgEnhetLeder);
 
         if (startdato != null) {
-            orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, OppdaterOrgEnhetLederStartdato.builder().startdato(startdato).inputMetadata(inputMetadata).build());
+            orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, OppdaterOrgEnhetLederStartdato.builder().orgEnhetId(orgEnhetId).startdato(startdato).inputMetadata(inputMetadata).build());
         }
 
         if (sluttdato != null) {
-            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(fid, OppdaterOrgEnhetLederSluttdato.builder().sluttdato(sluttdato).inputMetadata(inputMetadata).build());
+            orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(fid, OppdaterOrgEnhetLederSluttdato.builder().orgEnhetId(orgEnhetId).sluttdato(sluttdato).inputMetadata(inputMetadata).build());
         }
 
         return ResponseEntity.ok()
@@ -155,6 +172,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(
                     fid,
                     OppdaterOrgEnhetLederStartdato.builder()
+                        .orgEnhetId(orgEnhetLederState.orgEnhetId())
                         .startdato(startdato)
                         .inputMetadata(inputMetadata)
                         .build()
@@ -201,6 +219,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 orgEnhetLederCommandService.oppdaterOrgEnhetLederSluttdato(
                     fid,
                     OppdaterOrgEnhetLederSluttdato.builder()
+                        .orgEnhetId(orgEnhetLederState.orgEnhetId())
                         .sluttdato(sluttdato)
                         .inputMetadata(inputMetadata)
                         .build()
@@ -246,6 +265,7 @@ public class ManuelleOrgEnhetLederMeldinger {
                 orgEnhetLederCommandService.slettOrgEnhetLederState(
                     SlettOrgEnhetLeder.builder()
                         .fid(fid)
+                        .orgEnhetId(orgEnhetLederState.orgEnhetId())
                         .inputMetadata(inputMetadata)
                         .build()
                 );

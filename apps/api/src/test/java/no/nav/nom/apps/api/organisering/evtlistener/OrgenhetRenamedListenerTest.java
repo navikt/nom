@@ -59,7 +59,7 @@ public class OrgenhetRenamedListenerTest {
         orgenhetRenamedListener.setDelay(TimeUnit.MILLISECONDS, 3);
         var AvslutningEvent = new OrganiseringAvsluttetEventV1(
                 "FID_1",
-                new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(LocalDate.now()),
+                new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData("1", LocalDate.now()),
                 new Event.Metadata(
                     new InputMetadata(
                         "TEST",

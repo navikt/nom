@@ -117,6 +117,7 @@ public class OrgEnhetLederRestServiceTest {
         // Then
         ArgumentCaptor<OppdaterOrgEnhetLederSluttdato> sluttdatoCaptor = ArgumentCaptor.forClass(OppdaterOrgEnhetLederSluttdato.class);
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(eq(AKTIV_LEDER_FID), sluttdatoCaptor.capture());
+        assertEquals(ORG_ENHET_ID, sluttdatoCaptor.getValue().orgEnhetId());
         assertEquals(gyldigFom.minusDays(1), sluttdatoCaptor.getValue().sluttdato());
 
         verify(orgEnhetLederCommandService, times(1)).opprettOrgEnhetLeder(any());
@@ -151,6 +152,7 @@ public class OrgEnhetLederRestServiceTest {
         // Then - sluttdato blir forlenget til dagen foer ny leder, ikke beholdt paa den arvede datoen
         ArgumentCaptor<OppdaterOrgEnhetLederSluttdato> sluttdatoCaptor = ArgumentCaptor.forClass(OppdaterOrgEnhetLederSluttdato.class);
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(eq(AKTIV_LEDER_FID), sluttdatoCaptor.capture());
+        assertEquals(ORG_ENHET_ID, sluttdatoCaptor.getValue().orgEnhetId());
         assertEquals(gyldigFom.minusDays(1), sluttdatoCaptor.getValue().sluttdato());
     }
 
@@ -178,11 +180,13 @@ public class OrgEnhetLederRestServiceTest {
         // Then - den fremtidige lederen blir slettet
         ArgumentCaptor<SlettOrgEnhetLeder> slettCaptor = ArgumentCaptor.forClass(SlettOrgEnhetLeder.class);
         verify(orgEnhetLederCommandService, times(1)).slettOrgEnhetLederState(slettCaptor.capture());
+        assertEquals(ORG_ENHET_ID, slettCaptor.getValue().orgEnhetId());
         assertEquals("FID-B", slettCaptor.getValue().fid());
 
         // Og aktiv leder blir sluttdatert dagen foer ny leder overtar
         ArgumentCaptor<OppdaterOrgEnhetLederSluttdato> sluttdatoCaptor = ArgumentCaptor.forClass(OppdaterOrgEnhetLederSluttdato.class);
         verify(orgEnhetLederCommandService, times(1)).oppdaterOrgEnhetLederSluttdato(eq(AKTIV_LEDER_FID), sluttdatoCaptor.capture());
+        assertEquals(ORG_ENHET_ID, sluttdatoCaptor.getValue().orgEnhetId());
         assertEquals(gyldigFom.minusDays(1), sluttdatoCaptor.getValue().sluttdato());
 
         // Og ny leder blir opprettet
