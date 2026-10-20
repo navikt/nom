@@ -61,7 +61,7 @@ public class OutboxRestService {
         );
     }
 
-    public ResponseEntity<StandardResponse> retryBySporingsIds(String orgEnhetId) {
+    public ResponseEntity<StandardResponse> retryByOrgEnhetId(String orgEnhetId) {
         try {
             sfOutboxService.sendPayloadsToCpi(sfOutboxRepository.getAllByOrgEnhetIdAndSfStatusIn(orgEnhetId, List.of(SfStatus.FEILET, SfStatus.IKKE_SENDT, SfStatus.SENDT)));
         } catch (Exception e) {

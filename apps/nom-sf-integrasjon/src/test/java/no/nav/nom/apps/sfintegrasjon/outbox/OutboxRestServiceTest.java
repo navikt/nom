@@ -6,16 +6,21 @@ import no.nav.nom.apps.sfintegrasjon.outbox.repository.SfOutboxRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +30,8 @@ class OutboxRestServiceTest {
 
     @Mock SfOutboxRepository sfOutboxRepository;
     @Mock SfOutboxService sfOutboxService;
+
+    @Captor ArgumentCaptor<Collection<SfStatus>> statusCaptor;
 
     private OutboxRestService service;
 
@@ -80,22 +87,23 @@ class OutboxRestServiceTest {
 
     @Test
     void retrySenderRadeneTilEnhetenOgSvarerOk() {
-        var rader = List.of(SfOutbox.builder().sporingsId(9L).sfStatus(SfStatus.AVVIST).orgEnhetId("ab1234").orgenhet("{}").build());
-        when(sfOutboxRepository.getAllByOrgEnhetId("ab1234")).thenReturn(rader);
+        var rader = List.of(SfOutbox.builder().sporingsId(9L).sfStatus(SfStatus.FEILET).orgEnhetId("ab1234").orgenhet("{}").build());
+        when(sfOutboxRepository.getAllByOrgEnhetIdAndSfStatusIn(eq("ab1234"), anyCollection())).thenReturn(rader);
 
-        var svar = service.retryBySporingsIds("ab1234");
+        var svar = service.retryByOrgEnhetId("ab1234");
 
         verify(sfOutboxService).sendPayloadsToCpi(rader);
+        verify(sfOutboxRepository).getAllByOrgEnhetIdAndSfStatusIn(eq("ab1234"), statusCaptor.capture());
+        assertThat(statusCaptor.getValue()).containsExactlyInAnyOrder(SfStatus.FEILET, SfStatus.IKKE_SENDT, SfStatus.SENDT);
         assertThat(svar.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(svar.getBody().getMessage()).isEqualTo("OK");
     }
 
     @Test
     void retrySvarer500MedFeilmeldingenNaarSendingenFeiler() {
-        when(sfOutboxRepository.getAllByOrgEnhetId("ab1234")).thenReturn(List.of());
         doThrow(new IllegalStateException("Noe gikk galt")).when(sfOutboxService).sendPayloadsToCpi(anyList());
 
-        var svar = service.retryBySporingsIds("ab1234");
+        var svar = service.retryByOrgEnhetId("ab1234");
 
         assertThat(svar.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(svar.getBody().getMessage()).isEqualTo("Noe gikk galt");
