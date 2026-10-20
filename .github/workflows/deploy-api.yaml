@@ -11,6 +11,7 @@ on:
       - 'libs/nom-state/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/deploy-api.yaml'
+      - '.github/workflows/deploy-spring-app.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
       - 'Dockerfile_chainguard'
@@ -33,6 +34,10 @@ jobs:
       jar-path: apps/api/target/app.jar
       image-suffix: nom-api
       nais-config-file-path-dev: .nais/apps/api/api-dev-gcp.yaml
+      # Enable only after the variant manifests have isolated databases and Kafka topics:
+      # additional-dev-deployments: >-
+      #   [{"suffix":"q0","manifest":".nais/apps/api/api-dev-gcp-q0.yaml"},
+      #    {"suffix":"sf-test","manifest":".nais/apps/api/api-dev-gcp-sf-test.yaml"}]
       nais-config-file-path-prod: .nais/apps/api/api-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/api/unleash-vars.yaml
       deploy-timeout: 20m
@@ -40,4 +45,3 @@ jobs:
       dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-
