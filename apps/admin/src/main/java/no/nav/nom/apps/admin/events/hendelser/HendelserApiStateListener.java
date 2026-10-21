@@ -30,6 +30,7 @@ public class HendelserApiStateListener {
     @KafkaListener(
         containerFactory = "genericApiEventKafkaListenerContainerFactory",
         id = "#{apiStateHendelserUniqueListenerId}",
+        autoStartup = "#{!${app.kafka.skru-av-lyttere-for-ubrukte-topics-i-ekstra-dev-miljo:false}}",
         topicPartitions = @TopicPartition(
             topic = "${app.kafka.hendelser.apiEventTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
         )
