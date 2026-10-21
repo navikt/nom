@@ -69,3 +69,44 @@ updates:
     cooldown:
       default-days: 3
     open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/apps/admin-web/webapp"
+    schedule:
+      interval: daily
+      time: "04:00"
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 10
+    groups:
+      ui2-patches:
+        update-types:
+          - patch
+      ui2-minors:
+        update-types:
+          - minor
+
+  - package-ecosystem: npm
+    directory: "/apps/admin-web/frackend"
+    schedule:
+      interval: daily
+      time: "04:00"
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 10
+    groups:
+      frackend-patches:
+        update-types:
+          - patch
+      frackend-minors:
+        update-types:
+          - minor
+
+  - package-ecosystem: docker
+    directory: "/apps/admin-web/frackend"
+    schedule:
+      interval: daily
+      time: "04:00"
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 10
