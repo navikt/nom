@@ -306,6 +306,9 @@ spec:
         - application: nom-sf-integrasjon
           namespace: org
           cluster: prod-gcp
+        - application: nda
+          namespace: proaktiv
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
