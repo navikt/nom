@@ -32,7 +32,7 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {

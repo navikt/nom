@@ -1,7 +1,7 @@
 import { addYears } from "date-fns";
 import * as yup from "yup";
 
-import { dateIsBefore } from "~/dateUtils/dateUtils";
+import { dateIsBefore } from "~/customUtils/dateUtils";
 import { Sektor, Tilknytningtype } from "~/types/api-models";
 import {
   dateWithoutTimezone,

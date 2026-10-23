@@ -37,7 +37,7 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -57,7 +57,7 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
+import { navToppnode } from "~/utils";
 
 export const OpprettOrgEnhet = () => {
   const { id } = useSearch({
@@ -105,14 +105,14 @@ export const OpprettOrgEnhet = () => {
 };
 
 function OrgKartView() {
-  const inDevelopment = isInDevelopment();
+  const toppnodeOrgEnhetId = navToppnode();
 
   return (
     <>
       <DynamiskOrgKart
         opprettKnapp
         title="Velg plassering"
-        toppOrgEnhetId={inDevelopment ? "sa312u" : "py437s"}
+        toppOrgEnhetId={toppnodeOrgEnhetId}
       />
 
       <div

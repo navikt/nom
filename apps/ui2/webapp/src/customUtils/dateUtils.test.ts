@@ -15,7 +15,7 @@ import {
   dateWithoutTimezone,
   earliestDate,
   latestDate,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
 
 describe("dateWithoutTimezone()", () => {
   test("Fulle Date-objekter håndteres riktig", () => {

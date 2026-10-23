@@ -20,8 +20,8 @@ import {
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
+import { teknologiavdelingenId } from "~/customUtils/environmentUtils";
 import type { GlobalStatistikkResponse } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
 export function OrgEnhetStatistikk({
   orgEnhetId,
@@ -36,8 +36,6 @@ export function OrgEnhetStatistikk({
   expandable?: boolean;
   className?: string;
 }) {
-  const inDevelopment = isInDevelopment();
-
   const orgEnhetStatistikkQuery = useQuery({
     queryKey: getStatistikkForOrgEnhet.queryKey(orgEnhetId ?? ""),
     queryFn: () => getStatistikkForOrgEnhet.queryFn(orgEnhetId ?? ""),
@@ -48,7 +46,7 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
-  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
+  const tekAvdNavId = teknologiavdelingenId();
 
   const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,

@@ -292,9 +292,11 @@ async function createOptions(
   hasAdmin: boolean,
 ): Promise<SearchOption[]> {
   const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment();
+
   const filterToUse = skalFiltrereBortVikafossen
     ? notVikafossenEnhetPredicate
     : () => true;
+
   const searchResults = await commonSearch(inputValue, filterToUse);
 
   return searchResults.map((r) => {

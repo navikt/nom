@@ -4,7 +4,7 @@ import { useController } from "react-hook-form";
 
 import { OrgEnhetSearch } from "~/components/select/OrgEnhetSearch";
 import { RessursSearch } from "~/components/select/RessursSearch";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 
 export function FormDateWrapper({
   name,

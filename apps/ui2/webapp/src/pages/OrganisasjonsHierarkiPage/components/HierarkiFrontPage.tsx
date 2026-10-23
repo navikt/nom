@@ -2,20 +2,18 @@ import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 import React, { Fragment } from "react";
 
+import { direktoratOrgEnhetId } from "~/customUtils/environmentUtils";
 import { OrgEnhetView } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { UnderEnheterGraphic } from "~/pages/OrganisasjonsHierarkiPage/components/UnderEnheterGraphic";
 import { ValgtOrgEnhet } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import type { OrgEnhet } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
-const DIREKTORAT_ORGENHET_ID = isInDevelopment() ? "fa965e" : "bu431e";
+const direktoratId = direktoratOrgEnhetId();
 
 export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const underEnheterOrgEnhetIds = [
-    DIREKTORAT_ORGENHET_ID,
-    ...orgEnhet.underordnedeOrgEnhetId.filter(
-      (id) => id !== DIREKTORAT_ORGENHET_ID,
-    ),
+    direktoratId,
+    ...orgEnhet.underordnedeOrgEnhetId.filter((id) => id !== direktoratId),
   ];
 
   return (

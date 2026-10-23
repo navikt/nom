@@ -10,11 +10,7 @@ import {
 } from "date-fns";
 import { maxTime, minTime } from "date-fns/constants";
 
-import type {
-  FysiskBrukersted,
-  OrgEnhet,
-  Visningsnavn,
-} from "~/types/api-models";
+import type { FysiskBrukersted, Visningsnavn } from "~/types/api-models";
 
 /**
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
@@ -112,10 +108,6 @@ export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
     visningsNavn.mellomnavn ?? "",
     visningsNavn.etternavn,
   ].join(" ");
-}
-
-export function orgEnhetLederNavn(orgEnhet: OrgEnhet) {
-  return orgEnhet.leder.visningsnavn;
 }
 
 export function formatTlf(nummer: string) {

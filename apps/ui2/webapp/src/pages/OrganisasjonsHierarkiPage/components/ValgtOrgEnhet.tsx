@@ -30,6 +30,7 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
+import { teamkatalogenBaseUrl } from "~/customUtils/environmentUtils";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
   isPeriodActive,
@@ -38,11 +39,7 @@ import {
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { IdentType, NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
-import {
-  formatDisplayDate,
-  isEksternSamarbeidspartnerOrgEnhet,
-  isInDevelopment,
-} from "~/utils";
+import { formatDisplayDate, isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   orgEnhet,
@@ -51,8 +48,6 @@ export const ValgtOrgEnhet = ({
   orgEnhet: OrgEnhet;
   hideRessurser?: boolean;
 }) => {
-  const inDevelopment = isInDevelopment();
-
   const hasAdminAccess = useHasAdminAccess();
 
   const ressurserNavidents = orgEnhet.ressursKoblinger
@@ -114,9 +109,7 @@ export const ValgtOrgEnhet = ({
       orgEnhet.orgEnhetsType === OrgEnhetsType.KLAGEINSTANS,
   }).data;
 
-  const tkatLenke = inDevelopment
-    ? `https://teamkatalog.ekstern.dev.nav.no/area/${teamkatalogSeksjon?.id}`
-    : `https://teamkatalog.nav.no/area/${teamkatalogSeksjon?.id}`;
+  const teamkatalogenLenke = `${teamkatalogenBaseUrl()}/area/${teamkatalogSeksjon?.id}`;
 
   const kostnadssted = hasAdminAccess
     ? useKostnadsstedInfo(orgEnhet?.id)
@@ -229,7 +222,7 @@ export const ValgtOrgEnhet = ({
               margin-top: var(--a-spacing-4);
             `}
             externalIcon
-            href={tkatLenke}
+            href={teamkatalogenLenke}
           >
             Se seksjon i Teamkatalogen
           </SmartLink>

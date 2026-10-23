@@ -7,17 +7,15 @@ import { getGlobalStatistikk, getOrgEnhet } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
+import { forsideOrgEnhetIder } from "~/customUtils/environmentUtils";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
-import { isInDevelopment, navToppnode } from "~/utils";
+import { navToppnode } from "~/utils";
 
 export const FrontPage = () => {
-  const inDevelopment = isInDevelopment();
-
   const navOrgEnhetId = navToppnode();
 
-  const developmentLenker = ["fa965e", "me177r", "ju219d", "hu797w", "tu734a"];
-  const productionLenker = ["bu431e", "ry630r", "te464t", "se232x", "ne994m"];
+  const orgEnhetIder = forsideOrgEnhetIder();
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(navOrgEnhetId),
@@ -36,10 +34,7 @@ export const FrontPage = () => {
   return (
     <ContentWrapper>
       <VStack gap="12">
-        <Orghierarki
-          lenker={inDevelopment ? developmentLenker : productionLenker}
-          orgEnhet={orgEnhet}
-        />
+        <Orghierarki orgEnhetIder={orgEnhetIder} orgEnhet={orgEnhet} />
 
         <OrgEnhetStatistikk
           gittStatistikk={globalStatistikk}
@@ -53,10 +48,10 @@ export const FrontPage = () => {
 
 function Orghierarki({
   orgEnhet,
-  lenker,
+  orgEnhetIder,
 }: {
   orgEnhet?: OrgEnhet | undefined;
-  lenker: string[];
+  orgEnhetIder: string[];
 }) {
   if (!orgEnhet) {
     return;
@@ -89,7 +84,7 @@ function Orghierarki({
           <OrghierarkiItem
             icon={building}
             label="Arbeids- og velferdsdirektoratet"
-            to={`/org/${lenker[0]}`}
+            to={`/org/${orgEnhetIder[0]}`}
           />
         </div>
 
@@ -101,7 +96,7 @@ function Orghierarki({
           <OrghierarkiItem
             icon={building}
             label="Arbeids- og tjenestelinjen"
-            to={`/org/${lenker[1]}`}
+            to={`/org/${orgEnhetIder[1]}`}
           />
         </div>
 
@@ -113,7 +108,7 @@ function Orghierarki({
           <OrghierarkiItem
             icon={building}
             label="Velferdslinjen"
-            to={`/org/${lenker[2]}`}
+            to={`/org/${orgEnhetIder[2]}`}
           />
         </div>
 
@@ -125,7 +120,7 @@ function Orghierarki({
           <OrghierarkiItem
             icon={building}
             label="Ytelseslinjen"
-            to={`/org/${lenker[3]}`}
+            to={`/org/${orgEnhetIder[3]}`}
           />
         </div>
 
@@ -137,7 +132,7 @@ function Orghierarki({
           <OrghierarkiItem
             icon={building}
             label="Økonomilinjen"
-            to={`/org/${lenker[4]}`}
+            to={`/org/${orgEnhetIder[4]}`}
           />
         </div>
       </div>

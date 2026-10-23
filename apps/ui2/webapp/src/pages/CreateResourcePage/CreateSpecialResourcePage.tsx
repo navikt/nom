@@ -56,6 +56,7 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
+import { vikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -74,16 +75,19 @@ import type {
   OpprettRessursResponse,
   Ressurs,
 } from "~/types/api-models";
-import { Tilknytningtype } from "~/types/api-models";
-import { AnsettelsesType, Sektor } from "~/types/api-models";
-import { IdentType, type Person } from "~/types/api-models";
+import {
+  AnsettelsesType,
+  IdentType,
+  type Person,
+  Sektor,
+  Tilknytningtype,
+} from "~/types/api-models";
 import { validateFormDate } from "~/types/yupUtility";
 import {
   formatDateWithoutTimezone,
   formatDisplayDate,
   formatDisplayFysiskBrukersted,
   formatVisningsnavn,
-  isInDevelopment,
 } from "~/utils";
 
 export function CreateSpecialResourcePage() {
@@ -1110,16 +1114,14 @@ function lagRessursRequest(values: {
     return etternavn ?? "";
   };
 
-  const inDevelopment = isInDevelopment();
-
-  const vikafossenOrgEnhetId = inDevelopment ? "ru151s" : "ru664y";
+  const vikafossenId = vikafossenOrgEnhetId();
 
   return {
     identType: values.identType,
     personident: values.identifikasjonsnummer ?? "",
     orgEnhetId:
       values.identType === IdentType.VIKAFOSSEN
-        ? vikafossenOrgEnhetId
+        ? vikafossenId
         : (values.orgEnhetId ?? ""),
     startDato: values.startDato,
     sluttDato: values.sluttDato ?? "",
