@@ -13,15 +13,6 @@ import { maxTime, minTime } from "date-fns/constants";
 import type { FysiskBrukersted, Visningsnavn } from "~/types/api-models";
 
 /**
- * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
- */
-export function isInDevelopment() {
-  const match = globalThis.location.hostname.match(/localhost|\.dev\./);
-
-  return !!match;
-}
-
-/**
  * Best effort made to capitalize a name.
  * Every letter after a space or "-" is capitalized.
  */
@@ -309,43 +300,6 @@ export function promiseIsRejected<T>(
   promise: PromiseSettledResult<T>,
 ): promise is PromiseRejectedResult {
   return promise.status === "rejected";
-}
-
-export function navToppnode() {
-  return isInDevelopment() ? "sa312u" : "py437s";
-}
-
-export function isHelfoOrgEnhet(orgEnhetId: string) {
-  const helfoId = isInDevelopment() ? "mu405g" : "je305h";
-
-  return orgEnhetId === helfoId;
-}
-
-export function isSkatteetatenOrgEnhet(orgEnhetId: string) {
-  const skatteetatenId = isInDevelopment() ? "ja464g" : "ne938h";
-
-  return orgEnhetId === skatteetatenId;
-}
-
-export function isVikafossenOrgEnhet(orgEnhetId: string) {
-  const vikafossenId = isInDevelopment() ? "ru151s" : "ru664y";
-
-  return orgEnhetId === vikafossenId;
-}
-
-export function isRiksrevisjonenOrgEnhet(orgEnhetId: string) {
-  const riksrevisjonenId = isInDevelopment() ? "ge146b" : "ke602d";
-
-  return orgEnhetId === riksrevisjonenId;
-}
-
-export function isEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
-  return (
-    isHelfoOrgEnhet(orgEnhetId) ||
-    isSkatteetatenOrgEnhet(orgEnhetId) ||
-    isVikafossenOrgEnhet(orgEnhetId) ||
-    isRiksrevisjonenOrgEnhet(orgEnhetId)
-  );
 }
 
 export const skjulteOrgtilknytninger = [

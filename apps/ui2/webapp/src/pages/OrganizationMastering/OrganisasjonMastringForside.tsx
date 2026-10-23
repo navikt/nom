@@ -44,13 +44,14 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OrgEnhet,
   RedigeringsTilgangRessursResponse,
 } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn, navToppnode } from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -633,7 +634,7 @@ function HvemKanRedigereSection({
 }: {
   kanAdministrere: RedigeringsTilgangRessursResponse[];
 }) {
-  const toppnodeOrgEnhetId = navToppnode();
+  const toppnodeOrgEnhetId = navToppnodeOrgEnhetId();
 
   const toppnodeOrgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),

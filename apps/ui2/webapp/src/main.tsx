@@ -20,7 +20,7 @@ import { Toaster } from "react-hot-toast";
 
 import { apolloClient } from "~/api/apolloclient";
 import { useGetSession } from "~/api/useGetSession";
-import { isInDevelopment } from "~/utils";
+import { isInDevelopment } from "~/customUtils/environmentUtils";
 
 import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";

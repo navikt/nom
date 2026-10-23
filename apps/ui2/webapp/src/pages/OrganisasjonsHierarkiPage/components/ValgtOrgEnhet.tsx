@@ -30,7 +30,10 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
-import { teamkatalogenBaseUrl } from "~/customUtils/environmentUtils";
+import {
+  isEksternSamarbeidspartnerOrgEnhet,
+  teamkatalogenBaseUrl,
+} from "~/customUtils/environmentUtils";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
   isPeriodActive,
@@ -39,7 +42,7 @@ import {
 import building from "~/resources/building.svg";
 import type { OrgEnhet, Ressurs } from "~/types/api-models";
 import { IdentType, NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
-import { formatDisplayDate, isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
+import { formatDisplayDate } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   orgEnhet,

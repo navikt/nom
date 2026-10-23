@@ -7,13 +7,15 @@ import { getGlobalStatistikk, getOrgEnhet } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
-import { forsideOrgEnhetIder } from "~/customUtils/environmentUtils";
+import {
+  forsideOrgEnhetIder,
+  navToppnodeOrgEnhetId,
+} from "~/customUtils/environmentUtils";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
-import { navToppnode } from "~/utils";
 
 export const FrontPage = () => {
-  const navOrgEnhetId = navToppnode();
+  const navOrgEnhetId = navToppnodeOrgEnhetId();
 
   const orgEnhetIder = forsideOrgEnhetIder();
 
