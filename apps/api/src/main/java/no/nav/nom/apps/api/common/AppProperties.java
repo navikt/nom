@@ -8,6 +8,7 @@ import java.util.Set;
 public record AppProperties(
     Clients clients,
     String name,
+    String suffix,
     EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring,
     DollyRessurs dollyRessurs,
     Orgenhet orgenhet
@@ -102,6 +103,8 @@ public record AppProperties(
 
     public record Orgenhet(
         String navId,
+        String direktoratId,
+        String teknologiavdelingenId,
         String helfoId,
         String skattId,
         String riksrevisjonenId,

@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 public class KonverterEksternSamarbeidspartnerTilknytningtypeTest {
     private KonverterEksternSamarbeidspartnerTilknytningtype konverterEksternSamarbeidspartnerTilknytningtype;
 
-    AppProperties appProperties = new AppProperties(null, null, null, null, new AppProperties.Orgenhet("dummyNavId", "dummyHelfoId", "dummySkattId", "dummyRiksrevisjonId", "dummyVikafossenId", Set.of("linje-enhet","en-annen-linjeenhet"), Set.of("nasjonal", "nasjonal2")));
+    AppProperties appProperties = new AppProperties(null, null, null, null, null, new AppProperties.Orgenhet("dummyNavId", "dummyDirektoratetId", "dummyTeknologiavdelingenId", "dummyHelfoId", "dummySkattId", "dummyRiksrevisjonId", "dummyVikafossenId", Set.of("linje-enhet","en-annen-linjeenhet"), Set.of("nasjonal", "nasjonal2")));
 
     @Mock
     private OrgtilknytningStateRepository orgtilknytningStateRepository;

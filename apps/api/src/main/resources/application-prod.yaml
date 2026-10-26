@@ -78,10 +78,12 @@ app:
     enabled: false
   orgenhet:
     nav-id: py437s
+    direktoratId: bu431e
     helfo-id: je305h
     skatt-id: ne938h
     riksrevisjonen-id: ke602d
     vikafossen-id: ru664y
+    teknologiavdelingenId: te627k
     linjeenhetene: ry630r,te464t,se232x,ne994m
     nasjonaloppfolgning-ids: fu549z,nu155v
   google-storage-bucket-name:

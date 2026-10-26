@@ -111,11 +111,13 @@ app:
         scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
   orgenhet:
     nav-id: sa312u
+    direktoratId: fa965e
     helfo-id: mu405g
     skatt-id: ja464g
     riksrevisjonen-id: ge146b
     vikafossen-id: ru151s
-    linjeenhetene: me177r,ju219d,tu734a,sy471r
+    teknologiavdelingenId: je104d
+    linjeenhetene: me177r,ju219d,tu734a,sy471r, hu797w
     nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
