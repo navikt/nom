@@ -68,7 +68,8 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
   formatDateWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
+import { vikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import {
   SektorNameMapping,
@@ -109,7 +110,6 @@ import {
   formatDropdownFysiskBrukersted,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
-  isInDevelopment,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -241,9 +241,7 @@ export function EditOrgtilknytninger({
 }
 
 function defaultNyOrgtilknytning(ressurs: Ressurs) {
-  const inDevelopment = isInDevelopment();
-
-  const vikafossenId = inDevelopment ? "ru151s" : "ru664y";
+  const vikafossenId = vikafossenOrgEnhetId();
 
   const vikafossenRessurs = ressurs.identType === IdentType.VIKAFOSSEN;
 

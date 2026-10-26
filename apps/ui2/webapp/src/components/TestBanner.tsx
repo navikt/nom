@@ -3,11 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { useGetSession } from "~/api/useGetSession";
-import { isInDevelopment } from "~/utils";
+import { isInDevelopment } from "~/customUtils/environmentUtils";
 
-const inDevelopment = isInDevelopment();
-
-const displayTestBanner = inDevelopment;
+const displayTestBanner = isInDevelopment();
 
 export const testBannerHeight = displayTestBanner ? "48px" : "0px";
 

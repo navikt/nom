@@ -24,6 +24,7 @@ import {
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { SmartLink } from "~/components/navigation/SmartLink";
+import { adminBaseUrl } from "~/customUtils/environmentUtils";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
@@ -42,9 +43,7 @@ export function BurgerMenu() {
 
   const innloggetNavident = session.data?.navident;
 
-  const adminLenke: string = globalThis.location.href.includes("nom.nav.no")
-    ? "https://nom-admin.ansatt.nav.no"
-    : "https://nom-admin.ansatt.dev.nav.no/";
+  const adminLenke = adminBaseUrl();
 
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(

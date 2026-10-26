@@ -42,7 +42,7 @@ import {
   dateWithoutTimezone,
   formatDateWithoutTimezone,
   todayWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import {

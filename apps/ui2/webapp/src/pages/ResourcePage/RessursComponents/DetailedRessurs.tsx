@@ -45,6 +45,10 @@ import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import {
+  eksterneOrgEnheter,
+  teamkatalogenBaseUrl,
+} from "~/customUtils/environmentUtils";
+import {
   SektorNameMapping,
   TilknytningtypeNameMapping,
 } from "~/pages/CreateResourcePage/SektorStep";
@@ -73,7 +77,6 @@ import {
   isAfterToday,
   isBeforeToday,
   isGyldighetsPeriodeActive,
-  isInDevelopment,
   isTodayOrAfter,
   isTodayOrBefore,
   skjulteOrgtilknytninger,
@@ -756,8 +759,6 @@ function OrganisationHierarchyTree({
 }
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
-  const inDevelopment = isInDevelopment();
-
   const orgEnheterLedetAvRessurs =
     useQuery({
       queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
@@ -776,9 +777,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         }),
     }).data ?? [];
 
-  const skjulteEksterneOrgEnheter = inDevelopment
-    ? ["fa520s", "fe857w", "hy255y", "ja464g", "py733e", "ru151s"]
-    : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
+  const skjulteEksterneOrgEnheter = eksterneOrgEnheter();
 
   const orgEnheterLedetAvRessursFiltrert = orgEnheterLedetAvRessurs
     .filter(
@@ -938,9 +937,7 @@ function TeamCatSection({ navident }: { navident: string }) {
     return;
   }
 
-  const teamcatBaseUrl = isInDevelopment()
-    ? "https://teamkatalog.ekstern.dev.nav.no"
-    : "https://teamkatalog.nav.no";
+  const teamkatalogenLink = `${teamkatalogenBaseUrl()}/resource/${navident}`;
 
   return (
     <>
@@ -952,7 +949,7 @@ function TeamCatSection({ navident }: { navident: string }) {
       </Heading>
 
       <div>
-        <SmartLink externalIcon href={`${teamcatBaseUrl}/resource/${navident}`}>
+        <SmartLink externalIcon href={teamkatalogenLink}>
           Se mer i Teamkatalogen
         </SmartLink>
       </div>

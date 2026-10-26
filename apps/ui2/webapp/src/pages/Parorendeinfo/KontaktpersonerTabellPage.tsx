@@ -15,10 +15,11 @@ import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { isEksternSamarbeidspartnerOrgEnhet } from "~/customUtils/environmentUtils";
 import type { Relasjon } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import { RelasjonNameMapping } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import type { OrgEnhet } from "~/types/api-models";
-import { formatTlf, isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
+import { formatTlf } from "~/utils";
 
 export function KontaktpersonerTabellPage() {
   const { id } = useParams({ from: "/kontaktpersoner-tabell/$id" });

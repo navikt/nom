@@ -6,10 +6,10 @@ import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
 import { components, createFilter } from "react-select";
 
+import { isInDevelopment } from "~/customUtils/environmentUtils";
 import { gamleOrgEnheter } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { nomDateIsAfterToday } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { OrgEnhetMedLedernavn } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
 import { AsyncSearch, SelectLayoutWrapper } from "./CustomSelectComponents";
 

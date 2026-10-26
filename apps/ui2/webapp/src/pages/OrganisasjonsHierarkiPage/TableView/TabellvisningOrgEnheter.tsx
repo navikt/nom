@@ -8,13 +8,13 @@ import { getParentOgUnderliggende } from "~/api/react-query-endpoints";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { useTableSort } from "~/hooks/useTableSort";
 import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import type { OrgEnhet } from "~/types/api-models";
-import { navToppnode } from "~/utils";
 
 export const TabellvisningOrgEnheter = () => {
-  const { id = navToppnode() } = useSearch({
+  const { id = navToppnodeOrgEnhetId() } = useSearch({
     from: "/org/table",
   });
 
