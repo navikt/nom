@@ -28,7 +28,7 @@ import {
   dateIsTodayOrBefore,
   formatDateWithoutTimezone,
   todayWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";

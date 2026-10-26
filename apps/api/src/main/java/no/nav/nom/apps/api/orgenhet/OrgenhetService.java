@@ -295,8 +295,10 @@ public class OrgenhetService {
 
         if (existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent) {
             orgEnhetCommandService.endreOrgEnhetsType(
+
                 orgEnhetState.fid(),
                 new EndreOrgEnhetsType(
+                    orgEnhetState.id(),
                     orgEnhetsType,
                     new InputMetadata(
                         "nom-api REST",
@@ -444,6 +446,7 @@ public class OrgenhetService {
                         orgEnhetCommandService.endreTilgangsenhet(
                             orgEnhetState.fid(),
                             new EndreTilgangsenhet(
+                                orgEnhetState.id(),
                                 tilgangsEnhetId,
                                 inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
                             )
@@ -453,6 +456,7 @@ public class OrgenhetService {
                                 orgEnhetCommandService.endreTilgangsenhet(
                                     iOrgenhet.getFid(),
                                     new EndreTilgangsenhet(
+                                        iOrgenhet.getId(),
                                         tilgangsEnhetId,
                                         inputMetadata.toBuilder().inputInterfaceMethodArguments(orgEnhet).build()
                                     )

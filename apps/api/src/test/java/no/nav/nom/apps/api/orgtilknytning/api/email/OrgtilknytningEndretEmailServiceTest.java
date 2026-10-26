@@ -5,6 +5,8 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
+import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {Configuration.class})
 public class OrgtilknytningEndretEmailServiceTest {
 
-    Map<String,String> data = new HashMap<>();
+    Map<String, String> data = new HashMap<>();
 
     @Autowired
     private Configuration configuration;
@@ -68,6 +70,9 @@ public class OrgtilknytningEndretEmailServiceTest {
 
     @Mock
     private OrgEnhetLederService orgEnhetLederService;
+
+    @Mock
+    private FysiskBrukerstedService fysiskBrukerstedService;
 
     @Test
     public void tessFreemarkerTemplate() throws TemplateException, IOException {
@@ -108,6 +113,7 @@ public class OrgtilknytningEndretEmailServiceTest {
                 .orgEnhetId(orgEnhet)
                 .gyldigFom(LocalDate.now().minusDays(10))
                 .gyldigTom(LocalDate.now().plusDays(10))
+                .primaryFysiskBrukerstedNummer("2700")
                 .build()
             )
         );
@@ -124,6 +130,10 @@ public class OrgtilknytningEndretEmailServiceTest {
             )
         );
 
+        when(fysiskBrukerstedService.findFysiskBrukersted("2700"))
+            .thenReturn(Optional.of(
+                new FysiskBrukersted("2700", "Match avenue 1", null, null, null, null, null)));
+
         // test
         List<OTEndretData> otEndringerData = List.of(
             OTEndretData.builder()
@@ -135,7 +145,17 @@ public class OrgtilknytningEndretEmailServiceTest {
         );
 
         // verify
-        String expected = MessageFormat.format(orgtilknytningEndretEmailService.epost_body_item_template,"Ukjent", orgEnhet, DateUtils.formatDateTime(LocalDate.now().minusDays(10)), DateUtils.formatDateTime(LocalDate.now().plusDays(10)), navidentChangedByVisningsnavn.getFormattedVisningsnavn(), timestamp);
+        String expected = MessageFormat.format(
+            orgtilknytningEndretEmailService.epost_body_with_gyldig_tom_item_template,
+            "Ukjent",
+            orgEnhet,
+            DateUtils.formatDateTime(LocalDate.now().minusDays(10)),
+            DateUtils.formatDateTime(LocalDate.now().plusDays(10)),
+            "Match avenue 1",
+            "2700",
+            navidentChangedByVisningsnavn.getFormattedVisningsnavn(),
+            timestamp
+        );
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }
@@ -207,9 +227,8 @@ public class OrgtilknytningEndretEmailServiceTest {
     @Test
     public void testDateFormat() {
         // setup data
-        String timestamp = DateTimeFormatter.ofPattern("dd.MM.YYYY").format(LocalDate.of(2021, 10, 1));
+        String timestamp = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.of(2021, 10, 1));
         assertEquals("01.10.2021", timestamp);
-
     }
 
-    }
+}

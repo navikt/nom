@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederEvent;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederSluttdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.orgenhetleder.OrgEnhetLederStartdatoOppdatertEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
@@ -61,7 +62,7 @@ public class EventsrcToStateTest {
         String orgEnhetId = "ab123c";
 
         final OrgEnhetLederEvent opprettetEvent = lagOpprettetEvent(navident, orgEnhetId);
-        final OrgEnhetLederEvent startdatoEvent = lagStartdatoEvent(opprettetEvent.getFid(), LocalDate.now());
+        final OrgEnhetLederEvent startdatoEvent = lagStartdatoEvent(opprettetEvent.getFid(), LocalDate.now(), orgEnhetId);
 
         final OrgEnhetLederState expectedOpprettet = lagStateObjekt(navident, orgEnhetId, null, null, "nom-api");
 
@@ -86,8 +87,8 @@ public class EventsrcToStateTest {
         LocalDate sluttdato = startdato.plusMonths(3);
 
         final OrgEnhetLederEvent opprettetEvent = lagOpprettetEvent(navident, orgEnhetId);
-        final OrgEnhetLederEvent startdatoEvent = lagStartdatoEvent(opprettetEvent.getFid(), startdato);
-        final OrgEnhetLederEvent sluttdatoEvent = lagSluttdatoEvent(opprettetEvent.getFid(), sluttdato);
+        final OrgEnhetLederEvent startdatoEvent = lagStartdatoEvent(opprettetEvent.getFid(), startdato, orgEnhetId);
+        final OrgEnhetLederEvent sluttdatoEvent = lagSluttdatoEvent(opprettetEvent.getFid(), sluttdato, orgEnhetId);
 
         final OrgEnhetLederState expectedOpprettet = lagStateObjekt(navident, orgEnhetId, null, null, "nom-api");
 
@@ -107,6 +108,52 @@ public class EventsrcToStateTest {
             );
     }
 
+    @Test
+    @DisplayName("Historiske datoendringer uten orgEnhetId beholder orgEnhetId og datoer")
+    void historiskeDatoendringerUtenOrgEnhetIdBeholderOrgEnhetId() {
+        String fid = "FID_004";
+        String navident = "A000001";
+        String orgEnhetId = "ab123c";
+        LocalDate startdato = LocalDate.now().minusMonths(3);
+        LocalDate sluttdato = LocalDate.now();
+
+        inputTopic.pipeInput(fid, lagOpprettetEvent(fid, navident, orgEnhetId));
+        inputTopic.pipeInput(fid, lagStartdatoEvent(fid, startdato, null));
+        inputTopic.pipeInput(fid, lagSluttdatoEvent(fid, sluttdato, null));
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList()).containsExactly(
+            KeyValue.pair(fid, lagStateObjekt(fid, navident, orgEnhetId, null, null, "nom-api")),
+            KeyValue.pair(fid, lagStateObjekt(fid, navident, orgEnhetId, startdato, null, "nom-api")),
+            KeyValue.pair(fid, lagStateObjekt(fid, navident, orgEnhetId, startdato, sluttdato, "nom-api"))
+        );
+    }
+
+    @Test
+    @DisplayName("OrgEnhetLederSlettetEventV1 gir fortsatt tombstone")
+    void test_OrgEnhetLederSlettetEventV1() {
+        final String fid = "FID_003";
+        inputTopic.pipeInput(fid, lagOpprettetEvent(fid, "A000001", "ab123c"));
+        Assertions.assertThat(outputTopic.readValue()).isNotNull();
+
+        inputTopic.pipeInput(fid, new OrgEnhetLederSlettetEventV1(
+            fid, new OrgEnhetLederSlettetEventV1.OrgEnhetLederSlettetEventData("ab123c"), lagMetadata()));
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList()).containsExactly(KeyValue.pair(fid, null));
+    }
+
+    @Test
+    @DisplayName("OrgEnhetLederSlettetEventV1 gir tombstone når orgEnhetId mangler")
+    void slettetEventUtenOrgEnhetIdGirTombstone() {
+        final String fid = "FID_005";
+        inputTopic.pipeInput(fid, lagOpprettetEvent(fid, "A000001", "ab123c"));
+        outputTopic.readValue();
+
+        inputTopic.pipeInput(fid, new OrgEnhetLederSlettetEventV1(
+            fid, new OrgEnhetLederSlettetEventV1.OrgEnhetLederSlettetEventData(null), lagMetadata()));
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList()).containsExactly(KeyValue.pair(fid, null));
+    }
+
     private OrgEnhetLederOpprettetEventV1 lagOpprettetEvent(String navident, String orgEnhetId) {
         return lagOpprettetEvent("FID_001", navident, orgEnhetId);
     }
@@ -122,20 +169,22 @@ public class EventsrcToStateTest {
         );
     }
 
-    private OrgEnhetLederStartdatoOppdatertEventV1 lagStartdatoEvent(String fid, LocalDate startdato) {
+    private OrgEnhetLederStartdatoOppdatertEventV1 lagStartdatoEvent(String fid, LocalDate startdato, String orgEnhetId) {
         return new OrgEnhetLederStartdatoOppdatertEventV1(
             fid,
             new OrgEnhetLederStartdatoOppdatertEventV1.OrgEnhetLederStartdatoOppdatertData(
+                orgEnhetId,
                 startdato
             ),
             lagMetadata()
         );
     }
 
-    private OrgEnhetLederSluttdatoOppdatertEventV1 lagSluttdatoEvent(String fid, LocalDate sluttdato) {
+    private OrgEnhetLederSluttdatoOppdatertEventV1 lagSluttdatoEvent(String fid, LocalDate sluttdato, String orgEnhetId) {
         return new OrgEnhetLederSluttdatoOppdatertEventV1(
             fid,
             new OrgEnhetLederSluttdatoOppdatertEventV1.OrgEnhetLederAvsluttetEventData(
+                orgEnhetId,
                 sluttdato
             ),
             lagMetadata()
@@ -158,9 +207,13 @@ public class EventsrcToStateTest {
     }
 
     private static OrgEnhetLederState lagStateObjekt(String navident, String orgEnhetId, LocalDate startdato, LocalDate sluttdato, String sistEndretAv) {
+        return lagStateObjekt("FID_001", navident, orgEnhetId, startdato, sluttdato, sistEndretAv);
+    }
+
+    private static OrgEnhetLederState lagStateObjekt(String fid, String navident, String orgEnhetId, LocalDate startdato, LocalDate sluttdato, String sistEndretAv) {
         return OrgEnhetLederState
             .builder()
-            .fid("FID_001")
+            .fid(fid)
             .navident(navident)
             .orgEnhetId(orgEnhetId)
             .startdato(startdato)

@@ -118,6 +118,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         verify(orgEnhetCommandService, times(1))
                 .endreOrgEnhetsType(eq(existingOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
+        assertEquals(endreOrgEnhetsTypeArgumentCaptor.getValue().id(), existingOrgEnhet.id());
         assertEquals(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType(), setOrgEnhetsTypeRequest.getOrgEnhetsType());
     }
 
@@ -215,6 +216,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
             .tilgangsenhetId("1234")
             .orgEnhetsType(OrgEnhetsType.DIREKTORAT)
             .kostnadsstedId(kostnadsstedId)
+            .nomNivaa(NomNivaa.ARBEIDSOMRAADE)
             .build();
 
         var overordnetOrgEnhet = map(orgEnhetState());
@@ -266,6 +268,10 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         verify(orgEnhetCommandService, times(1)).opprettOrgEnhetSync(any(OpprettOrgEnhet.class));
         verify(orgEnhetCommandService, times(1)).endreOrgEnhetsType(anyString(), any(EndreOrgEnhetsType.class));
+        verify(orgEnhetCommandService, times(1)).endreNomNivaa(
+            eq(orgEnhetState.fid()),
+            org.mockito.ArgumentMatchers.argThat(cmd -> cmd.nomNivaa() == NomNivaa.ARBEIDSOMRAADE)
+        );
 
         verify(organiseringEventCommandService, times(1)).opprettOrganisering(any(OpprettOrganiseringCmd.class));
 

@@ -29,6 +29,7 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { FormRessursSearchWrapper } from "~/components/forms/FormComponents";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -38,13 +39,14 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
+import { navToppnodeOrgEnhetId, isInDevelopment } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
-  FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
+  NomNivaaSelect,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
   OrgEnhetTypeSelect,
@@ -52,12 +54,13 @@ import {
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import type {
+  NomNivaa,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
-import { formatVisningsnavn, isInDevelopment } from "~/utils";
+import { formatVisningsnavn } from "~/utils";
 import { LabelWithValue } from "~/components/LabelWithValue";
 
 export const OpprettOrgEnhet = () => {
@@ -106,14 +109,12 @@ export const OpprettOrgEnhet = () => {
 };
 
 function OrgKartView() {
-  const inDevelopment = isInDevelopment();
-
   return (
     <>
       <DynamiskOrgKart
         opprettKnapp
         title="Velg plassering"
-        toppOrgEnhetId={inDevelopment ? "sa312u" : "py437s"}
+        toppOrgEnhetId={navToppnodeOrgEnhetId()}
       />
 
       <div
@@ -205,6 +206,7 @@ function OpprettOrgEnhetForm({
   const methods = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      nomNivaa: undefined,
       tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
       kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
     },
@@ -231,6 +233,7 @@ function OpprettOrgEnhetForm({
     const request: OpprettOrgEnhetRequest = {
       ...values,
       overordnetOrgEnhetId: overordnetOrgEnhet.id,
+      nomNivaa: values.nomNivaa || undefined,
     };
 
     await showModal(
@@ -278,6 +281,14 @@ function OpprettOrgEnhetForm({
               `}
             >
               <OrgEnhetTypeSelect name="orgEnhetsType" fullWidth />
+            </div>
+
+            <div
+              css={css`
+                width: 50%;
+              `}
+            >
+              <NomNivaaSelect name="nomNivaa" fullWidth />
             </div>
 
             <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
@@ -425,5 +436,6 @@ const validationSchema = yup.object({
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk")
     .required("Obligatorisk"),
+  nomNivaa: yup.mixed<NomNivaa>(),
   kostnadsstedId: yup.string().required("Obligatorisk"),
 });

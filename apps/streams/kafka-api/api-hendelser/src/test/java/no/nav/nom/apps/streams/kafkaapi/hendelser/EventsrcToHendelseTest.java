@@ -63,7 +63,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
         //arrange orgenhet events og hendelser
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
-        final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
+        final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final Hendelse opprettOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
         final Hendelse endreOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
         final Hendelse avvikleOrgenhetHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
@@ -87,7 +87,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
         //arrange organisering events
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
         final OrganiseringEvent endreOrganiseringEvent = HendelserTestUtils.getEndretOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
-        final OrganiseringEvent avsluttOrganiseringEvent = HendelserTestUtils.getAvsluttetOrganiseringEvent(organiseringFid, eventMetadata);
+        final OrganiseringEvent avsluttOrganiseringEvent = HendelserTestUtils.getAvsluttetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
 
         // orgtilknytning events
         final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata, null);
@@ -177,7 +177,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
         // orgenhet events and hendelser
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
-        final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
+        final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final Hendelse opprettOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
         final Hendelse endreOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
         final Hendelse avvikleOrgenhetHendelseWithId = new Hendelse(
@@ -190,7 +190,7 @@ public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
 
         // organisering events and hendelser
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
-        final OrganiseringEvent avsluttOrganiseringEvent = HendelserTestUtils.getAvsluttetOrganiseringEvent(organiseringFid, eventMetadata);
+        final OrganiseringEvent avsluttOrganiseringEvent = HendelserTestUtils.getAvsluttetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
 
         // resurs events and hendelser
         final RessursEvent opprettRessursEvent = HendelserTestUtils.getRessursOpprettetEvent(resursFid, navident, eventMetadata);

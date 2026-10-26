@@ -61,6 +61,7 @@ public class KorrigerDuplikatEnheter {
             node.put("With period", duplikat.getGyldigFom().toString() + " - " + Objects.requireNonNullElse(duplikat.getGyldigTom(), " "));
             AvvikleOrgEnhet avvikleOrgEnhet =
                 new AvvikleOrgEnhet(
+                    duplikat.getId(),
                     duplikat.getGyldigFom(),
                     new InputMetadata(
                         "Swagger",

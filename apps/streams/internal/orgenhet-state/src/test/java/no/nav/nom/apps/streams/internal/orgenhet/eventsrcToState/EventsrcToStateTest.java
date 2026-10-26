@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -136,7 +137,7 @@ public class EventsrcToStateTest {
 
         final OrgEnhetEvent updateTypeEvent = new OrgEnhetTypeEndretEventV1(
             createEvent.getFid(),
-            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIR),
+            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(createEventData.id(), OrgEnhetsType.DIR),
             new Event.Metadata(null, LocalDateTime.now())
         );
 
@@ -166,7 +167,7 @@ public class EventsrcToStateTest {
 
         final OrgEnhetEvent updateNomNivaaEvent = new NomNivaaEndretEventV1(
             createEvent.getFid(),
-            new NomNivaaEndretEventV1.NomNivaaEndretEventData(NomNivaa.ARBEIDSOMRAADE),
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData(createEventData.id(), NomNivaa.ARBEIDSOMRAADE),
             new Event.Metadata(null, LocalDateTime.now())
         );
 
@@ -193,6 +194,41 @@ public class EventsrcToStateTest {
             .containsExactly(
                 KeyValue.pair(updateNomNivaaEvent.getFid(), expectedAfterUpdate2)
             );
+    }
+
+    @Test
+    @DisplayName("OrgEnhetAvvikletEventV1 uten id beholder eksisterende id og oppdaterer gyldigTom")
+    public void testOrgEnhetAvvikletEventV1() {
+        final OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData createEventData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData(
+            "DummyIntenrnId_1",
+            "TestName",
+            LocalDate.of(2022, 12, 1),
+            "orgEnhet_123",
+            "ressurs_123",
+            "1234"
+        );
+        final OrgEnhetEvent createEvent = new OrgEnhetOpprettetEventV1(
+            "FID_001",
+            createEventData,
+            (Event.Metadata) null,
+            null
+        );
+        inputTopic.pipeInput(createEvent.getFid(), createEvent);
+        Assertions.assertThat(outputTopic.readValue()).isNotNull();
+
+        final LocalDate gyldigTom = LocalDate.of(2024, 1, 1);
+        final OrgEnhetEvent avvikletEvent = new OrgEnhetAvvikletEventV1(
+            createEvent.getFid(),
+            new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(null, gyldigTom),
+            (Event.Metadata) null
+        );
+        inputTopic.pipeInput(avvikletEvent.getFid(), avvikletEvent);
+
+        final OrgEnhetState updatedState = outputTopic.readValue();
+        Assertions.assertThat(updatedState).isNotNull();
+        Assertions.assertThat(updatedState.id()).isEqualTo(createEventData.id());
+        Assertions.assertThat(updatedState.gyldigTom()).isEqualTo(gyldigTom);
+        Assertions.assertThat(outputTopic.isEmpty()).isTrue();
     }
 
     private void setupKafkaTransformer(){

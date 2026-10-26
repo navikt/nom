@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { Link, Tooltip } from "@navikt/ds-react";
 import React, { useState } from "react";
 
+import { isInDevelopment } from "~/customUtils/environmentUtils";
 import person from "~/resources/person.svg";
 
 type UserImageProperties = {
@@ -22,8 +23,7 @@ export function UserImage(props: UserImageProperties) {
   React.useEffect(() => {
     setImgSrc(person);
     setImgError(false);
-    const enableImgFetch =
-      !!navident && globalThis.location.href.includes("nom.nav.no");
+    const enableImgFetch = !!navident && !isInDevelopment();
 
     const img = new Image();
     // img.loading = loadOnlyWhenVisible ? "lazy" : "eager";

@@ -28,6 +28,7 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { FormRessursSearchWrapper } from "~/components/forms/FormComponents";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -36,11 +37,10 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
-  FormRessursSearchWrapper,
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
   OrgEnhetInfoWrapper,
@@ -290,9 +290,9 @@ function KorrigerOrgEnhetLederForm({
               >
                 Lagre
               </Button>
-
-              {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
             </div>
+
+            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </VStack>
         </form>
       </FormProvider>

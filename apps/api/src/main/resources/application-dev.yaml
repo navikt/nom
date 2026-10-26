@@ -61,6 +61,9 @@ app:
       nom-admin:
         client-id: "66c5096f-89dc-446f-bc15-a39d5b4274e7"
         scopes: ["QUERY_PERSON"]
+      nom-sf-integrasjon:
+        client-id: "2bf24748-6176-498e-ac9f-acd9d4f636e4"
+        scopes: ["NOM_SF_INTEGRASJON_APP"]
       #     For testing av endepunkter under /api/v1/teamcat
       org-token-tool:
         client-id: "18c1d86b-4635-461c-8718-62c130087211"
@@ -277,6 +280,15 @@ app:
 
       - navident: Z994019         # Team RPA, Morten Andre Mathisen
         orgtilknytning: pe225k    # 8571401-Utvikling 3A-ORGENHET
+        sektor: NAV_STATLIG
+
+      # Team Komet / https://nav-it.slack.com/archives/C0362LA7ZLN/p1791885140662729
+      - navident: Z993894
+        orgtilknytning: fa408a    # Grünerløkka
+        sektor: NAV_STATLIG
+
+      - navident: Z993285
+        orgtilknytning: fa408a    # Grünerløkka
         sektor: NAV_STATLIG
 
     ledere:

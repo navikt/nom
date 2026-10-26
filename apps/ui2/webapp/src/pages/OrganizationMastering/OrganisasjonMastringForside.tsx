@@ -43,9 +43,10 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-
-import type { MinimalRessurs, OrgEnhet } from "~/types/api-models";
-import { formatDisplayDate, formatVisningsnavn, navToppnode } from "~/utils";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
+import type { RedigeringsTilgangRessursResponse, OrgEnhet } from "~/types/api-models";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
   const hasAdminAccess = useHasAdminAccess();
@@ -243,7 +244,9 @@ function MineOrgEnheterSeksjon() {
   const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
 
   const toppnodeIder =
-    redigerbareToppnoder?.map((orgEnhet) => orgEnhet.id) ?? [];
+    redigerbareToppnoder
+      ?.filter((orgEnhet) => nomDateIsTodayOrAfter(orgEnhet.gyldigTom))
+      .map((orgEnhet) => orgEnhet.id) ?? [];
 
   const valgtRessursQuery = useQuery({
     queryKey: getRessurs.queryKey(perspectiveSelected),
@@ -347,7 +350,7 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
         <UtvidOrgEnhetKort
           key={orgEnhet.id}
           orgEnhet={orgEnhet}
-          underenheterDefaultopen={sorterteOrgEnheter?.length === 1}
+          underenheterDefaultOpen={sorterteOrgEnheter?.length === 1}
         />
       ))}
     </VStack>
@@ -357,18 +360,18 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
 function UtvidOrgEnhetKort({
   orgEnhet,
   defaultOpen = false,
-  underenheterDefaultopen = false,
+  underenheterDefaultOpen = false,
 }: {
   orgEnhet: OrgEnhet;
   defaultOpen?: boolean;
-  underenheterDefaultopen?: boolean;
+  underenheterDefaultOpen?: boolean;
 }) {
   const hasAdminAccess = useHasAdminAccess();
 
   const [expanded, setExpanded] = useState(defaultOpen);
 
   const [underenheterExpanded, setUnderenheterExpanded] = useState(
-    underenheterDefaultopen,
+    underenheterDefaultOpen,
   );
 
   const ledereForOrgEnhetQuery = useQuery({
@@ -446,7 +449,6 @@ function UtvidOrgEnhetKort({
               displayKostnadssted
               displayLeder={false}
               displayUni4Niv
-              nomIdLink
               orgEnhet={orgEnhet}
             />
 
@@ -510,6 +512,17 @@ function UtvidOrgEnhetKort({
                     iconPosition="right"
                   >
                     Endre informasjon
+                  </Button>
+                </SmartLink>
+
+                <SmartLink href={`/endre-overliggende-enhet?id=${orgEnhet.id}`}>
+                  <Button
+                    size="small"
+                    icon={<PencilIcon />}
+                    variant="primary"
+                    iconPosition="right"
+                  >
+                    Endre overliggende enhet
                   </Button>
                 </SmartLink>
 
@@ -590,9 +603,9 @@ function UtvidOrgEnhetKort({
 function HvemKanRedigereSection({
   kanAdministrere,
 }: {
-  kanAdministrere: MinimalRessurs[];
+  kanAdministrere: RedigeringsTilgangRessursResponse[];
 }) {
-  const toppnodeOrgEnhetId = navToppnode();
+  const toppnodeOrgEnhetId = navToppnodeOrgEnhetId();
 
   const toppnodeOrgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),
@@ -604,9 +617,24 @@ function HvemKanRedigereSection({
   const direktorNavident = toppnodeOrgEnhet?.leder.navident;
 
   const unikeFiltrerteRessurser = Array.from(
-    new Map(kanAdministrere.map((r) => [r.navident, r]))
-      .values()
-      .filter((ressurs) => ressurs.navident !== direktorNavident),
+    kanAdministrere.reduce((map, ressurs) => {
+      const existing = map.get(ressurs.navident);
+
+      if (!existing || (existing.erDelegert && !ressurs.erDelegert)) {
+        map.set(ressurs.navident, ressurs);
+      }
+
+      return map;
+    }, new Map<string, RedigeringsTilgangRessursResponse>()),
+    ([, ressurs]) => ressurs,
+  ).filter((ressurs) => ressurs.navident !== direktorNavident);
+
+  const ikkeDelegerteRessurser = unikeFiltrerteRessurser.filter(
+    (ressurs) => !ressurs.erDelegert,
+  );
+
+  const delegerteRessurser = unikeFiltrerteRessurser.filter(
+    (ressurs) => ressurs.erDelegert,
   );
 
   return (
@@ -615,27 +643,55 @@ function HvemKanRedigereSection({
         Administratorer for enheten:
       </Heading>
 
-      <BodyShort>
-        <b>Alle</b>
-      </BodyShort>
+      <HStack gap="8">
+        <VStack gap="2">
+          <BodyShort>
+            <b>Leder</b>
+          </BodyShort>
 
-      {unikeFiltrerteRessurser.length > 0 ? (
-        <VStack>
-          {unikeFiltrerteRessurser.map((ressurs, index) => (
-            <SmartLink
-              css={css`
-                width: fit-content;
-              `}
-              href={`/ressurs/${ressurs.navident}`}
-              key={`${ressurs.navident}${index}`}
-            >
-              {ressurs.visningsnavn}
-            </SmartLink>
-          ))}
+          {ikkeDelegerteRessurser.length > 0 ? (
+            <VStack>
+              {ikkeDelegerteRessurser.map((ressurs, index) => (
+                <SmartLink
+                  css={css`
+                    width: fit-content;
+                  `}
+                  href={`/ressurs/${ressurs.navident}`}
+                  key={`${ressurs.navident}${index}`}
+                >
+                  {ressurs.visningsnavn}
+                </SmartLink>
+              ))}
+            </VStack>
+          ) : (
+            <BodyShort>Ingen registrert</BodyShort>
+          )}
         </VStack>
-      ) : (
-        <BodyShort>Ingen registrert</BodyShort>
-      )}
+
+        <VStack gap="2">
+          <BodyShort>
+            <b>Lederstøtte</b>
+          </BodyShort>
+
+          {delegerteRessurser.length > 0 ? (
+            <VStack>
+              {delegerteRessurser.map((ressurs, index) => (
+                <SmartLink
+                  css={css`
+                    width: fit-content;
+                  `}
+                  href={`/ressurs/${ressurs.navident}`}
+                  key={`${ressurs.navident}${index}`}
+                >
+                  {ressurs.visningsnavn}
+                </SmartLink>
+              ))}
+            </VStack>
+          ) : (
+            <BodyShort>Ingen registrert</BodyShort>
+          )}
+        </VStack>
+      </HStack>
     </VStack>
   );
 }

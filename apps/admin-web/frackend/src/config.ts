@@ -23,6 +23,8 @@ const proxy = {
   nomApiUrl: requireEnvironment("NOM_API_URL"),
   nomRemedyScope: requireEnvironment("NOM_REMEDY_INTEGRASJON_API_SCOPE"),
   nomRemedyUrl: requireEnvironment("NOM_REMEDY_INTEGRASJON_API_URL"),
+  nomSfScope: requireEnvironment("NOM_SF_INTEGRASJON_API_SCOPE"),
+  nomSfUrl: requireEnvironment("NOM_SF_INTEGRASJON_API_URL"),
 };
 
 const app = {

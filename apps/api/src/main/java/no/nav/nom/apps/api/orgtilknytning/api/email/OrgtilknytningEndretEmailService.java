@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgtilknytning.api.email;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.ad.ADResponseException;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.msgraph.EmailMessage;
@@ -13,9 +12,10 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
-import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
+import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -44,11 +44,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 @Component
 public class OrgtilknytningEndretEmailService {
     private static final String OT_ENDRINGER_VARSEL_TEMPLATE = "ot-endringer-varsel.ftlh";
     public static final String MASSEFLYTTING_VARSEL_FTLH = "masseflytting-varsel.ftlh";
-    public final String epost_body_item_template = "{0}({1}), fra og med {2}, til og med {3}. Endring utført av {4}, på {5}.";
+    public final String epost_body_with_gyldig_tom_item_template = "{0}({1}), fra og med {2}, til og med {3}, med fysisk brukersted {4} ({5}). Endring utført av {6} den {7}.";
+    public final String epost_body_without_gyldig_tom_item_template = "{0}({1}), fra og med {2}, med fysisk brukersted {3} ({4}). Endring utført av {5} den {6}.";
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
     private final MicrosoftGraphClient microsoftGraphClient;
@@ -62,9 +65,8 @@ public class OrgtilknytningEndretEmailService {
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
     private final LeaderElection leaderElection;
     private final NomMastered nomMastered;
-    private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgenhetService orgenhetService;
-    private final Unleash unleash;
+    private final FysiskBrukerstedService fysiskBrukerstedService;
 
     public OrgtilknytningEndretEmailService(
         MicrosoftGraphClient microsoftGraphClient,
@@ -76,8 +78,9 @@ public class OrgtilknytningEndretEmailService {
         CacheQueueService cacheQueueService,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
         LeaderElection leaderElection,
-        NomMastered nomMastered, RemedyEnhetMapperService remedyEnhetMapperService,
-        OrgenhetService orgenhetService, Unleash unleash
+        NomMastered nomMastered,
+        OrgenhetService orgenhetService,
+        FysiskBrukerstedService fysiskBrukerstedService
     ) {
         this.microsoftGraphClient = microsoftGraphClient;
         this.freemarkerConfig = freemarkerConfig;
@@ -90,9 +93,8 @@ public class OrgtilknytningEndretEmailService {
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         this.leaderElection = leaderElection;
         this.nomMastered = nomMastered;
-        this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgenhetService = orgenhetService;
-        this.unleash = unleash;
+        this.fysiskBrukerstedService = fysiskBrukerstedService;
     }
 
     public void addToOrgtilknytningEndringerQueue(String fid, OTEndretData otEndretData) {
@@ -126,7 +128,7 @@ public class OrgtilknytningEndretEmailService {
         log.info("otEndringerByFid size, keys, values: {}, {}, {}", otEndringerByFid.size(), otEndringerByFid.keySet(), otEndringerByFid.values());
 
         // as OT changes are per orgenhet, group them by navident
-        Map<String, List<OTEndretData>> otEndringerByNavident =  new HashMap<>();
+        Map<String, List<OTEndretData>> otEndringerByNavident = new HashMap<>();
         otEndringerByFid.forEach((fid, endringer) -> {
             var navident = getNavidentFromOrgtilknytningStateRepository(fid);
             if (navident != null) {
@@ -145,15 +147,15 @@ public class OrgtilknytningEndretEmailService {
                 // not cleared from the queue! will be retried next time
             } else {
                 // check if the navident is mastered in nom
-                if(nomMastered.isMastered(navident)) {
+                if (nomMastered.isMastered(navident)) {
                     sendOTEndretEmail(endretRessurs.get(), endringer);
                 } else {
                     log.info("Navident {} is not mastered in nom. OT changes email will not be sent!", navident);
                 }
 
                 // remove from the queue in any case
-                otEndringerByFid.forEach((fid, otEndringer) -> {
-                    if(navident.equals(getNavidentFromOrgtilknytningStateRepository(fid))) {
+                otEndringerByFid.forEach((fid, _) -> {
+                    if (navident.equals(getNavidentFromOrgtilknytningStateRepository(fid))) {
                         removeFromOrgtilknytningEndringerQueue(fid);
                     }
                 });
@@ -169,7 +171,8 @@ public class OrgtilknytningEndretEmailService {
             var adRessurser = adClient.getAdRessurser(recipientNavidents);
             var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();
 
-            String subject = String.format("Endringer i org.tilknytninger for %s (%s)",
+            String subject = String.format(
+                "Endringer i org.tilknytninger for %s (%s)",
                 endretRessurs.visningsnavn().getFormattedVisningsnavn(), endretRessurs.navident()
             );
 
@@ -187,7 +190,7 @@ public class OrgtilknytningEndretEmailService {
             }
 
             log.info("Sender OT endringer epost subject: {}, recipients: {}, message: {}", subject, recipientList, body);
-            EmailMessage message = new EmailMessage(subject, body, recipientList, List.of(), getAdditionalBccRecipientsEmails());
+            EmailMessage message = new EmailMessage(subject, body, recipientList, List.of(), List.of());
             microsoftGraphClient.sendEmail(message).subscribe();
         } catch (ADResponseException e) {
             throw new RessursOpprettetEmailException("Fant ikke leder epost adresse for leder");
@@ -202,10 +205,9 @@ public class OrgtilknytningEndretEmailService {
         Collection<OrgtilknytningState> orgtilknytningerIkkeFlyttet
     ) {
         try {
-            List<String> recipientList = new ArrayList<>();
+            List<String> recipientList = new ArrayList<>(getAdditionalRecipientsEmails());
             var innsenderVisningsnavn = "";
 
-            recipientList.addAll(getAdditionalRecipientsEmails());
             if (SecurityUtil.hasAuthentication()) {
                 String innsenderNavident = SecurityUtil.getAuthenticatedNavIdent();
                 innsenderVisningsnavn = ressursStateRepository.findByNavident(innsenderNavident)
@@ -310,21 +312,34 @@ public class OrgtilknytningEndretEmailService {
                 );
                 log.info("Sender OT endringer utfortAv: {}, {}, {}", utfortAvNavIdent, utfortAvRessurs, utfortAvRessursNavn);
                 var orgenhetNavn = orgEnhetStateRepository.findById(ot.orgEnhetId()).map(OrgEnhetState::navn).orElse("Ukjent");
-                String endring = MessageFormat.format(epost_body_item_template,
+                String endring = nonNull(ot.gyldigTom()) ? MessageFormat.format(
+                    epost_body_with_gyldig_tom_item_template,
                     orgenhetNavn,
                     ot.orgEnhetId(),
                     DateUtils.formatDateTime(ot.gyldigFom()),
                     DateUtils.formatDateTime(ot.gyldigTom()),
+                    fysiskBrukerstedService.findFysiskBrukersted(ot.primaryFysiskBrukerstedNummer()).map(FysiskBrukersted::navn).orElse("Ukjent"),
+                    ot.primaryFysiskBrukerstedNummer(),
+                    utfortAvRessursNavn,
+                    event.timestamp()
+                ) : MessageFormat.format(
+                    epost_body_without_gyldig_tom_item_template,
+                    orgenhetNavn,
+                    ot.orgEnhetId(),
+                    DateUtils.formatDateTime(ot.gyldigFom()),
+                    fysiskBrukerstedService.findFysiskBrukersted(ot.primaryFysiskBrukerstedNummer()).map(FysiskBrukersted::navn).orElse("Ukjent"),
+                    ot.primaryFysiskBrukerstedNummer(),
                     utfortAvRessursNavn,
                     event.timestamp()
                 );
                 // update message if not blank and duplicate
-                if(!endring.isBlank() && !otEndringer.toString().contains(endring)) {
+                if (!endring.isBlank() && !otEndringer.toString().contains(endring)) {
                     otEndringer.append(endring);
                 }
             } else {
                 log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
-                String endring = MessageFormat.format(epost_body_item_template_ot_notfound,
+                String endring = MessageFormat.format(
+                    epost_body_item_template_ot_notfound,
                     event.eventType(), utfortAvRessursNavn, event.timestamp()
                 );
                 otEndringer.append(endring);
@@ -365,10 +380,6 @@ public class OrgtilknytningEndretEmailService {
         additionalRecipients.add("Mugunthan.Dharmadas@nav.no");
         additionalRecipients.add("Roy.Grini@nav.no");
         return additionalRecipients;
-    }
-
-    private List<String> getAdditionalBccRecipientsEmails() {
-        return unleash.isEnabled("nom.email.bcc-ot-endret") ? List.of("hama.keli@nav.no") : List.of();
     }
 
     private List<String> getOmadaRecipientsEmails() {

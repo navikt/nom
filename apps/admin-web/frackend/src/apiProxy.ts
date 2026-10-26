@@ -31,6 +31,13 @@ export const setupNomRemedyProxy = (app: Express) =>
     scope: config.proxy.nomRemedyScope,
   });
 
+export const setupNomSfIntegrasjonProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/frackend/nom-sf",
+    outgoingUrl: config.proxy.nomSfUrl,
+    scope: config.proxy.nomSfScope,
+  });
+
 export function addProxyHandler(
   server: Express,
   { ingoingUrl, outgoingUrl, scope }: ProxyOptions,

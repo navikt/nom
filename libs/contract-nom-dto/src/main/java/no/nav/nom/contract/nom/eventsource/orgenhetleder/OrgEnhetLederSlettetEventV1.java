@@ -20,5 +20,7 @@ public class OrgEnhetLederSlettetEventV1 extends OrgEnhetLederEvent {
         this(fid, data, Metadata.from(inputMetadata));
     }
 
-    public record OrgEnhetLederSlettetEventData() implements Data {}
+    public record OrgEnhetLederSlettetEventData(
+        String orgEnhetId
+    ) implements Data {}
 }

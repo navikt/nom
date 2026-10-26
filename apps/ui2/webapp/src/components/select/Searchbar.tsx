@@ -8,7 +8,7 @@ import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
-import { isInDevelopment } from "~/utils";
+import { isInDevelopment } from "~/customUtils/environmentUtils";
 
 import { AsyncSearch } from "./CustomSelectComponents";
 
@@ -69,8 +69,9 @@ export function SearchBar() {
       isClearable={false}
       loadOptions={(s) => searchIfEnoughInput(s, hasAdminAccess)}
       noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-        inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
-          ? "Du må skrive minst 3 tegn for å søke"
+        inputValue.toLowerCase().replace("nav ", "").trim().length <
+        RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
+          ? "Du må skrive lenger for å søke"
           : `Fant ingen resultater for "${inputValue}"`
       }
       onChange={(selectedOption) =>
@@ -84,6 +85,7 @@ export function SearchBar() {
 async function searchIfEnoughInput(inputValue: string, hasAdmin: boolean) {
   // Se bort ifra Nav når man søker
   const newSearchTerm = inputValue.toLowerCase().replace("nav ", "").trim();
+
   if (newSearchTerm.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
     return [];
   }
@@ -290,9 +292,11 @@ async function createOptions(
   hasAdmin: boolean,
 ): Promise<SearchOption[]> {
   const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment();
+
   const filterToUse = skalFiltrereBortVikafossen
     ? notVikafossenEnhetPredicate
     : () => true;
+
   const searchResults = await commonSearch(inputValue, filterToUse);
 
   return searchResults.map((r) => {

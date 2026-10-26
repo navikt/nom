@@ -99,8 +99,6 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             .containsAll(Arrays.stream(OrgEnhetsType.values())
                 .filter(orgEnhetsType -> !orgEnhetsType.equals(OrgEnhetsType.DIR)).toList()
             );
-
-
     }
 
     @Test
@@ -200,17 +198,12 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))
         );
 
-        orgEnhetTypeHandler.orgEnhetsTypeChanged(
-            new OrgEnhetTypeEndretEventV1(
-                changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(newOrgEnhetType),
-                new InputMetadata(null, null, null, null)
-            )
-        );
+        orgEnhetTypeHandler.orgEnhetsTypeChanged(changedOrgenhet.fid(), newOrgEnhetType);
 
         verify(orgEnhetCommandService, times(1))
             .endreOrgEnhetsType(eq(overordnetOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
+        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().id()).isEqualTo(overordnetOrgEnhet.id());
         assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(newOrgEnhetType);
 
     }
@@ -230,13 +223,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
 
         when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(changedOrgenhet)).thenReturn(Optional.of(overordnetOrgEnhet));
 
-        orgEnhetTypeHandler.orgEnhetsTypeChanged(
-            new OrgEnhetTypeEndretEventV1(
-                changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(newOrgEnhetType),
-                new InputMetadata(null, null, null, null)
-            )
-        );
+        orgEnhetTypeHandler.orgEnhetsTypeChanged(changedOrgenhet.fid(), newOrgEnhetType);
 
         verify(orgEnhetCommandService, times(0)).endreOrgEnhetsType(any(), any());
 
@@ -265,13 +252,7 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))
         );
 
-        orgEnhetTypeHandler.orgEnhetsTypeChanged(
-            new OrgEnhetTypeEndretEventV1(
-                changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIREKTORAT),
-                new InputMetadata(null, null, null, null)
-            )
-        );
+        orgEnhetTypeHandler.orgEnhetsTypeChanged(changedOrgenhet.fid(), OrgEnhetsType.DIREKTORAT);
 
         verify(orgEnhetCommandService, times(0)).endreOrgEnhetsType(any(), any());
 
@@ -299,17 +280,12 @@ public class OrgEnhetTypeHandlerTest extends OrgEnhetTestBase {
             when(orgEnhetOverordnetResolver.findOverordnetOrgEnhet(orgEnhetState)).thenReturn(Optional.of(overordnetOrgEnhet))
         );
 
-        orgEnhetTypeHandler.orgEnhetsTypeChanged(
-            new OrgEnhetTypeEndretEventV1(
-                changedOrgenhet.fid(),
-                new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(OrgEnhetsType.DIREKTORAT),
-                new InputMetadata(null, null, null, null)
-            )
-        );
+        orgEnhetTypeHandler.orgEnhetsTypeChanged(changedOrgenhet.fid(), OrgEnhetsType.DIREKTORAT);
 
         verify(orgEnhetCommandService, times(1))
             .endreOrgEnhetsType(eq(overordnetOrgEnhet.fid()), endreOrgEnhetsTypeArgumentCaptor.capture());
 
+        assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().id()).isEqualTo(overordnetOrgEnhet.id());
         assertThat(endreOrgEnhetsTypeArgumentCaptor.getValue().orgEnhetsType()).isEqualTo(OrgEnhetsType.DIREKTORAT);
     }
 }

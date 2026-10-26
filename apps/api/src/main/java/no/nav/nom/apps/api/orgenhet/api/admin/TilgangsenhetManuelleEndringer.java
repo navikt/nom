@@ -76,7 +76,9 @@ public class TilgangsenhetManuelleEndringer {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", tilgangsenhetEndring.orgEnhetId())));
 
         orgEnhetCommandService.endreTilgangsenhet(
-            orgenhetState.getFid(), new EndreTilgangsenhet(
+            orgenhetState.getFid(),
+            new EndreTilgangsenhet(
+                orgenhetState.getId(),
                 tilgangsenhetEndring.tilgangsenhetId(),
                 inputMetadata
             )
@@ -104,7 +106,9 @@ public class TilgangsenhetManuelleEndringer {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Orgenhet ID %s not found", orgEnhetId)));
 
         orgEnhetCommandService.endreTilgangsenhet(
-            orgenhetState.getFid(), new EndreTilgangsenhet(
+            orgenhetState.getFid(),
+            new EndreTilgangsenhet(
+                orgenhetState.getId(),
                 null,
                 inputMetadata
             )
@@ -137,12 +141,13 @@ public class TilgangsenhetManuelleEndringer {
                         endring,
                         new Origination(getAuthenticatedNavIdent(), "ADMIN-API")
                     );
-
                     orgEnhetCommandService.endreTilgangsenhet(
-                        orgenhetService.getById(endring.nomId()).get().getFid(), new EndreTilgangsenhet(
-                            endring.remedyEnhetId(),
-                            inputMetadata
-                        )
+                        orgenhetService.getById(endring.nomId()).get().getFid(),
+                            new EndreTilgangsenhet(
+                                endring.nomId(),
+                                endring.remedyEnhetId(),
+                                inputMetadata
+                            )
                     );
                 }
             );

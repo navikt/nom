@@ -128,7 +128,7 @@ public class EventsrcToStateTest {
         final OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData eventDataOpprett = getOpprettetEventData();
         final OrganiseringEvent eventOpprett = getOpprettetOrganiseringEvent(eventDataOpprett);
 
-        final OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData eventDataAvslutt = getAvsluttEventData(LocalDate.now());
+        final OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData eventDataAvslutt = getAvsluttEventData(eventDataOpprett.id(), LocalDate.now());
         final OrganiseringEvent eventAvslutt = getAvsluttOrganiseringEvent(eventOpprett.getFid(), eventDataAvslutt);
         final OrganiseringState expectedAvslutt = new OrganiseringState(
             eventOpprett.getFid(),
@@ -144,6 +144,29 @@ public class EventsrcToStateTest {
         inputTopic.pipeValueList(inputList);
 
         Assertions.assertThat(outputTopic.readValuesToList()).contains(expectedAvslutt);
+        Assertions.assertThat(outputTopic.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("OrganiseringAvsluttetEventV1 beholder id og sluttdato i state")
+    void OrganiseringAvsluttetEventV1_beholder_id_og_sluttdato_i_state_topic() {
+        final OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData createEventData = getOpprettetEventData();
+        final OrganiseringEvent createEvent = getOpprettetOrganiseringEvent(createEventData);
+        inputTopic.pipeInput(createEvent.getFid(), createEvent);
+        Assertions.assertThat(outputTopic.readValue()).isNotNull();
+
+        final LocalDate sluttdato = LocalDate.of(2024, 1, 1);
+        final OrganiseringEvent avsluttetEvent = new OrganiseringAvsluttetEventV1(
+            createEvent.getFid(),
+            new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(null, sluttdato),
+            (Event.Metadata) null
+        );
+        inputTopic.pipeInput(avsluttetEvent.getFid(), avsluttetEvent);
+
+        final OrganiseringState updatedState = outputTopic.readValue();
+        Assertions.assertThat(updatedState).isNotNull();
+        Assertions.assertThat(updatedState.id()).isEqualTo(createEventData.id());
+        Assertions.assertThat(updatedState.gyldigTom()).isEqualTo(sluttdato);
         Assertions.assertThat(outputTopic.isEmpty()).isTrue();
     }
 
@@ -249,8 +272,9 @@ public class EventsrcToStateTest {
         );
     }
 
-    private OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData getAvsluttEventData(LocalDate gyldigTom) {
+    private OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData getAvsluttEventData(String id, LocalDate gyldigTom) {
         return new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
+            id,
             gyldigTom
         );
     }
@@ -271,5 +295,3 @@ public class EventsrcToStateTest {
     }
 
 }
-
-

@@ -94,6 +94,7 @@ public class ManuelleOrganiseringEvtsrcMeldinger {
         organiseringEventCommandService.avsluttOrganisering(
             fid,
             new AvsluttOrganiseringCmd(
+                organiseringState.get().id(),
                 gyldigTom,
                 new InputMetadata(
                     "/api/admin/manuelleEvtsrcMeldinger",

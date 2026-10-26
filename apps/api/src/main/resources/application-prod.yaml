@@ -33,6 +33,9 @@ app:
       nom-admin:
         client-id: "00c7dcfe-c3ad-44eb-aaac-4f88c5d4f1d2"
         scopes: ["QUERY_PERSON"]
+      nom-sf-integrasjon:
+        client-id: "fc316244-0da7-4030-972c-2844214189a1"
+        scopes: ["NOM_SF_INTEGRASJON_APP"]
       # For scope fra lokal kjøring, mot nom-api dvh ORDS datalast endepunkter
       local-nom-api:
         client-id: "3e962532-1cd2-4bb4-8222-515c83df854a"

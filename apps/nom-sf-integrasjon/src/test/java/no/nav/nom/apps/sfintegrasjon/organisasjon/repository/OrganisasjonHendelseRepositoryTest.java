@@ -11,10 +11,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
-
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import javax.sql.DataSource;
 import java.time.OffsetDateTime;
@@ -31,8 +30,7 @@ class OrganisasjonHendelseRepositoryTest {
     @TestConfiguration
     static class ContainerConfig {
 
-        @SuppressWarnings("resource")
-        static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
+        static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
         static {
             POSTGRES.start();

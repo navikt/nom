@@ -270,6 +270,9 @@ spec:
         - application: nav-persondata-api
           namespace: holmes
           cluster: prod-gcp
+        - application: watson-admin-api
+          namespace: holmes
+          cluster: prod-gcp
         - application: klage-lookup
           namespace: klage
           cluster: prod-gcp
@@ -300,6 +303,12 @@ spec:
         - application: entra-proxy
           namespace: sikkerhetstjenesten
           cluster: prod-gcp
+        - application: nom-sf-integrasjon
+          namespace: org
+          cluster: prod-gcp
+        - application: nda
+          namespace: proaktiv
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident

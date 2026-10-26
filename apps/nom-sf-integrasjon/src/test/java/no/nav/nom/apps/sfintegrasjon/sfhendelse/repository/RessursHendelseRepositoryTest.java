@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -26,8 +26,7 @@ public class RessursHendelseRepositoryTest {
     @TestConfiguration
     static class ContainerConfig {
 
-        @SuppressWarnings("resource")
-        static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17");
+        static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17");
 
         static {
             POSTGRES.start();

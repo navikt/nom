@@ -142,11 +142,20 @@ public class OrgEnhetRestService {
             var orgEnhetState = orgEnhetCommandService.opprettOrgEnhetSync(opprettOrgEnhet);
 
             final var endreOrgEnhetsType = new EndreOrgEnhetsType(
+                orgEnhetState.id(),
                 opprettOrgEnhetRequest.orgEnhetsType(),
                 inputMetadata
             );
 
             orgEnhetCommandService.endreOrgEnhetsType(orgEnhetState.fid(), endreOrgEnhetsType);
+
+            // set nomNivaa
+            if (opprettOrgEnhetRequest.nomNivaa() != null) {
+                orgEnhetCommandService.endreNomNivaa(
+                    orgEnhetState.fid(),
+                    new EndreNomNivaa(orgEnhetState.id(), opprettOrgEnhetRequest.nomNivaa(), inputMetadata)
+                );
+            }
 
             final var opprettOrganisering = new OpprettOrganiseringCmd(
                 orgEnhetState.id(),
@@ -169,6 +178,7 @@ public class OrgEnhetRestService {
             String fid = orgEnhetLederCommandService.opprettOrgEnhetLeder(opprettOrgEnhetLeder);
 
             final var oppdaterOrgEnhetLederStartdato = new OppdaterOrgEnhetLederStartdato(
+                orgEnhetState.id(),
                 orgEnhetState.gyldigFom(),
                 inputMetadata
             );
@@ -223,11 +233,12 @@ public class OrgEnhetRestService {
             )
         );
 
-        if (!Objects.equals(korrigerOrgEnhetNavnRequest.navn(), orgEnhetState.getNavn())) {
-            if (orgenhetService.activeOrFutureWithEqualName(korrigerOrgEnhetNavnRequest.navn())) {
-                throw DuplicateOrgEnhetNameException.name(korrigerOrgEnhetNavnRequest.navn());
+        if (!Objects.equals(navn, orgEnhetState.getNavn())) {
+            if (orgenhetService.activeOrFutureWithEqualName(navn)) {
+                throw DuplicateOrgEnhetNameException.name(navn);
             }
             var oppdaterNavn = new KorrigerOrgEnhetNavn(
+                orgEnhetState.getId(),
                 navn,
                 inputMetadata
             );
@@ -259,6 +270,7 @@ public class OrgEnhetRestService {
                 .orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetState.getId()));
 
             orgEnhetCommandService.korrigerGyldigFom(orgEnhetState.getFid(), new KorrigerGyldigFom(
+                orgEnhetState.getId(),
                 ovrigeEndringerOrgEnhetRequest.gyldigFom(),
                 inputMetadata
             ));
@@ -279,6 +291,7 @@ public class OrgEnhetRestService {
 
         if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.orgEnhetsType(), orgEnhetState.getOrgEnhetsType())) {
             orgEnhetCommandService.endreOrgEnhetsType(orgEnhetState.getFid(), new EndreOrgEnhetsType(
+                orgEnhetState.getId(),
                 ovrigeEndringerOrgEnhetRequest.orgEnhetsType(),
                 inputMetadata
             ));
@@ -288,6 +301,7 @@ public class OrgEnhetRestService {
 
         if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.nomNivaa(), orgEnhetState.getNomNivaa())) {
             orgEnhetCommandService.endreNomNivaa(orgEnhetState.getFid(), new EndreNomNivaa(
+                orgEnhetState.getId(),
                 ovrigeEndringerOrgEnhetRequest.nomNivaa(),
                 inputMetadata
             ));
@@ -296,10 +310,14 @@ public class OrgEnhetRestService {
         }
 
         if (!Objects.equals(ovrigeEndringerOrgEnhetRequest.tilgangsenhetId(), orgEnhetState.getTilgangsenhetId())) {
-            orgEnhetCommandService.endreTilgangsenhet(orgEnhetState.getFid(), new EndreTilgangsenhet(
-                ovrigeEndringerOrgEnhetRequest.tilgangsenhetId(),
-                inputMetadata
-            ));
+            orgEnhetCommandService.endreTilgangsenhet(
+                orgEnhetState.getFid(),
+                new EndreTilgangsenhet(
+                    orgEnhetState.getId(),
+                    ovrigeEndringerOrgEnhetRequest.tilgangsenhetId(),
+                    inputMetadata
+                )
+            );
 
             oppdaterteElementer.add(String.format("Orgenhet har endret tilgangsenhet fra %s til %s", orgEnhetState.getTilgangsenhetId(), ovrigeEndringerOrgEnhetRequest.tilgangsenhetId()));
         }
@@ -349,11 +367,10 @@ public class OrgEnhetRestService {
             )
         );
 
-        orgEnhetCommandService.avvikleOrgEnhet(orgEnhet.fid(), new AvvikleOrgEnhet(avvikleOrgEnhetRequest.gyldigTom(), inputMetadata));
-
+        orgEnhetCommandService.avvikleOrgEnhet(orgEnhet.fid(), new AvvikleOrgEnhet(orgEnhetId, avvikleOrgEnhetRequest.gyldigTom(), inputMetadata));
 
         var organisering = organiseringStateRepository.findActiveById(orgEnhetId).orElseThrow(() -> OrganiseringNotFoundException.id(orgEnhetId));
-        organiseringEventCommandService.avsluttOrganisering(organisering.fid(), new AvsluttOrganiseringCmd(avvikleOrgEnhetRequest.gyldigTom(), inputMetadata));
+        organiseringEventCommandService.avsluttOrganisering(organisering.fid(), new AvsluttOrganiseringCmd(organisering.id(), avvikleOrgEnhetRequest.gyldigTom(), inputMetadata));
 
         return StandardResponse.builder()
             .message(String.format("Enhet %s (%s) har fått satt sluttdato til %s", orgEnhet.navn(), orgEnhet.id(), avvikleOrgEnhetRequest.gyldigTom()))
@@ -460,9 +477,12 @@ public class OrgEnhetRestService {
         var nyGyldigFom = endreOpphengOrgEnhetRequest.gyldigFom();
         var nyGyldigTom = gjeldendeOrganisering.gyldigTom();
 
-        if (nyGyldigFom.isBefore(iDag) || nyGyldigFom.isAfter(gjeldendeOrganisering.gyldigTom())) {
+        if (nyGyldigFom.isBefore(iDag)
+            || (gjeldendeOrganisering.gyldigTom() != null
+            && nyGyldigFom.isAfter(gjeldendeOrganisering.gyldigTom()))) {
             throw new IllegalStateException(String.format(
-                "GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s", nyGyldigFom, iDag, gjeldendeOrganisering.gyldigTom()));
+                "GyldigFom %s kan ikke være før i dag %s eller etter gyldigTom %s",
+                nyGyldigFom, iDag, gjeldendeOrganisering.gyldigTom()));
         }
 
         if (!Objects.equals(gjeldendeOrganisering.idOver(), endreOpphengOrgEnhetRequest.currentOverenhetId())) {

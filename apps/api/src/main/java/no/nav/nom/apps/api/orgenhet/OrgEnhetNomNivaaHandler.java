@@ -54,10 +54,9 @@ public class OrgEnhetNomNivaaHandler {
         this.linjeenheteneOrgEnhetIds = appProperties.orgenhet().linjeenhetene();
     }
 
-    public void mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(OrgEnhetTypeEndretEventV1 orgEnhetTypeEndretEventV1) {
-        var orgEnhetType = orgEnhetTypeEndretEventV1.getData().orgEnhetsType();
-        orgEnhetStateRepository.findByFid(orgEnhetTypeEndretEventV1.getFid()).ifPresent(orgEnhetState -> {
-                mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetType);
+    public void mapOrgEnhetTypeToNewNomNivaaAndUpdateChildren(String  fid, OrgEnhetsType newOrgEnhetsType) {
+        orgEnhetStateRepository.findByFid(fid).ifPresent(orgEnhetState -> {
+                mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, newOrgEnhetsType);
                 mapOrgEnhetTypeToNewNomNivaaForChildren(orgEnhetState);
             }
 
@@ -75,11 +74,9 @@ public class OrgEnhetNomNivaaHandler {
         });
     }
 
-    public void ensureArbeidsomraadePresentUnderDriftsenhet(NomNivaaEndretEventV1 nomNivaaEndretEventV1) {
-        var nomNivaa = nomNivaaEndretEventV1.getNomNivaaEndretEventData().nomNivaa();
-
-        if (nonNull(nomNivaa) && nomNivaa.equals(NomNivaa.DRIFTSENHET)) {
-            orgEnhetStateRepository.findByFid(nomNivaaEndretEventV1.getFid()).ifPresent(
+    public void ensureArbeidsomraadePresentUnderDriftsenhet(String fid, NomNivaa endretNomNivaa) {
+        if (nonNull(endretNomNivaa) && endretNomNivaa.equals(NomNivaa.DRIFTSENHET)) {
+            orgEnhetStateRepository.findByFid(fid).ifPresent(
                 orgEnhetState -> {
                     addArbeidsomraadeInAllSubPathsIfMissing(orgEnhetState);
                     logger.debug("Ensured that ARBEIDSOMRAADE is set under DRIFTSENHET {}", orgEnhetState.id());
@@ -223,6 +220,7 @@ public class OrgEnhetNomNivaaHandler {
             orgEnhetCommandService.endreNomNivaa(
                 orgEnhetState.fid(),
                 new EndreNomNivaa(
+                    orgEnhetState.id(),
                     newNomNivaa,
                     new InputMetadata(
                         "nom-api",

@@ -68,7 +68,8 @@ import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import {
   earliestDateInList,
   formatDateWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
+import { vikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import {
   SektorNameMapping,
@@ -109,7 +110,6 @@ import {
   formatDropdownFysiskBrukersted,
   formatVisningsnavn,
   isGyldighetsPeriodeActive,
-  isInDevelopment,
   todayWithoutTimezone,
 } from "~/utils";
 
@@ -241,9 +241,7 @@ export function EditOrgtilknytninger({
 }
 
 function defaultNyOrgtilknytning(ressurs: Ressurs) {
-  const inDevelopment = isInDevelopment();
-
-  const vikafossenId = inDevelopment ? "ru151s" : "ru664y";
+  const vikafossenId = vikafossenOrgEnhetId();
 
   const vikafossenRessurs = ressurs.identType === IdentType.VIKAFOSSEN;
 
@@ -368,6 +366,17 @@ function OrgtilknytningForm({
 
   const [saving, setSaving] = useState(false);
 
+  const [dolValidation, setDolValidation] = useState<{
+    dolGaps: {
+      fom: Date;
+      tom: Date | undefined;
+    }[];
+    dolOverlaps: {
+      fom: Date;
+      tom: Date | undefined;
+    }[];
+  }>();
+
   const oppdaterOrgtilknytningerMutation = useMutation<
     unknown,
     AxiosError<Error>,
@@ -461,6 +470,8 @@ function OrgtilknytningForm({
           oppdaterOrgtilknytningerMutation.mutate(request);
         },
       );
+    } else {
+      setDolValidation(dolValidation);
     }
   };
 
@@ -735,7 +746,7 @@ function OrgtilknytningForm({
             margin-top: var(--a-spacing-6);
           `}
         >
-          <IllegalDolCombinationAlert />
+          <IllegalDolCombinationAlert dolValidation={dolValidation} />
 
           <ApiResponseError error={oppdaterOrgtilknytningerMutation.error} />
         </div>
@@ -1292,20 +1303,25 @@ function LederLabel({ index, ressurs }: { index: number; ressurs: Ressurs }) {
   );
 }
 
-function IllegalDolCombinationAlert() {
-  const { watch } = useFormContext();
-
-  const skalValideres = formValuesSchema.isValidSync(watch());
-
-  if (!skalValideres) {
-    return <></>;
-  }
-
-  const orgtilknytninger = watch("mappedeOrgtilknytninger");
-
-  const { dolGaps, dolOverlaps } = dolValidering(orgtilknytninger ?? []);
-
-  if (dolGaps.length === 0 && dolOverlaps.length === 0) {
+function IllegalDolCombinationAlert({
+  dolValidation,
+}: {
+  dolValidation?: {
+    dolGaps: {
+      fom: Date;
+      tom: Date | undefined;
+    }[];
+    dolOverlaps: {
+      fom: Date;
+      tom: Date | undefined;
+    }[];
+  };
+}) {
+  if (
+    !dolValidation ||
+    (dolValidation.dolGaps.length === 0 &&
+      dolValidation.dolOverlaps.length === 0)
+  ) {
     return <></>;
   }
 
@@ -1318,7 +1334,7 @@ function IllegalDolCombinationAlert() {
           gap: var(--a-spacing-4);
         `}
       >
-        {dolGaps.length > 0 && (
+        {dolValidation.dolGaps.length > 0 && (
           <div
             css={css`
               display: flex;
@@ -1328,7 +1344,7 @@ function IllegalDolCombinationAlert() {
             <label>
               <b>Perioder uten daglig oppfølging-leder:</b>
             </label>
-            {dolGaps.map((gap) => {
+            {dolValidation.dolGaps.map((gap) => {
               return (
                 <span key={formatDisplayDate(gap.fom)}>
                   Fra <b>{formatDisplayDate(gap.fom)}</b>{" "}
@@ -1343,7 +1359,7 @@ function IllegalDolCombinationAlert() {
           </div>
         )}
 
-        {dolOverlaps.length > 0 && (
+        {dolValidation.dolOverlaps.length > 0 && (
           <div
             css={css`
               display: flex;
@@ -1353,7 +1369,7 @@ function IllegalDolCombinationAlert() {
             <label>
               <b>Perioder med mer enn én daglig oppfølging-leder:</b>
             </label>
-            {dolOverlaps.map((overlap) => {
+            {dolValidation.dolOverlaps.map((overlap) => {
               return (
                 <span key={formatDisplayDate(overlap.fom)}>
                   Fra <b>{formatDisplayDate(overlap.fom)}</b>{" "}

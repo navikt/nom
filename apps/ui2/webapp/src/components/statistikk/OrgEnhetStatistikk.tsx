@@ -20,8 +20,8 @@ import {
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
+import { teknologiavdelingenOrgEnhetId } from "~/customUtils/environmentUtils";
 import type { GlobalStatistikkResponse } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
 
 export function OrgEnhetStatistikk({
   orgEnhetId,
@@ -36,8 +36,6 @@ export function OrgEnhetStatistikk({
   expandable?: boolean;
   className?: string;
 }) {
-  const inDevelopment = isInDevelopment();
-
   const orgEnhetStatistikkQuery = useQuery({
     queryKey: getStatistikkForOrgEnhet.queryKey(orgEnhetId ?? ""),
     queryFn: () => getStatistikkForOrgEnhet.queryFn(orgEnhetId ?? ""),
@@ -48,7 +46,7 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
-  const tekAvdNavId = inDevelopment ? "je104d" : "te627k";
+  const teknologiavdelingenId = teknologiavdelingenOrgEnhetId();
 
   const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,
@@ -58,8 +56,8 @@ export function OrgEnhetStatistikk({
   };
 
   const enheterUnderTekAvdQuery = useQuery({
-    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
-    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
+    queryKey: getUnderliggendeOrgenheter.queryKey(teknologiavdelingenId),
+    queryFn: () => getUnderliggendeOrgenheter.queryFn(teknologiavdelingenId),
   });
 
   const isLoading = orgEnhetStatistikkQuery.isLoading && !gittStatistikk;
@@ -83,7 +81,8 @@ export function OrgEnhetStatistikk({
   const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
 
   const underTeknologiavdelingen =
-    orgEnhetId === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhetId);
+    orgEnhetId === teknologiavdelingenId ||
+    enheterUnderTekAvd?.includes(orgEnhetId);
 
   const innerContent = isLoading ? (
     <div
@@ -373,7 +372,11 @@ function OrgEnheterStatistikk({
   statistikk: OrgEnhetStatistikkItem[];
 }) {
   return (
-    <div>
+    <div
+      css={css`
+        width: 100%;
+      `}
+    >
       {(!!title || !!helpText) && (
         <div
           css={css`

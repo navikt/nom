@@ -23,6 +23,7 @@ public class KorrigerGyldigFomEventV1 extends OrgEnhetEvent {
     }
 
     public record KorrigerGyldigFomEventData(
+        String id,
         LocalDate gyldigFom
     ) implements Data {}
 }

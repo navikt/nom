@@ -21,10 +21,10 @@ import {
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
+import { isEksternSamarbeidspartnerOrgEnhet } from "~/customUtils/environmentUtils";
 import { isPeriodActiveOrFuture } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import { OrgRessursTabellPageInner } from "~/pages/ResourcePage/TableView/OrgRessursTabellPageInner";
 import type { ExcelExportRequest, OrgEnhet } from "~/types/api-models";
-import { isEksternSamarbeidspartnerOrgEnhet } from "~/utils";
 
 export const OrgRessursTabellPage = () => {
   const { id } = useParams({ from: "/org/resources-table/$id" });

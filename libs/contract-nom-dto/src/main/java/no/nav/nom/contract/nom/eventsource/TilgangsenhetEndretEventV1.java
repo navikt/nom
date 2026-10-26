@@ -25,6 +25,7 @@ public class TilgangsenhetEndretEventV1 extends OrgEnhetEvent {
     }
 
     public record TilgangsenhetEndretEventData(
+        String id,
         String tilgangsenhetId
     ) implements Data {}
 }

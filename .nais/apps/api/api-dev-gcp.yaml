@@ -348,9 +348,6 @@ spec:
         - application: eien-poc
           namespace: eien
           cluster: dev-gcp
-        - application: pensjon-deployment-audit
-          namespace: pensjon-revisjon
-          cluster: dev-gcp
         - application: nom-pusher
           namespace: oksty
           cluster: dev-gcp
@@ -362,6 +359,15 @@ spec:
           cluster: dev-gcp
         - application: entra-proxy
           namespace: sikkerhetstjenesten
+          cluster: dev-gcp
+        - application: nom-sf-integrasjon
+          namespace: org
+          cluster: dev-gcp
+        - application: nda
+          namespace: proaktiv
+          cluster: dev-gcp
+        - application: rekruttering
+          namespace: oksty
           cluster: dev-gcp
     outbound:
       rules:

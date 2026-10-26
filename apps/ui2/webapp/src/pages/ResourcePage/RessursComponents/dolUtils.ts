@@ -19,7 +19,7 @@ import {
   formatDateWithoutTimezone,
   latestDate,
   todayWithoutTimezone,
-} from "~/dateUtils/dateUtils";
+} from "~/customUtils/dateUtils";
 import type { OrgtilknytningEtterValidering } from "~/pages/ResourcePage/RessursComponents/EditOrgtilknytninger";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 

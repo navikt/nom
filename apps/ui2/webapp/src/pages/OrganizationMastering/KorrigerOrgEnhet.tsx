@@ -32,7 +32,7 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { formatDateWithoutTimezone } from "~/dateUtils/dateUtils";
+import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -195,9 +195,7 @@ function KorrigerOrgEnhetForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
-
       gyldigFom: values.gyldigFom,
-
       orgEnhetsType: values.orgEnhetsType ?? undefined,
     };
 
@@ -247,9 +245,9 @@ function KorrigerOrgEnhetForm({
             >
               Lagre
             </Button>
-
-            {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
           </div>
+
+          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
         </VStack>
       </form>
     </FormProvider>

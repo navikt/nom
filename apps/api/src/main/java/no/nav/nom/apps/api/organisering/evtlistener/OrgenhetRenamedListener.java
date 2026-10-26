@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -22,6 +23,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +75,17 @@ public class OrgenhetRenamedListener {
 
         StreamSupport.stream(records.spliterator(), false).forEach(consumerRecord -> {
             var organiseringEvent = consumerRecord.value();
-            if (organiseringEvent instanceof OrganiseringAvsluttetEventV1 avsluttet) {
+            if (organiseringEvent == null) {
+                log.warn("Received null organiseringEvent from Kafka. Skipping processing.");
+                return;
+            }
+            if (organiseringEvent instanceof OrganiseringAvsluttetEventV1 avsluttetEvt) {
+                var fid = avsluttetEvt.getFid();
+                var gyldigTom = ((OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData) avsluttetEvt.getData()).gyldigTom();
+                var metadata = avsluttetEvt.getMetadata();
+                var createdTimestamp = avsluttetEvt.getMetadata().createdTimestamp();
                 // Legg inn en delay for å sikre at eventuell ny organisering har blitt prosessert før vi sjekker opp mot alternativ orgenhet
-                ex.schedule(() -> handleOrganiseringAvsluttet(avsluttet), delayAmount, delayUnit);
+                ex.schedule(() -> handleOrganiseringAvsluttet(fid, gyldigTom, metadata, createdTimestamp), delayAmount, delayUnit);
             }
         });
     }
@@ -85,9 +95,8 @@ public class OrgenhetRenamedListener {
         this.delayAmount = amount;
     }
 
-    private void handleOrganiseringAvsluttet(OrganiseringAvsluttetEventV1 avsluttetEvt) {
-        var fid = avsluttetEvt.getFid();
-        var organisering = getAvsluttetOrganiseringState(avsluttetEvt);
+    private void handleOrganiseringAvsluttet(String fid, LocalDate gyldigTom, Event.Metadata metadata, LocalDateTime createdTimestamp) {
+        var organisering = getAvsluttetOrganiseringState(fid, gyldigTom, metadata.inputMetadata().inputInterfaceMethodArguments());
         if (organisering != null) {
             var opprinneligEnhet = orgenhetService.getById(organisering.id()).orElse(null);
             if (opprinneligEnhet == null) {
@@ -116,7 +125,7 @@ public class OrgenhetRenamedListener {
             if (!opprinneligEnhetRemedyEnhet.get().remedyEnhetId().equals(alternativEnhetRemedyEnhet.get().remedyEnhetId())) {
                 log.info("Remedy enhet id {} for enhet tilhørende avsluttet-organisering event er ikke lik remedy enhet id {} for alternativ aktiv enhet med samme agressoId og nivå", opprinneligEnhetRemedyEnhet.get().remedyEnhetId(), alternativEnhetRemedyEnhet.get().remedyEnhetId());
             }
-            if (avsluttetEvt.getMetadata().createdTimestamp().isBefore(LocalDate.now().minusDays(params.maxEvtAlderDagerForVarsel()).atStartOfDay())) {
+            if (createdTimestamp.isBefore(LocalDate.now().minusDays(params.maxEvtAlderDagerForVarsel()).atStartOfDay())) {
                 log.info("Gammel mulig navnendring på enhet {} til enhet {} for avsluttet-organisering event med fid {}. Sender ikke mail", opprinneligEnhet.getId(), alternativEnhet.getId(), fid);
             } else {
                 sendEpostVarsling(
@@ -158,22 +167,21 @@ public class OrgenhetRenamedListener {
         return orgenhetNavn + " (" + orgenhetId + "/" + remedyEnhetId + ")";
     }
 
-    private OrganiseringState getAvsluttetOrganiseringState(OrganiseringAvsluttetEventV1 avsluttetEvt) {
-        var gyldigTom = ((OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData)avsluttetEvt.getData()).gyldigTom();
+    private OrganiseringState getAvsluttetOrganiseringState(String fid, LocalDate gyldigTom, Object inputInterfaceMethodArguments) {
         if (gyldigTom == null || gyldigTom.isAfter(LocalDate.now())) {
             log.error("Gyldig tom er null eller ikke passert. Kan ikke håndtere det i denne konteksten. Fid: {}, Gyldig tom: {}",
-                avsluttetEvt.getFid(), gyldigTom);
+                fid, gyldigTom);
             return null;
         }
         // Lage fake OrganiseringState objekt siden state repo ikke har historikk
-        var input = jsonMapper.valueToTree(avsluttetEvt.getMetadata().inputMetadata().inputInterfaceMethodArguments());
+        var input = jsonMapper.valueToTree(inputInterfaceMethodArguments);
         var id = input.get("id").asString();
         var navn = input.get("navn").asString();
         var idOver = input.get("idOver").asString();
         var navnOver = input.get("navnOver").asString();
         var gyldigFom = LocalDate.parse(input.get("gyldigFom").asString(), DateTimeFormatter.ISO_DATE);
         var organiseringState = new OrganiseringState(
-            avsluttetEvt.getFid(),
+            fid,
             id,
             navn,
             idOver,
