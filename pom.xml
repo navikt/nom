@@ -55,7 +55,7 @@
         <apache.poi.version>6.0.0</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <slack-client.version>1.52.0</slack-client.version>
-        <okhttp.version>5.5.0</okhttp.version>
+        <okhttp.version>5.5.1</okhttp.version>
     </properties>
 
     <dependencyManagement>
