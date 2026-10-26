@@ -1,3 +1,5 @@
+// TODO: Fjerne unødvendige Consts i filer som bruker disse, heller bruke dem direkte
+
 export function isInDevelopment() {
   const match = globalThis.location.hostname.match(/localhost|\.dev\./);
 
@@ -12,7 +14,7 @@ export function direktoratOrgEnhetId() {
   return isInDevelopment() ? "fa965e" : "bu431e";
 }
 
-export function teknologiavdelingenId() {
+export function teknologiavdelingenOrgEnhetId() {
   return isInDevelopment() ? "je104d" : "te627k";
 }
 

@@ -59,6 +59,7 @@ function Orghierarki({
     return;
   }
 
+  // TODO: Hente navn på direktorat + linjene automatisk + for-loop?
   return (
     <div>
       <Heading level="2" size="large">

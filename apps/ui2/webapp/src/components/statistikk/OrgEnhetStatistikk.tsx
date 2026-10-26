@@ -20,7 +20,7 @@ import {
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import { teknologiavdelingenId } from "~/customUtils/environmentUtils";
+import { teknologiavdelingenOrgEnhetId } from "~/customUtils/environmentUtils";
 import type { GlobalStatistikkResponse } from "~/types/api-models";
 
 export function OrgEnhetStatistikk({
@@ -46,7 +46,7 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
-  const tekAvdNavId = teknologiavdelingenId();
+  const teknologiavdelingenId = teknologiavdelingenOrgEnhetId();
 
   const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,
@@ -56,8 +56,8 @@ export function OrgEnhetStatistikk({
   };
 
   const enheterUnderTekAvdQuery = useQuery({
-    queryKey: getUnderliggendeOrgenheter.queryKey(tekAvdNavId),
-    queryFn: () => getUnderliggendeOrgenheter.queryFn(tekAvdNavId),
+    queryKey: getUnderliggendeOrgenheter.queryKey(teknologiavdelingenId),
+    queryFn: () => getUnderliggendeOrgenheter.queryFn(teknologiavdelingenId),
   });
 
   const isLoading = orgEnhetStatistikkQuery.isLoading && !gittStatistikk;
@@ -81,7 +81,8 @@ export function OrgEnhetStatistikk({
   const enheterUnderTekAvd = enheterUnderTekAvdQuery.data;
 
   const underTeknologiavdelingen =
-    orgEnhetId === tekAvdNavId || enheterUnderTekAvd?.includes(orgEnhetId);
+    orgEnhetId === teknologiavdelingenId ||
+    enheterUnderTekAvd?.includes(orgEnhetId);
 
   const innerContent = isLoading ? (
     <div
