@@ -40,7 +40,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
-import { navToppnodeOrgEnhetId, isInDevelopment } from "~/customUtils/environmentUtils";
+import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -270,7 +270,7 @@ function OpprettOrgEnhetForm({
             <FormRessursSearchWrapper
               label="Leder på organisasjonsenhet"
               name="lederRessursNavident"
-              valgtRessursInfo
+              visValgtRessursInfo
             />
 
             <FormDateWrapper name="gyldigFom" />
