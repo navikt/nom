@@ -24,6 +24,7 @@ import no.nav.nom.apps.api.orgenhet.api.app.dto.OvrigeEndringerOrgEnhetRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreKostnadssted;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
@@ -186,7 +187,7 @@ public class OrgEnhetRestService {
             orgEnhetLederCommandService.oppdaterOrgEnhetLederStartdato(fid, oppdaterOrgEnhetLederStartdato);
 
             // map to a kostnadssted
-            opprettOrgEnhetKostnadsstedMapping(
+            var mappingResponse =  opprettOrgEnhetKostnadsstedMapping(
                 new OpprettOrgEnhetKostnadsstedMappingRequest(
                     opprettOrgEnhetRequest.kostnadsstedId(),
                     orgEnhetState.id(),
@@ -194,8 +195,12 @@ public class OrgEnhetRestService {
                     Objects.requireNonNullElse(orgEnhetState.gyldigTom(), LocalDate.parse("2099-12-31"))
                 )
             );
-            // TODO set kostnadssted til orgEnhetState
 
+            // TODO set kostnadssted til orgEnhetState
+            // if(mappingResponse.kostnadsstedId() != null) {
+                // orgEnhetCommandService.endreKostnadssted(orgEnhetState.fid(),
+                 //   new EndreKostnadssted(mappingResponse.kostnadsstedId(), orgEnhetState.id(), inputMetadata ));
+            //}
 
             return new OpprettOrgEnhetResponse(
                 orgEnhetState.fid(),
