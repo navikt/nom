@@ -194,6 +194,8 @@ public class OrgEnhetRestService {
                     Objects.requireNonNullElse(orgEnhetState.gyldigTom(), LocalDate.parse("2099-12-31"))
                 )
             );
+            // TODO set kostnadssted til orgEnhetState
+
 
             return new OpprettOrgEnhetResponse(
                 orgEnhetState.fid(),
