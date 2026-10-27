@@ -56,10 +56,10 @@ spec:
     failureThreshold: 50 # 18*10sec = 3min
   resources:
     requests:
-      cpu: 300m
-      memory: 12Gi
+      cpu: 1000m
+      memory: 10Gi
     limits:
-      memory: 20Gi
+      memory: 15Gi
   leaderElection: true
   prometheus:
     enabled: true
