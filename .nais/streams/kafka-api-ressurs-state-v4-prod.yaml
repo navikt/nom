@@ -32,9 +32,9 @@ spec:
   resources:
     requests:
       cpu: 100m
-      memory: 512Mi
+      memory: 1024Mi
     limits:
-      memory: 2024Mi
+      memory: 1526Mi
   prometheus:
     enabled: true
     path: /internal/prometheus
