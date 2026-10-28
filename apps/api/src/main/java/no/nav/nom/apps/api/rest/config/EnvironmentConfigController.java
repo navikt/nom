@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -69,7 +70,7 @@ public class EnvironmentConfigController {
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId for DIREKTORATET enhet") String direktoratId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId for TEKNOLOGIAVDELINGEN enhet") String teknologiavdelingenId,
 
-        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId'er for alle linjeenheter") Set<String> linjeenhetene,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId'er for alle linjeenheter") List<String> linjeenhetene,
 
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId for HELFO Løvnode enhet") String helfoId,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Nom OrgEnhetId for SKATTEETATEN Løvnode enhet") String skattId,

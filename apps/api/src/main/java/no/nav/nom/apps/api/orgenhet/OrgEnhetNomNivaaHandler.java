@@ -37,7 +37,7 @@ public class OrgEnhetNomNivaaHandler {
     private final OrgEnhetOverordnetResolver orgEnhetOverordnetResolver;
     private final OrgEnhetUnderordnetResolver orgEnhetUnderordnetResolver;
 
-    private final Set<String> linjeenheteneOrgEnhetIds;
+    private final List<String> linjeenheteneOrgEnhetIds;
 
 
     public OrgEnhetNomNivaaHandler(
