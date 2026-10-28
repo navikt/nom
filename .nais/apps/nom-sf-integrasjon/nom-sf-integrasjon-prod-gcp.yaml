@@ -43,7 +43,7 @@ spec:
       memory: 1Gi
   liveness:
     path: internal/health/liveness
-    initialDelay: 15
+    initialDelay: 30
     periodSeconds: 5
     failureThreshold: 5
   readiness:
