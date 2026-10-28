@@ -1,5 +1,5 @@
 NOM_ADMIN_GROUP_ID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
-NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
+NIK_BASEURL: "http://nav-ident.org"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
 ZALARIS_CLIENT_ID: "301f612f-eab6-47b5-84d0-8e517a8b48fc"
 
