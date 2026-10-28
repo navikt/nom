@@ -117,7 +117,7 @@ app:
     riksrevisjonen-id: ge146b
     vikafossen-id: ru151s
     teknologiavdelingenId: je104d
-    linjeenhetene: me177r,ju219d,tu734a,sy471r, hu797w
+    linjeenhetene: me177r,ju219d,hu797w,tu734a,sy471r, # Rekkefølgen styrer rekkefølge på forsiden. Frontend viser de 4 første.
     nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
   google-storage-bucket-name:
     missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket
