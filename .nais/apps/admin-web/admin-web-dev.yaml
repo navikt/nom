@@ -1,10 +1,10 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
-  name: "nom-admin-web"
-  namespace: "org"
+  name: nom-admin-web
+  namespace: org
   labels:
-    team: "org"
+    team: org
 spec:
   image: "{{image}}"
   port: 8080
