@@ -9,5 +9,5 @@ PDL_CLIENT_ID: prod-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_API_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
-REDIS_HOST: nav-ident-redis.org.svc.cluster.local
+REDIS_HOST: nav-ident-redis.org
 NAVIDENT_SEQUENCE: 168000

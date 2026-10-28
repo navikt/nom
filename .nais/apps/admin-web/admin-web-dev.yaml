@@ -14,11 +14,11 @@ spec:
     - name: EXPRESS_PORT
       value: "8080"
     - name: NOM_ADMIN_API_URL
-      value: http://nom-admin.org.svc.cluster.local
+      value: http://nom-admin.org
     - name: NOM_ADMIN_API_SCOPE
       value: api://dev-gcp.org.nom-admin/.default
     - name: NOM_API_URL
-      value: http://nom-api.nom.svc.cluster.local
+      value: http://nom-api.nom
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
     - name: NOM_REMEDY_INTEGRASJON_API_URL
@@ -26,7 +26,7 @@ spec:
     - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
       value: api://dev-fss.org.nom-remedy-integrasjon/.default
     - name: NOM_SF_INTEGRASJON_API_URL
-      value: http://nom-sf-integrasjon.org.svc.cluster.local
+      value: http://nom-sf-integrasjon.org
     - name: NOM_SF_INTEGRASJON_API_SCOPE
       value: api://dev-gcp.org.nom-sf-integrasjon/.default
   image: "{{image}}"

@@ -90,7 +90,7 @@ app:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
     utbet-mottakere: org-nom-prod-api-utbet-mottakere
-NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
+NIK_BASEURL: "http://nav-ident.org"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 
 PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
@@ -117,8 +117,8 @@ NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.def
 
 MAIN_MANAGER_BASEURL: "https://nav.mainmanager.no"
 
-PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
+PAARORENDE_BASEURL: "http://nom-paarorende.org"
 PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default
 
-ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof"
 ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://prod-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default
