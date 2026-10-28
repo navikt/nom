@@ -6,6 +6,29 @@ metadata:
   labels:
     team: org
 spec:
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: EXPRESS_HOST
+      value: "::"
+    - name: EXPRESS_PORT
+      value: "8080"
+    - name: NOM_ADMIN_API_URL
+      value: http://nom-admin.org.svc.cluster.local
+    - name: NOM_ADMIN_API_SCOPE
+      value: api://prod-gcp.org.nom-admin/.default
+    - name: NOM_API_URL
+      value: http://nom-api.nom.svc.cluster.local
+    - name: NOM_API_SCOPE
+      value: api://prod-gcp.nom.nom-api/.default
+    - name: NOM_REMEDY_INTEGRASJON_API_URL
+      value: https://nom-remedy-integrasjon.prod-fss-pub.nais.io
+    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
+      value: api://prod-fss.org.nom-remedy-integrasjon/.default
+    - name: NOM_SF_INTEGRASJON_API_URL
+      value: http://nom-sf-integrasjon.org.svc.cluster.local
+    - name: NOM_SF_INTEGRASJON_API_SCOPE
+      value: api://prod-gcp.org.nom-sf-integrasjon/.default
   image: "{{image}}"
   port: 8080
   azure:
@@ -76,26 +99,3 @@ spec:
       destinations:
         - id: loki
         - id: elastic
-  env:
-    - name: NODE_ENV
-      value: "production"
-    - name: EXPRESS_HOST
-      value: "::"
-    - name: EXPRESS_PORT
-      value: "8080"
-    - name: NOM_ADMIN_API_URL
-      value: http://nom-admin.org.svc.cluster.local
-    - name: NOM_ADMIN_API_SCOPE
-      value: api://prod-gcp.org.nom-admin/.default
-    - name: NOM_API_URL
-      value: http://nom-api.nom.svc.cluster.local
-    - name: NOM_API_SCOPE
-      value: api://prod-gcp.nom.nom-api/.default
-    - name: NOM_REMEDY_INTEGRASJON_API_URL
-      value: https://nom-remedy-integrasjon.prod-fss-pub.nais.io
-    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
-      value: api://prod-fss.org.nom-remedy-integrasjon/.default
-    - name: NOM_SF_INTEGRASJON_API_URL
-      value: http://nom-sf-integrasjon.org.svc.cluster.local
-    - name: NOM_SF_INTEGRASJON_API_SCOPE
-      value: api://prod-gcp.org.nom-sf-integrasjon/.default
