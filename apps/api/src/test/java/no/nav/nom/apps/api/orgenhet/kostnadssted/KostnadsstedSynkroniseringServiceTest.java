@@ -41,7 +41,6 @@ class KostnadsstedSynkroniseringServiceTest {
     @BeforeEach
     void setUp() {
         service = new KostnadsstedSynkroniseringService(client, repository, commandService, leaderElection, unleash);
-        when(unleash.isEnabled(any())).thenReturn(true);
     }
 
     private static OrgEnhetState orgEnhet(String fid, String id, String overFid, String kostnadssted) {
@@ -51,6 +50,7 @@ class KostnadsstedSynkroniseringServiceTest {
 
     @Test
     void should_identify_and_publish_changed_kostnadssted() {
+        when(unleash.isEnabled(any())).thenReturn(true);
         when(repository.getAll()).thenReturn(List.of(
             orgEnhet("FID_TOPP", "TOPP", null, "K0"),
             orgEnhet("FID_A", "A", "FID_TOPP", "K1"),
@@ -80,6 +80,7 @@ class KostnadsstedSynkroniseringServiceTest {
 
     @Test
     void should_not_run_when_not_leader() {
+        when(unleash.isEnabled(any())).thenReturn(true);
         when(leaderElection.isLeader()).thenReturn(false);
 
         service.synkroniserKostnadsstederScheduler();
