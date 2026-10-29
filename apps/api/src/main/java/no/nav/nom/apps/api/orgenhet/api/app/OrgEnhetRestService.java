@@ -196,11 +196,11 @@ public class OrgEnhetRestService {
                 )
             );
 
-            // TODO set kostnadssted til orgEnhetState
-            // if(mappingResponse.kostnadsstedId() != null) {
-                // orgEnhetCommandService.endreKostnadssted(orgEnhetState.fid(),
-                 //   new EndreKostnadssted(mappingResponse.kostnadsstedId(), orgEnhetState.id(), inputMetadata ));
-            //}
+            // set kostnadssted til orgEnhetState
+            if(mappingResponse.kostnadsstedId() != null) {
+                orgEnhetCommandService.endreKostnadssted(orgEnhetState.fid(),
+                 new EndreKostnadssted(mappingResponse.kostnadsstedId(), orgEnhetState.id(), inputMetadata ));
+            }
 
             return new OpprettOrgEnhetResponse(
                 orgEnhetState.fid(),
