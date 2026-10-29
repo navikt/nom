@@ -199,7 +199,7 @@ public class OrgEnhetRestService {
             // set kostnadssted til orgEnhetState
             if(mappingResponse.kostnadsstedId() != null) {
                 orgEnhetCommandService.endreKostnadssted(orgEnhetState.fid(),
-                 new EndreKostnadssted(mappingResponse.kostnadsstedId(), orgEnhetState.id(), inputMetadata ));
+                 new EndreKostnadssted(orgEnhetState.id(), mappingResponse.kostnadsstedId(), inputMetadata));
             }
 
             return new OpprettOrgEnhetResponse(
