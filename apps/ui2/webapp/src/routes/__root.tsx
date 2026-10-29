@@ -14,6 +14,7 @@ import { headerHeight, NavHeader } from "~/components/NavHeader";
 import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { TestBanner, testBannerHeight } from "~/components/TestBanner";
+import { useInDevelopment } from "~/customUtils/environmentUtils";
 
 export const queryClient = new QueryClient();
 
@@ -63,16 +64,23 @@ export const Route = createRootRouteWithContext<{
       currentRoute.includes(bannerRoute),
     );
 
+    const displayTestBanner = useInDevelopment();
+
     return (
       <>
         {hasAdminAccess && <PrefetchUsefulAdminQueries />}
         <React.Suspense fallback="">
           {/*<TanStackRouterDevtools position="bottom-right" />*/}
         </React.Suspense>
+
         <TestBanner />
+
         <NavHeader />
+
         <PilotBanner />
+
         {showChristmasBanner && <ChristmasBanner />}
+
         <div
           css={css`
             background-color: var(--nom-bg);
@@ -80,7 +88,7 @@ export const Route = createRootRouteWithContext<{
               100vh -
                 (
                   ${headerHeight} + ${pilotBannerHeight} + ${footerHeight} +
-                    ${testBannerHeight}
+                    ${displayTestBanner ? testBannerHeight : "0px"}
                 )
             );
             width: 100%;
@@ -91,6 +99,7 @@ export const Route = createRootRouteWithContext<{
             <Outlet />
           </div>
         </div>
+
         <Footer />
       </>
     );

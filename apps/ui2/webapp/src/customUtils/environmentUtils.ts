@@ -1,99 +1,105 @@
-// TODO: Fjerne unødvendige Consts i filer som bruker disse, heller bruke dem direkte
+import { useQuery } from "@tanstack/react-query";
 
-export function isInDevelopment() {
-  const match = globalThis.location.hostname.match(/localhost|\.dev\./);
+import { CACHE_FOR, getEnvironmentConfig } from "~/api/react-query-endpoints";
+import { DeployCluster } from "~/types/api-models";
 
-  return !!match;
+export function useGetEnvironmentConfig() {
+  return useQuery({
+    queryKey: getEnvironmentConfig.queryKey,
+    queryFn: getEnvironmentConfig.queryFn,
+    gcTime: CACHE_FOR.anHour,
+    staleTime: CACHE_FOR.anHour,
+  });
 }
 
-export function navToppnodeOrgEnhetId() {
-  return isInDevelopment() ? "sa312u" : "py437s";
+export function useInDevelopment() {
+  return useGetEnvironmentConfig().data?.deployCluster === DeployCluster.DEV;
 }
 
-export function direktoratOrgEnhetId() {
-  return isInDevelopment() ? "fa965e" : "bu431e";
+export function useNavToppnodeOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.navToppnodeId ?? "";
 }
 
-export function teknologiavdelingenOrgEnhetId() {
-  return isInDevelopment() ? "je104d" : "te627k";
+export function useDirektoratOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.direktoratId ?? "";
 }
 
-export function helfoOrgEnhetId() {
-  return isInDevelopment() ? "mu405g" : "je305h";
+export function useTeknologiavdelingenOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.teknologiavdelingenId ?? "";
 }
 
-export function skatteetatenOrgEnhetId() {
-  return isInDevelopment() ? "ja464g" : "ne938h";
+export function useHelfoOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.helfoId ?? "";
 }
 
-export function riksrevisjonenOrgEnhetId() {
-  return isInDevelopment() ? "ge146b" : "ke602d";
+export function useSkatteetatenOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.skattId ?? "";
 }
 
-export function vikafossenOrgEnhetId() {
-  return isInDevelopment() ? "ru151s" : "ru664y";
+export function useRiksrevisjonenOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.riksrevisjonenId ?? "";
 }
 
-export function forsideOrgEnhetIder() {
-  const developmentForsideOrgEnhetIder = [
-    "fa965e",
-    "me177r",
-    "ju219d",
-    "hu797w",
-    "tu734a",
-  ];
-  const productionForsideOrgEnhetIder = [
-    "bu431e",
-    "ry630r",
-    "te464t",
-    "se232x",
-    "ne994m",
-  ];
-
-  return isInDevelopment()
-    ? developmentForsideOrgEnhetIder
-    : productionForsideOrgEnhetIder;
+export function useVikafossenOrgEnhetId() {
+  return useGetEnvironmentConfig().data?.vikafossenId ?? "";
 }
 
-export function isHelfoOrgEnhet(orgEnhetId: string) {
-  return orgEnhetId === helfoOrgEnhetId();
+export function useLinjeenhetOrgEnhetIder() {
+  return useGetEnvironmentConfig().data?.linjeenhetene ?? "";
 }
 
-export function isSkatteetatenOrgEnhet(orgEnhetId: string) {
-  return orgEnhetId === skatteetatenOrgEnhetId();
+export function useIsHelfoOrgEnhet(orgEnhetId: string) {
+  return orgEnhetId === useHelfoOrgEnhetId();
 }
 
-export function isRiksrevisjonenOrgEnhet(orgEnhetId: string) {
-  return orgEnhetId === riksrevisjonenOrgEnhetId();
+export function useIsSkatteetatenOrgEnhet(orgEnhetId: string) {
+  return orgEnhetId === useSkatteetatenOrgEnhetId();
 }
 
-export function isVikafossenOrgEnhet(orgEnhetId: string) {
-  return orgEnhetId === vikafossenOrgEnhetId();
+export function useIsRiksrevisjonenOrgEnhet(orgEnhetId: string) {
+  return orgEnhetId === useRiksrevisjonenOrgEnhetId();
 }
 
-export function isEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
+export function useIsVikafossenOrgEnhet(orgEnhetId: string) {
+  return orgEnhetId === useVikafossenOrgEnhetId();
+}
+
+export function useIsEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
   return (
-    isHelfoOrgEnhet(orgEnhetId) ||
-    isSkatteetatenOrgEnhet(orgEnhetId) ||
-    isRiksrevisjonenOrgEnhet(orgEnhetId) ||
-    isVikafossenOrgEnhet(orgEnhetId)
+    useIsHelfoOrgEnhet(orgEnhetId) ||
+    useIsSkatteetatenOrgEnhet(orgEnhetId) ||
+    useIsRiksrevisjonenOrgEnhet(orgEnhetId) ||
+    useIsVikafossenOrgEnhet(orgEnhetId)
   );
 }
 
-export function eksterneOrgEnheter() {
-  return isInDevelopment()
-    ? ["fa520s", "fe857w", "hy255y", "ja464g", "py733e", "ru151s"]
-    : ["fe178t", "hu192a", "ne938h", "va111j", "va981f", "ru664y", "ke602d"];
+export function useUksterneOrgEnhetIder() {
+  return [
+    useHelfoOrgEnhetId(),
+    useSkatteetatenOrgEnhetId(),
+    useRiksrevisjonenOrgEnhetId(),
+    useVikafossenOrgEnhetId(),
+  ].filter((id) => id !== "");
 }
 
-export function teamkatalogenBaseUrl() {
-  return isInDevelopment()
+export function useTeamkatalogenBaseUrl() {
+  return useInDevelopment()
     ? "https://teamkatalog.ekstern.dev.nav.no"
     : "https://teamkatalog.nav.no";
 }
 
-export function adminBaseUrl() {
-  return isInDevelopment()
-    ? "https://nom-admin.ansatt.dev.nav.no"
+export function useAdminBaseUrl() {
+  return useInDevelopment()
+    ? `https://nom-admin${useEnvironmentSuffix()}.ansatt.dev.nav.no`
     : "https://nom-admin.ansatt.nav.no";
+}
+
+export function useEnvironmentSuffix() {
+  const suffix = useGetEnvironmentConfig().data?.environmentSuffix ?? "";
+
+  if (!suffix) {
+    return "";
+  }
+
+  return `-${suffix}`;
 }

@@ -71,7 +71,7 @@ export function SektorStep() {
     navigate({
       to: "/ressurs/create/$step",
       params: { step },
-      search: (oldSearch) => ({
+      search: (oldSearch: any) => ({
         ...oldSearch,
         sektor: selectedSektor,
         tilknytningtype,

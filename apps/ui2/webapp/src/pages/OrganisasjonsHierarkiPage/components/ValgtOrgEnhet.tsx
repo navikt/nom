@@ -31,8 +31,8 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { OrgEnhetStatistikk } from "~/components/statistikk/OrgEnhetStatistikk";
 import { UserImage } from "~/components/UserImage";
 import {
-  isEksternSamarbeidspartnerOrgEnhet,
-  teamkatalogenBaseUrl,
+  useIsEksternSamarbeidspartnerOrgEnhet,
+  useTeamkatalogenBaseUrl,
 } from "~/customUtils/environmentUtils";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import {
@@ -88,7 +88,7 @@ export const ValgtOrgEnhet = ({
     enheterSomKanHaRessurser.data || []
   ).some((enhet) => enhet.id === orgEnhet.id);
 
-  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+  const eksternSamarbeidspartner = useIsEksternSamarbeidspartnerOrgEnhet(
     orgEnhet.id,
   );
 
@@ -112,7 +112,7 @@ export const ValgtOrgEnhet = ({
       orgEnhet.orgEnhetsType === OrgEnhetsType.KLAGEINSTANS,
   }).data;
 
-  const teamkatalogenLenke = `${teamkatalogenBaseUrl()}/area/${teamkatalogSeksjon?.id}`;
+  const teamkatalogenLenke = `${useTeamkatalogenBaseUrl()}/area/${teamkatalogSeksjon?.id}`;
 
   const kostnadssted = hasAdminAccess
     ? useKostnadsstedInfo(orgEnhet?.id)
@@ -464,7 +464,7 @@ function DropdownMeny({
   const adminOrWriteForOrgenhet =
     (hasWriteAccess && hasWriteAccessForOrgenhet) || hasAdminAccess;
 
-  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+  const eksternSamarbeidspartner = useIsEksternSamarbeidspartnerOrgEnhet(
     orgEnhet.id,
   );
 

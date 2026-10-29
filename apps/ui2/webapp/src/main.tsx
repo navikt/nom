@@ -6,7 +6,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { css } from "@emotion/react";
 import { getWebInstrumentations, initializeFaro } from "@grafana/faro-web-sdk";
 import { TracingInstrumentation } from "@grafana/faro-web-tracing";
-import { Alert, Box, Heading, Loader } from "@navikt/ds-react";
+import { Alert, Box, Heading } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -20,14 +20,18 @@ import { Toaster } from "react-hot-toast";
 
 import { apolloClient } from "~/api/apolloclient";
 import { useGetSession } from "~/api/useGetSession";
-import { isInDevelopment } from "~/customUtils/environmentUtils";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import { useGetEnvironmentConfig } from "~/customUtils/environmentUtils";
 
 import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
 
 // Don't initialize faro when running the dev-server
 if (import.meta.env.PROD) {
-  const url = isInDevelopment()
+  const inDevelopment =
+    !!globalThis.location.hostname.match(/localhost|\.dev\./);
+
+  const url = inDevelopment
     ? "https://telemetry.ekstern.dev.nav.no/collect"
     : "https://telemetry.nav.no/collect";
 
@@ -80,45 +84,42 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
-// Register things for typesafety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
 createRoot(document.querySelector("#root") as HTMLElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ExpiryNotifier />
+
       <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+
       <ApolloProvider client={apolloClient}>
-        <LoadSession>
+        <LoadSessionAndEnvironment>
           <RouterProvider router={router} />
-        </LoadSession>
+        </LoadSessionAndEnvironment>
       </ApolloProvider>
+
       <Toaster toastOptions={{ position: "top-right" }} />
     </QueryClientProvider>
   </StrictMode>,
 );
 
-function LoadSession({ children }: { children: ReactNode }) {
+function LoadSessionAndEnvironment({ children }: { children: ReactNode }) {
   const session = useGetSession();
+  const environmentVariables = useGetEnvironmentConfig();
 
-  if (session.isLoading) {
+  if (session.isLoading || environmentVariables.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
+  if (session.isError || environmentVariables.isError) {
     return (
-      <Loader
-        css={css`
-          position: absolute;
-          top: 50%;
-          left: 50%;
-        `}
-      />
+      <Alert variant="error">
+        Det oppstod problemer med lasting av konfigurasjon
+      </Alert>
     );
   }
 
-  if (session.isError) {
-    return <Alert variant="error">Fant ikke sesjonsinfo</Alert>;
+  if (!session.data || !environmentVariables.data) {
+    return;
   }
 
   return children;

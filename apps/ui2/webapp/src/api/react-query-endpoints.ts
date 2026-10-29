@@ -8,6 +8,7 @@ import type {
   AvvikleRessursRequest,
   EndreOpphengOrgEnhetRequest,
   EndreOpphengOrgEnhetResponse,
+  EnvironmentConfigResponse,
   ExcelExportRequest,
   FysiskBrukersted,
   GetPersonRequest,
@@ -308,6 +309,16 @@ export const getSession = {
     (
       await axios.get<SessionInfoResponse>(
         `${NOM_API_BASE_PATH}/app/sessioninfo`,
+      )
+    ).data,
+};
+
+export const getEnvironmentConfig = {
+  queryKey: ["ENVIRONMENTCONFIG"],
+  queryFn: async () =>
+    (
+      await axios.get<EnvironmentConfigResponse>(
+        `${NOM_API_BASE_PATH}/app/environmentconfig`,
       )
     ).data,
 };
