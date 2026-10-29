@@ -10,7 +10,6 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,8 +34,7 @@ class KostnadsstedSynkroniseringServiceTest {
 
     private static final LocalDate FOM = LocalDate.now().minusYears(1);
 
-    @Mock
-    private Unleash unleash;
+    private final Unleash unleash = mock(Unleash.class);
 
     @BeforeEach
     void setUp() {
@@ -50,7 +48,7 @@ class KostnadsstedSynkroniseringServiceTest {
 
     @Test
     void should_identify_and_publish_changed_kostnadssted() {
-        when(unleash.isEnabled(any())).thenReturn(true);
+        when(unleash.isEnabled(KostnadsstedSynkroniseringService.UNLEASH_KOSTNADSSTED_SYNK)).thenReturn(true);
         when(repository.getAll()).thenReturn(List.of(
             orgEnhet("FID_TOPP", "TOPP", null, "K0"),
             orgEnhet("FID_A", "A", "FID_TOPP", "K1"),
@@ -80,12 +78,33 @@ class KostnadsstedSynkroniseringServiceTest {
 
     @Test
     void should_not_run_when_not_leader() {
-        when(unleash.isEnabled(any())).thenReturn(true);
+        when(unleash.isEnabled(KostnadsstedSynkroniseringService.UNLEASH_KOSTNADSSTED_SYNK)).thenReturn(true);
+
         when(leaderElection.isLeader()).thenReturn(false);
 
         service.synkroniserKostnadsstederScheduler();
 
         verifyNoInteractions(client, repository, commandService);
     }
-}
 
+    @Test
+    void should_not_run_when_toggle_disabled() {
+        when(unleash.isEnabled(KostnadsstedSynkroniseringService.UNLEASH_KOSTNADSSTED_SYNK)).thenReturn(false);
+        when(leaderElection.isLeader()).thenReturn(true);
+
+        service.synkroniserKostnadsstederScheduler();
+
+        verifyNoInteractions(client, repository, commandService);
+    }
+
+    @Test
+    void should_run_when_toggle_enabled_and_leader() {
+        when(unleash.isEnabled(KostnadsstedSynkroniseringService.UNLEASH_KOSTNADSSTED_SYNK)).thenReturn(true);
+        when(leaderElection.isLeader()).thenReturn(true);
+        when(repository.getAll()).thenReturn(List.of());
+
+        service.synkroniserKostnadsstederScheduler();
+
+        verify(repository).getAll();
+    }
+}
