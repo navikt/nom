@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.kostnadssted;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.clients.koststed.KostnadsstedMappingResponseDTO;
 import no.nav.nom.apps.api.clients.koststed.OrgEnhetKostnadsstedMappingClient;
@@ -35,17 +36,22 @@ public class KostnadsstedSynkroniseringService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final LeaderElection leaderElection;
+    private final Unleash unleash;
+
+    public static final String UNLEASH_KOSTNADSSTED_SYNK = "nom-api.kostnadssted-synk";
 
     public KostnadsstedSynkroniseringService(
         OrgEnhetKostnadsstedMappingClient kostnadsstedMappingClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         OrgEnhetCommandService orgEnhetCommandService,
-        LeaderElection leaderElection
+        LeaderElection leaderElection,
+        Unleash unleash
     ) {
         this.kostnadsstedMappingClient = kostnadsstedMappingClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.leaderElection = leaderElection;
+        this.unleash = unleash;
     }
 
     public record KostnadsstedEndring(String orgEnhetFid, String orgEnhetId, String gammeltKostnadsstedId, String nyttKostnadsstedId) {
@@ -53,6 +59,10 @@ public class KostnadsstedSynkroniseringService {
 
     @Scheduled(cron = "${kostnadssted.synk.cron:0 30 2 * * *}")
     public void synkroniserKostnadsstederScheduler() {
+        if (!unleash.isEnabled(UNLEASH_KOSTNADSSTED_SYNK)) {
+            log.info("Kostnadssted-synk: toggle {} er av, hopper over kjøring", UNLEASH_KOSTNADSSTED_SYNK);
+            return;
+        }
         if (leaderElection.isLeader()) {
             try {
                 synkroniserKostnadssteder();
@@ -126,4 +136,3 @@ public class KostnadsstedSynkroniseringService {
         return mappinger;
     }
 }
-

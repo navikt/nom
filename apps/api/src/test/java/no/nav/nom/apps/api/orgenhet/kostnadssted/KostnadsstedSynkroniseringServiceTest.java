@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.kostnadssted;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.clients.koststed.KostnadsstedMappingResponseDTO;
 import no.nav.nom.apps.api.clients.koststed.OrgEnhetKostnadsstedMappingClient;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
@@ -9,6 +10,7 @@ import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,9 +35,13 @@ class KostnadsstedSynkroniseringServiceTest {
 
     private static final LocalDate FOM = LocalDate.now().minusYears(1);
 
+    @Mock
+    private Unleash unleash;
+
     @BeforeEach
     void setUp() {
-        service = new KostnadsstedSynkroniseringService(client, repository, commandService, leaderElection);
+        service = new KostnadsstedSynkroniseringService(client, repository, commandService, leaderElection, unleash);
+        when(unleash.isEnabled(any())).thenReturn(true);
     }
 
     private static OrgEnhetState orgEnhet(String fid, String id, String overFid, String kostnadssted) {
