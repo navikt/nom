@@ -25,29 +25,45 @@ import { useGetEnvironmentConfig } from "~/customUtils/environmentUtils";
 
 import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
+import { getEnvironmentConfig } from "~/api/react-query-endpoints";
+import { DeployCluster, EnvironmentConfigResponse } from "~/types/api-models";
+
+const queryClient = new QueryClient();
 
 // Don't initialize faro when running the dev-server
 if (import.meta.env.PROD) {
-  const inDevelopment =
-    !!globalThis.location.hostname.match(/localhost|\.dev\./);
+  const environmentConfig = queryClient.getQueryData<EnvironmentConfigResponse>(
+    getEnvironmentConfig.queryKey,
+  );
 
-  const url = inDevelopment
-    ? "https://telemetry.ekstern.dev.nav.no/collect"
-    : "https://telemetry.nav.no/collect";
+  const configPromise = environmentConfig
+    ? Promise.resolve(environmentConfig)
+    : getEnvironmentConfig.queryFn();
 
-  initializeFaro({
-    url,
-    app: {
-      name: "nom-ui",
-    },
-    instrumentations: [
-      ...getWebInstrumentations(),
-      new TracingInstrumentation(),
-    ],
-  });
+  void configPromise
+    .then((config) => {
+      const inDevelopment = config.deployCluster === DeployCluster.DEV;
+
+      const suffix = config.environmentSuffix ?? "";
+
+      initializeFaro({
+        url: inDevelopment
+          ? "https://telemetry.ekstern.dev.nav.no/collect"
+          : "https://telemetry.nav.no/collect",
+        app: {
+          name: `nom-ui${suffix ? `-${suffix}` : ""}`,
+          namespace: "team-org",
+        },
+        instrumentations: [
+          ...getWebInstrumentations(),
+          new TracingInstrumentation(),
+        ],
+      });
+    })
+    .catch((error) => {
+      console.error("Could not load environment config for Faro", error);
+    });
 }
-
-const queryClient = new QueryClient();
 
 /**
  * Hide search params when creating ressurs
