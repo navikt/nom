@@ -593,6 +593,10 @@ function OrganisationHierarchyTree({
           .navds-expansioncard__header-content {
             width: 100%;
           }
+
+          .navds-expansioncard__header-button {
+            align-self: center;
+          }
         `}
       >
         <ExpansionCard.Title

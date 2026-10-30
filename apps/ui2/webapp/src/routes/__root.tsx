@@ -8,13 +8,17 @@ import {
 import React from "react";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
-import { ChristmasBanner } from "~/components/ChristmasBanner";
+import {
+  ChristmasBanner,
+  christmasBannerHeight,
+} from "~/components/ChristmasBanner";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import { PilotBanner, pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { TestBanner, testBannerHeight } from "~/components/TestBanner";
 import { useInDevelopment } from "~/customUtils/environmentUtils";
+import { isDecember } from "~/utils";
 
 export const queryClient = new QueryClient();
 
@@ -60,7 +64,7 @@ export const Route = createRootRouteWithContext<{
       "/korriger-leder-organisasjonsenhet",
     ];
 
-    const showChristmasBanner = !routesWithPageBanner.some((bannerRoute) =>
+    const displayChristmasBanner = !routesWithPageBanner.some((bannerRoute) =>
       currentRoute.includes(bannerRoute),
     );
 
@@ -79,7 +83,7 @@ export const Route = createRootRouteWithContext<{
 
         <PilotBanner />
 
-        {showChristmasBanner && <ChristmasBanner />}
+        {displayChristmasBanner && <ChristmasBanner />}
 
         <div
           css={css`
@@ -88,7 +92,8 @@ export const Route = createRootRouteWithContext<{
               100vh -
                 (
                   ${headerHeight} + ${pilotBannerHeight} + ${footerHeight} +
-                    ${displayTestBanner ? testBannerHeight : "0px"}
+                    ${displayTestBanner ? testBannerHeight : "0px"} +
+                    ${displayChristmasBanner && isDecember() ? christmasBannerHeight : "0px"}
                 )
             );
             width: 100%;

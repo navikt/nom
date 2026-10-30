@@ -27,7 +27,7 @@ export function TestBanner() {
       <div
         css={css`
           width: 100%;
-          height: ${displayTestBanner ? testBannerHeight : "0px"};
+          height: ${testBannerHeight};
           box-sizing: border-box;
           background: var(--a-orange-300);
           text-align: center;
