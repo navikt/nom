@@ -59,10 +59,6 @@ public class KostnadsstedSynkroniseringService {
 
     @Scheduled(cron = "${kostnadssted.synk.cron:0 30 2 * * *}")
     public void synkroniserKostnadsstederScheduler() {
-        if (!unleash.isEnabled(UNLEASH_KOSTNADSSTED_SYNK)) {
-            log.info("Kostnadssted-synk: toggle {} er av, hopper over kjøring", UNLEASH_KOSTNADSSTED_SYNK);
-            return;
-        }
         if (leaderElection.isLeader()) {
             try {
                 synkroniserKostnadssteder();
@@ -77,6 +73,11 @@ public class KostnadsstedSynkroniseringService {
         if (endringer.isEmpty()) {
             log.info("Kostnadssted-synk: ingen endringer funnet");
             return endringer;
+        }
+
+        if (!unleash.isEnabled(UNLEASH_KOSTNADSSTED_SYNK)) {
+            log.info("Kostnadssted-synk: toggle {} er av, hopper over kjøring. Men endringer er {}", UNLEASH_KOSTNADSSTED_SYNK, endringer);
+            return new ArrayList<>();
         }
 
         InputMetadata inputMetadata = InputMetadata.builder()
