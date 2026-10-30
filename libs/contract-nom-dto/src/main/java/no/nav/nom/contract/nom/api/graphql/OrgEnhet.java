@@ -24,6 +24,7 @@ public class OrgEnhet {
     OrgEnhetsType orgEnhetsType;
     String remedyEnhetId;
     String tilgangsenhetId;
+    String kostnadsstedId;
 
     AgressoInfo agressoInfo;
 

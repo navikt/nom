@@ -5,6 +5,7 @@ type OrgEnhet {
     gyldigTom: Date
     remedyEnhetId: String
     tilgangsenhetId: String
+    kostnadsstedId: String
     nomNivaa: NomNivaa
     organiseringer (retning: Retning, utvalg: PeriodiskUtvalgArg = AKTIVE) : [Organisering!]!
     # Deprekert Nov.2025
