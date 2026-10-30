@@ -12,6 +12,6 @@ public record DvhOrgenhetDTO(
     LocalDate GyldigTom,
     String agressoId,
     String agressoNivaa,
-    String remedyEnhet,
+    String tilgangsenehtId,
     String lederNavident
 ) {}
