@@ -88,13 +88,21 @@ class KostnadsstedSynkroniseringServiceTest {
     }
 
     @Test
-    void should_not_run_when_toggle_disabled() {
+    void should_not_publish_changes_when_toggle_disabled() {
         when(unleash.isEnabled(KostnadsstedSynkroniseringService.UNLEASH_KOSTNADSSTED_SYNK)).thenReturn(false);
         when(leaderElection.isLeader()).thenReturn(true);
+        when(repository.getAll()).thenReturn(List.of(
+            orgEnhet("FID_TOPP", "TOPP", null, "K0"),
+            orgEnhet("FID_A", "A", "FID_TOPP", "K1")
+        ));
+        when(client.hentKostnadsstedMappingerForGittToppNode("TOPP")).thenReturn(List.of(
+            new KostnadsstedMappingResponseDTO("K1_NY", "A", FOM, null)
+        ));
 
-        service.synkroniserKostnadsstederScheduler();
+        var endringer = service.synkroniserKostnadssteder();
 
-        verifyNoInteractions(client, repository, commandService);
+        assertThat(endringer).isEmpty();
+        verifyNoInteractions(commandService);
     }
 
     @Test
