@@ -8,7 +8,7 @@ import React, { useEffect, useRef } from "react";
 
 import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
-import { isInDevelopment } from "~/customUtils/environmentUtils";
+import { useInDevelopment } from "~/customUtils/environmentUtils";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import building from "~/resources/building.svg";
 import type { Ressurs } from "~/types/api-models";
@@ -37,8 +37,10 @@ export function OrgEnhetView({
     }
   }, []);
 
+  const inDevelopment = useInDevelopment();
+
   const gammel = !!orgEnhet
-    ? !isInDevelopment() && gamleOrgEnheter.includes(orgEnhet.id)
+    ? inDevelopment && gamleOrgEnheter.includes(orgEnhet.id)
     : false;
 
   return (

@@ -215,7 +215,7 @@ function EditPersonopplysningerButton({
         onClick={() =>
           navigate({
             to: "/ressurs/$id",
-            params: (previous) => ({ id: previous.id ?? "" }),
+            params: (previous: { id: any }) => ({ id: previous.id ?? "" }),
             search: { editPersonopplysninger: true },
           })
         }

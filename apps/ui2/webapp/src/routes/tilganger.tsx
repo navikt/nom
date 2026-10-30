@@ -152,7 +152,7 @@ function TilgangerPage() {
             <Heading level="2" size="medium">
               Organisasjonsenheter du er leder for:
             </Heading>
-            {orgenheterLedetAvMegOgDelegerbart.map((orgEnhet) => (
+            {orgenheterLedetAvMegOgDelegerbart.map((orgEnhet: OrgEnhet) => (
               <OrgEnhetCard
                 delegerbareRessurser={delegerbareRessurser}
                 isLoading={delegerbareRessurserQuery.isLoading}

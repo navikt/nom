@@ -56,7 +56,7 @@ import {
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
-import { vikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useVikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -1114,7 +1114,7 @@ function lagRessursRequest(values: {
     return etternavn ?? "";
   };
 
-  const vikafossenId = vikafossenOrgEnhetId();
+  const vikafossenId = useVikafossenOrgEnhetId();
 
   return {
     identType: values.identType,

@@ -15,6 +15,7 @@ import {
 import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
+  Sektor,
 } from "~/types/api-models";
 import {
   AnsettelsesType,
@@ -25,6 +26,8 @@ import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
+
+  // TODO: Sette disse til OpprettRessursRequest-type
   const {
     personident,
     navident,
@@ -63,7 +66,7 @@ export function ConfirmStep() {
     navigate({
       to: "/ressurs/create/$step",
       params: { step: "3" },
-      search: (oldSearch) => oldSearch,
+      search: (oldSearch: any) => oldSearch,
     });
 
   const opprettRessursMutation = useMutation<
@@ -98,7 +101,7 @@ export function ConfirmStep() {
       // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
       navigate({
         to: "/ressurs/create/$step",
-        search: (old) => ({
+        search: (old: any) => ({
           ...old,
           navident: opprettRessursResponse.data.navident,
           ansettelsesType,
@@ -144,7 +147,7 @@ export function ConfirmStep() {
           <LabelWithValue
             label="Sektor"
             split
-            value={sektor && SektorNameMapping[sektor]}
+            value={sektor && SektorNameMapping[sektor as Sektor]}
           />
           <LabelWithValue label="Nav-ident" split value={navident} />
           <LabelWithValue
@@ -154,14 +157,17 @@ export function ConfirmStep() {
               tilknytningtype &&
               (tilknytningtype === Tilknytningtype.INGEN
                 ? undefined
-                : TilknytningtypeNameMapping[tilknytningtype])
+                : TilknytningtypeNameMapping[
+                    tilknytningtype as Tilknytningtype
+                  ])
             }
           />
           <LabelWithValue
             label="Ansettelsestype"
             split
             value={
-              ansettelsesType && AnsettelsesTypeNameMapping[ansettelsesType]
+              ansettelsesType &&
+              AnsettelsesTypeNameMapping[ansettelsesType as AnsettelsesType]
             }
           />
           <LabelWithValue

@@ -15,7 +15,7 @@ import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import ContentWrapper from "~/components/ContentWrapper";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { isEksternSamarbeidspartnerOrgEnhet } from "~/customUtils/environmentUtils";
+import { useIsEksternSamarbeidspartnerOrgEnhet } from "~/customUtils/environmentUtils";
 import type { Relasjon } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import { RelasjonNameMapping } from "~/pages/Parorendeinfo/ParorendeinfoPage";
 import type { OrgEnhet } from "~/types/api-models";
@@ -56,7 +56,7 @@ export function KontaktpersonerTabellPage() {
     useQuery(harLederTilgangForOrgenhetOptions(orgEnhet?.id ?? "")).data ??
     false;
 
-  const eksternSamarbeidspartner = isEksternSamarbeidspartnerOrgEnhet(
+  const eksternSamarbeidspartner = useIsEksternSamarbeidspartnerOrgEnhet(
     orgEnhet?.id ?? "",
   );
 

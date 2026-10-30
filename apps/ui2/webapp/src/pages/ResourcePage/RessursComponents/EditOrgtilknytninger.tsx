@@ -69,7 +69,7 @@ import {
   earliestDateInList,
   formatDateWithoutTimezone,
 } from "~/customUtils/dateUtils";
-import { vikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useVikafossenOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import {
   SektorNameMapping,
@@ -240,9 +240,7 @@ export function EditOrgtilknytninger({
   );
 }
 
-function defaultNyOrgtilknytning(ressurs: Ressurs) {
-  const vikafossenId = vikafossenOrgEnhetId();
-
+function defaultNyOrgtilknytning(ressurs: Ressurs, vikafossenId: string) {
   const vikafossenRessurs = ressurs.identType === IdentType.VIKAFOSSEN;
 
   const ressursSektor = ressurs.sektor;
@@ -282,7 +280,12 @@ function OrgtilknytningForm({
   const hasAdminOrWriteAccess = useHasAdminOrWriteAccess();
   const hasAdminAccess = useHasAdminAccess();
 
+  const vikafossenId = useVikafossenOrgEnhetId();
+
   const navigate = useNavigate();
+
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
   const nomSharepointLenke: string =
     "https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Organisasjonsmaster-(NOM).aspx";
@@ -325,10 +328,7 @@ function OrgtilknytningForm({
               tilknytning.primaryFysiskBrukerstedNummer ?? "",
           };
         })
-      : [defaultNyOrgtilknytning(ressurs)];
-
-  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
-  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
+      : [defaultNyOrgtilknytning(ressurs, vikafossenId)];
 
   const fysiskeBrukerstederOptions = fysiskeBrukersteder
     .map((brukersted) => fysiskBrukerstedOptionMapping(brukersted))
@@ -513,7 +513,7 @@ function OrgtilknytningForm({
               <Button
                 icon={<PlusCircleIcon />}
                 onClick={() => {
-                  prepend(defaultNyOrgtilknytning(ressurs), {
+                  prepend(defaultNyOrgtilknytning(ressurs, vikafossenId), {
                     focusIndex: 0,
                   });
                 }}
@@ -721,7 +721,7 @@ function OrgtilknytningForm({
               navigate({
                 to: "/ressurs/$id",
                 search: { editOrgtilknytninger: undefined },
-                params: (previous) => ({ id: previous.id ?? "" }),
+                params: (previous: { id: any }) => ({ id: previous.id ?? "" }),
               })
             }
             size="small"

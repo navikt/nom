@@ -20,7 +20,7 @@ import {
 import type { ChartRow } from "~/components/charts/HorizontalBarChart";
 import { HorizontalBarChart } from "~/components/charts/HorizontalBarChart";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import { teknologiavdelingenOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useTeknologiavdelingenOrgEnhetId } from "~/customUtils/environmentUtils";
 import type { GlobalStatistikkResponse } from "~/types/api-models";
 
 export function OrgEnhetStatistikk({
@@ -46,7 +46,7 @@ export function OrgEnhetStatistikk({
 
   const ressursStatistikk = statistikk?.ressursStatistikk;
 
-  const teknologiavdelingenId = teknologiavdelingenOrgEnhetId();
+  const teknologiavdelingenId = useTeknologiavdelingenOrgEnhetId();
 
   const medarbeidereStatistikk: MedarbeidereStatistikk = {
     statlige: ressursStatistikk?.antallStatligeRessurser ?? 0,
