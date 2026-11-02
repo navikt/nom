@@ -19,18 +19,19 @@ import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
 
 import { apolloClient } from "~/api/apolloclient";
+import { getEnvironmentConfig } from "~/api/react-query-endpoints";
 import { useGetSession } from "~/api/useGetSession";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { useGetEnvironmentConfig } from "~/customUtils/environmentUtils";
+import type { EnvironmentConfigResponse } from "~/types/api-models";
+import { DeployCluster } from "~/types/api-models";
 
 import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
-import { getEnvironmentConfig } from "~/api/react-query-endpoints";
-import { DeployCluster, EnvironmentConfigResponse } from "~/types/api-models";
 
 const queryClient = new QueryClient();
 
-// Don't initialize faro when running the dev-server
+// Don't initialize faro when running the Vite-mode dev-server
 if (import.meta.env.PROD) {
   const environmentConfig = queryClient.getQueryData<EnvironmentConfigResponse>(
     getEnvironmentConfig.queryKey,
@@ -61,7 +62,7 @@ if (import.meta.env.PROD) {
       });
     })
     .catch((error) => {
-      console.error("Could not load environment config for Faro", error);
+      throw error;
     });
 }
 
