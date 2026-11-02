@@ -20,6 +20,7 @@ import { FormProvider, useController, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 import {
+  getAlleKostnadssteder,
   getAlleTilgangsenheter,
   getKostnadssted,
   getOrgEnhet,
@@ -55,13 +56,19 @@ import {
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import { DynamiskOrgKart } from "~/pages/OrganizationMastering/DynamiskOrgKart";
 import type {
+  KostnadsstedResponse,
   NomNivaa,
   OpprettOrgEnhetRequest,
   OpprettOrgEnhetResponse,
   OrgEnhet,
+  Tilgangsenhet,
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
+import {
+  NomNivaaNameMapping,
+  OrgEnhetsTypeNameMapping,
+} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 
 export const OpprettOrgEnhet = () => {
   const { id } = useSearch({
@@ -94,7 +101,7 @@ export const OpprettOrgEnhet = () => {
                 <OrgKartView />
               ) : (
                 <FormView
-                  overordnetOrgEnhetId={id}
+                  overliggendeOrgEnhetId={id}
                   setOpprettResponse={setOpprettResponse}
                 />
               )}
@@ -135,35 +142,35 @@ function OrgKartView() {
 }
 
 function FormView({
-  overordnetOrgEnhetId,
+  overliggendeOrgEnhetId,
   setOpprettResponse,
 }: {
-  overordnetOrgEnhetId: string;
+  overliggendeOrgEnhetId: string;
   setOpprettResponse: (response: any) => void;
 }) {
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(overordnetOrgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(overordnetOrgEnhetId),
-    enabled: !!overordnetOrgEnhetId,
+  const overliggendeOrgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(overliggendeOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(overliggendeOrgEnhetId),
+    enabled: !!overliggendeOrgEnhetId,
   });
 
+  const overliggendeOrgEnhet = overliggendeOrgEnhetQuery.data;
+
   const kostnadsstedQuery = useQuery({
-    queryKey: getKostnadssted.queryKey(overordnetOrgEnhetId),
-    queryFn: () => getKostnadssted.queryFn(overordnetOrgEnhetId),
-    enabled: !!overordnetOrgEnhetId,
+    queryKey: getKostnadssted.queryKey(overliggendeOrgEnhetId),
+    queryFn: () => getKostnadssted.queryFn(overliggendeOrgEnhetId),
+    enabled: !!overliggendeOrgEnhetId,
     retry: false,
     refetchOnWindowFocus: false,
   });
 
   const kostnadssted = kostnadsstedQuery.data;
 
-  const orgEnhet = orgEnhetQuery.data;
-
-  if (orgEnhetQuery.isLoading || kostnadsstedQuery.isLoading) {
+  if (overliggendeOrgEnhetQuery.isLoading || kostnadsstedQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
 
-  if (!orgEnhet) {
+  if (!overliggendeOrgEnhet) {
     return <OrgEnhetIkkeFunnet />;
   }
 
@@ -171,12 +178,12 @@ function FormView({
     <>
       <OrgEnhetInfoWrapper
         heading="Enheten blir opprettet under"
-        orgEnhet={orgEnhet}
+        orgEnhet={overliggendeOrgEnhet}
       />
 
       <OpprettOrgEnhetForm
-        overordnetOrgEnhet={orgEnhet}
-        overordnetOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? ""}
+        overliggendeOrgEnhet={overliggendeOrgEnhet}
+        overliggendeOrgEnhetKostnadsstedId={kostnadssted?.kostnadsstedId ?? ""}
         setOpprettResponse={setOpprettResponse}
       />
     </>
@@ -195,20 +202,34 @@ function KvitteringView({ opprettResponse }: { opprettResponse: any }) {
 }
 
 function OpprettOrgEnhetForm({
-  overordnetOrgEnhet,
-  overordnetOrgEnhetKostnadsstedId,
+  overliggendeOrgEnhet,
+  overliggendeOrgEnhetKostnadsstedId,
   setOpprettResponse,
 }: {
-  overordnetOrgEnhet: OrgEnhet;
-  overordnetOrgEnhetKostnadsstedId: string;
+  overliggendeOrgEnhet: OrgEnhet;
+  overliggendeOrgEnhetKostnadsstedId: string;
   setOpprettResponse: (response: any) => void;
 }) {
+  const alleTilgangsenheterQuery = useQuery({
+    queryKey: getAlleTilgangsenheter.queryKey(),
+    queryFn: () => getAlleTilgangsenheter.queryFn(),
+  });
+
+  const alleTilgangsenheter = alleTilgangsenheterQuery.data ?? [];
+
+  const alleKostnadsstederQuery = useQuery({
+    queryKey: getAlleKostnadssteder.queryKey(),
+    queryFn: () => getAlleKostnadssteder.queryFn(),
+  });
+
+  const alleKostnadssteder = alleKostnadsstederQuery.data ?? [];
+
   const methods = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
       nomNivaa: undefined,
-      tilgangsenhetId: overordnetOrgEnhet.tilgangsenhetId,
-      kostnadsstedId: overordnetOrgEnhetKostnadsstedId,
+      tilgangsenhetId: overliggendeOrgEnhet.tilgangsenhetId,
+      kostnadsstedId: overliggendeOrgEnhetKostnadsstedId,
     },
   });
 
@@ -232,19 +253,24 @@ function OpprettOrgEnhetForm({
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OpprettOrgEnhetRequest = {
       ...values,
-      overordnetOrgEnhetId: overordnetOrgEnhet.id,
+      overordnetOrgEnhetId: overliggendeOrgEnhet.id,
       nomNivaa: values.nomNivaa || undefined,
     };
 
     await showModal(
       <BekreftModal
-        content={<OpprettOrgEnhetModalContent request={request} />}
+        content={
+          <OpprettOrgEnhetModalContent
+            request={request}
+            tilgangsenheter={alleTilgangsenheter}
+            kostnadssteder={alleKostnadssteder}
+            overliggendeOrgEnhet={overliggendeOrgEnhet}
+          />
+        }
         heading="Bekreft opprettelse"
       />,
     ).then(() => {
-      //opprettOrgEnhetMutation.mutate(request);
-
-      console.log("Would save", request);
+      opprettOrgEnhetMutation.mutate(request);
     });
   };
 
@@ -291,7 +317,10 @@ function OpprettOrgEnhetForm({
               <NomNivaaSelect name="nomNivaa" fullWidth />
             </div>
 
-            <FormTilgangsenhetSelectWrapper name="tilgangsenhetId" />
+            <FormTilgangsenhetSelectWrapper
+              name="tilgangsenhetId"
+              tilgangsenheter={alleTilgangsenheter}
+            />
 
             <div
               css={css`
@@ -301,6 +330,7 @@ function OpprettOrgEnhetForm({
               <KostnadsstedSelectFormPart
                 label="Kostnadssted"
                 name="kostnadsstedId"
+                kostnadssteder={alleKostnadssteder}
               />
             </div>
           </VStack>
@@ -322,12 +352,22 @@ function OpprettOrgEnhetForm({
               icon={<FloppydiskIcon aria-hidden />}
               size="small"
               type="submit"
+              loading={opprettOrgEnhetMutation.isPending}
             >
               Lagre
             </Button>
           </div>
 
-          {!!mutateError && <Alert variant="error">{mutateError}</Alert>}
+          {!!mutateError &&
+            opprettOrgEnhetMutation.error?.response?.status !== 409 &&
+            mutateError && <Alert variant="error">{mutateError}</Alert>}
+
+          {opprettOrgEnhetMutation.error?.response?.status === 409 && (
+            <Alert variant="error">
+              Det valgte navnet er allerede i bruk. Vennligst velg et annet
+              navn.
+            </Alert>
+          )}
         </VStack>
       </form>
     </FormProvider>
@@ -351,23 +391,22 @@ function FormDateWrapper({ name }: { name: string }) {
         error={fieldState.error?.message}
         ref={field.ref}
         {...datePickerProperties.inputProps}
-        label="Dato"
+        label="Enheten er gyldig fra og med"
       />
     </DatePicker>
   );
 }
 
-function FormTilgangsenhetSelectWrapper({ name }: { name: string }) {
+function FormTilgangsenhetSelectWrapper({
+  name,
+  tilgangsenheter,
+}: {
+  name: string;
+  tilgangsenheter: Tilgangsenhet[];
+}) {
   const { field, fieldState } = useController({
     name,
   });
-
-  const alleTilgangsenheterQuery = useQuery({
-    queryKey: getAlleTilgangsenheter.queryKey(),
-    queryFn: () => getAlleTilgangsenheter.queryFn(),
-  });
-
-  const alleTilgangsenheter = alleTilgangsenheterQuery.data ?? [];
 
   return (
     <div
@@ -378,7 +417,7 @@ function FormTilgangsenhetSelectWrapper({ name }: { name: string }) {
       <TilgangsenhetSelect
         error={fieldState.error}
         label="Tilgangsenhet"
-        tilgangsenheter={alleTilgangsenheter}
+        tilgangsenheter={tilgangsenheter}
         value={field.value}
         onChange={field.onChange}
       />
@@ -388,11 +427,15 @@ function FormTilgangsenhetSelectWrapper({ name }: { name: string }) {
 
 function OpprettOrgEnhetModalContent({
   request,
+  tilgangsenheter,
+  kostnadssteder,
+  overliggendeOrgEnhet,
 }: {
   request: OpprettOrgEnhetRequest;
+  tilgangsenheter: Tilgangsenhet[];
+  kostnadssteder: KostnadsstedResponse[];
+  overliggendeOrgEnhet: OrgEnhet;
 }) {
-  console.log(request);
-
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(request.lederRessursNavident),
     queryFn: () => getRessurs.queryFn(request.lederRessursNavident),
@@ -400,13 +443,55 @@ function OpprettOrgEnhetModalContent({
 
   const ressurs = ressursQuery.data;
 
+  const valgtTilgangsenhet = tilgangsenheter.find(
+    (enhet) => enhet.enhetId === request.tilgangsenhetId,
+  );
+
+  const valgtKostnadssted = kostnadssteder.find(
+    (kostnadssted) => kostnadssted.kostnadsstedId === request.kostnadsstedId,
+  );
+
   return (
     <HGrid columns="max-content max-content" gap="2 2">
       <LabelWithValue split label="Navn" value={request.navn} />
       <LabelWithValue
         split
+        label="Opprett under"
+        value={`${overliggendeOrgEnhet.navn} (${overliggendeOrgEnhet.id})`}
+      />
+      <LabelWithValue
+        split
         label="Leder"
         value={`${formatVisningsnavn(ressurs?.visningsnavn)} (${ressurs?.navident})`}
+      />
+      <LabelWithValue
+        split
+        label="Gyldig f.o.m."
+        value={`${formatDisplayDate(request.gyldigFom)}`}
+      />
+      <LabelWithValue
+        split
+        label="Enhetstype"
+        value={OrgEnhetsTypeNameMapping[request.orgEnhetsType]}
+      />
+      <LabelWithValue
+        split
+        label="NOM-nivå"
+        value={
+          !!request.nomNivaa
+            ? `${NomNivaaNameMapping[request.nomNivaa]}`
+            : undefined
+        }
+      />
+      <LabelWithValue
+        split
+        label="Tilgangsenhet"
+        value={`${valgtTilgangsenhet?.navn ?? "Ukjent"} (${request.tilgangsenhetId})`}
+      />
+      <LabelWithValue
+        split
+        label="Kostnadssted"
+        value={`${valgtKostnadssted?.navn ?? "Ukjent"} (${request.kostnadsstedId})`}
       />
     </HGrid>
   );

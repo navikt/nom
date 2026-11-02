@@ -287,6 +287,7 @@ function KorrigerOrgEnhetLederForm({
                 icon={<FloppydiskIcon aria-hidden />}
                 size="small"
                 type="submit"
+                loading={opprettOrgEnhetLederMutation.isPending}
               >
                 Lagre
               </Button>

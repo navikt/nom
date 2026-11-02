@@ -223,6 +223,7 @@ function KorrigerOrgEnhetNavnForm({
               icon={<FloppydiskIcon aria-hidden />}
               size="small"
               type="submit"
+              loading={korrigerOrgEnhetNavnMutation.isPending}
             >
               Lagre
             </Button>
