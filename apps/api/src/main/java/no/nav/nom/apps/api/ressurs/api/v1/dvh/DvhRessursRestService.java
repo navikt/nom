@@ -6,10 +6,12 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.contract.nom.IdentType;
+import no.nav.nom.contract.nom.state.OrgEnhetLederState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.organisering.OrganiseringStateRepository;
+import no.nav.nom.libs.state.orgenhetleder.OrgEnhetLederStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
 import no.nav.nom.libs.state.ressurs.mastered.MasteredRessursStateRepository;
 import org.slf4j.Logger;
@@ -30,7 +32,7 @@ public class DvhRessursRestService {
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
-    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
 
     private final OrganiseringStateRepository organiseringStateRepository;
 
@@ -39,14 +41,14 @@ public class DvhRessursRestService {
         RessursStateRepository ressursStateRepository,
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
-        RemedyEnhetIdResolver remedyEnhetIdResolver,
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository,
         OrganiseringStateRepository organiseringStateRepository
     ) {
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
-        this.remedyEnhetIdResolver = remedyEnhetIdResolver;
+        this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
     }
 
@@ -102,9 +104,8 @@ public class DvhRessursRestService {
     }
 
     DvhOrgenhetDTO toDTO(IOrgenhet orgenhet) {
-        var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
-
         String overordnet = getOverordnetEnhetUsingNewOrganisering(orgenhet);
+        var leder = orgEnhetLederStateRepository.getActiveForOrgEnhet(orgenhet.getId());
 
         return new DvhOrgenhetDTO(
             orgenhet.getId(),
@@ -116,7 +117,8 @@ public class DvhRessursRestService {
             orgenhet.getGyldigTom(),
             orgenhet.getAgressoId(),
             orgenhet.getOrgNiv(),
-            remedyEnhetId
+            orgenhet.getTilgangsenhetId(),
+            leder.map(OrgEnhetLederState::navident).orElse(null)
         );
     }
 
