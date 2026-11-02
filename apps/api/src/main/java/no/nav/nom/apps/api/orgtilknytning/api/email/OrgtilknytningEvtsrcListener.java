@@ -2,9 +2,14 @@ package no.nav.nom.apps.api.orgtilknytning.api.email;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFysiskBrukerstedEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningSektorEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.core.env.Environment;
@@ -46,7 +51,7 @@ public class OrgtilknytningEvtsrcListener {
     }
 
     private void handleMessage(String jsonString) {
-        OrgtilknytningEvent event = null;
+        OrgtilknytningEvent event;
         try {
             event = jsonMapper.readValue(jsonString, OrgtilknytningEvent.class);
         } catch (Exception e) {
@@ -66,7 +71,7 @@ public class OrgtilknytningEvtsrcListener {
 
     private void addToOTEndretDataEmailQueue(OrgtilknytningEvent event) {
         String initiatedFrom = event.getMetadata().inputMetadata().origination().initiatedFrom();
-        if (!initiatedFrom.equals(getClusterName() + ":org:nom-ui2")) {
+        if ((!initiatedFrom.equals(getClusterName() + ":org:nom-ui2")) && (!initiatedFrom.equals("Admin swagger/rest"))) {
             log.debug("OT-endringer operation is not performed nom frontend: {}. OTendretData won´t be added to the email queue", initiatedFrom);
             return;
         }
@@ -76,15 +81,30 @@ public class OrgtilknytningEvtsrcListener {
 
         // loggin now for checking
         log.info("Adding to the OT changes email cache for fid: {}, event: {}", event.getFid(), event);
-        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
-            event.getFid(),
-            OTEndretData.builder()
+        OTEndretData.OTEndretDataType dataType = getOtEndretDataType(event);
+        OTEndretData otEndretData;
+        if (dataType.equals(OTEndretData.OTEndretDataType.OT_FJERNET)) {
+            OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData eventData = (OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData) event.getData();
+            otEndretData = new OTEndretData(
+                event.getFid(),
+                eventData.navident(),
+                eventData.orgEnhetId(),
+                dataType,
+                initiatedBy,
+                DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())
+            );
+        } else {
+            otEndretData = OTEndretData.builder()
                 .fid(event.getFid())
                 .navident(navident)
                 .changedByNavIdent(initiatedBy)
-                .eventType(getOtEndretDataType(event))
+                .eventType(dataType)
                 .timestamp(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now()))
-                .build()
+                .build();
+        }
+        orgtilknytningEndretEmailService.addToOrgtilknytningEndringerQueue(
+            event.getFid(),
+            otEndretData
         );
     }
 
@@ -92,8 +112,13 @@ public class OrgtilknytningEvtsrcListener {
         OTEndretData.OTEndretDataType eventType;
         switch (event) {
             case OrgtilknytningOpprettetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_NY;
+            case OrgtilknytningDatoEndretEventV2 ignored -> eventType = OTEndretData.OTEndretDataType.OT_DATO_ENDRET;
+            case OrgtilknytningFysiskBrukerstedEndretEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_FYSISK_BRUKERSTED_ENDRET;
             case OrgtilknytningAvsluttetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_AVSLUTTET;
             case OrgtilknytningFjernetEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_FJERNET;
+            case OrgtilknytningSektorEndretEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_SEKTOR_ENDRET;
+            case OrgtilknytningTilknytningtypeEndretEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_TILKNYTNINGTYPE_ENDRET;
+            case OrgtilknytningDagligOppfolgingEndretEventV1 ignored -> eventType = OTEndretData.OTEndretDataType.OT_DAGLIG_OPPFOLGING_ENDRET;
             default -> eventType = OTEndretData.OTEndretDataType.OT_ENDRET;
         }
         return eventType;

@@ -44,14 +44,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Component
 public class OrgtilknytningEndretEmailService {
     private static final String OT_ENDRINGER_VARSEL_TEMPLATE = "ot-endringer-varsel.ftlh";
     public static final String MASSEFLYTTING_VARSEL_FTLH = "masseflytting-varsel.ftlh";
-    public final String epost_body_with_gyldig_tom_item_template = "{0}({1}), fra og med {2}, til og med {3}, med fysisk brukersted {4} ({5}). Endring utført av {6} den {7}.";
-    public final String epost_body_without_gyldig_tom_item_template = "{0}({1}), fra og med {2}, med fysisk brukersted {3} ({4}). Endring utført av {5} den {6}.";
+    public final String epost_body_with_gyldig_tom_item_template = "{0}({1}), fra og med {2}, til og med {3}, med fysisk brukersted {4} ({5}). Endring utført av {6} den {7}.\nEndringer utført: {8}";
+    public final String epost_body_without_gyldig_tom_item_template = "{0}({1}), fra og med {2}, med fysisk brukersted {3} ({4}). Endring utført av {5} den {6}.\nEndringer utført: {7}";
+    public final String epost_body_with_fjernet_event_template = "Organisasjonstilknytningen for enhet {0}({1}) har blitt slettet av {2} den {3}.";
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
     private final MicrosoftGraphClient microsoftGraphClient;
@@ -73,7 +75,8 @@ public class OrgtilknytningEndretEmailService {
         Configuration freemarkerConfig,
         AdClient adClient,
         RessursStateRepository ressursStateRepository,
-        OrgtilknytningStateRepository orgtilknytningStateRepository, OrgEnhetLederService orgEnhetLederService,
+        OrgtilknytningStateRepository orgtilknytningStateRepository,
+        OrgEnhetLederService orgEnhetLederService,
         OrgEnhetStateRepository orgEnhetStateRepository,
         CacheQueueService cacheQueueService,
         DvhStartupLoadMonitor dvhStartupLoadMonitor,
@@ -130,8 +133,9 @@ public class OrgtilknytningEndretEmailService {
         // as OT changes are per orgenhet, group them by navident
         Map<String, List<OTEndretData>> otEndringerByNavident = new HashMap<>();
         otEndringerByFid.forEach((fid, endringer) -> {
+            var containsFjernet = endringer.stream().anyMatch(otEndretData -> otEndretData.eventType().equals(OTEndretData.OTEndretDataType.OT_FJERNET));
             var navident = getNavidentFromOrgtilknytningStateRepository(fid);
-            if (navident != null) {
+            if (navident != null || containsFjernet) {
                 otEndringerByNavident.putIfAbsent(navident, new ArrayList<>());
                 otEndringerByNavident.get(navident).addAll(endringer);
             } else {
@@ -295,14 +299,29 @@ public class OrgtilknytningEndretEmailService {
     }
 
     public String composeOTChangesMessage(List<OTEndretData> otEndringerData) {
+        Map<String, List<OTEndretData.OTEndretDataType>> mappedChangedDataType =
+            otEndringerData.stream()
+            .collect(Collectors.groupingBy(
+                OTEndretData::fid,
+                Collectors.mapping(OTEndretData::eventType,
+                    Collectors.toList()
+                )
+            ));
+
         StringBuilder otEndringer = new StringBuilder();
         for (OTEndretData event : otEndringerData) {
-            var orgtilknytningState = orgtilknytningStateRepository.findByFid(event.fid());
+            var fjernetEvent = mappedChangedDataType.getOrDefault(event.fid(), List.of()).stream()
+                .filter(otEndretDataType -> otEndretDataType.equals(OTEndretData.OTEndretDataType.OT_FJERNET)).findFirst().orElse(null);
             var utfortAvNavIdent = event.changedByNavIdent();
             var utfortAvRessurs = ressursStateRepository.findByNavident(utfortAvNavIdent);
             String utfortAvRessursNavn = utfortAvRessurs.map(ressursState -> ressursState.visningsnavn().getFormattedVisningsnavn()).orElse("Ukjent");
-            if (orgtilknytningState.isPresent()) {
+            var orgtilknytningState = orgtilknytningStateRepository.findByFid(event.fid());
+            if (orgtilknytningState.isPresent() && isNull(fjernetEvent)) {
                 var ot = orgtilknytningState.get();
+                var endringer = mappedChangedDataType.getOrDefault(event.fid(), List.of()).stream()
+                    .map(otEndretDataType -> otEndretDataType.beskrivelse)
+                    .distinct()
+                    .collect(Collectors.joining(",\n"));
                 log.info(
                     "Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}",
                     event.navident(),
@@ -321,7 +340,8 @@ public class OrgtilknytningEndretEmailService {
                     fysiskBrukerstedService.findFysiskBrukersted(ot.primaryFysiskBrukerstedNummer()).map(FysiskBrukersted::navn).orElse("Ukjent"),
                     ot.primaryFysiskBrukerstedNummer(),
                     utfortAvRessursNavn,
-                    event.timestamp()
+                    event.timestamp(),
+                    endringer
                 ) : MessageFormat.format(
                     epost_body_without_gyldig_tom_item_template,
                     orgenhetNavn,
@@ -330,12 +350,29 @@ public class OrgtilknytningEndretEmailService {
                     fysiskBrukerstedService.findFysiskBrukersted(ot.primaryFysiskBrukerstedNummer()).map(FysiskBrukersted::navn).orElse("Ukjent"),
                     ot.primaryFysiskBrukerstedNummer(),
                     utfortAvRessursNavn,
-                    event.timestamp()
+                    event.timestamp(),
+                    endringer
                 );
                 // update message if not blank and duplicate
                 if (!endring.isBlank() && !otEndringer.toString().contains(endring)) {
                     otEndringer.append(endring);
                 }
+            } else if (nonNull(fjernetEvent)) {
+                var orgEnhetNavn = orgEnhetStateRepository.findById(event.orgEnhetId()).map(OrgEnhetState::navn).orElse("N/A");
+                log.info(
+                    "Sender OT endringer for navident: {} og fjernetEvent mail for enhet {}, utfort av {}",
+                    event.navident(),
+                    event.orgEnhetId(),
+                    utfortAvRessursNavn
+                );
+                String endring = MessageFormat.format(
+                    epost_body_with_fjernet_event_template,
+                    orgEnhetNavn,
+                    event.orgEnhetId(),
+                    utfortAvRessursNavn,
+                    event.timestamp()
+                );
+                otEndringer.append(endring);
             } else {
                 log.warn("Fant ikke orgtilknytning for OTEndretData: {} i orgtilknytningStateRepository. Sjekk!", event);
                 String endring = MessageFormat.format(
