@@ -11,16 +11,16 @@ import type { OrgEnhet } from "~/types/api-models";
 
 export function DynamiskOrgKart({
   title,
-  toppOrgEnhetId,
+  toppnodeOrgEnhetId,
   opprettKnapp,
 }: {
   title?: string;
-  toppOrgEnhetId: string;
+  toppnodeOrgEnhetId: string;
   opprettKnapp?: boolean;
 }) {
   const toppOrgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(toppOrgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(toppOrgEnhetId),
+    queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(toppnodeOrgEnhetId),
   });
 
   const toppOrgEnhet = toppOrgEnhetQuery.data;

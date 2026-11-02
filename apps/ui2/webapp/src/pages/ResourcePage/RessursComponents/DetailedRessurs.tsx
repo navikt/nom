@@ -27,6 +27,7 @@ import {
   getOrgEnhet,
   getOrgEnheterLedetAvNavIdent,
   getOrgEnheterRessursKanRedigere,
+  getOrgEnhetList,
   getOrgTilknytninger,
   getTeamcatMemberships,
   harLederTilgangForNavidentOptions,
@@ -45,8 +46,8 @@ import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import {
-  eksterneOrgEnheter,
-  teamkatalogenBaseUrl,
+  useEksterneOrgEnhetIder,
+  useTeamkatalogenBaseUrl,
 } from "~/customUtils/environmentUtils";
 import {
   SektorNameMapping,
@@ -592,6 +593,10 @@ function OrganisationHierarchyTree({
           .navds-expansioncard__header-content {
             width: 100%;
           }
+
+          .navds-expansioncard__header-button {
+            align-self: center;
+          }
         `}
       >
         <ExpansionCard.Title
@@ -777,7 +782,21 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         }),
     }).data ?? [];
 
-  const skjulteEksterneOrgEnheter = eksterneOrgEnheter();
+  const eksterneLovnodeIder = useEksterneOrgEnhetIder();
+
+  const eksterneOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(eksterneLovnodeIder),
+    queryFn: () => getOrgEnhetList.queryFn(eksterneLovnodeIder),
+  });
+
+  const eksterneOrgEnheter = eksterneOrgEnheterQuery.data;
+
+  const skjulteEksterneOrgEnheter = [
+    ...eksterneLovnodeIder,
+    ...(
+      eksterneOrgEnheter?.map((orgEnhet) => orgEnhet.overordnetEnhetId) ?? []
+    ).filter((id) => !!id),
+  ];
 
   const orgEnheterLedetAvRessursFiltrert = orgEnheterLedetAvRessurs
     .filter(
@@ -916,6 +935,8 @@ function SummarySection({
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
+  const teamkatalogenLenke = `${useTeamkatalogenBaseUrl()}/resource/${navident}`;
+
   const membershipsQuery = useQuery({
     queryKey: getTeamcatMemberships.queryKey(navident),
     queryFn: () => getTeamcatMemberships.queryFn(navident),
@@ -937,8 +958,6 @@ function TeamCatSection({ navident }: { navident: string }) {
     return;
   }
 
-  const teamkatalogenLink = `${teamkatalogenBaseUrl()}/resource/${navident}`;
-
   return (
     <>
       <Divider noMargins />
@@ -949,7 +968,7 @@ function TeamCatSection({ navident }: { navident: string }) {
       </Heading>
 
       <div>
-        <SmartLink externalIcon href={teamkatalogenLink}>
+        <SmartLink externalIcon href={teamkatalogenLenke}>
           Se mer i Teamkatalogen
         </SmartLink>
       </div>
@@ -1010,7 +1029,7 @@ function EditOrgtilknytningerButton({
           navigate({
             to: "/ressurs/$id",
             search: { editOrgtilknytninger: true },
-            params: (previous) => ({ id: previous.id ?? "" }),
+            params: (previous: { id: any }) => ({ id: previous.id ?? "" }),
           })
         }
         size="small"

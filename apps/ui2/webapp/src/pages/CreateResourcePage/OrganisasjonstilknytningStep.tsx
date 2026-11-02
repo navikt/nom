@@ -92,7 +92,7 @@ function CreateInternRessurs() {
     navigate({
       to: "/ressurs/create/$step",
       params: { step: "2" },
-      search: (oldSearch) => ({
+      search: (oldSearch: any) => ({
         ...oldSearch,
         ...validValues,
         gyldigTom: values.gyldigTom ?? undefined,
@@ -112,7 +112,7 @@ function CreateInternRessurs() {
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "9" },
-            search: (oldSearch) => ({
+            search: (oldSearch: any) => ({
               ...oldSearch,
               ...values,
               gyldigTom: values.gyldigTom ?? undefined,
@@ -186,7 +186,7 @@ function CreateEksternRessurs() {
     navigate({
       to: "/ressurs/create/$step",
       params: { step: "2" },
-      search: (oldSearch) => ({ ...oldSearch, ...validValues }),
+      search: (oldSearch: any) => ({ ...oldSearch, ...validValues }),
     }).then();
   };
 
@@ -198,7 +198,7 @@ function CreateEksternRessurs() {
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "9" },
-            search: (oldSearch) => ({
+            search: (oldSearch: any) => ({
               ...oldSearch,
               ...values,
               gyldigTom: values.gyldigTom ?? undefined,

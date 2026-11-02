@@ -6,7 +6,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { css } from "@emotion/react";
 import { getWebInstrumentations, initializeFaro } from "@grafana/faro-web-sdk";
 import { TracingInstrumentation } from "@grafana/faro-web-tracing";
-import { Alert, Box, Heading, Loader } from "@navikt/ds-react";
+import { Alert, Box, Heading } from "@navikt/ds-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -19,31 +19,52 @@ import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
 
 import { apolloClient } from "~/api/apolloclient";
+import { getEnvironmentConfig } from "~/api/react-query-endpoints";
 import { useGetSession } from "~/api/useGetSession";
-import { isInDevelopment } from "~/customUtils/environmentUtils";
+import { LoaderWithText } from "~/components/LoaderWithText";
+import { useGetEnvironmentConfig } from "~/customUtils/environmentUtils";
+import type { EnvironmentConfigResponse } from "~/types/api-models";
+import { DeployCluster } from "~/types/api-models";
 
 import { ExpiryNotifier } from "./components/ExpiryNotifier";
 import { routeTree } from "./routeTree.gen";
 
-// Don't initialize faro when running the dev-server
-if (import.meta.env.PROD) {
-  const url = isInDevelopment()
-    ? "https://telemetry.ekstern.dev.nav.no/collect"
-    : "https://telemetry.nav.no/collect";
-
-  initializeFaro({
-    url,
-    app: {
-      name: "nom-ui",
-    },
-    instrumentations: [
-      ...getWebInstrumentations(),
-      new TracingInstrumentation(),
-    ],
-  });
-}
-
 const queryClient = new QueryClient();
+
+// Don't initialize faro when running the Vite-mode dev-server
+if (import.meta.env.PROD) {
+  const environmentConfig = queryClient.getQueryData<EnvironmentConfigResponse>(
+    getEnvironmentConfig.queryKey,
+  );
+
+  const configPromise = environmentConfig
+    ? Promise.resolve(environmentConfig)
+    : getEnvironmentConfig.queryFn();
+
+  void configPromise
+    .then((config) => {
+      const inDevelopment = config.deployCluster === DeployCluster.DEV;
+
+      const suffix = config.environmentSuffix ?? "";
+
+      initializeFaro({
+        url: inDevelopment
+          ? "https://telemetry.ekstern.dev.nav.no/collect"
+          : "https://telemetry.nav.no/collect",
+        app: {
+          name: `nom-ui${!!suffix ? `-${suffix}` : ""}`,
+          namespace: "team-org",
+        },
+        instrumentations: [
+          ...getWebInstrumentations(),
+          new TracingInstrumentation(),
+        ],
+      });
+    })
+    .catch((error) => {
+      throw error;
+    });
+}
 
 /**
  * Hide search params when creating ressurs
@@ -80,45 +101,42 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
-// Register things for typesafety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
 createRoot(document.querySelector("#root") as HTMLElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ExpiryNotifier />
+
       <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
+
       <ApolloProvider client={apolloClient}>
-        <LoadSession>
+        <LoadSessionAndEnvironment>
           <RouterProvider router={router} />
-        </LoadSession>
+        </LoadSessionAndEnvironment>
       </ApolloProvider>
+
       <Toaster toastOptions={{ position: "top-right" }} />
     </QueryClientProvider>
   </StrictMode>,
 );
 
-function LoadSession({ children }: { children: ReactNode }) {
+function LoadSessionAndEnvironment({ children }: { children: ReactNode }) {
   const session = useGetSession();
+  const environmentVariables = useGetEnvironmentConfig();
 
-  if (session.isLoading) {
+  if (session.isLoading || environmentVariables.isLoading) {
+    return <LoaderWithText>Laster...</LoaderWithText>;
+  }
+
+  if (session.isError || environmentVariables.isError) {
     return (
-      <Loader
-        css={css`
-          position: absolute;
-          top: 50%;
-          left: 50%;
-        `}
-      />
+      <Alert variant="error">
+        Det oppstod problemer med lasting av konfigurasjon
+      </Alert>
     );
   }
 
-  if (session.isError) {
-    return <Alert variant="error">Fant ikke sesjonsinfo</Alert>;
+  if (!session.data || !environmentVariables.data) {
+    return;
   }
 
   return children;

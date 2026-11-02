@@ -44,7 +44,7 @@ import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
@@ -634,16 +634,16 @@ function HvemKanRedigereSection({
 }: {
   kanAdministrere: RedigeringsTilgangRessursResponse[];
 }) {
-  const toppnodeOrgEnhetId = navToppnodeOrgEnhetId();
+  const navToppnodeId = useNavToppnodeOrgEnhetId();
 
   const toppnodeOrgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(toppnodeOrgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(toppnodeOrgEnhetId),
+    queryKey: getOrgEnhet.queryKey(navToppnodeId),
+    queryFn: () => getOrgEnhet.queryFn(navToppnodeId),
   });
 
-  const toppnodeOrgEnhet = toppnodeOrgEnhetQuery.data;
+  const navToppnodeOrgEnhet = toppnodeOrgEnhetQuery.data;
 
-  const direktorNavident = toppnodeOrgEnhet?.leder.navident;
+  const direktorNavident = navToppnodeOrgEnhet?.leder.navident;
 
   const unikeFiltrerteRessurser = Array.from(
     kanAdministrere.reduce((map, ressurs) => {

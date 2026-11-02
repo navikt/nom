@@ -200,7 +200,7 @@ function VisningsnavnForm({ person }: { person: Person }) {
           navigate({
             to: "/ressurs/create/$step",
             params: { step: "2" },
-            search: (oldSearch) => ({
+            search: (oldSearch: any) => ({
               ...oldSearch,
               ...values,
               primaryTelefonnummer: nummerUtenSpaces,

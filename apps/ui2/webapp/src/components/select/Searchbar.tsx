@@ -8,7 +8,7 @@ import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
-import { isInDevelopment } from "~/customUtils/environmentUtils";
+import { useInDevelopment } from "~/customUtils/environmentUtils";
 
 import { AsyncSearch } from "./CustomSelectComponents";
 
@@ -291,7 +291,7 @@ async function createOptions(
   inputValue: string,
   hasAdmin: boolean,
 ): Promise<SearchOption[]> {
-  const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment();
+  const skalFiltrereBortVikafossen = !hasAdmin && !useInDevelopment();
 
   const filterToUse = skalFiltrereBortVikafossen
     ? notVikafossenEnhetPredicate

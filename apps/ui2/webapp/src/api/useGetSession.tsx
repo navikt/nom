@@ -13,23 +13,19 @@ export function useGetSession() {
 }
 
 export function useHasWriteAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE);
+  return useGetSession().data?.roles.includes(UserRoles.ROLE_WRITE) ?? false;
 }
 
 export function useHasAdminAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_ADMIN);
+  return useGetSession().data?.roles.includes(UserRoles.ROLE_ADMIN) ?? false;
 }
 
 export function useHasPilotAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_PILOT);
+  return useGetSession().data?.roles.includes(UserRoles.ROLE_PILOT) ?? false;
 }
 
 export function useHasAdminReadOnlyAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_READONLY);
+  return useGetSession().data?.roles.includes(UserRoles.ROLE_READONLY) ?? false;
 }
 
 export function useHasSelvbetjeningAccess(navident: string) {
@@ -41,23 +37,29 @@ export function useHasAdminOrWriteAccess() {
 }
 
 export function useHasRobotAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_ROBOT);
+  return (
+    useGetSession().data?.roles.includes(UserRoles.ROLE_WRITE_ROBOT) ?? false
+  );
 }
 
 export function useHasVikafossenAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_VIKAFOSSEN);
+  return (
+    useGetSession().data?.roles.includes(UserRoles.ROLE_WRITE_VIKAFOSSEN) ??
+    false
+  );
 }
 
 export function useHasUtenlandskKonsulentAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE_UTL_KONSULENT);
+  return (
+    useGetSession().data?.roles.includes(UserRoles.ROLE_WRITE_UTL_KONSULENT) ??
+    false
+  );
 }
 
 export function useHasExternalFundsRecipientAccess() {
-  const session = useGetSession();
-  return !!session.data?.roles.includes(
-    UserRoles.ROLE_EXTERNAL_FUNDS_RECIPIENT,
+  return (
+    useGetSession().data?.roles.includes(
+      UserRoles.ROLE_EXTERNAL_FUNDS_RECIPIENT,
+    ) ?? false
   );
 }

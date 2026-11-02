@@ -88,6 +88,11 @@ export enum IdentType {
   UKJENT = "UKJENT",
 }
 
+export enum DeployCluster {
+  PROD = "PROD",
+  DEV = "DEV",
+}
+
 export enum AnsettelsesType {
   FAST = "FAST",
   MIDLERTIDIG = "MIDLERTIDIG",
@@ -154,6 +159,32 @@ export interface EndreOrgtilknytningRequest {
 
 export interface EndreTilknytningtypeRequest {
   tilknytningtype?: Tilknytningtype;
+}
+
+export interface EnvironmentConfigResponse {
+  /** PROD/DEV */
+  deployCluster: DeployCluster;
+  /** Nom OrgEnhetId for DIREKTORATET enhet */
+  direktoratId: string;
+  /** Suffix for deployment miljø */
+  environmentSuffix?: string;
+  /** Nom OrgEnhetId for HELFO Løvnode enhet */
+  helfoId: string;
+  /**
+   * Nom OrgEnhetId'er for alle linjeenheter
+   * @uniqueItems true
+   */
+  linjeenhetene: string[];
+  /** Nom OrgEnhetId for NAV Toppnode enhet */
+  navToppnodeId: string;
+  /** Nom OrgEnhetId for RIKSREVISJONEN Løvnode enhet */
+  riksrevisjonenId: string;
+  /** Nom OrgEnhetId for SKATTEETATEN Løvnode enhet */
+  skattId: string;
+  /** Nom OrgEnhetId for TEKNOLOGIAVDELINGEN enhet */
+  teknologiavdelingenId: string;
+  /** Nom OrgEnhetId for VIKAFOSSEN Løvnode enhet */
+  vikafossenId: string;
 }
 
 export interface ExcelExportRequest {
