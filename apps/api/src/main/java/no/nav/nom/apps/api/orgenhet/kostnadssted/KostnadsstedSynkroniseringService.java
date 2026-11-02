@@ -76,7 +76,9 @@ public class KostnadsstedSynkroniseringService {
         }
 
         if (!unleash.isEnabled(UNLEASH_KOSTNADSSTED_SYNK)) {
-            log.info("Kostnadssted-synk: toggle {} er av, hopper over kjøring. Men endringer er {}", UNLEASH_KOSTNADSSTED_SYNK, endringer);
+            log.info("Kostnadssted-synk: toggle {} er av, hopper over kjøring. " +
+                "Men, total endringer: {}, " +
+                "og endringer er: {}", UNLEASH_KOSTNADSSTED_SYNK, endringer.size(), endringer);
             return new ArrayList<>();
         }
 
