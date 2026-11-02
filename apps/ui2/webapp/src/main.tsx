@@ -52,7 +52,7 @@ if (import.meta.env.PROD) {
           ? "https://telemetry.ekstern.dev.nav.no/collect"
           : "https://telemetry.nav.no/collect",
         app: {
-          name: `nom-ui${suffix ? `-${suffix}` : ""}`,
+          name: `nom-ui${!!suffix ? `-${suffix}` : ""}`,
           namespace: "team-org",
         },
         instrumentations: [

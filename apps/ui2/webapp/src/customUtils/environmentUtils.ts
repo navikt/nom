@@ -73,7 +73,7 @@ export function useIsEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
   );
 }
 
-export function useUksterneOrgEnhetIder() {
+export function useEksterneOrgEnhetIder() {
   return [
     useHelfoOrgEnhetId(),
     useSkatteetatenOrgEnhetId(),
@@ -97,9 +97,5 @@ export function useAdminBaseUrl() {
 export function useEnvironmentSuffix() {
   const suffix = useGetEnvironmentConfig().data?.environmentSuffix ?? "";
 
-  if (!suffix) {
-    return "";
-  }
-
-  return `-${suffix}`;
+  return !!suffix ? `-${suffix}` : "";
 }

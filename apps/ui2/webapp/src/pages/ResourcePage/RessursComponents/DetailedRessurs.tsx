@@ -46,8 +46,8 @@ import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import { ModalProvider } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import {
+  useEksterneOrgEnhetIder,
   useTeamkatalogenBaseUrl,
-  useUksterneOrgEnhetIder,
 } from "~/customUtils/environmentUtils";
 import {
   SektorNameMapping,
@@ -782,7 +782,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         }),
     }).data ?? [];
 
-  const eksterneLovnodeIder = useUksterneOrgEnhetIder();
+  const eksterneLovnodeIder = useEksterneOrgEnhetIder();
 
   const eksterneOrgEnheterQuery = useQuery({
     queryKey: getOrgEnhetList.queryKey(eksterneLovnodeIder),
