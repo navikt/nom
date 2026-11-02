@@ -41,6 +41,9 @@ class OrganisasjonV1IdKompatibilitetTest {
             new TilgangsenhetEndretEventV1("fid-tilgangsenhet", new TilgangsenhetEndretEventV1.TilgangsenhetEndretEventData(
                 "org-tilgangsenhet-id", "tilgangsenhet-id"
             ), (Event.Metadata) null),
+            new KostnadsstedEndretEventV1("fid-kostnadssted", new KostnadsstedEndretEventV1.KostnadsstedEndretEventData(
+                "org-kostnadssted-id", "kostnadssted-id"
+            ), (Event.Metadata) null),
             new OrgEnhetLederSlettetEventV1("fid-leder-slettet", new OrgEnhetLederSlettetEventV1.OrgEnhetLederSlettetEventData(
                 "org-leder-slettet-id"
             ), (Event.Metadata) null),

@@ -2,12 +2,14 @@ package no.nav.nom.apps.api.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
 import java.util.Set;
 
 @ConfigurationProperties("app")
 public record AppProperties(
     Clients clients,
     String name,
+    String suffix,
     EpostVarselForEnhetNavnendring epostVarselForEnhetNavnendring,
     DollyRessurs dollyRessurs,
     Orgenhet orgenhet
@@ -102,11 +104,13 @@ public record AppProperties(
 
     public record Orgenhet(
         String navId,
+        String direktoratId,
+        String teknologiavdelingenId,
         String helfoId,
         String skattId,
         String riksrevisjonenId,
         String vikafossenId,
-        Set<String> linjeenhetene,
+        List<String> linjeenhetene,
         Set<String> nasjonaloppfolgningIds
     ) {}
 

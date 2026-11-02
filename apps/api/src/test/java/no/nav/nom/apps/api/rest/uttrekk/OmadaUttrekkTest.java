@@ -19,8 +19,8 @@ class OmadaUttrekkTest {
     private final OmadaUttrekk omadaUttrekk;
 
     OmadaUttrekkTest() {
-        var orgenhet = new AppProperties.Orgenhet(null, null, null, null, null, null, null);
-        var appProperties = new AppProperties(null, null, null, null, orgenhet);
+        var orgenhet = new AppProperties.Orgenhet(null, null, null, null, null, null, null, null, null);
+        var appProperties = new AppProperties(null, null, null, null, null, orgenhet);
         omadaUttrekk = new OmadaUttrekk(
             null, null,
             null, null, null,

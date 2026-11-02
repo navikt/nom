@@ -40,7 +40,7 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
-import { navToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
@@ -114,7 +114,7 @@ function OrgKartView() {
       <DynamiskOrgKart
         opprettKnapp
         title="Velg plassering"
-        toppOrgEnhetId={navToppnodeOrgEnhetId()}
+        toppnodeOrgEnhetId={useNavToppnodeOrgEnhetId()}
       />
 
       <div

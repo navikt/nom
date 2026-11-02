@@ -12,6 +12,7 @@ import {
   lastTyperForOrgenheter,
   persisterLedere,
   reberegnNomnivaa,
+  synkroniserKostnadssteder,
 } from "~/api/apiQueries.ts";
 
 export const Route = createFileRoute("/manuell-last")({
@@ -30,6 +31,10 @@ const LASTER = [
   { text: "Last typer for orgenheter", fn: lastTyperForOrgenheter },
   { text: "Beregn NOM-nivå på nytt", fn: reberegnNomnivaa },
   { text: "Persister ledere", fn: persisterLedere },
+  {
+    text: "Synkroniser kostnadssteder fra OrgKostMapping",
+    fn: synkroniserKostnadssteder,
+  },
 ];
 function ManuellLastPage() {
   return (

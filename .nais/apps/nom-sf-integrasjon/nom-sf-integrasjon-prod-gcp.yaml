@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: nom-sf-integrasjon
   namespace: org
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: org
 spec:
@@ -43,7 +40,7 @@ spec:
       memory: 1Gi
   liveness:
     path: internal/health/liveness
-    initialDelay: 15
+    initialDelay: 30
     periodSeconds: 5
     failureThreshold: 5
   readiness:

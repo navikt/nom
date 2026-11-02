@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: nom-proxy
   namespace: nom
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: nom
 spec:
@@ -66,7 +63,6 @@ spec:
       cpu: 100m
       memory: 1024Mi
     limits:
-      cpu: 1000m
       memory: 5120Mi
   prometheus:
     enabled: true

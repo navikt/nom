@@ -3,14 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { useGetSession } from "~/api/useGetSession";
-import { isInDevelopment } from "~/customUtils/environmentUtils";
+import { useInDevelopment } from "~/customUtils/environmentUtils";
 
-const displayTestBanner = isInDevelopment();
-
-export const testBannerHeight = displayTestBanner ? "48px" : "0px";
+export const testBannerHeight = "48px";
 
 export function TestBanner() {
   const session = useGetSession();
+
+  const displayTestBanner = useInDevelopment();
 
   const navident = session.data?.navident;
 

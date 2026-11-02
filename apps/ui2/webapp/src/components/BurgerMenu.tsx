@@ -24,7 +24,7 @@ import {
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import { SmartLink } from "~/components/navigation/SmartLink";
-import { adminBaseUrl } from "~/customUtils/environmentUtils";
+import { useAdminBaseUrl } from "~/customUtils/environmentUtils";
 import flyttFysiskBrukersted from "~/resources/flyttFysiskBrukersted.svg";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
@@ -43,7 +43,7 @@ export function BurgerMenu() {
 
   const innloggetNavident = session.data?.navident;
 
-  const adminLenke = adminBaseUrl();
+  const adminLenke = useAdminBaseUrl();
 
   const ledetAvMeg = useGetSession().data?.navident
     ? (useQuery(

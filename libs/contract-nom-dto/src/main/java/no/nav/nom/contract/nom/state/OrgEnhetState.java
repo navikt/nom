@@ -24,10 +24,30 @@ public record OrgEnhetState (
     String agressoId,
     String agressoOrgNivaa,
     String agressoOrgenhetType,
-    String tilgangsenhetId
-
-
+    String tilgangsenhetId,
+    String kostnadsstedId
 ) {
+    // Bakoverkompatibel konstruktør uten kostnadssted
+    public OrgEnhetState(
+        String fid,
+        String id,
+        String navn,
+        LocalDate gyldigFom,
+        LocalDate gyldigTom,
+        String overordnetOrgEnhetFid,
+        String lederFid,
+        OrgEnhetsType orgEnhetsType,
+        NomNivaa nomNivaa,
+        String uniqueAgressoId,
+        String agressoId,
+        String agressoOrgNivaa,
+        String agressoOrgenhetType,
+        String tilgangsenhetId
+    ) {
+        this(fid, id, navn, gyldigFom, gyldigTom, overordnetOrgEnhetFid, lederFid, orgEnhetsType, nomNivaa,
+            uniqueAgressoId, agressoId, agressoOrgNivaa, agressoOrgenhetType, tilgangsenhetId, null);
+    }
+
     // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
     public boolean endedOnStartDate() {
         return nonNull(gyldigTom()) && gyldigFom().isEqual(gyldigTom());

@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: nom-api
   namespace: nom
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: nom
 spec:
@@ -56,10 +53,10 @@ spec:
     failureThreshold: 50 # 36*10sec = 6min
   resources:
     requests:
-      cpu: 300m
-      memory: 4Gi
+      cpu: 600m
+      memory: 12Gi
     limits:
-      memory: 20Gi
+      memory: 14Gi
   leaderElection: true
   prometheus:
     enabled: true

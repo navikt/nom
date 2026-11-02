@@ -139,11 +139,62 @@ public class ApiTest extends ApiTestBase {
     }
 
     @Test
+    @DisplayName("Generisk GET viderefører ikke upstream-headere")
+    void unit4_generic_get_does_not_forward_upstream_headers() {
+        String body = "{\"message\":\"æøå\"}";
+        stubFor(get(unit4ApiPath + "/chunked-response")
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader("Content-Type", "application/json")
+                .withChunkedDribbleDelay(2, 100)
+                .withHeader("X-Upstream-Response", "must-not-forward")
+                .withHeader("X-Arbitrary-Upstream", "must-not-forward")
+                .withBody(body)));
+
+        webTestClient
+            .get()
+            .uri("/proxy/unit4/chunked-response")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectHeader().doesNotExist("X-Upstream-Response")
+            .expectHeader().doesNotExist("X-Arbitrary-Upstream")
+            .expectBody(String.class).isEqualTo(body)
+            .consumeWith(response -> assertThat(response.getResponseHeaders().getOrEmpty("Transfer-Encoding")).hasSizeLessThanOrEqualTo(1));
+    }
+
+    @Test
+    @DisplayName("Feilrespons viderefører ikke upstream-headere")
+    void unit4_error_response_does_not_forward_upstream_headers() {
+        String body = "{\"message\":\"Feil: æøå\"}";
+        stubFor(get(unit4EmployeesPath + "/chunked-error")
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.BAD_GATEWAY.value())
+                .withHeader("Content-Type", "application/json; charset=UTF-8")
+                .withChunkedDribbleDelay(2, 100)
+                .withHeader("X-Upstream-Response", "must-not-forward")
+                .withHeader("X-Arbitrary-Upstream", "must-not-forward")
+                .withBody(body)));
+
+        webTestClient
+            .get()
+            .uri("/proxy/unit4/ressurs/chunked-error")
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(getValidToken(oAuth2Server)))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.BAD_GATEWAY)
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectHeader().doesNotExist("X-Upstream-Response")
+            .expectHeader().doesNotExist("X-Arbitrary-Upstream")
+            .expectBody(String.class).isEqualTo(body)
+            .consumeWith(response -> assertThat(response.getResponseHeaders().getOrEmpty("Transfer-Encoding")).hasSizeLessThanOrEqualTo(1));
+    }
+
+    @Test
     @DisplayName("Unit4-endpoint kan sende POST-request")
     void unit4_successful_post() {
         stubFor(post(unit4EmployeesPath)
             .willReturn((aResponse()
-                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
                 .withHeader("Content-Type", "application/json")
                 .withStatus(HttpStatus.CREATED.value())
                 .withBody("{\"status\":\"created\"}"))));
@@ -186,7 +237,6 @@ public class ApiTest extends ApiTestBase {
     void unit4_successful_patch() {
         stubFor(patch(urlMatching(unit4EmployeesPath + "/123456"))
             .willReturn((aResponse()
-                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\":\"ok\"}"))));
 
@@ -205,7 +255,6 @@ public class ApiTest extends ApiTestBase {
     void unit4_successful_delete() {
         stubFor(delete(unit4EmployeesPath + "/123456")
             .willReturn((aResponse()
-                .withHeader("Transfer-Encoding", "identity") // Overrides 'chunked'
                 .withHeader("Content-Type", "application/json")
                 .withBody("{\"status\":\"ok\"}"))));
 

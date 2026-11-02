@@ -66,6 +66,9 @@ public class Orgenhet {
     @Column(name = "tilgangsenhet_id")
     private String tilgangsenhetId;
 
+    @Column(name = "kostnadssted_id")
+    private String kostnadsstedId;
+
     public Orgenhet(String fid) {
         this.fid = fid;
     }
@@ -84,6 +87,7 @@ public class Orgenhet {
             .agressoOrgNivaa(orgenhetState.agressoOrgNivaa())
             .agressoOrgenhetType(orgenhetState.agressoOrgenhetType())
             .tilgangsenhetId(orgenhetState.tilgangsenhetId())
+            .kostnadsstedId(orgenhetState.kostnadsstedId())
             .build();
     }
 }

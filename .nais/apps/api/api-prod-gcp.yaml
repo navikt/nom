@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: nom-api
   namespace: nom
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: nom
 spec:
@@ -56,10 +53,10 @@ spec:
     failureThreshold: 50 # 18*10sec = 3min
   resources:
     requests:
-      cpu: 300m
-      memory: 12Gi
+      cpu: 1000m
+      memory: 10Gi
     limits:
-      memory: 20Gi
+      memory: 15Gi
   leaderElection: true
   prometheus:
     enabled: true
@@ -309,6 +306,9 @@ spec:
         - application: nda
           namespace: proaktiv
           cluster: dev-gcp
+        - application: portal-org-lookup
+          namespace: dataplattform
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

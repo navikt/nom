@@ -58,6 +58,12 @@ export async function persisterLedere() {
   return ky.get(`${API_BASE_URL}/api/admin/dvhLast/persisterLedere`);
 }
 
+export async function synkroniserKostnadssteder() {
+  return ky.get(`${API_BASE_URL}/api/admin/kostnadssted/synkroniser`, {
+    timeout: 120_000,
+  });
+}
+
 export async function oppdaterOrgEnhetType(data: {
   nomId: string | undefined;
   orgEnhetsType: OrgEnhetsType | undefined;

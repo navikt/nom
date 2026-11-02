@@ -3,9 +3,6 @@ kind: Application
 metadata:
   name: nom-admin
   namespace: org
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: org
 spec:
@@ -54,7 +51,7 @@ spec:
   resources:
     requests:
       cpu: 100m
-      memory: 4Gi
+      memory: 10Gi
     limits:
       memory: 15Gi
   prometheus:

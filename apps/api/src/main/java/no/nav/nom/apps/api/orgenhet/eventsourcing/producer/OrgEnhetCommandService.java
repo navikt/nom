@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreKostnadssted;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
@@ -12,6 +13,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgE
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
 import no.nav.nom.contract.nom.eventsource.KorrigerGyldigFomEventV1;
+import no.nav.nom.contract.nom.eventsource.KostnadsstedEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEndretNavnEventV1;
@@ -223,6 +225,17 @@ public class OrgEnhetCommandService {
                 endreTilgangsenhet.tilgangsenhetId()
             ),
             endreTilgangsenhet.inputMetadata()
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> endreKostnadssted(String fid, EndreKostnadssted endreKostnadssted) {
+        return eventProducer.sendMessage(new KostnadsstedEndretEventV1(
+            fid,
+            new KostnadsstedEndretEventV1.KostnadsstedEndretEventData(
+                endreKostnadssted.id(),
+                endreKostnadssted.kostnadsstedId()
+            ),
+            endreKostnadssted.inputMetadata()
         ));
     }
 

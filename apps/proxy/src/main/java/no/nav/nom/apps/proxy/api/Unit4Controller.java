@@ -2,7 +2,6 @@ package no.nav.nom.apps.proxy.api;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ import reactor.core.publisher.Mono;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
-
 import static no.nav.nom.apps.proxy.common.CommonConfig.TEAM_LOGS;
 
 
@@ -56,7 +54,7 @@ public class Unit4Controller {
         log.debug(TEAM_LOGS, "POST /proxy/unit4/ressurs payload: {}", body);
 
         try {
-            return webClient
+            ResponseEntity<String> response = webClient
                 .post()
                 .uri(unit4EmployeesUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,6 +63,7 @@ public class Unit4Controller {
                 .retrieve()
                 .toEntity(String.class)
                 .block();
+            return copyResponse(response.getStatusCode(), response.getBody());
 
         } catch (WebClientResponseException ex) {
             log.error("Error in Unit4 POST request:", ex);
@@ -82,7 +81,7 @@ public class Unit4Controller {
         log.debug(TEAM_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
 
         try {
-            return webClient
+            ResponseEntity<String> response = webClient
                 .patch()
                 .uri(url)
                 .contentType(MediaType.valueOf("application/json-patch+json"))  //Content-type i request må være application/json-patch+json
@@ -91,6 +90,7 @@ public class Unit4Controller {
                 .retrieve()
                 .toEntity(String.class)
                 .block();
+            return copyResponse(response.getStatusCode(), response.getBody());
 
         } catch (WebClientResponseException ex) {
             log.error("Error in Unit4 PATCH request:", ex);
@@ -107,13 +107,14 @@ public class Unit4Controller {
         log.debug(TEAM_LOGS, "DELETE /proxy/unit4/ressurs/{}", personId);
 
         try {
-            return webClient
+            ResponseEntity<String> response = webClient
                 .delete()
                 .uri(unit4EmployeesUrl + "/" + personId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .toEntity(String.class)
                 .block();
+            return copyResponse(response.getStatusCode(), response.getBody());
 
         } catch (WebClientResponseException ex) {
             log.error("Error in Unit4 DELETE request:", ex);
@@ -158,23 +159,22 @@ public class Unit4Controller {
 
         log.info("Mottatt GET-forespørsel med path: " + request.getRequestURI() + ", ruter til: " + uri);
 
-        return webClient
+        ResponseEntity<String> response = webClient
             .get()
             .uri(uri)
             .retrieve()
             .toEntity(String.class)
             .block();
+        return copyResponse(response.getStatusCode(), response.getBody());
     }
 
     private static ResponseEntity<String> getErrorResponseEntity(WebClientResponseException ex) {
         String errorBody = ex.getResponseBodyAsString();
         HttpStatusCode status = ex.getStatusCode();
-        HttpHeaders headers = ex.getHeaders();
+        return copyResponse(status, errorBody);
+    }
 
-        return ResponseEntity.status(status)
-            .headers(headers)
-            .body(errorBody);
+    private static ResponseEntity<String> copyResponse(HttpStatusCode status, String body) {
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(body);
     }
 }
-
-

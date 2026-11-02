@@ -2,15 +2,15 @@ import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 import React, { Fragment } from "react";
 
-import { direktoratOrgEnhetId } from "~/customUtils/environmentUtils";
+import { useDirektoratOrgEnhetId } from "~/customUtils/environmentUtils";
 import { OrgEnhetView } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { UnderEnheterGraphic } from "~/pages/OrganisasjonsHierarkiPage/components/UnderEnheterGraphic";
 import { ValgtOrgEnhet } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import type { OrgEnhet } from "~/types/api-models";
 
-const direktoratId = direktoratOrgEnhetId();
-
 export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const direktoratId = useDirektoratOrgEnhetId();
+
   const underEnheterOrgEnhetIds = [
     direktoratId,
     ...orgEnhet.underordnedeOrgEnhetId.filter((id) => id !== direktoratId),
@@ -19,6 +19,7 @@ export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <>
       <ValgtOrgEnhet hideRessurser orgEnhet={orgEnhet} />
+
       <UnderEnheterGraphic valgtEnhet={orgEnhet} />
       <div
         css={css`

@@ -73,6 +73,7 @@ class EventsrcToState {
         OrgEnhetsType orgEnhetsType =  eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asString()) : null;
 
         String tilgangsenhetId = eventStateAggregate.hasNonNull("tilgangsenhetId") ? eventStateAggregate.get("tilgangsenhetId").asString() : null;
+        String kostnadsstedId = eventStateAggregate.hasNonNull("kostnadsstedId") ? eventStateAggregate.get("kostnadsstedId").asString() : null;
 
         // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
@@ -96,7 +97,8 @@ class EventsrcToState {
                 agressoId,
                 agressoOrgNivaa,
                 agressoOrgenhetType,
-                tilgangsenhetId
+                tilgangsenhetId,
+                kostnadsstedId
             );
         } catch (Exception e){
             log.error("Error mapping to OrgEnhetState", e);

@@ -78,17 +78,19 @@ app:
     enabled: false
   orgenhet:
     nav-id: py437s
+    direktoratId: bu431e
     helfo-id: je305h
     skatt-id: ne938h
     riksrevisjonen-id: ke602d
     vikafossen-id: ru664y
-    linjeenhetene: ry630r,te464t,se232x,ne994m
+    teknologiavdelingenId: te627k
+    linjeenhetene: ry630r,te464t,se232x,ne994m # Rekkefølgen styrer rekkefølge på forsiden. Frontend viser de 4 første.
     nasjonaloppfolgning-ids: fu549z,nu155v
   google-storage-bucket-name:
     missing-ot: no-nav-org-prod-missing-orgtilnytninger-storage-bucket
     missing-ekstern-sluttdato: remedy-ressurs-sluttdato-prod
     utbet-mottakere: org-nom-prod-api-utbet-mottakere
-NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
+NIK_BASEURL: "http://nav-ident.org"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 
 PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
@@ -115,8 +117,8 @@ NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.def
 
 MAIN_MANAGER_BASEURL: "https://nav.mainmanager.no"
 
-PAARORENDE_BASEURL: "http://nom-paarorende.org.svc.cluster.local"
+PAARORENDE_BASEURL: "http://nom-paarorende.org"
 PAARORENDE_API_SCOPE: api://prod-gcp.org.nom-paarorende/.default
 
-ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof.svc.cluster.local"
+ORGENHET_KOSTNADSSTED_MAPPING_API_URL: "http://orgenhet-kostnadssted-mapping-api.team-nof"
 ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://prod-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default

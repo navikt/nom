@@ -16,39 +16,35 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
-import {
-  AnsettelsesType,
-  IdentType,
-  Tilknytningtype,
-} from "~/types/api-models";
+import { IdentType, Tilknytningtype } from "~/types/api-models";
 import { formatDisplayDate, formatDisplayFysiskBrukersted } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: "/ressurs/create/$step" });
-  const {
-    personident,
-    navident,
-    visningsfornavn,
-    visningsetternavn,
-    visningsmellomnavn,
-    sektor,
-    ansettelsesType,
-    gyldigFom,
-    gyldigTom,
-    orgEnhetId,
-    fysiskBrukerstedNr,
-    primaryTelefonnummer,
-    tilknytningtype,
-  } = useSearch({ from: "/ressurs/create/$step" });
 
-  const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
+  const { gyldigFom, gyldigTom, navident, ...requestFields } = useSearch({
+    from: "/ressurs/create/$step",
+  });
+
+  const request: OpprettRessursRequest = {
+    ...requestFields,
+    startDato: gyldigFom,
+    sluttDato: gyldigTom,
+    identType: IdentType.STANDARD,
+  };
+
+  const formattedName = [
+    request.visningsfornavn,
+    request.visningsmellomnavn,
+    request.visningsetternavn,
+  ]
     .filter((navn) => !!navn)
     .join(" ");
 
   const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgEnhetId as string),
-    queryFn: () => getOrgEnhet.queryFn(orgEnhetId as string),
-    enabled: !!orgEnhetId,
+    queryKey: getOrgEnhet.queryKey(request.orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(request.orgEnhetId),
+    enabled: !!request.orgEnhetId,
   });
 
   const selectOrgEnhet = orgEnhetQuery.data;
@@ -56,14 +52,14 @@ export function ConfirmStep() {
   const lederNavn = selectOrgEnhet?.leder?.visningsnavn;
 
   const selectedFysiskBrukersted = useFysiskBrukersted(
-    fysiskBrukerstedNr ?? "",
+    request.fysiskBrukerstedNr,
   );
 
   const onClose = () =>
     navigate({
       to: "/ressurs/create/$step",
       params: { step: "3" },
-      search: (oldSearch) => oldSearch,
+      search: (oldSearch: any) => oldSearch,
     });
 
   const opprettRessursMutation = useMutation<
@@ -72,36 +68,15 @@ export function ConfirmStep() {
     void
   >({
     mutationFn: () => {
-      const opprettRessursRequest = {
-        personident,
-        visningsfornavn,
-        visningsetternavn,
-        visningsmellomnavn,
-        sektor,
-        ansettelsesType,
-        startDato: gyldigFom,
-        sluttDato: gyldigTom,
-        orgEnhetId,
-        primaryTelefonnummer,
-        fysiskBrukerstedNr,
-        tilknytningtype,
-        identType: IdentType.STANDARD,
-      };
-
-      // TODO: better type safety here.
-      // We assume that each step has verified that these values exist.
-      // Using a type assertion here is cheating, ideally we would use something like zod/yup to parse and validate the data instead.
-      return createRessurs(opprettRessursRequest as OpprettRessursRequest);
+      return createRessurs(request);
     },
 
     onSuccess: (opprettRessursResponse) => {
-      // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
       navigate({
         to: "/ressurs/create/$step",
-        search: (old) => ({
+        search: (old: any) => ({
           ...old,
           navident: opprettRessursResponse.data.navident,
-          ansettelsesType,
         }),
         params: { step: "4" },
         replace: true,
@@ -139,29 +114,21 @@ export function ConfirmStep() {
           <LabelWithValue
             label="Telefonnummer"
             split
-            value={primaryTelefonnummer}
+            value={request.primaryTelefonnummer}
           />
           <LabelWithValue
             label="Sektor"
             split
-            value={sektor && SektorNameMapping[sektor]}
+            value={SektorNameMapping[request.sektor]}
           />
           <LabelWithValue label="Nav-ident" split value={navident} />
           <LabelWithValue
             label="Tilknytningstype"
             split
             value={
-              tilknytningtype &&
-              (tilknytningtype === Tilknytningtype.INGEN
+              request.tilknytningtype === Tilknytningtype.INGEN
                 ? undefined
-                : TilknytningtypeNameMapping[tilknytningtype])
-            }
-          />
-          <LabelWithValue
-            label="Ansettelsestype"
-            split
-            value={
-              ansettelsesType && AnsettelsesTypeNameMapping[ansettelsesType]
+                : TilknytningtypeNameMapping[request.tilknytningtype]
             }
           />
           <LabelWithValue
@@ -186,12 +153,12 @@ export function ConfirmStep() {
           <LabelWithValue
             label="Startdato (første arbeidsdag)"
             split
-            value={gyldigFom && formatDisplayDate(gyldigFom)}
+            value={formatDisplayDate(request.startDato)}
           />
           <LabelWithValue
             label="Sluttdato"
             split
-            value={gyldigTom && formatDisplayDate(gyldigTom)}
+            value={request.sluttDato && formatDisplayDate(request.sluttDato)}
           />
         </HGrid>
         <ApiResponseError error={opprettRessursMutation.error} />
@@ -205,6 +172,7 @@ export function ConfirmStep() {
         >
           Opprett medarbeider
         </Button>
+
         <Button onClick={onClose} type="button" variant="secondary">
           Avbryt
         </Button>
@@ -212,8 +180,3 @@ export function ConfirmStep() {
     </Modal>
   );
 }
-
-export const AnsettelsesTypeNameMapping = {
-  [AnsettelsesType.FAST]: "Fast",
-  [AnsettelsesType.MIDLERTIDIG]: "Midlertidig",
-};

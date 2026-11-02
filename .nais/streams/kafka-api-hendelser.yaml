@@ -1,11 +1,8 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
   name: nom-kafka-api-hendelser
   namespace: org
-  annotations:
-    nais.io/run-as-group: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
-    nais.io/run-as-user: "65532" # nonroot https://github.com/GoogleContainerTools/distroless/issues/443
   labels:
     team: org
 spec:
@@ -33,9 +30,9 @@ spec:
   resources:
     requests:
       cpu: 100m
-      memory: 1024Mi
+      memory: 800Mi
     limits:
-      memory: 2048Mi
+      memory: 1500Mi
   prometheus:
     enabled: true
     path: /internal/prometheus
