@@ -30,6 +30,7 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
 import { FormRessursSearchWrapper } from "~/components/forms/FormComponents";
+import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -61,7 +62,6 @@ import type {
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
-import { LabelWithValue } from "~/components/LabelWithValue";
 
 export const OpprettOrgEnhet = () => {
   const { id } = useSearch({

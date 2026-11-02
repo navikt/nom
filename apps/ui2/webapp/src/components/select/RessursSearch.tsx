@@ -1,20 +1,20 @@
+import { css } from "@emotion/react";
+import { BodyShort, VStack } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import React, { useState } from "react";
 import type { FieldError } from "react-hook-form";
 
+import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
 import {
   AsyncSearch,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
-import { useQuery } from "@tanstack/react-query";
-import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
 import {
   isPeriodActive,
   nomDateIsAfterToday,
   nomDateIsBefore,
 } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import { BodyShort, VStack } from "@navikt/ds-react";
-import { css } from "@emotion/react";
 import { formatDisplayDate } from "~/utils";
 
 export function RessursSearch({

@@ -45,7 +45,10 @@ import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
-import type { RedigeringsTilgangRessursResponse, OrgEnhet } from "~/types/api-models";
+import type {
+  OrgEnhet,
+  RedigeringsTilgangRessursResponse,
+} from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const OrganisasjonMastringForside = () => {
