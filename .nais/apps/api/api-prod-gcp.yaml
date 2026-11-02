@@ -322,6 +322,9 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
+        - application: portal-org-lookup
+          namespace: dataplattform
+          cluster: prod-gcp
       external:
         - host: org-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
