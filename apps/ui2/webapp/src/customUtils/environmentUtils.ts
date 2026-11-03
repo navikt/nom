@@ -45,7 +45,7 @@ export function useVikafossenOrgEnhetId() {
 }
 
 export function useLinjeenhetOrgEnhetIder() {
-  return useGetEnvironmentConfig().data?.linjeenhetene ?? "";
+  return useGetEnvironmentConfig().data?.linjeenhetene ?? [];
 }
 
 export function useIsHelfoOrgEnhet(orgEnhetId: string) {
@@ -65,12 +65,12 @@ export function useIsVikafossenOrgEnhet(orgEnhetId: string) {
 }
 
 export function useIsEksternSamarbeidspartnerOrgEnhet(orgEnhetId: string) {
-  return (
-    useIsHelfoOrgEnhet(orgEnhetId) ||
-    useIsSkatteetatenOrgEnhet(orgEnhetId) ||
-    useIsRiksrevisjonenOrgEnhet(orgEnhetId) ||
-    useIsVikafossenOrgEnhet(orgEnhetId)
-  );
+  const isHelfo = useIsHelfoOrgEnhet(orgEnhetId);
+  const isSkatteetaten = useIsSkatteetatenOrgEnhet(orgEnhetId);
+  const isRiksrevisjonen = useIsRiksrevisjonenOrgEnhet(orgEnhetId);
+  const isVikafossen = useIsVikafossenOrgEnhet(orgEnhetId);
+
+  return isHelfo || isSkatteetaten || isRiksrevisjonen || isVikafossen;
 }
 
 export function useEksterneOrgEnhetIder() {
@@ -89,8 +89,10 @@ export function useTeamkatalogenBaseUrl() {
 }
 
 export function useAdminBaseUrl() {
+  const suffix = useEnvironmentSuffix();
+
   return useInDevelopment()
-    ? `https://nom-admin${useEnvironmentSuffix()}.ansatt.dev.nav.no`
+    ? `https://nom-admin${suffix}.ansatt.dev.nav.no`
     : "https://nom-admin.ansatt.nav.no";
 }
 
