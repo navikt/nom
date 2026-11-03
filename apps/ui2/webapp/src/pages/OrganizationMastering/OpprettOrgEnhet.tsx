@@ -46,6 +46,10 @@ import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
+  NomNivaaNameMapping,
+  OrgEnhetsTypeNameMapping,
+} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
+import {
   IkkeTilgangRedigering,
   KostnadsstedSelectFormPart,
   NomNivaaSelect,
@@ -65,10 +69,6 @@ import type {
 } from "~/types/api-models";
 import { OrgEnhetsType } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
-import {
-  NomNivaaNameMapping,
-  OrgEnhetsTypeNameMapping,
-} from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 
 export const OpprettOrgEnhet = () => {
   const { id } = useSearch({
