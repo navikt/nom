@@ -134,6 +134,8 @@ function CreateSpecialResourceForm() {
   const hasUtenlandskKonsulentAccess = useHasUtenlandskKonsulentAccess();
   const hasVikafossenAccess = useHasVikafossenAccess();
 
+  const vikafossenId = useVikafossenOrgEnhetId();
+
   const IdentTypeAccessMap = {
     [IdentType.ROBOT]: hasRobotAccess || hasAdminAccess,
     [IdentType.UTENLANDSK_KONSULENT]:
@@ -189,7 +191,7 @@ function CreateSpecialResourceForm() {
   const onValid = async (
     values: InferType<typeof opprettSpesiellValidationSchema>,
   ) => {
-    const request = lagRessursRequest(values);
+    const request = lagRessursRequest(values, vikafossenId);
 
     await showModal(
       <CreateSpecialConfirmModal
@@ -1097,24 +1099,25 @@ function FormDateWrapper({ name, label }: { name: string; label: string }) {
   );
 }
 
-function lagRessursRequest(values: {
-  identType: NonNullable<IdentType | undefined>;
-  visningsfornavn?: string | undefined;
-  visningsmellomnavn?: string | undefined;
-  visningsetternavn?: string | undefined;
-  orgEnhetId?: string | undefined;
-  startDato: string;
-  sluttDato?: string | null | undefined;
-  identifikasjonsnummer?: string;
-  navident?: string | undefined;
-}): OpprettRessursRequest {
+function lagRessursRequest(
+  values: {
+    identType: NonNullable<IdentType | undefined>;
+    visningsfornavn?: string | undefined;
+    visningsmellomnavn?: string | undefined;
+    visningsetternavn?: string | undefined;
+    orgEnhetId?: string | undefined;
+    startDato: string;
+    sluttDato?: string | null | undefined;
+    identifikasjonsnummer?: string;
+    navident?: string | undefined;
+  },
+  vikafossenId: string,
+): OpprettRessursRequest {
   const getVisningsEtternavn = (identType: IdentType, etternavn?: string) => {
     if (identType === IdentType.ROBOT) return "RPARobot";
 
     return etternavn ?? "";
   };
-
-  const vikafossenId = useVikafossenOrgEnhetId();
 
   return {
     identType: values.identType,
