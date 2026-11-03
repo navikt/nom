@@ -54,7 +54,7 @@ import {
   KostnadsstedSelectFormPart,
   NomNivaaSelect,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
   OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
@@ -176,9 +176,10 @@ function FormView({
 
   return (
     <>
-      <OrgEnhetInfoWrapper
+      <OrgEnhetInfo
         heading="Enheten blir opprettet under"
         orgEnhet={overliggendeOrgEnhet}
+        displayKostnadssted
       />
 
       <OpprettOrgEnhetForm

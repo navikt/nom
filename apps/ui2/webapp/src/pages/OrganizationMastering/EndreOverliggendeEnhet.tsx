@@ -34,7 +34,7 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
 import type {
@@ -117,10 +117,7 @@ function FormView({
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={6}>
-        <OrgEnhetInfoWrapper
-          heading="Valgt organisasjonsenhet"
-          orgEnhet={orgEnhet}
-        />
+        <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <EndreOverliggendeEnhetForm
           orgEnhet={orgEnhet}

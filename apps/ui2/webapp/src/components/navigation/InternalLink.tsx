@@ -20,9 +20,10 @@ export function InternalLink({
     <Link
       className={className}
       css={css`
+        width: fit-content;
+
         :hover {
           text-decoration: none;
-          width: fit-content;
         }
       `}
       rel={rel}
