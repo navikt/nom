@@ -61,13 +61,16 @@ const OptionWithTag = (properties: OptionProps<SearchOption, false>) => {
 export function SearchBar() {
   const navigate = useNavigate();
   const hasAdminAccess = useHasAdminAccess();
+  const isInDevelopment = useInDevelopment();
 
   return (
     <AsyncSearch
       components={{ Option: OptionWithTag }}
       controlShouldRenderValue={false}
       isClearable={false}
-      loadOptions={(s) => searchIfEnoughInput(s, hasAdminAccess)}
+      loadOptions={(s) =>
+        searchIfEnoughInput(s, hasAdminAccess, isInDevelopment)
+      }
       noOptionsMessage={({ inputValue }: { inputValue: string }) =>
         inputValue.toLowerCase().replace("nav ", "").trim().length <
         RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
@@ -82,7 +85,11 @@ export function SearchBar() {
   );
 }
 
-async function searchIfEnoughInput(inputValue: string, hasAdmin: boolean) {
+async function searchIfEnoughInput(
+  inputValue: string,
+  hasAdmin: boolean,
+  isInDevelopment: boolean,
+) {
   // Se bort ifra Nav når man søker
   const newSearchTerm = inputValue.toLowerCase().replace("nav ", "").trim();
 
@@ -90,7 +97,7 @@ async function searchIfEnoughInput(inputValue: string, hasAdmin: boolean) {
     return [];
   }
 
-  return await createOptions(newSearchTerm, hasAdmin);
+  return await createOptions(newSearchTerm, hasAdmin, isInDevelopment);
 }
 
 async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
@@ -290,8 +297,9 @@ function notVikafossenEnhetPredicate(searchResultRaw: SearchResultRaw) {
 async function createOptions(
   inputValue: string,
   hasAdmin: boolean,
+  isInDevelopment: boolean,
 ): Promise<SearchOption[]> {
-  const skalFiltrereBortVikafossen = !hasAdmin && !useInDevelopment();
+  const skalFiltrereBortVikafossen = !hasAdmin && !isInDevelopment;
 
   const filterToUse = skalFiltrereBortVikafossen
     ? notVikafossenEnhetPredicate
