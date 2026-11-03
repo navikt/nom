@@ -39,9 +39,11 @@ export function FormDateWrapper({
 export function FormRessursSearchWrapper({
   name,
   label,
+  visValgtRessursInfo = false,
 }: {
   name: string;
   label: string;
+  visValgtRessursInfo?: boolean;
 }) {
   const { field, fieldState } = useController({
     name,
@@ -52,6 +54,7 @@ export function FormRessursSearchWrapper({
       label={label}
       onChange={field.onChange}
       error={fieldState.error}
+      visValgtRessursInfo={visValgtRessursInfo}
     />
   );
 }

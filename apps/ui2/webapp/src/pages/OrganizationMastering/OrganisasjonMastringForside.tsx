@@ -14,7 +14,6 @@ import {
   HGrid,
   HStack,
   LinkCard,
-  Search,
   UNSAFE_Combobox,
   VStack,
 } from "@navikt/ds-react";
@@ -45,7 +44,6 @@ import { LoaderWithText } from "~/components/LoaderWithText";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
 import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
-import { useUnleashToggle } from "~/hooks/useUnleashToggle";
 import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   OrgEnhet,
@@ -229,13 +227,6 @@ function MineOrgEnheterSeksjon() {
 
   const visPerspektivSearch = hasAdminAccess || hasAdminReadOnlyAccess;
 
-  const simpleSearchEnabled = useUnleashToggle(
-    "nom-fe.orgmastring.simple-search",
-  );
-  const advancedSearchEnabled = useUnleashToggle(
-    "nom-fe.orgmastring.advanced-search",
-  );
-
   const [perspectiveSelected, setPerspectiveSelected] = useState("");
 
   const handlePerpectiveSelect = (input: string) =>
@@ -253,6 +244,13 @@ function MineOrgEnheterSeksjon() {
       ),
   });
 
+  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
+
+  const toppnodeIder =
+    redigerbareToppnoder
+      ?.filter((orgEnhet) => nomDateIsTodayOrAfter(orgEnhet.gyldigTom))
+      .map((orgEnhet) => orgEnhet.id) ?? [];
+
   const valgtRessursQuery = useQuery({
     queryKey: getRessurs.queryKey(perspectiveSelected),
     queryFn: () => getRessurs.queryFn(perspectiveSelected),
@@ -261,17 +259,10 @@ function MineOrgEnheterSeksjon() {
 
   const valgtRessurs = valgtRessursQuery.data;
 
-  const redigerbareToppnoder = redigerbareToppnoderQuery?.data;
-
-  const toppnodeIder =
-    redigerbareToppnoder
-      ?.filter((orgEnhet) => nomDateIsTodayOrAfter(orgEnhet.gyldigTom))
-      .map((orgEnhet) => orgEnhet.id) ?? [];
-
   const delegerbareRessurserQuery = useQuery({
     queryKey: getRessurserWhichCanBeDelegatedTo.queryKey,
     queryFn: () => getRessurserWhichCanBeDelegatedTo.queryFn(),
-    enabled: advancedSearchEnabled && visPerspektivSearch,
+    enabled: visPerspektivSearch,
   });
 
   const delegerbareRessurser = delegerbareRessurserQuery?.data;
@@ -288,39 +279,22 @@ function MineOrgEnheterSeksjon() {
     <VStack gap="6">
       {visPerspektivSearch && (
         <>
-          <VStack
+          <div
             css={css`
-              width: 35%;
+              width: 50%;
             `}
-            gap="4"
           >
-            {simpleSearchEnabled && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <Search
-                  autoComplete="off"
-                  hideLabel={false}
-                  label="Se perspektivet til ressurs"
-                  onSearchClick={handlePerpectiveSelect}
-                />
-              </form>
+            {delegerbareRessurserQuery.isLoading ? (
+              <LoaderWithText>Laster...</LoaderWithText>
+            ) : (
+              <UNSAFE_Combobox
+                label="Se perspektivet til ledere eller lederstøtte"
+                onToggleSelected={handlePerpectiveSelect}
+                options={alleOptions}
+                size="medium"
+              />
             )}
-
-            {advancedSearchEnabled &&
-              (delegerbareRessurserQuery.isLoading ? (
-                <LoaderWithText>Laster...</LoaderWithText>
-              ) : (
-                <UNSAFE_Combobox
-                  label="Se perspektivet til ledere eller lederstøtte"
-                  onToggleSelected={handlePerpectiveSelect}
-                  options={alleOptions}
-                  size="medium"
-                />
-              ))}
-          </VStack>
+          </div>
 
           {!!valgtRessurs && (
             <BodyShort
@@ -437,7 +411,13 @@ function UtvidOrgEnhetKort({
           border-radius: var(--a-border-radius-large);
           padding: var(--a-spacing-4) var(--a-spacing-6);
           display: block;
+          cursor: pointer;
+
+          :hover {
+            background: var(--a-surface-action-subtle-hover);
+          }
         `}
+        onClick={() => setExpanded(!expanded)}
       >
         <div
           css={css`

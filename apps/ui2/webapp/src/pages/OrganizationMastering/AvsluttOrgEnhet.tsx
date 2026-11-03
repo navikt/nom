@@ -588,7 +588,7 @@ function AvsluttOrgEnhetModalContent({
 }) {
   return (
     <BodyLong>
-      Avslutte <b>{orgEnhet.navn}</b> fra og med{" "}
+      <b>{orgEnhet.navn}</b> blir gyldig til og med{" "}
       <b>{formatDisplayDate(sluttdato)}</b>.
     </BodyLong>
   );
@@ -603,7 +603,7 @@ function AvsluttOrgEnhetKvitteringContent({
 }) {
   return (
     <BodyLong>
-      <b>{orgEnhet.navn}</b> avsluttet fra og med{" "}
+      <b>{orgEnhet.navn}</b> er gyldig til og med{" "}
       <b>{formatDisplayDate(changeInfo.sluttdato)}</b>.
     </BodyLong>
   );

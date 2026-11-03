@@ -242,6 +242,7 @@ function KorrigerOrgEnhetForm({
               icon={<FloppydiskIcon aria-hidden />}
               size="small"
               type="submit"
+              loading={endreOrgEnhetInformasjonMutation.isPending}
             >
               Lagre
             </Button>
