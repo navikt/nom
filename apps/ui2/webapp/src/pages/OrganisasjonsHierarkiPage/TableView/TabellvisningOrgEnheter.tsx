@@ -14,7 +14,10 @@ import { OrgEnhetsTypeNameMapping } from "~/pages/OrganisasjonsHierarkiPage/comp
 import type { OrgEnhet } from "~/types/api-models";
 
 export const TabellvisningOrgEnheter = () => {
-  const { id = useNavToppnodeOrgEnhetId() } = useSearch({
+  //noinspection UnnecessaryLocalVariableJS Local variable to ensure hook rules
+  const navToppnodeId = useNavToppnodeOrgEnhetId();
+
+  const { id = navToppnodeId } = useSearch({
     from: "/org/table",
   });
 
