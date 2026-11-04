@@ -5,6 +5,8 @@ import { useController } from "react-hook-form";
 import { OrgEnhetSearch } from "~/components/select/OrgEnhetSearch";
 import { RessursSearch } from "~/components/select/RessursSearch";
 import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
+import type { Tilgangsenhet } from "~/types/api-models";
+import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 
 export function FormDateWrapper({
   name,
@@ -75,6 +77,28 @@ export function FormOrgEnhetSearchWrapper({
       label={label}
       onChange={field.onChange}
       error={fieldState.error}
+    />
+  );
+}
+
+export function FormTilgangsenhetSelectWrapper({
+  name,
+  tilgangsenheter,
+}: {
+  name: string;
+  tilgangsenheter: Tilgangsenhet[];
+}) {
+  const { field, fieldState } = useController({
+    name,
+  });
+
+  return (
+    <TilgangsenhetSelect
+      error={fieldState.error}
+      label="Tilgangsenhet"
+      tilgangsenheter={tilgangsenheter}
+      value={field.value}
+      onChange={field.onChange}
     />
   );
 }

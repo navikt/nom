@@ -764,6 +764,31 @@ function OrganisationHierarchyTree({
 }
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
+  const eksterneLovnodeIder = useEksterneOrgEnhetIder();
+
+  const eksterneOrgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(eksterneLovnodeIder),
+    queryFn: () => getOrgEnhetList.queryFn(eksterneLovnodeIder),
+  });
+
+  const eksterneOrgEnheter = eksterneOrgEnheterQuery.data;
+
+  const skjulteEksterneOrgEnheter = [
+    ...eksterneLovnodeIder,
+    ...(
+      eksterneOrgEnheter?.map((orgEnhet) => orgEnhet.overordnetEnhetId) ?? []
+    ).filter((id) => !!id),
+  ];
+
+  const orgEnheterLedetAvRessursQuery = useQuery({
+    queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
+    queryFn: () => getOrgEnheterLedetAvNavIdent.queryFn(ressurs.navident),
+  });
+
+  const orgEnheterLedetAvRessurs2 = orgEnheterLedetAvRessursQuery.data;
+
+  console.log(orgEnheterLedetAvRessurs2);
+
   const orgEnheterLedetAvRessurs =
     useQuery({
       queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
@@ -781,22 +806,6 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           );
         }),
     }).data ?? [];
-
-  const eksterneLovnodeIder = useEksterneOrgEnhetIder();
-
-  const eksterneOrgEnheterQuery = useQuery({
-    queryKey: getOrgEnhetList.queryKey(eksterneLovnodeIder),
-    queryFn: () => getOrgEnhetList.queryFn(eksterneLovnodeIder),
-  });
-
-  const eksterneOrgEnheter = eksterneOrgEnheterQuery.data;
-
-  const skjulteEksterneOrgEnheter = [
-    ...eksterneLovnodeIder,
-    ...(
-      eksterneOrgEnheter?.map((orgEnhet) => orgEnhet.overordnetEnhetId) ?? []
-    ).filter((id) => !!id),
-  ];
 
   const orgEnheterLedetAvRessursFiltrert = orgEnheterLedetAvRessurs
     .filter(

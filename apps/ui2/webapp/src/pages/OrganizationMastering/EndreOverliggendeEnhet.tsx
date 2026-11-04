@@ -43,6 +43,7 @@ import type {
   OrgEnhet,
 } from "~/types/api-models";
 import { formatDisplayDate } from "~/utils";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
 export const EndreOverliggendeEnhet = () => {
   const { id } = useSearch({ from: "/endre-overliggende-enhet" });
@@ -298,5 +299,12 @@ function EndreOverliggendeKvitteringContent({
 
 const validationSchema = yup.object({
   nyOverenhetId: yup.string().required("Obligatorisk"),
-  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigFom: yup
+    .string()
+    .required("Obligatorisk")
+    .test(
+      "gyldig-dagens-dato-eller-senere",
+      "Må være tidligst dagens dato",
+      (value) => nomDateIsTodayOrAfter(value),
+    ),
 });
