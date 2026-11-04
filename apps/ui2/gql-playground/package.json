@@ -9,15 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "graphiql": "^5.2.0",
+    "graphiql": "^5.4.0",
     "graphql": "^16.11.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",
-    "@types/react": "^19.1.16",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.0.4",
     "globals": "^16.4.0",
     "typescript": "~5.9.3",
