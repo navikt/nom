@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.email;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
@@ -31,11 +32,13 @@ public class OrgtilknytningEvtsrcListener {
 
     private final Environment env;
     private final OrgtilknytningEndretEmailService orgtilknytningEndretEmailService;
+    private final Unleash unleash;
     private final JsonMapper jsonMapper = configureJsonMapper();
 
-    public OrgtilknytningEvtsrcListener(OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, Environment env) {
+    public OrgtilknytningEvtsrcListener(OrgtilknytningEndretEmailService orgtilknytningEndretEmailService, Environment env, Unleash unleash) {
         this.orgtilknytningEndretEmailService = orgtilknytningEndretEmailService;
         this.env = env;
+        this.unleash = unleash;
     }
 
     @KafkaListener(
@@ -71,8 +74,15 @@ public class OrgtilknytningEvtsrcListener {
 
     private void addToOTEndretDataEmailQueue(OrgtilknytningEvent event) {
         String initiatedFrom = event.getMetadata().inputMetadata().origination().initiatedFrom();
-        if ((!initiatedFrom.equals(getClusterName() + ":org:nom-ui2")) && (!initiatedFrom.equals("Admin swagger/rest"))) {
+        // Uten toggle: bare endringer fra nom-ui2 og ingen slettevarsel, slik det var før
+        boolean detaljertEpost = unleash.isEnabled(OrgtilknytningEndretEmailService.UNLEASH_DETALJERT_OT_EPOST);
+        boolean fraAdmin = detaljertEpost && initiatedFrom.equals("Admin swagger/rest");
+        if ((!initiatedFrom.equals(getClusterName() + ":org:nom-ui2")) && !fraAdmin) {
             log.debug("OT-endringer operation is not performed nom frontend: {}. OTendretData won´t be added to the email queue", initiatedFrom);
+            return;
+        }
+        if (!detaljertEpost && event instanceof OrgtilknytningFjernetEventV1) {
+            log.debug("Slettevarsel er skrudd av med toggle {}. Fid {} legges ikke i køen", OrgtilknytningEndretEmailService.UNLEASH_DETALJERT_OT_EPOST, event.getFid());
             return;
         }
 
