@@ -132,6 +132,9 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
+        - application: notat-administrasjon-q2
+          namespace: isa
+          cluster: dev-gcp
         - application: amt-person-service
           namespace: amt
           cluster: dev-gcp

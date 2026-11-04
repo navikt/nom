@@ -25,7 +25,7 @@ export function UserImage(props: UserImageProperties) {
   React.useEffect(() => {
     setImgSrc(person);
     setImgError(false);
-    const enableImgFetch = !!navident && inDevelopment;
+    const enableImgFetch = !!navident && !inDevelopment;
 
     const img = new Image();
     // img.loading = loadOnlyWhenVisible ? "lazy" : "eager";

@@ -28,12 +28,12 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.90.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.91.0</gcp.libraries-bom.version>
         <springdoc.version>3.2.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-73.version>3.16.0</hypersistence-utils-hibernate-73.version>
         <graphql-extended-scalars.version>24.0</graphql-extended-scalars.version>
-        <unleash.version>12.3.0</unleash.version>
+        <unleash.version>12.3.2</unleash.version>
         <opencsv.version>5.12.0</opencsv.version>
         <apache.common.csv.version>1.14.1</apache.common.csv.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
@@ -42,19 +42,19 @@
         <swagger-annotations-jakarta.version>2.2.55</swagger-annotations-jakarta.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
         <org.wiremock-spring-boot.version>4.4.3</org.wiremock-spring-boot.version>
-        <mock-oauth2-server.version>6.1.1</mock-oauth2-server.version>
+        <mock-oauth2-server.version>6.1.4</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.6.Final</hibernate-validator.version>
-        <ojdbc.version>23.26.3.0.0</ojdbc.version>
+        <ojdbc.version>23.26.4.0.0</ojdbc.version>
         <poi-ooxml.version>6.0.0</poi-ooxml.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <postgresql.version>42.7.14</postgresql.version>
         <microsoft-graph.version>6.72.0</microsoft-graph.version>
-        <azure-identity.version>1.18.7</azure-identity.version>
+        <azure-identity.version>1.19.0</azure-identity.version>
         <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>6.0.0</apache.poi.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <slack-client.version>1.52.0</slack-client.version>
+        <slack-client.version>1.53.0</slack-client.version>
         <okhttp.version>5.5.1</okhttp.version>
     </properties>
 

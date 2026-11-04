@@ -31,7 +31,7 @@ public record ManuelleRessurserOgLedereProperties(
                 navident,
                 Sektor.valueOf(sektor),
                 new Visningsnavn("Test", Optional.empty(), navident),
-                new Jobbtelefon(null, null),
+                null,
                 null,
                 null,
                 LocalDate.of(2022, 1, 1),
