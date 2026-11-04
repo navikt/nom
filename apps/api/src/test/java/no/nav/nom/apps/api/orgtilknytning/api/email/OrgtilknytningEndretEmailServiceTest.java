@@ -3,9 +3,14 @@ package no.nav.nom.apps.api.orgtilknytning.api.email;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import io.getunleash.Unleash;
+import no.nav.nom.apps.api.common.cache.CacheQueueService;
+import no.nav.nom.apps.api.common.cache.CacheType;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
+import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.model.FysiskBrukersted;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetLederState;
@@ -15,10 +20,13 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.state.orgenhet.OrgEnhetStateRepository;
 import no.nav.nom.libs.state.orgtilknytning.OrgtilknytningStateRepository;
 import no.nav.nom.libs.state.ressurs.RessursStateRepository;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,10 +45,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -74,6 +84,21 @@ public class OrgtilknytningEndretEmailServiceTest {
     @Mock
     private FysiskBrukerstedService fysiskBrukerstedService;
 
+    @Mock
+    private CacheQueueService cacheQueueService;
+
+    @Mock
+    private LeaderElection leaderElection;
+
+    @Mock
+    private DvhStartupLoadMonitor dvhStartupLoadMonitor;
+
+    @Mock
+    private NomMastered nomMastered;
+
+    @Mock
+    private Unleash unleash;
+
     @Test
     public void tessFreemarkerTemplate() throws TemplateException, IOException {
         configuration.setClassForTemplateLoading(this.getClass(), "/templates/");
@@ -97,8 +122,10 @@ public class OrgtilknytningEndretEmailServiceTest {
     }
 
 
-    @Test
-    public void testComposeOTChangesMessage() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testComposeOTChangesMessage(boolean detaljertEpost) {
+        when(unleash.isEnabled(OrgtilknytningEndretEmailService.UNLEASH_DETALJERT_OT_EPOST)).thenReturn(detaljertEpost);
 
         // setup data
         String fid = "fid123456";
@@ -156,6 +183,12 @@ public class OrgtilknytningEndretEmailServiceTest {
             navidentChangedByVisningsnavn.getFormattedVisningsnavn(),
             timestamp
         );
+        if (detaljertEpost) {
+            expected += MessageFormat.format(
+                orgtilknytningEndretEmailService.epost_body_endringer_utfort_template,
+                OTEndretData.OTEndretDataType.OT_NY.beskrivelse
+            );
+        }
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
     }
@@ -222,6 +255,99 @@ public class OrgtilknytningEndretEmailServiceTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(navidentChangedBy));
         assertTrue(result.contains(orgenhetLederNavIdent));
+    }
+
+    @Test
+    public void testComposeOTChangesMessageForSlettetOT() {
+        String fid = "fid123456";
+        String orgEnhet = "orgenhet123456";
+        String timestamp = "02.11.2026";
+        when(orgEnhetStateRepository.findById(orgEnhet)).thenReturn(Optional.of(
+            OrgEnhetState.builder().id(orgEnhet).navn("Enhet A").build()
+        ));
+
+        // Opprettet og slettet samme dag: OT_NY-oppføringen mangler orgEnhetId
+        var opprettet = OTEndretData.builder()
+            .fid(fid)
+            .changedByNavIdent("C123456")
+            .timestamp(timestamp)
+            .eventType(OTEndretData.OTEndretDataType.OT_NY)
+            .build();
+        var slettet = opprettet.toBuilder()
+            .navident("A123456")
+            .orgEnhetId(orgEnhet)
+            .eventType(OTEndretData.OTEndretDataType.OT_FJERNET)
+            .build();
+
+        var result = orgtilknytningEndretEmailService.composeOTChangesMessage(List.of(opprettet, slettet));
+
+        String expected = MessageFormat.format(
+            orgtilknytningEndretEmailService.epost_body_with_fjernet_event_template,
+            "Enhet A", orgEnhet, "Ukjent", timestamp
+        );
+        assertEquals(expected, result.trim());
+    }
+
+    @Test
+    public void testGetRecipientNavidentsForSlettetOT() {
+        String orgEnhet = "orgenhet123456";
+        String lederNavident = "L123456";
+        when(orgEnhetStateRepository.findById(orgEnhet)).thenReturn(Optional.of(
+            OrgEnhetState.builder().id(orgEnhet).navn("Enhet A").build()
+        ));
+        when(orgEnhetLederService.getAktivLederForOrgEnhet(orgEnhet)).thenReturn(Optional.of(
+            OrgEnhetLederState.builder().fid("FID_1").navident(lederNavident).orgEnhetId(orgEnhet).build()
+        ));
+
+        // OT-en finnes ikke i state, så findByFid gir Optional.empty()
+        var result = orgtilknytningEndretEmailService.getRecipientNavidents(List.of(
+            OTEndretData.builder()
+                .fid("fid123456")
+                .navident("A123456")
+                .orgEnhetId(orgEnhet)
+                .changedByNavIdent("C123456")
+                .eventType(OTEndretData.OTEndretDataType.OT_FJERNET)
+                .build()
+        ));
+
+        assertEquals(Set.of("C123456", lederNavident), result);
+    }
+
+    @Test
+    public void testSendOTEndretEmailFjernerEndretOgSlettetOTFraKoen() {
+        String navident = "A123456";
+        String endretFid = "fid-endret";
+        String slettetFid = "fid-slettet";
+        when(leaderElection.isLeader()).thenReturn(true);
+        when(orgtilknytningStateRepository.findByFid(endretFid)).thenReturn(Optional.of(
+            OrgtilknytningState.builder().fid(endretFid).navident(navident).orgEnhetId("orgenhet1").build()
+        ));
+        // Må stubbes eksplisitt, ellers kaster MockitoExtension PotentialStubbingProblem
+        when(orgtilknytningStateRepository.findByFid(slettetFid)).thenReturn(Optional.empty());
+        when(cacheQueueService.getOTEndringerFromCache()).thenReturn(Map.of(
+            endretFid, List.of(OTEndretData.builder()
+                .fid(endretFid)
+                .changedByNavIdent("C123456")
+                .eventType(OTEndretData.OTEndretDataType.OT_SEKTOR_ENDRET)
+                .build()),
+            slettetFid, List.of(OTEndretData.builder()
+                .fid(slettetFid)
+                .navident(navident)
+                .orgEnhetId("orgenhet2")
+                .changedByNavIdent("C123456")
+                .eventType(OTEndretData.OTEndretDataType.OT_FJERNET)
+                .build())
+        ));
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(
+            RessursState.builder().navident(navident).build()
+        ));
+        // Ikke mastered: ingen e-post sendes, men endringene skal likevel ut av køen
+        when(nomMastered.isMastered(navident)).thenReturn(false);
+
+        orgtilknytningEndretEmailService.sendOTEndretEmail();
+
+        verify(cacheQueueService).delete(endretFid, CacheType.OTENDRINGER.toString());
+        verify(cacheQueueService).delete(slettetFid, CacheType.OTENDRINGER.toString());
     }
 
     @Test
