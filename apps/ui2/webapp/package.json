@@ -65,13 +65,13 @@
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-unicorn": "74.0.0",
     "graphql": "17.0.2",
-    "postcss-styled-syntax": "0.7.2",
+    "postcss-styled-syntax": "0.7.4",
     "prettier": "3.9.10",
     "stylelint": "17.16.0",
     "stylelint-config-standard": "40.0.0",
     "swagger-typescript-api": "13.13.0",
     "typescript": "6.0.3",
-    "vite": "7.3.6",
+    "vite": "7.3.7",
     "vitest": "4.1.11"
   },
   "optionalDependencies": {
