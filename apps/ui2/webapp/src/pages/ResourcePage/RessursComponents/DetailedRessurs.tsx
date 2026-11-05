@@ -437,6 +437,7 @@ function ExpiredOrgTilknytninger({
         <Heading level="2" size="xsmall">
           Avsluttede organisasjonstilknytninger
         </Heading>
+
         <HelpText
           css={css`
             margin-left: var(--a-spacing-2);
@@ -446,12 +447,14 @@ function ExpiredOrgTilknytninger({
           NOM har kun avsluttede organisasjonstilknytninger fra og med 2021.
         </HelpText>
       </div>
+
       {tilknyttingerToShow.map((orgtilknytning) => (
         <ExpiredOrgTilknytning
           expiredOrgTilknytning={orgtilknytning}
           key={orgtilknytning.fid}
         />
       ))}
+
       {shouldDisplayShowAllButton && (
         <Button
           onClick={() => setShowAll(true)}
