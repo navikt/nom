@@ -5,6 +5,10 @@ app:
     orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource
     navidentTopic: org.nav-ident
 
+    # Se Readme.md    org.nom-kafka-api-ressurs-state_stream_-2
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 0
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
+
 spring:
   kafka:
     security:
@@ -42,30 +46,3 @@ management:
       exposure:
         include: prometheus, info, health, metrics
       base-path: /internal
-
---- # PROD config
-spring:
-  config:
-    activate:
-      on-profile: prod && !dev
-
-app:
-  kafka:
-    # Se Readme.md    org.nom-kafka-api-ressurs-state_stream_-2
-    skip-producing-state-events-until-ressurs-evtsrc-offset: 0
-    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0
-
---- # DEV config
-spring:
-  config:
-    activate:
-      on-profile: dev && !prod
-
-  kafka:
-    streams:
-      application-id: ${KAFKA_STREAMS_APPLICATION_ID}-5 # Versjonert app id for å få nye consumer grupper
-
-app:
-  kafka:
-    skip-producing-state-events-until-ressurs-evtsrc-offset: 868058
-    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 1788287
