@@ -38,6 +38,10 @@ public interface IOrgenhet {
 
     String getTilgangsenhetId();
 
+    default String getKostnadsstedId() {
+        return null;
+    }
+
     record AgressoIdCombo(
             String agressoId,
             String orgNiv

@@ -13,5 +13,6 @@ public record DvhOrgenhetDTO(
     String agressoId,
     String agressoNivaa,
     String tilgangsenehtId,
-    String lederNavident
+    String lederNavident,
+    String kostnadsstedId
 ) {}
