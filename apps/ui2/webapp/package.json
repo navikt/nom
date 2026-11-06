@@ -46,7 +46,7 @@
     "@graphql-codegen/typescript": "6.1.2",
     "@graphql-codegen/typescript-operations": "6.2.0",
     "@graphql-codegen/typescript-resolvers": "6.1.1",
-    "@navikt/aksel-stylelint": "7.38.0",
+    "@navikt/aksel-stylelint": "8.21.0",
     "@tanstack/react-query-devtools": "5.105.1",
     "@tanstack/router-vite-plugin": "1.167.48",
     "@types/lodash": "4.17.27",
