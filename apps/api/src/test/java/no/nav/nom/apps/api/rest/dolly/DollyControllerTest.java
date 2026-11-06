@@ -12,7 +12,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
-import no.nav.nom.apps.api.ressurs.api.app.NomRemedyIntegrasjonClient;
 import no.nav.nom.apps.api.ressurs.api.app.OpprettRessursResponse;
 import no.nav.nom.apps.api.ressurs.api.app.RessursContactDetailsResolver;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommandService;
@@ -47,9 +46,6 @@ public class DollyControllerTest extends RestTestBase {
 
     @MockitoBean
     PdlClient pdlClient;
-
-    @MockitoBean
-    NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
     @MockitoBean
     RessursCommandService ressursCommandService;
@@ -109,7 +105,7 @@ public class DollyControllerTest extends RestTestBase {
 
         var request = new DollyRessursRequest(personident, navn.getFornavn(), navn.getMellomnavn(), navn.getEtternavn(), null, null);
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(appProperties.dollyRessurs().fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(appProperties.dollyRessurs().fysiskBrukerstedNr()));
 
         postOpprettRessursRequest(

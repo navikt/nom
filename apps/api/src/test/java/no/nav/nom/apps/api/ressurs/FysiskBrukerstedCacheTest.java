@@ -63,6 +63,19 @@ public class FysiskBrukerstedCacheTest {
     }
 
     @Test
+    public void testCacheUsesNomRemedyWhenMainManagerToggleIsDisabled() {
+        var brukersteder = List.of(FysiskBrukersted.builder().nr("456").navn("Remedy").build());
+        when(unleashMock.isEnabled(UNLEASH_USEMAINMANAGER_FOR_FYSISK_BRUKERSTED)).thenReturn(false);
+        when(nomRemedyIntegrasjonClientMock.getFysiskeBrukersteder()).thenReturn(brukersteder);
+
+        assertEquals(brukersteder, fysiskBrukerstedCache.getAll());
+
+        verify(nomRemedyIntegrasjonClientMock, times(1)).getFysiskeBrukersteder();
+        verifyNoMoreInteractions(nomRemedyIntegrasjonClientMock);
+        verifyNoMoreInteractions(mainManagerClientMock);
+    }
+
+    @Test
     public void testRefreshCacheReplacesDataWithoutEvicting() {
         when(mainManagerClientMock.getFysiskeBrukersteder()).thenReturn(List.of(FysiskBrukersted.builder().nr("123").navn("Test").build()));
 
