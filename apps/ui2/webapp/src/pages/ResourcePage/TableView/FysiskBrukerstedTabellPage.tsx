@@ -170,8 +170,10 @@ function FysiskBrukerstedTabell() {
           Postnummer og -sted:{" "}
           {!!valgtFysiskBrukersted && (
             <b>
-              {valgtFysiskBrukersted.postnummer},{" "}
-              {valgtFysiskBrukersted.poststed}
+              {!!valgtFysiskBrukersted.postnummer &&
+              !!valgtFysiskBrukersted.poststed
+                ? `${valgtFysiskBrukersted.postnummer}, ${valgtFysiskBrukersted.poststed}`
+                : "Ukjent"}
             </b>
           )}
         </BodyShort>
