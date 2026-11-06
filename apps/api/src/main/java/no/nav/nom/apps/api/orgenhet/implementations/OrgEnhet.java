@@ -72,4 +72,9 @@ public class OrgEnhet implements IOrgenhet {
     public String getTilgangsenhetId() {
         return orgEnhetState.tilgangsenhetId();
     }
+
+    @Override
+    public String getKostnadsstedId() {
+        return orgEnhetState.kostnadsstedId();
+    }
 }
