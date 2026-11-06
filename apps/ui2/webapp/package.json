@@ -19,7 +19,7 @@
     "all-checks": "npm run check-types && npm run test && npm run lint && npm run stylelint"
   },
   "dependencies": {
-    "@apollo/client": "4.3.5",
+    "@apollo/client": "4.3.6",
     "@emotion/react": "11.14.0",
     "@grafana/faro-web-sdk": "2.13.0",
     "@grafana/faro-web-tracing": "2.13.0",
@@ -27,7 +27,7 @@
     "@navikt/aksel-icons": "7.38.0",
     "@navikt/ds-css": "7.38.0",
     "@navikt/ds-react": "7.38.0",
-    "@tanstack/react-query": "5.105.1",
+    "@tanstack/react-query": "5.105.3",
     "@tanstack/react-router": "1.170.46",
     "axios": "1.21.0",
     "date-fns": "4.4.0",
@@ -47,7 +47,7 @@
     "@graphql-codegen/typescript-operations": "6.2.0",
     "@graphql-codegen/typescript-resolvers": "6.1.1",
     "@navikt/aksel-stylelint": "7.38.0",
-    "@tanstack/react-query-devtools": "5.105.1",
+    "@tanstack/react-query-devtools": "5.105.3",
     "@tanstack/router-vite-plugin": "1.167.48",
     "@types/lodash": "4.17.27",
     "@types/react": "19.3.0",
