@@ -363,7 +363,7 @@ export function OrgtilknytningerUtenforHierarki() {
               />
             </DatePicker>
           </div>
-          <HStack gap="space-8" justify="end">
+          <HStack gap="2" justify="end">
             <Button
               disabled={nyOrgenhetId === ""}
               onClick={() => {

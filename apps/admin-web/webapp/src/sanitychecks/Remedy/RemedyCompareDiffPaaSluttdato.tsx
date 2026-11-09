@@ -90,7 +90,7 @@ export function RemedyCompareDiffPaaSluttdato() {
       <HStack
         align="end"
         as="form"
-        gap="space-32"
+        gap="8"
         onSubmit={handleSubmit(onValidSubmit)}
       >
         <div style={{ paddingBottom: "20px" }}>
