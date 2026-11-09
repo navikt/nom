@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.propertyresolvers.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -25,6 +26,7 @@ import static java.util.Objects.nonNull;
 @Service
 @Slf4j
 public class DvhRessursRestService {
+    public static final String UNLEASH_BEHANDLE_ALLE_SOM_MASTRET_I_NOM = "nom-api.behandle_alle_ressurser_som_mastret_i_nom";
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -33,8 +35,8 @@ public class DvhRessursRestService {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
-
     private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
 
     public DvhRessursRestService(
         MasteredRessursStateRepository masteredRessursStateRepository,
@@ -42,7 +44,7 @@ public class DvhRessursRestService {
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         OrgEnhetLederStateRepository orgEnhetLederStateRepository,
-        OrganiseringStateRepository organiseringStateRepository
+        OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.ressursStateRepository = ressursStateRepository;
@@ -50,9 +52,15 @@ public class DvhRessursRestService {
         this.orgenhetService = orgenhetService;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
         this.organiseringStateRepository = organiseringStateRepository;
+        this.unleash = unleash;
     }
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
+        if (unleash.isEnabled(UNLEASH_BEHANDLE_ALLE_SOM_MASTRET_I_NOM, false)) {
+            return ressursStateRepository.getAll().stream()
+                .map(this::toDTO)
+                .toList();
+        }
         return ressursStateRepository
             .findByNavidentBulk(masteredRessursStateRepository.navidenter()).values().stream()
             .map(this::toDTO)

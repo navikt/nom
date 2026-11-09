@@ -107,7 +107,6 @@ public class DvhRestConsumer {
             if (!dvhStartupLoadMonitor.hasCompleted()) {
                 dvhStartupLoadMonitor.setCompleted();
             }
-            loadOrganiseringerFromDvh(false);
             manuelleRessurserOgLedereTilState.oppdater();
 
             log.info("DVH lasten er skrudd av i Unleash, State Topics er lest inn, går ut av schedulert oppdatering fra DVH etter {}", durationAsH24(start));
@@ -117,12 +116,6 @@ public class DvhRestConsumer {
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
         List<DvhTelefon> dvhTelefoner = loadTlfFromDvh();
-
-        // Denne kommer før oppdatering av orgenheter - gjør at noen organiseringer feiler når ny enhet ikke er opprettet enda
-        // Men - vi må ha den her så lenge saveOrganiseringer(...) til orgenhetService benyttes - slik at hver pod er oppdatert med denne infoen.
-        // Skal fjernes når det over er tatt vekk
-        // Legger inn lesningen av denne under i lederElection delen for å sikre oppdaterte enheter først
-        loadOrganiseringerFromDvh(false); // Hvis dette er leader og schedulert, skal ikke oppdaterring gjøres - altså force er false
 
         if (!dvhStartupLoadMonitor.hasCompleted() && dvhTelefoner != null && !dvhTelefoner.isEmpty()) { // Pod kan markeres som klar etter oppstart
             dvhStartupLoadMonitor.setCompleted();
@@ -145,7 +138,7 @@ public class DvhRestConsumer {
                 throw new RuntimeException(e);
             }
 
-            loadOrganiseringerFromDvh(true); // Her kan leader oppdatere
+            loadOrganiseringerFromDvh(); // Her kan leader oppdatere
 
             // Finn OTer utenfor hierarki - og autoflytt om mulig
             findOTUtenforHierarki();
@@ -326,15 +319,13 @@ public class DvhRestConsumer {
         }
     }
 
-    public void loadOrganiseringerFromDvh(boolean forceEvtSrcUpdate) {
+    public void loadOrganiseringerFromDvh() {
         log.info("Laster Organisering fra dvh");
         try {
             var organiseringer = dvhOrdsService.getOrganiseringer();
 
-            if (forceEvtSrcUpdate) { // Kun leader schedulert trigget eller trigget fra swagger admin
-                log.info("Oppdaterer evtsrc med nye Organiseringer fra dvh");
-                organiseringService.saveOrganiseringer(organiseringer);
-            }
+            log.info("Oppdaterer evtsrc med nye Organiseringer fra dvh");
+            organiseringService.saveOrganiseringer(organiseringer);
         } catch (Exception e) {
             log.error("ALERT! Failure loading Organisering data from DVH", e);
         }
