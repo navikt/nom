@@ -36,8 +36,8 @@ jobs:
       nais-config-file-path-dev: .nais/apps/api/api-dev-gcp.yaml
       # Enable only after the variant manifests have isolated databases and Kafka topics:
       # additional-dev-deployments: >-
-      #   [{"suffix":"q0","manifest":".nais/apps/api/api-dev-gcp-q0.yaml"},
-      #    {"suffix":"sf-test","manifest":".nais/apps/api/api-dev-gcp-sf-test.yaml"}]
+       #   [{"suffix":"q0","manifest":".nais/apps/api/api-q0-dev-gcp.yaml"},
+       #    {"suffix":"sf-test","manifest":".nais/apps/api/api-sf-test-dev-gcp.yaml"}]
       nais-config-file-path-prod: .nais/apps/api/api-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/api/unleash-vars.yaml
       deploy-timeout: 20m

@@ -83,7 +83,7 @@ jobs:
         run: npm run build
 
       - name: Build and push Docker image
-        uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: org
@@ -130,7 +130,7 @@ jobs:
       - id: variants
         env:
           # Enable only after variant manifests and matching backends are ready:
-          # ADDITIONAL_DEV_DEPLOYMENTS: '[{"suffix":"q0","manifest":".nais/apps/ui2/ui2-dev-q0.yaml"},{"suffix":"sf-test","manifest":".nais/apps/ui2/ui2-dev-sf-test.yaml"}]'
+          # ADDITIONAL_DEV_DEPLOYMENTS: '[{"suffix":"q0","manifest":".nais/apps/ui2/ui2-q0-dev.yaml"},{"suffix":"sf-test","manifest":".nais/apps/ui2/ui2-sf-test-dev.yaml"}]'
           ADDITIONAL_DEV_DEPLOYMENTS: '[]'
         run: |
           # Parse the deployment JSON array and publish it as a compact GitHub Actions output.
@@ -177,25 +177,38 @@ jobs:
           variant = pathlib.Path(os.environ['VARIANT_MANIFEST'])
           suffix = os.environ['SUFFIX']
 
+          def scalar(value):
+              match = re.fullmatch(r'''(?:"([^"]*)"|'([^']*)'|([^\s#'"`]+))\s*(?:#.*)?''', value.strip())
+              if not match:
+                  raise ValueError(f'invalid manifest scalar: {value}')
+              return next(part for part in match.groups() if part is not None)
+
           def section_values(lines, heading):
               values = []
               in_section = False
+              found_section = False
               for line in lines:
                   if line == heading:
                       in_section = True
+                      found_section = True
                   elif in_section and line.strip() and not line.lstrip().startswith('#'):
                       if len(line) - len(line.lstrip()) <= len(heading) - len(heading.lstrip()):
                           break
                       if line.startswith('    - '):
-                          values.append(line.removeprefix('    - ').strip().strip('"\''))
+                          values.append(scalar(line.removeprefix('    - ')))
+                      elif line.startswith('    -'):
+                          raise ValueError(f'malformed ingress: {line}')
+              if found_section and not values:
+                  raise ValueError(f'empty or malformed {heading}')
               return values
 
           def manifest_info(path):
               lines = path.read_text().splitlines()
-              if not any(re.fullmatch(r'kind: ["\']?Application["\']?', line) for line in lines):
+              if not any(line.startswith('kind:') and scalar(line.partition(':')[2]) == 'Application'
+                         for line in lines if line.startswith('kind:')):
                   raise ValueError(f'{path}: expected a Nais Application')
               metadata = lines.index('metadata:')
-              name = next((line.split(':', 1)[1].strip().strip('"\'') for line in lines[metadata + 1:]
+              name = next((scalar(line.partition(':')[2]) for line in lines[metadata + 1:]
                            if line.startswith('  name:')), None)
               if not name or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', name):
                   raise ValueError(f'{path}: invalid metadata.name')
@@ -204,7 +217,8 @@ jobs:
           try:
               if not isinstance(suffix, str) or not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', suffix):
                   raise ValueError('invalid variant suffix')
-              expected_path = base.with_name(f'{base.stem}-{suffix}{base.suffix}')
+              environment = next((end for end in ('-dev-gcp', '-dev') if base.stem.endswith(end)), '')
+              expected_path = base.with_name(f'{base.stem.removesuffix(environment)}-{suffix}{environment}{base.suffix}')
               if variant != expected_path or not variant.is_file():
                   raise ValueError(f'variant manifest must be {expected_path}')
               base_name, base_ingresses = manifest_info(base)

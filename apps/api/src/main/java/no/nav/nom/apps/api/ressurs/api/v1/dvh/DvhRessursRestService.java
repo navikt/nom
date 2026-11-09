@@ -118,7 +118,8 @@ public class DvhRessursRestService {
             orgenhet.getAgressoId(),
             orgenhet.getOrgNiv(),
             orgenhet.getTilgangsenhetId(),
-            leder.map(OrgEnhetLederState::navident).orElse(null)
+            leder.map(OrgEnhetLederState::navident).orElse(null),
+            orgenhet.getKostnadsstedId()
         );
     }
 

@@ -36,6 +36,7 @@ public class DeadLetterListener {
     @KafkaListener(
         containerFactory = "deadLetterKafkaListenerContainerFactory",
         id = "#{deadLetterUniqueListenerId}",
+        autoStartup = "#{!${app.kafka.skru-av-lyttere-for-ubrukte-topics-i-ekstra-dev-miljo:false}}",
         topicPartitions = {
             @TopicPartition(
                 topic = "${app.kafka.dead-letter.orgtilknytning-topic}",

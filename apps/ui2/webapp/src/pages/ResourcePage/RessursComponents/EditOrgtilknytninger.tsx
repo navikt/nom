@@ -1322,7 +1322,7 @@ function IllegalDolCombinationAlert({
     (dolValidation.dolGaps.length === 0 &&
       dolValidation.dolOverlaps.length === 0)
   ) {
-    return <></>;
+    return;
   }
 
   return (

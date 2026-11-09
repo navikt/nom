@@ -51,7 +51,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,9 +82,6 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockitoBean
     PdlClient pdlClient;
-
-    @MockitoBean
-    NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
     @MockitoBean
     RessursCommandService ressursCommandService;
@@ -197,7 +193,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(STANDARD)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -334,7 +330,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(STANDARD)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -414,7 +410,7 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         postOpprettRessursRequest(
@@ -494,7 +490,7 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         postOpprettRessursRequest(
@@ -578,7 +574,7 @@ public class RessursControllerTest extends RestTestBase {
             .build();
 
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -1142,10 +1138,8 @@ public class RessursControllerTest extends RestTestBase {
             .build();
 
         when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
-                new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
-            )
-        )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
+            .thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
         postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isOk();
@@ -1179,10 +1173,8 @@ public class RessursControllerTest extends RestTestBase {
             .build();
 
         when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
-                new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
-            )
-        )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
+            .thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
         postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), updateFysiskeBrukerstederRequest)
             .expectStatus().isForbidden();
@@ -1364,7 +1356,7 @@ public class RessursControllerTest extends RestTestBase {
 
         when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(existingRessurs));
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         postOpprettRessursRequest(
@@ -1507,6 +1499,27 @@ public class RessursControllerTest extends RestTestBase {
             null,
             null
         );
+    }
+
+    @Test
+    void oppdatere_fysiske_brukersteder_avviser_bare_ukjent_nummer() {
+        var existingRessurs = ressursState().toBuilder().fysiskeBrukersteder(null).build();
+        var request = UpdateFysiskeBrukerstederRequest.builder()
+            .primaryFysiskBrukersted("kjent")
+            .fysiskeBrukersteder(Set.of("kjent", "ukjent"))
+            .build();
+
+        when(ressursStateRepository.findByFid(existingRessurs.fid())).thenReturn(Optional.of(existingRessurs));
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre()).thenReturn(Set.of("kjent"));
+
+        postUpdateFysiskeBrukerstederRequest(existingRessurs.fid(), testToken.nomWriteGroupAndNomUiAzp(), request)
+            .expectStatus().isBadRequest()
+            .expectBody(StandardResponse.class)
+            .isEqualTo(StandardResponse.builder()
+                .message("Fysiske brukersteder with brukerstedNr [ukjent] does not exist")
+                .build());
+
+        verifyNoInteractions(ressursCommandService);
     }
 
     @Test
@@ -1672,7 +1685,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(IdentType.ROBOT)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -1803,7 +1816,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(VIKAFOSSEN)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -1862,7 +1875,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(STANDARD)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -1919,7 +1932,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(ROBOT)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommandService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -1998,7 +2011,7 @@ public class RessursControllerTest extends RestTestBase {
             .identType(VIKAFOSSEN)
             .build();
 
-        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+        when(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre())
             .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         postOpprettRessursRequest(

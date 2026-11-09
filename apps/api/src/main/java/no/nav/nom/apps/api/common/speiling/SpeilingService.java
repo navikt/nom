@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.common.speiling;
 
+import no.nav.nom.apps.api.orgtilknytning.api.app.EndreOrgtilknytningRequest;
+import no.nav.nom.apps.api.orgtilknytning.api.app.LeggTilOrgtilknytningRequest;
 import no.nav.nom.apps.api.orgtilknytning.api.app.OppdaterOrgtilknytningerForRessursRequest;
 import no.nav.nom.apps.api.ressurs.NomMastered;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
@@ -17,6 +19,8 @@ import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -230,9 +234,11 @@ public class SpeilingService {
     public void speilBrukerstederFromRequest(RessursState ressursState, OppdaterOrgtilknytningerForRessursRequest request, InputMetadata inputMetadata) {
         String primaryFysiskBrukersted = null;
         Set<String> alleFysiskeBrukersteder = new HashSet<>();
+        boolean hasActive = false;
 
         for (var eksisterende : request.eksisterendeOrgtilknytninger()) {
             if (isPeriodActive(eksisterende.gyldigFom(), eksisterende.gyldigTom())) {
+                hasActive = true;
                 if (eksisterende.erDagligOppfolging() && nonNull(eksisterende.primaryFysiskBrukerstedNummer())) {
                     primaryFysiskBrukersted = eksisterende.primaryFysiskBrukerstedNummer();
                 }
@@ -247,6 +253,7 @@ public class SpeilingService {
 
         for (var ny : request.nyeOrgtilknytninger()) {
             if (isPeriodActive(ny.gyldigFom(), ny.gyldigTom())) {
+                hasActive = true;
                 if (ny.erDagligOppfolging() && nonNull(ny.primaryFysiskBrukerstedNummer())) {
                     primaryFysiskBrukersted = ny.primaryFysiskBrukerstedNummer();
                 }
@@ -255,6 +262,60 @@ public class SpeilingService {
                 }
                 if (nonNull(ny.optionalFysiskBrukersteder())) {
                     alleFysiskeBrukersteder.addAll(ny.optionalFysiskBrukersteder());
+                }
+            }
+        }
+
+        if (!hasActive) {
+            var existingFurureOt = request.eksisterendeOrgtilknytninger().stream()
+                .filter(EndreOrgtilknytningRequest::erDagligOppfolging)
+                .filter(endreOrgtilknytningRequest -> endreOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now()))
+                .min(Comparator.comparing(EndreOrgtilknytningRequest::gyldigFom)).orElse(null);
+
+            var newFutureOt = request.nyeOrgtilknytninger().stream()
+                .filter(LeggTilOrgtilknytningRequest::erDagligOppfolging)
+                .filter(leggTilOrgtilknytningRequest -> leggTilOrgtilknytningRequest.gyldigFom().isAfter(LocalDate.now()))
+                .min(Comparator.comparing(LeggTilOrgtilknytningRequest::gyldigFom)).orElse(null);
+
+            if (nonNull(existingFurureOt) && nonNull(newFutureOt)) {
+                if (existingFurureOt.gyldigFom().isBefore(newFutureOt.gyldigFom())) {
+                    primaryFysiskBrukersted = existingFurureOt.primaryFysiskBrukerstedNummer();
+
+                    if (nonNull(primaryFysiskBrukersted)) {
+                        alleFysiskeBrukersteder.add(primaryFysiskBrukersted);
+                    }
+
+                    if (nonNull(existingFurureOt.optionalFysiskBrukersteder())) {
+                        alleFysiskeBrukersteder.addAll(existingFurureOt.optionalFysiskBrukersteder());
+                    }
+                } else {
+                    primaryFysiskBrukersted = newFutureOt.primaryFysiskBrukerstedNummer();
+
+                    if (nonNull(primaryFysiskBrukersted)) {
+                        alleFysiskeBrukersteder.add(primaryFysiskBrukersted);
+                    }
+
+                    if (nonNull(newFutureOt.optionalFysiskBrukersteder())) {
+                        alleFysiskeBrukersteder.addAll(newFutureOt.optionalFysiskBrukersteder());
+                    }
+                }
+            } else if (isNull(existingFurureOt) && nonNull(newFutureOt)) {
+                primaryFysiskBrukersted = newFutureOt.primaryFysiskBrukerstedNummer();
+                if (nonNull(primaryFysiskBrukersted)) {
+                    alleFysiskeBrukersteder.add(primaryFysiskBrukersted);
+                }
+
+                if (nonNull(newFutureOt.optionalFysiskBrukersteder())) {
+                    alleFysiskeBrukersteder.addAll(newFutureOt.optionalFysiskBrukersteder());
+                }
+            } else if (nonNull(existingFurureOt)) {
+                primaryFysiskBrukersted = existingFurureOt.primaryFysiskBrukerstedNummer();
+                if (nonNull(primaryFysiskBrukersted)) {
+                    alleFysiskeBrukersteder.add(primaryFysiskBrukersted);
+                }
+
+                if (nonNull(existingFurureOt.optionalFysiskBrukersteder())) {
+                    alleFysiskeBrukersteder.addAll(existingFurureOt.optionalFysiskBrukersteder());
                 }
             }
         }

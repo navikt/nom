@@ -360,11 +360,10 @@ public class RessursRestService {
     }
 
     private void validateFysiskeBrukerstederExists(Set<String> brukerstedNrs) {
-        var existingBrukerstedNrs = nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(brukerstedNrs.stream().toList());
+        var existingBrukerstedNrs = fysiskBrukerstedService.getAllFysiskBrukerstedsNumre();
 
         if (!existingBrukerstedNrs.containsAll(brukerstedNrs)) {
-            var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(existingBrukerstedNrs::contains)
-                .collect(Collectors.toSet());
+            var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(nr -> !existingBrukerstedNrs.contains(nr)).toList();
 
             throw new IllegalArgumentException(String.format(
                 "Fysiske brukersteder with brukerstedNr %s does not exist",

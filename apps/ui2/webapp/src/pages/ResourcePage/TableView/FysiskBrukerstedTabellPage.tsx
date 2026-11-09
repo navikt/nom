@@ -58,9 +58,9 @@ export function FysiskBrukerstedTabellPage() {
 }
 
 function FysiskBrukerstedTabell() {
-  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const alleFysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
 
-  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data ?? [];
+  const alleFysiskeBrukersteder = alleFysiskeBrukerstederQuery.data ?? [];
 
   const alleTilgangsenheterQuery = useQuery({
     queryKey: getAlleTilgangsenheter.queryKey(),
@@ -75,7 +75,7 @@ function FysiskBrukerstedTabell() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const eksportFilnavn = () => {
-    const valgtBrukersted = fysiskeBrukersteder.find(
+    const valgtBrukersted = alleFysiskeBrukersteder.find(
       (brukersted) => brukersted.nr === fysiskBrukerstedFilter,
     );
 
@@ -115,9 +115,13 @@ function FysiskBrukerstedTabell() {
     }
   };
 
-  if (fysiskeBrukerstederQuery.isLoading) {
+  if (alleFysiskeBrukerstederQuery.isLoading) {
     return <LoaderWithText>Laster...</LoaderWithText>;
   }
+
+  const valgtFysiskBrukersted = alleFysiskeBrukersteder.find(
+    (fysiskBrukersted) => fysiskBrukersted.nr === fysiskBrukerstedFilter,
+  );
 
   return (
     <VStack gap="6">
@@ -139,7 +143,7 @@ function FysiskBrukerstedTabell() {
             `}
           >
             <FysiskBrukerstedSelect
-              fysiskeBrukersteder={fysiskeBrukersteder}
+              fysiskeBrukersteder={alleFysiskeBrukersteder}
               isClearable
               label="Primært fysisk brukersted"
               onChange={(value) => setFysiskBrukerstedFilter(value ?? "")}
@@ -162,17 +166,29 @@ function FysiskBrukerstedTabell() {
           </div>
         </HStack>
 
+        <BodyShort>
+          Postnummer og -sted:{" "}
+          {!!valgtFysiskBrukersted && (
+            <b>
+              {!!valgtFysiskBrukersted.postnummer &&
+              !!valgtFysiskBrukersted.poststed
+                ? `${valgtFysiskBrukersted.postnummer}, ${valgtFysiskBrukersted.poststed}`
+                : "Ukjent"}
+            </b>
+          )}
+        </BodyShort>
+
         <Alert variant="info">
           Filtrene baserer seg på medarbeideres organisasjonstilknytninger med
           daglig oppfølging.
         </Alert>
       </VStack>
 
-      {(!!fysiskBrukerstedFilter || tilgangsenhetFilter) && (
+      {(!!fysiskBrukerstedFilter || !!tilgangsenhetFilter) && (
         <FysiskBrukerstedTabellInner
           handleDownloadExcel={handleDownloadExcel}
           fysiskBrukerstedNr={fysiskBrukerstedFilter}
-          tilgangsenhet={tilgangsenhetFilter}
+          tilgangsenhetId={tilgangsenhetFilter}
           isDownloading={isDownloading}
         />
       )}
@@ -182,24 +198,24 @@ function FysiskBrukerstedTabell() {
 
 function FysiskBrukerstedTabellInner({
   fysiskBrukerstedNr,
-  tilgangsenhet,
+  tilgangsenhetId,
   handleDownloadExcel,
   isDownloading,
 }: {
   fysiskBrukerstedNr: string;
-  tilgangsenhet: string;
+  tilgangsenhetId: string;
   handleDownloadExcel: any;
   isDownloading: boolean;
 }) {
   const request: RessurserByFysiskBrukerstedAndTilgangsenhetIdRequest = {
     fysiskBrukerstedNr: fysiskBrukerstedNr || undefined,
-    tilgangsenhetId: tilgangsenhet || undefined,
+    tilgangsenhetId: tilgangsenhetId || undefined,
   };
 
   const fysiskBrukerstedRessurserAlleQuery = useQuery({
     queryKey: getRessurserForFysiskBrukerstedAlle.queryKey(request),
     queryFn: () => getRessurserForFysiskBrukerstedAlle.queryFn(request),
-    enabled: !!fysiskBrukerstedNr || !!tilgangsenhet,
+    enabled: !!fysiskBrukerstedNr || !!tilgangsenhetId,
   });
 
   const fysiskBrukerstedRessurser = fysiskBrukerstedRessurserAlleQuery.data;

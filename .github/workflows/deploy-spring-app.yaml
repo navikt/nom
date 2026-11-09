@@ -20,7 +20,7 @@ on:
         required: false
         type: string
         default: '[]'
-        description: 'JSON array of {"suffix":"q0","manifest":".nais/apps/api/api-dev-gcp-q0.yaml"} entries'
+        description: 'JSON array of {"suffix":"q0","manifest":".nais/apps/api/api-q0-dev-gcp.yaml"} entries'
       deploy-timeout:
         required: false
         type: string
@@ -95,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
         run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=true --batch-mode
       - name: Build and push Docker image
-        uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # ratchet:nais/docker-build-push@v0
+        uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: org
@@ -223,9 +223,16 @@ jobs:
           variant = pathlib.Path(os.environ['VARIANT_MANIFEST'])
           suffix = os.environ['SUFFIX']
 
+          def scalar(value):
+              match = re.fullmatch(r'''(?:"([^"]*)"|'([^']*)'|([^\s#'"`]+))\s*(?:#.*)?''', value.strip())
+              if not match:
+                  raise ValueError(f'invalid manifest scalar: {value}')
+              return next(part for part in match.groups() if part is not None)
+
           def app_name(path):
               lines = path.read_text().splitlines()
-              if not any(line.strip() == 'kind: Application' for line in lines):
+              if not any(line.startswith('kind:') and scalar(line.partition(':')[2]) == 'Application'
+                         for line in lines if line.startswith('kind:')):
                   raise ValueError(f'{path}: expected a Nais Application')
               in_metadata = False
               for line in lines:
@@ -234,40 +241,53 @@ jobs:
                   elif in_metadata and line and not line.startswith((' ', '#')):
                       break
                   elif in_metadata:
-                      match = re.fullmatch(r'  name: ([a-z0-9-]+)(?:\s+#.*)?', line)
-                      if match:
-                          return match.group(1)
-              raise ValueError(f'{path}: expected an unquoted metadata.name')
+                      if line.startswith('  name:'):
+                          name = scalar(line.partition(':')[2])
+                          if re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', name):
+                              return name
+                          raise ValueError(f'{path}: invalid metadata.name')
+              raise ValueError(f'{path}: missing metadata.name')
 
-          def list_values(lines, heading, item_pattern):
+          def list_values(lines, heading, item_indent, prefix=''):
               indent = len(heading) - len(heading.lstrip())
               values = []
               in_section = False
+              found_section = False
               for line in lines:
                   if line == heading:
                       in_section = True
+                      found_section = True
                   elif in_section and line.strip() and not line.lstrip().startswith('#'):
                       if len(line) - len(line.lstrip()) <= indent:
                           break
-                      match = re.fullmatch(item_pattern, line)
-                      if match:
-                          values.append(match.group(1))
+                      if line.startswith(item_indent + '- '):
+                          entry = line[len(item_indent) + 2:]
+                          if prefix:
+                              if not entry.startswith(prefix):
+                                  raise ValueError(f'malformed entry in {heading}: {line}')
+                              entry = entry[len(prefix):]
+                          values.append(scalar(entry))
+                      elif len(line) - len(line.lstrip()) == len(item_indent) and line.lstrip().startswith('-'):
+                          raise ValueError(f'malformed entry in {heading}: {line}')
+              if found_section and not values:
+                  raise ValueError(f'empty or malformed {heading}')
               return values
 
           try:
               if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', suffix):
                   raise ValueError('invalid variant suffix')
-              expected_path = base.with_name(f'{base.stem}-{suffix}{base.suffix}')
+              environment = next((end for end in ('-dev-gcp', '-dev') if base.stem.endswith(end)), '')
+              expected_path = base.with_name(f'{base.stem.removesuffix(environment)}-{suffix}{environment}{base.suffix}')
               if variant != expected_path or not variant.is_file():
                   raise ValueError(f'variant manifest must be {expected_path}')
               expected_name = f'{app_name(base)}-{suffix}'
               if len(expected_name) > 63 or app_name(variant) != expected_name:
                   raise ValueError(f'{variant}: metadata.name must be {expected_name}')
               lines = variant.read_text().splitlines()
-              sql_names = list_values(lines, '    sqlInstances:', r'      - name: ([a-z0-9-]+)')
-              if any(not name.startswith(expected_name) for name in sql_names):
+              sql_names = list_values(lines, '    sqlInstances:', '      ', 'name: ')
+              if any(not re.fullmatch(r'[a-z0-9-]+', name) or not name.startswith(expected_name) for name in sql_names):
                   raise ValueError(f'{variant}: every gcp.sqlInstances.name must start with {expected_name}')
-              ingresses = list_values(lines, '  ingresses:', r'    - (\S+)')
+              ingresses = list_values(lines, '  ingresses:', '    ')
               if any(
                   urlsplit(ingress).scheme != 'https'
                   or not (urlsplit(ingress).hostname or '').startswith(f'{expected_name}.')

@@ -267,6 +267,10 @@ public class FysiskBrukerstedService {
                 (fysiskBrukersted, _) -> fysiskBrukersted));
     }
 
+    public Set<String> getAllFysiskBrukerstedsNumre() {
+        return fysiskBrukerstedCache.getAll().stream().map(FysiskBrukersted::nr).collect(Collectors.toSet());
+    }
+
     public void sendMasseflyttFysiskBrukerstedEmail(
         String tilFysiskbrukersted,
         List<String> navidenter,

@@ -535,6 +535,17 @@ class FysiskBrukerstedServiceTest {
     }
 
     @Test
+    void getAllFysiskBrukerstedsNumre() {
+        when(fysiskBrukerstedCacheMock.getAll()).thenReturn(List.of(
+            FysiskBrukersted.builder().nr("1234").navn("Der").build(),
+            FysiskBrukersted.builder().nr("9876").navn("Her").build(),
+            FysiskBrukersted.builder().nr("1234").navn("Duplikat").build()
+        ));
+
+        assertThat(fysiskBrukerstedService.getAllFysiskBrukerstedsNumre()).containsExactlyInAnyOrder("1234", "9876");
+    }
+
+    @Test
     void verifyUnrelatedOtToPreviousFysiskBrukerstedNummerIsIgnored(){
 
         var fysiskBrukerstedToMatch = "1234";
