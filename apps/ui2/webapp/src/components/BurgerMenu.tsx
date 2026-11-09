@@ -99,7 +99,7 @@ export function BurgerMenu() {
         <Dropdown.Menu
           css={css`
             padding: 0;
-            color: var(--ax-text-default);
+            color: var(--ax-text-neutral);
             width: fit-content;
             max-height: fit-content !important;
 

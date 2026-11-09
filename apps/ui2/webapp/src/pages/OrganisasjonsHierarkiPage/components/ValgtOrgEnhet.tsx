@@ -374,7 +374,7 @@ function MedarbeidereList({
             <ReadMore
               css={css`
                 > button {
-                  color: var(--ax-text-default);
+                  color: var(--ax-text-neutral);
                   font-size: var(--ax-font-size-heading-small);
                   font-weight: var(--ax-font-weight-bold);
                 }
@@ -411,7 +411,7 @@ function MedarbeidereList({
             <ReadMore
               css={css`
                 > button {
-                  color: var(--ax-text-default);
+                  color: var(--ax-text-neutral);
                   font-size: var(--ax-font-size-heading-small);
                   font-weight: var(--ax-font-weight-bold);
                 }

@@ -112,7 +112,7 @@ function ExternalFundsRecipientForm() {
         description={
           <strong
             css={css`
-              color: var(--ax-text-default);
+              color: var(--ax-text-neutral);
             `}
           >
             Fyll inn fødselsnummer/D-nummer, så finner vi personen i
