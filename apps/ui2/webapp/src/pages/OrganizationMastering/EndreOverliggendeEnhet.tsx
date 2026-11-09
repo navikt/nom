@@ -116,7 +116,7 @@ function FormView({
 }) {
   return (
     <ModalProvider>
-      <ContainerWithHighlightedTop padding={6}>
+      <ContainerWithHighlightedTop padding={24}>
         <OrgEnhetInfoWrapper
           heading="Valgt organisasjonsenhet"
           orgEnhet={orgEnhet}
@@ -206,8 +206,8 @@ function EndreOverliggendeEnhetForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="9">
-          <VStack gap="4">
+        <VStack gap="space-36">
+          <VStack gap="space-16">
             <FormOrgEnhetSearchWrapper
               label="Ny overliggende enhet"
               name="nyOverenhetId"
@@ -220,7 +220,7 @@ function EndreOverliggendeEnhetForm({
             css={css`
               display: flex;
               justify-content: end;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
             `}
           >
             <SmartLink href="/organisasjonsmastring">

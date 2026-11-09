@@ -227,15 +227,23 @@ function SelectLabelWithHelpText({
   size: string;
 }) {
   return (
-    <HStack gap={size === "small" ? "1" : "2"}>
+    <HStack gap={size === "small" ? "space-4" : "space-8"}>
       <div>{label}</div>
       {helpText && (
         <HelpText
-          css={css`
-            .navds-help-text__icon {
-              height: ${size === "small" ? "16px" : undefined};
-            }
-          `}
+          css={
+            size === "small"
+              ? css`
+                  min-width: var(--ax-space-24);
+                  min-height: var(--ax-space-24);
+
+                  > svg {
+                    width: var(--ax-space-16);
+                    height: var(--ax-space-16);
+                  }
+                `
+              : undefined
+          }
         >
           {helpText}
         </HelpText>

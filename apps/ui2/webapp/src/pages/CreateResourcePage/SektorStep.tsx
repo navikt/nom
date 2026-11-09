@@ -114,7 +114,7 @@ export function SektorStep() {
       >
         <RadioGroup
           css={css`
-            margin-bottom: var(--a-spacing-4);
+            margin-bottom: var(--ax-space-16);
           `}
           legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
@@ -173,7 +173,7 @@ export function SektorStep() {
             {selectedSektor === Sektor.EKSTERN && (
               <Alert
                 css={css`
-                  margin-top: var(--a-spacing-4);
+                  margin-top: var(--ax-space-16);
                 `}
                 variant="info"
               >

@@ -33,7 +33,7 @@ export function RessursSearch({
   >(undefined);
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <SelectLayoutWrapper
         error={
           error
@@ -67,8 +67,8 @@ export function RessursSearch({
         <div
           css={css`
             background-color: #deecef;
-            padding: var(--a-spacing-4);
-            border-radius: var(--a-border-radius-xlarge);
+            padding: var(--ax-space-16);
+            border-radius: var(--ax-radius-12);
             display: grid;
           `}
         >
@@ -125,10 +125,10 @@ export function RessursInfo({
   const orgEnhet = orgEnhetQuery.data;
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <BodyShort
         css={css`
-          font-size: var(--a-font-size-xlarge);
+          font-size: var(--ax-font-size-xlarge);
         `}
       >
         <b>{ressursOption.label}</b>

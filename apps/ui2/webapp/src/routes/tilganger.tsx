@@ -117,8 +117,8 @@ function TilgangerPage() {
       <List>
         <Heading
           css={css`
-            margin-bottom: var(--a-spacing-2);
-            margin-left: var(--a-spacing-2);
+            margin-bottom: var(--ax-space-8);
+            margin-left: var(--ax-space-8);
           `}
           level="2"
           size="small"
@@ -146,7 +146,7 @@ function TilgangerPage() {
       "https://navno.sharepoint.com/sites/intranett-it/SitePages/Brukerveiledninger-Mine-Tilganger.aspx";
 
     return (
-      <VStack gap="6">
+      <VStack gap="space-24">
         {orgenheterLedetAvMegOgDelegerbart.length > 0 && (
           <>
             <Heading level="2" size="medium">
@@ -164,7 +164,7 @@ function TilgangerPage() {
         )}
 
         {filtrertDelegertTilMeg.length > 0 && (
-          <ContainerWithHighlightedTop gap={6} padding={9}>
+          <ContainerWithHighlightedTop gap={24} padding={36}>
             <Heading level="2" size="medium">
               Organisasjonsenheter du har fått redigeringstilgang til:
             </Heading>
@@ -214,15 +214,15 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
       css={css`
         padding: 2rem;
         border-radius: 5px;
-        background: ${!tilgang.active ? "var(--a-surface-subtle)" : "#fff"};
+        background: ${!tilgang.active ? "var(--ax-bg-neutral-soft)" : "#fff"};
         border: 1px solid
           ${
             !tilgang.active
-              ? "var(--a-border-subtle)"
-              : "var(--a-border-default)"
+              ? "var(--ax-border-neutral-subtleA)"
+              : "var(--ax-border-neutral)"
           };
       `}
-      gap="6"
+      gap="space-24"
     >
       <div
         css={css`
@@ -231,7 +231,7 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         `}
       >
         <VStack>
-          <HStack gap="2">
+          <HStack gap="space-8">
             <Buildings3Icon fontSize="24" />
             <Heading
               level="3"
@@ -257,7 +257,7 @@ function DelegertRolleCard({ tilgang }: { tilgang: LederTilgangState }) {
         )}
       </div>
 
-      <HStack gap="4" key={tilgang.fid}>
+      <HStack gap="space-16" key={tilgang.fid}>
         <span>
           Delegert fra:{" "}
           <b>
@@ -398,17 +398,17 @@ function OrgEnhetCard({
             background: white;
           `,
         ]}
-        gap="6"
+        gap="space-24"
         onSubmit={methods.handleSubmit((values) => mutate(values))}
       >
         <Heading level="2" size="small">
-          <HGrid columns={{ md: "max-content 1fr max-content" }} gap="2">
+          <HGrid columns={{ md: "max-content 1fr max-content" }} gap="space-8">
             <Buildings3Icon fontSize="24" />
             <span>{`${orgEnhet?.navn} (${orgEnhet?.id})`}</span>
             <Detail>{orgEnhet.nomNivaa ?? orgEnhet.orgNiv}</Detail>
           </HGrid>
         </Heading>
-        <VStack gap="4">
+        <VStack gap="space-16">
           <Heading level="3" size="xsmall">
             Redigeringstilgang er delegert videre til{" "}
             {tilgangerDelegertAvMeg.length}{" "}
@@ -457,7 +457,7 @@ function OrgEnhetCard({
             </Table.Body>
           </Table>
 
-          <HStack gap="2">
+          <HStack gap="space-8">
             <BodyLong>
               Redigeringstilgangen gjelder for alle underliggende
               organisasjonsenheter.
@@ -483,7 +483,7 @@ function OrgEnhetCard({
           css={css`
             align-self: flex-end;
           `}
-          gap="2"
+          gap="space-8"
         >
           {edit ? (
             <>
@@ -667,8 +667,8 @@ function ActiveAddTilgangRow({
         <Table.DataCell>
           <div
             css={css`
-              padding-left: var(--a-spacing-2);
-              padding-top: var(--a-spacing-3);
+              padding-left: var(--ax-space-8);
+              padding-top: var(--ax-space-12);
             `}
           >
             <Loader />

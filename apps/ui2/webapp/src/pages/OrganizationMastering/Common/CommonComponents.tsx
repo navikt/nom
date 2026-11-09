@@ -45,7 +45,7 @@ export function OrgEnhetInfoWrapper({
   heading?: string;
 }) {
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       {!!heading && (
         <Heading level="2" size="small">
           {heading}
@@ -55,8 +55,8 @@ export function OrgEnhetInfoWrapper({
       <div
         css={css`
           background-color: #deecef;
-          padding: var(--a-spacing-4);
-          border-radius: var(--a-border-radius-xlarge);
+          padding: var(--ax-space-16);
+          border-radius: var(--ax-radius-12);
           display: grid;
         `}
       >

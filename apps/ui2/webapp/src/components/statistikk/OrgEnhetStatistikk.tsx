@@ -90,7 +90,7 @@ export function OrgEnhetStatistikk({
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--a-spacing-2);
+        gap: var(--ax-space-8);
       `}
     >
       <Loader size="3xlarge" />
@@ -99,9 +99,9 @@ export function OrgEnhetStatistikk({
   ) : (
     <div
       css={css`
-        margin-top: var(--a-spacing-4);
+        margin-top: var(--ax-space-16);
         display: grid;
-        gap: var(--a-spacing-6);
+        gap: var(--ax-space-24);
         grid-template-columns: repeat(2, 1fr);
       `}
     >
@@ -119,13 +119,13 @@ export function OrgEnhetStatistikk({
       <ReadMore
         className={className}
         css={css`
-          .navds-read-more__button {
-            color: var(--a-text-default);
-            font-size: var(--a-font-size-heading-medium);
-            font-weight: var(--a-font-weight-bold);
+          > button {
+            color: var(--ax-text-default);
+            font-size: var(--ax-font-size-heading-medium);
+            font-weight: var(--ax-font-weight-bold);
           }
 
-          .navds-read-more__content {
+          > div {
             margin-left: 0;
             padding-left: 0;
             border-left: none;
@@ -168,9 +168,9 @@ function GridItem({
         width: 100%;
         display: flex;
         background: #deecef;
-        padding: var(--a-spacing-6);
+        padding: var(--ax-space-24);
         border-radius: 10px;
-        border: 2px solid var(--a-icon-info);
+        border: 2px solid var(--nom-primary);
         align-items: center;
         ${
           standalone
@@ -230,7 +230,7 @@ function MedarbeidereBarChart({
   return (
     <HorizontalBarChart
       helpText={
-        <VStack gap="2">
+        <VStack gap="space-8">
           <BodyLong>
             Alle medarbeidere med en aktiv Nav-ident telles én gang.{" "}
             {teknologiavdelingen
@@ -339,7 +339,7 @@ function OrgEnheterStatistikkGridWrapper({
     <GridItem standalone>
       <OrgEnheterStatistikk
         helpText={
-          <VStack gap="2">
+          <VStack gap="space-8">
             <BodyLong>
               Vi teller organisasjonsenheter basert på hvilken type enhet det
               er, eksempelvis Nav-kontor, kontaktsenter, etc. Du kan lese mer om
@@ -382,7 +382,7 @@ function OrgEnheterStatistikk({
           css={css`
             display: flex;
             align-items: center;
-            margin-bottom: var(--a-spacing-6);
+            margin-bottom: var(--ax-space-24);
           `}
         >
           {!!title && (
@@ -405,7 +405,7 @@ function OrgEnheterStatistikk({
         </div>
       )}
 
-      <HStack gap="4">
+      <HStack gap="space-16">
         {statistikk.map((statistikkItem) => (
           <OrgEnhetStatistikkVerdi
             helpText={statistikkItem.helpText}
@@ -422,7 +422,7 @@ function OrgEnheterStatistikk({
                     border-radius: 50%;
                     width: 37px;
                     height: 37px;
-                    padding: var(--a-spacing-1);
+                    padding: var(--ax-space-4);
                   `}
                   fontSize="1.75rem"
                   title="a11y-title"
@@ -475,14 +475,14 @@ function OrgEnhetStatistikkVerdi({
 
       <div
         css={css`
-          font-size: var(--a-font-size-large);
+          font-size: var(--ax-font-size-large);
           display: flex;
           align-items: center;
         `}
       >
         <BodyShort
           css={css`
-            margin-left: var(--a-spacing-4);
+            margin-left: var(--ax-space-16);
             font-size: inherit;
           `}
           size="large"
@@ -492,7 +492,7 @@ function OrgEnhetStatistikkVerdi({
 
         <span
           css={css`
-            margin-left: var(--a-spacing-4);
+            margin-left: var(--ax-space-16);
           `}
         >
           <b>{value.toString()}</b>
@@ -502,7 +502,7 @@ function OrgEnhetStatistikkVerdi({
       {!!helpText && (
         <HelpText
           css={css`
-            margin-left: var(--a-spacing-4);
+            margin-left: var(--ax-space-16);
           `}
         >
           {helpText}

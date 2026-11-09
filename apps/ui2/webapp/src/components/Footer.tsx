@@ -29,9 +29,9 @@ export function Footer() {
       css={css`
         width: 100%;
         height: ${footerHeight};
-        background: var(--a-lightblue-900);
-        color: var(--a-white);
-        padding: var(--a-spacing-4) 0;
+        background: var(--nom-primary-hover);
+        color: var(--ax-text-neutral-contrast);
+        padding: var(--ax-space-16) 0;
         display: flex;
         justify-content: center;
       `}
@@ -44,7 +44,7 @@ export function Footer() {
             justify-content: space-between;
 
             a {
-              color: var(--a-white);
+              color: var(--ax-text-neutral-contrast);
               width: fit-content;
             }
 

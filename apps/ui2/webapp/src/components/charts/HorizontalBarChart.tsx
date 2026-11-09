@@ -32,7 +32,7 @@ export function HorizontalBarChart({
           css={css`
             display: flex;
             align-items: center;
-            margin-bottom: var(--a-spacing-6);
+            margin-bottom: var(--ax-space-24);
           `}
         >
           {!!title && (
@@ -60,8 +60,8 @@ export function HorizontalBarChart({
           css={css`
             display: flex;
             align-items: center;
-            font-size: var(--a-font-size-large);
-            margin-bottom: var(--a-spacing-4);
+            font-size: var(--ax-font-size-large);
+            margin-bottom: var(--ax-space-16);
           `}
         >
           <div
@@ -80,7 +80,7 @@ export function HorizontalBarChart({
                 border-radius: 50%;
                 width: 37px;
                 height: 37px;
-                padding: var(--a-spacing-1);
+                padding: var(--ax-space-4);
               `}
               fontSize="1.75rem"
               title="a11y-title"
@@ -94,7 +94,7 @@ export function HorizontalBarChart({
           >
             <BodyShort
               css={css`
-                margin-left: var(--a-spacing-2);
+                margin-left: var(--ax-space-8);
                 font-size: inherit;
               `}
             >
@@ -102,7 +102,7 @@ export function HorizontalBarChart({
             </BodyShort>
             <span
               css={css`
-                margin-left: var(--a-spacing-4);
+                margin-left: var(--ax-space-16);
               `}
             >
               <b>{formatDisplayNumber(total)}</b>
@@ -116,7 +116,7 @@ export function HorizontalBarChart({
         css={css`
           width: 100%;
         `}
-        gap="4"
+        gap="space-16"
       >
         {data.map((row, index) => (
           <BarChartRow key={index} row={row} />
@@ -126,13 +126,14 @@ export function HorizontalBarChart({
   );
 }
 
+//REVERT: AKSEL OPPGRADERING - Diskuter fargen med Julie, gamle er --a-deepblue-500
 function BarChartRow({ row }: { row: PercentageChartRow }) {
   return (
     <>
       <BodyShort>{row.label}</BodyShort>
       <span
         css={css`
-          background: var(--a-deepblue-500);
+          background: var(--nom-primary-active);
           width: ${row.percentage}%;
           border-radius: 5px;
         `}

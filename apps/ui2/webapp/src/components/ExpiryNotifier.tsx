@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Box, Button, HGrid, Modal } from "@navikt/ds-react";
+import { Alert, BodyShort, Box, Button, Modal } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import React from "react";
@@ -44,7 +44,7 @@ export function dynamicChooseActionMatrix(
   const di = dialogHolder();
   const promptIsString = typeof prompt === "string";
   return di.showDialog(
-    <Box padding={"1"}>
+    <Box padding={"space-4"}>
       {promptIsString ? <BodyShort>{prompt}</BodyShort> : prompt}
       <Modal.Footer>
         {actions.map((action, idx) => (

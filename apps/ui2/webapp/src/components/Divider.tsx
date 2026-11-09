@@ -16,16 +16,16 @@ export function Divider({
       css={[
         css`
           height: 1px;
-          margin: var(--a-spacing-8) 0;
-          background-color: var(--a-gray-400);
+          margin: var(--ax-space-32) 0;
+          background-color: var(--ax-border-neutral);
         `,
         size === "large" &&
           css`
-            margin: var(--a-spacing-8) 0;
+            margin: var(--ax-space-32) 0;
           `,
         size === "small" &&
           css`
-            margin: var(--a-spacing-6) 0;
+            margin: var(--ax-space-24) 0;
           `,
         noMargins &&
           css`

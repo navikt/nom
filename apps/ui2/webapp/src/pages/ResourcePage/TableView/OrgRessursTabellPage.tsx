@@ -173,7 +173,7 @@ export const OrgRessursTabellPage = () => {
               display: flex;
               justify-content: space-between;
               align-items: flex-start;
-              margin-top: var(--a-spacing-1);
+              margin-top: var(--ax-space-4);
             `}
           >
             <div>
@@ -193,7 +193,7 @@ export const OrgRessursTabellPage = () => {
 
               <BodyShort
                 css={css`
-                  margin-top: var(--a-spacing-2);
+                  margin-top: var(--ax-space-8);
                 `}
               >
                 Antall medarbeidere: <b>{ressurserNavidents.length}</b>

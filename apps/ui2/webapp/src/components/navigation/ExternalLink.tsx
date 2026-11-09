@@ -30,6 +30,7 @@ export function ExternalLink({
           width: fit-content;
         }
       `}
+      data-color="neutral"
       href={href}
       inlineText={inline}
       rel={rel}

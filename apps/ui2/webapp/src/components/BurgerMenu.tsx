@@ -85,13 +85,7 @@ export function BurgerMenu() {
   const showTilgangerLink = harRedigeringstilgang;
 
   return (
-    <div
-      css={css`
-        .navds-dropdown__menu {
-          max-height: fit-content !important;
-        }
-      `}
-    >
+    <div>
       <Dropdown>
         <Button
           as={Dropdown.Toggle}
@@ -105,11 +99,12 @@ export function BurgerMenu() {
         <Dropdown.Menu
           css={css`
             padding: 0;
-            color: var(--a-text-default);
+            color: var(--ax-text-default);
             width: fit-content;
+            max-height: fit-content !important;
 
             button {
-              padding: var(--a-spacing-4);
+              padding: var(--ax-space-16);
             }
 
             a {
@@ -229,7 +224,7 @@ export function BurgerMenu() {
                       width: 100%;
                     }
 
-                    .navds-dropdown__list-item {
+                    > li {
                       width: 100%;
                     }
                   `}

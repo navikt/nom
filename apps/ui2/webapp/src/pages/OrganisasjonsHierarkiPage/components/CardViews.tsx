@@ -47,7 +47,7 @@ export function OrgEnhetView({
     <ReactRouterLink
       css={css`
         text-decoration: none;
-        color: var(--a-gray-900);
+        color: var(--ax-text-neutral);
       `}
       params={{ id: orgEnhetId }}
       ref={reference}
@@ -59,7 +59,7 @@ export function OrgEnhetView({
         </VerticalEdge>
         <div
           css={css`
-            margin: var(--a-spacing-3) 0;
+            margin: var(--ax-space-12) 0;
           `}
         >
           <Heading level="2" size="small">
@@ -83,10 +83,10 @@ export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
     <ReactRouterLink
       css={css`
         text-decoration: none;
-        color: var(--a-gray-900);
+        color: var(--ax-text-neutral);
 
         > div {
-          padding: var(--a-spacing-2);
+          padding: var(--ax-space-8);
         }
       `}
       params={{ id: ressurs.navident }}
@@ -125,12 +125,12 @@ function UnitContainerLink({
         width: 100%;
         height: 100%;
         border-radius: 5px;
-        border: 1px solid var(--a-gray-400);
-        background-color: ${gammel ? "var(--a-gray-300)" : "var(--a-white)"};
+        border: 1px solid var(--ax-border-neutral);
+        background-color: ${gammel ? "var(--ax-bg-neutral-moderate-pressed)" : "var(--ax-bg-default)"};
         display: grid;
         grid-template-columns: min-content 1fr 40px;
         align-items: center;
-        gap: var(--a-spacing-4);
+        gap: var(--ax-space-16);
         cursor: pointer;
 
         :hover {
@@ -139,7 +139,7 @@ function UnitContainerLink({
       `}
     >
       {children}
-      <ChevronRightIcon fontSize="var(--a-spacing-8)" />
+      <ChevronRightIcon fontSize="var(--ax-space-32)" />
     </div>
   );
 }
@@ -156,9 +156,9 @@ export function VerticalEdge({
       // Using outline with a border behind creates some weird lines showing through.
       // A hack around that to use 2px for the outline and -1 for the offset.
       css={css`
-        outline: 2px solid var(--a-lightblue-800);
+        outline: 2px solid var(--nom-primary);
         outline-offset: -1px;
-        background-color: var(--a-lightblue-800);
+        background-color: var(--nom-primary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -177,8 +177,8 @@ export function OverEnheterDivider() {
     <div
       css={css`
         margin-left: 65px;
-        height: var(--a-spacing-4);
-        background-color: var(--a-lightblue-800);
+        height: var(--ax-space-16);
+        background-color: var(--nom-primary);
         width: 6px;
       `}
     />

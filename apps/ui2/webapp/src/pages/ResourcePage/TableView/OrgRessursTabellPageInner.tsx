@@ -101,7 +101,7 @@ export const OrgRessursTabellPageInner = ({
     return (
       <div
         css={css`
-          margin-top: var(--a-spacing-4);
+          margin-top: var(--ax-space-16);
         `}
       >
         <Table
@@ -110,7 +110,10 @@ export const OrgRessursTabellPageInner = ({
             padding: 6px;
             border-radius: 5px;
 
-            --ac-table-row-border: #071a3636;
+            th,
+            td {
+              border-bottom-color: #071a3636;
+            }
           `}
           onSortChange={(sortKey) => handleSort(sortKey)}
           size="small"
@@ -229,7 +232,7 @@ export const OrgRessursTabellPageInner = ({
         <Pagination
           count={Math.ceil(data.length / rowsPerPage)}
           css={css`
-            margin-top: var(--a-spacing-6);
+            margin-top: var(--ax-space-24);
             display: flex;
             align-items: center;
             justify-content: center;

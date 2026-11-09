@@ -71,7 +71,7 @@ function InformationView({
   valueHref?: string;
 }) {
   return (
-    <HStack gap="2">
+    <HStack gap="space-8">
       <span>
         {label && <>{label}: </>}
         <b>

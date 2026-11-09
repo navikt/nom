@@ -8,10 +8,10 @@ export function ContainerWithHighlightedTop({
   children,
   title,
   icon,
-  padding = 12,
+  padding = 48,
   verticalPadding,
   horizontalPadding,
-  gap = 9,
+  gap = 36,
 }: {
   children: ReactNode;
   title?: string | ReactNode;
@@ -21,8 +21,8 @@ export function ContainerWithHighlightedTop({
   horizontalPadding?: number;
   gap?: number;
 }) {
-  const paddingValue = `var(--a-spacing-${verticalPadding ?? padding}) var(--a-spacing-${horizontalPadding ?? padding})`;
-  const gapValue = `var(--a-spacing-${gap})`;
+  const paddingValue = `var(--ax-space-${verticalPadding ?? padding}) var(--ax-space-${horizontalPadding ?? padding})`;
+  const gapValue = `var(--ax-space-${gap})`;
 
   return (
     <div

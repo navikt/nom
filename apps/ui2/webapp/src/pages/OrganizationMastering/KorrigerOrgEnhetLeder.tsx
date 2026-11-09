@@ -130,7 +130,7 @@ function FormView({
 }) {
   return (
     <ModalProvider>
-      <ContainerWithHighlightedTop padding={6}>
+      <ContainerWithHighlightedTop padding={24}>
         <OrgEnhetInfoWrapper
           heading="Valgt organisasjonsenhet"
           orgEnhet={orgEnhet}
@@ -258,8 +258,8 @@ function KorrigerOrgEnhetLederForm({
 
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onValid)}>
-          <VStack gap="8">
-            <VStack gap="6">
+          <VStack gap="space-32">
+            <VStack gap="space-24">
               <FormRessursSearchWrapper
                 label="Ny leder på organisasjonsenhet"
                 name="lederRessursNavident"
@@ -274,7 +274,7 @@ function KorrigerOrgEnhetLederForm({
               css={css`
                 display: flex;
                 justify-content: end;
-                gap: var(--a-spacing-4);
+                gap: var(--ax-space-16);
               `}
             >
               <SmartLink href="/organisasjonsmastring">
@@ -311,7 +311,7 @@ function FremtidigLeder({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <Heading level="2" size="small">
         Fremtidig leder:
       </Heading>
@@ -379,7 +379,7 @@ function KorrigerOrgEnhetLederModalContent({
   const gyldigFom = request.gyldigFom;
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <BodyLong>
         <b>{formatVisningsnavn(ressurs?.visningsnavn)}</b> fra og med{" "}
         <b>{formatDisplayDate(gyldigFom)}</b>
@@ -425,7 +425,7 @@ function KorrigerOrgEnhetLederKvitteringContent({
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <BodyLong>
         Leder oppdatert for <b>{orgEnhet.navn}</b>:
       </BodyLong>

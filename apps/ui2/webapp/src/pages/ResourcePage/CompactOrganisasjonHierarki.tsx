@@ -83,17 +83,17 @@ function CompactOrgEnhet({
       css={[
         css`
           border-radius: 5px;
-          border: 1px solid var(--a-gray-400);
+          border: 1px solid var(--ax-border-neutral);
           display: grid;
           grid-template-columns: min-content 1fr;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `,
         selected
           ? css`
               background-color: var(--nom-secondary-hover);
             `
           : css`
-              background-color: var(--a-white);
+              background-color: var(--ax-bg-default);
             `,
       ]}
     >
@@ -103,7 +103,7 @@ function CompactOrgEnhet({
 
       <div
         css={css`
-          padding: var(--a-spacing-2) 0;
+          padding: var(--ax-space-8) 0;
           display: flex;
           flex-direction: column;
         `}
@@ -130,9 +130,9 @@ function SelectedResource({ ressurs }: { ressurs: Ressurs }) {
     <div
       css={css`
         display: flex;
-        gap: var(--a-spacing-4);
+        gap: var(--ax-space-16);
         border-radius: 5px;
-        border: 1px solid var(--a-gray-400);
+        border: 1px solid var(--ax-border-neutral);
         align-items: center;
         width: 100%;
         height: 40px;

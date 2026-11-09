@@ -206,7 +206,7 @@ export function EditOrgtilknytninger({
 
       <Label
         css={css`
-          font-weight: var(--a-font-weight-regular);
+          font-weight: var(--ax-font-weight-regular);
         `}
         size="small"
       >
@@ -217,7 +217,7 @@ export function EditOrgtilknytninger({
         css={css`
           display: flex;
           align-items: center;
-          margin-top: var(--a-spacing-8);
+          margin-top: var(--ax-space-32);
         `}
         size="small"
         spacing
@@ -505,7 +505,7 @@ function OrgtilknytningForm({
           (ressurs.identType !== IdentType.VIKAFOSSEN || hasAdminAccess) && (
             <div
               css={css`
-                margin-top: var(--a-spacing-9);
+                margin-top: var(--ax-space-36);
                 display: flex;
                 justify-content: end;
               `}
@@ -563,11 +563,11 @@ function OrgtilknytningForm({
           return (
             <div
               css={css`
-                background: ${avsluttet ? "var(--a-surface-subtle)" : "#fff"};
-                margin-top: var(--a-spacing-6);
-                padding: var(--a-spacing-6);
+                background: ${avsluttet ? "var(--ax-bg-neutral-soft)" : "#fff"};
+                margin-top: var(--ax-space-24);
+                padding: var(--ax-space-24);
                 border-radius: 8px;
-                border: 1px solid var(--a-border-subtle);
+                border: 1px solid var(--ax-border-neutral-subtleA);
               `}
               key={field.id}
             >
@@ -582,9 +582,9 @@ function OrgtilknytningForm({
 
               <HStack
                 css={css`
-                  margin-bottom: var(--a-spacing-6);
+                  margin-bottom: var(--ax-space-24);
                 `}
-                gap="8"
+                gap="space-32"
               >
                 <FormDateWrapper
                   defaultDate={field.gyldigFom ?? undefined}
@@ -636,7 +636,7 @@ function OrgtilknytningForm({
               <div
                 css={css`
                   display: flex;
-                  margin-top: var(--a-spacing-4);
+                  margin-top: var(--ax-space-16);
                 `}
               >
                 <FormSektorSelectWrapper
@@ -670,9 +670,9 @@ function OrgtilknytningForm({
 
               <VStack
                 css={css`
-                  margin-top: var(--a-spacing-4);
+                  margin-top: var(--ax-space-16);
                 `}
-                gap="4"
+                gap="space-16"
               >
                 <FysiskBrukerstedSelectWrapper
                   fysiskeBrukerstederOptions={fysiskeBrukerstederOptions}
@@ -691,7 +691,7 @@ function OrgtilknytningForm({
         {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
           <Alert
             css={css`
-              margin-top: var(--a-spacing-8);
+              margin-top: var(--ax-space-32);
             `}
             variant="info"
           >
@@ -712,8 +712,8 @@ function OrgtilknytningForm({
           css={css`
             display: flex;
             justify-content: end;
-            margin-top: var(--a-spacing-8);
-            gap: var(--a-spacing-4);
+            margin-top: var(--ax-space-32);
+            gap: var(--ax-space-16);
           `}
         >
           <Button
@@ -743,7 +743,7 @@ function OrgtilknytningForm({
 
         <div
           css={css`
-            margin-top: var(--a-spacing-6);
+            margin-top: var(--ax-space-24);
           `}
         >
           <IllegalDolCombinationAlert dolValidation={dolValidation} />
@@ -851,7 +851,7 @@ function OrgEnhetFormPart({
         <div>
           <div
             css={css`
-              margin-top: var(--a-spacing-4);
+              margin-top: var(--ax-space-16);
             `}
           >
             <FormOrgEnhetSelectWrapper
@@ -861,7 +861,7 @@ function OrgEnhetFormPart({
 
           <BodyShort
             css={css`
-              margin-top: var(--a-spacing-2);
+              margin-top: var(--ax-space-8);
             `}
           >
             Tilgangsenhet: <b>{orgEnhetQuery.data?.tilgangsenhetId}</b>
@@ -939,7 +939,7 @@ function FormDateWrapper({
             <div
               css={css`
                 display: flex;
-                margin-top: var(--a-spacing-4);
+                margin-top: var(--ax-space-16);
               `}
             >
               <span
@@ -955,7 +955,7 @@ function FormDateWrapper({
               {labelHelpText && (
                 <HelpText
                   css={css`
-                    margin-left: var(--a-spacing-2);
+                    margin-left: var(--ax-space-8);
                   `}
                 >
                   {labelHelpText}
@@ -1010,7 +1010,7 @@ function FormSektorSelectWrapper({
       {!disabled && (
         <Select
           css={css`
-            margin-left: var(--a-spacing-1);
+            margin-left: var(--ax-space-4);
             height: fit-content;
           `}
           error={error}
@@ -1119,7 +1119,7 @@ function FormTilknytningstypeSelectWrapper({
     <div
       css={css`
         display: flex;
-        margin-left: var(--a-spacing-8);
+        margin-left: var(--ax-space-32);
       `}
     >
       <Label
@@ -1137,7 +1137,7 @@ function FormTilknytningstypeSelectWrapper({
       {!disabled && (
         <Select
           css={css`
-            margin-left: var(--a-spacing-1);
+            margin-left: var(--ax-space-4);
             height: fit-content;
           `}
           error={error}
@@ -1331,7 +1331,7 @@ function IllegalDolCombinationAlert({
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         {dolValidation.dolGaps.length > 0 && (
@@ -1393,13 +1393,13 @@ function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
     <ExpansionCard
       aria-label="Veiledning for utfylling"
       css={css`
-        margin-top: var(--a-spacing-9);
-        margin-bottom: var(--a-spacing-9);
+        margin-top: var(--ax-space-36);
+        margin-bottom: var(--ax-space-36);
       `}
       defaultOpen
     >
       <ExpansionCard.Header>
-        <HStack align="center" gap="4" wrap={false}>
+        <HStack align="center" gap="space-16" wrap={false}>
           <div
             css={css`
               display: flex;
@@ -1408,15 +1408,13 @@ function Informasjonsboks({ ressursSektor }: { ressursSektor: Sektor }) {
           >
             <img alt="informasjonsboks" height="48px" src={infoikonNOM} />
           </div>
-          <div
+          <ExpansionCard.Title
             css={css`
-              .navds-expansioncard__title--medium {
-                margin-top: unset;
-              }
+              margin-top: unset;
             `}
           >
-            <ExpansionCard.Title>Veiledning for utfylling</ExpansionCard.Title>
-          </div>
+            Veiledning for utfylling
+          </ExpansionCard.Title>
         </HStack>
       </ExpansionCard.Header>
       <ExpansionCard.Content>

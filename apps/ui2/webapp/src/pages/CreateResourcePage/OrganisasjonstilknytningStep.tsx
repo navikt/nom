@@ -349,7 +349,7 @@ function Orgtilknytningsvarighet({
       css={css(
         fullwidthRow,
         css`
-          margin-top: var(--a-spacing-8);
+          margin-top: var(--ax-space-32);
         `,
       )}
     >
@@ -376,7 +376,7 @@ function Orgtilknytningsvarighet({
                     <span
                       css={css`
                         display: inline-flex;
-                        gap: var(--a-spacing-2);
+                        gap: var(--ax-space-8);
                       `}
                     >
                       Sluttdato {optionalExternal && " (valgfritt)"}
@@ -424,7 +424,7 @@ function InnerOrgEnhetSelect() {
         <div
           css={css`
             display: flex;
-            gap: var(--a-spacing-4);
+            gap: var(--ax-space-16);
           `}
         >
           <span>
@@ -433,7 +433,7 @@ function InnerOrgEnhetSelect() {
           <div
             css={css`
               display: inline-flex;
-              gap: var(--a-spacing-2);
+              gap: var(--ax-space-8);
             `}
           >
             <span>

@@ -29,8 +29,8 @@ export function PilotBanner() {
         width: 100%;
         min-height: ${pilotBannerHeight};
         background-color: var(--nom-secondary-hover);
-        border-bottom: 1px solid var(--a-lightblue-800);
-        padding: var(--a-spacing-3) 0;
+        border-bottom: 1px solid var(--nom-primary);
+        padding: var(--ax-space-12) 0;
       `}
     >
       <div
@@ -44,7 +44,7 @@ export function PilotBanner() {
       >
         <InformationSquareFillIcon
           css={css`
-            margin-right: var(--a-spacing-2);
+            margin-right: var(--ax-space-8);
           `}
           fontSize="24px"
         />
@@ -56,7 +56,7 @@ export function PilotBanner() {
         <div
           css={css`
             display: flex;
-            margin-left: var(--a-spacing-2);
+            margin-left: var(--ax-space-8);
           `}
         >
           {isOpen ? (
@@ -73,7 +73,7 @@ export function PilotBanner() {
           css={css`
             width: 100%;
             max-width: 600px;
-            margin: var(--a-spacing-3) auto 0;
+            margin: var(--ax-space-12) auto 0;
           `}
         >
           <BodyLong>

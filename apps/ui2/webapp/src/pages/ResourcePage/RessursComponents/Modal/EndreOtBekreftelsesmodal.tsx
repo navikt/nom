@@ -156,7 +156,7 @@ export function EndreOtBekreftelsesmodal({
   const tomDatoMessage = senesteTomDato ? (
     isTomDatoTodayOrBefore ? (
       <Alert variant="warning">
-        <HStack gap="6">
+        <HStack gap="space-24">
           <BodyLong>
             Du har nå satt siste sluttdato på medarbeiderens
             organisasjonstilknytning(er) til dagens dato eller tidligere, og det
@@ -180,7 +180,7 @@ export function EndreOtBekreftelsesmodal({
         </HStack>
       </Alert>
     ) : (
-      <HStack gap="6">
+      <HStack gap="space-24">
         <BodyLong>
           Du har nå satt siste sluttdato på medarbeiderens
           organisasjonstilknytning(er) til {formatDisplayDate(senesteTomDato)},
@@ -214,7 +214,7 @@ export function EndreOtBekreftelsesmodal({
     dagensTilgangsenhetId ? (
       isNyTilgangsenhetTilknytningTodayOrBefore ? (
         <Alert variant="warning">
-          <HStack gap="6">
+          <HStack gap="space-24">
             <BodyLong>
               Du registrerer nå at medarbeideren på dagens dato eller tidligere
               bytter organisasjonstilknytning fra{" "}
@@ -246,7 +246,7 @@ export function EndreOtBekreftelsesmodal({
           </HStack>
         </Alert>
       ) : (
-        <HStack gap="6">
+        <HStack gap="space-24">
           <BodyLong>
             Du registrerer nå at medarbeideren fra{" "}
             {formatDisplayDate(nyTilgangsenhetTilknytning.gyldigFom)} bytter
@@ -292,7 +292,7 @@ export function EndreOtBekreftelsesmodal({
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-6);
+        padding: var(--ax-space-24);
         border-radius: 0;
       `}
       header={{ heading: `Bekreft endringer for ${navn}`, closeButton: false }}
@@ -305,7 +305,7 @@ export function EndreOtBekreftelsesmodal({
           css={css`
             display: grid;
             gap: 1px;
-            background-color: var(--a-border-divider);
+            background-color: var(--ax-border-neutral-subtleA);
             padding-top: 1px;
             padding-bottom: 1px;
           `}
@@ -388,16 +388,17 @@ function ModalReadMore({
         width: 100%;
         background: white;
 
-        .navds-read-more__button {
+        > button {
           width: 100%;
           color: #000;
           display: flex;
           align-items: center;
           background: #fff;
-          font-size: var(--a-font-size-heading-small);
+          font-size: var(--ax-font-size-heading-small);
 
+          /* TODO: AKSEL OPPGRADERING - før --a-border-divider */
           :hover {
-            background: var(--a-border-divider);
+            background: var(--ax-border-neutral-subtleA);
           }
         }
 
@@ -418,7 +419,7 @@ function ModalReadMore({
           {icon === "warning" ? (
             <ExclamationmarkTriangleFillIcon
               css={css`
-                color: var(--a-icon-warning);
+                color: var(--ax-text-warning-decoration);
                 float: right;
               `}
               fontSize="2rem"
@@ -438,7 +439,7 @@ function ModalReadMore({
     >
       <div
         css={css`
-          margin-bottom: var(--a-spacing-3);
+          margin-bottom: var(--ax-space-12);
         `}
       >
         {content}

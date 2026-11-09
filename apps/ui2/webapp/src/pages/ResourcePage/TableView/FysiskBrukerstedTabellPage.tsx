@@ -124,19 +124,19 @@ function FysiskBrukerstedTabell() {
   );
 
   return (
-    <VStack gap="6">
+    <VStack gap="space-24">
       <VStack
         css={css`
           max-width: 1008px;
           width: 100%;
           margin: auto;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
+          padding: var(--ax-space-16) var(--ax-space-24);
+          border-radius: var(--ax-radius-8);
           background-color: #deecef;
         `}
-        gap="4"
+        gap="space-16"
       >
-        <HStack gap="4">
+        <HStack gap="space-16">
           <div
             css={css`
               flex: 1;
@@ -291,7 +291,7 @@ function FysiskBrukerstedTabellInner({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <div
         css={css`
           display: flex;
@@ -308,7 +308,7 @@ function FysiskBrukerstedTabellInner({
           size="small"
           css={css`
             justify-self: end;
-            margin-bottom: var(--a-spacing-1);
+            margin-bottom: var(--ax-space-4);
           `}
 
           icon={<FileExcelIcon aria-hidden />}
@@ -326,7 +326,10 @@ function FysiskBrukerstedTabellInner({
           padding: 6px;
           border-radius: 5px;
 
-          --ac-table-row-border: #071a3636;
+          th,
+          td {
+            border-bottom-color: #071a3636;
+          }
         `}
         onSortChange={handleSort}
         sort={sort}
@@ -389,7 +392,7 @@ function FysiskBrukerstedTabellInner({
                 </SmartLink>
               </Table.DataCell>
               <Table.DataCell>
-                <VStack gap="1">
+                <VStack gap="space-4">
                   {rad.orgEnheter.map((orgEnhet) => (
                     <SmartLink
                       css={css`
@@ -404,7 +407,7 @@ function FysiskBrukerstedTabellInner({
                 </VStack>
               </Table.DataCell>
               <Table.DataCell>
-                <VStack gap="1">
+                <VStack gap="space-4">
                   {rad.fysiskeBrukersteder.map((brukersted) => (
                     <BodyShort key={brukersted.nummer}>
                       {formatTableDisplayFysiskBrukersted(brukersted)}
@@ -422,7 +425,7 @@ function FysiskBrukerstedTabellInner({
         <Pagination
           count={pages}
           css={css`
-            margin: var(--a-spacing-6) auto 0;
+            margin: var(--ax-space-24) auto 0;
 
             display: flex;
           `}

@@ -64,11 +64,11 @@ export function Receipt({ ressurs }: { ressurs: Ressurs }) {
       <ContainerWithHighlightedTop
         icon={opprettRessursIconRoundedBackground}
         title={
-          <HStack gap="4">
+          <HStack gap="space-16">
             <CheckmarkCircleFillIcon
               css={css`
-                color: var(--a-surface-success-hover);
-                font-size: var(--a-font-size-heading-xlarge);
+                color: var(--ax-text-success-decoration);
+                font-size: var(--ax-font-size-heading-xlarge);
               `}
             />
             Medarbeideren er nå registrert i NOM
@@ -116,7 +116,7 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
           css={css`
             display: grid;
           `}
-          gap="2"
+          gap="space-8"
         >
           <BodyShort>
             Medarbeideren er nå registrert i NOM og Nav-ident{" "}
@@ -142,7 +142,7 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
           {ressurs.sektor === Sektor.NAV_KOMMUNAL && (
             <Alert
               css={css`
-                margin-top: var(--a-spacing-4);
+                margin-top: var(--ax-space-16);
                 max-width: fit-content;
                 justify-self: center;
               `}
@@ -170,13 +170,13 @@ function IdentTypeStandardReceipt({ ressurs }: { ressurs: Ressurs }) {
           {ressurs.sektor === Sektor.NAV_STATLIG && (
             <Alert
               css={css`
-                margin-top: var(--a-spacing-4);
+                margin-top: var(--ax-space-16);
                 max-width: fit-content;
                 justify-self: center;
               `}
               variant="info"
             >
-              <VStack gap="2">
+              <VStack gap="space-8">
                 <BodyShort>
                   Alle statlig ansatte må også registreres i Unit4 for å få
                   utbetalt lønn.
@@ -212,7 +212,7 @@ function IdentTypeRobotReceipt({ ressurs }: { ressurs: Ressurs }) {
           css={css`
             display: grid;
           `}
-          gap="2"
+          gap="space-8"
         >
           <BodyShort>
             Medarbeideren er nå registrert i NOM og Nav-ident{" "}
@@ -254,7 +254,7 @@ function IdentTypeUtenlandskKonsulentReceipt({
           css={css`
             display: grid;
           `}
-          gap="2"
+          gap="space-8"
         >
           <BodyShort>
             Medarbeideren er nå registrert i NOM og Nav-ident{" "}
@@ -296,7 +296,7 @@ function IdentTypeVikafossenReceipt({ ressurs }: { ressurs: Ressurs }) {
           css={css`
             display: grid;
           `}
-          gap="2"
+          gap="space-8"
         >
           <BodyShort>
             Medarbeideren er nå registrert i NOM og Nav-ident{" "}
@@ -328,7 +328,7 @@ function RessursLenker({ ressursNavIdent }: { ressursNavIdent: string }) {
         width: 70%;
         margin: auto;
       `}
-      gap="4"
+      gap="space-16"
     >
       <PanelLink
         href={identrutinenLenke}
@@ -352,21 +352,24 @@ export function PanelLink({ label, href }: { label: string; href: string }) {
         display: flex;
         width: 100%;
         margin: auto;
-        padding: var(--a-spacing-4);
-        border: 1px solid var(--a-border-default);
+        padding: var(--ax-space-16);
+        border: 1px solid var(--ax-border-neutral);
         text-decoration: none;
-        font-size: var(--a-font-size-heading-medium);
-        color: var(--a-text-default);
+        font-size: var(--ax-font-size-heading-medium);
+        color: var(--ax-text-neutral);
         justify-content: space-between;
         align-items: center;
 
         :hover,
         :active {
-          color: var(--a-text-action-hover);
-          border: 1px solid var(--a-border-action-hover);
+          color: var(--ax-text-accent-subtle);
+          border: 1px solid var(--ax-border-accent-strong);
           width: 100%;
           text-decoration: underline;
-          box-shadow: var(--a-shadow-small);
+          box-shadow:
+            0 3px 8px rgb(0 0 0 / 10%),
+            0 1px 3px rgb(0 0 0 / 10%),
+            0 0 1px rgb(0 0 0 / 18%);
           background: unset;
         }
       `}

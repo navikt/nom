@@ -25,9 +25,9 @@ export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-4);
-          margin-left: var(--a-spacing-24);
-          margin-right: var(--a-spacing-12);
+          gap: var(--ax-space-16);
+          margin-left: var(--ax-space-96);
+          margin-right: var(--ax-space-48);
         `}
       >
         {underEnheterOrgEnhetIds.map((underEnhetId, index) => (

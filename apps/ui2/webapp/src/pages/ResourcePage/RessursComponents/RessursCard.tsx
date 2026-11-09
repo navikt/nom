@@ -27,7 +27,7 @@ export function RessursCard({
     <div
       css={[
         css`
-          padding: var(--a-spacing-8);
+          padding: var(--ax-space-32);
         `,
         blueTopBorder,
       ]}
@@ -36,8 +36,8 @@ export function RessursCard({
         css={css`
           display: flex;
           align-items: center;
-          gap: var(--a-spacing-4);
-          margin-bottom: var(--a-spacing-4);
+          gap: var(--ax-space-16);
+          margin-bottom: var(--ax-space-16);
         `}
       >
         <Heading size="large">
@@ -50,7 +50,7 @@ export function RessursCard({
         css={css`
           display: grid;
           grid-template-columns: max-content 1fr;
-          gap: var(--a-spacing-3);
+          gap: var(--ax-space-12);
         `}
       >
         <LabelWithValue label="Nav-ident" split value={ressurs.navident} />

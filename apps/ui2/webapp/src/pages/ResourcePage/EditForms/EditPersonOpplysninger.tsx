@@ -173,7 +173,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           <>
             <VStack
               css={css`
-                margin-bottom: var(--a-spacing-4);
+                margin-bottom: var(--ax-space-16);
               `}
             >
               <Label>Visningsnavn</Label>
@@ -189,7 +189,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
             <div
               css={css`
                 display: flex;
-                gap: var(--a-spacing-2);
+                gap: var(--ax-space-8);
                 align-items: flex-start;
 
                 > * {
@@ -227,7 +227,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
               flex: 1;
               display: grid;
               grid-template-columns: max-content 1fr;
-              gap: var(--a-spacing-2) var(--a-spacing-4);
+              gap: var(--ax-space-8) var(--ax-space-16);
             `}
           >
             <Navident ressurs={ressurs} />
@@ -253,7 +253,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
           autoComplete="off"
           css={css`
             width: 270px;
-            margin-top: var(--a-spacing-4);
+            margin-top: var(--ax-space-16);
           `}
           error={methods.formState.errors.primaryTelefonnummer?.message}
           label={
@@ -266,7 +266,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
 
               <HelpText
                 css={css`
-                  margin-left: var(--a-spacing-2);
+                  margin-left: var(--ax-space-8);
                 `}
                 title="Regler for telefonnummer"
               >
@@ -283,7 +283,7 @@ export function EditPersonOpplysninger({ ressurs }: { ressurs: Ressurs }) {
             css={css`
               display: flex;
               justify-content: flex-end;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
             `}
           >
             <Button

@@ -1,26 +1,28 @@
 
 :root {
     /*Define the primary color used in nom*/
-    --nom-primary: var(--a-lightblue-800);
-    --nom-primary-hover: var(--a-lightblue-900);
-    --nom-primary-active: var(--a-deepblue-500);
+    /* REVERT: AKSEL OPPGRADERING - gammel verdi: var(--a-lightblue-800) */
+    --nom-primary: #236b7d;
+    /* REVERT: AKSEL OPPGRADERING - gammel verdi: var(--a-lightblue-900) */
+    --nom-primary-hover: #134852;
+    /* REVERT: AKSEL OPPGRADERING - gammel verdi: var(--a-deepblue-500) */
+    --nom-primary-active: #005b82;
     --nom-secondary-hover: #DEECEF;
-    --nom-bg: var(--a-gray-50);
+    /* REVERT: AKSEL OPPGRADERING - gammel verdi: var(--a-gray-50) */
+    --nom-bg: var(--ax-bg-neutral-soft);
 
     /* --a prefixes overrides general building blocks of design system tokens */
-    --a-surface-action: var(--a-lightblue-800);
-    --a-surface-action-hover: var(--a-lightblue-900);
-    --a-surface-active: var(--a-deepblue-500);
-    --a-surface-action-subtle-hover: var(--nom-secondary-hover);
-    --a-border-action: var(--a-lightblue-800);
-    --a-text-action: var(--a-lightblue-800);
-    --a-text-action-on-action-subtle: var(--a-lightblue-800);
-    --a-border-focus: var(--a-lightblue-800);
+    /* stylelint-disable aksel/design-token-no-global-override -- Bevisst NOM-fargetema for accent. */
+    --ax-bg-accent-strong: var(--nom-primary);
+    --ax-bg-accent-strong-hover: var(--nom-primary-hover);
+    --ax-bg-accent-strong-pressed: var(--nom-primary-active);
+    --ax-text-accent-subtle: var(--nom-primary);
+    --ax-text-accent-decoration: var(--nom-primary);
+    --ax-border-accent: var(--nom-primary);
+    --ax-border-accent-strong: var(--nom-primary-hover);
+    --ax-bg-accent-moderate-hoverA: var(--nom-secondary-hover);
 
-    /*--ac prefixes overrides tokens for specific components*/
-    --ac-dropdown-item-text: var(--a-text-default);
-    --ac-link-text: var(--a-gray-900);
-
+    /* stylelint-enable aksel/design-token-no-global-override */
     /*--Make the "Skru av DEVMODE" button float above the test banner, so the test banner can be above everything else*/
     #dev-mode {
         z-index: 2;

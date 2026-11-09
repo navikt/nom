@@ -24,7 +24,7 @@ export const FrontPage = () => {
 
   return (
     <ContentWrapper>
-      <VStack gap="12">
+      <VStack gap="space-48">
         <Orghierarki />
 
         <OrgEnhetStatistikk
@@ -53,8 +53,8 @@ function Orghierarki() {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           justify-content: center;
-          gap: var(--a-spacing-6);
-          margin-top: var(--a-spacing-6);
+          gap: var(--ax-space-24);
+          margin-top: var(--ax-space-24);
         `}
       >
         <div
@@ -111,7 +111,7 @@ function OrghierarkiItem({ label, to }: { label: string; to: string }) {
           border-radius: 10px;
           align-items: center;
           justify-content: center;
-          padding: var(--a-spacing-4);
+          padding: var(--ax-space-16);
           text-align: center;
 
           :hover {
@@ -124,10 +124,10 @@ function OrghierarkiItem({ label, to }: { label: string; to: string }) {
             display: flex;
             height: 60px;
             width: 60px;
-            background: var(--a-icon-info);
+            background: var(--nom-primary);
             border-radius: 50%;
-            padding: var(--a-spacing-4);
-            margin: auto auto var(--a-spacing-4);
+            padding: var(--ax-space-16);
+            margin: auto auto var(--ax-space-16);
           `}
         >
           <img
@@ -142,8 +142,8 @@ function OrghierarkiItem({ label, to }: { label: string; to: string }) {
 
         <Label
           css={css`
-            font-size: var(--a-font-size-heading-small);
-            font-weight: var(--a-font-weight-bold);
+            font-size: var(--ax-font-size-heading-small);
+            font-weight: var(--ax-font-weight-bold);
             cursor: inherit;
           `}
         >

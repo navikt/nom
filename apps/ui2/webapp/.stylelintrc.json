@@ -6,6 +6,7 @@
     "no-empty-source": null,
     "declaration-empty-line-before": null,
     "selector-class-pattern": null,
-    "aksel/no-class-override": null
+    "aksel/no-class-override": null,
+    "custom-property-pattern": "^(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)*|ax-[a-z0-9-]+A)$"
   }
 }

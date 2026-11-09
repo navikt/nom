@@ -243,9 +243,9 @@ function VisningsnavnForm({ person }: { person: Person }) {
           {...register("primaryTelefonnummer")}
           autoComplete="off"
           css={css`
-            margin-top: var(--a-spacing-4);
+            margin-top: var(--ax-space-16);
             width: 33%;
-            padding-right: var(--a-spacing-2);
+            padding-right: var(--ax-space-8);
           `}
           description="Telefonnummer er valgfritt"
           error={errors.primaryTelefonnummer?.message}
@@ -259,7 +259,7 @@ function VisningsnavnForm({ person }: { person: Person }) {
 
               <HelpText
                 css={css`
-                  margin-left: var(--a-spacing-2);
+                  margin-left: var(--ax-space-8);
                 `}
                 title="Regler for telefonnummer"
               >

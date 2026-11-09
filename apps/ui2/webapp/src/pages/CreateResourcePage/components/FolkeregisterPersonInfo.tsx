@@ -5,9 +5,9 @@ import type { FolkeregisterPerson } from "~/types/api-models";
 
 const backgroundBox = css`
   background-color: var(--nom-secondary-hover);
-  border: 1px solid var(--a-gray-400);
+  border: 1px solid var(--ax-border-neutral);
   border-radius: 4px;
-  padding: var(--a-spacing-4);
+  padding: var(--ax-space-16);
 `;
 
 export function FolkeregisterPersonInfo({
@@ -20,7 +20,7 @@ export function FolkeregisterPersonInfo({
       <Heading size="small">Opplysninger fra Folkeregisteret</Heading>
       <div
         css={css`
-          margin-top: var(--a-spacing-6);
+          margin-top: var(--ax-space-24);
           display: grid;
           grid-auto-flow: column;
           grid-template-rows: 1fr 1fr;

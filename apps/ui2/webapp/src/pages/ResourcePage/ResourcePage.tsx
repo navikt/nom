@@ -91,7 +91,7 @@ export const ResourcePage = () => {
             css={css`
               display: flex;
               width: fit-content;
-              margin-bottom: var(--a-spacing-4);
+              margin-bottom: var(--ax-space-16);
               color: #000;
               font-size: 1.2rem;
             `}
@@ -112,7 +112,7 @@ export const ResourcePage = () => {
           <>
             <LocalAlert
               css={css`
-                margin-bottom: var(--a-spacing-4);
+                margin-bottom: var(--ax-space-16);
               `}
               status="warning"
             >
