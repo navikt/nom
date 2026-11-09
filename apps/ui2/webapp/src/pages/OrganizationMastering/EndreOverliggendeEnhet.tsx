@@ -37,13 +37,13 @@ import {
   OrgEnhetInfo,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   EndreOpphengOrgEnhetRequest,
   EndreOpphengOrgEnhetResponse,
   OrgEnhet,
 } from "~/types/api-models";
 import { formatDisplayDate } from "~/utils";
-import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 
 export const EndreOverliggendeEnhet = () => {
   const { id } = useSearch({ from: "/endre-overliggende-enhet" });

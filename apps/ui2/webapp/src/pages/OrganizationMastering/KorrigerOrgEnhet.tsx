@@ -25,6 +25,7 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { FormTilgangsenhetSelectWrapper } from "~/components/forms/FormComponents";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -44,13 +45,11 @@ import {
   OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
-import {
-  NomNivaa,
+import type {
   OrgEnhet,
-  OrgEnhetsType,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { FormTilgangsenhetSelectWrapper } from "~/components/forms/FormComponents";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });

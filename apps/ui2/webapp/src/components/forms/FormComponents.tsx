@@ -2,11 +2,11 @@ import { DatePicker, useDatepicker } from "@navikt/ds-react";
 import React from "react";
 import { useController } from "react-hook-form";
 
+import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSearch } from "~/components/select/OrgEnhetSearch";
 import { RessursSearch } from "~/components/select/RessursSearch";
 import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import type { Tilgangsenhet } from "~/types/api-models";
-import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 
 export function FormDateWrapper({
   name,

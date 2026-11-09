@@ -45,6 +45,7 @@ import {
 } from "~/customUtils/dateUtils";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import { OrgEnhetInfo } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import {
   isPeriodActive,
   nomDateIsTodayOrAfter,
@@ -58,7 +59,6 @@ import type {
 } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
-import { OrgEnhetInfo } from "~/pages/OrganizationMastering/Common/CommonComponents";
 
 export function Masseflytting() {
   const { id } = useParams({ from: "/masseflytting/$id" });

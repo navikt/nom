@@ -9,6 +9,7 @@ import {
 } from "react-hook-form";
 
 import { getAlleKostnadssteder } from "~/api/react-query-endpoints";
+import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import {
   BasicSelect,
   SelectLayoutWrapper,
@@ -17,14 +18,12 @@ import {
   NomNivaaNameMapping,
   OrgEnhetsTypeNameMapping,
 } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
-
 import {
   type KostnadsstedResponse,
   NomNivaa,
   type OrgEnhet,
   OrgEnhetsType,
 } from "~/types/api-models";
-import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 
 export function OrgEnhetIkkeFunnet() {
   return <Alert variant="error">Organisasjonsenheten ble ikke funnet</Alert>;
