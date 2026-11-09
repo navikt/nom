@@ -28,7 +28,6 @@ export function UserImage(props: UserImageProperties) {
     const enableImgFetch = !!navident && !inDevelopment;
 
     const img = new Image();
-    // img.loading = loadOnlyWhenVisible ? "lazy" : "eager";
     img.src = enableImgFetch
       ? `/frackend/nom-azure/picture/${props.navident}`
       : person;

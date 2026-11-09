@@ -411,13 +411,17 @@ function UtvidOrgEnhetKort({
           border-radius: var(--a-border-radius-large);
           padding: var(--a-spacing-4) var(--a-spacing-6);
           display: block;
-          cursor: pointer;
+          cursor: ${!expanded ? "pointer" : "unset"};
 
           :hover {
-            background: var(--a-surface-action-subtle-hover);
+            background: ${!expanded ? "var(--a-surface-action-subtle-hover)" : "#eef6fc"};
           }
         `}
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => {
+          if (!expanded) {
+            setExpanded(!expanded);
+          }
+        }}
       >
         <div
           css={css`

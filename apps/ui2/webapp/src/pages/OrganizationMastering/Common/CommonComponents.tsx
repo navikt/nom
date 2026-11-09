@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Alert, Heading, Select, VStack } from "@navikt/ds-react";
+import { Alert, BodyShort, Heading, Select, VStack } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
@@ -9,6 +9,7 @@ import {
 } from "react-hook-form";
 
 import { getAlleKostnadssteder } from "~/api/react-query-endpoints";
+import { EnhetKontekstInfo } from "~/components/EnhetKontekstInfo";
 import {
   BasicSelect,
   SelectLayoutWrapper,
@@ -17,7 +18,6 @@ import {
   NomNivaaNameMapping,
   OrgEnhetsTypeNameMapping,
 } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
-import { OrgEnhetInfo } from "~/pages/ResourcePage/Masseflytting/Masseflytting";
 import {
   type KostnadsstedResponse,
   NomNivaa,
@@ -37,12 +37,16 @@ export function IkkeTilgangRedigering() {
   );
 }
 
-export function OrgEnhetInfoWrapper({
+export function OrgEnhetInfo({
   orgEnhet,
   heading,
+  internalHeading,
+  displayKostnadssted,
 }: {
   orgEnhet: OrgEnhet;
   heading?: string;
+  internalHeading?: string;
+  displayKostnadssted?: boolean;
 }) {
   return (
     <VStack gap="2">
@@ -55,12 +59,31 @@ export function OrgEnhetInfoWrapper({
       <div
         css={css`
           background-color: #deecef;
-          padding: var(--a-spacing-4);
+          padding: var(--a-spacing-4) var(--a-spacing-6);
           border-radius: var(--a-border-radius-xlarge);
           display: grid;
         `}
       >
-        <OrgEnhetInfo orgEnhet={orgEnhet} />
+        <VStack gap="2">
+          {!!internalHeading && (
+            <Heading level="1" size="xsmall">
+              {internalHeading}
+            </Heading>
+          )}
+
+          <BodyShort
+            css={css`
+              font-size: var(--a-font-size-xlarge);
+            `}
+          >
+            <b>{orgEnhet.navn}</b>
+          </BodyShort>
+
+          <EnhetKontekstInfo
+            orgEnhet={orgEnhet}
+            displayKostnadssted={displayKostnadssted}
+          />
+        </VStack>
       </div>
     </VStack>
   );

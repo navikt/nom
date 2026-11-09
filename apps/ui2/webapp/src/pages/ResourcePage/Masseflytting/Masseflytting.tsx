@@ -45,6 +45,7 @@ import {
 } from "~/customUtils/dateUtils";
 import { useTableSort } from "~/hooks/useTableSort";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import { OrgEnhetInfo } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import {
   isPeriodActive,
   nomDateIsTodayOrAfter,
@@ -312,21 +313,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
   return (
     <VStack gap="4">
-      <div
-        css={css`
-          background-color: #deecef;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
-          display: grid;
-          gap: var(--a-spacing-2);
-        `}
-      >
-        <Heading level="1" size="xsmall">
-          Flytt fra
-        </Heading>
-
-        <OrgEnhetInfo orgEnhet={orgEnhet} />
-      </div>
+      <OrgEnhetInfo orgEnhet={orgEnhet} internalHeading="Flytt fra" />
 
       <VStack
         css={css`
@@ -567,22 +554,6 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           </BodyShort>
         </div>
       )}
-    </VStack>
-  );
-}
-
-export function OrgEnhetInfo({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  return (
-    <VStack gap="2">
-      <BodyShort
-        css={css`
-          font-size: var(--a-font-size-xlarge);
-        `}
-      >
-        <b>{orgEnhet.navn}</b>
-      </BodyShort>
-
-      <EnhetKontekstInfo orgEnhet={orgEnhet} />
     </VStack>
   );
 }

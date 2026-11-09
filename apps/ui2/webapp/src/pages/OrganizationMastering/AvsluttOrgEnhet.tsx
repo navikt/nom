@@ -41,10 +41,13 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
-import { nomDateIsAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
+import {
+  nomDateIsAfter,
+  nomDateIsBefore,
+} from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type { AvvikleOrgEnhetRequest, OrgEnhet } from "~/types/api-models";
 import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
@@ -120,10 +123,7 @@ function FormView({
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={6}>
-        <OrgEnhetInfoWrapper
-          heading="Valgt organisasjonsenhet"
-          orgEnhet={orgEnhet}
-        />
+        <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <AvsluttOrgEnhetForm
           orgEnhet={orgEnhet}
@@ -166,59 +166,9 @@ function AvsluttOrgEnhetForm({
   const [sluttdato, setSluttdato] = useState<string>("");
 
   const [displayDateError, setDisplayDateError] = useState<boolean>(false);
+
   const [displayErrorSummary, setDisplayErrorSummary] =
     useState<boolean>(false);
-
-  const handleDateChange = (date: string) => {
-    setSluttdato(date);
-
-    if (!!date) {
-      setDisplayDateError(false);
-    } else {
-      setDisplayErrorSummary(false);
-    }
-  };
-
-  const avvikleOrgEnhetMutation = useMutation<
-    unknown,
-    AxiosError<Error>,
-    AvvikleOrgEnhetRequest
-  >({
-    mutationFn: async (request) => {
-      return avvikleOrgEnhet(orgEnhet.id, request);
-    },
-    onSuccess: async () => {
-      setChangeInfo({ sluttdato });
-
-      showToast({ text: "Avsluttet" });
-    },
-  });
-
-  const { showModal } = useModal();
-
-  const handleSaveClick = async () => {
-    if (!sluttdato) {
-      setDisplayDateError(true);
-    } else {
-      if (ressursAvhengigheter.length > 0 || orgEnhetAvhengigheter.length > 0) {
-        setDisplayErrorSummary(true);
-      } else {
-        await showModal(
-          <BekreftModal
-            content={
-              <AvsluttOrgEnhetModalContent
-                orgEnhet={orgEnhet}
-                sluttdato={sluttdato}
-              />
-            }
-            heading="Bekreft avslutning"
-          />,
-        ).then(() => {
-          avvikleOrgEnhetMutation.mutate({ gyldigTom: sluttdato });
-        });
-      }
-    }
-  };
 
   const ulovligeOrgtilknytninger = orgEnhet.ressursKoblinger.filter(
     (tilknytning) => nomDateIsAfter(tilknytning.gyldigTom, sluttdato),
@@ -263,14 +213,73 @@ function AvsluttOrgEnhetForm({
       ?.filter((enhet) => nomDateIsAfter(enhet.gyldigTom, sluttdato))
       .sort((a, b) => a.navn.localeCompare(b.navn, "no")) ?? [];
 
+  const handleDateChange = (date: string) => {
+    setSluttdato(date);
+
+    setDisplayDateError(true);
+
+    if (!dateValid(date, orgEnhet.gyldigFom)) {
+      setDisplayErrorSummary(false);
+    }
+  };
+
+  const avvikleOrgEnhetMutation = useMutation<
+    unknown,
+    AxiosError<Error>,
+    AvvikleOrgEnhetRequest
+  >({
+    mutationFn: async (request) => {
+      return avvikleOrgEnhet(orgEnhet.id, request);
+    },
+    onSuccess: async () => {
+      setChangeInfo({ sluttdato });
+
+      showToast({ text: "Avsluttet" });
+    },
+  });
+
+  const { showModal } = useModal();
+
+  const handleSaveClick = async () => {
+    if (!dateValid(sluttdato, orgEnhet.gyldigFom)) {
+      setDisplayDateError(true);
+      setDisplayErrorSummary(false);
+
+      return;
+    }
+
+    if (ressursAvhengigheter.length > 0 || orgEnhetAvhengigheter.length > 0) {
+      setDisplayErrorSummary(true);
+
+      return;
+    }
+
+    await showModal(
+      <BekreftModal
+        content={
+          <AvsluttOrgEnhetModalContent
+            orgEnhet={orgEnhet}
+            sluttdato={sluttdato}
+          />
+        }
+        heading="Bekreft avslutning"
+      />,
+    )
+      .then(() => {
+        avvikleOrgEnhetMutation.mutate({ gyldigTom: sluttdato });
+      })
+      .catch(() => {});
+  };
+
+  const dateError = displayDateError
+    ? getDateError(sluttdato, orgEnhet.gyldigFom)
+    : undefined;
+
   return (
     <>
-      <DatePickerWrapper
-        error={displayDateError && !sluttdato ? "Obligatorisk" : undefined}
-        onChange={handleDateChange}
-      />
+      <DatePickerWrapper error={dateError} onChange={handleDateChange} />
 
-      {!!sluttdato && (
+      {dateValid(sluttdato, orgEnhet.gyldigFom) && (
         <AvslutningTillattStatus
           loading={
             ulovligeRessurserQuery.isLoading ||
@@ -607,6 +616,26 @@ function AvsluttOrgEnhetKvitteringContent({
       <b>{formatDisplayDate(changeInfo.sluttdato)}</b>.
     </BodyLong>
   );
+}
+
+function dateValid(sluttdato: string | undefined, gyldigFom: string): boolean {
+  if (!sluttdato) {
+    return false;
+  }
+
+  return !nomDateIsBefore(sluttdato, gyldigFom);
+}
+
+function getDateError(sluttdato: string | undefined, gyldigFom: string) {
+  if (!sluttdato) {
+    return "Obligatorisk";
+  }
+
+  if (nomDateIsBefore(sluttdato, gyldigFom)) {
+    return `Må være tidligst ${formatDisplayDate(gyldigFom)}`;
+  }
+
+  return undefined;
 }
 
 interface RessursAvhengighet {

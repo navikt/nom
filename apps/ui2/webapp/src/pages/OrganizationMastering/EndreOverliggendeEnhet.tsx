@@ -34,9 +34,10 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import {
   IkkeTilgangRedigering,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
+import { nomDateIsTodayOrAfter } from "~/pages/ResourcePage/RessursComponents/dolUtils";
 import type {
   EndreOpphengOrgEnhetRequest,
   EndreOpphengOrgEnhetResponse,
@@ -117,10 +118,7 @@ function FormView({
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={6}>
-        <OrgEnhetInfoWrapper
-          heading="Valgt organisasjonsenhet"
-          orgEnhet={orgEnhet}
-        />
+        <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <EndreOverliggendeEnhetForm
           orgEnhet={orgEnhet}
@@ -301,5 +299,12 @@ function EndreOverliggendeKvitteringContent({
 
 const validationSchema = yup.object({
   nyOverenhetId: yup.string().required("Obligatorisk"),
-  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigFom: yup
+    .string()
+    .required("Obligatorisk")
+    .test(
+      "gyldig-dagens-dato-eller-senere",
+      "Må være tidligst dagens dato",
+      (value) => nomDateIsTodayOrAfter(value),
+    ),
 });
