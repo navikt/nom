@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.common.testidenter.ManuelleRessurserOgLedereTilState;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
@@ -75,6 +76,7 @@ public class DvhRestConsumer {
     private final TelefonService telefonService;
     private final NomStateOrgEnhetLederListener nomStateOrgEnhetLederListener;
     private final Unleash unleash;
+    private final OrgenhetService orgenhetService;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
     public void scheduledOppdateringFraDvh() {
@@ -153,6 +155,13 @@ public class DvhRestConsumer {
             if (dvhTelefoner != null && !dvhTelefoner.isEmpty()) {
                 oppdaterTelefonerFraDvh(dvhTelefoner);
             }
+
+            try {
+                Thread.sleep(15_000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            orgenhetService.alignOrgEnhetGyldigTomWithOrganisering();
         }
 
         manuelleRessurserOgLedereTilState.oppdater();

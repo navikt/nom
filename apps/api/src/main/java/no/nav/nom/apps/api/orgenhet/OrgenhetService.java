@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.organisering.exceptions.OrganiseringNotFoundException;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreTilgangsenhet;
 import no.nav.nom.apps.api.orgenhet.exceptions.OrgEnhetNotFoundException;
@@ -377,6 +378,20 @@ public class OrgenhetService {
         return getById(orgEnhetId).map(IOrgenhet::getTilgangsenhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
     }
 
+    public void avsluttOrgEnhet(String orgEnhetId, LocalDate gyldigTom) {
+        var orgEnhet = getById(orgEnhetId).orElseThrow(() -> OrgEnhetNotFoundException.id(orgEnhetId));
+        orgEnhetCommandService.avvikleOrgEnhet(orgEnhet.getFid(), new AvvikleOrgEnhet(orgEnhet.getId(), gyldigTom, createInputMetadata(orgEnhet)));
+    }
+
+    private InputMetadata createInputMetadata(Object rawData) {
+        return new InputMetadata(
+            "nom-api BatchJob",
+            "Datavarehus",
+            rawData,
+            new Origination("nom-api", "nom-api")
+        );
+    }
+
 
     @KafkaListener(
         id = "nomApi_organiseringState_listener_for_tilgangsenhet_resolve",
@@ -482,5 +497,22 @@ public class OrgenhetService {
     private boolean isInitialStateReady() {
         return nomStateOrganiseringListener.hasReadToEndOnStartup()
             && nomStateOrgEnhetListener.hasReadToEndOnStartup();
+    }
+
+    public void alignOrgEnhetGyldigTomWithOrganisering() {
+        var allOrganiseringWithGyldigTom = organiseringStateRepository.getOrganiseringWithLatestGyldigTom()
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().isPresent())
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
+        var allOrgEnhetWihoutGyldigTomWhereOrganiseringHasGyldigTom = orgEnhetStateRepository.getAll().stream()
+            .filter(orgEnhetState -> isNull(orgEnhetState.gyldigTom()))
+            .filter(orgEnhetState -> allOrganiseringWithGyldigTom.containsKey(orgEnhetState.id()))
+            .toList();
+
+        allOrgEnhetWihoutGyldigTomWhereOrganiseringHasGyldigTom.forEach(iOrgenhet -> {
+            var gyldigTom = allOrganiseringWithGyldigTom.get(iOrgenhet.id()).gyldigTom();
+            avsluttOrgEnhet(iOrgenhet.id(), gyldigTom);
+        });
     }
 }
