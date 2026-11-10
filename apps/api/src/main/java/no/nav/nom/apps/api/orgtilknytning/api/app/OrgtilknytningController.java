@@ -163,6 +163,20 @@ public class OrgtilknytningController {
         return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
     }
 
+    @PostMapping("/forRessurs/{navident}/replace")
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS')")
+    public ResponseEntity<StandardResponse> updateAndRemoveMissingOrgtilknytninger(
+        @PathVariable String navident,
+        @Valid @RequestBody OppdaterOrgtilknytningerForRessursRequest oppdaterOrgtilknytningerForRessursRequest
+    ) {
+        orgtilknytningRestService.fjernMissingOrgtilknytninger(navident, oppdaterOrgtilknytningerForRessursRequest);
+
+        validateKanEndreOrgtilknytninger(navident, oppdaterOrgtilknytningerForRessursRequest);
+
+        orgtilknytningRestService.oppdaterOrgtilknytningerForRessurs(navident, oppdaterOrgtilknytningerForRessursRequest);
+        return ResponseEntity.ok(StandardResponse.builder().message("Orgtilknytninger for ressurs oppdatert").build());
+    }
+
     @PostMapping("/masseflytting")
     @Operation(
         description = "Masseflytting av ressurs fra en enhet til en annen",
