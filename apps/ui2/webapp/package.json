@@ -19,7 +19,7 @@
     "all-checks": "npm run check-types && npm run test && npm run lint && npm run stylelint"
   },
   "dependencies": {
-    "@apollo/client": "4.3.5",
+    "@apollo/client": "4.3.7",
     "@emotion/react": "11.14.0",
     "@grafana/faro-web-sdk": "2.13.0",
     "@grafana/faro-web-tracing": "2.13.0",
