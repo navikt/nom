@@ -1,0 +1,18 @@
+# Kopiert fra apps/nom-rdbms-data/src/main/resources/application.yaml (commit: 40f4be3730b0501efc0269d866cf472b6431561e)
+app:
+  name: ${NAIS_APP_NAME:nom-rdbms-data-sf-test} # Auto-utfylt av 'create_additional_dev_deployment.py'
+  kafka:
+    ressurs:
+      state-topic: org.nom.intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgenhet:
+      state-topic: org.nom.intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgtilknytning:
+      state-topic: org.nom.intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    organisering:
+      state-topic: org.nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    mastered-ressurs:
+      evtsrc-topic: org.nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgenhet-leder:
+      state-topic: org.nom.intern-orgenhet-leder-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+
+nom.libs.state.delegert-leder.state-topic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'

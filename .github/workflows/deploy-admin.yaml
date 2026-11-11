@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
+      - '.nais/apps/admin/admin-sf-test-dev-gcp.yaml'
       - 'apps/admin/**'
       - 'libs/**'
       - '.nais/apps/admin/*.yaml'
@@ -32,6 +33,7 @@ jobs:
       jar-path: apps/admin/target/app.jar
       image-suffix: nom-admin
       nais-config-file-path-dev: .nais/apps/admin/admin-dev-gcp.yaml
+      additional-dev-deployments: '[{"suffix":"sf-test","manifest":".nais/apps/admin/admin-sf-test-dev-gcp.yaml"}]'
       nais-config-file-path-prod: .nais/apps/admin/admin-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/admin/unleash-vars.yaml
       deploy-timeout: 20m

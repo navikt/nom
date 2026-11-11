@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
+      - '.nais/apps/paarorende/paarorende-sf-test-dev.yml'
       - 'apps/paarorende/**'
       - '.nais/apps/paarorende/paarorende*.yml'
       - '.github/*/deploy-paarorende.yml'
@@ -32,6 +33,7 @@ jobs:
       jar-path: apps/paarorende/target/app.jar
       image-suffix: nom-paarorende
       nais-config-file-path-dev: .nais/apps/paarorende/paarorende-dev.yml
+      additional-dev-deployments: '[{"suffix":"sf-test","manifest":".nais/apps/paarorende/paarorende-sf-test-dev.yml"}]'
       nais-config-file-path-prod: .nais/apps/paarorende/paarorende-prod.yml
       unleash-vars-file-path: .nais/apps/paarorende/unleash-vars.yml
       deploy-timeout: 20m

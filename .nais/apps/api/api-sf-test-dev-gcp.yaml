@@ -1,0 +1,149 @@
+# Kopiert fra .nais/apps/api/api-dev-gcp.yaml (commit: 3ddd8ec7e691f74c4bcb1281b8904da89fa71739)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  tokenx:
+    enabled: true
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev,sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+    - name: JDK_JAVA_OPTIONS
+      value: "-XX:+UseZGC -XX:MaxRAMPercentage=70.0 -XX:ActiveProcessorCount=4" # Ref https://nav-it.slack.com/archives/C5KUST8N6/p1714054537557279 og https://nav-it.slack.com/archives/C60FFACN5/p1728888091610999
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
+  envFrom:
+    - secret: nom-api-unleash-api-token
+    - secret: dvh-ords-secret # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': hemmelighet må godkjennes for varianten
+    - secret: nom-epost-varsel-recipient # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': hemmelighet må godkjennes for varianten
+    - secret: nom-mainmanager-secret # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': hemmelighet må godkjennes for varianten
+    - secret: nom-slack-orgbot # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': hemmelighet må godkjennes for varianten
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://nom-api-sf-test.intern.dev.nav.no # Auto-utfylt av 'create_additional_dev_deployment.py'
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 99%
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 3
+    timeout: 4
+    failureThreshold: 2
+  startup:
+    path: internal/health/startupState
+    initialDelay: 15
+    periodSeconds: 10
+    failureThreshold: 50 # 36*10sec = 6min
+  resources:
+    requests:
+      cpu: 600m
+      memory: 6Gi
+    limits:
+      memory: 8Gi
+  leaderElection: true
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  kafka:
+    pool: nav-dev
+  azure:
+    application: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': Azure-klient, grupper, redirect og azp må vurderes
+      enabled: true
+      allowAllUsers: true
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: "c5752f26-105a-460f-a538-1859273f5057" # nom-write
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+          - id: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER
+          - id: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT
+          - id: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT
+          - id: "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent
+          - id: "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen
+          - id: "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot
+          - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+          - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+          - id: "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker
+        extra:
+          - azp_name
+          - NAVident
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-ui2-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-admin-web-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: org-ekstern-proxy
+          namespace: org
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-paarorende-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-paarorende-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: norg2
+          namespace: org
+          cluster: dev-gcp
+        - application: orgenhet-kostnadssted-mapping-api
+          namespace: team-nof
+          cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
+      external:
+        - host: org-unleash-api.nav.cloud.nais.io
+        - host: nom-proxy.dev-fss-pub.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+        - host: dvh.adeo.no # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+        - host: nav-test.mainmanager.no # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+        - host: slack.com # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+  gcp:
+    sqlInstances:
+      - name: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+        type: POSTGRES_18
+        tier: db-custom-1-3840
+        databases:
+          - name: nom-api-sf-test-db # Auto-utfylt av 'create_additional_dev_deployment.py'
+            envVarPrefix: DATABASE

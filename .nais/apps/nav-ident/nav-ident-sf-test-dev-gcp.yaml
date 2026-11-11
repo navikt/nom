@@ -1,0 +1,140 @@
+# Kopiert fra .nais/apps/nav-ident/nav-ident-dev-gcp.yaml (commit: d3d986fe2f5b4d9f2d84ff5016202e75ab0ab766)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev,sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+    - name: GROUP_ID_ADMIN
+      value: '9e0e2958-df7a-4376-83f3-9bcbec1f2650'
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
+  envFrom:
+    - secret: nav-ident-unleash-api-token
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://nav-ident-sf-test.intern.dev.nav.no # Auto-utfylt av 'create_additional_dev_deployment.py'
+  webproxy: true
+  leaderElection: false
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  startup:
+    path: internal/health/startupState
+    initialDelay: 60
+    periodSeconds: 15
+    failureThreshold: 20
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 60
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 60
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    limits:
+      memory: 3Gi
+    requests:
+      cpu: 200m
+      memory: 1Gi
+
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  gcp:
+    sqlInstances:
+      - name: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+        type: POSTGRES_18
+        tier: db-custom-1-3840
+        databases:
+          - name: nav-ident-sf-test-db # Auto-utfylt av 'create_additional_dev_deployment.py'
+            envVarPrefix: DATABASE
+
+  azure:
+    application: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': Azure-klient, grupper, redirect og azp må vurderes
+      enabled: true
+      allowAllUsers: true
+      claims:
+        groups:
+          # AD gruppe NOM-ADMIN
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+
+  kafka:
+    pool: nav-dev
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: nom
+          cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nav-ident-redis-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
+      external:
+        - host: pdl-api.dev-fss-pub.nais.io # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+        - host: org-unleash-api.nav.cloud.nais.io
+
+---
+
+apiVersion: "nais.io/v1alpha1"
+kind: Application # Auto-utfylt av 'create_additional_dev_deployment.py'
+metadata:
+  labels:
+    team: org
+  annotations:
+    nais.io/read-only-file-system: "false"
+    nais.io/run-as-user: "999"
+  name: nav-ident-redis-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+spec:
+  image: redis:latest
+  port: 6379
+  replicas: # A single Redis-app doesn't scale
+    min: 1
+    max: 1 # More replicas doesn't sync
+  resources: # you need to monitor the resource usage yourself
+    limits:
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    port: 6379
+    protocol: redis
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp

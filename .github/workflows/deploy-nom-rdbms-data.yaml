@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
+      - '.nais/apps/nom-rdbms-data/nom-rdbms-data-sf-test-dev-gcp.yaml'
       - 'apps/nom-rdbms-data/**'
       - 'libs/**'
       - '.nais/apps/nom-rdbms-data/*.yaml'
@@ -32,6 +33,7 @@ jobs:
       jar-path: apps/nom-rdbms-data/target/app.jar
       image-suffix: nom-rdbms-data
       nais-config-file-path-dev: .nais/apps/nom-rdbms-data/nom-rdbms-data-dev-gcp.yaml
+      additional-dev-deployments: '[{"suffix":"sf-test","manifest":".nais/apps/nom-rdbms-data/nom-rdbms-data-sf-test-dev-gcp.yaml"}]'
       nais-config-file-path-prod: .nais/apps/nom-rdbms-data/nom-rdbms-data-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/nom-rdbms-data/unleash-vars.yaml
       deploy-timeout: 20m
