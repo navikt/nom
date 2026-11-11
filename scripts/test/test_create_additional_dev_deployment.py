@@ -37,7 +37,8 @@ class GenerateTests(unittest.TestCase):
                     ("topics-internal.yaml", "nav-ident-topics.yaml", "topics-kafka-api.yaml")]
         sources += list(Path("libs/nom-state/src/main/resources") / f"{kind}-state.yaml"
                         for kind in generator.STATE_TYPES)
-        sources.append(Path(".github/workflows/deploy-spring-app.yaml"))
+        sources.extend((Path(".github/workflows/deploy-spring-app.yaml"),
+                        Path(".github/workflows/kafka-topics-org.yaml")))
         sources.extend(path for path, _, _ in generator.SHARED_DEV_CALLERS)
         sources.extend((Path(".nais/apps/nom-azure/nom-azure-prod-gcp.yaml"),
                         Path(".nais/apps/proxy/proxy-prod-fss.yaml")))
@@ -93,6 +94,10 @@ class GenerateTests(unittest.TestCase):
         self.assertIn("# Kopiert fra apps/api/src/main/resources/application-dev.yaml", api)
         self.assertNotIn("on-profile:", api)
         self.assertNotIn("\n---\n", api)
+        self.assertIn('http://nav-ident-q9.org', api)
+        self.assertIn('api://dev-gcp.org.nav-ident-q9/.default', api)
+        self.assertIn('http://nom-paarorende-q9.org', api)
+        self.assertIn('api://dev-gcp.org.nom-paarorende-q9/.default', api)
         self.assertIn("@    offsets: # KONTROLLER MANUELT", api)
         self.assertIn("      ressurs: 865000", api)
         self.assertIn("org.nom.ressurs-eventsource-q9", api)
@@ -127,14 +132,16 @@ class GenerateTests(unittest.TestCase):
         self.assertIn("value: dev,q9", stream)
         self.assertNotIn("accessPolicy:", stream)
         stream_profile = (self.root / "apps/streams/kafka-api/api-ressurs-state-v4/src/main/resources/application-q9.yaml").read_text()
-        self.assertIn("application-id: ${KAFKA_STREAMS_APPLICATION_ID}-q9", stream_profile)
         self.assertIn("@    skip-producing-state-events-until-ressurs-evtsrc-offset: 0 # KONTROLLER MANUELT", stream_profile)
         self.assertNotIn("on-profile:", stream_profile)
+        expected_application_id = "      application-id: ${KAFKA_STREAMS_APPLICATION_ID}"
         for name, (module, _, _) in generator.STREAMS.items():
             content = (self.root / "apps/streams" / module / "src/main/resources/application-q9.yaml").read_text()
             self.assertNotIn("on-profile:", content, name)
             self.assertNotIn("\n---\n", content, name)
             self.assertNotRegex(content, r"(?m)^\s+[\w-]+: org\.nom\.[\w.-]+(?<!-q9)$")
+            self.assertEqual(content.splitlines().count(expected_application_id), 1, name)
+            self.assertNotRegex(content, r"(?m)^      application-id: \$\{KAFKA_STREAMS_APPLICATION_ID\}-")
 
         rdbms = (self.root / ".nais/apps/nom-rdbms-data/nom-rdbms-data-q9-dev-gcp.yaml").read_text()
         self.assertIn("- name: nom-rdbms-data-q9", rdbms)
@@ -155,8 +162,12 @@ class GenerateTests(unittest.TestCase):
         self.assertRegex(admin, r"@      memory: \d+Gi # KONTROLLER MANUELT")
         self.assertIn("@      memory: 20Gi # KONTROLLER MANUELT", admin)
         self.assertIn("- secret: nom-admin-unleash-api-token", admin)
-        self.assertIn("- host: nom-remedy-integrasjon.dev-fss-pub.nais.io", admin)
+        self.assertNotIn("- host: nom-remedy-integrasjon.dev-fss-pub.nais.io", admin)
         self.assertIn("- host: org-unleash-api.nav.cloud.nais.io", admin)
+        for app, (directory, manifest, _, _) in generator.APPS.items():
+            path = generator.variant_manifest_path(Path(".nais/apps") / directory / manifest, "q9")
+            variant = (self.root / path).read_text()
+            self.assertNotIn("- host: nom-remedy-integrasjon.dev-fss-pub.nais.io", variant, app)
         admin_profile = (self.root / "apps/admin/src/main/resources/application-q9.yaml").read_text()
         inactive_topics = sorted(generator.ADMIN_INACTIVE_TOPICS)
         inactive_properties = {
@@ -206,12 +217,27 @@ class GenerateTests(unittest.TestCase):
         sf = (self.root / ".nais/apps/nom-sf-integrasjon/nom-sf-integrasjon-q9-dev-gcp.yaml").read_text()
         self.assertIn("value: http://nom-api-q9.nom", sf)
         self.assertIn("api://dev-gcp.nom.nom-api-q9/.default # Auto-utfylt", sf)
+        sf_profile = (self.root / "apps/nom-sf-integrasjon/src/main/resources/application-q9.yaml").read_text()
+        self.assertIn("http://nav-ident-q9.org", sf_profile)
+        self.assertIn("api://dev-gcp.org.nav-ident-q9/.default", sf_profile)
+        for event_source, topic in (
+            ("orgenhet", "orgenhet-eventsource"),
+            ("orgenhet-leder", "orgenhet-leder-eventsource"),
+            ("organisering", "organisering-eventsource"),
+        ):
+            self.assertIn(
+                f"      {event_source}:\n        topic: org.nom.{topic}-q9",
+                sf_profile,
+            )
+        self.assertIn("application: nav-ident-q9", sf)
         self.assertIn("- name: nom-sf-integrasjon-q9-db", sf)
         self.assertIn("      external:\n        - host: org-unleash-api.nav.cloud.nais.io", sf)
         self.assertIn("@        - host: api55.sapsf.eu", sf)
         self.assertIn("application: org-ekstern-proxy", sf)
         self.assertIn("application: org-token-tool", sf)
         api_manifest = (self.root / ".nais/apps/api/api-q9-dev-gcp.yaml").read_text()
+        self.assertIn("application: nav-ident-q9", api_manifest)
+        self.assertIn("application: nom-paarorende-q9", api_manifest)
         for app in ("logging", "norg2", "orgenhet-kostnadssted-mapping-api"):
             self.assertIn(f"application: {app}\n", api_manifest)
         for manifest_path, caller, namespace in generator.SHARED_DEV_CALLERS:
@@ -231,6 +257,9 @@ class GenerateTests(unittest.TestCase):
         self.assertIn("CLUSTER: dev-gcp", topicflow)
         self.assertNotIn("prod-gcp", topicflow)
         self.assertNotIn("nav-prod", topicflow)
+        for action in ("actions/checkout", "nais/deploy/actions/deploy"):
+            self.assertIn(f"- uses: {generator.topic_action(self.root, action)}", topicflow)
+
 
         # A second variant extends the matrices instead of replacing the previous one.
         generator.generate(self.root, "q8")
@@ -269,6 +298,38 @@ class GenerateTests(unittest.TestCase):
         self.assertEqual(original, (self.root / ".github/workflows/deploy-api.yaml").read_text())
         self.assertFalse((self.root / ".nais/topics/topics-additional-dev-q9.yaml").exists())
 
+    def test_topic_workflow_uses_current_pinned_actions(self):
+        path = self.root / ".github/workflows/kafka-topics-org.yaml"
+        original = path.read_text()
+        checkout = "f" * 40
+        deploy = "e" * 40
+        updated = re.sub(r"actions/checkout@[a-f0-9]{40}", f"actions/checkout@{checkout}", original)
+        updated = re.sub(r"nais/deploy/actions/deploy@[a-f0-9]{40}",
+                         f"nais/deploy/actions/deploy@{deploy}", updated)
+        path.write_text(updated)
+        generated = generator.topic_workflow(self.root, "q9")
+        self.assertIn(f"actions/checkout@{checkout}", generated)
+        self.assertIn(f"nais/deploy/actions/deploy@{deploy}", generated)
+        path.write_text(updated.replace(f"nais/deploy/actions/deploy@{deploy}",
+                                        "nais/deploy/actions/deploy@v3"))
+        with self.assertRaisesRegex(ValueError, "Mangler entydig SHA"):
+            generator.topic_workflow(self.root, "q9")
+
+    def test_remedy_only_external_access_is_not_emitted(self):
+        source = """apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-admin
+spec:
+  accessPolicy:
+    outbound:
+      external:
+        - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
+"""
+        generated = generator.manifest(source, "q9", "nom-admin")
+        self.assertNotIn("nom-remedy-integrasjon.dev-fss-pub.nais.io", generated)
+        self.assertNotIn("outbound:", generated)
+
     def test_unexpected_app_name_fallback_fails_closed(self):
         source = self.root / "apps/nom-sf-integrasjon/src/main/resources/application.yaml"
         source.write_text(source.read_text().replace(
@@ -276,6 +337,31 @@ class GenerateTests(unittest.TestCase):
         ))
         with self.assertRaisesRegex(ValueError, "Unexpected app.name fallback for nom-sf-integrasjon"):
             generator.profile(self.root, "nom-sf-integrasjon", "sf-test")
+
+    def test_dev_http_service_urls_only_suffix_known_variant_hosts(self):
+        source = self.root / "apps/api/src/main/resources/application-dev.yaml"
+        entries = textwrap.dedent('''
+            CUSTOM_ENDPOINT_URL: "http://nav-ident.org:8080/path"
+            URL_WITH_SPACE: http://nom-api.nom
+            URL_AT_END: http://nav-ident.org
+            ALREADY_BASEURL: "http://nav-ident-q9.org"
+            EXTERNAL_BASEURL: "https://nav-ident.org"
+            SHARED_BASEURL: "http://orgenhet-kostnadssted-mapping-api.team-nof"
+            HOST_PREFIX_BASEURL: "http://nav-ident.org.example"
+        ''').replace("URL_WITH_SPACE: http://nom-api.nom\n", "URL_WITH_SPACE: http://nom-api.nom \n")
+        source.write_text(source.read_text() + entries)
+
+        generated = generator.profile(self.root, "api", "q9")
+
+        self.assertIn('http://nav-ident-q9.org:8080/path', generated)
+        self.assertIn('http://nom-api-q9.nom', generated)
+        already_suffixed = re.search(r'(?m)^@?ALREADY_BASEURL: "([^\"]+)"', generated)
+        self.assertIsNotNone(already_suffixed)
+        self.assertEqual(already_suffixed.group(1), "http://nav-ident-q9.org")
+        self.assertNotIn('http://nav-ident-q9-q9.org', generated)
+        self.assertIn('https://nav-ident.org', generated)
+        self.assertIn('http://orgenhet-kostnadssted-mapping-api.team-nof', generated)
+        self.assertIn('http://nav-ident.org.example', generated)
 
     def test_state_overrides_fail_closed(self):
         state_dir = self.root / "libs/nom-state/src/main/resources"
