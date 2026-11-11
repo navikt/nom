@@ -305,7 +305,7 @@ function OpprettOrgEnhetForm({
             <FormDateWrapper name="gyldigFom" />
 
             <VStack
-              gap="4"
+              gap="space-16"
               css={css`
                 width: 50%;
               `}
