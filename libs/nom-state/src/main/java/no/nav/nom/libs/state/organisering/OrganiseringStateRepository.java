@@ -24,6 +24,8 @@ public interface OrganiseringStateRepository {
 
     Map<String, OrganiseringState> getActiveOrganisering();
 
+    Map<String, OrganiseringState> getHistoricOrganisering();
+
     List<OrganiseringState> getOrganiseringer();
 
     List<OrganiseringState> getOrganiseringerContainingId(String id);

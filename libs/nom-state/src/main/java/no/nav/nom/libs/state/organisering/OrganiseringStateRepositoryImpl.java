@@ -8,6 +8,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -332,6 +334,26 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
         return organiseringByFid.entrySet().stream()
             .filter(e -> isActive(e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<String, OrganiseringState> getHistoricOrganisering() {
+        Map<String, Optional<OrganiseringState>> latestOrganiseringWithGyldigTom = new HashMap<>();
+        organiseringerById.forEach((key, value) -> {
+            var copyOfList = new CopyOnWriteArrayList<>(value);
+            if (copyOfList.stream().anyMatch(this::isActive)) {
+                return;
+            }
+            latestOrganiseringWithGyldigTom.put(
+                key, copyOfList.stream()
+                    .max(Comparator.comparing(OrganiseringState::gyldigTom))
+            );
+        });
+        return latestOrganiseringWithGyldigTom
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().isPresent())
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
     }
 
     @Override
