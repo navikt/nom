@@ -19,15 +19,15 @@
     "all-checks": "npm run check-types && npm run test && npm run lint && npm run stylelint"
   },
   "dependencies": {
-    "@apollo/client": "4.3.5",
+    "@apollo/client": "4.3.7",
     "@emotion/react": "11.14.0",
     "@grafana/faro-web-sdk": "2.13.0",
     "@grafana/faro-web-tracing": "2.13.0",
     "@hookform/resolvers": "5.9.1",
-    "@navikt/aksel-icons": "8.16.2",
-    "@navikt/ds-css": "8.16.2",
-    "@navikt/ds-react": "8.16.2",
-    "@tanstack/react-query": "5.105.1",
+    "@navikt/aksel-icons": "8.22.1",
+    "@navikt/ds-css": "8.22.1",
+    "@navikt/ds-react": "8.22.1",
+    "@tanstack/react-query": "5.107.1",
     "@tanstack/react-router": "1.170.46",
     "axios": "1.21.0",
     "date-fns": "4.4.0",
@@ -46,9 +46,9 @@
     "@graphql-codegen/typescript": "6.1.2",
     "@graphql-codegen/typescript-operations": "6.2.0",
     "@graphql-codegen/typescript-resolvers": "6.1.1",
-    "@navikt/aksel-stylelint": "8.16.2",
-    "@tanstack/react-query-devtools": "5.105.1",
-    "@tanstack/router-vite-plugin": "1.167.48",
+    "@navikt/aksel-stylelint": "8.22.1",
+    "@tanstack/react-query-devtools": "5.107.1",
+    "@tanstack/router-vite-plugin": "1.167.49",
     "@types/lodash": "4.17.27",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -58,13 +58,13 @@
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
-    "eslint-plugin-import-x": "4.17.1",
+    "eslint-plugin-import-x": "4.18.0",
     "eslint-plugin-lodash": "8.1.0",
     "eslint-plugin-prettier": "5.5.7",
     "eslint-plugin-react-jsx": "5.28.8",
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-unicorn": "74.0.0",
-    "graphql": "17.0.2",
+    "graphql": "17.1.0",
     "postcss-styled-syntax": "0.7.4",
     "prettier": "3.9.10",
     "stylelint": "17.16.0",
@@ -75,6 +75,6 @@
     "vitest": "4.1.11"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.67.4"
+    "@rollup/rollup-linux-x64-gnu": "4.68.0"
   }
 }
