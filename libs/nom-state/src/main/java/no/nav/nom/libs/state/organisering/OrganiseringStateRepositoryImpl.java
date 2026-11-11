@@ -337,7 +337,7 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
     }
 
     @Override
-    public Map<String, Optional<OrganiseringState>> getOrganiseringWithLatestGyldigTom() {
+    public Map<String, OrganiseringState> getHistoricOrganisering() {
         Map<String, Optional<OrganiseringState>> latestOrganiseringWithGyldigTom = new HashMap<>();
         organiseringerById.forEach((key, value) -> {
             var copyOfList = new CopyOnWriteArrayList<>(value);
@@ -349,7 +349,11 @@ public class OrganiseringStateRepositoryImpl implements OrganiseringStateReposit
                     .max(Comparator.comparing(OrganiseringState::gyldigTom))
             );
         });
-        return latestOrganiseringWithGyldigTom;
+        return latestOrganiseringWithGyldigTom
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue().isPresent())
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
     }
 
     @Override

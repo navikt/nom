@@ -500,11 +500,7 @@ public class OrgenhetService {
     }
 
     public void alignOrgEnhetGyldigTomWithOrganisering() {
-        var allOrganiseringWithGyldigTom = organiseringStateRepository.getOrganiseringWithLatestGyldigTom()
-            .entrySet()
-            .stream()
-            .filter(entry -> entry.getValue().isPresent())
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
+        var allOrganiseringWithGyldigTom = organiseringStateRepository.getHistoricOrganisering();
         var allOrgEnhetWihoutGyldigTomWhereOrganiseringHasGyldigTom = orgEnhetStateRepository.getAll().stream()
             .filter(orgEnhetState -> isNull(orgEnhetState.gyldigTom()))
             .filter(orgEnhetState -> allOrganiseringWithGyldigTom.containsKey(orgEnhetState.id()))
