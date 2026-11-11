@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Tag(name = "OrgEnhet Admin")
 @RestController
-@RequestMapping(value = {"/admin/orgenheter"})
+@RequestMapping(value = {"/api/admin/orgenheter"})
 public class OrgEnhetAdminController {
     private final OrgenhetService orgEnhetService;
 
@@ -21,7 +21,7 @@ public class OrgEnhetAdminController {
         this.orgEnhetService = orgEnhetService;
     }
 
-    @PostMapping()
+    @PostMapping("/sammenstill")
     @Operation(
         description = "Manuell kjøring av orgEnhet samstemming av gyldigTom mot Organisering",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
