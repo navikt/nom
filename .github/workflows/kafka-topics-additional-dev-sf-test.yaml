@@ -1,0 +1,26 @@
+name: 'update-kafka-topics: additional-dev-sf-test'
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - '.nais/topics/topics-additional-dev-sf-test.yaml'
+      - '.github/workflows/kafka-topics-additional-dev-sf-test.yaml'
+  workflow_dispatch:
+
+jobs:
+  deploy-kafka-topics-dev:
+    name: Deploy to Aiven Dev
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
+      - uses: nais/deploy/actions/deploy@033f70f2484ddfa91dc3d878e06ced3113f996ad # ratchet:nais/deploy/actions/deploy@v3
+        env:
+          CLUSTER: dev-gcp
+          VAR: kafka-pool=nav-dev
+          RESOURCE: .nais/topics/topics-additional-dev-sf-test.yaml
