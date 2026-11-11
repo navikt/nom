@@ -29,7 +29,7 @@ export function TestBanner() {
           width: 100%;
           height: ${testBannerHeight};
           box-sizing: border-box;
-          background: var(--a-orange-300);
+          background: var(--ax-bg-warning-moderate-pressed);
           text-align: center;
           align-content: center;
           padding: 0.5rem;

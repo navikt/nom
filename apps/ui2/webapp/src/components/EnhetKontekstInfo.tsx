@@ -39,10 +39,10 @@ export function EnhetKontekstInfo({
   return (
     <HStack
       css={css`
-        font-size: var(--a-font-size-large);
-        row-gap: var(--a-spacing-1);
+        font-size: var(--ax-font-size-large);
+        row-gap: var(--ax-space-4);
       `}
-      gap="4"
+      gap="space-16"
     >
       <LabelWithValue
         label="NOM-ID"

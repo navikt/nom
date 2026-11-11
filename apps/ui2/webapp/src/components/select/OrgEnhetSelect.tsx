@@ -100,8 +100,8 @@ export const OrgEnhetSelect = forwardRef(
           css={[
             error &&
               css`
-                border-color: var(--a-border-danger);
-                box-shadow: 0 0 0 1px var(--a-border-danger);
+                border-color: var(--ax-border-danger-strong);
+                box-shadow: 0 0 0 1px var(--ax-border-danger-strong);
               `,
           ]}
           inputId={label}
@@ -144,7 +144,7 @@ function OptionWithIds(properties: OptionProps<Option, false>) {
         css={css`
           display: flex;
           justify-content: space-between;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         <span>{properties.data.label}</span>

@@ -87,7 +87,7 @@ export function ConfirmStep() {
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-4);
+        padding: var(--ax-space-16);
       `}
       header={{ heading: "Bekreft registrering" }}
       onClose={onClose}
@@ -97,7 +97,7 @@ export function ConfirmStep() {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         <span
@@ -109,7 +109,7 @@ export function ConfirmStep() {
             medarbeider i NOM.${!!navident ? " Nav-ident blir videreført fra tidligere arbeidsforhold." : ""}`}
         </span>
 
-        <HGrid columns="max-content max-content" gap="2 2">
+        <HGrid columns="max-content max-content" gap="space-8 space-8">
           <LabelWithValue label="Navn" split value={formattedName} />
           <LabelWithValue
             label="Telefonnummer"

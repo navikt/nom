@@ -8,7 +8,7 @@ export function LoaderWithText({ children }: { children?: string }) {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--a-spacing-2);
+        gap: var(--ax-space-8);
       `}
     >
       <Loader size="3xlarge" />

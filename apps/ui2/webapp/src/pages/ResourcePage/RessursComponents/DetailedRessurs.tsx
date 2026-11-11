@@ -194,15 +194,15 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
     <div
       css={[
         css`
-          padding: var(--a-spacing-12);
+          padding: var(--ax-space-48);
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-9);
+          gap: var(--ax-space-36);
 
           h1,
           h2 {
             display: flex;
-            gap: var(--a-spacing-2);
+            gap: var(--ax-space-8);
 
             svg {
               width: 24px;
@@ -320,14 +320,14 @@ function OrgTilknytningSection({
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         <div
           css={css`
             display: flex;
             justify-content: space-between;
-            margin-bottom: var(--a-spacing-4);
+            margin-bottom: var(--ax-space-16);
           `}
         >
           <Heading level="2" size="small">
@@ -441,7 +441,7 @@ function ExpiredOrgTilknytninger({
 
         <HelpText
           css={css`
-            margin-left: var(--a-spacing-2);
+            margin-left: var(--ax-space-8);
           `}
           title="Avsluttede organisasjonstilknytninger"
         >
@@ -483,12 +483,12 @@ function ExpiredOrgTilknytning({
     <div
       css={css`
         display: flex;
-        gap: var(--a-spacing-4);
+        gap: var(--ax-space-16);
         align-items: center;
-        background: var(--a-surface-subtle);
-        padding: var(--a-spacing-6);
-        border: 1px solid var(--a-border-default);
-        border-radius: var(--a-border-radius-large);
+        background: var(--ax-bg-neutral-soft);
+        padding: var(--ax-space-24);
+        border: 1px solid var(--ax-border-default);
+        border-radius: var(--ax-radius-8);
       `}
       key={expiredOrgTilknytning.orgEnhetId}
     >
@@ -522,6 +522,8 @@ function OrganisationHierarchyTree({
   hasWriteAccessForRessurs: boolean;
   fysiskeBrukersteder: FysiskBrukersted[];
 }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
     queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
@@ -584,21 +586,18 @@ function OrganisationHierarchyTree({
   return (
     <ExpansionCard
       aria-label="organisasjons-hierarki"
-      css={css`
-        .navds-expansioncard--open #title-start-date {
-          color: blue;
-          visibility: hidden;
-        }
-      `}
+      open={isExpanded}
+      onToggle={setIsExpanded}
       size="small"
     >
       <ExpansionCard.Header
         css={css`
-          .navds-expansioncard__header-content {
-            width: 100%;
+          > div {
+            flex: 1;
+            min-width: 0;
           }
 
-          .navds-expansioncard__header-button {
+          > button {
             align-self: center;
           }
         `}
@@ -613,9 +612,10 @@ function OrganisationHierarchyTree({
             <>
               <span
                 css={css`
-                  font-size: var(--a-font-size-large);
-                  font-weight: var(--a-font-weight-regular);
-                  margin-left: var(--a-spacing-4);
+                  font-size: var(--ax-font-size-large);
+                  font-weight: var(--ax-font-weight-regular);
+                  margin-left: var(--ax-space-16);
+                  visibility: ${isExpanded ? "hidden" : "visible"};
                 `}
                 id="title-start-date"
               >
@@ -639,7 +639,7 @@ function OrganisationHierarchyTree({
           <Label size="small">
             <span
               css={css`
-                font-weight: var(--a-font-weight-regular);
+                font-weight: var(--ax-font-weight-regular);
               `}
             >
               Leder:{" "}
@@ -649,7 +649,7 @@ function OrganisationHierarchyTree({
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
-                margin-left: var(--a-spacing-4);
+                margin-left: var(--ax-space-16);
               `}
               size="xsmall"
               variant="info"
@@ -673,8 +673,8 @@ function OrganisationHierarchyTree({
               {!!primaryFysiskBrukersted && (
                 <BodyShort
                   css={css`
-                    margin-top: var(--a-spacing-4);
-                    font-size: var(--a-font-size-large);
+                    margin-top: var(--ax-space-16);
+                    font-size: var(--ax-font-size-large);
                   `}
                 >
                   Primært fysisk brukersted:{" "}
@@ -688,8 +688,8 @@ function OrganisationHierarchyTree({
                 ytterligereFysiskeBrukersteder?.length > 0 && (
                   <VStack
                     css={css`
-                      margin-top: var(--a-spacing-4);
-                      font-size: var(--a-font-size-large);
+                      margin-top: var(--ax-space-16);
+                      font-size: var(--ax-font-size-large);
                     `}
                   >
                     <span>Ytterligere fysiske brukersteder:</span>
@@ -711,7 +711,7 @@ function OrganisationHierarchyTree({
           css={css`
             display: flex;
             justify-content: space-between;
-            margin-top: var(--a-spacing-2);
+            margin-top: var(--ax-space-8);
           `}
         >
           <div
@@ -826,7 +826,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
         `}
       >
         {sorterteOrgEnheter.map((orgEnhet) => (

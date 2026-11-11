@@ -286,14 +286,14 @@ function FysiskBrukerstedFlyttingTable() {
   );
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <VStack
         css={css`
           background-color: #deecef;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
+          padding: var(--ax-space-16) var(--ax-space-24);
+          border-radius: var(--ax-radius-8);
         `}
-        gap="4"
+        gap="space-16"
       >
         <Heading level="1" size="medium">
           Flytt fra
@@ -310,7 +310,7 @@ function FysiskBrukerstedFlyttingTable() {
 
             <Button
               css={css`
-                margin-top: var(--a-spacing-4);
+                margin-top: var(--ax-space-16);
                 float: right;
               `}
               disabled={!selectedFysiskBrukerstedFra}
@@ -333,7 +333,7 @@ function FysiskBrukerstedFlyttingTable() {
           >
             <BodyShort
               css={css`
-                font-size: var(--a-font-size-large);
+                font-size: var(--ax-font-size-large);
               `}
             >
               <b>
@@ -357,11 +357,11 @@ function FysiskBrukerstedFlyttingTable() {
           <VStack
             css={css`
               background-color: #deecef;
-              padding: var(--a-spacing-4) var(--a-spacing-6);
-              border-radius: var(--a-border-radius-large);
+              padding: var(--ax-space-16) var(--ax-space-24);
+              border-radius: var(--ax-radius-8);
               display: grid;
             `}
-            gap="4"
+            gap="space-16"
           >
             <Heading level="1" size="medium">
               Flytt til
@@ -391,7 +391,7 @@ function FysiskBrukerstedFlyttingTable() {
 
               <Button
                 css={css`
-                  margin-left: var(--a-spacing-4);
+                  margin-left: var(--ax-space-16);
                 `}
                 disabled={
                   valgteOrgtilknytninger.length === 0 ||
@@ -408,15 +408,15 @@ function FysiskBrukerstedFlyttingTable() {
 
           <div
             css={css`
-              margin-left: var(--a-spacing-2);
+              margin-left: var(--ax-space-8);
               display: flex;
             `}
           >
             <div>
               <Heading
                 css={css`
-                  margin-top: var(--a-spacing-2);
-                  margin-bottom: var(--a-spacing-4);
+                  margin-top: var(--ax-space-8);
+                  margin-bottom: var(--ax-space-16);
                 `}
                 size="small"
               >
@@ -432,7 +432,7 @@ function FysiskBrukerstedFlyttingTable() {
               <div
                 css={css`
                   display: flex;
-                  gap: var(--a-spacing-4);
+                  gap: var(--ax-space-16);
                 `}
               >
                 <Checkbox
@@ -477,7 +477,10 @@ function FysiskBrukerstedFlyttingTable() {
               padding: 6px;
               border-radius: 5px;
 
-              --ac-table-row-border: #071a3636;
+              th,
+              td {
+                border-bottom-color: #071a3636;
+              }
             `}
             onSortChange={(sortKey) => handleSort(sortKey)}
             sort={sort}
@@ -542,9 +545,12 @@ function FysiskBrukerstedFlyttingTable() {
               {sorterteOrgtilknytninger.map((orgtilknytning) => (
                 <Table.Row
                   css={css`
-                    --ac-table-row-border: none;
                     height: 48px;
                     border-width: 0 0 1px;
+
+                    > td {
+                      border-bottom: none;
+                    }
                   `}
                   key={orgtilknytning.fid}
                 >
@@ -630,7 +636,7 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-6);
+        padding: var(--ax-space-24);
         border-radius: 0;
       `}
       header={{ heading: "Bekreft flytting", closeButton: false }}
@@ -663,10 +669,10 @@ function MasseflyttingFysiskBrukerstedBekreftModal({
         <VStack
           css={css`
             max-height: 500px;
-            background: var(--a-grayalpha-100);
-            margin-top: var(--a-spacing-4);
+            background: var(--ax-bg-neutral-moderateA);
+            margin-top: var(--ax-space-16);
           `}
-          gap="1"
+          gap="space-4"
           overflow="auto"
         >
           {valgteOrgtilknytninger.map((fid) => {

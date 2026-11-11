@@ -247,7 +247,7 @@ function CreateSpecialResourceForm() {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onValid)}>
-        <VStack gap="8">
+        <VStack gap="space-32">
           <div
             css={css`
               display: flex;
@@ -295,7 +295,7 @@ function CreateSpecialResourceForm() {
                 width: 30%;
                 background-color: var(--nom-secondary-hover);
                 border-radius: 8px;
-                padding: var(--a-spacing-4);
+                padding: var(--ax-space-16);
                 height: fit-content;
                 align-self: center;
               `}
@@ -509,7 +509,7 @@ function BottomButtonSection({
   return (
     <div
       css={css`
-        margin-top: var(--a-spacing-4);
+        margin-top: var(--ax-space-16);
         display: flex;
         justify-content: end;
       `}
@@ -529,7 +529,7 @@ function BottomButtonSection({
       {nesteButton && (
         <Button
           css={css`
-            margin-left: var(--a-spacing-6);
+            margin-left: var(--ax-space-24);
             width: 130px;
           `}
           size="small"
@@ -588,7 +588,7 @@ function CreateSpecialConfirmModal({
       <Modal
         css={css`
           width: 600px;
-          padding: var(--a-spacing-4);
+          padding: var(--ax-space-16);
         `}
         header={{
           heading: `Bekreft ${!!navident ? "gjenoppretting" : "registrering"}`,
@@ -601,7 +601,7 @@ function CreateSpecialConfirmModal({
           css={css`
             display: flex;
             flex-direction: column;
-            gap: var(--a-spacing-9);
+            gap: var(--ax-space-36);
           `}
         >
           <Loader
@@ -618,7 +618,7 @@ function CreateSpecialConfirmModal({
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-4);
+        padding: var(--ax-space-16);
       `}
       header={{
         heading: `Bekreft ${!!navident ? "gjenoppretting" : "registrering"}`,
@@ -631,7 +631,7 @@ function CreateSpecialConfirmModal({
         css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-9);
+          gap: var(--ax-space-36);
         `}
       >
         <span
@@ -649,7 +649,7 @@ function CreateSpecialConfirmModal({
           )}
         </span>
 
-        <HGrid columns="max-content max-content" gap="2 2">
+        <HGrid columns="max-content max-content" gap="space-8 space-8">
           <LabelWithValue label="Navn" split value={formattedName} />
           <LabelWithValue label="Identifikator" split value={personident} />
           <LabelWithValue label="Nav-ident" split value={navident} />
@@ -782,7 +782,7 @@ function IdentifikasjonsnummerSearchFormPart({
   return (
     <div
       css={css`
-        margin-top: var(--a-spacing-8);
+        margin-top: var(--ax-space-32);
       `}
     >
       <Search
@@ -842,13 +842,13 @@ function NavidentSearchFormPart({
   return (
     <div
       css={css`
-        margin-top: var(--a-spacing-8);
+        margin-top: var(--ax-space-32);
       `}
     >
       <Search
         autoComplete="off"
         css={css`
-          .navds-search__input {
+          input {
             text-transform: uppercase;
           }
         `}
@@ -964,8 +964,8 @@ function VisningsnavnFormSection({ identType }: { identType: IdentType }) {
 
             <BodyShort
               css={css`
-                margin-top: var(--a-spacing-5);
-                margin-left: var(--a-spacing-2);
+                margin-top: var(--ax-space-20);
+                margin-left: var(--ax-space-8);
               `}
             >
               RPARobot
@@ -1015,7 +1015,7 @@ function OrgEnhetSelectFormSection() {
   );
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <OrgEnhetSelectFormPart
         name={"orgEnhetId"}
         orgEnheter={orgEnheterSomKanHaRessurser}
@@ -1025,7 +1025,7 @@ function OrgEnhetSelectFormSection() {
         <div
           css={css`
             display: flex;
-            gap: var(--a-spacing-4);
+            gap: var(--ax-space-16);
           `}
         >
           <span>
@@ -1034,7 +1034,7 @@ function OrgEnhetSelectFormSection() {
           <div
             css={css`
               display: inline-flex;
-              gap: var(--a-spacing-2);
+              gap: var(--ax-space-8);
             `}
           >
             <span>
@@ -1057,7 +1057,7 @@ function DateFormSection() {
     <div
       css={css`
         display: flex;
-        gap: var(--a-spacing-6);
+        gap: var(--ax-space-24);
       `}
     >
       <FullWidthDatePickerWrapper>

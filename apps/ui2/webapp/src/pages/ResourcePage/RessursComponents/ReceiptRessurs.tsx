@@ -37,12 +37,12 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
       css={[
         blueTopBorder,
         css`
-          padding: var(--a-spacing-8);
+          padding: var(--ax-space-32);
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
           flex-wrap: wrap-reverse;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `,
       ]}
     >
@@ -53,7 +53,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
         <div
           css={css`
             display: grid;
-            gap: var(--a-spacing-4);
+            gap: var(--ax-space-16);
             grid-template-columns: 1fr 1fr;
           `}
         >

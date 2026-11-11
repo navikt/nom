@@ -83,7 +83,7 @@ export function DynamiskOrgKart({
         <div
           css={css`
             overflow-x: auto;
-            padding-bottom: var(--a-spacing-10);
+            padding-bottom: var(--ax-space-40);
           `}
         >
           <div
@@ -98,7 +98,7 @@ export function DynamiskOrgKart({
               selected
             />
 
-            <HStack gap="4" wrap={false}>
+            <HStack gap="space-16" wrap={false}>
               {underliggendeOrgEnheter.map((underliggendeOrgEnhet) => (
                 <div
                   css={css`
@@ -410,7 +410,7 @@ function OrgKartLine({ invisible }: { invisible?: boolean }) {
       css={css`
         margin: auto;
         width: 4px;
-        height: var(--a-spacing-6);
+        height: var(--ax-space-24);
         background: ${invisible ? "transparent" : "#236b7d"};
       `}
     />

@@ -122,9 +122,9 @@ export const ValgtOrgEnhet = ({
     <div
       css={css`
         display: grid;
-        border-radius: var(--a-spacing-2);
+        border-radius: var(--ax-space-8);
         background-color: var(--nom-secondary-hover);
-        border: 1px solid var(--a-gray-400);
+        border: 1px solid var(--ax-border-neutral);
       `}
     >
       <TopBorder />
@@ -133,7 +133,7 @@ export const ValgtOrgEnhet = ({
         css={css`
           display: flex;
           flex-direction: column;
-          padding: var(--a-spacing-6);
+          padding: var(--ax-space-24);
         `}
       >
         <div
@@ -151,9 +151,9 @@ export const ValgtOrgEnhet = ({
             <HGrid
               columns="max-content max-content"
               css={css`
-                row-gap: var(--a-spacing-2);
+                row-gap: var(--ax-space-8);
               `}
-              gap="4"
+              gap="space-16"
             >
               <LabelWithValue copyButton label="ID" value={orgEnhet.id} />
               <LabelWithValue
@@ -206,7 +206,7 @@ export const ValgtOrgEnhet = ({
             css={css`
               display: flex;
               flex-direction: column;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
               align-items: center;
             `}
           >
@@ -222,7 +222,7 @@ export const ValgtOrgEnhet = ({
         {!!teamkatalogSeksjon && (
           <SmartLink
             css={css`
-              margin-top: var(--a-spacing-4);
+              margin-top: var(--ax-space-16);
             `}
             externalIcon
             href={teamkatalogenLenke}
@@ -234,7 +234,7 @@ export const ValgtOrgEnhet = ({
         {loading ? (
           <Loader
             css={css`
-              margin: var(--a-spacing-8) auto auto;
+              margin: var(--ax-space-32) auto auto;
             `}
             size="3xlarge"
           />
@@ -250,7 +250,7 @@ export const ValgtOrgEnhet = ({
 
         <OrgEnhetStatistikk
           css={css`
-            margin-top: var(--a-spacing-6);
+            margin-top: var(--ax-space-24);
           `}
           expandable
           header="Statistikk"
@@ -281,7 +281,7 @@ function MedarbeidereList({
           display: flex;
           justify-content: end;
           align-items: center;
-          margin-top: var(--a-spacing-6);
+          margin-top: var(--ax-space-24);
         `}
       >
         <DropdownMeny
@@ -316,7 +316,7 @@ function MedarbeidereList({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-top: var(--a-spacing-6);
+          margin-top: var(--ax-space-24);
         `}
       >
         <Heading
@@ -338,13 +338,13 @@ function MedarbeidereList({
         )}
       </div>
 
-      <VStack gap="4">
+      <VStack gap="space-16">
         {interneRessurser.length > 0 && (
           <div>
             <div
               css={css`
                 display: flex;
-                margin-bottom: var(--a-spacing-5);
+                margin-bottom: var(--ax-space-20);
                 align-items: center;
               `}
             >
@@ -357,7 +357,7 @@ function MedarbeidereList({
               css={css`
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: var(--a-spacing-4);
+                gap: var(--ax-space-16);
               `}
             >
               {interneRessurser.map((ressurs) => {
@@ -373,13 +373,13 @@ function MedarbeidereList({
           <div>
             <ReadMore
               css={css`
-                .navds-read-more__button {
-                  color: var(--a-text-default);
-                  font-size: var(--a-font-size-heading-small);
-                  font-weight: var(--a-font-weight-bold);
+                > button {
+                  color: var(--ax-text-neutral);
+                  font-size: var(--ax-font-size-heading-small);
+                  font-weight: var(--ax-font-weight-bold);
                 }
 
-                .navds-read-more__content {
+                > div {
                   margin-left: 0;
                   padding-left: 0;
                   border-left: none;
@@ -390,10 +390,10 @@ function MedarbeidereList({
             >
               <div
                 css={css`
-                  margin-top: var(--a-spacing-4);
+                  margin-top: var(--ax-space-16);
                   display: grid;
                   grid-template-columns: repeat(2, 1fr);
-                  gap: var(--a-spacing-4);
+                  gap: var(--ax-space-16);
                 `}
               >
                 {eksterneRessurser.map((ressurs) => {
@@ -410,13 +410,13 @@ function MedarbeidereList({
           <div>
             <ReadMore
               css={css`
-                .navds-read-more__button {
-                  color: var(--a-text-default);
-                  font-size: var(--a-font-size-heading-small);
-                  font-weight: var(--a-font-weight-bold);
+                > button {
+                  color: var(--ax-text-neutral);
+                  font-size: var(--ax-font-size-heading-small);
+                  font-weight: var(--ax-font-weight-bold);
                 }
 
-                .navds-read-more__content {
+                > div {
                   margin-left: 0;
                   padding-left: 0;
                   border-left: none;
@@ -426,10 +426,10 @@ function MedarbeidereList({
             >
               <div
                 css={css`
-                  margin-top: var(--a-spacing-4);
+                  margin-top: var(--ax-space-16);
                   display: grid;
                   grid-template-columns: repeat(2, 1fr);
-                  gap: var(--a-spacing-4);
+                  gap: var(--ax-space-16);
                 `}
               >
                 {roboter.map((ressurs) => {
@@ -574,7 +574,7 @@ function DropdownLink({
     <Dropdown.Menu.GroupedList.Item
       as={SmartLink}
       css={css`
-        color: var(--a-text-action);
+        color: var(--nom-primary);
         text-decoration: underline;
         width: 100%;
 
@@ -594,13 +594,13 @@ function TopBorder() {
     <div
       css={css`
         display: flex;
-        gap: var(--a-spacing-3);
-        outline: 2px solid var(--a-lightblue-800);
+        gap: var(--ax-space-12);
+        outline: 2px solid var(--nom-primary);
         outline-offset: -1px;
-        background-color: var(--a-lightblue-800);
+        background-color: var(--nom-primary);
         border-radius: 4px 4px 0 0;
         color: white;
-        padding: var(--a-spacing-1) var(--a-spacing-3);
+        padding: var(--ax-space-4) var(--ax-space-12);
       `}
     >
       <img alt="" src={building} />

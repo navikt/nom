@@ -49,7 +49,7 @@ export function OrgEnhetInfo({
   displayKostnadssted?: boolean;
 }) {
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       {!!heading && (
         <Heading level="2" size="small">
           {heading}
@@ -59,12 +59,12 @@ export function OrgEnhetInfo({
       <div
         css={css`
           background-color: #deecef;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-xlarge);
+          padding: var(--ax-space-16) var(--ax-space-24);
+          border-radius: var(--ax-radius-12);
           display: grid;
         `}
       >
-        <VStack gap="2">
+        <VStack gap="space-8">
           {!!internalHeading && (
             <Heading level="1" size="xsmall">
               {internalHeading}
@@ -73,7 +73,7 @@ export function OrgEnhetInfo({
 
           <BodyShort
             css={css`
-              font-size: var(--a-font-size-xlarge);
+              font-size: var(--ax-font-size-xlarge);
             `}
           >
             <b>{orgEnhet.navn}</b>

@@ -31,6 +31,7 @@ export function ExternalLink({
           text-decoration: none;
         }
       `}
+      data-color="neutral"
       href={href}
       inlineText={inline}
       rel={rel}

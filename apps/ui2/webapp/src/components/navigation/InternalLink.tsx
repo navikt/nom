@@ -20,6 +20,8 @@ export function InternalLink({
     <Link
       className={className}
       css={css`
+        color: var(--nom-primary);
+
         width: fit-content;
 
         :hover {

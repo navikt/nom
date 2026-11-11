@@ -52,7 +52,7 @@ export function CreateRessursPage() {
         <Stepper
           activeStep={stepIdAsNumber}
           css={css`
-            margin-bottom: var(--a-spacing-8);
+            margin-bottom: var(--ax-space-32);
           `}
           interactive={false}
           orientation="horizontal"

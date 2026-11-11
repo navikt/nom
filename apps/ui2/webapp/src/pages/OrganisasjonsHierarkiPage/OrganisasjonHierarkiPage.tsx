@@ -33,8 +33,8 @@ function OrganisasjonHierarkiPageInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         css={css`
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: var(--a-spacing-4);
-          margin-left: var(--a-spacing-24);
+          gap: var(--ax-space-16);
+          margin-left: var(--ax-space-96);
         `}
       >
         {underEnheter.map((underEnhet, index) => (

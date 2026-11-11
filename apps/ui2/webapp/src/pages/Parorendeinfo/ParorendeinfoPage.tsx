@@ -107,7 +107,7 @@ export const ParorendeinfoPage = () => {
         <div
           css={css`
             width: fit-content;
-            margin: var(--a-spacing-8) auto auto;
+            margin: var(--ax-space-32) auto auto;
           `}
         >
           <Loader size="3xlarge" />
@@ -121,7 +121,7 @@ export const ParorendeinfoPage = () => {
       <StaticContentWrapper ressurs={ressurs}>
         <Alert
           css={css`
-            margin-top: var(--a-spacing-8);
+            margin-top: var(--ax-space-32);
           `}
           variant="error"
         >
@@ -169,7 +169,7 @@ function StaticContentWrapper({
             css={css`
               display: flex;
               width: fit-content;
-              margin-bottom: var(--a-spacing-4);
+              margin-bottom: var(--ax-space-16);
               color: #000;
               font-size: 1.2rem;
             `}
@@ -217,11 +217,11 @@ function ParorendeList({
   return (
     <VStack
       css={css`
-        margin-top: var(--a-spacing-8);
+        margin-top: var(--ax-space-32);
         display: flex;
         justify-content: space-between;
       `}
-      gap="4"
+      gap="space-16"
     >
       <div
         css={css`
@@ -259,14 +259,14 @@ function ParorendeList({
         )}
       </div>
 
-      <VStack gap="6">
+      <VStack gap="space-24">
         {kontaktinformasjon.map((kontaktinfo, index) => {
           return (
             <ContainerWithHighlightedTop
-              gap={6}
-              horizontalPadding={12}
+              gap={24}
+              horizontalPadding={48}
               key={index}
-              verticalPadding={8}
+              verticalPadding={32}
             >
               <div
                 css={css`
@@ -283,7 +283,7 @@ function ParorendeList({
 
                 <Heading
                   css={css`
-                    margin-left: var(--a-spacing-2);
+                    margin-left: var(--ax-space-8);
                   `}
                   level="2"
                   size="medium"
@@ -297,7 +297,7 @@ function ParorendeList({
                   display: flex;
                 `}
               >
-                <VStack gap="4">
+                <VStack gap="space-16">
                   {kontaktinfo.relasjon && <BodyShort>Relasjon:</BodyShort>}
                   {kontaktinfo.telefon && <BodyShort>Telefon:</BodyShort>}
                   {kontaktinfo.prioritet && <BodyShort>Prioritet:</BodyShort>}
@@ -305,9 +305,9 @@ function ParorendeList({
 
                 <VStack
                   css={css`
-                    margin-left: var(--a-spacing-4);
+                    margin-left: var(--ax-space-16);
                   `}
-                  gap="4"
+                  gap="space-16"
                 >
                   {kontaktinfo.relasjon && (
                     <BodyShort>
@@ -417,7 +417,7 @@ function ParorendeForm({
       await showModal(
         <BekreftModal
           content={
-            <VStack gap="2">
+            <VStack gap="space-8">
               <BodyLong>
                 Bekreft sletting av{" "}
                 <Pluralize
@@ -510,11 +510,11 @@ function ParorendeForm({
       <form onSubmit={handleSubmit(onValid)}>
         <VStack
           css={css`
-            margin-top: var(--a-spacing-8);
+            margin-top: var(--ax-space-32);
             display: flex;
             justify-content: space-between;
           `}
-          gap="4"
+          gap="space-16"
         >
           <div
             css={css`
@@ -544,12 +544,12 @@ function ParorendeForm({
             </div>
           </div>
 
-          <VStack gap="4">
+          <VStack gap="space-16">
             {fields.map((field, index) => (
               <ContainerWithHighlightedTop
-                horizontalPadding={10}
+                horizontalPadding={40}
                 key={index}
-                verticalPadding={6}
+                verticalPadding={24}
               >
                 <div
                   css={css`
@@ -561,7 +561,7 @@ function ParorendeForm({
                     css={css`
                       width: 100%;
                     `}
-                    gap="4"
+                    gap="space-16"
                   >
                     <TextField
                       {...register(`kontaktinfo.${index}.fornavn`)}
@@ -624,7 +624,7 @@ function ParorendeForm({
                 css={css`
                   width: fit-content;
                   float: right;
-                  margin-left: var(--a-spacing-4);
+                  margin-left: var(--ax-space-16);
                 `}
                 icon={<FloppydiskIcon title="a11y-title" />}
                 size="small"

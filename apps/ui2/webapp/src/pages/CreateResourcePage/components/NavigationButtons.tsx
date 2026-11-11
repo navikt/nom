@@ -5,9 +5,9 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 export const navigationButtonCss = css`
   display: grid;
   grid-template-columns: repeat(2, 150px);
-  gap: var(--a-spacing-4);
+  gap: var(--ax-space-16);
   justify-content: center;
-  margin-top: var(--a-spacing-10);
+  margin-top: var(--ax-space-40);
 
   button {
     max-width: 150px;

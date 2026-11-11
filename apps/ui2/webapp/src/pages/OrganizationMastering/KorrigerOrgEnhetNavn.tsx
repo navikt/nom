@@ -98,7 +98,7 @@ function FormView({
 
   return (
     <ModalProvider>
-      <ContainerWithHighlightedTop padding={6}>
+      <ContainerWithHighlightedTop padding={24}>
         <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <KorrigerOrgEnhetNavnForm
@@ -195,7 +195,7 @@ function KorrigerOrgEnhetNavnForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="9">
+        <VStack gap="space-36">
           <TextField
             {...methods.register("navn")}
             description="Enheten kan ikke ha likt navn som en annen enhet"
@@ -207,7 +207,7 @@ function KorrigerOrgEnhetNavnForm({
             css={css`
               display: flex;
               justify-content: end;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
             `}
           >
             <SmartLink href="/organisasjonsmastring">
@@ -241,7 +241,7 @@ function KorrigerOrgEnhetNavnModalContent({
   nyttNavn: string;
 }) {
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <div>
         <LabelWithValue
           label={"Opprinnelig navn"}

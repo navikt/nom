@@ -34,7 +34,7 @@ export function OrgEnhetKvittering({
           width: 70%;
           margin: auto;
         `}
-        gap="4"
+        gap="space-16"
       >
         <PanelLink
           href="/organisasjonsmastring"

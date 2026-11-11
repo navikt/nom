@@ -19,7 +19,7 @@ const outerDiv = css`
   min-height: ${headerHeight};
   width: 100%;
   place-content: center center;
-  border-bottom: 1px solid var(--a-lightblue-800);
+  border-bottom: 1px solid var(--nom-primary);
   padding-top: 1px;
 `;
 
@@ -41,7 +41,7 @@ export const NavHeader = () => {
           css={css`
             display: flex;
             align-content: center;
-            ${`margin-right: var(--a-spacing-${displayChristmasLogo ? "3" : "8"})`};
+            ${`margin-right: var(--ax-space-${displayChristmasLogo ? "12" : "32"})`};
           `}
           href="/"
           title="Hjem"
@@ -54,7 +54,7 @@ export const NavHeader = () => {
 
         <div
           css={css`
-            margin-right: var(--a-spacing-8);
+            margin-right: var(--ax-space-32);
           `}
         >
           <SearchBar />

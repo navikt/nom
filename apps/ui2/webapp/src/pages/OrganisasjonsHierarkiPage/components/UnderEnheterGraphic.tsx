@@ -8,10 +8,10 @@ export function UnderEnheterGraphic({ valgtEnhet }: { valgtEnhet: OrgEnhet }) {
       css={css`
         display: flex;
         align-items: flex-end;
-        gap: var(--a-spacing-2);
+        gap: var(--ax-space-8);
         margin-left: 65px;
-        font-weight: var(--a-font-weight-bold);
-        margin-bottom: var(--a-spacing-2);
+        font-weight: var(--ax-font-weight-bold);
+        margin-bottom: var(--ax-space-8);
       `}
     >
       <div

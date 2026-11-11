@@ -189,7 +189,7 @@ export function TerminateResourcePage() {
                     at vedkommende slutter.
                   </Alert>
                 )}
-                <HStack gap="8" justify="end">
+                <HStack gap="space-32" justify="end">
                   <Button
                     onClick={() =>
                       navigate({ params: { id }, to: "/ressurs/$id" })
@@ -257,9 +257,9 @@ function SluttDatoPicker() {
 
       <Button
         css={css`
-          margin-left: var(--a-spacing-8);
-          margin-top: var(--a-spacing-10);
-          height: var(--a-spacing-8);
+          margin-left: var(--ax-space-32);
+          margin-top: var(--ax-space-40);
+          height: var(--ax-space-32);
         `}
         onClick={() => {
           sluttDatoDatepicker.setSelected(todayWithoutTimezone());
@@ -276,7 +276,7 @@ function SluttDatoPicker() {
 
 function ModalInnholdFremtiden({ navn, dato }: { navn: string; dato: string }) {
   return (
-    <HStack gap="6">
+    <HStack gap="space-24">
       <BodyLong>
         Du er nå i ferd med å sette medarbeiderens sluttdato til <b>{dato}</b>.
       </BodyLong>
@@ -301,7 +301,7 @@ function ModalInnholdFremtiden({ navn, dato }: { navn: string; dato: string }) {
 function ModalInnholdFortiden({ navn }: { navn: string }) {
   return (
     <Alert variant="warning">
-      <HStack gap="6">
+      <HStack gap="space-24">
         <BodyLong>
           Du er nå i ferd med å sette medarbeiderens sluttdato til dagens dato
           eller tidligere.

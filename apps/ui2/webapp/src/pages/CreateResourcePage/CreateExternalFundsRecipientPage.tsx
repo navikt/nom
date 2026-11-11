@@ -7,7 +7,6 @@ import {
   Button,
   CopyButton,
   HStack,
-  Loader,
   Search,
 } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -113,7 +112,7 @@ function ExternalFundsRecipientForm() {
         description={
           <strong
             css={css`
-              color: var(--a-text-default);
+              color: var(--ax-text-neutral);
             `}
           >
             Fyll inn fødselsnummer/D-nummer, så finner vi personen i
@@ -217,7 +216,7 @@ function ShowPreviousNavident(props: { navIdent: string }) {
       <BodyShort size={"large"} weight={"semibold"}>
         Fant eksisterende navident
       </BodyShort>
-      <Box paddingBlock={"4"}>
+      <Box paddingBlock={"space-16"}>
         <HStack align={"center"}>
           <BodyShort size={"large"} weight={"semibold"}>
             {props.navIdent}
@@ -245,10 +244,10 @@ function ShowError(props: {
       <BodyShort size={"large"} weight={"semibold"}>
         {props.errorTitle}
       </BodyShort>
-      <Box paddingBlock={"4"}>
+      <Box paddingBlock={"space-16"}>
         <Box>{props.children}</Box>
         {props.reset && (
-          <Box paddingBlock={"4"}>
+          <Box paddingBlock={"space-16"}>
             <Button onClick={props.reset} variant={"secondary"}>
               Forkast feilmelding
             </Button>
@@ -265,7 +264,7 @@ function ShowCreatedNavIdent(props: { navIdent: string }) {
       <BodyShort size={"large"} weight={"semibold"}>
         Navident opprettet
       </BodyShort>
-      <Box paddingBlock={"4"}>
+      <Box paddingBlock={"space-16"}>
         <BodyLong>Har opprettet navident:</BodyLong>
         <HStack align={"center"}>
           <BodyShort size={"large"} weight={"semibold"}>

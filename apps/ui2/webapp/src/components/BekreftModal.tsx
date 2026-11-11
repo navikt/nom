@@ -26,7 +26,7 @@ export function BekreftModal({
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-6);
+        padding: var(--ax-space-24);
         border-radius: 0;
       `}
       header={{ heading: heading, closeButton: false }}

@@ -80,7 +80,7 @@ export function Masseflytting() {
           css={css`
             display: flex;
             width: fit-content;
-            margin-bottom: var(--a-spacing-4);
+            margin-bottom: var(--ax-space-16);
             color: #000;
           `}
           href={`/org/${id}`}
@@ -312,19 +312,19 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <OrgEnhetInfo orgEnhet={orgEnhet} internalHeading="Flytt fra" />
 
       <VStack
         css={css`
           background-color: #deecef;
-          padding: var(--a-spacing-4) var(--a-spacing-6);
-          border-radius: var(--a-border-radius-large);
+          padding: var(--ax-space-16) var(--ax-space-24);
+          border-radius: var(--ax-radius-8);
           display: grid;
         `}
-        gap="4"
+        gap="space-16"
       >
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Heading level="1" size="xsmall">
             Flytt til
           </Heading>
@@ -369,7 +369,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
           <Button
             css={css`
-              margin-left: var(--a-spacing-4);
+              margin-left: var(--ax-space-16);
             `}
             disabled={valgteRessurser.length === 0 || !masseflyttingTilOrgEnhet}
             onClick={() => {
@@ -390,7 +390,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
 
       <div
         css={css`
-          margin-left: var(--a-spacing-2);
+          margin-left: var(--ax-space-8);
           display: flex;
         `}
       >
@@ -400,7 +400,7 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           <div
             css={css`
               display: flex;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
             `}
           >
             <Checkbox
@@ -442,7 +442,10 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           padding: 6px;
           border-radius: 5px;
 
-          --ac-table-row-border: #071a3636;
+          th,
+          td {
+            border-bottom-color: #071a3636;
+          }
         `}
         onSortChange={(sortKey) => handleSort(sortKey)}
         sort={sort}
@@ -499,7 +502,9 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
           {sortedRessurser.map((ressurs) => (
             <Table.Row
               css={css`
-                --ac-table-row-border: none;
+                > td {
+                  border-bottom: none;
+                }
                 height: 48px;
                 border-width: 0 0 1px;
               `}
@@ -540,13 +545,13 @@ function MasseflyttingTable({ orgEnhet }: { orgEnhet: OrgEnhet | undefined }) {
         <div
           css={css`
             display: block;
-            margin-top: var(--a-spacing-8);
+            margin-top: var(--ax-space-32);
             justify-items: center;
           `}
         >
           <BodyShort
             css={css`
-              font-size: var(--a-font-size-heading-2xlarge);
+              font-size: var(--ax-font-size-heading-2xlarge);
               font-weight: bold;
             `}
           >
@@ -609,7 +614,7 @@ function MasseflyttingBekreftModal({
   return (
     <Modal
       css={css`
-        padding: var(--a-spacing-6);
+        padding: var(--ax-space-24);
         border-radius: 0;
       `}
       header={{ heading: "Bekreft flytting", closeButton: false }}
@@ -636,10 +641,10 @@ function MasseflyttingBekreftModal({
         <VStack
           css={css`
             max-height: 500px;
-            background: var(--a-grayalpha-100);
-            margin-top: var(--a-spacing-4);
+            background: var(--ax-bg-neutral-moderateA);
+            margin-top: var(--ax-space-16);
           `}
-          gap="1"
+          gap="space-4"
           overflow="auto"
         >
           {valgteRessurser.map((navident) => {
@@ -667,7 +672,7 @@ function MasseflyttingBekreftModal({
         </VStack>
         <BodyShort
           css={css`
-            margin-top: var(--a-spacing-4);
+            margin-top: var(--ax-space-16);
           `}
         >
           Eksisterende tilganger blir {beholdTilganger ? "" : <b>ikke</b>}{" "}
@@ -734,7 +739,7 @@ function MasseflyttingResponseAlert({
 
   return (
     <Alert variant="warning">
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Heading size="small">
           Flytting av {data?.feiledeFlyttinger.length}{" "}
           <Pluralize

@@ -87,7 +87,7 @@ const router = createRouter({
     <Box
       css={css`
         text-align: center;
-        padding: var(--a-spacing-8);
+        padding: var(--ax-space-32);
       `}
     >
       <Heading level="1" size="large" spacing>

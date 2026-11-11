@@ -51,9 +51,9 @@ export function OrgtilknytningTimeline({
     <div
       css={css`
         background: #fff;
-        padding: var(--a-spacing-6) var(--a-spacing-4);
+        padding: var(--ax-space-24) var(--ax-space-16);
         border-radius: 8px;
-        border: 1px solid var(--a-border-subtle);
+        border: 1px solid var(--ax-border-neutral-subtleA);
       `}
     >
       <Timeline
@@ -118,7 +118,7 @@ function DagligOppfolgingIcon() {
       <CheckmarkCircleFillIcon />
       <span
         css={css`
-          margin-left: var(--a-spacing-2);
+          margin-left: var(--ax-space-8);
         `}
       >
         <b>Daglig oppfølging</b>

@@ -185,12 +185,15 @@ function KontaktpersonerTabellInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <Table
       css={css`
-        margin-top: var(--a-spacing-4);
+        margin-top: var(--ax-space-16);
         padding: 6px;
         border-radius: 5px;
         background-color: #fff;
 
-        --ac-table-row-border: #071a3636;
+        th,
+        td {
+          border-bottom-color: #071a3636;
+        }
       `}
       zebraStripes
     >

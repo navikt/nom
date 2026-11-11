@@ -59,7 +59,7 @@ function OrgEnhetTabell({
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
         `}
       >
         <Loader size="3xlarge" />
@@ -75,7 +75,10 @@ function OrgEnhetTabell({
         padding: 6px;
         border-radius: 5px;
 
-        --ac-table-row-border: #071a3636;
+        th,
+        td {
+          border-bottom-color: #071a3636;
+        }
       `}
       onSortChange={(sortKey) => handleSort(sortKey)}
       size="small"

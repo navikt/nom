@@ -11,8 +11,8 @@ export function PageBanner({ text }: { text: string }) {
         css={css`
           width: 100%;
           height: 78px;
-          background: var(--a-lightblue-800);
-          color: var(--a-white);
+          background: var(--nom-primary);
+          color: var(--ax-text-neutral-contrast);
           display: flex;
         `}
       >

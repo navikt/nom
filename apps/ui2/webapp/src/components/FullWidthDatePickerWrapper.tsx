@@ -11,11 +11,8 @@ export function FullWidthDatePickerWrapper({
       css={css`
         width: 100%;
 
-        .navds-date__wrapper {
-          width: 100%;
-        }
-
-        .navds-date__field-wrapper {
+        > div,
+        div:has(> input) {
           width: 100%;
         }
 

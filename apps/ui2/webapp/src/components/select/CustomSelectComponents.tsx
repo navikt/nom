@@ -14,13 +14,13 @@ import type { AsyncProps } from "react-select/async";
 import AsyncSelect from "react-select/async";
 
 const commonSelectCss = css`
-  border-radius: var(--a-border-radius-medium);
-  border: 1px solid var(--a-border-strong);
+  border-radius: var(--ax-radius-4);
+  border: 1px solid var(--ax-border-neutral-strong);
 
   width: 100%;
   height: 48px;
 
-  color: var(--a-gray-900);
+  color: var(--ax-text-neutral);
 
   > div {
     cursor: text;
@@ -28,8 +28,8 @@ const commonSelectCss = css`
   }
 
   :focus-within {
-    outline: none;
-    box-shadow: var(--a-shadow-focus);
+    outline: 3px solid var(--ax-border-focus);
+    outline-offset: 3px;
   }
 `;
 
@@ -59,15 +59,15 @@ const commonSelectOverwriteStyles = {
   }),
   dropdownIndicator: (base: CSSObjectWithLabel) => ({
     ...base,
-    color: "var(--a-gray-900)",
+    color: "var(--ax-text-neutral)",
   }),
   placeholder: (base: CSSObjectWithLabel) => ({
     ...base,
-    color: "var(--a-gray-900)",
+    color: "var(--ax-text-neutral)",
   }),
   noOptionsMessage: (base: CSSObjectWithLabel) => ({
     ...base,
-    color: "var(--a-gray-900)",
+    color: "var(--ax-text-neutral)",
   }),
 };
 
@@ -184,12 +184,11 @@ export function SelectLayoutWrapper({
 }) {
   return (
     <div
-      className="navds-form-field"
       css={[
         css`
           display: flex;
           flex-direction: column;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
         `,
         error && errorCss,
       ]}
@@ -197,7 +196,7 @@ export function SelectLayoutWrapper({
       <Label
         css={css`
           display: flex;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
           align-items: center;
         `}
         htmlFor={htmlFor}
@@ -209,11 +208,7 @@ export function SelectLayoutWrapper({
           </HelpText>
         ) : undefined}
       </Label>
-      {description && (
-        <BodyShort className="navds-form-field__description">
-          {description}
-        </BodyShort>
-      )}
+      {description && <BodyShort>{description}</BodyShort>}
       {children}
       {error && <ErrorMessage>{error.message}</ErrorMessage>}
     </div>
@@ -222,7 +217,7 @@ export function SelectLayoutWrapper({
 
 const errorCss = css`
   > div {
-    border-color: var(--a-border-danger);
-    box-shadow: 0 0 0 1px var(--a-border-danger);
+    border-color: var(--ax-border-danger-strong);
+    box-shadow: 0 0 0 1px var(--ax-border-danger-strong);
   }
 `;

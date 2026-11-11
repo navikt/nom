@@ -115,7 +115,7 @@ export function PersonOpplysninger({
           {harSluttet && (
             <Tag
               css={css`
-                margin-left: var(--a-spacing-4);
+                margin-left: var(--ax-space-16);
                 height: fit-content;
               `}
               size="medium"
@@ -132,7 +132,7 @@ export function PersonOpplysninger({
           css={css`
             display: grid;
             grid-template-columns: max-content 1fr;
-            gap: var(--a-spacing-2) var(--a-spacing-4);
+            gap: var(--ax-space-8) var(--ax-space-16);
           `}
         >
           <Type ressurs={ressurs} />
@@ -234,8 +234,8 @@ export function KortFortalt() {
   return (
     <Heading
       css={css`
-        margin-top: var(--a-spacing-8);
-        margin-bottom: var(--a-spacing-6);
+        margin-top: var(--ax-space-32);
+        margin-bottom: var(--ax-space-24);
       `}
       level="2"
       size="small"
@@ -409,7 +409,7 @@ export function DagligLeder({ ressurs }: { ressurs: Ressurs }) {
       <div
         css={css`
           display: flex;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
         `}
       >
         <ReactRouterLink

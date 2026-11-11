@@ -98,7 +98,7 @@ export const OpprettOrgEnhet = () => {
           <KvitteringView opprettResponse={opprettResponse} />
         ) : (
           <ModalProvider>
-            <ContainerWithHighlightedTop padding={6}>
+            <ContainerWithHighlightedTop padding={24}>
               {!id ? (
                 <OrgKartView />
               ) : (
@@ -130,7 +130,7 @@ function OrgKartView() {
         css={css`
           display: flex;
           justify-content: end;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         <SmartLink href="/organisasjonsmastring">
@@ -282,8 +282,8 @@ function OpprettOrgEnhetForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
-        <VStack gap="9">
-          <VStack gap="4">
+        <VStack gap="space-36">
+          <VStack gap="space-16">
             <Heading level="2" size="medium">
               Om enheten
             </Heading>
@@ -305,7 +305,7 @@ function OpprettOrgEnhetForm({
             <FormDateWrapper name="gyldigFom" />
 
             <VStack
-              gap="4"
+              gap="space-16"
               css={css`
                 width: 50%;
               `}
@@ -331,7 +331,7 @@ function OpprettOrgEnhetForm({
             css={css`
               display: flex;
               justify-content: end;
-              gap: var(--a-spacing-4);
+              gap: var(--ax-space-16);
             `}
           >
             <SmartLink href="/opprett-organisasjonsenhet">
@@ -416,7 +416,7 @@ function OpprettOrgEnhetModalContent({
   );
 
   return (
-    <HGrid columns="max-content max-content" gap="2 2">
+    <HGrid columns="max-content max-content" gap="space-8 space-8">
       <LabelWithValue split label="Navn" value={request.navn} />
       <LabelWithValue
         split

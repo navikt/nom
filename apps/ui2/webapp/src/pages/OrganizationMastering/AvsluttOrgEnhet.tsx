@@ -122,7 +122,7 @@ function FormView({
 }) {
   return (
     <ModalProvider>
-      <ContainerWithHighlightedTop padding={6}>
+      <ContainerWithHighlightedTop padding={24}>
         <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <AvsluttOrgEnhetForm
@@ -320,7 +320,7 @@ function AvsluttOrgEnhetForm({
         css={css`
           display: flex;
           justify-content: end;
-          gap: var(--a-spacing-4);
+          gap: var(--ax-space-16);
         `}
       >
         <SmartLink href="/organisasjonsmastring">
@@ -351,7 +351,7 @@ function AvslutningTillattStatus({
   loading: boolean;
 }) {
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Heading level="2" size="medium">
         Avhengigheter
       </Heading>
@@ -381,7 +381,7 @@ function AvslutningTillatStatusInner({
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: var(--a-spacing-2);
+          gap: var(--ax-space-8);
         `}
       >
         <Loader size="3xlarge" />
@@ -399,9 +399,9 @@ function AvslutningTillatStatusInner({
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       <Alert variant="warning">
-        <VStack gap="2">
+        <VStack gap="space-8">
           <Heading level="3" size="small">
             Det er avhengigheter til denne enheten som går utover valgt dato
           </Heading>
@@ -413,7 +413,7 @@ function AvslutningTillatStatusInner({
         </VStack>
       </Alert>
 
-      <VStack gap="8">
+      <VStack gap="space-32">
         <RessursAvhengigheter ressursAvhengigheter={ressursAvhengigheter} />
 
         <OrgEnhetAvhengigheter orgEnhetAvhengigheter={orgEnhetAvhengigheter} />
@@ -432,7 +432,7 @@ function RessursAvhengigheter({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <Heading level="3" size="small">
         Disse medarbeiderne må flyttes med dato før enhetens sluttdato:
       </Heading>
@@ -443,7 +443,10 @@ function RessursAvhengigheter({
           padding: 6px;
           border-radius: 5px;
 
-          --ac-table-row-border: #071a3636;
+          th,
+          td {
+            border-bottom-color: #071a3636;
+          }
         `}
         size="small"
         zebraStripes
@@ -503,7 +506,7 @@ function OrgEnhetAvhengigheter({
   }
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <Heading level="3" size="small">
         Disse organisasjonsenhetene må flyttes med dato før enhetens sluttdato:
       </Heading>
@@ -514,7 +517,10 @@ function OrgEnhetAvhengigheter({
           padding: 6px;
           border-radius: 5px;
 
-          --ac-table-row-border: #071a3636;
+          th,
+          td {
+            border-bottom-color: #071a3636;
+          }
         `}
         size="small"
         zebraStripes

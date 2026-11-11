@@ -82,7 +82,7 @@ export const OrganisasjonMastringForside = () => {
       <PageBanner text="Administrering av organisasjonsenheter" />
 
       <ContentWrapper>
-        <VStack gap="12">
+        <VStack gap="space-48">
           <AdministreringAvOrgEnheterSeksjon />
 
           <MineOrgEnheterSeksjon />
@@ -96,8 +96,8 @@ function AdministreringAvOrgEnheterSeksjon() {
   const hasAdminAccess = useHasAdminAccess();
 
   return (
-    <VStack gap="6">
-      <HGrid columns="50% 50%" gap="4">
+    <VStack gap="space-24">
+      <HGrid columns="50% 50%" gap="space-16">
         <NavigationButton
           disabled={!hasAdminAccess}
           href="/opprett-organisasjonsenhet"
@@ -121,7 +121,7 @@ function AdministreringAvOrgEnheterSeksjon() {
 
 function ExternalLinkCards() {
   return (
-    <HGrid columns="auto auto" gap="4">
+    <HGrid columns="auto auto" gap="space-16">
       <ExternalLinkCard description="Gå til Mine tilganger" href="">
         Sett opp tilganger til en organisasjonsenhet
       </ExternalLinkCard>
@@ -153,9 +153,9 @@ function NavigationButton({
     <Button
       css={css`
         justify-content: space-between;
-        padding: var(--a-spacing-5);
+        padding: var(--ax-space-20);
         border-radius: 10px;
-        background: var(--a-white);
+        background: var(--ax-bg-default);
         width: 100%;
       `}
       disabled={disabled}
@@ -167,8 +167,8 @@ function NavigationButton({
         css={css`
           display: flex;
           width: 100%;
-          font-size: var(--a-font-size-heading-small);
-          line-height: var(--a-font-line-height-heading-small);
+          font-size: var(--ax-font-size-heading-small);
+          line-height: var(--ax-font-line-height-heading-small);
         `}
       >
         {children}
@@ -208,7 +208,7 @@ function ExternalLinkCard({
   return (
     <LinkCard
       css={css`
-        background: var(--a-surface-action-subtle);
+        background: var(--ax-bg-accent-soft);
       `}
     >
       <LinkCard.Title>
@@ -276,7 +276,7 @@ function MineOrgEnheterSeksjon() {
     }) ?? [];
 
   return (
-    <VStack gap="6">
+    <VStack gap="space-24">
       {visPerspektivSearch && (
         <>
           <div
@@ -299,7 +299,7 @@ function MineOrgEnheterSeksjon() {
           {!!valgtRessurs && (
             <BodyShort
               css={css`
-                margin-bottom: var(--a-spacing-3);
+                margin-bottom: var(--ax-space-12);
               `}
               size="large"
             >
@@ -348,7 +348,7 @@ function MineOrgEnheter({ toppnodeIder }: { toppnodeIder: string[] }) {
   }
 
   return (
-    <VStack gap="4">
+    <VStack gap="space-16">
       {sorterteOrgEnheter?.map((orgEnhet) => (
         <UtvidOrgEnhetKort
           key={orgEnhet.id}
@@ -408,13 +408,13 @@ function UtvidOrgEnhetKort({
         css={css`
           background: #eef6fc;
           border: 2px solid #457c9d;
-          border-radius: var(--a-border-radius-large);
-          padding: var(--a-spacing-4) var(--a-spacing-6);
+          border-radius: var(--ax-radius-8);
+          padding: var(--ax-space-16) var(--ax-space-24);
           display: block;
           cursor: ${!expanded ? "pointer" : "unset"};
 
           :hover {
-            background: ${!expanded ? "var(--a-surface-action-subtle-hover)" : "#eef6fc"};
+            background: ${!expanded ? "var(--nom-secondary-hover)" : "#eef6fc"};
           }
         `}
         onClick={() => {
@@ -428,7 +428,7 @@ function UtvidOrgEnhetKort({
             width: 100%;
             display: flex;
             justify-content: space-between;
-            margin-bottom: ${expanded ? "var(--a-spacing-4)" : "0"};
+            margin-bottom: ${expanded ? "var(--ax-space-16)" : "0"};
           `}
         >
           <div>
@@ -455,7 +455,7 @@ function UtvidOrgEnhetKort({
         </div>
 
         {expanded && (
-          <VStack gap="4">
+          <VStack gap="space-16">
             <Divider noMargins />
 
             <EnhetKontekstInfo
@@ -465,7 +465,7 @@ function UtvidOrgEnhetKort({
               orgEnhet={orgEnhet}
             />
 
-            <HStack gap="4">
+            <HStack gap="space-16">
               <LabelWithValue
                 label="Startdato"
                 value={formatDisplayDate(orgEnhet.gyldigFom)}
@@ -487,7 +487,7 @@ function UtvidOrgEnhetKort({
                 css={css`
                   margin-left: auto;
                 `}
-                gap="2"
+                gap="space-8"
               >
                 <SmartLink
                   href={`/korriger-navn-organisasjonsenhet?id=${orgEnhet.id}`}
@@ -560,7 +560,7 @@ function UtvidOrgEnhetKort({
       {!!sorterteOrgEnheter && sorterteOrgEnheter?.length > 0 && (
         <div
           css={css`
-            margin-left: var(--a-spacing-8);
+            margin-left: var(--ax-space-32);
             display: flex;
           `}
         >
@@ -569,11 +569,11 @@ function UtvidOrgEnhetKort({
               css={css`
                 width: 100%;
               `}
-              gap="0"
+              gap="space-0"
             >
               <div
                 css={css`
-                  height: var(--a-spacing-2);
+                  height: var(--ax-space-8);
                   border-left: 4px solid #457c9d;
                 `}
               />
@@ -592,8 +592,8 @@ function UtvidOrgEnhetKort({
                   <div
                     css={css`
                       width: 100%;
-                      margin-top: var(--a-spacing-2);
-                      margin-bottom: var(--a-spacing-2);
+                      margin-top: var(--ax-space-8);
+                      margin-bottom: var(--ax-space-8);
                     `}
                   >
                     <UtvidOrgEnhetKort orgEnhet={underliggendeOrgEnhet} />
@@ -651,13 +651,13 @@ function HvemKanRedigereSection({
   );
 
   return (
-    <VStack gap="2">
+    <VStack gap="space-8">
       <Heading size="small" level="4">
         Administratorer for enheten:
       </Heading>
 
-      <HStack gap="8">
-        <VStack gap="2">
+      <HStack gap="space-32">
+        <VStack gap="space-8">
           <BodyShort>
             <b>Leder</b>
           </BodyShort>
@@ -681,7 +681,7 @@ function HvemKanRedigereSection({
           )}
         </VStack>
 
-        <VStack gap="2">
+        <VStack gap="space-8">
           <BodyShort>
             <b>Lederstøtte</b>
           </BodyShort>
@@ -770,7 +770,7 @@ function UnderenhetListIllustration({
               left: 44px;
               background: #eef6fc;
               border: 2px solid #457c9d;
-              border-radius: var(--a-border-radius-large);
+              border-radius: var(--ax-radius-8);
               z-index: 1;
             `}
           />
@@ -783,7 +783,7 @@ function UnderenhetListIllustration({
               left: 30px;
               background: #eef6fc;
               border: 2px solid #457c9d;
-              border-radius: var(--a-border-radius-large);
+              border-radius: var(--ax-radius-8);
               z-index: 2;
             `}
           />
@@ -791,10 +791,10 @@ function UnderenhetListIllustration({
           <div
             css={css`
               position: relative;
-              padding: var(--a-spacing-1) var(--a-spacing-4);
+              padding: var(--ax-space-4) var(--ax-space-16);
               background: #eef6fc;
               border: 2px solid #457c9d;
-              border-radius: var(--a-border-radius-large);
+              border-radius: var(--ax-radius-8);
               z-index: 3;
             `}
           >
@@ -807,8 +807,8 @@ function UnderenhetListIllustration({
             >
               <BodyShort
                 css={css`
-                  font-size: var(--a-font-size-heading-small);
-                  font-weight: var(--a-font-weight-bold);
+                  font-size: var(--ax-font-size-heading-small);
+                  font-weight: var(--ax-font-weight-bold);
                 `}
               >
                 {`+ ${length} underenhet${length > 1 ? "er" : ""}`}
