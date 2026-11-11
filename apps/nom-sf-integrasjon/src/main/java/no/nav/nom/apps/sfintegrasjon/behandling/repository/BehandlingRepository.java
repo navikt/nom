@@ -30,4 +30,38 @@ public interface BehandlingRepository extends JpaRepository<Behandling, Long> {
                 """, nativeQuery = true
     )
     List<Behandling> getLatestNonProcessedBehandlinger();
+
+    @Query(
+        value = """
+                WITH siste_status AS (
+                    SELECT DISTINCT ON (behandlings_id) *
+                    FROM behandling
+                    WHERE outbox_sporings_id is null
+                    order by behandlings_id, behandling_tidspunkt DESC, id DESC
+                )
+                SELECT *
+                FROM siste_status
+                WHERE status = 'MOTTATT'
+                LIMIT 1000
+                """, nativeQuery = true
+    )
+    List<Behandling> getIkkeProsesserteBehandlinger();
+
+    @Query(
+        value = """
+                WITH siste_status AS (
+                    SELECT DISTINCT ON (behandlings_id) *
+                    FROM behandling
+                    WHERE outbox_sporings_id is null
+                    order by behandlings_id, behandling_tidspunkt DESC, id DESC
+                )
+                SELECT *
+                FROM siste_status
+                WHERE status = 'PROSESSERT'
+                LIMIT 1000
+                """, nativeQuery = true
+    )
+    List<Behandling> getProsesserteBehandlinger();
+
+
 }

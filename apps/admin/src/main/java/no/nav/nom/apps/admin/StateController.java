@@ -1,5 +1,6 @@
 package no.nav.nom.apps.admin;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.admin.dto.OrganiseringStateSearchParams;
 import no.nav.nom.apps.admin.dto.OrgenhetStateSearchParams;
 import no.nav.nom.apps.admin.dto.OrgtilknytningStateSearchParams;
@@ -37,6 +38,7 @@ import static no.nav.nom.apps.admin.utils.safeSubList;
 @RestController
 @RequestMapping("/states")
 public class StateController {
+    public static final String UNLEASH_BEHANDLE_ALLE_SOM_MASTRET_I_NOM = "nom-api.behandle_alle_ressurser_som_mastret_i_nom";
 
     private static final int NUMBER_OF_EVENTS = 500;
 
@@ -46,7 +48,7 @@ public class StateController {
     private final OrganiseringStateRepository organiseringStateRepository;
     private final MasteredRessursStateRepository masteredRessursStateRepository;
     private final OrgEnhetLederStateRepository orgEnhetLederStateRepository;
-
+    private final Unleash unleash;
 
     public StateController(
         RessursStateRepository ressursStateRepository,
@@ -54,7 +56,7 @@ public class StateController {
         OrgtilknytningStateRepository orgtilknytningStateRepository,
         OrganiseringStateRepository organiseringStateRepository,
         MasteredRessursStateRepository masteredRessursStateRepository,
-        OrgEnhetLederStateRepository orgEnhetLederStateRepository
+        OrgEnhetLederStateRepository orgEnhetLederStateRepository, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -62,6 +64,7 @@ public class StateController {
         this.organiseringStateRepository = organiseringStateRepository;
         this.masteredRessursStateRepository = masteredRessursStateRepository;
         this.orgEnhetLederStateRepository = orgEnhetLederStateRepository;
+        this.unleash = unleash;
     }
 
     @GetMapping(value = "/ressurs")
@@ -108,6 +111,9 @@ public class StateController {
 
     @GetMapping(value = "/nom-mastered")
     public List<String> getMasteredNavidentsIds() {
+        if (unleash.isEnabled(UNLEASH_BEHANDLE_ALLE_SOM_MASTRET_I_NOM, false)) {
+            return ressursStateRepository.getAll().stream().map(RessursState::navident).toList();
+        }
         return masteredRessursStateRepository.navidenter();
     }
 
@@ -115,6 +121,16 @@ public class StateController {
     public List<MasteredRessursDTO> getMasteredNavidents(
         @RequestParam(required = false) String navident,
         @RequestParam(required = false, defaultValue = "0") int fromOffset) {
+
+        if (unleash.isEnabled(UNLEASH_BEHANDLE_ALLE_SOM_MASTRET_I_NOM, false)) {
+            var events =  ressursStateRepository.getAll().stream()
+                .filter(ressursState -> isNull(navident) || ressursState.navident().equals(navident))
+                .map(ressursState -> MasteredRessursDTO.from(ressursState.navident(), ressursState.startdato().atStartOfDay()))
+                .toList();
+
+            return safeSubList(events, fromOffset, fromOffset + NUMBER_OF_EVENTS);
+        }
+
         var events =  masteredRessursStateRepository.getMasteredNavidenter().entrySet().stream()
             .filter(entry -> isNull(navident) || entry.getKey().equals(navident))
             .map(masteredEntry -> MasteredRessursDTO.from(masteredEntry.getKey(), masteredEntry.getValue()))

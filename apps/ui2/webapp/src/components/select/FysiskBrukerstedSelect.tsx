@@ -13,11 +13,11 @@ import type { FysiskBrukersted, Tilgangsenhet } from "~/types/api-models";
 import { formatDropdownFysiskBrukersted } from "~/utils";
 
 export function FysiskBrukerstedSelectFormPart({
-  name = "fysiskBrukerstedNr",
+  name,
   description,
   helpText,
 }: {
-  name?: string;
+  name: string;
   description?: string;
   helpText?: string;
 }) {

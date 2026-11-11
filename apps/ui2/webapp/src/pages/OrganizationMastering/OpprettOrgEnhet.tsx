@@ -30,7 +30,10 @@ import {
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
-import { FormRessursSearchWrapper } from "~/components/forms/FormComponents";
+import {
+  FormRessursSearchWrapper,
+  FormTilgangsenhetSelectWrapper,
+} from "~/components/forms/FormComponents";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
@@ -40,7 +43,6 @@ import {
 } from "~/components/modalProvider/ModalProvider";
 import { SmartLink } from "~/components/navigation/SmartLink";
 import { PageBanner } from "~/components/PageBanner";
-import { TilgangsenhetSelect } from "~/components/select/FysiskBrukerstedSelect";
 import { formatDateWithoutTimezone } from "~/customUtils/dateUtils";
 import { useNavToppnodeOrgEnhetId } from "~/customUtils/environmentUtils";
 import { showToast } from "~/hooks/showToast";
@@ -54,7 +56,7 @@ import {
   KostnadsstedSelectFormPart,
   NomNivaaSelect,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
   OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
@@ -176,9 +178,10 @@ function FormView({
 
   return (
     <>
-      <OrgEnhetInfoWrapper
+      <OrgEnhetInfo
         heading="Enheten blir opprettet under"
         orgEnhet={overliggendeOrgEnhet}
+        displayKostnadssted
       />
 
       <OpprettOrgEnhetForm
@@ -301,38 +304,27 @@ function OpprettOrgEnhetForm({
 
             <FormDateWrapper name="gyldigFom" />
 
-            <div
+            <VStack
+              gap="4"
               css={css`
                 width: 50%;
               `}
             >
               <OrgEnhetTypeSelect name="orgEnhetsType" fullWidth />
-            </div>
 
-            <div
-              css={css`
-                width: 50%;
-              `}
-            >
               <NomNivaaSelect name="nomNivaa" fullWidth />
-            </div>
 
-            <FormTilgangsenhetSelectWrapper
-              name="tilgangsenhetId"
-              tilgangsenheter={alleTilgangsenheter}
-            />
+              <FormTilgangsenhetSelectWrapper
+                name="tilgangsenhetId"
+                tilgangsenheter={alleTilgangsenheter}
+              />
 
-            <div
-              css={css`
-                width: 50%;
-              `}
-            >
               <KostnadsstedSelectFormPart
                 label="Kostnadssted"
                 name="kostnadsstedId"
                 kostnadssteder={alleKostnadssteder}
               />
-            </div>
+            </VStack>
           </VStack>
 
           <div
@@ -394,34 +386,6 @@ function FormDateWrapper({ name }: { name: string }) {
         label="Enheten er gyldig fra og med"
       />
     </DatePicker>
-  );
-}
-
-function FormTilgangsenhetSelectWrapper({
-  name,
-  tilgangsenheter,
-}: {
-  name: string;
-  tilgangsenheter: Tilgangsenhet[];
-}) {
-  const { field, fieldState } = useController({
-    name,
-  });
-
-  return (
-    <div
-      css={css`
-        width: 50%;
-      `}
-    >
-      <TilgangsenhetSelect
-        error={fieldState.error}
-        label="Tilgangsenhet"
-        tilgangsenheter={tilgangsenheter}
-        value={field.value}
-        onChange={field.onChange}
-      />
-    </div>
   );
 }
 

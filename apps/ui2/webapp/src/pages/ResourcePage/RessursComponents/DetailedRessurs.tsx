@@ -19,7 +19,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { subMonths } from "date-fns";
-import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
 import {
@@ -67,6 +66,8 @@ import { PersonOpplysninger } from "~/pages/ResourcePage/RessursComponents/Perso
 import { blueTopBorder } from "~/resources/NomStyles";
 import type {
   FysiskBrukersted,
+  OrgEnhet,
+  OrgEnhetLederResponse,
   OrgtilknytningState,
   Ressurs,
 } from "~/types/api-models";
@@ -767,24 +768,6 @@ function OrganisationHierarchyTree({
 }
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
-  const orgEnheterLedetAvRessurs =
-    useQuery({
-      queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
-      queryFn: () => getOrgEnheterLedetAvNavIdent.queryFn(ressurs.navident),
-      select: (orgenhetLederList) =>
-        orgenhetLederList.filter((orgEnhet) => {
-          if (!orgEnhet.sluttdato) {
-            return true;
-          }
-          const isoFormatRoughlyOk = /^\d{4}-\d{2}-\d{2}$/.test(
-            orgEnhet.sluttdato,
-          );
-          return (
-            isoFormatRoughlyOk && orgEnhet.sluttdato >= new Date().toISOString()
-          );
-        }),
-    }).data ?? [];
-
   const eksterneLovnodeIder = useEksterneOrgEnhetIder();
 
   const eksterneOrgEnheterQuery = useQuery({
@@ -792,39 +775,43 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getOrgEnhetList.queryFn(eksterneLovnodeIder),
   });
 
-  const eksterneOrgEnheter = eksterneOrgEnheterQuery.data;
+  const orgEnheterLedetAvRessursQuery = useQuery({
+    queryKey: getOrgEnheterLedetAvNavIdent.queryKey(ressurs.navident),
+    queryFn: () => getOrgEnheterLedetAvNavIdent.queryFn(ressurs.navident),
+  });
 
-  const skjulteEksterneOrgEnheter = [
-    ...eksterneLovnodeIder,
-    ...(
-      eksterneOrgEnheter?.map((orgEnhet) => orgEnhet.overordnetEnhetId) ?? []
-    ).filter((id) => !!id),
+  const filtrerteLederskap = getFiltrerteLederskap(
+    eksterneLovnodeIder,
+    eksterneOrgEnheterQuery.data ?? [],
+    orgEnheterLedetAvRessursQuery.data ?? [],
+  );
+
+  const orgEnheterIder = [
+    ...new Set(
+      filtrerteLederskap
+        .map((lederskap) => lederskap.orgEnhetId)
+        .filter((id): id is string => !!id),
+    ),
   ];
 
-  const orgEnheterLedetAvRessursFiltrert = orgEnheterLedetAvRessurs
-    .filter(
-      (orgEnhet) =>
-        !skjulteEksterneOrgEnheter.includes(orgEnhet?.orgEnhetId ?? ""),
-    )
-    .filter((orgEnhet) =>
-      isPeriodActive(orgEnhet?.startdato ?? "", orgEnhet.sluttdato),
-    );
+  const orgEnheterQuery = useQuery({
+    queryKey: getOrgEnhetList.queryKey(orgEnheterIder),
+    queryFn: () => getOrgEnhetList.queryFn(orgEnheterIder),
+    enabled: orgEnheterIder.length > 0,
+  });
 
-  if (orgEnheterLedetAvRessursFiltrert.length === 0) {
+  const sorterteOrgEnheter = getSorterteOrgEnheter(
+    filtrerteLederskap,
+    orgEnheterQuery.data ?? [],
+  );
+
+  if (
+    sorterteOrgEnheter.length === 0 ||
+    eksterneOrgEnheterQuery.isLoading ||
+    orgEnheterLedetAvRessursQuery.isLoading
+  ) {
     return;
   }
-
-  /*
-     Leder høyt oppe i hierarkiet er ofte leder i flere "like" orgEnheter.
-     Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
-     Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
-    */
-  const unikeOrgEnheter = uniqBy(
-    orgEnheterLedetAvRessursFiltrert,
-    (orgEnhet) => orgEnhet.orgEnhetNavn,
-  ).sort(
-    (a, b) => a.orgEnhetNavn?.localeCompare(b.orgEnhetNavn ?? "", "no") ?? 0,
-  );
 
   return (
     <>
@@ -842,7 +829,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           gap: var(--ax-space-8);
         `}
       >
-        {unikeOrgEnheter.map((orgEnhet) => (
+        {sorterteOrgEnheter.map((orgEnhet) => (
           <SmartLink
             href={`/org/${orgEnhet.orgEnhetId}`}
             key={orgEnhet.orgEnhetId}
@@ -1152,4 +1139,64 @@ function TerminateButton({ ressursNavIdent }: { ressursNavIdent: string }) {
   }
 
   return;
+}
+
+function getFiltrerteLederskap(
+  eksterneLovnodeIder: string[],
+  eksterneOrgEnheter: OrgEnhet[],
+  orgEnheterLedetAvRessurs: OrgEnhetLederResponse[],
+): OrgEnhetLederResponse[] {
+  const skjulteEksterneOrgEnheter = new Set([
+    ...eksterneLovnodeIder,
+    ...eksterneOrgEnheter
+      .map((orgEnhet) => orgEnhet.overordnetEnhetId)
+      .filter((id): id is string => !!id),
+  ]);
+
+  return orgEnheterLedetAvRessurs.filter(
+    (orgEnhet) =>
+      !skjulteEksterneOrgEnheter.has(orgEnhet.orgEnhetId ?? "") &&
+      isPeriodActive(orgEnhet.startdato ?? "", orgEnhet.sluttdato),
+  );
+}
+
+function getSorterteOrgEnheter(
+  filtrerteLederskap: OrgEnhetLederResponse[],
+  orgEnheter: OrgEnhet[],
+): OrgEnhetLederResponse[] {
+  const orgEnheterById = new Map(
+    orgEnheter.map((orgEnhet) => [orgEnhet.id, orgEnhet]),
+  );
+
+  const aktiveLederskap = filtrerteLederskap.filter((lederskap) => {
+    const orgEnhet = orgEnheterById.get(lederskap.orgEnhetId ?? "");
+
+    return !orgEnhet?.gyldigTom || !nomDateIsBeforeToday(orgEnhet.gyldigTom);
+  });
+
+  const aktiveOrgEnhetIder = new Set(
+    aktiveLederskap
+      .map((lederskap) => lederskap.orgEnhetId)
+      .filter((id): id is string => !!id),
+  );
+
+  return aktiveLederskap
+    .filter((lederskap) => {
+      const orgEnhet = orgEnheterById.get(lederskap.orgEnhetId ?? "");
+
+      if (!orgEnhet?.overordnetEnhetId) {
+        return true;
+      }
+
+      const overordnetEnhet = orgEnheterById.get(orgEnhet.overordnetEnhetId);
+
+      return !(
+        overordnetEnhet &&
+        aktiveOrgEnhetIder.has(overordnetEnhet.id) &&
+        overordnetEnhet.navn === orgEnhet.navn
+      );
+    })
+    .sort(
+      (a, b) => a.orgEnhetNavn?.localeCompare(b.orgEnhetNavn ?? "", "no") ?? 0,
+    );
 }

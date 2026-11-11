@@ -127,6 +127,7 @@ function CreateInternRessurs() {
           sektor={sektor}
         />
         <FysiskBrukerstedSelectFormPart
+          name="fysiskBrukerstedNr"
           helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
           arbeide."
         />
@@ -219,6 +220,7 @@ function CreateEksternRessurs() {
           sektor={sektor}
         />
         <FysiskBrukerstedSelectFormPart
+          name="fysiskBrukerstedNr"
           helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
           arbeide."
         />

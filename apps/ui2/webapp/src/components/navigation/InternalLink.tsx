@@ -22,9 +22,10 @@ export function InternalLink({
       css={css`
         color: var(--nom-primary);
 
+        width: fit-content;
+
         :hover {
           text-decoration: none;
-          width: fit-content;
         }
       `}
       rel={rel}

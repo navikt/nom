@@ -18,12 +18,14 @@ import * as yup from "yup";
 
 import {
   endreOrgEnhetInfo,
+  getAlleTilgangsenheter,
   getOrgEnhet,
   orgEnheterKeys,
 } from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { BekreftModal } from "~/components/BekreftModal";
 import ContentWrapper from "~/components/ContentWrapper";
+import { FormTilgangsenhetSelectWrapper } from "~/components/forms/FormComponents";
 import { LoaderWithText } from "~/components/LoaderWithText";
 import ModalComponent from "~/components/modalProvider/ModalComponent";
 import {
@@ -37,8 +39,9 @@ import { showToast } from "~/hooks/showToast";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import {
   IkkeTilgangRedigering,
+  NomNivaaSelect,
   OrgEnhetIkkeFunnet,
-  OrgEnhetInfoWrapper,
+  OrgEnhetInfo,
   OrgEnhetTypeSelect,
 } from "~/pages/OrganizationMastering/Common/CommonComponents";
 import { OrgEnhetKvittering } from "~/pages/OrganizationMastering/Common/OrgEnhetKvittering";
@@ -46,7 +49,7 @@ import type {
   OrgEnhet,
   OvrigeEndringerOrgEnhetRequest,
 } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 export const KorrigerOrgEnhet = () => {
   const { id } = useSearch({ from: "/korriger-organisasjonsenhet" });
@@ -120,10 +123,7 @@ function FormView({
   return (
     <ModalProvider>
       <ContainerWithHighlightedTop padding={24}>
-        <OrgEnhetInfoWrapper
-          heading="Valgt organisasjonsenhet"
-          orgEnhet={orgEnhet}
-        />
+        <OrgEnhetInfo heading="Valgt organisasjonsenhet" orgEnhet={orgEnhet} />
 
         <KorrigerOrgEnhetForm
           orgEnhet={orgEnhet}
@@ -160,15 +160,23 @@ function KorrigerOrgEnhetForm({
   orgEnhet: OrgEnhet;
   setChangeInfo: (response: any) => void;
 }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   const queryClient = useQueryClient();
 
-  const { showModal } = useModal();
+  const alleTilgangsenheterQuery = useQuery({
+    queryKey: getAlleTilgangsenheter.queryKey(),
+    queryFn: () => getAlleTilgangsenheter.queryFn(),
+  });
+
+  const alleTilgangsenheter = alleTilgangsenheterQuery.data ?? [];
 
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgEnhet.gyldigFom,
-
       orgEnhetsType: orgEnhet.orgEnhetsType,
+      nomNivaa: orgEnhet.nomNivaa,
+      tilgangsenhetId: orgEnhet.tilgangsenhetId,
     },
     resolver: yupResolver(validationSchema),
   });
@@ -192,11 +200,15 @@ function KorrigerOrgEnhetForm({
     },
   });
 
+  const { showModal } = useModal();
+
   const onValid = async (values: yup.InferType<typeof validationSchema>) => {
     const request: OvrigeEndringerOrgEnhetRequest = {
       id: orgEnhet.id,
       gyldigFom: values.gyldigFom,
       orgEnhetsType: values.orgEnhetsType ?? undefined,
+      nomNivaa: values.nomNivaa,
+      tilgangsenhetId: values.tilgangsenhetId,
     };
 
     await showModal(
@@ -216,13 +228,29 @@ function KorrigerOrgEnhetForm({
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onValid)}>
         <VStack gap="space-36">
-          <VStack gap="space-16">
+          <VStack
+            gap="space-16"
+            css={css`
+              width: 50%;
+            `}
+          >
             <FormDateWrapper name="gyldigFom" />
 
             <OrgEnhetTypeSelect
               emptyOption={!orgEnhet.orgEnhetsType}
               name="orgEnhetsType"
             />
+
+            {hasAdminAccess && (
+              <>
+                <NomNivaaSelect name="nomNivaa" fullWidth />
+
+                <FormTilgangsenhetSelectWrapper
+                  name="tilgangsenhetId"
+                  tilgangsenheter={alleTilgangsenheter}
+                />
+              </>
+            )}
           </VStack>
 
           <div
@@ -304,4 +332,10 @@ const validationSchema = yup.object({
   orgEnhetsType: yup
     .mixed<OrgEnhetsType>()
     .oneOf(Object.values(OrgEnhetsType), "Obligatorisk"),
+  nomNivaa: yup
+    .mixed<NomNivaa>()
+    .transform((value) => (value === "" ? undefined : value))
+    .oneOf(Object.values(NomNivaa), "Ugyldig verdi")
+    .optional(),
+  tilgangsenhetId: yup.string().required("Obligatorisk"),
 });

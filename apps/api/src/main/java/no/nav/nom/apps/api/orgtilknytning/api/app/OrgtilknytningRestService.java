@@ -20,6 +20,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreF
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDatoCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningSektorCommand;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtypeCommand;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.FysiskBrukerstedService;
 import no.nav.nom.apps.api.ressurs.NomMastered;
@@ -905,6 +906,31 @@ public class OrgtilknytningRestService {
         );
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
+    }
+
+    public void fjernMissingOrgtilknytninger(String navident, OppdaterOrgtilknytningerForRessursRequest request) {
+        var inputMetadata = new InputMetadata(
+            "REST",
+            "oppdaterOrgtilknytningerForRessurs",
+            request,
+            new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName()));
+        var eksisteredeOtFids = request.eksisterendeOrgtilknytninger().stream().map(EndreOrgtilknytningRequest::fid).toList();
+
+        orgtilknytningStateRepository.findByNavident(navident).forEach(ot -> {
+            if (!eksisteredeOtFids.contains(ot.fid())) {
+                orgtilknytningCommandService.fjernOrgtilknytning(
+                    ot.fid(),
+                    new FjernOrgtilknytning(
+                        navident,
+                        ot.orgEnhetId(),
+                        ot.gyldigFom(),
+                        ot.gyldigTom(),
+                        inputMetadata,
+                        null
+                    )
+                );
+            }
+        });
     }
 
     public MasseFlyttingResponse masseflyttingAvRessurser(MasseFlyttingRequest request) {
