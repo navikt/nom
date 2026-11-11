@@ -170,10 +170,7 @@ export interface EnvironmentConfigResponse {
   environmentSuffix?: string;
   /** Nom OrgEnhetId for HELFO Løvnode enhet */
   helfoId: string;
-  /**
-   * Nom OrgEnhetId'er for alle linjeenheter
-   * @uniqueItems true
-   */
+  /** Nom OrgEnhetId'er for alle linjeenheter */
   linjeenhetene: string[];
   /** Nom OrgEnhetId for NAV Toppnode enhet */
   navToppnodeId: string;
@@ -247,6 +244,7 @@ export interface IOrgenhet {
   /** @format date */
   gyldigTom?: string;
   id?: string;
+  kostnadsstedId?: string;
   navn?: string;
   nomNivaa?: NomNivaa;
   orgEnhetsType?: OrgEnhetsType;
