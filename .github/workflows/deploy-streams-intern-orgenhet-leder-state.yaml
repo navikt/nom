@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
+      - '.nais/streams/intern-orgenhet-leder-state-sf-test.yaml'
       - 'apps/streams/internal/orgenhetleder-state/**'
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/intern-orgenhet-leder-state.yaml'
@@ -24,6 +25,7 @@ jobs:
       jar-path: apps/streams/internal/orgenhetleder-state/target/app.jar
       image-suffix: nom-intern-orgenhet-leder-state
       nais-config-file-path-dev: .nais/streams/intern-orgenhet-leder-state.yaml
+      additional-dev-deployments: '[{"suffix":"sf-test","manifest":".nais/streams/intern-orgenhet-leder-state-sf-test.yaml"}]'
       nais-config-file-path-prod: .nais/streams/intern-orgenhet-leder-state.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'

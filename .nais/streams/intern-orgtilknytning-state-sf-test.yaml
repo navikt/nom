@@ -1,0 +1,52 @@
+# Kopiert fra .nais/streams/intern-orgtilknytning-state.yaml (commit: d3d986fe2f5b4d9f2d84ff5016202e75ab0ab766)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev,sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+  port: 8080
+  replicas:
+    min: 1
+    max: 1
+  liveness:
+    path: /internal/health/liveness
+    periodSeconds: 5
+    failureThreshold: 3
+  readiness:
+    path: /internal/health/readiness
+    periodSeconds: 5
+    failureThreshold: 3
+  startup:
+    path: /internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 15
+  resources:
+    requests:
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      memory: 1024Mi
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  kafka:
+    pool: {{kafka-pool}}
+    streams: true
