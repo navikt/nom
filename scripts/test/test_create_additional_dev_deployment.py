@@ -38,7 +38,9 @@ class GenerateTests(unittest.TestCase):
         sources += list(Path("libs/nom-state/src/main/resources") / f"{kind}-state.yaml"
                         for kind in generator.STATE_TYPES)
         sources.extend((Path(".github/workflows/deploy-spring-app.yaml"),
-                        Path(".github/workflows/kafka-topics-org.yaml")))
+                         Path(".github/workflows/kafka-topics-org.yaml")))
+        sources.extend(Path(".github/workflows/scripts") / name for name in (
+            "prepare_dev_variants.py", "validate_web_variant.py", "validate_spring_variant.py"))
         sources.extend(path for path, _, _ in generator.SHARED_DEV_CALLERS)
         sources.extend((Path(".nais/apps/nom-azure/nom-azure-prod-gcp.yaml"),
                         Path(".nais/apps/proxy/proxy-prod-fss.yaml")))
@@ -461,13 +463,174 @@ spec:
         self.assertEqual((self.root / ".github/workflows/deploy-api.yaml").read_text(), original)
 
     def validator(self, workflow_name, base, variant, suffix="q9"):
-        workflow = (self.root / ".github/workflows" / ("deploy-spring-app.yaml" if workflow_name not in ("deploy-ui2.yaml", "deploy-admin-web.yaml") else workflow_name)).read_text()
-        match = re.search(r"(?ms)^      - name: Validate variant manifest\n.*?^          python3 - <<'PY'\n(.*?)^          PY$", workflow)
-        self.assertIsNotNone(match, workflow_name)
+        script = ("validate_web_variant.py" if workflow_name in ("deploy-ui2.yaml", "deploy-admin-web.yaml")
+                  else "validate_spring_variant.py")
         env = os.environ.copy()
         env.update(BASE_MANIFEST=str(base), VARIANT_MANIFEST=str(variant), SUFFIX=suffix)
-        return subprocess.run(["/usr/bin/python3", "-B", "-c", textwrap.dedent(match.group(1))],
+        return subprocess.run(["/usr/bin/python3", "-B", f".github/workflows/scripts/{script}"],
                               cwd=self.root, env=env, capture_output=True, text=True)
+
+    def test_web_variant_ingresses_allow_nonempty_subset_only(self):
+        generator.generate(self.root, "q9")
+        base = ".nais/apps/admin-web/admin-web-dev.yaml"
+        variant = ".nais/apps/admin-web/admin-web-q9-dev.yaml"
+        target = self.root / variant
+        both = target.read_text()
+        ansatt = "https://nom-admin-q9.ansatt.dev.nav.no"
+        intern = "https://nom-admin-q9.intern.dev.nav.no"
+        ansatt_line = next(line for line in both.splitlines(keepends=True) if line.startswith(f"    - {ansatt}"))
+        intern_line = next(line for line in both.splitlines(keepends=True) if line.startswith(f"    - {intern}"))
+
+        def verify(content, accepted):
+            target.write_text(content)
+            result = self.validator("deploy-admin-web.yaml", base, variant)
+            self.assertEqual(result.returncode == 0, accepted, result.stderr or result.stdout)
+
+        verify(both, True)
+        one = both.replace(intern_line, "", 1)
+        verify(one, True)
+        verify(both.replace(ansatt_line, "", 1), True)
+        verify(one.replace(ansatt_line, "", 1), False)
+        verify(one.replace("  ingresses:\n", "", 1), False)
+        verify(one.replace(ansatt_line, ansatt_line * 2, 1), False)
+        verify(one.replace(ansatt_line, f"    - {ansatt}/\n{ansatt_line}", 1), False)
+        for invalid in (
+            "https://evil.example.com", "https://nom-admin.ansatt.dev.nav.no",
+            "https://nom-admin-sf-prod.ansatt.dev.nav.no", "http://nom-admin-q9.ansatt.dev.nav.no",
+            f"{ansatt}:8443", f"{ansatt}/admin",
+        ):
+            with self.subTest(invalid=invalid):
+                verify(one.replace(ansatt, invalid, 1), False)
+        verify(one.replace(ansatt_line, ansatt_line + "    - https://evil.example.com\n", 1), False)
+
+        # Check the manually selected ingress in the existing sf-test manifest too.
+        sf_variant = ".nais/apps/admin-web/admin-web-sf-test-dev.yaml"
+        shutil.copyfile(generator.ROOT / sf_variant, self.root / sf_variant)
+        result = self.validator("deploy-admin-web.yaml", base, sf_variant, suffix="sf-test")
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
+    def test_workflows_call_extracted_scripts_and_prepare_output(self):
+        for workflow_name in ("deploy-ui2.yaml", "deploy-admin-web.yaml"):
+            workflow = (self.root / ".github/workflows" / workflow_name).read_text()
+            self.assertIn("run: python3 .github/workflows/scripts/prepare_dev_variants.py", workflow)
+            self.assertIn("run: python3 .github/workflows/scripts/validate_web_variant.py", workflow)
+            prepare = workflow.split("  prepare-dev-variants:", 1)[1].split("  deploy-additional-dev:", 1)[0]
+            self.assertIn("uses: actions/checkout@", prepare)
+            if workflow_name == "deploy-ui2.yaml":
+                self.assertIn("working-directory: .", prepare)
+                validation = workflow.split("- name: Validate variant manifest", 1)[1]
+                self.assertIn("working-directory: .", validation.split("run:", 1)[0])
+        spring = (self.root / ".github/workflows/deploy-spring-app.yaml").read_text()
+        self.assertIn("run: python3 .github/workflows/scripts/validate_spring_variant.py", spring)
+
+        output = self.root / "deployments-output"
+        for value in ('[{"suffix":"q9","manifest":".nais/apps/ui2/ui2-q9-dev.yaml"}]', "[]"):
+            env = dict(os.environ, ADDITIONAL_DEV_DEPLOYMENTS=value, GITHUB_OUTPUT=str(output))
+            result = subprocess.run(["/usr/bin/python3", "-B", ".github/workflows/scripts/prepare_dev_variants.py"],
+                                    cwd=self.root, env=env, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(output.read_text().splitlines()[-1], f"deployments={value}")
+        for value in ("not-json", "{}"):
+            env = dict(os.environ, ADDITIONAL_DEV_DEPLOYMENTS=value, GITHUB_OUTPUT=str(output))
+            result = subprocess.run(["/usr/bin/python3", "-B", ".github/workflows/scripts/prepare_dev_variants.py"],
+                                    cwd=self.root, env=env, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+        missing = subprocess.run(["/usr/bin/python3", "-B", ".github/workflows/scripts/missing.py"],
+                                 cwd=self.root, capture_output=True, text=True)
+        self.assertNotEqual(missing.returncode, 0)
+
+    def test_spring_ingresses_match_base_hosts_and_reject_unsafe_urls(self):
+        generator.generate(self.root, "q9")
+        base = ".nais/apps/admin/admin-dev-gcp.yaml"
+        variant = ".nais/apps/admin/admin-q9-dev-gcp.yaml"
+        base_path, variant_path = self.root / base, self.root / variant
+        base_text, variant_text = base_path.read_text(), variant_path.read_text()
+        base_url = "https://nom-admin-api.intern.dev.nav.no"
+        variant_url = "https://nom-admin-api-q9.intern.dev.nav.no"
+
+        def verify(base_content=base_text, variant_content=variant_text, accepted=False):
+            base_path.write_text(base_content)
+            variant_path.write_text(variant_content)
+            outcome = self.validator("deploy-admin.yaml", base, variant)
+            self.assertEqual(outcome.returncode == 0, accepted, outcome.stderr or outcome.stdout)
+
+        verify(accepted=True)
+        stream_base = ".nais/streams/intern-ressurs-state.yaml"
+        stream_variant = ".nais/streams/intern-ressurs-state-q9.yaml"
+        stream_result = self.validator("deploy-streams-intern-ressurs-state.yaml", stream_base, stream_variant)
+        self.assertEqual(stream_result.returncode, 0, stream_result.stderr or stream_result.stdout)
+        nav_ident_result = self.validator("deploy-nav-ident.yaml", ".nais/apps/nav-ident/nav-ident-dev-gcp.yaml",
+                                          ".nais/apps/nav-ident/nav-ident-q9-dev-gcp.yaml")
+        self.assertEqual(nav_ident_result.returncode, 0, nav_ident_result.stderr or nav_ident_result.stdout)
+
+        for bad_url in (
+            "http://nom-admin-api-q9.intern.dev.nav.no",
+            "https://nom-admin-api.intern.dev.nav.no",
+            "https://nom-admin-api-q9.intern.dev.nav.no.evil.example",
+            "https://nom-admin-api-q9.evil.example",
+            "https://x.nom-admin-api-q9.intern.dev.nav.no",
+            "https://nom-admin-api-q9x.intern.dev.nav.no",
+            "https://nom-admin-api-q9.intern.dev.nav.no:8443",
+            "https://nom-admin-api-q9.intern.dev.nav.no:",
+            "https://nom-admin-api-q9.intern.dev.nav.no/",
+            "https://nom-admin-api-q9.intern.dev.nav.no/path",
+            "https://nom-admin-api-q9.intern.dev.nav.no?",
+            "https://nom-admin-api-q9.intern.dev.nav.no#f",
+            "https://user@nom-admin-api-q9.intern.dev.nav.no",
+            "https://NOM-ADMIN-API-q9.intern.dev.nav.no",
+            "https://nom-admin-api-q9.intern.dev.nav.no.",
+            "https://nom-admin-api-q9.intern..dev.nav.no",
+            "https://xn--nom-admin-api-q9.intern.dev.nav.no",
+            "https://" + "x" * 64 + "-q9.intern.dev.nav.no",
+        ):
+            with self.subTest(url=bad_url):
+                verify(variant_content=variant_text.replace(variant_url, f"'{bad_url}'"))
+
+        for bad_base_url in ("http://nom-admin-api.intern.dev.nav.no",
+                             "https://nom-admin-api.intern.dev.nav.no/path",
+                             "https://nom-admin-api.intern.dev.nav.no.evil.example"):
+            with self.subTest(base_url=bad_base_url):
+                verify(base_content=base_text.replace(base_url, f"'{bad_base_url}'"))
+
+        for bad_heading in ('  ingresses: []', '  ingresses: # kommentar',
+                            '  "ingresses":', '   ingresses:',
+                            f'  ingresses: [{variant_url}]'):
+            with self.subTest(heading=bad_heading):
+                verify(variant_content=variant_text.replace('  ingresses:', bad_heading))
+                verify(base_content=base_text.replace('  ingresses:', bad_heading))
+
+        without_base = base_text.replace(f'  ingresses:\n    - {base_url}\n', '')
+        without_variant = re.sub(r'(?m)^  ingresses:\n    - .*\n', '', variant_text, count=1)
+        verify(base_content=without_base)
+        verify(variant_content=without_variant)
+        verify(base_content=without_base, variant_content=without_variant, accepted=True)
+        verify(base_content=without_base + '\nspec: {ingresses: [https://unexpected.intern.dev.nav.no]}\n',
+               variant_content=without_variant)
+        verify(base_content=without_base, variant_content=without_variant +
+               '\nspec: {ingresses: [https://unexpected.intern.dev.nav.no]}\n')
+
+        variant_line = next(line for line in variant_text.splitlines(keepends=True)
+                            if line.startswith(f'    - {variant_url}'))
+        verify(variant_content=variant_text.replace(variant_line, variant_line * 2, 1))
+        base_line = f'    - {base_url}\n'
+        verify(base_content=base_text.replace(base_line, base_line * 2, 1))
+        extra_base_url = 'https://nom-admin-extra.intern.dev.nav.no'
+        extra_variant_url = 'https://nom-admin-extra-q9.intern.dev.nav.no'
+        more_base = base_text.replace(f'    - {base_url}\n', f'    - {base_url}\n    - {extra_base_url}\n')
+        more_variant = variant_text.replace(variant_line, f'    - {extra_variant_url}\n{variant_line}', 1)
+        verify(base_content=more_base, variant_content=more_variant, accepted=True)
+        verify(base_content=more_base)
+        verify(variant_content=more_variant)
+
+        # A later document must not hide an ingress; nav-ident legitimately has two Applications.
+        verify(variant_content=variant_text + '\n---\nkind: Application\nspec:\n  ingresses:\n'
+                                                '    - https://unauthorized.intern.dev.nav.no\n')
+        verify(variant_content=variant_text + '\n  <<: *extra\n')
+        verify(base_content=without_base + '\nspec: *hidden_ingresses\n', variant_content=without_variant)
+        verify(variant_content=variant_text.replace('  ingresses:', '  ingresses: &hosts'))
+        verify(variant_content=variant_text.replace('  ingresses:', '  ingresses:\n  ingresses:'))
+        verify(variant_content=variant_text.replace('    - ' + variant_url,
+                                                    '      - ' + variant_url))
 
     def test_validators_accept_quotes_comments_and_reject_wrong_values(self):
         generator.generate(self.root, "q9")
