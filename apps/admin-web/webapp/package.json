@@ -45,10 +45,10 @@
   },
   "devDependencies": {
     "@navikt/aksel-stylelint": "7.37.0",
-    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tanstack/eslint-plugin-query": "5.105.1",
     "@tanstack/react-query-devtools": "5.105.1",
-    "@tanstack/router-vite-plugin": "1.167.48",
+    "@tanstack/router-vite-plugin": "1.167.49",
     "@types/lodash": "4.17.27",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -66,13 +66,13 @@
     "eslint-plugin-simple-import-sort": "14.0.0",
     "eslint-plugin-unicorn": "74.0.0",
     "postcss-import": "17.0.1",
-    "postcss-styled-syntax": "0.7.2",
+    "postcss-styled-syntax": "0.7.4",
     "prettier": "3.9.10",
     "stylelint": "17.16.0",
     "stylelint-config-standard": "40.0.0",
-    "tailwindcss": "4.3.3",
+    "tailwindcss": "4.3.5",
     "typescript": "^5.9.3",
-    "vite": "^8.3.5"
+    "vite": "^8.3.6"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.67.4"
