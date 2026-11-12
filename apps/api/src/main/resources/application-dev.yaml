@@ -293,6 +293,10 @@ app:
         orgtilknytning: fa408a    # Grünerløkka
         sektor: NAV_STATLIG
 
+      - navident: Z994794         # Andre Roaldseth - https://nav-it.slack.com/archives/C0362LA7ZLN/p1794475301633279
+        orgtilknytning: fa408a    # Grünerløkka
+        sektor: NAV_STATLIG
+
     ledere:
       - navident: N852930
         orgenhet: dy165d
