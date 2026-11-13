@@ -1,7 +1,7 @@
 package no.nav.nom.apps.sfintegrasjon.outbox;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.sfintegrasjon.common.StandardResponse;
 import no.nav.nom.apps.sfintegrasjon.outbox.domain.SfStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Slf4j
 @Tag(name = "Outbox API", description = "Endpoints for Team ORG Admins to check and resend data.")
 @PreAuthorize("hasAuthority('ADMIN')")
 @RestController
@@ -54,7 +53,7 @@ public class OutboxController {
     }
 
     @PostMapping("/retry")
-    public ResponseEntity<StandardResponse> retry(@RequestBody String orgEnhetId) {
+    public ResponseEntity<StandardResponse> retry(@Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "ab123c") @RequestBody String orgEnhetId) {
         return outboxRestService.retryByOrgEnhetId(orgEnhetId);
     }
 }
