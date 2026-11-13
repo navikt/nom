@@ -1,0 +1,99 @@
+# Kopiert fra .nais/apps/admin/admin-dev-gcp.yaml (commit: 34e66b74740f39ba761c00f35f39416e7302e93c)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev,sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_API_URL
+      value: http://nom-api-sf-test.nom # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_REMEDY_INTEGRASJON_BASE_URL
+      value: https://nom-remedy-integrasjon.dev-fss-pub.nais.io
+    - name: NOM_REMEDY_API_SCOPE
+      value: api://dev-fss.org.nom-remedy-integrasjon/.default
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback.xml'
+    - name: JDK_JAVA_OPTIONS
+      value: "-XX:+UseZGC -XX:MaxRAMPercentage=70.0 -XX:ActiveProcessorCount=4" # Ref https://nav-it.slack.com/archives/C5KUST8N6/p1714054537557279 og https://nav-it.slack.com/archives/C60FFACN5/p1728888091610999
+    - name: OTEL_JAVAAGENT_LOGGING  # Bli kvitt Otel loggingen https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output
+      value: none
+  envFrom:
+    - secret: nom-admin-unleash-api-token
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://nom-admin-api-sf-test.intern.dev.nav.no # Auto-utfylt av 'create_additional_dev_deployment.py'
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 99%
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 15
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 15
+    periodSeconds: 3
+    timeout: 4
+    failureThreshold: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 6Gi # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': minnebehov i ekstra DEV-miljø må vurderes
+    limits:
+      memory: 10Gi # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': minnebehov i ekstra DEV-miljø må vurderes
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  kafka:
+    pool: nav-dev
+  azure:
+    application: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': Azure-klient, grupper, redirect og azp må vurderes
+      enabled: true
+      allowAllUsers: false
+      tenant: trygdeetaten.no
+      claims:
+        groups:
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin
+          - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+          - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+        extra:
+          - azp_name
+          - NAVident
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-admin-web-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: nom
+          cluster: dev-gcp
+      external:
+        - host: org-unleash-api.nav.cloud.nais.io

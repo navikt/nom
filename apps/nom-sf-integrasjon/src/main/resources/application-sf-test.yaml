@@ -1,0 +1,47 @@
+# Kopiert fra apps/nom-sf-integrasjon/src/main/resources/application.yaml (commit: 4922675be974c1e334687e22424c8eb4700810b7)
+# Kopiert fra apps/nom-sf-integrasjon/src/main/resources/application-dev.yaml (commit: cdf9b216b58cdff69040d5941876b16d9fe6d6f1)
+app:
+  name: ${NAIS_APP_NAME:nom-sf-integrasjon-sf-test} # Auto-utfylt av 'create_additional_dev_deployment.py'
+  kafka:
+    evtsrc:
+      group-id: nom-sf-integrasjon-sf-test-evtsrc # Auto-utfylt av 'create_additional_dev_deployment.py'
+      auto-startup: true
+      state-ready-timeout: PT10M
+      retry-delay-ms: 2000
+      orgenhet:
+        start-offset: 0 # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        topic: org.nom.orgenhet-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      orgenhet-leder:
+        start-offset: 0 # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        topic: org.nom.orgenhet-leder-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      organisering:
+        start-offset: 0 # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        topic: org.nom.organisering-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  sf:
+    api-url: ${SF_API_URL:https://sf.api.example.com}
+    client-id: ${SF_CLIENT_ID:sf-client-id}
+    private-key: ${SF_PRIVATE_KEY:sf-private-key}
+    tenant: ${SF_TENANT:sf-tenant}
+    user-id: ${SF_USER_ID:sf-user-id}
+    cpi-api-url: https://cloud-platform-integration-test-02d6jg6h.it-cpi050-rt.cfapps.eu20-002.hana.ondemand.com
+    historicalCutoffDate: 2026-11-11
+    nav-toppnode-id: ${SF_NAV_TOPPNODE_ID:sf-nav-topnode-id}
+  nik:
+    base-url: ${NIK_BASEURL}
+    aad-scope: ${NIK_API_SCOPE}
+  nom-api:
+    base-url: ${NOM_API_URL}
+
+NIK_BASEURL: "http://nav-ident-sf-test.org" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NIK_API_SCOPE: api://dev-gcp.org.nav-ident-sf-test/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+ZALARIS_CLIENT_ID: "301f612f-eab6-47b5-84d0-8e517a8b48fc" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+
+SF_NAV_TOPPNODE_ID: "sa312u"
+
+nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet.state-topic: org.nom.intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgtilknytning.state-topic: org.nom.intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.organisering.state-topic: org.nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.delegert-leder.state-topic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet-leder.state-topic: org.nom.intern-orgenhet-leder-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'

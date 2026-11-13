@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.dvh.DvhService;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.organisering.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgenhetleder.OrgEnhetLederService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
@@ -123,4 +124,6 @@ public abstract class DvhTestBase {
     OTUtenforHierarki oTUtenforHierarki;
     @MockitoBean
     OrgEnhetLederService orgEnhetLederService;
+    @MockitoBean
+    OrgenhetService orggenhetService;
 }

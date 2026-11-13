@@ -1,0 +1,487 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.ressurs-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hours
+  acl:
+    - team: org
+      application: nom-intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.orgenhet-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-kafka-api-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hours
+  acl:
+    - team: org
+      application: nom-intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.orgtilknytning-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nom-intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hours
+  acl:
+    - team: org
+      application: nom-intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.organisering-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nom-intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hours
+  acl:
+    - team: org
+      application: nom-intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.orgenhet-leder-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nom-intern-orgenhet-leder-state-v2-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgenhet-leder-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 * 1 = 3600000 = 1 hours
+  acl:
+    - team: org
+      application: nom-intern-orgenhet-leder-state-v2-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
+  acl:
+    - team: nom
+      application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-rdbms-data-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nav-ident-rnr-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 2
+    replication: 3
+    retentionBytes: -1
+    retentionHours: 5
+  acl:
+    - team: org
+      application: nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 10
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
+  acl:
+    - team: org
+      application: nom-kafka-api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.api-orgenhet-state-v3-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
+  acl:
+    - team: org
+      application: nom-kafka-api-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: readwrite
+    - team: org
+      application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      access: read

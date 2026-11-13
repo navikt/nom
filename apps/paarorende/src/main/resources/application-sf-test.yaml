@@ -1,0 +1,8 @@
+# Kopiert fra apps/paarorende/src/main/resources/application.yaml (commit: 6f3230a31b1243ee2ffaee6bc9533aa1b7a9ed33)
+app:
+  name: nom-paarorende-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  client:
+    nom-api:
+      url: http://nom-api-sf-test.nom # Auto-utfylt av 'create_additional_dev_deployment.py'
+  security:
+    nom-admin: ${NOM_ADMIN_GROUP}

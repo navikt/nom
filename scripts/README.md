@@ -1,5 +1,10 @@
 # Script for ekstra DEV-miljø
 
+> [!WARNING]
+> Dette er et script som i hovedsak er laget utelukkende av AI og det er selve resultatet som er gjennomgått, ikke scriptkoden i seg selv. 
+> <p>Alle genererte filer _må_ gjennomgåes manuelt før det pushes til repo!!
+> <p>Det bør gjøres sammenligning på applikasjons konfig filer mellom variant konfig, hoved konfig og dev konfig. Appene får spring profile DEV og &ltsuffix&gt, og vil derfor lese 'application.yaml' som ioverstyres av verdier i 'application-dev.yaml' og til slutt overstyres av verdier i 'application-&ltsuffix&gt.yaml' konfig filen 
+
 `create_additional_dev_deployment.py` lager lokale forslag til et nytt NOM DEV-miljø med eget suffix. Det oppretter variantkonfigurasjon og Nais-manifester for appene og stream-appene, én fil med 16 Kafka-topics og en egen topic-workflow for DEV. Scriptet legger også **aktive** variantreferanser i eksisterende deploy-workflows. Det committer, pusher eller deployer ikke.
 
 Kjør fra prosjektroten med et nytt suffix, for eksempel `q9`:

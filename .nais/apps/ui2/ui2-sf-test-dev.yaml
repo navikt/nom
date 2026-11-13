@@ -1,0 +1,113 @@
+# Kopiert fra .nais/apps/ui2/ui2-dev.yaml (commit: 3cc5a9e00081fc2d6374b52069e34e040fe7870c)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-ui2-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  port: 8080
+  azure:
+    application: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': Azure-klient, grupper, redirect og azp må vurderes
+      enabled: true
+      allowAllUsers: true
+      singlePageApplication: true
+      claims:
+        extra:
+          - NAVident
+          - azp_name
+      tenant: trygdeetaten.no
+      replyURLs:
+        - http://localhost:8080/oauth2/callback
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - "/frackend/*"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+    outbound:
+      rules:
+        - application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: nom
+          cluster: dev-gcp
+        - application: nom-paarorende-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-azure
+          namespace: org
+          cluster: dev-gcp
+      external:
+        - host: unpkg.com # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+        - host: org-unleash-api.nav.cloud.nais.io
+        - host: cdn.nav.no # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': ekstern host må vurderes
+  ingresses:
+    - https://nom-sf-test.ansatt.dev.nav.no # Auto-utfylt av 'create_additional_dev_deployment.py'
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: nodejs
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: EXPRESS_HOST
+      value: "::"
+    - name: EXPRESS_PORT
+      value: "8080"
+    - name: NOM_API_URL
+      value: http://nom-api-sf-test.nom # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_AZURE_URL
+      value: http://nom-azure.org
+    - name: NOM_AZURE_SCOPE
+      value: api://dev-gcp.org.nom-azure/.default
+    - name: TEAM_CATALOG_API_URL
+      value: http://team-catalog-backend.org
+    - name: TEAM_CATALOG_SCOPE
+      value: api://dev-gcp.org.team-catalog-backend/.default
+    - name: NOM_REMEDY_INTEGRASJON_API_URL
+      value: https://nom-remedy-integrasjon.dev-fss-pub.nais.io
+    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
+      value: api://dev-fss.org.nom-remedy-integrasjon/.default
+    - name: PAARORENDE_API_URL
+      value: http://nom-paarorende-sf-test.org # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: PAARORENDE_API_SCOPE
+      value: api://dev-gcp.org.nom-paarorende-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: ENABLE_CDN_BUNDLES
+      value: "true"
+  envFrom:
+    - secret: nom-ui2-unleash-api-token

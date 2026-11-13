@@ -1,0 +1,69 @@
+# Kopiert fra apps/admin/src/main/resources/application.yaml (commit: 460d94704826746f707f12cd79f91b43475e3470)
+# Kopiert fra apps/admin/src/main/resources/application-dev.yaml (commit: 460d94704826746f707f12cd79f91b43475e3470)
+app:
+  name: ${NAIS_APP_NAME:nom-admin-sf-test} # Auto-utfylt av 'create_additional_dev_deployment.py'
+  kafka:
+    skru-av-lyttere-for-ubrukte-topics-i-ekstra-dev-miljo: true # Inaktive topics: nom.api-hendelser-v1, nom.api-ressurs-hendelse-v1, nom.intern-orgtilknytning-state-dlt, nom.intern-ressurs-state-dlt
+    ressurs:
+      eventsourceTopic: org.nom.ressurs-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      apiEventTopic: org.nom.api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_ressursEvtsrcListener_${HOSTNAME}
+      apiEventTopic-listener-id: nom-admin_apiRessursListener_v4_${HOSTNAME}
+    orgenhet:
+      eventsourceTopic: org.nom.orgenhet-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      apiEventTopic: org.nom.api-orgenhet-state-v3-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_orgenhetEvtsrcListener_${HOSTNAME}
+      apiEventTopic-listener-id: nom-admin_apiOrgenhetListener_${HOSTNAME}
+    organisering:
+      eventsourceTopic: org.nom.organisering-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_organiseringEvtsrcListener_${HOSTNAME}
+    orgEnhetLeder:
+      eventsourceTopic: org.nom.orgenhet-leder-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_orgenhetLederEvtsrcListener_${HOSTNAME}
+    orgtilknytning:
+      eventsourceTopic: org.nom.orgtilknytning-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_orgtilknytningEvtsrcListener_${HOSTNAME}
+    authorize:
+      eventsourceTopic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      eventsource-listener-id: nom-admin_authorizeEvtsrcListener_${HOSTNAME}
+    hendelser:
+      apiEventTopic: IKKE_I_BRUK # Auto-utfylt av 'create_additional_dev_deployment.py'
+      apiEventTopic-listener-id: nom-admin_apiHendelserListener_${HOSTNAME}
+    ressurs-hendelser:
+      apiEventTopic: IKKE_I_BRUK # Auto-utfylt av 'create_additional_dev_deployment.py'
+      apiEventTopic-listener-id: nom-admin_apiRessursHendelserListener_${HOSTNAME}
+    dead-letter:
+      orgtilknytning-topic: IKKE_I_BRUK # Auto-utfylt av 'create_additional_dev_deployment.py'
+      ressurs-topic: IKKE_I_BRUK # Auto-utfylt av 'create_additional_dev_deployment.py'
+      listener-id: nom-admin_deadLetterListener_${HOSTNAME}
+  clients:
+    nom-api:
+      url: ${NOM_API_URL}
+    nom-remedy-integrasjon:
+      url: ${NOM_REMEDY_INTEGRASJON_BASE_URL}
+  granted-authorities:
+    groups:
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN"]
+      readonly:
+        group-id: "${READONLY_GROUPID}"
+        scopes:
+          - READONLY
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}"
+        scopes:
+          - READONLY
+          - EXTENDED_READONLY
+
+NOM_ADMIN_GROUPID:          "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+
+nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet.state-topic: org.nom.intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgtilknytning.state-topic: org.nom.intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.organisering.state-topic: org.nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.delegert-leder.state-topic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet-leder.state-topic: org.nom.intern-orgenhet-leder-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'

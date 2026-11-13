@@ -63,9 +63,9 @@ SHARED_DEV_CALLERS = (
 )
 SHARED_EXTERNAL_HOSTS = (
     "org-unleash-api.nav.cloud.nais.io",
-    "nom-remedy-integrasjon.dev-fss-pub.nais.io",
     "nom-proxy.dev-fss-pub.nais.io",
 )
+OMITTED_EXTERNAL_HOSTS = {"nom-remedy-integrasjon.dev-fss-pub.nais.io"}
 
 
 def marked(line: str, reason: str) -> str:
@@ -166,11 +166,11 @@ def state_overrides(root: Path, module: str, suffix: str) -> list[str]:
 def merge_mapping(base: list[str], overrides: list[str], indent: int = 0) -> list[str]:
     """Merge mapping nodes without adding a second app key or losing base siblings."""
     def nodes(lines):
-        starts = [i for i, line in enumerate(lines)
-                  if re.match(r"^" + " " * indent + r"[\w.-]+:", line)]
-        return [(lines[i].strip().split(":", 1)[0], i,
-                 starts[pos + 1] if pos + 1 < len(starts) else len(lines))
-                for pos, i in enumerate(starts)]
+        starts = [(i, match.group(1)) for i, line in enumerate(lines)
+                  if (match := re.match(r"^@?" + " " * indent + r"([\w.-]+):", line))]
+        return [(key, i,
+                  starts[pos + 1][0] if pos + 1 < len(starts) else len(lines))
+                for pos, (i, key) in enumerate(starts)]
 
     result = base[:]
     for key, start, end in nodes(overrides):
@@ -184,7 +184,8 @@ def merge_mapping(base: list[str], overrides: list[str], indent: int = 0) -> lis
         children = [line for line in replacement[1:] if line.strip() and not line.lstrip().startswith('#')]
         old_children = [line for line in old[1:] if line.strip() and not line.lstrip().startswith('#')]
         mapping = (children and old_children and
-                   all(re.match(r"^" + " " * (indent + 2) + r"[\w.-]+:", line) for line in children[:1] + old_children[:1]))
+                   all(re.match(r"^@?" + " " * (indent + 2) + r"[\w.-]+:", line)
+                       for line in children[:1] + old_children[:1]))
         result[a:b] = ([old[0]] + merge_mapping(old[1:], replacement[1:], indent + 2)
                        if mapping else replacement)
     return result
@@ -280,7 +281,19 @@ def manifest(source: str, suffix: str, name: str) -> str:
                 allowed_outbound = [rule for rule in outbound_rules if rule[0] in SHARED_OUTBOUND
                                     or rule[0] in NAMES and rule[0] != current]
                 external = re.search(r"(?ms)^      external:\s*\n(.*?)(?=^    [A-Za-z]|^  [A-Za-z]|\Z)", outbound.group(1) if outbound else "")
-                if allowed_outbound or external:
+                external_lines = []
+                if external:
+                    for external_line in external.group(1).splitlines():
+                        host = re.fullmatch(r"\s*- host: ([\w.-]+)(?:\s+#.*)?", external_line)
+                        if not host:
+                            if external_line.strip() and not external_line.lstrip().startswith('#'):
+                                raise ValueError(f"Ukjent ekstern regel i {name}: {external_line}")
+                            continue
+                        if host.group(1) in OMITTED_EXTERNAL_HOSTS:
+                            continue
+                        external_lines.append(external_line if host.group(1) in SHARED_EXTERNAL_HOSTS
+                                              else marked(external_line, "ekstern host må vurderes"))
+                if allowed_outbound or external_lines:
                     transformed.append("    outbound:")
                 if allowed_outbound:
                     transformed.append("      rules:")
@@ -291,16 +304,8 @@ def manifest(source: str, suffix: str, name: str) -> str:
                                             f"          namespace: {namespace}"])
                         if cluster or not shared:
                             transformed.append(f"          cluster: {cluster if shared else 'dev-gcp'}")
-                if external:
-                    transformed.append("      external:")
-                    for external_line in external.group(1).splitlines():
-                        host = re.fullmatch(r"\s*- host: ([\w.-]+)(?:\s+#.*)?", external_line)
-                        if not host:
-                            if external_line.strip() and not external_line.lstrip().startswith('#'):
-                                raise ValueError(f"Ukjent ekstern regel i {name}: {external_line}")
-                            continue
-                        transformed.append(external_line if host.group(1) in SHARED_EXTERNAL_HOSTS
-                                           else marked(external_line, "ekstern host må vurderes"))
+                if external_lines:
+                    transformed.extend(["      external:", *external_lines])
                 continue
             if in_access:
                 if not re.match(r"^  [A-Za-z]", line) and not line.startswith("---"):
@@ -477,11 +482,23 @@ def profile(root: Path, module: str, suffix: str, stream: bool = False) -> str:
                 continue
             if line.startswith("REDIS_HOST:"):
                 result.append(changed(line, "nav-ident-redis.org", f"nav-ident-redis-{suffix}.org"))
-            elif re.search(r"(?:SCOPE|BASEURL|BASE_URL|GROUPID|CLIENT_ID)", line):
-                for peer in sorted(NAMES, key=len, reverse=True):
-                    line = re.sub(r"(?<![\w-])" + re.escape(peer) + r"(?=(?:\.(?:nom|org)\.svc|/\.default))",
-                                  lambda m: f"{m.group(0)}-{suffix}", line)
-                result.append(marked(line, "scope, delt tjeneste eller klienttilgang må godkjennes"))
+            else:
+                review = bool(re.search(r"(?:SCOPE|BASEURL|BASE_URL|GROUPID|CLIENT_ID)", line))
+                if review:
+                    for peer in sorted(NAMES, key=len, reverse=True):
+                        line = re.sub(r"(?<![\w-])" + re.escape(peer) + r"(?=(?:\.(?:nom|org)\.svc|/\.default))",
+                                      lambda m: f"{m.group(0)}-{suffix}", line)
+                url_changed = False
+                for peer in sorted(NAMES - {"nav-ident-redis"}, key=len, reverse=True):
+                    namespace = "nom" if peer == "nom-api" else "org"
+                    host = re.compile(
+                        r"(?<![\w.-])http://" + re.escape(peer) + r"\." + namespace
+                        + r"(?=:\d+(?:/|[\"'\s#]|$)|(?:/|[\"'\s#]|$))"
+                    )
+                    line, count = host.subn(lambda _: f"http://{peer}-{suffix}.{namespace}", line)
+                    url_changed = url_changed or count > 0
+                if review or url_changed:
+                    result.append(marked(line, "scope, delt tjeneste eller klienttilgang må godkjennes"))
     app_names = {app_module: app_name for app_name, (_, _, app_module, _) in APPS.items() if app_module}
     if not stream and module != "paarorende":
         expected_name = app_names[module]
@@ -497,7 +514,7 @@ def profile(root: Path, module: str, suffix: str, stream: bool = False) -> str:
         result[result.index(name_lines[0])] = changed(name_lines[0], old, new)
     if stream:
         result += ["", "spring:", "  kafka:", "    streams:",
-                   f"      application-id: ${{KAFKA_STREAMS_APPLICATION_ID}}-{suffix} {AUTO}"]
+                   "      application-id: ${KAFKA_STREAMS_APPLICATION_ID}"]
     overrides = state_overrides(root, module, suffix)
     if overrides:
         result += ["", *overrides]
@@ -578,7 +595,18 @@ def workflow(text: str, manifest_path: str, suffix: str, web: bool, path_filter:
     return text
 
 
-def topic_workflow(suffix: str) -> str:
+def topic_action(root: Path, action: str) -> str:
+    """Use the same pinned action as the existing org topic deployment."""
+    workflow = (root / ".github/workflows/kafka-topics-org.yaml").read_text()
+    matches = re.findall(r"(?m)^\s*- uses: (" + re.escape(action) + r"@[a-f0-9]{40}(?:\s+#.*)?)$", workflow)
+    if not matches or len(set(matches)) != 1:
+        raise ValueError(f"Mangler entydig SHA for {action} i kafka-topics-org.yaml")
+    return matches[0]
+
+
+def topic_workflow(root: Path, suffix: str) -> str:
+    checkout = topic_action(root, "actions/checkout")
+    deploy = topic_action(root, "nais/deploy/actions/deploy")
     return f"""name: 'update-kafka-topics: additional-dev-{suffix}'
 on:
   push:
@@ -599,8 +627,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
-      - uses: nais/deploy/actions/deploy@d003bddf74ce5b96fa3056ae60bd4b9b3bbc89ef # ratchet:nais/deploy/actions/deploy@v3
+      - uses: {checkout}
+      - uses: {deploy}
         env:
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
@@ -640,7 +668,7 @@ def generate(root: Path, suffix: str) -> list[Path]:
     topics = Path(".nais/topics") / f"topics-additional-dev-{suffix}.yaml"
     writes[topics] = topic_documents(root, suffix)
     topic_flow = Path(".github/workflows") / f"kafka-topics-additional-dev-{suffix}.yaml"
-    writes[topic_flow] = topic_workflow(suffix)
+    writes[topic_flow] = topic_workflow(root, suffix)
     for path, app, namespace in SHARED_DEV_CALLERS:
         writes[path] = add_shared_dev_caller((root / path).read_text(), app, namespace, suffix)
     # Refuse any existing generated target and any repository with missing sources.

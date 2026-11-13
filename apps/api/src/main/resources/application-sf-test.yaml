@@ -1,0 +1,222 @@
+# Kopiert fra apps/api/src/main/resources/application.yaml (commit: 460d94704826746f707f12cd79f91b43475e3470)
+# Kopiert fra apps/api/src/main/resources/application-dev.yaml (commit: cdf9b216b58cdff69040d5941876b16d9fe6d6f1)
+app:
+  name: ${NAIS_APP_NAME:nom-api-sf-test} # Auto-utfylt av 'create_additional_dev_deployment.py'
+  kafka:
+    authorize:
+      eventsource-topic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    ressurs:
+      eventsourceTopic: org.nom.ressurs-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      nomMasteredRessursTopic: org.nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgEnhet:
+      eventsourceTopic: org.nom.orgenhet-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgEnhetLeder:
+      eventsource-topic: org.nom.orgenhet-leder-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgtilknytning:
+      eventsource-topic: org.nom.orgtilknytning-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      dvhLastResultTopic: IKKE_I_BRUK # Auto-utfylt av 'create_additional_dev_deployment.py'
+    organisering:
+      eventsourceTopic: org.nom.organisering-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      stateTopic: org.nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  clients:
+    nom-paarorende:
+      base-url: ${PAARORENDE_BASEURL}
+      max-attempts: 3
+      backoff-duration-millis: 2000
+      aad-scope: ${PAARORENDE_API_SCOPE}
+    nom-proxy:
+      base-url: ${NOM_PROXY_BASEURL}
+    nik:
+      base-url: ${NIK_BASEURL}
+      aad-scope: ${NIK_API_SCOPE}
+    pdl:
+      tema: GEN
+      behandlingsnummer: B348
+      base-url: ${PDL_BASEURL}
+      aad-scope: ${PDL_API_SCOPE}
+    microsoft-graph:
+      base-url: https://graph.microsoft.com/v1.0
+      max-attempts: 3
+      backoff-duration-millis: 2000
+      send-email: false
+      groups:
+        nom-delegert: ${NOM_DELEGERT_GROUPID:nomDelegertGroup}
+        nom-leder: ${NOM_LEDER_GROUPID:nomLederGroup}
+    nom-remedy-integrasjon:
+      base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
+    main-manager:
+      base-url: ${MAIN_MANAGER_BASEURL}
+      username: ${MAIN_MANAGER_USERNAME}
+      password: ${MAIN_MANAGER_PASSWORD}
+      grant-type: password
+      token-path: /restapi/token
+    dvh-ords:
+      client_-id: ${DVH_ORDS_CLIENT_ID:dvh_client_id}
+      client-secret: ${DVH_ORDS_CLIENT_SECRET:dvh_client_secret}
+      token-uri: https://dvh.adeo.no/ords/dvh/oauth/token
+      base-url: https://dvh.adeo.no/ords/dvh
+      enhet-path: /dvh_nom/nom_ords_hrorg_orgenhet.json
+      ressurs-stillinger-path: /dvh_nom/nom_ords_ressurs_stillinger.json
+      eksterne-ressurser-path: /dvh_nom/nom_ords_eksterne.json
+      ansatte-buckets-path: /dvh_nom/nom_ords_ansatte_buckets.json
+      tlf-path: /dvh_nom/nom_ords_tlf.json
+      org-hierarki-path: /dvh_nom/nom_ords_hrorg_hierarki.json
+      nom-ressurser-path: /dvh_nom/nom_ords_ansatte_historikk.json
+    slack:
+      token: ${SLACK_TOKEN}
+      channel-id-primary: "G01F99D2AHX"
+      channel-id-secondary: "C040RV7KCH5"
+    org-enhet-kostnadssted-mapping:
+      aad-scope: ${ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE}
+      base-url: ${ORGENHET_KOSTNADSSTED_MAPPING_API_URL}
+  epost-varsel-for-enhet-navnendring:
+    max-evt-alder-dager-for-varsel: 60
+  email:
+    enabled: false # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+  dolly-ressurs:
+    fysisk-brukersted-nr: 1424
+    orgenhet-id: ra970u #Årdal
+
+  fiksEventsourcePayload:
+    offsets: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+      ressurs: 0
+      orgenhet: 0
+      orgenhetLeder: 0
+      orgtilknytning: 0
+      organisering: 0
+      authorize: 0
+  granted-authorities:
+    clients:
+      nom-ui2:
+        client-id: "<client id for nom-ui2-sf-test>" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS", "NOM_UI_APP"]
+      ida:
+        client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      dolly:
+        client-id: "0395cdd9-bb3b-4370-adcb-d67e3dd63b7d" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["MUTATE_RESSURS", "DOLLY"]
+      nom-admin:
+        client-id: "<client id for nom-admin-sf-test>" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["QUERY_PERSON"]
+      nom-sf-integrasjon:
+        client-id: "<client id for nom-sf-integrasjon-sf-test>" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_SF_INTEGRASJON_APP"]
+      #     For testing av endepunkter under /api/v1/teamcat
+      org-token-tool:
+        client-id: "18c1d86b-4635-461c-8718-62c130087211" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["TEAMCAT"]
+    groups:
+      nom-leder:
+        group-id: "${NOM_LEDER_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["MUTATE_RESSURS"]
+      nom-delegert:
+        group-id: "${NOM_DELEGERT_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["MUTATE_RESSURS"]
+      nom-write:
+        group-id: "${NOM_WRITE_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["ADMIN", "MUTATE_RESSURS"]
+      nom-pilot:
+        group-id: "${NOM_PILOT_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_PILOT"]
+      nom-write-utl-konsulent:
+        group-id: "${NOM_WRITE_UTL_KONSULENT_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_WRITE_UTL_KONSULENT", "MUTATE_RESSURS"]
+      nom-write-vikafossen:
+        group-id: "${NOM_WRITE_VIKAFOSSEN_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_WRITE_VIKAFOSSEN", "MUTATE_RESSURS"]
+      nom-write-robot:
+        group-id: "${NOM_WRITE_ROBOT_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_WRITE_ROBOT", "MUTATE_RESSURS"]
+      readonly:
+        group-id: "${READONLY_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes:
+          - READONLY
+      extended-readonly:
+        group-id: "${EXTENDED_READONLY_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes:
+          - READONLY
+          - EXTENDED_READONLY
+      nom-write-external-funds-recipient:
+        group-id: "${NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID}" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+        scopes: ["NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT"]
+  orgenhet:
+    nav-id: sa312u
+    direktoratId: fa965e
+    helfo-id: mu405g
+    skatt-id: ja464g
+    riksrevisjonen-id: ge146b
+    vikafossen-id: ru151s
+    teknologiavdelingenId: je104d
+    linjeenhetene: me177r,ju219d,hu797w,tu734a,sy471r # Rekkefølgen styrer rekkefølge på forsiden. Frontend viser de 4 første.
+    nasjonaloppfolgning-ids: pa473v,sa676g,hy812b
+  google-storage-bucket-name: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+    ressurs-endringer: no-nav-nom-dev-ressurs-syntetisering-storage-bucket-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    missing-ot: no-nav-org-dev-missing-orgtilnytninger-storage-bucket-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py' # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+    missing-ekstern-sluttdato: remedy-ressurs-sluttdato
+    utbet-mottakere: org-nom-api-utbet-mottakere-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  manuelle-ressurser-og-ledere:
+    enabled: true # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': DEV-verdi eller tilgang må godkjennes for varianten
+    ressurser:
+      - navident: N852930         # fredfull.nitrogen@trygdeetaten.no - Leder av dy165d - 857610-Brukerstøtte-ORGNIV3
+        orgtilknytning: de870y    # 8576100-Brukerstøtte-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: F869325         # kald.floy@trygdeetaten.no - Leder av sy293c - 8576101-Brukerstøtte 1-ORGENHET - Har N852930 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: F850744         # lei.frukt@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHETT
+        sektor: NAV_STATLIG
+      - navident: F873959         # gjestfri.folk@trygdeetaten.no - Har IKKE NOM-WRITE-DELEGERT tilgang - Har F869325 som leder
+        orgtilknytning: sy293c    # 8576101-Brukerstøtte 1-ORGENHET
+        sektor: EKSTERN
+      - navident: A862414         # toff.andrefiolin@trygdeetaten.no - Leder av na494k - 192400-Målselv-Bardu-ORGNIV3
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_STATLIG
+      - navident: G850411         # Varm.Gullstol@trygdeetaten.no - Har NOM-WRITE-DELEGERT tilgang - Har A862414 som leder
+        orgtilknytning: mu972n    # 1924000-Målselv-Bardu-ORGENHET
+        sektor: NAV_KOMMUNAL
+
+    ledere:
+      - navident: N852930
+        orgenhet: dy165d
+      - navident: F869325
+        orgenhet: sy293c
+      - navident: A862414
+        orgenhet: na494k
+
+NIK_BASEURL: "http://nav-ident-sf-test.org" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NIK_API_SCOPE: api://dev-gcp.org.nav-ident-sf-test/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+MAIN_MANAGER_BASEURL: "https://nav-test.mainmanager.no" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PAARORENDE_BASEURL: "http://nom-paarorende-sf-test.org" # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PAARORENDE_API_SCOPE: api://dev-gcp.org.nom-paarorende-sf-test/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+ORGENHET_KOSTNADSSTED_MAPPING_API_SCOPE: api://dev-gcp.team-nof.orgenhet-kostnadssted-mapping-api/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+
+NOM_DELEGERT_GROUPID: "42d11885-1e29-4fc4-9eed-1b339c2c8e36" # 0000-GA-NOM-WRITE-DELEGERT # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_LEDER_GROUPID: "e9cd9267-9baf-4078-abb8-7251c4313d32" # 0000-GA-NOM-WRITE-LEDER # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057" # nom-write # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # nom-admin # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_PILOT_GROUPID: "087625aa-d658-4b00-9d71-8538b1a8fd15" # NOM-PILOT # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_WRITE_UTL_KONSULENT_GROUPID:  "fb625494-4aa6-4061-9f87-02c820210ed9" # 0000-CA-NOM-Write-Utl-Konsulent # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_WRITE_VIKAFOSSEN_GROUPID:     "2632148d-54a6-4b17-9e53-9d415d73653f" # 0000-CA-NOM-Write-Vikafossen # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_WRITE_ROBOT_GROUPID:          "a735d831-420f-4a63-949b-a02ef0f17673" # 0000-CA-NOM-Write-Robot # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+READONLY_GROUPID:           "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+EXTENDED_READONLY_GROUPID:  "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+NOM_WRITE_EXTERNAL_FUNDS_RECIPIENT_GROUPID:  "b83d8dcc-9d73-4609-8e86-f9d1666df174" # 0000-CA-NomApi_Opprette_ekstern_utbetalings_mottaker # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+
+nom.libs.state.ressurs.state-topic: org.nom.intern-ressurs-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet.state-topic: org.nom.intern-orgenhet-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgtilknytning.state-topic: org.nom.intern-orgtilknytning-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.organisering.state-topic: org.nom.intern-organisering-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.mastered-ressurs.state-topic: org.nom.nom-mastered-ressurs-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.delegert-leder.state-topic: org.nom.nom-authorize-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+nom.libs.state.orgenhet-leder.state-topic: org.nom.intern-orgenhet-leder-state-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'

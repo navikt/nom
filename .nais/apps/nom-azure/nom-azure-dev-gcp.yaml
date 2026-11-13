@@ -83,6 +83,9 @@ spec:
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: dev-gcp
+        - application: nom-ui2-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
     outbound:
       external:
         - host: org-unleash-api.nav.cloud.nais.io

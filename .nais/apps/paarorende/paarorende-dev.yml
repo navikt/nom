@@ -11,7 +11,7 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    - https://paarorende.intern.dev.nav.no
+    - https://nom-paarorende.intern.dev.nav.no
   env:
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default

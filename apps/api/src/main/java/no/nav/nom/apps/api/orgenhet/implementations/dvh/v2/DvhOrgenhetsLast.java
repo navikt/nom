@@ -53,7 +53,7 @@ public class DvhOrgenhetsLast {
         try {
             var dvhOrgenheter = dvhOrdsService.getOrgenheter();
 
-            val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
+            val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), _ -> new LinkedList<DvhOrgenhetV2>()));
 
             val parsedEnheter = dvhOrgenheter.stream()
                     // Validation: Orgenhetstatus should only be P and N
@@ -111,7 +111,7 @@ public class DvhOrgenhetsLast {
 
             debugLogDuplikaterPaaUniqueAgressoId(parsedEnheter);
 
-            parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
+            parsedEnheter.forEach((_, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
                 .forEach(parsedEnhet -> {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateRepository.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
                     val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
@@ -283,7 +283,7 @@ public class DvhOrgenhetsLast {
     private void korrigerOrgEnhetHvisEndringer(DvhOrgenhetV2 dvhOrgenhetV2, OrgEnhetState orgEnhetState) {
         val navnEndret = !orgEnhetState.navn().equals(dvhOrgenhetV2.getNavn());
         val datoFOMEndret = !orgEnhetState.gyldigFom().equals(dvhOrgenhetV2.getGyldigFom());
-        val datoTOMEndret = !Objects.equals(orgEnhetState.gyldigTom(),dvhOrgenhetV2.getGyldigTom());
+        val datoTOMEndret = !Objects.equals(orgEnhetState.gyldigTom(),dvhOrgenhetV2.getGyldigTom()) && nonNull(dvhOrgenhetV2.getGyldigTom());
         val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType(), dvhOrgenhetV2.getAgressoOrgenhetType());
 
         if (navnEndret || datoFOMEndret || datoTOMEndret ||agressoOrgEnhetTypeEndret) {
@@ -291,7 +291,7 @@ public class DvhOrgenhetsLast {
                     orgEnhetState.id(),
                     dvhOrgenhetV2.getNavn(),
                     dvhOrgenhetV2.getGyldigFom(),
-                    dvhOrgenhetV2.getGyldigTom(),
+                    datoTOMEndret ? dvhOrgenhetV2.getGyldigTom() : orgEnhetState.gyldigTom(),
                     orgEnhetState.overordnetOrgEnhetFid(),
                     orgEnhetState.lederFid(),
                     new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
@@ -306,7 +306,7 @@ public class DvhOrgenhetsLast {
         PARKED_WITHOUT_STILLINGER("Enheten er parkert uten stillinger"),
         PARKED_INVALID_PERIOD("Parkert enhet med gyldigTom som er før gyldigFom");
 
-        String beskrivelse;
+        final String beskrivelse;
 
         ValidationType(String beskrivelse) {
             this.beskrivelse = beskrivelse;

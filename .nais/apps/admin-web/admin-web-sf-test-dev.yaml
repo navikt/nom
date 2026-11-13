@@ -1,0 +1,100 @@
+# Kopiert fra .nais/apps/admin-web/admin-web-dev.yaml (commit: d3d986fe2f5b4d9f2d84ff5016202e75ab0ab766)
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-admin-web-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+  namespace: org
+  labels:
+    team: org
+spec:
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: EXPRESS_HOST
+      value: "::"
+    - name: EXPRESS_PORT
+      value: "8080"
+    - name: NOM_ADMIN_API_URL
+      value: http://nom-admin-sf-test.org # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_ADMIN_API_SCOPE
+      value: api://dev-gcp.org.nom-admin-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_API_URL
+      value: http://nom-api-sf-test.nom # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_REMEDY_INTEGRASJON_API_URL
+      value: https://nom-remedy-integrasjon.dev-fss-pub.nais.io
+    - name: NOM_REMEDY_INTEGRASJON_API_SCOPE
+      value: api://dev-fss.org.nom-remedy-integrasjon/.default
+    - name: NOM_SF_INTEGRASJON_API_URL
+      value: http://nom-sf-integrasjon-sf-test.org # Auto-utfylt av 'create_additional_dev_deployment.py'
+    - name: NOM_SF_INTEGRASJON_API_SCOPE
+      value: api://dev-gcp.org.nom-sf-integrasjon-sf-test/.default # Auto-utfylt av 'create_additional_dev_deployment.py'
+  image: "{{image}}"
+  port: 8080
+  azure:
+    application: # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': Azure-klient, grupper, redirect og azp må vurderes
+      enabled: true
+      allowAllUsers: false
+      singlePageApplication: true
+      claims:
+        groups:
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650" # AD gruppe NOM-ADMIN
+          - id: "76611d10-876b-4df1-8425-dfe61e6990d1" # 0000-CA-NOM-ADMIN-Lesetilgang
+          - id: "a0c8eddc-2435-4fea-a642-58b2b16dd8e0" # 0000-CA-NOM-ADMIN-Utvidet-Lesetilgang
+        extra:
+          - NAVident
+          - azp_name
+      tenant: trygdeetaten.no
+      replyURLs:
+        - http://localhost:8080/oauth2/callback
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - "/frackend/*"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: nom-admin-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+        - application: nom-api-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: nom
+          cluster: dev-gcp
+        - application: nom-sf-integrasjon-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+          namespace: org
+          cluster: dev-gcp
+  ingresses:
+    - https://nom-admin-sf-test.ansatt.dev.nav.no # Auto-utfylt av 'create_additional_dev_deployment.py'
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: nodejs
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic

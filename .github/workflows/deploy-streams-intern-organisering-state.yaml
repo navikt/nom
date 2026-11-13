@@ -6,6 +6,7 @@ on:
       - 'main'
       - 'dev/**'
     paths:
+      - '.nais/streams/intern-organisering-state-sf-test.yaml'
       - 'apps/streams/internal/organisering-state/**'
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/intern-organisering-state.yaml'
@@ -24,6 +25,7 @@ jobs:
       jar-path: apps/streams/internal/organisering-state/target/app.jar
       image-suffix: nom-intern-organisering-state
       nais-config-file-path-dev: .nais/streams/intern-organisering-state.yaml
+      additional-dev-deployments: '[{"suffix":"sf-test","manifest":".nais/streams/intern-organisering-state-sf-test.yaml"}]'
       nais-config-file-path-prod: .nais/streams/intern-organisering-state.yaml
       additional-nais-vars-dev: ',kafka-pool=nav-dev'
       additional-nais-vars-prod: ',kafka-pool=nav-prod'

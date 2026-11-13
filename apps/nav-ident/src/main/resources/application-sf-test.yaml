@@ -1,0 +1,28 @@
+# Kopiert fra apps/nav-ident/src/main/resources/application.yaml (commit: 460d94704826746f707f12cd79f91b43475e3470)
+# Kopiert fra apps/nav-ident/src/main/resources/application-dev.yaml (commit: cdf9b216b58cdff69040d5941876b16d9fe6d6f1)
+app:
+  name: ${NAIS_APP_NAME:nav-ident-sf-test} # Auto-utfylt av 'create_additional_dev_deployment.py'
+  kafka:
+    topic:
+      eventsource:
+        name: org.nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+      rnr:
+        name: org.nav-ident-rnr-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    identServiceListenerName: IdentService_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (For asynk koble rnr need.respons til selve requesten)
+    eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod), også fra start av stream
+    eventSourceIdleTimeout: 10000 # Millis før idle event - brukes for å trigge når lesing av eventsource køen er ferdig.
+  pdl:
+    tema: GEN
+    behandlingsnummer: B348
+    baseUrl: ${PDL_BASE_URL}
+    aadClientId: api://${PDL_CLIENT_ID}/.default
+    timeoutInMillis: 2500
+  redis:
+    rnrClientTokenCacheName: rnrClientTokenCache
+  navident:
+    sequence:  ${NAVIDENT_SEQUENCE:168000} # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': sekvensområde for NAV-ident må være unikt
+
+PDL_CLIENT_ID: dev-fss.pdl.pdl-api # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': scope, delt tjeneste eller klienttilgang må godkjennes
+REDIS_HOST: nav-ident-redis-sf-test.org # Auto-utfylt av 'create_additional_dev_deployment.py'

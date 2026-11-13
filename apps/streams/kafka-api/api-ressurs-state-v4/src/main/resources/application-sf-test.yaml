@@ -1,0 +1,16 @@
+# Kopiert fra apps/streams/kafka-api/api-ressurs-state-v4/src/main/resources/application.yaml (commit: 4f52f32feec215bc8e68b44c4e9030b05c03fb50)
+app:
+  kafka:
+    state-topic: org.nom.api-ressurs-state-v4-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    ressurs-evtsrc-topic: org.nom.ressurs-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+    navidentTopic: org.nav-ident-sf-test # Auto-utfylt av 'create_additional_dev_deployment.py'
+
+    # Se Readme.md    org.nom-kafka-api-ressurs-state_stream_-2
+    skip-producing-state-events-until-ressurs-evtsrc-offset: 0 # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': offset i nytt topic
+    skip-producing-state-events-until-orgtilknytning-evtsrc-offset: 0 # KONTROLLER MANUELT - Kontroller verdi og tilgang før deploy - 'create_additional_dev_deployment.py': offset i nytt topic
+
+spring:
+  kafka:
+    streams:
+      application-id: ${KAFKA_STREAMS_APPLICATION_ID}
