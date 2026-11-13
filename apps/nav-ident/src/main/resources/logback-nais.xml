@@ -49,6 +49,8 @@
 
     <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
     <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
+    <!-- Ikke logg JDBC url med pwd i klartekst - FlywayExecutor -->
+    <logger name="org.flywaydb" level="warn"/>
 
     <!-- Quiet down kafka logging -->
     <logger name="org.apache.kafka" level="warn" />

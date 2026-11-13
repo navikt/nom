@@ -8,6 +8,8 @@
     </appender>
     <!-- Ikke logg JDBC url med pwd i klartekst - spring boot 4 -->
     <logger name="org.hibernate.orm.connections.pooling" level="warn"/>
+    <!-- Ikke logg JDBC url med pwd i klartekst - FlywayExecutor -->
+    <logger name="org.flywaydb" level="warn"/>
     <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>
