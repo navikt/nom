@@ -27,14 +27,12 @@ public class SetteGyldigTomPaaOrgEnheterUtenOrganisering {
         var orgEnheterUtenGyldigTom = orgEnhetStateRepository.getAll()
             .stream()
             .filter(orgEnhetState -> isNull(orgEnhetState.gyldigTom()))
-            .filter(orgEnhetState -> !orgEnhetState.gyldigFom().isAfter(LocalDate.now()))
+            .filter(orgEnhetState -> orgEnhetState.gyldigFom().isBefore(LocalDate.now()))
             .collect(Collectors.toMap(OrgEnhetState::id, orgEnhetState -> orgEnhetState));
-
-        var organiseringer = organiseringStateRepository.getHistoricOrganisering();
 
         var orgEnheterToSetGyldigTom = orgEnheterUtenGyldigTom.entrySet()
             .stream()
-            .filter(stringOrgEnhetStateEntry -> !organiseringer.containsKey(stringOrgEnhetStateEntry.getKey()))
+            .filter(stringOrgEnhetStateEntry -> organiseringStateRepository.findById(stringOrgEnhetStateEntry.getKey()).isEmpty())
             .toList();
 
         StringBuilder antallAvsluttet = new StringBuilder();
@@ -49,7 +47,7 @@ public class SetteGyldigTomPaaOrgEnheterUtenOrganisering {
                 orgEnhetState.id(),
                 orgEnhetState.navn(),
                 orgEnhetState.gyldigFom(),
-                orgEnhetState.gyldigTom()
+                LocalDate.now().minusDays(1)
             ));
             if (!dryRun) {
                 orgEnhetCommandService.avvikleOrgEnhet(
