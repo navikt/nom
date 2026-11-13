@@ -343,6 +343,7 @@ function CreateSpecialResourceFormInner({
     queryFn: () => getPerson.queryFn(personRequest),
     enabled: !!identifikasjonsnummer,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const person = personQuery.data;
