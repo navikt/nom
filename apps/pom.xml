@@ -24,6 +24,7 @@
         <module>nom-sf-integrasjon</module>
         <module>admin</module>
         <module>nom-rdbms-data</module>
+        <module>nom-testdata</module>
         <module>paarorende</module>
         <module>nom-azure</module>
     </modules>

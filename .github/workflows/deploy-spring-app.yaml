@@ -14,8 +14,9 @@ on:
         required: true
         type: string
       nais-config-file-path-prod:
-        required: true
+        required: false
         type: string
+        default: ''
       additional-dev-deployments:
         required: false
         type: string
@@ -224,7 +225,7 @@ jobs:
       contents: "read"
       id-token: "write"
     name: Deploy to NAIS ${{ inputs.prod-cluster }}
-    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests && !inputs.skip-prod-deploy}}
+    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests && !inputs.skip-prod-deploy && inputs.nais-config-file-path-prod != ''}}
     needs:
       - build-app-docker
       - build-test-app
