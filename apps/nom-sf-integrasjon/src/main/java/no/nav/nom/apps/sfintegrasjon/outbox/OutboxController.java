@@ -54,7 +54,7 @@ public class OutboxController {
     }
 
     @PostMapping("/retry")
-    private ResponseEntity<StandardResponse> retry(@RequestBody String orgEnhetId) {
+    public ResponseEntity<StandardResponse> retry(@RequestBody String orgEnhetId) {
         return outboxRestService.retryByOrgEnhetId(orgEnhetId);
     }
 }
