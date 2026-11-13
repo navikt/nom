@@ -73,11 +73,15 @@ public class SecurityConfig {
         var decoder = NimbusJwtDecoder.withJwkSetUri(settings.getJwkSetUri()).build();
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
                 JwtValidators.createDefaultWithIssuer(settings.getIssuerUri()),
-                jwt -> jwt.getAudience().stream().anyMatch(settings.getAudiences()::contains)
+                jwt -> isValidAudience(jwt, settings)
                         ? OAuth2TokenValidatorResult.success() : invalidToken(),
                 jwt -> isDelegatedUserToken(jwt, allowedClients)
                         ? OAuth2TokenValidatorResult.success() : invalidToken()));
         return decoder;
+    }
+
+    private static boolean isValidAudience(Jwt jwt, OAuth2ResourceServerProperties.Jwt settings) {
+        return jwt.getAudience() != null && jwt.getAudience().stream().anyMatch(settings.getAudiences()::contains);
     }
 
     private static boolean isDelegatedUserToken(Jwt jwt, Set<String> allowedClients) {
