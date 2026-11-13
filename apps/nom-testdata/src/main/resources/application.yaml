@@ -1,0 +1,56 @@
+app:
+  name: ${NAIS_APP_NAME:nom-testdata}
+
+spring:
+  application:
+    name: nom-testdata
+  datasource:
+    url: ${DATABASE_JDBC_URL}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 3
+      idle-timeout: 300000
+      max-lifetime: 1800000
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    fail-on-missing-locations: false
+  kafka:
+    listener:
+      auto-startup: false
+    admin:
+      auto-create: false
+    client-id: nom-testdata
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AZURE_OPENID_CONFIG_ISSUER}
+          jwk-set-uri: ${AZURE_OPENID_CONFIG_JWKS_URI}
+          audiences: ${AZURE_APP_CLIENT_ID}
+
+nom:
+  security:
+    admin-group-id: ${NOM_ADMIN_GROUPID}
+    pre-authorized-apps: ${AZURE_APP_PRE_AUTHORIZED_APPS}
+
+unleash:
+  enabled: ${UNLEASH_ENABLED:true}
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}
+
+management:
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db

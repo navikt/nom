@@ -1,0 +1,84 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-testdata
+  namespace: org
+  labels:
+    team: org
+spec:
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://nom-testdata.intern.dev.nav.no
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: LOGGING_CONFIG
+      value: classpath:logback-nais.xml
+    - name: NOM_ADMIN_GROUPID
+      value: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+    - name: OTEL_JAVAAGENT_LOGGING
+      value: none
+  envFrom:
+    - secret: nom-testdata-unleash-api-token
+  replicas:
+    min: 1
+    max: 1
+  liveness:
+    path: /internal/health/liveness
+    initialDelay: 15
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: /internal/health/readiness
+    initialDelay: 15
+    periodSeconds: 3
+    timeout: 4
+    failureThreshold: 2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"    # NOM_ADMIN_GROUPID
+  gcp:
+    sqlInstances:
+      - name: nom-testdata
+        type: POSTGRES_18
+        tier: db-custom-1-3840
+        databases:
+          - name: nom-testdata-db
+            envVarPrefix: DATABASE
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-admin-web
+          namespace: org
+          cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+        - application: azure-token-generator
+          namespace: nais
+          cluster: dev-gcp
+    outbound:
+      external:
+        - host: org-unleash-api.nav.cloud.nais.io
