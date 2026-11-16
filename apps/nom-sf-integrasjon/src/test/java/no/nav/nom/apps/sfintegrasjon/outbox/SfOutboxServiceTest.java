@@ -161,7 +161,7 @@ class SfOutboxServiceTest {
 
             assertThat(sendtTilSf()).singleElement().satisfies(sendt -> {
                 assertThat(sendt.sporingsId()).isEqualTo("10");
-                assertThat(sendt.sfOrgEnhet().navn()).isEqualTo("Versjon 10");
+                assertThat(sendt.orgenhet().navn()).isEqualTo("Versjon 10");
                 assertThat(sendt.endretAv()).containsExactly("Z990010");
                 assertThat(sendt.endringshendelser()).containsExactly("OrgEnhetKorrigertEventV1");
             });

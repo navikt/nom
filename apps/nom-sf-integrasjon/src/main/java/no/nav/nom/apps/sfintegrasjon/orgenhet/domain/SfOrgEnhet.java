@@ -19,6 +19,6 @@ public record SfOrgEnhet(
     LocalDate gyldigFom,
     LocalDate gyldigTom,
     List<Leder> ledere,
-    List<OverOrgEnhet> overOrgEnheter
+    List<OverOrgEnhet> overenheter
 ) {
 }

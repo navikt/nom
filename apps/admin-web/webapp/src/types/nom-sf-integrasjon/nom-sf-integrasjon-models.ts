@@ -62,7 +62,7 @@ export interface SfOrgEnhet {
   /** @format date */
   gyldigTom?: string;
   ledere?: Leder[];
-  overOrgEnheter?: OverOrgEnhet[];
+  overenheter?: OverOrgEnhet[];
 }
 
 export interface SfOutboxResponse {

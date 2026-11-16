@@ -56,7 +56,7 @@ class SfCpiClientTest {
         .sporingsId("42")
         .endretAv(Set.of("Z990001"))
         .endringshendelser(Set.of("OrgEnhetKorrigertEventV1", "OrgEnhetLederOpprettetEventV1"))
-        .sfOrgEnhet(SfOrgEnhet.builder()
+        .orgenhet(SfOrgEnhet.builder()
             .id("aa0001")
             .navn("Seksjon for testing")
             .nivaa(NomNivaa.ARBEIDSOMRAADE)
@@ -67,7 +67,7 @@ class SfCpiClientTest {
             .gyldigFom(LocalDate.of(2024, 1, 1))
             .gyldigTom(null)
             .ledere(List.of(new Leder("Z990002", LocalDate.of(2024, 2, 1), null)))
-            .overOrgEnheter(List.of(new OverOrgEnhet("bb0002", NomNivaa.LINJEENHET, LocalDate.of(2024, 1, 1), null)))
+            .overenheter(List.of(new OverOrgEnhet("bb0002", NomNivaa.LINJEENHET, LocalDate.of(2024, 1, 1), null)))
             .build())
         .build();
 
@@ -88,7 +88,7 @@ class SfCpiClientTest {
             "gyldigFom": "2024-01-01",
             "gyldigTom": null,
             "ledere": [{"navident": "Z990002", "gyldigFom": "2024-02-01", "gyldigTom": null}],
-            "overOrgEnheter": [{"id": "bb0002", "nivaa": "LINJEENHET", "gyldigFom": "2024-01-01", "gyldigTom": null}]
+            "overenheter": [{"id": "bb0002", "nivaa": "LINJEENHET", "gyldigFom": "2024-01-01", "gyldigTom": null}]
           }
         }
         """;

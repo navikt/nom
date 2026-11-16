@@ -122,9 +122,9 @@ public class NomSfOrgEnhetOppdateringService {
                         orgEnhetLederState.sluttdato()
                     )).toList();
 
-                    List<OverOrgEnhet> overOrgEnheter = new ArrayList<>();
+                    List<OverOrgEnhet> overenheter = new ArrayList<>();
                     if (!Objects.equals(orgEnhet.nomNivaa(), NomNivaa.LINJEENHET)) {
-                        overOrgEnheter.addAll(organiseringerState.stream()
+                        overenheter.addAll(organiseringerState.stream()
                             .filter(organiseringState -> !Objects.equals(organiseringState.gyldigFom(), organiseringState.gyldigTom()))
                             .filter(organiseringState -> nonNull(organiseringState.idOver()))
                             // Datoene er perioden enheten lå under overenheten, ikke overenhetens egne datoer
@@ -139,7 +139,7 @@ public class NomSfOrgEnhetOppdateringService {
                     }
 
                     //TODO (hamkel): Vurder å fjerne denne hvis det ikke brukes lenger frem i tid.
-                    //checkForNomNivaaAndFetchIfMissing(overOrgEnheter);
+                    //checkForNomNivaaAndFetchIfMissing(overenheter);
                     //var nivaa = finnNivaa(orgEnhet);
 
                     var sfOrgEnhet = new SfOrgEnhet(
@@ -153,7 +153,7 @@ public class NomSfOrgEnhetOppdateringService {
                         orgEnhet.gyldigFom(),
                         orgEnhet.gyldigTom(),
                         ledere,
-                        overOrgEnheter
+                        overenheter
                     );
 
                     var outboxSporingsId = sfOutboxRepository.save(SfOutbox.builder()
@@ -193,8 +193,8 @@ public class NomSfOrgEnhetOppdateringService {
             : findNewestNomNivaaForOverOrgEnhet(orgEnhet.id());
     }
 
-    /*private void checkForNomNivaaAndFetchIfMissing(List<OverOrgEnhet> overOrgEnheter) {
-        overOrgEnheter.replaceAll(overOrgEnhet -> {
+    /*private void checkForNomNivaaAndFetchIfMissing(List<OverOrgEnhet> overenheter) {
+        overenheter.replaceAll(overOrgEnhet -> {
             if (nonNull(overOrgEnhet.nivaa())) {
                 return overOrgEnhet;
             }

@@ -83,13 +83,13 @@ public class SfOutboxService {
             var sfOrgEnhet = objectMapper.readValue(nyesteSfOutboxEnhet.getOrgenhet(), SfOrgEnhet.class);
             SfOutboxDTO response;
             if (unleash.isEnabled("nom-sf-integrasjon.outbox-service-sende-til-sf")) {
-                response = sfCpiClient.sendOrgenhetPayload(sfOutboxDTO.toBuilder().sfOrgEnhet(sfOrgEnhet).build()).getBody();
+                response = sfCpiClient.sendOrgenhetPayload(sfOutboxDTO.toBuilder().orgenhet(sfOrgEnhet).build()).getBody();
             } else {
                 response = SfOutboxDTO.builder()
                     .sporingsId(nyesteSfOutboxEnhet.getSporingsId().toString())
                     .endretAv(nyesteSfOutboxEnhet.getEndretAv())
                     .endringshendelser(nyesteSfOutboxEnhet.getEndringshendelser())
-                    .sfOrgEnhet(sfOrgEnhet)
+                    .orgenhet(sfOrgEnhet)
                     .build();
                 log.info("UNLEASH TOGGLE ER AV, OUTBOX RAD BLIR SATT TIL SENDT. SporingsId: {}", response.sporingsId());
             }
