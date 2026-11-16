@@ -70,7 +70,7 @@ class SfOutboxRepositoryTest {
             .id("aa0001")
             .navn("Seksjon for testing")
             .nivaa(NomNivaa.ARBEIDSOMRAADE)
-            .erLovnode(true)
+            .lovnode(true)
             .type(OrgEnhetsType.NAV_KONTOR)
             .tilgangsenhet("cc0003")
             .kostnadssted("0123400")

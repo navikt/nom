@@ -247,7 +247,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
     class Ovrig {
 
         @Test
-        @DisplayName("erLovnode er true når enheten bare har avsluttede underenheter")
+        @DisplayName("lovnode er true når enheten bare har avsluttede underenheter")
         void erLovnodeNaarEnhetenBareHarAvsluttedeUnderenheter() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
@@ -255,11 +255,11 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "C", IDAG.minusYears(1), null);
             oppheng("W", "Z", IDAG.minusYears(1), IDAG.minusMonths(1));
 
-            assertThat(synk("Z").erLovnode()).isTrue();
+            assertThat(synk("Z").lovnode()).isTrue();
         }
 
         @Test
-        @DisplayName("erLovnode er false når enheten har en aktiv underenhet")
+        @DisplayName("lovnode er false når enheten har en aktiv underenhet")
         void erIkkeLovnodeNaarEnhetenHarAktivUnderenhet() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
@@ -267,7 +267,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "C", IDAG.minusYears(1), null);
             oppheng("W", "Z", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").erLovnode()).isFalse();
+            assertThat(synk("Z").lovnode()).isFalse();
         }
 
         @Test
