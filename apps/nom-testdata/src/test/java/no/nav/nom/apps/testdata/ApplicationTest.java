@@ -1,11 +1,9 @@
 package no.nav.nom.apps.testdata;
 
-import com.zaxxer.hikari.HikariDataSource;
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -13,8 +11,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-
-import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,13 +35,13 @@ class ApplicationTest {
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
     private final WebApplicationContext webApplicationContext;
 
     @Autowired
-    ApplicationTest(JdbcTemplate jdbcTemplate,
+    ApplicationTest(JdbcClient jdbcClient,
                     WebApplicationContext webApplicationContext) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcClient = jdbcClient;
         this.webApplicationContext = webApplicationContext;
     }
 
@@ -57,6 +53,6 @@ class ApplicationTest {
 
         assertThat(result.getStatus().is2xxSuccessful()).isTrue();
         assertThat(result.getResponseBody()).contains("\"status\":\"UP\"");
-        assertThat(jdbcTemplate.queryForObject("select 1", Integer.class)).isEqualTo(1);
+        assertThat(jdbcClient.sql("select 1").query(Integer.class).single()).isEqualTo(1);
     }
 }

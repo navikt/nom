@@ -59,6 +59,8 @@ spec:
       claims:
         groups:
           - id: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"    # NOM_ADMIN_GROUPID
+        extra:
+          - NAVident
   gcp:
     sqlInstances:
       - name: nom-testdata
