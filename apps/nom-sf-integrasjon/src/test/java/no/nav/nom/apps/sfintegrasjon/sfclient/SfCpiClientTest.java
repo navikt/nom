@@ -77,7 +77,7 @@ class SfCpiClientTest {
           "sporingsId": "42",
           "endretAv": ["Z990001"],
           "endringshendelser": ["OrgEnhetKorrigertEventV1", "OrgEnhetLederOpprettetEventV1"],
-          "sfOrgEnhet": {
+          "orgenhet": {
             "id": "aa0001",
             "navn": "Seksjon for testing",
             "nivaa": "ARBEIDSOMRAADE",
@@ -115,7 +115,7 @@ class SfCpiClientTest {
         sfCpiClient = new SfCpiClient(sfProperties, authorizedClientManager);
     }
 
-    //@Test
+    @Test
     @DisplayName("Sender payloaden som JSON med token for sap-cpi, og leser det speilede svaret")
     void senderPayloadOgLeserSpeiletSvar() {
         stubFor(post(STI).willReturn(okJson(PAYLOAD_JSON)));
