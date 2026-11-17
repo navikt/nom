@@ -44,7 +44,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@navikt/aksel-stylelint": "7.37.0",
+    "@navikt/aksel-stylelint": "8.21.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/eslint-plugin-query": "5.105.1",
     "@tanstack/react-query-devtools": "5.105.1",
