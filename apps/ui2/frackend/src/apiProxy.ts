@@ -81,6 +81,12 @@ export function addProxyHandler(
       logger: console,
       on: {
         proxyReq: (proxyRequest, request) => {
+          if (
+            ingoingUrl === "/frackend/nom-api" ||
+            ingoingUrl === "/frackend/teamcat"
+          ) {
+            proxyRequest.setHeader("Accept-Language", "nb-NO");
+          }
           const obo = request.headers["obo-token"];
           if (obo) {
             proxyRequest.removeHeader("obo-token");

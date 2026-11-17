@@ -165,7 +165,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Y", "X", IDAG.minusYears(1), null);
             oppheng("Z", "Y", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").overOrgEnheter())
+            assertThat(synk("Z").overenheter())
                 .containsExactly(new OverOrgEnhet("Y", null, IDAG.minusYears(1), null));
         }
 
@@ -180,7 +180,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "A", IDAG.minusYears(1), IDAG.plusMonths(2).minusDays(1));
             oppheng("Z", "O", IDAG.plusMonths(2), null);
 
-            assertThat(synk("Z").overOrgEnheter())
+            assertThat(synk("Z").overenheter())
                 .filteredOn(overOrgEnhet -> overOrgEnhet.id().equals("O"))
                 .containsExactly(new OverOrgEnhet("O", null, IDAG.plusMonths(2), null));
         }
@@ -197,7 +197,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
             oppheng("Z", "C", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").overOrgEnheter())
+            assertThat(synk("Z").overenheter())
                 .containsExactly(new OverOrgEnhet("C", NomNivaa.DRIFTSENHET, IDAG.minusYears(1), null));
         }
 
@@ -210,7 +210,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "B", IDAG.minusYears(2), IDAG.minusYears(1).minusDays(1));
             oppheng("Z", "C", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").overOrgEnheter()).containsExactlyInAnyOrder(
+            assertThat(synk("Z").overenheter()).containsExactlyInAnyOrder(
                 new OverOrgEnhet("B", NomNivaa.DRIFTSENHET, IDAG.minusYears(2), IDAG.minusYears(1).minusDays(1)),
                 new OverOrgEnhet("C", NomNivaa.DRIFTSENHET, IDAG.minusYears(1), null)
             );
@@ -226,7 +226,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             // Lik FOM og TOM betyr slettet. State beholder opphenget fordi datoen ikke er i dag.
             oppheng("Z", "D", IDAG.minusMonths(1), IDAG.minusMonths(1));
 
-            assertThat(synk("Z").overOrgEnheter())
+            assertThat(synk("Z").overenheter())
                 .extracting(OverOrgEnhet::id)
                 .containsExactly("C");
         }
@@ -238,7 +238,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             enhet("Z", NomNivaa.LINJEENHET);
             oppheng("Z", "T", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").overOrgEnheter()).isEmpty();
+            assertThat(synk("Z").overenheter()).isEmpty();
         }
     }
 
@@ -247,7 +247,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
     class Ovrig {
 
         @Test
-        @DisplayName("erLovnode er true når enheten bare har avsluttede underenheter")
+        @DisplayName("lovnode er true når enheten bare har avsluttede underenheter")
         void erLovnodeNaarEnhetenBareHarAvsluttedeUnderenheter() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
@@ -255,11 +255,11 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "C", IDAG.minusYears(1), null);
             oppheng("W", "Z", IDAG.minusYears(1), IDAG.minusMonths(1));
 
-            assertThat(synk("Z").erLovnode()).isTrue();
+            assertThat(synk("Z").lovnode()).isTrue();
         }
 
         @Test
-        @DisplayName("erLovnode er false når enheten har en aktiv underenhet")
+        @DisplayName("lovnode er false når enheten har en aktiv underenhet")
         void erIkkeLovnodeNaarEnhetenHarAktivUnderenhet() {
             enhet("C", NomNivaa.DRIFTSENHET);
             enhet("Z", NomNivaa.ARBEIDSOMRAADE);
@@ -267,7 +267,7 @@ class NomSfOrgEnhetOppdateringServiceTest {
             oppheng("Z", "C", IDAG.minusYears(1), null);
             oppheng("W", "Z", IDAG.minusYears(1), null);
 
-            assertThat(synk("Z").erLovnode()).isFalse();
+            assertThat(synk("Z").lovnode()).isFalse();
         }
 
         @Test

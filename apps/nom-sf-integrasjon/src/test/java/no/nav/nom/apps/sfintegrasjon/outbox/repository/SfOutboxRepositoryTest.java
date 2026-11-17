@@ -70,14 +70,14 @@ class SfOutboxRepositoryTest {
             .id("aa0001")
             .navn("Seksjon for testing")
             .nivaa(NomNivaa.ARBEIDSOMRAADE)
-            .erLovnode(true)
+            .lovnode(true)
             .type(OrgEnhetsType.NAV_KONTOR)
             .tilgangsenhet("cc0003")
             .kostnadssted("0123400")
             .gyldigFom(LocalDate.of(2024, 1, 1))
             .gyldigTom(null)
             .ledere(List.of(new Leder("Z990002", LocalDate.of(2024, 2, 1), null)))
-            .overOrgEnheter(List.of(
+            .overenheter(List.of(
                 new OverOrgEnhet("bb0002", NomNivaa.LINJEENHET, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31)),
                 new OverOrgEnhet("dd0004", NomNivaa.LINJEENHET, LocalDate.of(2024, 1, 1), null)
             ))

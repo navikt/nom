@@ -12,13 +12,13 @@ public record SfOrgEnhet(
     String id,
     String navn,
     NomNivaa nivaa,
-    boolean erLovnode,
+    boolean lovnode,
     OrgEnhetsType type,
     String tilgangsenhet,
     String kostnadssted,
     LocalDate gyldigFom,
     LocalDate gyldigTom,
     List<Leder> ledere,
-    List<OverOrgEnhet> overOrgEnheter
+    List<OverOrgEnhet> overenheter
 ) {
 }

@@ -10,6 +10,6 @@ public record SfOutboxDTO(
     String sporingsId,
     Set<String> endretAv,
     Set<String> endringshendelser,
-    SfOrgEnhet sfOrgEnhet
+    SfOrgEnhet orgenhet
 ) {
 }
