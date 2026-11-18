@@ -5,11 +5,8 @@ import no.nav.nom.apps.testdata.repository.OrgenhetStateRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -83,7 +80,9 @@ public class OrgenhetStateService {
     @Transactional
     public void endreRekkefolge(long testSettId, List<Long> ids) {
         testSettPessimisticLocking.lockTestSett(testSettId);
-        var rekkefolge = kontrollerRekkefolge(ids, stateRepository.findAll(testSettId));
+        var rekkefolge = RekkefolgeValidator.kontrollerRekkefolge(
+            ids, stateRepository.findAll(testSettId), OrgenhetState::id
+        );
         stateRepository.deferSortOrderConstraint();
         var endring = auditService.endring();
         for (int i = 0; i < rekkefolge.size(); i++) {
@@ -91,16 +90,4 @@ public class OrgenhetStateService {
         }
     }
 
-    private static List<Long> kontrollerRekkefolge(List<Long> ids, List<OrgenhetState> states) {
-        if (ids == null) {
-            throw new IllegalArgumentException("Rekkefølgen må inneholde alle rad-ID-ene nøyaktig én gang");
-        }
-        var rekkefolge = new ArrayList<>(ids);
-        var unikeIder = new HashSet<>(rekkefolge);
-        var eksisterendeIder = states.stream().map(OrgenhetState::id).collect(Collectors.toSet());
-        if (unikeIder.contains(null) || unikeIder.size() != rekkefolge.size() || !unikeIder.equals(eksisterendeIder)) {
-            throw new IllegalArgumentException("Rekkefølgen må inneholde alle rad-ID-ene nøyaktig én gang");
-        }
-        return rekkefolge;
-    }
 }

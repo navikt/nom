@@ -3,33 +3,16 @@ package no.nav.nom.apps.testdata;
 import no.nav.nom.apps.testdata.model.OrgenhetEvtsrcMsg;
 import no.nav.nom.apps.testdata.model.OrgenhetState;
 import no.nav.nom.apps.testdata.model.TestSett;
-import no.nav.nom.apps.testdata.repository.TestSettRepository;
-import no.nav.nom.apps.testdata.service.OrgenhetEvtsrcMsgService;
-import no.nav.nom.apps.testdata.service.OrgenhetStateService;
 import no.nav.nom.apps.testdata.service.TestSettPessimisticLocking;
-import no.nav.nom.apps.testdata.service.TestSettService;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.IllegalTransactionStateException;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -45,65 +28,19 @@ import java.util.concurrent.TimeoutException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Testcontainers
-@SpringBootTest(
-    properties = {
-        "unleash.enabled=false",
-        "spring.security.oauth2.resourceserver.jwt.issuer-uri=https://issuer.invalid",
-        "spring.security.oauth2.resourceserver.jwt.jwk-set-uri=https://issuer.invalid/jwks",
-        "spring.security.oauth2.resourceserver.jwt.audiences=test-client",
-        "nom.security.admin-group-id=test-admin",
-        "nom.security.pre-authorized-apps=[{\"clientId\":\"test-caller\",\"name\":\"test\"}]"
-    }
-)
-class TestdataServiceTest {
+class TestdataServiceTest extends RepositoryDomainTestBase {
     private static final Instant START = Instant.parse("2026-01-14T10:00:00Z");
     private static final LocalDateTime STATE_TIME = LocalDateTime.of(2026, 1, 14, 12, 0);
 
-    @Container
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18");
-
-    @DynamicPropertySource
-    static void databaseProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
-    }
-
-    @Autowired
-    private TestSettService testSettService;
     @Autowired
     private TestSettPessimisticLocking testSettPessimisticLocking;
-    @Autowired
-    private OrgenhetStateService stateService;
-    @Autowired
-    private OrgenhetEvtsrcMsgService meldingService;
-    @Autowired
-    private TestSettRepository testSettRepository;
-    @Autowired
-    private JdbcClient jdbcClient;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @BeforeEach
-    void reset() {
-        SecurityContextHolder.clearContext();
-        jdbcClient.sql("DELETE FROM orgenhet_evtsrc_msg").update();
-        jdbcClient.sql("DELETE FROM orgenhet_state").update();
-        jdbcClient.sql("DELETE FROM test_sett").update();
-    }
-
-    @AfterEach
-    void clearContext() {
-        SecurityContextHolder.clearContext();
-    }
 
     @Test
     void readsCompleteSetAndUpdatesMetadataWithoutChangingCreationAudit() {
         setActor("synthetic-creator");
         var sett = testSettService.opprett(new TestSett.Data("Synthetic set", "description"));
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var melding = meldingService.opprett(sett.id(), messageData(state.id(), 0));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var melding = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
 
         assertThat(sett.audit().opprettetAv()).isEqualTo("synthetic-creator");
         assertThat(state.audit().opprettetAv()).isEqualTo("synthetic-creator");
@@ -126,13 +63,13 @@ class TestdataServiceTest {
     @Test
     void updatesStateAndMessageWithoutChangingTheirCreationAudit() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var melding = meldingService.opprett(sett.id(), messageData(state.id(), 0));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var melding = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
 
         setActor("synthetic-editor");
 
-        var updatedState = stateService.endre(sett.id(), state.id(), stateData(4, STATE_TIME.plusDays(1)));
-        var updatedMessage = meldingService.endre(sett.id(), melding.id(), messageData(null, 5));
+        var updatedState = orgenhetStateService.endre(sett.id(), state.id(), stateData(4, STATE_TIME.plusDays(1)));
+        var updatedMessage = orgenhetEvtsrcMsgService.endre(sett.id(), melding.id(), messageData(null, 5));
 
         assertThat(updatedState.audit().opprettet()).isEqualTo(state.audit().opprettet());
         assertThat(updatedState.audit().opprettetAv()).isEqualTo("nom-testdata");
@@ -146,15 +83,15 @@ class TestdataServiceTest {
     @Test
     void sortsOnlyBySortIdxIncludingHistoryWithReverseTimestamps() {
         var sett = createSet();
-        var first = stateService.opprett(sett.id(), stateData(10, STATE_TIME.plusDays(2)));
-        var second = stateService.opprett(sett.id(), stateData(20, STATE_TIME));
-        var third = stateService.opprett(sett.id(), stateData(30, STATE_TIME));
-        var secondMessage = meldingService.opprett(sett.id(), messageData(second.id(), 20));
-        var firstMessage = meldingService.opprett(sett.id(), messageData(first.id(), 10));
+        var first = orgenhetStateService.opprett(sett.id(), stateData(10, STATE_TIME.plusDays(2)));
+        var second = orgenhetStateService.opprett(sett.id(), stateData(20, STATE_TIME));
+        var third = orgenhetStateService.opprett(sett.id(), stateData(30, STATE_TIME));
+        var secondMessage = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(second.id(), 20));
+        var firstMessage = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(first.id(), 10));
 
-        assertThat(stateService.finnAlle(sett.id())).containsExactly(first, second, third);
-        assertThat(stateService.finnForOrgenhet(sett.id(), "synthetic-unit")).containsExactly(first, second, third);
-        assertThat(meldingService.finnAlle(sett.id())).containsExactly(firstMessage, secondMessage);
+        assertThat(orgenhetStateService.finnAlle(sett.id())).containsExactly(first, second, third);
+        assertThat(orgenhetStateService.finnForOrgenhet(sett.id(), "synthetic-unit")).containsExactly(first, second, third);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).containsExactly(firstMessage, secondMessage);
         assertThat(testSettService.hentKomplett(sett.id()).states()).containsExactly(first, second, third);
     }
 
@@ -162,57 +99,57 @@ class TestdataServiceTest {
     void databaseRejectsStateReferenceToAnotherSet() {
         var firstSet = createSet();
         var otherSet = createSet();
-        var state = stateService.opprett(firstSet.id(), stateData(0, STATE_TIME));
-        var message = meldingService.opprett(otherSet.id(), messageData(null, 0));
+        var state = orgenhetStateService.opprett(firstSet.id(), stateData(0, STATE_TIME));
+        var message = orgenhetEvtsrcMsgService.opprett(otherSet.id(), messageData(null, 0));
 
-        assertThatThrownBy(() -> meldingService.opprett(otherSet.id(), messageData(state.id(), 1)))
+        assertThatThrownBy(() -> orgenhetEvtsrcMsgService.opprett(otherSet.id(), messageData(state.id(), 1)))
             .isInstanceOf(DataIntegrityViolationException.class);
-        assertThatThrownBy(() -> meldingService.endre(otherSet.id(), message.id(), messageData(state.id(), 0)))
+        assertThatThrownBy(() -> orgenhetEvtsrcMsgService.endre(otherSet.id(), message.id(), messageData(state.id(), 0)))
             .isInstanceOf(DataIntegrityViolationException.class);
-        assertThat(meldingService.finnAlle(firstSet.id())).isEmpty();
-        assertThat(meldingService.finnAlle(otherSet.id())).containsExactly(message);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(firstSet.id())).isEmpty();
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(otherSet.id())).containsExactly(message);
     }
 
     @Test
     void childOperationsCannotTargetRowsInAnotherSet() {
         var sett = createSet();
         var otherSet = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var message = meldingService.opprett(sett.id(), messageData(state.id(), 0));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var message = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
 
-        assertThatThrownBy(() -> stateService.hent(otherSet.id(), state.id())).isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> stateService.endre(otherSet.id(), state.id(), stateData(3, STATE_TIME)))
+        assertThatThrownBy(() -> orgenhetStateService.hent(otherSet.id(), state.id())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> orgenhetStateService.endre(otherSet.id(), state.id(), stateData(3, STATE_TIME)))
             .isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> stateService.slett(otherSet.id(), state.id(), true)).isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> meldingService.hent(otherSet.id(), message.id())).isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> meldingService.endre(otherSet.id(), message.id(), messageData(null, 3)))
+        assertThatThrownBy(() -> orgenhetStateService.slett(otherSet.id(), state.id(), true)).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> orgenhetEvtsrcMsgService.hent(otherSet.id(), message.id())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> orgenhetEvtsrcMsgService.endre(otherSet.id(), message.id(), messageData(null, 3)))
             .isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> meldingService.slett(otherSet.id(), message.id())).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(() -> orgenhetEvtsrcMsgService.slett(otherSet.id(), message.id())).isInstanceOf(NoSuchElementException.class);
 
-        assertThat(stateService.hent(sett.id(), state.id())).isEqualTo(state);
-        assertThat(meldingService.hent(sett.id(), message.id())).isEqualTo(message);
+        assertThat(orgenhetStateService.hent(sett.id(), state.id())).isEqualTo(state);
+        assertThat(orgenhetEvtsrcMsgService.hent(sett.id(), message.id())).isEqualTo(message);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void deletesOneStateWithExplicitMessagePolicy(boolean deleteMessages) {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var retainedState = stateService.opprett(sett.id(), stateData(1, STATE_TIME));
-        var linked = meldingService.opprett(sett.id(), messageData(state.id(), 0));
-        var other = meldingService.opprett(sett.id(), messageData(retainedState.id(), 1));
-        var standalone = meldingService.opprett(sett.id(), messageData(null, 2));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var retainedState = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME));
+        var linked = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
+        var other = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(retainedState.id(), 1));
+        var standalone = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 2));
         setActor("synthetic-editor");
 
-        stateService.slett(sett.id(), state.id(), deleteMessages);
+        orgenhetStateService.slett(sett.id(), state.id(), deleteMessages);
 
-        assertThat(stateService.finnAlle(sett.id())).containsExactly(retainedState);
-        assertThat(meldingService.hent(sett.id(), other.id())).isEqualTo(other);
-        assertThat(meldingService.hent(sett.id(), standalone.id())).isEqualTo(standalone);
+        assertThat(orgenhetStateService.finnAlle(sett.id())).containsExactly(retainedState);
+        assertThat(orgenhetEvtsrcMsgService.hent(sett.id(), other.id())).isEqualTo(other);
+        assertThat(orgenhetEvtsrcMsgService.hent(sett.id(), standalone.id())).isEqualTo(standalone);
         if (deleteMessages) {
-            assertThatThrownBy(() -> meldingService.hent(sett.id(), linked.id())).isInstanceOf(NoSuchElementException.class);
+            assertThatThrownBy(() -> orgenhetEvtsrcMsgService.hent(sett.id(), linked.id())).isInstanceOf(NoSuchElementException.class);
         } else {
-            var detached = meldingService.hent(sett.id(), linked.id());
+            var detached = orgenhetEvtsrcMsgService.hent(sett.id(), linked.id());
             assertThat(detached.data().orgenhetStateId()).isNull();
             assertThat(detached.data().evtsrcMessage()).isEqualTo(linked.data().evtsrcMessage());
             assertThat(detached.audit().opprettet()).isEqualTo(linked.audit().opprettet());
@@ -225,28 +162,28 @@ class TestdataServiceTest {
     @ValueSource(booleans = {false, true})
     void deletesStateWithoutMessagesWithEitherPolicy(boolean deleteMessages) {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
 
-        stateService.slett(sett.id(), state.id(), deleteMessages);
+        orgenhetStateService.slett(sett.id(), state.id(), deleteMessages);
 
-        assertThat(stateService.finnAlle(sett.id())).isEmpty();
+        assertThat(orgenhetStateService.finnAlle(sett.id())).isEmpty();
         assertThat(testSettService.hent(sett.id())).isEqualTo(sett);
     }
 
     @Test
     void deletesEveryMessageLinkedToStateWithoutChangingOtherMessages() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var otherState = stateService.opprett(sett.id(), stateData(1, STATE_TIME));
-        meldingService.opprett(sett.id(), messageData(state.id(), 0));
-        meldingService.opprett(sett.id(), messageData(state.id(), 1));
-        var otherMessage = meldingService.opprett(sett.id(), messageData(otherState.id(), 2));
-        var standalone = meldingService.opprett(sett.id(), messageData(null, 3));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var otherState = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 1));
+        var otherMessage = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(otherState.id(), 2));
+        var standalone = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 3));
 
-        stateService.slett(sett.id(), state.id(), true);
+        orgenhetStateService.slett(sett.id(), state.id(), true);
 
-        assertThat(stateService.finnAlle(sett.id())).containsExactly(otherState);
-        assertThat(meldingService.finnAlle(sett.id())).containsExactly(otherMessage, standalone);
+        assertThat(orgenhetStateService.finnAlle(sett.id())).containsExactly(otherState);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).containsExactly(otherMessage, standalone);
     }
 
     @Test
@@ -263,54 +200,54 @@ class TestdataServiceTest {
     @ValueSource(booleans = {false, true})
     void bulkStateDeletionKeepsStandaloneMessagesAndOtherSets(boolean deleteMessages) {
         var sett = createSet();
-        var first = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var second = stateService.opprett(sett.id(), stateData(1, STATE_TIME));
-        var linked = meldingService.opprett(sett.id(), messageData(first.id(), 0));
-        meldingService.opprett(sett.id(), messageData(second.id(), 1));
-        var standalone = meldingService.opprett(sett.id(), messageData(null, 2));
+        var first = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var second = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME));
+        var linked = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(first.id(), 0));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(second.id(), 1));
+        var standalone = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 2));
         var otherSet = createSet();
-        var otherState = stateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
-        var otherMessage = meldingService.opprett(otherSet.id(), messageData(otherState.id(), 0));
+        var otherState = orgenhetStateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
+        var otherMessage = orgenhetEvtsrcMsgService.opprett(otherSet.id(), messageData(otherState.id(), 0));
         setActor("synthetic-editor");
 
-        assertThat(stateService.slettAlle(sett.id(), deleteMessages)).isEqualTo(2);
+        assertThat(orgenhetStateService.slettAlle(sett.id(), deleteMessages)).isEqualTo(2);
 
-        assertThat(stateService.finnAlle(sett.id())).isEmpty();
-        assertThat(meldingService.hent(sett.id(), standalone.id())).isEqualTo(standalone);
+        assertThat(orgenhetStateService.finnAlle(sett.id())).isEmpty();
+        assertThat(orgenhetEvtsrcMsgService.hent(sett.id(), standalone.id())).isEqualTo(standalone);
         if (deleteMessages) {
-            assertThat(meldingService.finnAlle(sett.id())).containsExactly(standalone);
+            assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).containsExactly(standalone);
         } else {
-            assertThat(meldingService.finnAlle(sett.id())).hasSize(3)
+            assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).hasSize(3)
                 .allSatisfy(message -> assertThat(message.data().orgenhetStateId()).isNull());
-            assertThat(meldingService.hent(sett.id(), linked.id()).audit().sistEndretAv()).isEqualTo("synthetic-editor");
+            assertThat(orgenhetEvtsrcMsgService.hent(sett.id(), linked.id()).audit().sistEndretAv()).isEqualTo("synthetic-editor");
         }
-        assertThat(stateService.finnAlle(otherSet.id())).containsExactly(otherState);
-        assertThat(meldingService.finnAlle(otherSet.id())).containsExactly(otherMessage);
+        assertThat(orgenhetStateService.finnAlle(otherSet.id())).containsExactly(otherState);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(otherSet.id())).containsExactly(otherMessage);
     }
 
     @Test
     void canDeleteMessagesWithoutDeletingStatesOrSet() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var first = meldingService.opprett(sett.id(), messageData(state.id(), 0));
-        meldingService.opprett(sett.id(), messageData(null, 1));
-        meldingService.slett(sett.id(), first.id());
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var first = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 1));
+        orgenhetEvtsrcMsgService.slett(sett.id(), first.id());
 
-        assertThat(meldingService.slettAlle(sett.id())).isEqualTo(1);
-        assertThat(meldingService.finnAlle(sett.id())).isEmpty();
-        assertThat(stateService.finnAlle(sett.id())).containsExactly(state);
+        assertThat(orgenhetEvtsrcMsgService.slettAlle(sett.id())).isEqualTo(1);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).isEmpty();
+        assertThat(orgenhetStateService.finnAlle(sett.id())).containsExactly(state);
         assertThat(testSettService.hent(sett.id())).isEqualTo(sett);
     }
 
     @Test
     void deletesCompleteSetWithAllChildrenAndLeavesOtherSetUntouched() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        meldingService.opprett(sett.id(), messageData(state.id(), 0));
-        meldingService.opprett(sett.id(), messageData(null, 1));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 1));
         var otherSet = createSet();
-        var otherState = stateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
-        var otherMessage = meldingService.opprett(otherSet.id(), messageData(otherState.id(), 0));
+        var otherState = orgenhetStateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
+        var otherMessage = orgenhetEvtsrcMsgService.opprett(otherSet.id(), messageData(otherState.id(), 0));
 
         testSettService.slett(sett.id());
 
@@ -329,30 +266,30 @@ class TestdataServiceTest {
     @Test
     void swapsStateOrderWithoutUniqueConstraintViolation() {
         var sett = createSet();
-        var first = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var second = stateService.opprett(sett.id(), stateData(1, STATE_TIME.plusDays(1)));
+        var first = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var second = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME.plusDays(1)));
         setActor("synthetic-editor");
 
-        stateService.endreRekkefolge(sett.id(), List.of(second.id(), first.id()));
+        orgenhetStateService.endreRekkefolge(sett.id(), List.of(second.id(), first.id()));
 
-        var states = stateService.finnAlle(sett.id());
+        var states = orgenhetStateService.finnAlle(sett.id());
         assertThat(states).extracting(OrgenhetState::id).containsExactly(second.id(), first.id());
         assertThat(states).extracting(row -> row.data().sortIdx()).containsExactly(0L, 1L);
         assertThat(states).allSatisfy(row -> assertThat(row.audit().sistEndretAv()).isEqualTo("synthetic-editor"));
-        assertThat(stateService.hent(sett.id(), first.id()).audit().opprettet()).isEqualTo(first.audit().opprettet());
-        assertThat(stateService.hent(sett.id(), first.id()).data().stateTimestamp()).isEqualTo(STATE_TIME);
+        assertThat(orgenhetStateService.hent(sett.id(), first.id()).audit().opprettet()).isEqualTo(first.audit().opprettet());
+        assertThat(orgenhetStateService.hent(sett.id(), first.id()).data().stateTimestamp()).isEqualTo(STATE_TIME);
     }
 
     @Test
     void swapsMessageOrderWithoutUniqueConstraintViolation() {
         var sett = createSet();
-        var first = meldingService.opprett(sett.id(), messageData(null, 0));
-        var second = meldingService.opprett(sett.id(), messageData(null, 1));
+        var first = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 0));
+        var second = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 1));
         setActor("synthetic-editor");
 
-        meldingService.endreRekkefolge(sett.id(), List.of(second.id(), first.id()));
+        orgenhetEvtsrcMsgService.endreRekkefolge(sett.id(), List.of(second.id(), first.id()));
 
-        var messages = meldingService.finnAlle(sett.id());
+        var messages = orgenhetEvtsrcMsgService.finnAlle(sett.id());
         assertThat(messages).extracting(OrgenhetEvtsrcMsg::id).containsExactly(second.id(), first.id());
         assertThat(messages).extracting(row -> row.data().sortIdx()).containsExactly(0L, 1L);
         assertThat(messages).allSatisfy(row -> assertThat(row.audit().sistEndretAv()).isEqualTo("synthetic-editor"));
@@ -361,46 +298,46 @@ class TestdataServiceTest {
     @Test
     void rejectsIncompleteDuplicateNullAndForeignStateOrderWithoutChanges() {
         var sett = createSet();
-        var first = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var second = stateService.opprett(sett.id(), stateData(1, STATE_TIME));
+        var first = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var second = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME));
         var otherSet = createSet();
-        var foreign = stateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
+        var foreign = orgenhetStateService.opprett(otherSet.id(), stateData(0, STATE_TIME));
         List<List<Long>> invalidOrders = Arrays.asList(
             null, List.of(), List.of(first.id()),
             List.of(first.id(), first.id()), List.of(first.id(), foreign.id()), Arrays.asList(first.id(), null)
         );
 
         for (var order : invalidOrders) {
-            assertThatThrownBy(() -> stateService.endreRekkefolge(sett.id(), order)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> orgenhetStateService.endreRekkefolge(sett.id(), order)).isInstanceOf(IllegalArgumentException.class);
         }
-        assertThat(stateService.finnAlle(sett.id())).containsExactly(first, second);
-        assertThat(stateService.hent(otherSet.id(), foreign.id())).isEqualTo(foreign);
+        assertThat(orgenhetStateService.finnAlle(sett.id())).containsExactly(first, second);
+        assertThat(orgenhetStateService.hent(otherSet.id(), foreign.id())).isEqualTo(foreign);
     }
 
     @Test
     void rejectsIncompleteDuplicateNullAndForeignMessageOrderWithoutChanges() {
         var sett = createSet();
-        var first = meldingService.opprett(sett.id(), messageData(null, 0));
-        var second = meldingService.opprett(sett.id(), messageData(null, 1));
+        var first = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 0));
+        var second = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 1));
         var otherSet = createSet();
-        var foreign = meldingService.opprett(otherSet.id(), messageData(null, 0));
+        var foreign = orgenhetEvtsrcMsgService.opprett(otherSet.id(), messageData(null, 0));
         List<List<Long>> invalidOrders = Arrays.asList(
             null, List.of(), List.of(first.id()),
             List.of(first.id(), first.id()), List.of(first.id(), foreign.id()), Arrays.asList(first.id(), null)
         );
 
         for (var order : invalidOrders) {
-            assertThatThrownBy(() -> meldingService.endreRekkefolge(sett.id(), order)).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> orgenhetEvtsrcMsgService.endreRekkefolge(sett.id(), order)).isInstanceOf(IllegalArgumentException.class);
         }
-        assertThat(meldingService.finnAlle(sett.id())).containsExactly(first, second);
-        assertThat(meldingService.hent(otherSet.id(), foreign.id())).isEqualTo(foreign);
+        assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).containsExactly(first, second);
+        assertThat(orgenhetEvtsrcMsgService.hent(otherSet.id(), foreign.id())).isEqualTo(foreign);
     }
 
     @Test
     void fullSetDeletionRollsBackTogetherWithItsChildren() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        meldingService.opprett(sett.id(), messageData(state.id(), 0));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
         var before = testSettService.hentKomplett(sett.id());
 
         assertThatThrownBy(() -> new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
@@ -414,14 +351,14 @@ class TestdataServiceTest {
     @Test
     void detachAndStateDeletionRollBackTogether() {
         var sett = createSet();
-        var state = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        meldingService.opprett(sett.id(), messageData(state.id(), 0));
+        var state = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(state.id(), 0));
         var before = testSettService.hentKomplett(sett.id());
 
         setActor("synthetic-editor");
 
         assertThatThrownBy(() -> new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            stateService.slett(sett.id(), state.id(), false);
+            orgenhetStateService.slett(sett.id(), state.id(), false);
             throw new IllegalStateException("synthetic rollback");
         })).isInstanceOf(IllegalStateException.class);
 
@@ -431,7 +368,7 @@ class TestdataServiceTest {
     @Test
     void databasePreventsDeletingParentWithRemainingChildren() {
         var sett = createSet();
-        stateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
         assertThatThrownBy(() -> testSettRepository.delete(sett.id())).isInstanceOf(DataIntegrityViolationException.class);
         assertThat(testSettService.hent(sett.id())).isEqualTo(sett);
     }
@@ -440,16 +377,16 @@ class TestdataServiceTest {
     @ValueSource(strings = {"opprettState", "opprettMelding", "endreStateRekkefolge", "endreMeldingRekkefolge"})
     void mutationsWaitForParentLock(String operation) throws Exception {
         var sett = createSet();
-        var firstState = stateService.opprett(sett.id(), stateData(0, STATE_TIME));
-        var secondState = stateService.opprett(sett.id(), stateData(1, STATE_TIME));
-        var firstMessage = meldingService.opprett(sett.id(), messageData(null, 0));
-        var secondMessage = meldingService.opprett(sett.id(), messageData(null, 1));
+        var firstState = orgenhetStateService.opprett(sett.id(), stateData(0, STATE_TIME));
+        var secondState = orgenhetStateService.opprett(sett.id(), stateData(1, STATE_TIME));
+        var firstMessage = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 0));
+        var secondMessage = orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 1));
         var started = new CountDownLatch(1);
         Runnable mutation = switch (operation) {
-            case "opprettState" -> () -> stateService.opprett(sett.id(), stateData(2, STATE_TIME));
-            case "opprettMelding" -> () -> meldingService.opprett(sett.id(), messageData(null, 2));
-            case "endreStateRekkefolge" -> () -> stateService.endreRekkefolge(sett.id(), List.of(secondState.id(), firstState.id()));
-            case "endreMeldingRekkefolge" -> () -> meldingService.endreRekkefolge(sett.id(), List.of(secondMessage.id(), firstMessage.id()));
+            case "opprettState" -> () -> orgenhetStateService.opprett(sett.id(), stateData(2, STATE_TIME));
+            case "opprettMelding" -> () -> orgenhetEvtsrcMsgService.opprett(sett.id(), messageData(null, 2));
+            case "endreStateRekkefolge" -> () -> orgenhetStateService.endreRekkefolge(sett.id(), List.of(secondState.id(), firstState.id()));
+            case "endreMeldingRekkefolge" -> () -> orgenhetEvtsrcMsgService.endreRekkefolge(sett.id(), List.of(secondMessage.id(), firstMessage.id()));
             default -> throw new IllegalArgumentException("Unknown test operation");
         };
 
@@ -474,17 +411,13 @@ class TestdataServiceTest {
         }
 
         switch (operation) {
-            case "opprettState" -> assertThat(stateService.finnAlle(sett.id())).hasSize(3);
-            case "opprettMelding" -> assertThat(meldingService.finnAlle(sett.id())).hasSize(3);
-            case "endreStateRekkefolge" -> assertThat(stateService.finnAlle(sett.id())).extracting(OrgenhetState::id)
+            case "opprettState" -> assertThat(orgenhetStateService.finnAlle(sett.id())).hasSize(3);
+            case "opprettMelding" -> assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).hasSize(3);
+            case "endreStateRekkefolge" -> assertThat(orgenhetStateService.finnAlle(sett.id())).extracting(OrgenhetState::id)
                 .containsExactly(secondState.id(), firstState.id());
-            case "endreMeldingRekkefolge" -> assertThat(meldingService.finnAlle(sett.id())).extracting(OrgenhetEvtsrcMsg::id)
+            case "endreMeldingRekkefolge" -> assertThat(orgenhetEvtsrcMsgService.finnAlle(sett.id())).extracting(OrgenhetEvtsrcMsg::id)
                 .containsExactly(secondMessage.id(), firstMessage.id());
         }
-    }
-
-    private TestSett createSet() {
-        return testSettService.opprett(new TestSett.Data("Synthetic set", null));
     }
 
     private static OrgenhetState.Data stateData(long index, LocalDateTime timestamp) {
@@ -499,9 +432,4 @@ class TestdataServiceTest {
         return new OrgenhetEvtsrcMsg.Data(stateId, index, STATE_TIME, "synthetic.Event", "synthetic-key", "  synthetic message\n ");
     }
 
-    private static void setActor(String ident) {
-        var jwt = Jwt.withTokenValue("synthetic-token").header("alg", "RS256")
-            .subject("synthetic-user").claim("NAVident", ident).build();
-        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt, List.of()));
-    }
 }
