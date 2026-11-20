@@ -33,6 +33,15 @@ public class DvhRessursController {
     }
 
     @Operation(
+        description = "Hent alle ressurser med orgtilknytninger som er i NOM",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/nom-ressurser")
+    public ResponseEntity<List<DvhRessursDTO>> nomRessurser() {
+        return ResponseEntity.ok(restService.nomRessurser());
+    }
+
+    @Operation(
         description = "Hent alle Orgenheter med tilleggsinfo",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
