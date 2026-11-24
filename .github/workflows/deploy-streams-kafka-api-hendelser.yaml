@@ -10,6 +10,7 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/kafka-api-hendelser.yaml'
       - '.github/*/deploy-streams-kafka-api-hendelser.yaml'
+      - 'apps/pom.xml'
       - 'Dockerfile_chainguard'
   workflow_dispatch:
 
@@ -20,6 +21,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: api-hendelser
       jar-path: apps/streams/kafka-api/api-hendelser/target/app.jar
       image-suffix: nom-kafka-api-hendelser

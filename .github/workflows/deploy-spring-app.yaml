@@ -63,6 +63,10 @@ on:
         required: false
         default: Dockerfile_chainguard
         description: Dockerfile to use for building the docker image
+      large-runner:
+        type: boolean
+        required: true
+        description: Use the large runner for build and attestation jobs.
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER:
         required: true
@@ -73,7 +77,7 @@ jobs:
       contents: "read"
       id-token: "write"
     name: "Build app and push docker image to GAR"
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ${{ inputs.large-runner && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
@@ -119,7 +123,7 @@ jobs:
       contents: "read"
       id-token: "write"
     name: "Build app and test"
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ${{ inputs.large-runner && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
@@ -145,7 +149,7 @@ jobs:
   salsa:
     name: Generate SBOM, attest and sign image
     needs: [build-app-docker]
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ${{ inputs.large-runner && 'ubuntu-latest-8-cores' || 'ubuntu-latest' }}
     permissions:
       id-token: "write"
     steps:

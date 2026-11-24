@@ -29,6 +29,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: admin
       jar-path: apps/admin/target/app.jar
       image-suffix: nom-admin

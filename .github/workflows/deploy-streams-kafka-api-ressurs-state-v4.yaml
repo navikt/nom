@@ -11,6 +11,7 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/kafka-api-ressurs-state-v4.yaml'
       - '.github/*/deploy-streams-kafka-api-ressurs-state-v4.yaml'
+      - 'apps/pom.xml'
       - 'Dockerfile_chainguard'
   workflow_dispatch:
 
@@ -21,6 +22,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: api-ressurs-state-v4
       jar-path: apps/streams/kafka-api/api-ressurs-state-v4/target/app.jar
       image-suffix: nom-kafka-api-ressurs-state-v4

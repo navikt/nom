@@ -21,11 +21,13 @@ class KafkaConfig {
         final var objectSerde = new JacksonJsonSerde<>(Object.class, jsonMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         return objectSerde;
     }
     @Bean
     public JacksonJsonSerde<Object> jsonSerde(JsonMapper jsonMapper){
         final var jsonSerde = new JacksonJsonSerde<>(Object.class, jsonMapper);
+        jsonSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         jsonSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         return jsonSerde;
     }
