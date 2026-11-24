@@ -53,7 +53,7 @@
         <azure-identity.version>1.19.0</azure-identity.version>
         <caffeine.version>3.2.3</caffeine.version>
         <apache.poi.version>6.0.0</apache.poi.version>
-        <slack-client.version>1.55.0</slack-client.version>
+        <slack-client.version>1.56.0</slack-client.version>
         <okhttp.version>5.5.1</okhttp.version>
     </properties>
 
