@@ -28,7 +28,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.93.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.94.0</gcp.libraries-bom.version>
         <springdoc.version>3.2.0</springdoc.version>
         <springdoc-openapi-security.version>1.8.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-73.version>3.16.0</hypersistence-utils-hibernate-73.version>
@@ -39,10 +39,10 @@
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <ulid-creator.version>5.2.4</ulid-creator.version>
         <vault-jdbc.version>1.4.1</vault-jdbc.version>
-        <swagger-annotations-jakarta.version>2.2.55</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.56</swagger-annotations-jakarta.version>
         <org.wiremock.version>3.13.2</org.wiremock.version>
         <org.wiremock-spring-boot.version>4.4.3</org.wiremock-spring-boot.version>
-        <mock-oauth2-server.version>7.0.0</mock-oauth2-server.version>
+        <mock-oauth2-server.version>7.0.1</mock-oauth2-server.version>
         <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
         <hibernate-validator.version>8.0.6.Final</hibernate-validator.version>
         <ojdbc.version>23.26.4.0.0</ojdbc.version>
