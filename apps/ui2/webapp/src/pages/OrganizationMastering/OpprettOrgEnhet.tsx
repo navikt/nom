@@ -294,6 +294,7 @@ function OpprettOrgEnhetForm({
               error={methods.formState.errors.navn?.message}
               label="Navn på ny organisasjonsenhet"
               autoComplete="off"
+              maxLength={70}
             />
 
             <FormRessursSearchWrapper

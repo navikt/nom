@@ -808,7 +808,8 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   if (
     sorterteOrgEnheter.length === 0 ||
     eksterneOrgEnheterQuery.isLoading ||
-    orgEnheterLedetAvRessursQuery.isLoading
+    orgEnheterLedetAvRessursQuery.isLoading ||
+    orgEnheterQuery.isLoading
   ) {
     return;
   }

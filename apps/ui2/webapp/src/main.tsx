@@ -101,7 +101,23 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
-createRoot(document.querySelector("#root") as HTMLElement).render(
+// On hot reload, it will try to render the root again even if it already exists
+// This code ensures it re-uses the root if it already exists for hot reloading after hard refresh
+declare global {
+  interface Window {
+    __root?: ReturnType<typeof createRoot>;
+  }
+}
+
+const container = document.getElementById("root");
+
+if (!container) {
+  throw new Error("Could not find the root element");
+}
+
+const root = (window.__root ??= createRoot(container));
+
+root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ExpiryNotifier />
