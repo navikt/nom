@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.config.KafkaStreamsCustomizer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerde;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @EnableKafka
 @Configuration
@@ -22,6 +23,7 @@ public class KafkaConfig {
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         return objectSerde;
     }
 

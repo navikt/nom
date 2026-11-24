@@ -28,6 +28,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: nom-azure
       jar-path: apps/nom-azure/target/app.jar
       image-suffix: nom-azure

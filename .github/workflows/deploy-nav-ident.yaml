@@ -23,6 +23,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: true
       maven-project: nav-ident
       jar-path: apps/nav-ident/target/app.jar
       image-suffix: nav-ident

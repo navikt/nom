@@ -33,6 +33,7 @@ jobs:
       id-token: write
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: nom-testdata
       jar-path: apps/nom-testdata/target/app.jar
       image-suffix: nom-testdata

@@ -11,6 +11,7 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/intern-orgenhet-state.yaml'
       - '.github/*/deploy-streams-intern-orgenhet-state.yaml'
+      - 'apps/pom.xml'
       - 'Dockerfile_chainguard'
   workflow_dispatch:
 
@@ -21,6 +22,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: false
       maven-project: orgenhet-state
       jar-path: apps/streams/internal/orgenhet-state/target/app.jar
       image-suffix: nom-intern-orgenhet-state

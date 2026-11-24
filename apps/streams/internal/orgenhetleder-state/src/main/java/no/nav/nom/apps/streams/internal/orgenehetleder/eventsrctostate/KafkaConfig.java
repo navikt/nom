@@ -24,6 +24,7 @@ public class KafkaConfig {
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetLederEvent.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetLederState.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(ObjectNode.class.getPackageName());
         return objectSerde;
     }
 

@@ -31,6 +31,7 @@ jobs:
       id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      large-runner: true
       maven-project: api
       jar-path: apps/api/target/app.jar
       image-suffix: nom-api
