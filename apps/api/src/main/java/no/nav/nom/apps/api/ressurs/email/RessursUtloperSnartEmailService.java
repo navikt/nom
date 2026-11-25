@@ -317,7 +317,7 @@ public class RessursUtloperSnartEmailService {
 
     public List<RessursUtloperData> getUtlopendeRessurser() {
         return ressursStateRepository.findAllActiveRessurser().values().stream()
-            .filter(RessursUtloperSnartEmailService::ressursMedUtlopsDatoOmFemEllerToUker)
+            .filter(RessursUtloperSnartEmailService::skalVarslesOmUtlop)
             .map(this::finnOrgEnhetOgLederTilRessurs)
             .toList();
     }
@@ -397,9 +397,26 @@ public class RessursUtloperSnartEmailService {
             .ifPresent(mottakere::add);
     }
 
-    private static boolean ressursMedUtlopsDatoOmFemEllerToUker(RessursState ressurs) {
-        return ressurs.sluttdato() != null && (ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(2)) ||
-            ressurs.sluttdato().isEqual(LocalDate.now().plusWeeks(5)));
+    private static boolean skalVarslesOmUtlop(RessursState ressurs) {
+        var sluttdato = ressurs.sluttdato();
+        return sluttdato != null && (
+            utloperOmToUker(sluttdato)
+                || utloperOmFemUker(sluttdato)
+                || utloperVedArssluttOmTreUker(sluttdato)
+        );
+    }
+
+    private static boolean utloperOmToUker(LocalDate sluttdato) {
+        return sluttdato.isEqual(LocalDate.now().plusWeeks(2));
+    }
+
+    private static boolean utloperOmFemUker(LocalDate sluttdato) {
+        return sluttdato.isEqual(LocalDate.now().plusWeeks(5));
+    }
+
+    private static boolean utloperVedArssluttOmTreUker(LocalDate sluttdato) {
+        return sluttdato.isEqual(LocalDate.now().plusWeeks(3))
+            && sluttdato.isEqual(LocalDate.of(LocalDate.now().getYear(), 12, 31));
     }
 
     private static boolean ressursMedSluttdatoEqualToIgaar(RessursState ressurs) {

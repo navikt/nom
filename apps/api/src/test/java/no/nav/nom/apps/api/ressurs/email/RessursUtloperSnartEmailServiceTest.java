@@ -16,6 +16,8 @@ import no.nav.nom.libs.utils.common.util.DateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +39,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -284,6 +288,35 @@ public class RessursUtloperSnartEmailServiceTest {
         assertEquals(2, expected.size());
         assertTrue(result.containsAll(expected));
         assertTrue(expected.containsAll(result));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "2026-12-10, 2026-12-24, true",
+        "2026-12-10, 2027-01-14, true",
+        "2026-12-10, 2026-12-31, true",
+        "2026-06-10, 2026-07-01, false",
+        "2026-12-09, 2026-12-31, false",
+        "2026-12-11, 2026-12-31, false"
+    })
+    void testGetUtlopendeRessurser_includes_three_weeks_only_for_year_end(
+        LocalDate idag, LocalDate sluttdato, boolean forventerVarsel
+    ) {
+        var ressurs = RessursState.builder()
+            .navident("X987654")
+            .visningsnavn(new Visningsnavn("Test", Optional.empty(), "Ressurs"))
+            .sluttdato(sluttdato)
+            .build();
+        when(ressursStateRepository.findAllActiveRessurser()).thenReturn(Map.of(ressurs.navident(), ressurs));
+
+        try (var localDate = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+            localDate.when(LocalDate::now).thenReturn(idag);
+
+            var result = ressursUtlopersnartEmailService.getUtlopendeRessurser();
+            var forventedeSluttdatoer = forventerVarsel ? List.of(sluttdato) : List.of();
+
+            assertEquals(forventedeSluttdatoer, result.stream().map(RessursUtloperData::ressursSluttdato).toList());
+        }
     }
 
     @Test
