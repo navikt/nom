@@ -76,8 +76,9 @@ spec:
         - application: azure-token-generator
           namespace: nais
           cluster: dev-gcp
+    outbound:
+      rules:
         - application: logging
           namespace: nais-system
-    outbound:
       external:
         - host: org-unleash-api.nav.cloud.nais.io
