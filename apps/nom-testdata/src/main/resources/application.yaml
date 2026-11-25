@@ -12,6 +12,7 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1800000
   flyway:
+    url: ${PGJDBCURL}
     enabled: true
     baseline-on-migrate: false
     fail-on-missing-locations: false
