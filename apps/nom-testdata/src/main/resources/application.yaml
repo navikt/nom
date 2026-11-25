@@ -5,7 +5,7 @@ spring:
   application:
     name: nom-testdata
   datasource:
-    url: ${DATABASE_JDBC_URL}
+    url: ${READWRITE_PGJDBCURL}
     hikari:
       minimum-idle: 1
       maximum-pool-size: 3
