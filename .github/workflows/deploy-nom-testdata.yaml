@@ -33,14 +33,15 @@ jobs:
       id-token: write
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
+      skip-prod-deploy: true
       large-runner: false
       maven-project: nom-testdata
       jar-path: apps/nom-testdata/target/app.jar
       image-suffix: nom-testdata
       nais-config-file-path-dev: .nais/apps/nom-testdata/nom-testdata-dev-gcp.yaml
+      nais-postgres-manifest: .nais/apps/nom-testdata/nom-testdata-db.yaml
       unleash-vars-file-path: .nais/apps/nom-testdata/unleash-vars.yaml
       skip-tests: ${{ github.event.inputs.skip-tests == 'true' }}
-      skip-prod-deploy: true
       dockerfile: Dockerfile_chainguard
     secrets:
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

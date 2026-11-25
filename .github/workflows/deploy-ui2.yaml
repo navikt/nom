@@ -46,8 +46,10 @@ jobs:
 
       - name: Build webapp and decide minification yes/no
         working-directory: apps/ui2/webapp
+        env:
+          MINIFY: ${{ github.event.inputs.minify }}
         run: |
-          if [[ "${GITHUB_REF}" != "refs/heads/main" || "${{ github.event.inputs.minify }}" == 'false' ]]; then
+          if [[ "${GITHUB_REF}" != "refs/heads/main" || "$MINIFY" == 'false' ]]; then
             echo "Webapp build: Skipping minification";
             npm run build -- --minify=false;
           else

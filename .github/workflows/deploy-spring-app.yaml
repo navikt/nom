@@ -17,6 +17,14 @@ on:
         required: false
         type: string
         default: ''
+      nais-postgres-manifest:
+        required: false
+        type: string
+        default: ''
+      nais-team:
+        required: false
+        type: string
+        default: 'org'
       additional-dev-deployments:
         required: false
         type: string
@@ -98,12 +106,13 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=true --batch-mode
+          MAVEN_PROJECT: ${{ inputs.maven-project }}
+        run: mvn clean package --projects :"$MAVEN_PROJECT" --also-make -Dmaven.test.skip=true --batch-mode
       - name: Build and push Docker image
         uses: nais/docker-build-push@6394144a53cad0332745f24a8302f5efaf81719a # ratchet:nais/docker-build-push@v1.0.0
         id: docker-push
         with:
-          team: org
+          team: ${{ inputs.nais-team }}
           image_suffix: ${{ inputs.image-suffix }}
           dockerfile: ${{ inputs.dockerfile }}
           docker_context: .
@@ -144,7 +153,9 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
+          MAVEN_PROJECT: ${{ inputs.maven-project }}
+          SKIP_TESTS: ${{ inputs.skip-tests }}
+        run: mvn clean package --projects :"$MAVEN_PROJECT" --also-make -Dmaven.test.skip="$SKIP_TESTS" --batch-mode
 
   salsa:
     name: Generate SBOM, attest and sign image
@@ -159,7 +170,7 @@ jobs:
         with:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          team: org
+          team: ${{ inputs.nais-team }}
       - name: Generate SBOM, attest and sign image
         id: attest-sign
         uses: nais/attest-sign@7e00e8439c266ec6d28b7f429d607e35e20acf6f # ratchet:nais/attest-sign@v2.1.7
@@ -252,3 +263,39 @@ jobs:
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: image=${{needs.build-app-docker.outputs.image}}${{ inputs.additional-nais-vars-prod }}
           TELEMETRY: ${{ needs.build-app-docker.outputs.telemetry }}
+
+  deploy-postgres-prod:
+    permissions:
+      contents: read
+      id-token: write
+    name: Deploy Nais Postgres to ${{ inputs.prod-cluster }}
+    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-prod-deploy && inputs.nais-postgres-manifest != ''}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
+      - uses: nais/setup@cc4e4226c3c8e819ded324ecd8608fd905347428 # ratchet:nais/setup@v1
+        with:
+          team: ${{ inputs.nais-team }}
+      - name: Apply Postgres
+        env:
+          POSTGRES_MANIFEST: ${{ inputs.nais-postgres-manifest }}
+          NAIS_ENVIRONMENT: ${{ inputs.prod-cluster }}
+        run: nais apply "$POSTGRES_MANIFEST" --environment "$NAIS_ENVIRONMENT"
+
+  deploy-postgres-dev:
+    permissions:
+      contents: read
+      id-token: write
+    name: Deploy Nais Postgres to ${{ inputs.dev-cluster }}
+    if: ${{ inputs.nais-postgres-manifest != ''}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v6
+      - uses: nais/setup@cc4e4226c3c8e819ded324ecd8608fd905347428 # ratchet:nais/setup@v1
+        with:
+          team: ${{ inputs.nais-team }}
+      - name: Apply Postgres
+        env:
+          POSTGRES_MANIFEST: ${{ inputs.nais-postgres-manifest }}
+          NAIS_ENVIRONMENT: ${{ inputs.dev-cluster }}
+        run: nais apply "$POSTGRES_MANIFEST" --environment "$NAIS_ENVIRONMENT"
