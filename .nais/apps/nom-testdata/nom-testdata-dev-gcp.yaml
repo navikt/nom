@@ -62,7 +62,8 @@ spec:
         extra:
           - NAVident
   uses:
-    - name: nom-testdata-db
+    postgres:
+      - name: nom-testdata-db
   accessPolicy:
     inbound:
       rules:
