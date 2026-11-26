@@ -56,7 +56,7 @@ public class OrgtilknytningEndretEmailService {
     public static final String UNLEASH_DETALJERT_OT_EPOST = "nom-api.ot-endringer-detaljert-epost";
     public final String epost_body_with_gyldig_tom_item_template = "{0}({1}), fra og med {2}, til og med {3}, med fysisk brukersted {4} ({5}). Endring utført av {6} den {7}.";
     public final String epost_body_without_gyldig_tom_item_template = "{0}({1}), fra og med {2}, med fysisk brukersted {3} ({4}). Endring utført av {5} den {6}.";
-    public final String epost_body_endringer_utfort_template = "\nEndringer utført: \n{0}\n";
+    public final String epost_body_endringer_utfort_template = "\n\nEndringer utført:\n\n{0}";
     public final String epost_body_with_fjernet_event_template = "Organisasjonstilknytningen for enhet {0}({1}) har blitt slettet av {2} den {3}.";
     public final String epost_body_item_template_ot_notfound = "Endring({0}) utført av {1}, på {2}.";
     private final Logger log = LoggerFactory.getLogger(OrgtilknytningEndretEmailService.class);
@@ -335,7 +335,7 @@ public class OrgtilknytningEndretEmailService {
                 var endringer = mappedChangedDataType.getOrDefault(event.fid(), List.of()).stream()
                     .map(otEndretDataType -> otEndretDataType.beskrivelse)
                     .distinct()
-                    .collect(Collectors.joining(",\n"));
+                    .collect(Collectors.joining("\n\n"));
                 log.info(
                     "Sender OT endringer for navident:{} orgtilknytningState: {}, and formated dates: {}, {}",
                     event.navident(),

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -123,8 +123,8 @@ public class OrgtilknytningEndretEmailServiceTest {
 
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testComposeOTChangesMessage(boolean detaljertEpost) {
+    @CsvSource({"true, 1", "true, 3", "false, 1", "false, 3"})
+    public void testComposeOTChangesMessage(boolean detaljertEpost, int antallHendelser) {
         when(unleash.isEnabled(OrgtilknytningEndretEmailService.UNLEASH_DETALJERT_OT_EPOST)).thenReturn(detaljertEpost);
 
         // setup data
@@ -162,14 +162,17 @@ public class OrgtilknytningEndretEmailServiceTest {
                 new FysiskBrukersted("2700", "Match avenue 1", null, null, null, null, null)));
 
         // test
+        var opprettet = OTEndretData.builder()
+            .fid(fid)
+            .changedByNavIdent(navidentChangedBy)
+            .timestamp(timestamp)
+            .eventType(OTEndretData.OTEndretDataType.OT_NY)
+            .build();
         List<OTEndretData> otEndringerData = List.of(
-            OTEndretData.builder()
-                .fid(fid)
-                .changedByNavIdent(navidentChangedBy)
-                .timestamp(timestamp)
-                .eventType(OTEndretData.OTEndretDataType.OT_NY)
-                .build()
-        );
+            opprettet,
+            opprettet.toBuilder().eventType(OTEndretData.OTEndretDataType.OT_DATO_ENDRET).build(),
+            opprettet
+        ).subList(0, antallHendelser);
 
         // verify
         String expected = MessageFormat.format(
@@ -184,10 +187,10 @@ public class OrgtilknytningEndretEmailServiceTest {
             timestamp
         );
         if (detaljertEpost) {
-            expected += MessageFormat.format(
-                orgtilknytningEndretEmailService.epost_body_endringer_utfort_template,
-                OTEndretData.OTEndretDataType.OT_NY.beskrivelse
-            );
+            expected += "\n\nEndringer utført:\n\nNy organisasjonstilknytning opprettet";
+            if (antallHendelser > 1) {
+                expected += "\n\nGyldighetsperiode endret";
+            }
         }
         var result = orgtilknytningEndretEmailService.composeOTChangesMessage(otEndringerData);
         assertEquals(expected, result.trim());
