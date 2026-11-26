@@ -1,9 +1,9 @@
 package no.nav.nom.apps.testdata;
 
-import no.nav.nom.apps.testdata.model.Audit;
-import no.nav.nom.apps.testdata.model.OrgenhetEvtsrcMsg;
-import no.nav.nom.apps.testdata.model.OrgenhetState;
-import no.nav.nom.apps.testdata.model.TestSett;
+import no.nav.nom.apps.testdata.common.repository.Audit;
+import no.nav.nom.apps.testdata.orgenhet.OrgenhetEvtsrcMsg;
+import no.nav.nom.apps.testdata.orgenhet.OrgenhetState;
+import no.nav.nom.apps.testdata.testsett.TestSett;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import org.junit.jupiter.api.Test;
